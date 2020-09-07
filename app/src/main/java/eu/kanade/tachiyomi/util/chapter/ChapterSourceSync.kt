@@ -24,7 +24,8 @@ import java.util.TreeSet
 fun syncChaptersWithSource(
     db: DatabaseHelper,
     rawSourceChapters: List<SChapter>,
-    manga: Manga
+    manga: Manga,
+    errorFromMerged: Boolean = false
 ): Pair<List<Chapter>, List<Chapter>> {
 
     val downloadManager: DownloadManager = Injekt.get()
@@ -91,8 +92,13 @@ fun syncChaptersWithSource(
 
     // Chapters from the db not in the source.
     var toDelete = dbChapters.filterNot { dbChapter ->
-        sourceChapters.any { sourceChapter ->
-            dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
+        //ignore to delete when there is a site error
+        if (dbChapter.isMergedChapter() && errorFromMerged) {
+            true
+        } else {
+            sourceChapters.any { sourceChapter ->
+                dbChapter.mangadex_chapter_id == sourceChapter.mangadex_chapter_id
+            }
         }
     }
 

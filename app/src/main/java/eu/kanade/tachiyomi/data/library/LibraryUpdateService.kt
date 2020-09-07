@@ -6,10 +6,12 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import android.widget.Toast
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.LoadRequest
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -29,17 +31,21 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
+import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -339,8 +345,8 @@ class LibraryUpdateService(
                         )
                     )
             if (updateMangaChapters(
-                mangaToUpdateMap[source]!![count], this.count.andIncrement, shouldDownload
-            )
+                    mangaToUpdateMap[source]!![count], this.count.andIncrement, shouldDownload
+                )
             ) {
                 hasDownloads = true
             }
@@ -356,103 +362,106 @@ class LibraryUpdateService(
         shouldDownload: Boolean
     ):
         Boolean {
-            try {
-                var hasDownloads = false
-                if (job?.isCancelled == true) {
-                    return false
-                }
-                notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
-                val source = sourceManager.getMangadex()
-                val details = source.fetchMangaAndChapterDetails(manga)
-                val fetchedChapters = details.second.toMutableList()
-                manga.merge_manga_url?.let {
-                    try {
-                        val chapters = sourceManager.getMergeSource().fetchChapters(it)
-                        fetchedChapters.addAll(chapters)
-                    } catch (e: Exception) {
-                        XLog.e("Error with mergedsource", e)
-                    }
-                }
-
-                // delete cover cache image if the thumbnail from network is not empty
-                // note: we preload the covers here so we can view everything offline if they change
-                val thumbnailUrl = manga.thumbnail_url
-                manga.copyFrom(details.first)
-                manga.initialized = true
-                if (manga.thumbnail_url != null && preferences.refreshCoversToo().getOrDefault()) {
-                    coverCache.deleteFromCache(thumbnailUrl)
-                    // load new covers in background
-                    val request =
-                        LoadRequest.Builder(this@LibraryUpdateService).data(manga)
-                            .memoryCachePolicy(CachePolicy.DISABLED).build()
-                    Coil.imageLoader(this@LibraryUpdateService).execute(request)
-                }
-                db.insertManga(manga).executeAsBlocking()
-                // add mdlist tracker if manga in library has it missing
-                val tracks = db.getTracks(manga).executeAsBlocking()
-                if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-                    val tracks = db.getTracks(manga).executeAsBlocking()
-                    if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-                        val track = trackManager.mdList.createInitialTracker(manga)
-                        db.insertTrack(track).executeAsBlocking()
-                    }
-                }
-
-                if (fetchedChapters.isNotEmpty()) {
-                    val originalChapters = db.getChapters(manga).executeAsBlocking()
-                    val newChapters = syncChaptersWithSource(db, fetchedChapters, manga)
-
-                    manga.missing_chapters = updateMissingChapterCount(manga).missing_chapters
-
-                    if (newChapters.first.isNotEmpty()) {
-                        if (shouldDownload) {
-                            var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
-                            if (manga.scanlator_filter != null) {
-
-                                val originalScanlators = originalChapters.flatMap { it.scanlatorList() }.distinct()
-                                val newScanlators = newChapters.first.flatMap { it.scanlatorList() }.distinct()
-
-                                val results = newScanlators.filter { !originalScanlators.contains(it) }
-
-                                val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
-
-                                if (results.isNotEmpty()) {
-                                    scanlatorsToDownload.addAll(results)
-                                    manga.scanlator_filter = null
-                                    db.insertManga(manga).executeAsBlocking()
-                                }
-
-                                chaptersToDl = chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
-                            }
-                            downloadChapters(manga, chaptersToDl)
-                            hasDownloads = true
-                        }
-                        newUpdates[manga] =
-                            newChapters.first.sortedBy { it.chapter_number }.toTypedArray()
-                    }
-                    if (deleteRemoved && newChapters.second.isNotEmpty()) {
-                        val removedChapters = newChapters.second.filter {
-                            downloadManager.isChapterDownloaded(it, manga)
-                        }
-                        if (removedChapters.isNotEmpty()) {
-                            downloadManager.deleteChapters(removedChapters, manga, source)
-                        }
-                    }
-                    if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                        manga
-                    )
-                } else {
-                    updateMissingChapterCount(manga)
-                }
-                return hasDownloads
-            } catch (e: Exception) {
-                if (e !is CancellationException) {
-                    failedUpdates[manga] = e.message
-                    XLog.e("Failed updating: ${manga.title}: $e")
-                }
+        try {
+            var hasDownloads = false
+            if (job?.isCancelled == true) {
                 return false
             }
+            var errorFromMerged: Boolean = false
+
+            notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
+            val source = sourceManager.getMangadex()
+            val details = source.fetchMangaAndChapterDetails(manga)
+            val fetchedChapters = details.second.toMutableList()
+            manga.merge_manga_url?.let {
+                try {
+                    val chapters = sourceManager.getMergeSource().fetchChapters(it)
+                    fetchedChapters.addAll(chapters)
+                } catch (e: Exception) {
+                    XLog.e("Error with mergedsource", e)
+                    errorFromMerged = true
+                }
+            }
+
+            // delete cover cache image if the thumbnail from network is not empty
+            // note: we preload the covers here so we can view everything offline if they change
+            val thumbnailUrl = manga.thumbnail_url
+            manga.copyFrom(details.first)
+            manga.initialized = true
+            if (manga.thumbnail_url != null && preferences.refreshCoversToo().getOrDefault()) {
+                coverCache.deleteFromCache(thumbnailUrl)
+                // load new covers in background
+                val request =
+                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                        .memoryCachePolicy(CachePolicy.DISABLED).build()
+                Coil.imageLoader(this@LibraryUpdateService).execute(request)
+            }
+            db.insertManga(manga).executeAsBlocking()
+            // add mdlist tracker if manga in library has it missing
+            val tracks = db.getTracks(manga).executeAsBlocking()
+            if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+                val tracks = db.getTracks(manga).executeAsBlocking()
+                if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
+                    val track = trackManager.mdList.createInitialTracker(manga)
+                    db.insertTrack(track).executeAsBlocking()
+                }
+            }
+
+            if (fetchedChapters.isNotEmpty()) {
+                val originalChapters = db.getChapters(manga).executeAsBlocking()
+                val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
+
+                manga.missing_chapters = updateMissingChapterCount(manga).missing_chapters
+
+                if (newChapters.first.isNotEmpty()) {
+                    if (shouldDownload) {
+                        var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
+                        if (manga.scanlator_filter != null) {
+
+                            val originalScanlators = originalChapters.flatMap { it.scanlatorList() }.distinct()
+                            val newScanlators = newChapters.first.flatMap { it.scanlatorList() }.distinct()
+
+                            val results = newScanlators.filter { !originalScanlators.contains(it) }
+
+                            val scanlatorsToDownload = MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
+
+                            if (results.isNotEmpty()) {
+                                scanlatorsToDownload.addAll(results)
+                                manga.scanlator_filter = null
+                                db.insertManga(manga).executeAsBlocking()
+                            }
+
+                            chaptersToDl = chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
+                        }
+                        downloadChapters(manga, chaptersToDl)
+                        hasDownloads = true
+                    }
+                    newUpdates[manga] =
+                        newChapters.first.sortedBy { it.chapter_number }.toTypedArray()
+                }
+                if (deleteRemoved && newChapters.second.isNotEmpty()) {
+                    val removedChapters = newChapters.second.filter {
+                        downloadManager.isChapterDownloaded(it, manga)
+                    }
+                    if (removedChapters.isNotEmpty()) {
+                        downloadManager.deleteChapters(removedChapters, manga, source)
+                    }
+                }
+                if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
+                    manga
+                )
+            } else {
+                updateMissingChapterCount(manga)
+            }
+            return hasDownloads
+        } catch (e: Exception) {
+            if (e !is CancellationException) {
+                failedUpdates[manga] = e.message
+                XLog.e("Failed updating: ${manga.title}: $e")
+            }
+            return false
         }
+    }
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
         val allChaps = db.getChapters(manga).executeAsBlocking()
