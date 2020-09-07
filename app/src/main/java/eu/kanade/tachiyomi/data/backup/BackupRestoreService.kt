@@ -78,6 +78,8 @@ class BackupRestoreService : Service() {
 
     private var skippedAmount = 0
 
+    private var skippedTitles = mutableListOf<String>()
+
     private var categoriesAmount = 0
 
     /**
@@ -203,7 +205,7 @@ class BackupRestoreService : Service() {
             val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(MANGA))
             val isMangaDex = backupManager.sourceManager.isMangadex(manga.source)
             if (!isMangaDex) {
-                restoreAmount -= 1
+                skippedTitles.add(manga.ogTitle)
             }
             isMangaDex
         }
@@ -335,13 +337,22 @@ class BackupRestoreService : Service() {
      */
     private fun writeErrorLog(): File {
         try {
-            if (errors.isNotEmpty()) {
+            if (errors.isNotEmpty() || skippedTitles.isNotEmpty()) {
                 val destFile = File(externalCacheDir, "neko_restore.log")
                 val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
 
                 destFile.bufferedWriter().use { out ->
-                    errors.forEach { message ->
-                        out.write("$message\n")
+                    if (skippedAmount > 0) {
+                        out.write("skipped titles: \n")
+                        skippedTitles.forEach { message ->
+                            out.write("$message\n")
+                        }
+                    }
+                    if (errors.isNotEmpty()) {
+                        out.write("\n\nErrors: \n")
+                        errors.forEach { message ->
+                            out.write("$message\n")
+                        }
                     }
                 }
                 return destFile
