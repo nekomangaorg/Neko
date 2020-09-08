@@ -92,7 +92,7 @@ fun syncChaptersWithSource(
 
     // Chapters from the db not in the source.
     var toDelete = dbChapters.filterNot { dbChapter ->
-        //ignore to delete when there is a site error
+        // ignore to delete when there is a site error
         if (dbChapter.isMergedChapter() && errorFromMerged) {
             true
         } else {
