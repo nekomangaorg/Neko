@@ -8,7 +8,7 @@
     <!-- Backup -->
     <string name="restore_completed_successful">%1$s/%2$s Manga restored</string>
     <string name="restore_completed_errors">%1$s errors were found</string>
-    <string name="restore_skipped">%1$s/%2$s manga were skipped because they were not Mangadex</string>
+    <string name="restore_skipped">%1$s/%2$s manga were skipped because they were not MangaDex</string>
     <plurals name="restore_categories">
         <item quantity="one">%d category restored</item>
         <item quantity="other">%d categories restored</item>
@@ -57,7 +57,7 @@
 
     <!-- Follows -->
     <string name="follows">My follows</string>
-    <string name="add_to_follows">Add to Mangadex follows</string>
+    <string name="add_to_follows">Add to MangaDex follows</string>
     <string name="follows_status">Follows Sstatus</string>
     <string name="follows_unfollowed">Unfollowed</string>
     <string name="follows_reading">Reading</string>
