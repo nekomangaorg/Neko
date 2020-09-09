@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.os.Bundle
+import com.elvishew.xlog.XLog
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.flexibleadapter.items.ISectionable
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -34,7 +35,6 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subjects.PublishSubject
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -171,7 +171,7 @@ open class BrowseSourcePresenter(
             .doOnNext { initializeMangas(it.second) }
             .map {
                 it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
-                    .filter { isLibraryVisible || !it.manga.favorite }
+                    .filter { isDeepLink || isLibraryVisible || !it.manga.favorite }
             }
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay(
@@ -241,7 +241,7 @@ open class BrowseSourcePresenter(
         initializerSubscription = mangaDetailSubject.observeOn(Schedulers.io())
             .flatMap { Observable.from(it) }
             .filter { it.thumbnail_url == null && !it.initialized }
-            .filter { isLibraryVisible || !it.favorite }
+            .filter { isDeepLink || isLibraryVisible || !it.favorite }
             .concatMap { getMangaDetailsObservable(it) }
             .onBackpressureBuffer()
             .observeOn(AndroidSchedulers.mainThread())
