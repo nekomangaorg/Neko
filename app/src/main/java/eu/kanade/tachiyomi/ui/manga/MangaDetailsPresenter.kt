@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.manga
 import android.app.Application
 import android.graphics.Bitmap
 import com.elvishew.xlog.XLog
+import android.net.Uri
+import android.os.Environment
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -37,6 +39,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -749,6 +752,48 @@ class MangaDetailsPresenter(
         cover.compress(Bitmap.CompressFormat.JPEG, 75, stream)
         stream.flush()
         stream.close()
+        return destFile
+    }
+    fun shareCover(): File? {
+        return try {
+            val destDir = File(coverCache.context.cacheDir, "shared_image")
+            val file = saveCover(destDir)
+            file
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    fun saveCover(): Boolean {
+        return try {
+            val directory = File(
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator + Environment.DIRECTORY_PICTURES +
+                    File.separator + "Tachiyomi"
+            )
+            saveCover(directory)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun saveCover(directory: File): File {
+        val cover = coverCache.getCoverFile(manga)
+        val type = ImageUtil.findImageType(cover.inputStream())
+            ?: throw Exception("Not an image")
+
+        directory.mkdirs()
+
+        // Build destination file.
+        val filename = DiskUtil.buildValidFilename("${manga.title}.${type.extension}")
+
+        val destFile = File(directory, filename)
+        cover.inputStream().use { input ->
+            destFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
         return destFile
     }
 
