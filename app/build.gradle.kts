@@ -87,7 +87,7 @@ androidExtensions {
 
 dependencies {
     // Modified dependencies
-    implementation("com.github.inorichi:subsampling-scale-image-view:ac0dae7")
+    implementation("com.github.jays2kings:subsampling-scale-image-view:78f9664")
     implementation("com.github.inorichi:junrar-android:634c1f5")
 
     // Android X libraries
