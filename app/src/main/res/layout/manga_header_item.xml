@@ -132,14 +132,14 @@
         android:layout_marginTop="4dp"
         android:layout_marginEnd="16dp"
         android:textIsSelectable="false"
-        app:layout_constraintStart_toStartOf="@id/title"
         android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="rating 4.82"
         app:iiv_start_color="?android:attr/textColorSecondary"
-        app:iiv_start_size="15dp"
         app:iiv_start_icon="gmf_bar_chart"
-        app:layout_constraintTop_toBottomOf="@+id/manga_status" />
+        app:iiv_start_size="15dp"
+        app:layout_constraintStart_toStartOf="@id/title"
+        app:layout_constraintTop_toBottomOf="@+id/manga_status"
+        tools:text="rating 4.82"
+        tools:visibility="visible" />
 
     <com.mikepenz.iconics.view.IconicsTextView
         android:id="@+id/manga_users"
@@ -147,17 +147,17 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
-        android:paddingStart="8dp"
         android:layout_marginEnd="16dp"
+        android:paddingStart="8dp"
         android:textIsSelectable="false"
-        app:layout_constraintStart_toEndOf="@id/manga_rating"
         android:visibility="gone"
-        tools:visibility="visible"
-        tools:text="user 4.82"
         app:iiv_start_color="?android:attr/textColorSecondary"
-        app:iiv_start_size="15dp"
         app:iiv_start_icon="gmf_person"
-        app:layout_constraintTop_toBottomOf="@+id/manga_status" />
+        app:iiv_start_size="15dp"
+        app:layout_constraintStart_toEndOf="@id/manga_rating"
+        app:layout_constraintTop_toBottomOf="@+id/manga_status"
+        tools:text="user 4.82"
+        tools:visibility="visible" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_missing_chapters"
@@ -168,22 +168,40 @@
         android:layout_marginEnd="16dp"
         android:text="@string/missing_chapters"
         android:textIsSelectable="false"
+        android:visibility="gone"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="@id/title"
-        android:visibility="gone"
-        tools:visibility="visible"
-        app:layout_constraintTop_toBottomOf="@+id/manga_rating" />
+        app:layout_constraintTop_toBottomOf="@+id/manga_rating"
+        tools:visibility="visible" />
 
 
     <ImageView
         android:id="@+id/manga_lang_flag"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginEnd="16dp"
         android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
         app:layout_constraintStart_toStartOf="@id/title"
-        tools:src="@drawable/ic_flag_japan"
-        app:layout_constraintTop_toBottomOf="@id/manga_missing_chapters" />
+        app:layout_constraintTop_toBottomOf="@id/manga_missing_chapters"
+        tools:src="@drawable/ic_flag_japan" />
+
+    <TextView
+        android:id="@+id/r18_badge"
+        style="@style/Neko.Overline_bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/material_red_500"
+        android:padding="2dp"
+        android:text="H"
+        android:textColor="@color/md_white_1000"
+        android:textSize="14sp"
+        android:translationZ="1dp"
+        android:layout_marginStart="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/cover_card"
+        app:layout_constraintStart_toStartOf="@+id/cover_card"
+        app:layout_constraintTop_toTopOf="@id/cover_card"
+        tools:visibility="visible" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/bottom_line"
@@ -222,14 +240,15 @@
                 android:layout_gravity="center"
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
-                android:padding="5dp"
                 android:background="@drawable/round_ripple"
+                android:padding="5dp"
                 android:tooltipText="@string/add_to_library"
                 tools:background="@color/md_black_1000"
                 tools:src="@drawable/ic_open_in_webview_24dp" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/track_button"
+                style="@style/Neko.Iconics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -239,26 +258,26 @@
                 android:tooltipText="@string/tracking"
                 app:iiv_icon="gmf_art_track"
                 app:iiv_size="28dp"
-                style="@style/Neko.Iconics"
                 tools:background="@color/md_black_1000" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/similar_button"
+                style="@style/Neko.Iconics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginStart="6dp"
                 android:layout_marginEnd="6dp"
                 android:padding="5dp"
+                android:tooltipText="@string/similar"
                 android:visibility="gone"
                 app:iiv_icon="gmf_account_tree"
-                style="@style/Neko.Iconics"
-                tools:visibility="visible"
-                android:tooltipText="@string/similar"
-                tools:background="@color/md_black_1000" />
+                tools:background="@color/md_black_1000"
+                tools:visibility="visible" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/merge_button"
+                style="@style/Neko.Iconics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -266,15 +285,15 @@
                 android:layout_marginEnd="6dp"
                 android:contentDescription="@string/share"
                 android:padding="5dp"
+                android:tooltipText="@string/merge_other"
                 android:visibility="gone"
                 app:iiv_icon="gmf_merge_type"
-                style="@style/Neko.Iconics"
-                tools:visibility="visible"
-                android:tooltipText="@string/merge_other"
-                tools:background="@color/md_black_1000" />
+                tools:background="@color/md_black_1000"
+                tools:visibility="visible" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/webview_button"
+                style="@style/Neko.Iconics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -282,13 +301,13 @@
                 android:layout_marginEnd="6dp"
                 android:contentDescription="@string/open_external"
                 android:padding="5dp"
-                app:iiv_icon="cmd_web"
-                style="@style/Neko.Iconics"
                 android:tooltipText="@string/open_external"
+                app:iiv_icon="cmd_web"
                 tools:background="@color/md_black_1000" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/share_button"
+                style="@style/Neko.Iconics"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
@@ -296,9 +315,8 @@
                 android:layout_marginEnd="6dp"
                 android:contentDescription="@string/share"
                 android:padding="5dp"
-                app:iiv_icon="gmf_share"
-                style="@style/Neko.Iconics"
                 android:tooltipText="@string/share"
+                app:iiv_icon="gmf_share"
                 tools:background="@color/md_black_1000" />
 
         </LinearLayout>
@@ -307,7 +325,6 @@
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/manga_summary_label"
         style="@style/Neko.Headline5"
-        android:textSize="17sp"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -315,6 +332,7 @@
         android:layout_marginEnd="16dp"
         android:text="@string/description"
         android:textIsSelectable="false"
+        android:textSize="17sp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/sub_button_scroll"
         tools:text="About this manga" />
@@ -323,8 +341,6 @@
         android:id="@+id/manga_summary"
         style="@style/Neko.Condensed"
         android:layout_width="match_parent"
-        android:textSize="16sp"
-        android:textColor="@color/text_color_secondary"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
         android:layout_marginTop="4dp"
@@ -332,6 +348,8 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="3"
+        android:textColor="@color/text_color_secondary"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -487,7 +505,6 @@
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/filters_text"
             style="@style/Neko.Body1"
-            android:textSize="13sp"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
@@ -496,6 +513,7 @@
             android:padding="5dp"
             android:textAlignment="textEnd"
             android:textColor="@color/colorAccent"
+            android:textSize="13sp"
             app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
             app:layout_constraintEnd_toStartOf="@id/filter_button"

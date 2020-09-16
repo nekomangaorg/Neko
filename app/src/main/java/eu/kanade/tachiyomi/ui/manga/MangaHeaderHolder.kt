@@ -266,6 +266,10 @@ class MangaHeaderHolder(
 
         manga_missing_chapters.text = itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
 
+        manga.genre?.let {
+            r18_badge.visibleIf(it.contains("Hentai", true))
+        }
+
         manga_lang_flag.visibility = View.VISIBLE
         when (manga.lang_flag?.toLowerCase(Locale.US)) {
             "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
