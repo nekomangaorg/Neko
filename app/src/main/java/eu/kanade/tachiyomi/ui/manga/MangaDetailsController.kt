@@ -30,6 +30,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.iterator
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -177,6 +178,7 @@ class MangaDetailsController :
     private var currentAnimator: Animator? = null
 
     var headerHeight = 0
+    var fullCoverActive = false
 
     override fun getTitle(): String? {
         return null
@@ -190,6 +192,7 @@ class MangaDetailsController :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         coverColor = null
+        fullCoverActive = false
 
         setRecycler(view)
         setPaletteColor()
@@ -756,6 +759,19 @@ class MangaDetailsController :
             searchView.clearFocus()
         }
 
+        val menuItems = menu.iterator()
+        while (menuItems.hasNext()) {
+            menuItems.next().isVisible = !fullCoverActive
+        }
+        val saveItem = menu.findItem(R.id.save)
+        val shareItem = menu.findItem(R.id.share)
+        saveItem.isVisible = fullCoverActive
+        shareItem.isVisible = fullCoverActive
+        if (fullCoverActive) {
+            saveItem.icon.setTint(Color.WHITE)
+            shareItem.icon.setTint(Color.WHITE)
+        }
+
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
             if (query.isNotEmpty()) getHeader()?.collapse()
@@ -798,6 +814,28 @@ class MangaDetailsController :
             R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
                 item.itemId
             )
+            R.id.save -> {
+                if (presenter.saveCover()) {
+                    activity?.toast(R.string.cover_saved)
+                } else {
+                    activity?.toast(R.string.error_saving_cover)
+                }
+            }
+            R.id.share -> {
+                val cover = presenter.shareCover()
+                if (cover != null) {
+                    val stream = cover.getUriCompat(activity!!)
+                    val intent = Intent(Intent.ACTION_SEND).apply {
+                        putExtra(Intent.EXTRA_STREAM, stream)
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        clipData = ClipData.newRawUri(null, stream)
+                        type = "image/*"
+                    }
+                    startActivity(Intent.createChooser(intent, activity?.getString(R.string.share)))
+                } else {
+                    activity?.toast(R.string.error_sharing_cover)
+                }
+            }
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -1324,6 +1362,24 @@ class MangaDetailsController :
         }
         expandedImageView.requestLayout()
 
+        val activity = activity as? MainActivity ?: return
+        val currTheme = activity.appbar.context.theme
+        val currColor = activity.drawerArrow?.color
+        if (!activity.isInNightMode()) {
+            activity.appbar.context.setTheme(R.style.ThemeOverlay_AppCompat_Dark_ActionBar)
+
+            val iconPrimary = Color.WHITE
+            activity.toolbar.setTitleTextColor(iconPrimary)
+            activity.drawerArrow?.color = iconPrimary
+            activity.toolbar.overflowIcon?.setTint(iconPrimary)
+            activity.window.decorView.systemUiVisibility =
+                activity.window.decorView.systemUiVisibility.rem(
+                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                )
+        }
+        fullCoverActive = true
+        activity.invalidateOptionsMenu()
+
         expandedImageView.post {
             val defMargin = 16.dpToPx
             expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -1374,6 +1430,8 @@ class MangaDetailsController :
             expandedImageView.setOnClickListener {
                 currentAnimator?.cancel()
 
+                fullCoverActive = false
+                activity.invalidateOptionsMenu()
                 val rect2 = Rect()
                 thumbView.getGlobalVisibleRect(rect2)
                 expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -1399,6 +1457,21 @@ class MangaDetailsController :
                     play(ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f))
                     duration = shortAnimationDuration.toLong()
                     interpolator = DecelerateInterpolator()
+
+                    if (!activity.isInNightMode()) {
+                        activity.appbar.context.setTheme(
+                            ThemeUtil.theme(presenter.preferences.theme())
+                        )
+
+                        val iconPrimary = currColor ?: Color.WHITE
+                        activity.toolbar.setTitleTextColor(iconPrimary)
+                        activity.drawerArrow?.color = iconPrimary
+                        activity.toolbar.overflowIcon?.setTint(iconPrimary)
+                        activity.window.decorView.systemUiVisibility =
+                            activity.window.decorView.systemUiVisibility.or(
+                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
+                            )
+                    }
                     addListener(
                         object : AnimatorListenerAdapter() {
 
