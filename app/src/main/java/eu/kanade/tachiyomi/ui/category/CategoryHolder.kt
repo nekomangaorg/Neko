@@ -73,7 +73,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         title.visibility = if (editing) View.INVISIBLE else View.VISIBLE
         edit_text.visibility = if (!editing) View.INVISIBLE else View.VISIBLE
         if (editing) {
-            edit_text.inputType = InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
+            edit_text.inputType = InputType.TYPE_TEXT_VARIATION_SHORT_MESSAGE
             edit_text.requestFocus()
             edit_text.selectAll()
             edit_button.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
