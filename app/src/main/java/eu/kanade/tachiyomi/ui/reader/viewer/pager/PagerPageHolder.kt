@@ -13,6 +13,7 @@ import android.view.MotionEvent
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -364,7 +365,17 @@ class PagerPageHolder(
             setMinimumDpi(90)
             setMinimumTileDpi(180)
             setCropBorders(config.imageCropBorders)
-            setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+                val insets: WindowInsets? = viewer.activity.window.decorView.rootWindowInsets
+                setExtraSpace(
+                    0f,
+                    insets?.displayCutout?.boundingRectTop?.height()?.toFloat() ?: 0f,
+                    0f,
+                    insets?.displayCutout?.boundingRectBottom?.height()?.toFloat() ?: 0f
+                )
+            }
+            setOnImageEventListener(
+                object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                 override fun onReady() {
                     when (config.imageZoomType) {
                         ZoomType.Left -> setScaleAndCenter(scale, PointF(0f, 0f))
