@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga
 import android.app.Application
 import android.graphics.Bitmap
 import com.elvishew.xlog.XLog
-import android.net.Uri
 import android.os.Environment
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache

@@ -49,6 +49,8 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.elvishew.xlog.XLog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.iconics.IconicsDrawable
+import com.mikepenz.iconics.utils.colorInt
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -1323,13 +1325,13 @@ class MangaDetailsController :
 
         val activity = activity as? MainActivity ?: return
         val currTheme = activity.appbar.context.theme
-        val currColor = activity.drawerArrow?.color
+        val currColor = (activity.backArrow as IconicsDrawable).colorInt
         if (!activity.isInNightMode()) {
             activity.appbar.context.setTheme(R.style.ThemeOverlay_AppCompat_Dark_ActionBar)
 
             val iconPrimary = Color.WHITE
             activity.toolbar.setTitleTextColor(iconPrimary)
-            activity.drawerArrow?.color = iconPrimary
+            activity.backArrow?.setTint(iconPrimary)
             activity.toolbar.overflowIcon?.setTint(iconPrimary)
             activity.window.decorView.systemUiVisibility =
                 activity.window.decorView.systemUiVisibility.rem(
@@ -1422,7 +1424,7 @@ class MangaDetailsController :
 
                         val iconPrimary = currColor ?: Color.WHITE
                         activity.toolbar.setTitleTextColor(iconPrimary)
-                        activity.drawerArrow?.color = iconPrimary
+                        activity.backArrow?.setTint(iconPrimary)
                         activity.toolbar.overflowIcon?.setTint(iconPrimary)
                         activity.window.decorView.systemUiVisibility =
                             activity.window.decorView.systemUiVisibility.or(
@@ -1432,22 +1434,22 @@ class MangaDetailsController :
                     addListener(
                         object : AnimatorListenerAdapter() {
 
-                        override fun onAnimationEnd(animation: Animator) {
-                            thumbView.alpha = 1f
-                            expandedImageView.visibility = View.GONE
-                            fullBackdrop.visibility = View.GONE
-                            swipe_refresh.isEnabled = true
-                            currentAnimator = null
-                        }
+                            override fun onAnimationEnd(animation: Animator) {
+                                thumbView.alpha = 1f
+                                expandedImageView.visibility = View.GONE
+                                fullBackdrop.visibility = View.GONE
+                                swipe_refresh.isEnabled = true
+                                currentAnimator = null
+                            }
 
-                        override fun onAnimationCancel(animation: Animator) {
-                            thumbView.alpha = 1f
-                            expandedImageView.visibility = View.GONE
-                            fullBackdrop.visibility = View.GONE
-                            swipe_refresh.isEnabled = true
-                            currentAnimator = null
-                        }
-                    })
+                            override fun onAnimationCancel(animation: Animator) {
+                                thumbView.alpha = 1f
+                                expandedImageView.visibility = View.GONE
+                                fullBackdrop.visibility = View.GONE
+                                swipe_refresh.isEnabled = true
+                                currentAnimator = null
+                            }
+                        })
                     start()
                 }
             }

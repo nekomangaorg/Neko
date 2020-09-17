@@ -66,13 +66,15 @@
     </item>
     <item
         android:id="@+id/save"
+        android:icon="@drawable/ic_save_24dp"
         android:title="@string/save"
         android:visible="false"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/share"
+        android:icon="@drawable/ic_share_24dp"
         android:title="@string/share"
         android:visible="false"
-        app:showAsAction="never" />
+        app:showAsAction="ifRoom" />
 </menu>

@@ -134,7 +134,7 @@ object Libs {
         const val materialDialogsInput = "com.afollestad.material-dialogs:input:${Versions.materialDialogs}"
         const val numberSlidingPicker = "com.github.sephiroth74:NumberSlidingPicker:${Versions.numberSlidingPicker}"
         const val photoView = "com.github.chrisbanes:PhotoView:${Versions.photoView}"
-        const val subsamplingScaleImageView = "com.github.inorichi:subsampling-scale-image-view:${Versions.subsamplingImageScale}"
+        const val subsamplingScaleImageView = "com.github.jays2kings:subsampling-scale-image-view:${Versions.subsamplingImageScale}"
         const val systemUiHelper = "me.zhanghai.android.systemuihelper:library:${Versions.systemUiHelper}"
         const val tapTargetView = "com.getkeepsafe.taptargetview:taptargetview:${Versions.tapTargetView}"
         const val viewStatePager = "com.nightlynexus.viewstatepageradapter:viewstatepageradapter:${Versions.viewStatePagerAdapter}"
@@ -142,6 +142,10 @@ object Libs {
     }
 
     object Util {
+        object CrazyLegend {
+            const val ktx = "com.github.CraZyLegenD.Set-Of-Useful-Kotlin-Extensions-and-Helpers:kotlinextensions:${Versions.crazyLegend}"
+        }
+
         const val aboutLibraries = "com.mikepenz:aboutlibraries:${Versions.aboutLibraries}"
         const val changelog = "com.github.gabrielemariotti.changeloglib:changelog:${Versions.changelog}"
         const val injekt = "com.github.inorichi.injekt:injekt-core:${Versions.injekt}"
@@ -177,6 +181,7 @@ object Versions {
     const val coil = "0.11.0"
     const val conductor = "2.1.5"
     const val conscrypt = "2.4.0"
+    const val crazyLegend = "2.0.8"
     const val directionalViewPager = "a844dbca0a"
     const val diskLruCache = "2.0.2"
     const val fastAdapter = "5.0.0"
@@ -222,7 +227,7 @@ object Versions {
     const val storioCommon = "8be19de@aar"
     const val storioSqlite = "8be19de@aar"
     const val stringSimilarity = "2.0.0"
-    const val subsamplingImageScale = "ac0dae7"
+    const val subsamplingImageScale = "78f9664"
     const val systemUiHelper = "1.0.0"
     const val tagGroup = "1.6.0"
     const val tapTargetView = "1.13.0"

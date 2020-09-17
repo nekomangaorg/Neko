@@ -254,6 +254,7 @@ dependencies {
     implementation(Libs.Util.listenableFutureConflictResolve)
 
     implementation(Libs.Util.aboutLibraries)
+    implementation(Libs.Util.CrazyLegend.ktx)
 }
 
 // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api-markers

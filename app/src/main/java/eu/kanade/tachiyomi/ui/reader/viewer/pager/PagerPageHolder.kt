@@ -376,19 +376,19 @@ class PagerPageHolder(
             }
             setOnImageEventListener(
                 object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
-                override fun onReady() {
-                    when (config.imageZoomType) {
-                        ZoomType.Left -> setScaleAndCenter(scale, PointF(0f, 0f))
-                        ZoomType.Right -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
-                        ZoomType.Center -> setScaleAndCenter(scale, center.also { it?.y = 0f })
+                    override fun onReady() {
+                        when (config.imageZoomType) {
+                            ZoomType.Left -> setScaleAndCenter(scale, PointF(0f, 0f))
+                            ZoomType.Right -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
+                            ZoomType.Center -> setScaleAndCenter(scale, center.also { it?.y = 0f })
+                        }
+                        onImageDecoded()
                     }
-                    onImageDecoded()
-                }
 
-                override fun onImageLoadError(e: Exception) {
-                    onImageDecodeError()
-                }
-            })
+                    override fun onImageLoadError(e: Exception) {
+                        onImageDecodeError()
+                    }
+                })
         }
         addView(subsamplingImageView)
         return subsamplingImageView!!
