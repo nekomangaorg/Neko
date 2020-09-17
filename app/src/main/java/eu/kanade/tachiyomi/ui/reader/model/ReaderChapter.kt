@@ -4,6 +4,7 @@ import com.elvishew.xlog.XLog
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.ui.reader.loader.PageLoader
+import eu.kanade.tachiyomi.util.system.HashCode
 
 data class ReaderChapter(val chapter: Chapter) {
 
@@ -46,6 +47,14 @@ data class ReaderChapter(val chapter: Chapter) {
 
     fun urlAndName(): String {
         return this.chapter.url + " - " + this.chapter.name
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return (other is ReaderChapter) && (other as ReaderChapter).urlAndName() == this.urlAndName()
+    }
+
+    override fun hashCode(): Int {
+        return HashCode.generate(urlAndName())
     }
 
     sealed class State {
