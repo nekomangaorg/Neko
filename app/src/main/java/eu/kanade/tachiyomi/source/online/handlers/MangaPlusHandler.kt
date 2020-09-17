@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.handlers
 import MangaPlusSerializer
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.Page
-import java.util.UUID
 import kotlinx.serialization.protobuf.ProtoBuf
 import okhttp3.Headers
 import okhttp3.Interceptor
@@ -12,8 +11,9 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import java.util.UUID
 
-class MangaPlusHandler(val currentClient: OkHttpClient) {
+class MangaPlusHandler(private val currentClient: OkHttpClient) {
     val baseUrl = "https://jumpg-webapi.tokyo-cdn.com/api"
     val headers = Headers.Builder()
         .add("Origin", WEB_URL)
@@ -38,7 +38,7 @@ class MangaPlusHandler(val currentClient: OkHttpClient) {
     }
 
     private fun pageListParse(response: Response): List<Page> {
-        val result = ProtoBuf.load(MangaPlusSerializer, response.body!!.bytes())
+        val result = ProtoBuf.decodeFromByteArray(MangaPlusSerializer, response.body!!.bytes())
 
         if (result.success == null) {
             throw Exception("error getting images")

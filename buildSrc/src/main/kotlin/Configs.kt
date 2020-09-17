@@ -16,7 +16,7 @@ object LegacyPluginClassPath {
     const val kotlinExtensions = "org.jetbrains.kotlin:kotlin-android-extensions:${Versions.kotlin}"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     const val kotlinSerializations = "org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}"
-    const val fireBaseCrashlytics = "com.google.firebase:firebase-crashlytics-gradle:2.0.0"
+    const val fireBaseCrashlytics = "com.google.firebase:firebase-crashlytics-gradle:2.3.0"
 }
 
 object Plugins {

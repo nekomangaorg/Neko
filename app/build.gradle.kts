@@ -254,12 +254,12 @@ dependencies {
     implementation(Libs.Util.listenableFutureConflictResolve)
 
     implementation(Libs.Util.aboutLibraries)
-    implementation(Libs.Util.CrazyLegend.ktx)
 }
 
 // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api-markers
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=org.mylibrary.OptInAnnotation"
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
 }
 
 tasks.preBuild {

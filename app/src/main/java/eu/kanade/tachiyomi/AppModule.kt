@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.serialization.UnstableDefault
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
@@ -23,7 +22,6 @@ import uy.kohesive.injekt.api.get
 
 class AppModule(val app: Application) : InjektModule {
 
-    @OptIn(UnstableDefault::class)
     override fun InjektRegistrar.registerInjectables() {
 
         addSingleton(app)

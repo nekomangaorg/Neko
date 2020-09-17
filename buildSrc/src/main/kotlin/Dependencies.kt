@@ -70,7 +70,7 @@ object Libs {
         const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}"
         const val flowPreferences = "com.github.tfcporciuncula:flow-preferences:${Versions.flowPreferences}"
         const val stdLib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
-        const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-runtime:${Versions.kotlinSerialization}"
+        const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.kotlinSerialization}"
         const val serializationProtobuf = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.kotlinSerialization}"
     }
 
@@ -142,10 +142,6 @@ object Libs {
     }
 
     object Util {
-        object CrazyLegend {
-            const val ktx = "com.github.CraZyLegenD.Set-Of-Useful-Kotlin-Extensions-and-Helpers:kotlinextensions:${Versions.crazyLegend}"
-        }
-
         const val aboutLibraries = "com.mikepenz:aboutlibraries:${Versions.aboutLibraries}"
         const val changelog = "com.github.gabrielemariotti.changeloglib:changelog:${Versions.changelog}"
         const val injekt = "com.github.inorichi.injekt:injekt-core:${Versions.injekt}"
@@ -186,8 +182,8 @@ object Versions {
     const val diskLruCache = "2.0.2"
     const val fastAdapter = "5.0.0"
     const val filePicker = "2.5.2"
-    const val firebase = "17.4.4"
-    const val firebaseCrashlytics = "17.1.1"
+    const val firebase = "17.5.0"
+    const val firebaseCrashlytics = "17.2.1"
     const val flexibleAdapter = "5.1.0"
     const val flexibleAdapterUi = "1.0.0"
     const val flowPreferences = "1.1.1"
@@ -199,11 +195,11 @@ object Versions {
     const val injekt = "65b0440"
     const val jsoup = "1.13.1"
     const val junit = "4.13"
-    const val kotlin = "1.3.72"
-    const val kotlinCoroutines = "1.3.5"
-    const val kotlinSerialization = "0.20.0"
+    const val kotlin = "1.4.10"
+    const val kotlinCoroutines = "1.3.9"
+    const val kotlinSerialization = "1.0.0-RC"
     const val kotson = "2.5.0"
-    const val ktlint = "9.3.0"
+    const val ktlint = "9.4.0"
     const val loadingButton = "2.2.0"
     const val materialDesignDimens = "1.4"
     const val materialDialogs = "3.1.1"
@@ -217,7 +213,7 @@ object Versions {
     const val reactiveNetwork = "0.13.0"
     const val requerySqlite = "3.31.0"
     const val retrofit = "2.7.2"
-    const val retrofitKotlinSerialization = "0.5.0"
+    const val retrofitKotlinSerialization = "0.7.0"
     const val roboElectric = "3.1.4"
     const val rxAndroid = "1.2.1"
     const val rxBinding = "1.0.1"

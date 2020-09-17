@@ -110,18 +110,20 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         pager = controller.recycler
         val shadow2: View = controller.shadow2
         val shadow: View = controller.shadow
-        sheetBehavior?.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
-            override fun onSlide(bottomSheet: View, progress: Float) {
-                pill.alpha = (1 - max(0f, progress)) * 0.25f
-                shadow2.alpha = (1 - max(0f, progress)) * 0.25f
-                shadow.alpha = 1 + min(0f, progress)
-                updateRootPadding(progress)
-            }
+        sheetBehavior?.addBottomSheetCallback(
+            object : BottomSheetBehavior.BottomSheetCallback() {
+                override fun onSlide(bottomSheet: View, progress: Float) {
+                    pill.alpha = (1 - max(0f, progress)) * 0.25f
+                    shadow2.alpha = (1 - max(0f, progress)) * 0.25f
+                    shadow.alpha = 1 + min(0f, progress)
+                    updateRootPadding(progress)
+                }
 
-            override fun onStateChanged(p0: View, state: Int) {
-                stateChanged(state)
+                override fun onStateChanged(p0: View, state: Int) {
+                    stateChanged(state)
+                }
             }
-        })
+        )
 
         if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             second_layout.removeView(view_options)

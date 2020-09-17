@@ -2,9 +2,7 @@ package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import kotlinx.serialization.UnstableDefault
 import kotlinx.serialization.json.Json
-import kotlinx.serialization.json.JsonConfiguration
 import org.jsoup.parser.Parser
 import kotlin.math.floor
 
@@ -24,14 +22,14 @@ class MdUtil {
         const val reportUrl = "https://api.mangadex.network/report"
         const val imageUrl = "$baseUrl/data"
 
-        @OptIn(UnstableDefault::class)
         val jsonParser =
-            Json(
-                JsonConfiguration(
-                    isLenient = true, ignoreUnknownKeys = true, serializeSpecialFloatingPointValues = true,
-                    useArrayPolymorphism = true, prettyPrint = true
-                )
-            )
+            Json {
+                isLenient = true
+                ignoreUnknownKeys = true
+                allowSpecialFloatingPointValues = true
+                useArrayPolymorphism = true
+                prettyPrint = true
+            }
 
         private const
         val scanlatorSeparator = " & "

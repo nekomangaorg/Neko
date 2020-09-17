@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.ImplicitReflectionSerializer
 import okhttp3.CacheControl
 import okhttp3.FormBody
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -165,7 +164,6 @@ open class MangaDex() : HttpSource() {
         return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
     }
 
-    @OptIn(ImplicitReflectionSerializer::class)
     override fun fetchImage(page: Page): Observable<Response> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
             return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
@@ -178,7 +176,7 @@ open class MangaDex() : HttpSource() {
                     page.imageUrl!!, response.isSuccessful, byteSize
                 )
 
-                val jsonString = MdUtil.jsonParser.stringify(ImageReportResult.serializer(), result)
+                val jsonString = MdUtil.jsonParser.encodeToString(ImageReportResult.serializer(), result)
 
                 val postResult = clientBuilder().newCall(
                     POST(

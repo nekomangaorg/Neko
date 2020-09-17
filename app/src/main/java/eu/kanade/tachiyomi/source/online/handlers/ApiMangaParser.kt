@@ -28,7 +28,7 @@ class ApiMangaParser(val langs: List<String>) {
     fun mangaDetailsParse(jsonData: String, forceLatestCover: Boolean): SManga {
         try {
             val manga = SManga.create()
-            val networkApiManga = MdUtil.jsonParser.parse(ApiMangaSerializer.serializer(), jsonData)
+            val networkApiManga = MdUtil.jsonParser.decodeFromString(ApiMangaSerializer.serializer(), jsonData)
             val networkManga = networkApiManga.manga
             manga.title = MdUtil.cleanString(networkManga.title)
 
@@ -161,7 +161,7 @@ class ApiMangaParser(val langs: List<String>) {
 
     fun chapterListParse(jsonData: String): List<SChapter> {
         val now = Date().time
-        val networkApiManga = MdUtil.jsonParser.parse(ApiMangaSerializer.serializer(), jsonData)
+        val networkApiManga = MdUtil.jsonParser.decodeFromString(ApiMangaSerializer.serializer(), jsonData)
         val networkManga = networkApiManga.manga
         val networkChapters = networkApiManga.chapter
         if (networkChapters.isNullOrEmpty()) {
