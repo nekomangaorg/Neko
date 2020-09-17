@@ -2,6 +2,19 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.3.8">
+        <changelogtext>New: Option to save or share cover when it is enlarged</changelogtext>
+        <changelogtext>New: Pages in Pager mode no longer overlap cutout areas</changelogtext>
+        <changelogtext>New: Added H icon on cover in Manga Info for H manga</changelogtext>
+        <changelogtext>New: Allow emoji's for category names</changelogtext>
+        <changelogtext>New: Added the skipped titles to the restore log</changelogtext>
+        <changelogtext>Fix: Issue where merged source being down caused the chapter list to delete during library update</changelogtext>
+        <changelogtext>Fix: Opening Chapter or Manga when hide library manga enabled crash</changelogtext>
+        <changelogtext>Fix: Duplicates showing in browse view</changelogtext>
+        <changelogtext>Fix: Possibly fix the stuck on 2nd chapter bug</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.3.7">
         <changelogtext>Fix: Crash in reader for certain manga</changelogtext>
         <changelogtext>Fix: [END] tag bug in some scenarios was showing when it shouldnt</changelogtext>
