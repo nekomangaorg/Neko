@@ -20,5 +20,7 @@ jobs:
         java-version: 1.8
     - name: Get NDK 
       run: sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669"    
+    - name: clean
+      run: ./gradlew clean
     - name: Build with Gradle
       run: ./gradlew assembleDebug
