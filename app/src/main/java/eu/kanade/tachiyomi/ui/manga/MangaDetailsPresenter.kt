@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.app.Application
 import android.graphics.Bitmap
-import com.elvishew.xlog.XLog
 import android.os.Environment
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -753,6 +753,7 @@ class MangaDetailsPresenter(
         stream.close()
         return destFile
     }
+
     fun shareCover(): File? {
         return try {
             val destDir = File(coverCache.context.cacheDir, "shared_image")
@@ -768,7 +769,7 @@ class MangaDetailsPresenter(
             val directory = File(
                 Environment.getExternalStorageDirectory().absolutePath +
                     File.separator + Environment.DIRECTORY_PICTURES +
-                    File.separator + "Tachiyomi"
+                    File.separator + "Neko"
             )
             saveCover(directory)
             true
