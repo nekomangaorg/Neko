@@ -21,4 +21,4 @@ jobs:
     - name: Install NDK
       run: sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669" &> /dev/null
     - name: Build app
-      run: ./gradlew assembleStandardDebug
+      run: ./gradlew assembleDebug
