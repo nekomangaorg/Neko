@@ -18,9 +18,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 1.8
-    - name: Get NDK 
-      run: sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669"    
-    - name: clean
-      run: ./gradlew clean
-    - name: Build with Gradle
-      run: ./gradlew assembleDebug
+    - name: Install NDK
+      run: sudo ${ANDROID_HOME}/tools/bin/sdkmanager --install "ndk;21.0.6113669" &> /dev/null
+    - name: Build app
+      run: ./gradlew assembleStandardDebug
