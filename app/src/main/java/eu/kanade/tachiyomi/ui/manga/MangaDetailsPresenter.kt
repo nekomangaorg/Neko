@@ -492,6 +492,7 @@ class MangaDetailsPresenter(
                     manga.missing_chapters = missingChapters
                     db.insertManga(manga).executeOnIO()
                 }
+                refreshTracking(false)
             }
             withContext(Dispatchers.IO) {
                 updateChapters()
@@ -843,9 +844,20 @@ class MangaDetailsPresenter(
                             null
                         }
                         if (trackItem != null) {
+                            if (item.service.isMdList()) {
 
-                            if (item.service.isMdList() && trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {
-                                trackItem.total_chapters = manga.last_chapter_number!!
+                                if (preferences.markChaptersReadFromMDList()) {
+                                    chapters.firstOrNull { it.chapter_number.toInt() == trackItem!!.last_chapter_read && !it.chapter.read }?.let {
+                                        scope.launch(Dispatchers.Main) {
+                                            controller.markAsRead(listOf(it))
+                                            controller.markPreviousAs(it, true)
+                                        }
+                                    }
+                                }
+
+                                if (trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {
+                                    trackItem.total_chapters = manga.last_chapter_number!!
+                                }
                             }
 
                             db.insertTrack(trackItem).executeAsBlocking()

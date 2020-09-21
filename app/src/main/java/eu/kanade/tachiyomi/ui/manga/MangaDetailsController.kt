@@ -352,8 +352,8 @@ class MangaDetailsController :
         val activity = activity ?: return
         // if the theme is using inverted toolbar color
         if (!activity.isInNightMode() && ThemeUtil.isBlueTheme(
-            presenter.preferences.theme()
-        )
+                presenter.preferences.theme()
+            )
         ) {
             if (forThis) (activity as MainActivity).appbar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
@@ -640,7 +640,7 @@ class MangaDetailsController :
         }
     }
 
-    private fun markPreviousAs(chapter: ChapterItem, read: Boolean) {
+    fun markPreviousAs(chapter: ChapterItem, read: Boolean) {
         val adapter = adapter ?: return
         val chapters = if (presenter.sortDescending()) adapter.items.reversed() else adapter.items
         val chapterPos = chapters.indexOf(chapter)
@@ -705,7 +705,7 @@ class MangaDetailsController :
         presenter.bookmarkChapters(chapters, bookmarked)
     }
 
-    private fun markAsRead(chapters: List<ChapterItem>) {
+    fun markAsRead(chapters: List<ChapterItem>) {
         presenter.markChaptersRead(chapters, true)
     }
 
@@ -958,12 +958,12 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.mangaType
-            (view.context).toLowerCase(Locale.ROOT)
+                (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
-            snack == null ||
-                snack?.getText() != text
-            )
+                snack == null ||
+                    snack?.getText() != text
+                )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
@@ -994,8 +994,8 @@ class MangaDetailsController :
         if (item != null) {
             openChapter(item.chapter)
         } else if (snack == null || snack?.getText() != view?.context?.getString(
-            R.string.next_chapter_not_found
-        )
+                R.string.next_chapter_not_found
+            )
         ) {
             snack = view?.snack(R.string.next_chapter_not_found, Snackbar.LENGTH_LONG) {
                 addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
