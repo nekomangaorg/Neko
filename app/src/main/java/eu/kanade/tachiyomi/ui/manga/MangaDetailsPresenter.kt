@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MergeSource
+import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
@@ -846,13 +847,14 @@ class MangaDetailsPresenter(
                         if (trackItem != null) {
                             if (item.service.isMdList()) {
 
-                                if (preferences.markChaptersReadFromMDList()) {
-                                    chapters.firstOrNull { it.chapter_number.toInt() == trackItem!!.last_chapter_read && !it.chapter.read }?.let {
-                                        scope.launch(Dispatchers.Main) {
-                                            controller.markAsRead(listOf(it))
-                                            controller.markPreviousAs(it, true)
+                                if (preferences.markChaptersReadFromMDList() && trackItem.status == FollowStatus.READING.int) {
+                                    chapters.firstOrNull { it.chapter_number.toInt() == trackItem.last_chapter_read && !it.chapter.read }
+                                        ?.let {
+                                            scope.launch(Dispatchers.Main) {
+                                                controller.markAsRead(listOf(it))
+                                                controller.markPreviousAs(it, true)
+                                            }
                                         }
-                                    }
                                 }
 
                                 if (trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {

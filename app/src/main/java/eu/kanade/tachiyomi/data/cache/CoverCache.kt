@@ -129,7 +129,7 @@ class CoverCache(val context: Context) {
                     return@launch
                 }
                 var deletedSize = 0L
-                val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
+                val files = directory.listFiles()?.sortedWith(compareBy { it.lastModified() })?.iterator()
                     ?: return@launch
                 while (files.hasNext()) {
                     val file = files.next()
