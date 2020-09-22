@@ -108,6 +108,25 @@ class SettingsSiteController :
                 )
             }
         }
+
+        preference {
+            titleRes = R.string.push_favorites_to_mangadex
+            summaryRes = R.string.push_favorites_to_mangadex_summary
+
+            onClick {
+                LibraryUpdateService.start(
+                    context,
+                    target = LibraryUpdateService.Target.PUSH_FAVORITES
+                )
+            }
+        }
+
+        switchPreference {
+            key = PreferenceKeys.markChaptersFromMDList
+            titleRes = R.string.mark_mdlist_chapters_read
+            summaryRes = R.string.mark_mdlist_chapters_read_summary
+            defaultValue = false
+        }
     }
 
     override fun siteLoginDialogClosed(source: Source) {

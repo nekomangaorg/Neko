@@ -91,6 +91,9 @@ class LibraryUpdateService(
     // List containing failed updates
     private val failedUpdates = mutableMapOf<Manga, String?>()
 
+    // Trackers which are enabled
+    private val loggedServices by lazy { trackManager.services.filter { it.isLogged || it.isMdList() } }
+
     val count = AtomicInteger(0)
     val jobCount = AtomicInteger(0)
 
@@ -277,6 +280,7 @@ class LibraryUpdateService(
             when (target) {
                 Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
                 Target.SYNC_FOLLOWS -> syncFollows()
+                Target.PUSH_FAVORITES -> pushFavorites()
                 else -> updateTrackings(mangaToAdd)
             }
         }
@@ -514,7 +518,8 @@ class LibraryUpdateService(
      * Method that updates the syncs reading and rereading manga into neko library
      */
     private suspend fun syncFollows() {
-        val count = AtomicInteger(0)
+        var count = AtomicInteger(0)
+        var countNew = AtomicInteger(0)
         val listManga = sourceManager.getMangadex().fetchAllFollows(true)
         // filter all follows from Mangadex and only add reading or rereading manga to library
         listManga.filter { it ->
@@ -543,6 +548,45 @@ class LibraryUpdateService(
                 }
             }
         notifier.cancelProgressNotification()
+        withContext(Dispatchers.Main) {
+            toast(getString(R.string.sync_follows_to_library_toast, countNew.toInt()), Toast.LENGTH_LONG)
+        }
+    }
+
+    /**
+     * Method that updates the all mangas which are not tracked as "reading" on mangadex
+     */
+    private suspend fun pushFavorites() {
+        val count = AtomicInteger(0)
+        var countNew = AtomicInteger(0)
+        val listManga = db.getLibraryMangas().executeAsBlocking()
+        // filter all follows from Mangadex and only add reading or rereading manga to library
+
+        listManga.forEach { manga ->
+            showProgressNotification(manga, count.andIncrement, listManga.size)
+
+            // Get this manga's trackers from the database
+            val dbTracks = db.getTracks(manga).executeAsBlocking()
+            val trackList = loggedServices.map { service ->
+                TrackItem(dbTracks.find { it.sync_id == service.id }, service)
+            }
+
+            //find the mdlist entry if its unfollowed the follow it
+
+            trackList.firstOrNull { it.service.isMdList() }?.let { tracker ->
+                if (tracker.track?.status == FollowStatus.UNFOLLOWED.int) {
+                    tracker.track.status = FollowStatus.READING.int
+                    val returnedTracker = tracker.service.update(tracker.track)
+                    db.insertTrack(returnedTracker)
+                    countNew.incrementAndGet()
+                }
+            }
+
+        }
+        notifier.cancelProgressNotification()
+        withContext(Dispatchers.Main) {
+            toast(getString(R.string.push_favorites_to_mangadex_toast, countNew.toInt()), Toast.LENGTH_LONG)
+        }
     }
 
     /**
@@ -583,6 +627,7 @@ class LibraryUpdateService(
     enum class Target {
         CHAPTERS, // Manga meta data and  chapters
         SYNC_FOLLOWS, // Manga in reading, rereading
+        PUSH_FAVORITES, // Manga in reading
         TRACKING // Tracking metadata
     }
 
