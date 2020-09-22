@@ -68,7 +68,7 @@ object Libs {
 
     object Kotlin {
         const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}"
-        const val flowPreferences = "com.github.tfcporciuncula:flow-preferences:${Versions.flowPreferences}"
+        const val flowPreferences = "com.github.tfcporciuncula.flow-preferences:flow-preferences:${Versions.flowPreferences}"
         const val stdLib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
         const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.kotlinSerialization}"
         const val serializationProtobuf = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.kotlinSerialization}"
@@ -186,7 +186,7 @@ object Versions {
     const val firebaseCrashlytics = "17.2.1"
     const val flexibleAdapter = "5.1.0"
     const val flexibleAdapterUi = "1.0.0"
-    const val flowPreferences = "1.1.1"
+    const val flowPreferences = "1.3.2"
     const val googlePlayServices = "17.0.0"
     const val googleServices = "4.3.3"
     const val gradleVersions = "0.29.0"
