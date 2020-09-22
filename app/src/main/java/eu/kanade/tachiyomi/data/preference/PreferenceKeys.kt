@@ -177,7 +177,7 @@ object PreferenceKeys {
 
     const val logLevel = "log_level"
 
-    const val markChaptersReadFromMdList = "mdlist_mark_read"
+    const val markChaptersFromMDList = "mdlist_mark_read"
 
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
