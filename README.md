@@ -9,11 +9,6 @@
 
 <p align="center">A Free, Open source unofficial manga reader for MangaDex</p>
 
-<p align="center">
-  Need info? Check the <a href="https://github.com/CarlosEsco/Neko/wiki">Wiki</a>
-  | Create an  <a href="https://github.com/CarlosEsco/Neko/issues/new/choose">issue</a>
-  | Check the <a href="https://github.com/CarlosEsco/Neko/projects/1">Project Board</a>
-</p>
  <p align="center">
     <a href="https://github.com/CarlosEsco/Neko/releases/latest"><img src="https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
     <a href="https://github.com/carlosesco/neko/actions?query=workflow%3A%22Android+CI%22"><img src="https://img.shields.io/github/workflow/status/carlosesco/neko/Android%20CI?style=for-the-badge" /></a>
@@ -36,11 +31,12 @@ This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href=
  **Note**: This fork is for Android 7+
 
 ## Specific features:
-- Supports native login to MangaDex and supports 2FA
-- MDList support as a tracker
+- Supports native login to MangaDex and 2FA
+- Use MDList as  Tracker
 - Similar Manga Recommendations
 - Manually sync of Manga to and from Mangadex follows list
-- Filter by Group in chapter list
+- Sync Followed Manga's read chapters from MangaDex into Neko automatically
+- Filter by Scanlation Group in chapter list
 - Look at an additional source for missing chapters not hosted on MangaDex
 - Ability to attempt to merge missing chapters from MangaDex with another source
 - And many more
