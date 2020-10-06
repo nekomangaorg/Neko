@@ -72,7 +72,7 @@ class ApiMangaParser(val langs: List<String>) {
                 manga.status = tempStatus
             }
 
-            val demographic = FilterHandler.demographics().filter { it.id == networkManga.demographic }.firstOrNull()
+            val demographic = FilterHandler.demographics().firstOrNull { it.id == networkManga.demographic }
 
             val genres = networkManga.genres.mapNotNull { FilterHandler.allTypes[it.toString()] }
                 .toMutableList()

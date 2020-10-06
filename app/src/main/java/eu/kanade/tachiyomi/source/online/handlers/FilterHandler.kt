@@ -1,9 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 
-class FilterHandler {
+class FilterHandler(private val preferencesHelper: PreferencesHelper) {
 
     class TextField(name: String, val key: String) : Filter.Text(name)
     class Tag(val id: String, name: String) : Filter.TriState(name)
@@ -27,21 +28,29 @@ class FilterHandler {
 
     class OriginalLanguage : Filter.Select<String>("Original Language", sourceLang().map { it.first }.toTypedArray())
 
-    fun getFilterList() = FilterList(
-        TextField("Author", "author"),
-        TextField("Artist", "artist"),
-        R18(),
-        SortFilter(),
-        DemographicList(demographics()),
-        PublicationStatusList(publicationStatus()),
-        OriginalLanguage(),
-        ContentList(contentType()),
-        FormatList(formats()),
-        GenreList(genre()),
-        ThemeList(themes()),
-        TagInclusionMode(),
-        TagExclusionMode()
-    )
+    fun getFilterList(): FilterList {
+
+        val filters = mutableListOf(
+            TextField("Author", "author"),
+            TextField("Artist", "artist"),
+            SortFilter(),
+            DemographicList(demographics()),
+            PublicationStatusList(publicationStatus()),
+            OriginalLanguage(),
+            ContentList(contentType()),
+            FormatList(formats()),
+            GenreList(genre()),
+            ThemeList(themes()),
+            TagInclusionMode(),
+            TagExclusionMode()
+        )
+
+        if (preferencesHelper.showR18Filter()) {
+            filters.add(2, R18())
+        }
+
+        return FilterList(list = filters.toList())
+    }
 
     companion object {
         fun demographics() = listOf(

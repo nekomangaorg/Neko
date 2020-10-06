@@ -312,7 +312,7 @@ open class MangaDex() : HttpSource() {
     fun getLangsToShow() = preferences.langsToShow().get().split(",")
 
     override fun getFilterList(): FilterList {
-        return FilterHandler().getFilterList()
+        return FilterHandler(preferences).getFilterList()
     }
 
     companion object {

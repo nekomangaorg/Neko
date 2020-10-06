@@ -126,6 +126,7 @@
     <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
     <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
     <string name="mark_mdlist_chapters_read_summary">When enabled, this will attempt to mark chapters as read if they were read on MangaDex and are tracked with MDList</string>
+    <string name="show_r18_filter_in_search">Show R18 filter in search</string>
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

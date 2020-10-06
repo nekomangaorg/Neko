@@ -179,6 +179,8 @@ object PreferenceKeys {
 
     const val markChaptersFromMDList = "mdlist_mark_read"
 
+    const val showR18Filter = "show_R18_filter"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"

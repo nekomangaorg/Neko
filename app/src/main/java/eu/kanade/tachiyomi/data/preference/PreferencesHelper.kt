@@ -329,4 +329,6 @@ class PreferencesHelper(val context: Context) {
     fun logLevel() = prefs.getInt(Keys.logLevel, 0)
 
     fun markChaptersReadFromMDList() = prefs.getBoolean(Keys.markChaptersFromMDList, false)
+
+    fun showR18Filter(): Boolean = prefs.getBoolean(Keys.showR18Filter, true)
 }

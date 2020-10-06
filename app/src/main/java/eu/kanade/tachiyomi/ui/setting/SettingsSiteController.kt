@@ -70,6 +70,12 @@ class SettingsSiteController :
             summary = "%s"
         }
 
+        switchPreference {
+            key = PreferenceKeys.showR18Filter
+            titleRes = R.string.show_r18_filter_in_search
+            defaultValue = true
+        }
+
         listPreference(activity) {
             key = PreferenceKeys.imageServer
             titleRes = R.string.image_server
