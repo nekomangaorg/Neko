@@ -113,8 +113,13 @@ class ApiMangaParser(val langs: List<String>) {
                 }
             }
         }
-        val removeOneshots = filteredChapters.filter { !it.value.chapter.isNullOrBlank() }
-        return removeOneshots.size.toString() == floor(finalChapterNumber.toDouble()).toInt().toString()
+        val removeOneshots = filteredChapters.asSequence()
+            .map { it.value.chapter!!.toDoubleOrNull() }
+            .filter { it != null }
+            .map { floor(it!!).toInt() }
+            .filter { it != 0 }
+            .toList().distinctBy { it }
+        return removeOneshots.toList().size == floor(finalChapterNumber.toDouble()).toInt()
     }
 
     private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<Map.Entry<String, ChapterSerializer>> {
@@ -123,7 +128,7 @@ class ApiMangaParser(val langs: List<String>) {
             .filter { langs.contains(it.value.lang_code) }
             .filter {
                 it.value.chapter?.let { chapterNumber ->
-                    if (chapterNumber.toIntOrNull() == null) {
+                    if (chapterNumber.toDoubleOrNull() == null) {
                         return@filter false
                     }
                     return@filter true
