@@ -63,7 +63,11 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
             followFromElement(it, lowQualityCovers)
         }
 
-        return MangasPage(follows, false)
+        val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
+
+        val result = follows.sortedWith(comparator)
+
+        return MangasPage(result, false)
     }
 
     /**fetch follow status used when fetching status for 1 manga
