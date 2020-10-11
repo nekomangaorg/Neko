@@ -404,11 +404,14 @@ class LibraryUpdateService(
             // add mdlist tracker if manga in library has it missing
             val tracks = db.getTracks(manga).executeAsBlocking()
             if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-                val tracks = db.getTracks(manga).executeAsBlocking()
-                if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
-                    val track = trackManager.mdList.createInitialTracker(manga)
-                    db.insertTrack(track).executeAsBlocking()
-                }
+                val track = trackManager.mdList.createInitialTracker(manga)
+                db.insertTrack(track).executeAsBlocking()
+                tracks.add(track)
+            }
+            tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.apply {
+                val refreshedTrack = trackManager.mdList.refresh(this)
+                db.insertTrack(refreshedTrack).executeAsBlocking()
+                copyPersonalFrom(refreshedTrack)
             }
 
             if (fetchedChapters.isNotEmpty()) {
@@ -456,6 +459,24 @@ class LibraryUpdateService(
                 )
             } else {
                 updateMissingChapterCount(manga)
+            }
+            if (preferences.markChaptersReadFromMDList()) {
+                tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
+                    if (FollowStatus.fromInt(it.status) == FollowStatus.READING) {
+                        val chapters = db.getChapters(manga).executeAsBlocking()
+                        val filteredChp = chapters.filter { chp -> chp.chapter_number.toInt() <= it.last_chapter_read && !chp.read }
+                        if (filteredChp.isNotEmpty()) {
+                            filteredChp.forEach {
+                                it.read = true
+                            }
+                            db.updateChaptersProgress(filteredChp).executeAsBlocking()
+
+                            if (preferences.removeAfterMarkedAsRead()) {
+                                downloadManager.deleteChapters(filteredChp, manga, source)
+                            }
+                        }
+                    }
+                }
             }
             return hasDownloads
         } catch (e: Exception) {
