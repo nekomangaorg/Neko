@@ -331,4 +331,6 @@ class PreferencesHelper(val context: Context) {
     fun markChaptersReadFromMDList() = prefs.getBoolean(Keys.markChaptersFromMDList, false)
 
     fun showR18Filter(): Boolean = prefs.getBoolean(Keys.showR18Filter, true)
+
+    fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 }

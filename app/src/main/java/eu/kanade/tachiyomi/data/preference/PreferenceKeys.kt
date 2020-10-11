@@ -181,6 +181,8 @@ object PreferenceKeys {
 
     const val showR18Filter = "show_R18_filter"
 
+    const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"

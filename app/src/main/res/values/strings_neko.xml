@@ -115,18 +115,21 @@
     <string name="data_saver">Data Saver (Compressed Chapter Images)</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
-    <string name="sync_follows_to_library">Sync MangaDex manga into Neko</string>
+    <string name="sync_follows_to_library">Sync MangaDex manga to Neko</string>
     <string name="sync_follows_to_library_summary">Pulls reading/rereading manga from MangaDex into your Neko library if they are not already added.</string>
     <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
-    <string name="push_favorites_to_mangadex">Push Neko manga to MangaDex</string>
-    <string name="push_favorites_to_mangadex_summary">Pushes any non MdList tracked manga to MangaDex as reading.</string>
+    <string name="push_favorites_to_mangadex">Sync Neko manga to MangaDex</string>
+    <string name="push_favorites_to_mangadex_summary">Sync any non MdList tracked manga to MangaDex as reading.</string>
     <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
     <string name="use_latest_cover">Use latest uploaded cover</string>
     <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
     <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
-    <string name="mark_mdlist_chapters_read_summary">When enabled, this will attempt to mark chapters as read if they were read on MangaDex and are tracked with MDList</string>
+    <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
     <string name="show_r18_filter_in_search">Show R18 filter in search</string>
+    <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
+    <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList. If you long press and favorite or have existing library manga unfollowed,  you will need to click into the manga to have it auto switch to MdList.  Note: If you unfollow a manga you will need to also remove it from your library or the next time you access it, it will mark as planned to read again.</string>
+
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

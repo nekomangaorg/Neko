@@ -133,6 +133,13 @@ class SettingsSiteController :
             summaryRes = R.string.mark_mdlist_chapters_read_summary
             defaultValue = false
         }
+
+        switchPreference {
+            key = PreferenceKeys.addToLibraryAsPlannedToRead
+            titleRes = R.string.add_favorites_as_planned_to_read
+            summaryRes = R.string.add_favorites_as_planned_to_read_summary
+            defaultValue = false
+        }
     }
 
     override fun siteLoginDialogClosed(source: Source) {

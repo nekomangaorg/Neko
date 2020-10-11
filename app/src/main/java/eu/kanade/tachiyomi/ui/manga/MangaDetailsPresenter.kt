@@ -655,7 +655,22 @@ class MangaDetailsPresenter(
         manga.favorite = !manga.favorite
 
         when (manga.favorite) {
-            true -> manga.date_added = Date().time
+            true -> {
+                manga.date_added = Date().time
+                if (preferences.addToLibraryAsPlannedToRead()) {
+
+                    val mdTrack = trackList.firstOrNull { it.service.isMdList() }?.track
+
+                    mdTrack?.let {
+                        if (FollowStatus.fromInt(it.status) == FollowStatus.UNFOLLOWED) {
+                            it.status = FollowStatus.PLAN_TO_READ.int
+                            scope.launch {
+                                trackManager.getService(TrackManager.MDLIST)!!.update(it)
+                            }
+                        }
+                    }
+                }
+            }
             false -> manga.date_added = 0
         }
 
@@ -846,6 +861,13 @@ class MangaDetailsPresenter(
                         }
                         if (trackItem != null) {
                             if (item.service.isMdList()) {
+
+                                if (manga.favorite && preferences.addToLibraryAsPlannedToRead() && trackItem.status == FollowStatus.UNFOLLOWED.int) {
+                                    trackItem.status = FollowStatus.PLAN_TO_READ.int
+                                    scope.launch {
+                                        trackManager.getService(TrackManager.MDLIST)!!.update(trackItem)
+                                    }
+                                }
 
                                 if (preferences.markChaptersReadFromMDList() && trackItem.status == FollowStatus.READING.int) {
                                     chapters.firstOrNull { it.chapter_number.toInt() == trackItem.last_chapter_read && !it.chapter.read }
