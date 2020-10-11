@@ -541,7 +541,7 @@ class LibraryUpdateService(
 
                 // Increment and update if it is not already favorited
                 if (!dbManga.favorite) {
-                    count.incrementAndGet()
+                    countNew.incrementAndGet()
                     dbManga.favorite = true
                     dbManga.copyFrom(networkManga)
                     db.insertManga(dbManga).executeAsBlocking()
