@@ -47,7 +47,7 @@ Get the app from our [releases page](https://github.com/CarlosEsco/Neko/releases
 
 ## Thanks
 - <a href="https://github.com/inorichi">Inorichi</a> for making the original Tachiyomi
-- <a href="https://github.com/arkon">Arkon> Current maintainer of Tachiyomi
+- <a href="https://github.com/arkon">Arkon</a> Current maintainer of Tachiyomi
 - <a href="https://github.com/Jays2Kings">Jays2Kings</a> for the wonderful new UI of J2K
 - <a href="https://github.com/goldbattle">GoldBattle</a> for all the similar manga logic
 
