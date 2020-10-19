@@ -76,7 +76,7 @@ class MergeSource : ReducedHttpSource() {
             SManga.create().apply {
                 title = it["s"].string
                 url = "/manga/${it["i"].string}"
-                thumbnail_url = "https://cover.mangabeast01.com/cover/${it["i"].string}.jpg"
+                thumbnail_url = "https://cover.nep.li/cover/${it["i"].string}.jpg"
             }
         }
     }
