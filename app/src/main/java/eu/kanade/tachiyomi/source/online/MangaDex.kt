@@ -39,6 +39,7 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import rx.Observable
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.net.URLEncoder
 import java.util.Date
@@ -185,7 +186,11 @@ open class MangaDex() : HttpSource() {
                         jsonString.toRequestBody("application/json".toMediaType())
                     )
                 )
-                // postResult.execute()
+                try {
+                    postResult.execute()
+                } catch (e: Exception) {
+                    Timber.e(e, "error trying to post to dex@home")
+                }
 
                 if (!response.isSuccessful) {
                     response.close()
