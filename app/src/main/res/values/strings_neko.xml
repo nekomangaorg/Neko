@@ -128,7 +128,7 @@
     <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
     <string name="show_r18_filter_in_search">Show R18 filter in search</string>
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
-    <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList. If you long press and favorite or have existing library manga unfollowed,  you will need to click into the manga to have it auto switch to MdList.  Note: If you unfollow a manga you will need to also remove it from your library or the next time you access it, it will mark as planned to read again.</string>
+    <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList. Note: If you unfollow a manga you will need to also remove it from your library or the next time you access it, it will mark as planned to read again.</string>
 
 
     <!-- Advanced Settings -->
