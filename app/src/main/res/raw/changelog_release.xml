@@ -2,6 +2,13 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.4.1">
+        <changelogtext>New: Enables post to Mangadex@home so they can keep metrics on good hosts</changelogtext>
+        <changelogtext>New: Planned to read Manga for MDList now switches to reading when you read a chapter</changelogtext>
+        <changelogtext>Fix: Covers not loading during merged source search</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.4">
         <changelogtext>New: Option to have favorites added as planning to read on MdList</changelogtext>
         <changelogtext>New: Library update now triggers planning to read and mark chapter read options when they are enabled</changelogtext>
