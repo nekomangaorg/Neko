@@ -163,15 +163,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                     formBody.build()
                 )
             ).execute()
-
-            val response2 = client.newCall(
-                GET(
-                    "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
-                    headers
-                )
-            )
-                .execute()
-
+            
             response.body!!.string().isEmpty()
         }
     }

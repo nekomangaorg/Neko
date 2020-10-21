@@ -705,8 +705,8 @@ class ReaderPresenter(
                     if (shouldUpdateTracker(service, chapterRead, track)) {
                         try {
                             track.last_chapter_read = chapterRead
-                            service!!.update(track)
-                            db.insertTrack(track).executeAsBlocking()
+                            val updatedTrack = service!!.update(track)
+                            db.insertTrack(updatedTrack).executeAsBlocking()
                         } catch (e: Exception) {
                             XLog.e(e)
                         }
