@@ -4,28 +4,39 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ApiMangaSerializer(
-    val chapter: Map<String, ChapterSerializer>? = null,
-    val manga: MangaSerializer,
+    val data: DataSerializer,
     val status: String
 )
 
 @Serializable
+data class DataSerializer(
+    val manga: MangaSerializer,
+    val chapters: List<ChapterSerializer>,
+    val groups: Map<Long, String>,
+
+    )
+
+@Serializable
 data class MangaSerializer(
-    val artist: String,
-    val author: String,
-    val cover_url: String,
+    val artist: List<String>,
+    val author: List<String>,
+    val mainCover: String,
     val description: String,
-    val demographic: String,
-    val genres: List<Int>,
-    val covers: List<String>,
-    val hentai: Int,
-    val lang_flag: String,
-    val lang_name: String,
-    val last_chapter: String? = null,
+    val tags: List<Int>,
+    val isHentai: Boolean,
+    val lastChapter: String? = null,
+    val publication: PublicationSerializer? = null,
     val links: LinksSerializer? = null,
     val rating: RatingSerializer? = null,
-    val status: Int,
     val title: String
+)
+
+@Serializable
+data class PublicationSerializer(
+    val language: String? = null,
+    val status: Int,
+    val demographic: Int?
+
 )
 
 @Serializable
@@ -49,15 +60,11 @@ data class RatingSerializer(
 
 @Serializable
 data class ChapterSerializer(
+    val id: Long,
     val volume: String? = null,
     val chapter: String? = null,
     val title: String? = null,
-    val lang_code: String,
-    val group_id: Int? = null,
-    val group_name: String? = null,
-    val group_id_2: Int? = null,
-    val group_name_2: String? = null,
-    val group_id_3: Int? = null,
-    val group_name_3: String? = null,
+    val language: String,
+    val groups: List<Long>,
     val timestamp: Long
 )
