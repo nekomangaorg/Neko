@@ -44,7 +44,6 @@
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
-                <action android:name="com.samsung.android.support.REMOTE_ACTION" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -65,11 +64,15 @@
                     android:scheme="https"
                     android:host="mangadex.cc"
                     android:pathPattern="/chapter/..*" />
-
-                <meta-data
-                    android:name="com.samsung.android.support.REMOTE_ACTION"
-                    android:resource="@xml/s_pen_actions" />
             </intent-filter>
+
+            <intent-filter>
+                <action android:name="com.samsung.android.support.REMOTE_ACTION" />
+            </intent-filter>
+
+            <meta-data
+                android:name="com.samsung.android.support.REMOTE_ACTION"
+                android:resource="@xml/s_pen_actions" />
         </activity>
         <activity
             android:name=".ui.webview.WebViewActivity"
@@ -79,6 +82,9 @@
             android:name=".widget.CustomLayoutPickerActivity"
             android:label="@string/neko_app_name"
             android:theme="@style/FilePickerTheme" />
+        <activity
+            android:name=".ui.setting.track.MyAnimeListLoginActivity"
+            android:configChanges="uiMode|orientation|screenSize" />
         <activity
             android:name=".ui.setting.track.AnilistLoginActivity"
             android:label="Anilist">
@@ -147,13 +153,6 @@
         <activity
             android:name=".ui.main.SearchActivity"
             android:theme="@style/Theme.Tachiyomi" />
-
-        <activity
-            android:name="com.google.android.gms.oss.licenses.OssLicensesMenuActivity"
-            android:theme="@style/Theme.OSS" />
-        <activity
-            android:name="com.google.android.gms.oss.licenses.OssLicensesActivity"
-            android:theme="@style/Theme.OSS" />
 
         <provider
             android:name="androidx.core.content.FileProvider"
