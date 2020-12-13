@@ -1,27 +1,22 @@
 package eu.kanade.tachiyomi.ui.webview
 
-import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -36,11 +31,7 @@ open class BaseWebViewActivity : BaseActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        delegate.localNightMode = when (preferences.theme()) {
-            1, 8 -> AppCompatDelegate.MODE_NIGHT_NO
-            2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
-            else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-        }
+        delegate.localNightMode = ThemeUtil.nightMode(preferences.theme())
         setContentView(R.layout.webview_activity)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -187,69 +178,14 @@ open class BaseWebViewActivity : BaseActivity() {
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
 
         if (typedValue.data == -1)
-            web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
         else
-            web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility
+            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        invalidateOptionsMenu()
     }
-
-    /**
-     * Called when the options menu of the toolbar is being created. It adds our custom menu.
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflate(R.menu.webview, menu)
-        return true
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val backItem = toolbar.menu.findItem(R.id.action_web_back)
-        val forwardItem = toolbar.menu.findItem(R.id.action_web_forward)
-        backItem?.isEnabled = webview.canGoBack()
-        forwardItem?.isEnabled = webview.canGoForward()
-        val hasHistory = webview.canGoBack() || webview.canGoForward()
-        backItem?.isVisible = hasHistory
-        forwardItem?.isVisible = hasHistory
-        val tintColor = getResourceColor(R.attr.actionBarTintColor)
-        val translucentWhite = ColorUtils.setAlphaComponent(tintColor, 127)
-        backItem.icon?.setTint(if (webview.canGoBack()) tintColor else translucentWhite)
-        forwardItem?.icon?.setTint(if (webview.canGoForward()) tintColor else translucentWhite)
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     override fun onBackPressed() {
         if (webview.canGoBack()) webview.goBack()
         else super.onBackPressed()
-    }
-
-    /**
-     * Called when an item of the options menu was clicked. Used to handle clicks on our menu
-     * entries.
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_web_back -> webview.goBack()
-            R.id.action_web_forward -> webview.goForward()
-            R.id.action_web_share -> shareWebpage()
-            R.id.action_web_browser -> openInBrowser()
-        }
-        return super.onOptionsItemSelected(item)
-    }
-
-    private fun shareWebpage() {
-        try {
-            val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, webview.url)
-            }
-            startActivity(Intent.createChooser(intent, getString(R.string.share)))
-        } catch (e: Exception) {
-            toast(e.message)
-        }
-    }
-
-    private fun openInBrowser() {
-        openInBrowser(webview.url)
     }
 }
