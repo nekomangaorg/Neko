@@ -1,5 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <changelog bulletedList="true">
+    <changelogversion versionName="v1.0.10" changeDate="">
+        <changelogtext>Fixed MAL issues (You will need to log in again)</changelogtext>
+        <changelogtext>Option to mark previous as unread</changelogtext>
+        <changelogtext>Bulk Download unread chapters, mark read, mark unread in the library</changelogtext>
+    </changelogversion>
+
     <changelogversion versionName="v1.0.9" changeDate="">
 		<changelogtext>Fixes to crashes while using certain extensions</changelogtext>
 		<changelogtext>Option to save or share a manga cover</changelogtext>

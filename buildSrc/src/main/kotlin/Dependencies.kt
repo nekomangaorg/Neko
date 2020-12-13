@@ -20,8 +20,8 @@ object AndroidVersions {
     const val COMPILE_SDK = 29
     const val MIN_SDK = 23
     const val TARGET_SDK = 29
-    const val VERSION_CODE = 66
-    const val VERSION_NAME = "1.0.9"
+    const val VERSION_CODE = 67
+    const val VERSION_NAME = "1.0.10"
 }
 
 object BuildPluginsVersion {
