@@ -245,7 +245,7 @@ open class MangaDex() : HttpSource() {
 
     override suspend fun fetchTrackingInfo(url: String): Track {
         if (!isLogged()) {
-            throw Exception("Not Logged in")
+            throw Exception("Not Logged in to MangaDex")
         }
         return FollowsHandler(clientBuilder(), headers, preferences).fetchTrackingInfo(url)
     }
