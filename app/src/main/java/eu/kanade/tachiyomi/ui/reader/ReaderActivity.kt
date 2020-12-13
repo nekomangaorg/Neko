@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
@@ -85,7 +86,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.text.DecimalFormat
@@ -602,7 +602,7 @@ class ReaderActivity :
         page_text.text = "${page.number} / ${pages.size}"
 
         if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet
-            .sheetBehavior.isExpanded()
+                .sheetBehavior.isExpanded()
         ) {
             chapters_bottom_sheet.sheetBehavior?.collapse()
         }
@@ -685,10 +685,12 @@ class ReaderActivity :
         val decimalFormat =
             DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
 
-        val text = "${manga.title}: ${getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number)
-        )}, ${getString(R.string.page_, page.number)}"
+        val text = "${manga.title}: ${
+            getString(
+                R.string.chapter_,
+                decimalFormat.format(chapter.chapter_number)
+            )
+        }, ${getString(R.string.page_, page.number)}"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -999,5 +1001,16 @@ class ReaderActivity :
             color_overlay.visible()
             color_overlay.setFilterColor(value, preferences.colorFilterMode().get())
         }
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_N) {
+            presenter.loadNextChapter()
+            return true
+        } else if (keyCode == KeyEvent.KEYCODE_P) {
+            presenter.loadPreviousChapter()
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
     }
 }

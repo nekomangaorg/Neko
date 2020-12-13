@@ -757,4 +757,39 @@ class ReaderPresenter(
             .subscribeOn(Schedulers.io())
             .subscribe()
     }
+
+    /**
+     * Called from the activity to load and set the next chapter as active.
+     */
+    fun loadNextChapter() {
+        val nextChapter = viewerChaptersRelay.value?.nextChapter ?: return
+        loadAdjacent(nextChapter)
+    }
+
+    /**
+     * Called from the activity to load and set the previous chapter as active.
+     */
+    fun loadPreviousChapter() {
+        val prevChapter = viewerChaptersRelay.value?.prevChapter ?: return
+        loadAdjacent(prevChapter)
+    }
+
+    private fun loadAdjacent(chapter: ReaderChapter) {
+        val loader = loader ?: return
+
+        XLog.d("Loading adjacent ${chapter.chapter.url}")
+
+        activeChapterSubscription?.unsubscribe()
+        activeChapterSubscription = getLoadObservable(loader, chapter)
+            .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
+            .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
+            .subscribeFirst(
+                { view, _ ->
+                    view.moveToPageIndex(0)
+                },
+                { _, _ ->
+                    // Ignore onError event, viewers handle that state
+                }
+            )
+    }
 }
