@@ -5,9 +5,12 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.File
 
 object Migrations {
@@ -80,6 +83,11 @@ object Migrations {
             }
             if (oldVersion < 66) {
                 LibraryPresenter.updateCustoms()
+            }
+            if (oldVersion < 67) {
+                // Force MAL log out due to login flow change
+                val trackManager = Injekt.get<TrackManager>()
+                trackManager.myAnimeList.logout()
             }
             return true
         }
