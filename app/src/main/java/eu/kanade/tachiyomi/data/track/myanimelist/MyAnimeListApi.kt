@@ -114,32 +114,6 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         }
     }
 
-    suspend fun login(username: String, password: String): String {
-        return withContext(Dispatchers.IO) {
-            val csrf = getSessionInfo()
-            login(username, password, csrf)
-            csrf
-        }
-    }
-
-    private suspend fun getSessionInfo(): String {
-        val response = client.newCall(GET(loginUrl())).execute()
-
-        return Jsoup.parse(response.consumeBody()).select("meta[name=csrf_token]").attr("content")
-    }
-
-    private suspend fun login(username: String, password: String, csrf: String) {
-        withContext(Dispatchers.IO) {
-            val response =
-                client.newCall(POST(loginUrl(), body = loginPostBody(username, password, csrf)))
-                    .execute()
-
-            response.use {
-                if (response.priorResponse?.code != 302) throw Exception("Authentication error")
-            }
-        }
-    }
-
     private suspend fun getList(): List<TrackSearch> {
         val results = getListXml(getListUrl()).select("manga")
 
@@ -174,7 +148,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     companion object {
         const val CSRF = "csrf_token"
 
-        private const val baseUrl = "https://myanimelist.net"
+        const val baseUrl = "https://myanimelist.net"
         private const val baseMangaUrl = "$baseUrl/manga/"
         private const val baseModifyListUrl = "$baseUrl/ownlist/manga"
         private const val PREFIX_MY = "my:"
@@ -182,7 +156,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
 
         private fun mangaUrl(remoteId: Int) = baseMangaUrl + remoteId
 
-        private fun loginUrl() = baseUrl.toUri().buildUpon().appendPath("login.php").toString()
+        fun loginUrl() = baseUrl.toUri().buildUpon().appendPath("login.php").build()
 
         private fun searchUrl(query: String): String {
             val col = "c[]"

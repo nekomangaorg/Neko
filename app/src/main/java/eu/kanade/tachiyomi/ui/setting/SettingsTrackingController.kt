@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
+import eu.kanade.tachiyomi.ui.setting.track.MyAnimeListLoginActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
@@ -36,7 +37,7 @@ class SettingsTrackingController :
 
             trackPreference(trackManager.myAnimeList) {
                 onClick {
-                    showDialog(trackManager.myAnimeList)
+                    startActivity(MyAnimeListLoginActivity.newIntent(context))
                 }
             }
             trackPreference(trackManager.aniList) {

@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 
 import android.content.Context
 import android.graphics.Color
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import com.elvishew.xlog.XLog
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
@@ -96,11 +96,11 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return track
     }
 
+    suspend fun login(csrfToken: String) = login("myanimelist", csrfToken)
+
     override suspend fun login(username: String, password: String): Boolean {
-        logout()
         return try {
-            val csrf = api.login(username, password)
-            saveCSRF(csrf)
+            saveCSRF(password)
             saveCredentials(username, password)
             true
         } catch (e: Exception) {
@@ -110,28 +110,10 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-    suspend fun refreshLogin() {
-        val username = getUsername()
-        val password = getPassword()
-        logout()
-
-        try {
-            val csrf = api.login(username, password)
-            saveCSRF(csrf)
-            saveCredentials(username, password)
-        } catch (e: Exception) {
-            XLog.e(e)
-            logout()
-            throw e
-        }
-    }
-
     // Attempt to login again if cookies have been cleared but credentials are still filled
     suspend fun ensureLoggedIn() {
         if (isAuthorized) return
         if (!isLogged) throw Exception("MAL Login Credentials not found")
-
-        refreshLogin()
     }
 
     override fun logout() {
