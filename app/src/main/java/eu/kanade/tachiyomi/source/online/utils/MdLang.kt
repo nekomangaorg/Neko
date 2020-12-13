@@ -38,7 +38,7 @@ enum class MdLang(val lang: String, val dexLang: String, val langId: Int) {
     ChineseTraditional("zh-Hant", "hk", 35),
     Ukrainian("uk", "ua", 36),
     Burmese("my", "mm", 37),
-    Lithuanian("lt", "il", 38),
+    Lithuanian("lt", "lt", 38),
     Hebrew("he", "il", 39),
     Hindi("hi", "in", 40),
     Norwegian("no", "no", 42)
