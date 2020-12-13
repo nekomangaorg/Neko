@@ -141,5 +141,9 @@
     <string name="two_factor">2FA Code</string>
     <string name="fields_cannot_be_blank">Fields cannot be blank</string>
 
+    <!-- S Pen actions -->
+    <string name="spen_previous_page">Previous page</string>
+    <string name="spen_next_page">Next page</string>
+
 
 </resources>

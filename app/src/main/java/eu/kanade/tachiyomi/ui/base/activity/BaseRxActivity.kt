@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.base.activity
 
 import android.os.Bundle
+import android.view.KeyEvent
 import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -18,5 +19,16 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
     override fun onResume() {
         super.onResume()
         SecureActivityDelegate.promptLockIfNeeded(this)
+    }
+
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_N) {
+            presenter.loadNextChapter()
+            return true
+        } else if (keyCode == KeyEvent.KEYCODE_P) {
+            presenter.loadPreviousChapter()
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
     }
 }

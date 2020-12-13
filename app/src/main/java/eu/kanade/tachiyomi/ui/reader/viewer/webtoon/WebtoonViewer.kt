@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.WebtoonLayoutManager
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.util.view.visible
 import rx.subscriptions.CompositeSubscription
-import com.elvishew.xlog.XLog
 import kotlin.math.max
 import kotlin.math.min
 
@@ -180,7 +180,7 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
             XLog.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
-            val transitionChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as?ReaderPage)?.chapter
+            val transitionChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
             if (transitionChapter != null) {
                 XLog.d("Requesting to preload chapter ${transitionChapter.chapter.chapter_number}")
                 activity.requestPreloadChapter(transitionChapter)
@@ -271,11 +271,11 @@ class WebtoonViewer(val activity: ReaderActivity, val isContinuous: Boolean = tr
             }
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
 
-            KeyEvent.KEYCODE_DPAD_RIGHT,
+            KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_UP,
             KeyEvent.KEYCODE_PAGE_UP -> if (isUp) scrollUp()
 
-            KeyEvent.KEYCODE_DPAD_LEFT,
+            KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_DOWN,
             KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) scrollDown()
             else -> return false

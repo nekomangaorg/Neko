@@ -6,6 +6,7 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
 import androidx.viewpager.widget.ViewPager
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import com.elvishew.xlog.XLog
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [ViewPager].
@@ -301,6 +301,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     override fun handleKeyEvent(event: KeyEvent): Boolean {
         val isUp = event.action == KeyEvent.ACTION_UP
+        val ctrlPressed = event.metaState.and(KeyEvent.META_CTRL_ON) > 0
 
         when (event.keyCode) {
             KeyEvent.KEYCODE_VOLUME_DOWN -> {
@@ -317,8 +318,16 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                     if (!config.volumeKeysInverted) moveUp() else moveDown()
                 }
             }
-            KeyEvent.KEYCODE_DPAD_RIGHT -> if (isUp) moveRight()
-            KeyEvent.KEYCODE_DPAD_LEFT -> if (isUp) moveLeft()
+            KeyEvent.KEYCODE_DPAD_RIGHT -> {
+                if (isUp) {
+                    if (ctrlPressed) moveToNext() else moveRight()
+                }
+            }
+            KeyEvent.KEYCODE_DPAD_LEFT -> {
+                if (isUp) {
+                    if (ctrlPressed) moveToPrevious() else moveLeft()
+                }
+            }
             KeyEvent.KEYCODE_DPAD_DOWN -> if (isUp) moveDown()
             KeyEvent.KEYCODE_DPAD_UP -> if (isUp) moveUp()
             KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveDown()

@@ -44,6 +44,7 @@
             android:theme="@style/Theme.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
+                <action android:name="com.samsung.android.support.REMOTE_ACTION" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
@@ -64,6 +65,10 @@
                     android:scheme="https"
                     android:host="mangadex.cc"
                     android:pathPattern="/chapter/..*" />
+
+                <meta-data
+                    android:name="com.samsung.android.support.REMOTE_ACTION"
+                    android:resource="@xml/s_pen_actions" />
             </intent-filter>
         </activity>
         <activity
