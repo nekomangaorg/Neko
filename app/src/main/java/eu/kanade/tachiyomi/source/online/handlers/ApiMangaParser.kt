@@ -171,7 +171,7 @@ class ApiMangaParser(val langs: List<String>) {
         val networkApiManga = MdUtil.jsonParser.decodeFromString(ApiMangaSerializer.serializer(), jsonData)
         val networkManga = networkApiManga.data.manga
         val networkChapters = networkApiManga.data.chapters
-        val groups = networkApiManga.data.groups
+        val groups = networkApiManga.data.groups.map { it.id to it.name }.toMap()
 
         val status = networkManga.publication!!.status
 
@@ -180,6 +180,8 @@ class ApiMangaParser(val langs: List<String>) {
         // Skip chapters that don't match the desired language, or are future releases
 
         val chapLangs = MdLang.values().filter { langs.contains(it.dexLang) }
+
+
 
         return networkChapters.asSequence()
             .filter { langs.contains(it.language) && (it.timestamp * 1000) <= now }
