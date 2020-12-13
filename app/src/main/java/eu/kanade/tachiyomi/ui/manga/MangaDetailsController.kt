@@ -1456,6 +1456,11 @@ class MangaDetailsController :
         }
     }
 
+    fun clearCoverCache() {
+        manga_cover_full.setImageDrawable(null)
+        manga_cover.setImageDrawable(null)
+    }
+
     companion object {
         const val UPDATE_EXTRA = "update"
 

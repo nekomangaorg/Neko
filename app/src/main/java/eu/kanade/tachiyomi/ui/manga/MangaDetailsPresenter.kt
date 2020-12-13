@@ -441,8 +441,11 @@ class MangaDetailsPresenter(
                 manga.initialized = true
 
                 // force new cover if it exists
-                if (networkManga.thumbnail_url != null) {
+                if (networkManga.thumbnail_url != null || preferences.refreshCoversToo().getOrDefault()) {
                     coverCache.deleteFromCache(thumbnailUrl)
+                    withContext(Dispatchers.Main) {
+                        controller.clearCoverCache()
+                    }
                 }
                 withContext(Dispatchers.Main) {
                     controller.setPaletteColor()
