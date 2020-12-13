@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
+import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.ui.setting.track.MyAnimeListLoginActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
@@ -37,7 +38,7 @@ class SettingsTrackingController :
 
             trackPreference(trackManager.myAnimeList) {
                 onClick {
-                    startActivity(MyAnimeListLoginActivity.newIntent(context))
+                    showDialog(trackManager.myAnimeList)
                 }
             }
             trackPreference(trackManager.aniList) {
@@ -78,9 +79,13 @@ class SettingsTrackingController :
             dialog.targetController = this@SettingsTrackingController
             dialog.showDialog(router)
         } else if (url == null) {
-            val dialog = TrackLoginDialog(trackService, userNameLabel)
-            dialog.targetController = this@SettingsTrackingController
-            dialog.showDialog(router)
+            if (trackService is MyAnimeList) {
+                startActivity(MyAnimeListLoginActivity.newIntent(activity!!))
+            } else {
+                val dialog = TrackLoginDialog(trackService, userNameLabel)
+                dialog.targetController = this@SettingsTrackingController
+                dialog.showDialog(router)
+            }
         } else {
             val tabsIntent = CustomTabsIntent.Builder()
                 .setToolbarColor(activity!!.getResourceColor(R.attr.colorPrimaryVariant))
