@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.bangumi.BangumiApi
 import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
+import eu.kanade.tachiyomi.ui.setting.track.MyAnimeListLoginActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
@@ -38,7 +39,13 @@ class SettingsTrackingController :
 
             trackPreference(trackManager.myAnimeList) {
                 onClick {
-                    showDialog(trackManager.myAnimeList)
+                    if (trackManager.myAnimeList.isLogged) {
+                        val dialog = TrackLogoutDialog(trackManager.myAnimeList)
+                        dialog.targetController = this@SettingsTrackingController
+                        dialog.showDialog(router)
+                    } else {
+                        startActivity(MyAnimeListLoginActivity.newIntent(context))
+                    }
                 }
             }
             trackPreference(trackManager.aniList) {
@@ -79,7 +86,7 @@ class SettingsTrackingController :
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        // Manually refresh anilist holder
+        updatePreference(trackManager.myAnimeList.id)
         updatePreference(trackManager.aniList.id)
         updatePreference(trackManager.shikimori.id)
         updatePreference(trackManager.bangumi.id)

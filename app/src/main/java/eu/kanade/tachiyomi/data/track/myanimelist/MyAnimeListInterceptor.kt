@@ -21,17 +21,7 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList) : Interceptor
             myanimelist.ensureLoggedIn()
         }
         val request = chain.request()
-        var response = chain.proceed(updateRequest(request))
-
-        if (response.code == 400) {
-            runBlocking {
-                myanimelist.refreshLogin()
-            }
-            response.close()
-            response = chain.proceed(updateRequest(request))
-        }
-
-        return response
+        return chain.proceed(updateRequest(request))
     }
 
     private fun updateRequest(request: Request): Request {

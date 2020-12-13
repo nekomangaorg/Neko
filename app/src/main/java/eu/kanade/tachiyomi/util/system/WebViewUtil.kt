@@ -1,6 +1,19 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.webkit.WebSettings
 import android.webkit.WebView
+
+fun WebView.setDefaultSettings() {
+    with(settings) {
+        javaScriptEnabled = true
+        domStorageEnabled = true
+        databaseEnabled = true
+        setAppCacheEnabled(true)
+        useWideViewPort = true
+        loadWithOverviewMode = true
+        cacheMode = WebSettings.LOAD_DEFAULT
+    }
+}
 
 private val WEBVIEW_UA_VERSION_REGEX by lazy {
     Regex(""".*Chrome/(\d+)\..*""")

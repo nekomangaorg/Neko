@@ -1,9 +1,7 @@
 package eu.kanade.tachiyomi.ui.webview
 
-import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
@@ -18,13 +16,11 @@ import android.widget.LinearLayout
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.marginBottom
@@ -33,27 +29,10 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.webview_activity.*
-import uy.kohesive.injekt.injectLazy
 
-open class WebViewActivity : BaseActivity() {
+open class BaseWebViewActivity : BaseActivity() {
 
-    private val sourceManager by injectLazy<SourceManager>()
     private var bundle: Bundle? = null
-
-    companion object {
-        const val SOURCE_KEY = "source_key"
-        const val URL_KEY = "url_key"
-        const val TITLE_KEY = "title_key"
-
-        fun newIntent(context: Context, sourceId: Long, url: String, title: String?): Intent {
-            val intent = Intent(context, WebViewActivity::class.java)
-            intent.putExtra(SOURCE_KEY, sourceId)
-            intent.putExtra(URL_KEY, url)
-            intent.putExtra(TITLE_KEY, title)
-            intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
-            return intent
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -63,7 +42,6 @@ open class WebViewActivity : BaseActivity() {
             else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
         }
         setContentView(R.layout.webview_activity)
-        title = intent.extras?.getString(TITLE_KEY)
         setSupportActionBar(toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
@@ -141,9 +119,8 @@ open class WebViewActivity : BaseActivity() {
         swipe_refresh.isEnabled = false
 
         if (bundle == null) {
-            val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
-            val url = intent.extras!!.getString(URL_KEY) ?: return
-            val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
+            webview.setDefaultSettings()
+
             webview.webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                     progressBar.visible()
@@ -151,31 +128,6 @@ open class WebViewActivity : BaseActivity() {
                     if (newProgress == 100)
                         progressBar.invisible()
                     super.onProgressChanged(view, newProgress)
-                }
-            }
-
-            webview.webViewClient = object : WebViewClientCompat() {
-                override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
-                    view.loadUrl(url)
-                    return true
-                }
-
-                override fun onPageFinished(view: WebView?, url: String?) {
-                    super.onPageFinished(view, url)
-                    invalidateOptionsMenu()
-                    title = view?.title
-                    swipe_refresh.isEnabled = true
-                    swipe_refresh?.isRefreshing = false
-                }
-
-                override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
-                    super.onPageStarted(view, url, favicon)
-                    invalidateOptionsMenu()
-                }
-
-                override fun onPageCommitVisible(view: WebView?, url: String?) {
-                    super.onPageCommitVisible(view, url)
-                    nested_view.scrollTo(0, 0)
                 }
             }
             val marginB = webview.marginBottom
@@ -188,15 +140,11 @@ open class WebViewActivity : BaseActivity() {
                 }
                 insets
             }
-            webview.settings.javaScriptEnabled = true
-            webview.settings.domStorageEnabled = true
-
-            webview.settings.userAgentString = source.headers["User-Agent"]
-            webview.loadUrl(url, headers)
         } else {
             webview.restoreState(bundle)
         }
     }
+
     private fun refreshPage() {
         swipe_refresh.isRefreshing = true
         webview.reload()
