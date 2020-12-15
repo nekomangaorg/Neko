@@ -2,8 +2,18 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.4.3">
+        <changelogtext>Fix: Deeplink on manga</changelogtext>
+        <changelogtext>Fix: Corrupt covers on ocassion</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.4.2">
-        o
+        <changelogtext>New: S-Pen options for the reader</changelogtext>
+        <changelogtext>New: Swipe refresh manga info refreshes cover when always refresh covers is enabled</changelogtext>
+        <changelogtext>Fix: MAL login not working</changelogtext>
+        <changelogtext>Fix: Selecting Hebrew was selecting Lithuanian in chapter language</changelogtext>
+        <changelogtext>Fix: Description clean ups</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
