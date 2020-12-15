@@ -3,8 +3,8 @@
     <changelogversion
         changeDate=""
         versionName="v2.1.4.3">
-        <changelogtext>Fix: Deeplink on manga</changelogtext>
-        <changelogtext>Fix: Corrupt covers on ocassion</changelogtext>
+        <changelogtext>Fix: opening manga links in app</changelogtext>
+        <changelogtext>Fix: Corrupt covers on occasion</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
