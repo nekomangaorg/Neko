@@ -11,6 +11,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
@@ -40,7 +41,10 @@ import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import coil.Coil
+import coil.bitmappool.BitmapPool
 import coil.request.LoadRequest
+import coil.size.Size
+import coil.transform.Transformation
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
@@ -105,6 +109,7 @@ import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
+import kotlinx.android.synthetic.main.manga_grid_item.*
 import kotlinx.android.synthetic.main.manga_header_item.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -312,19 +317,18 @@ class MangaDetailsController :
         val view = view ?: return
 
         val request = LoadRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
-            .target(
-                onSuccess = { drawable ->
-                    val bitmap = (drawable as BitmapDrawable).bitmap
-                    // Generate the Palette on a background thread.
-                    Palette.from(bitmap).generate {
-                        if (recycler == null || it == null) return@generate
+            .transformations(object : Transformation {
+                override fun key() = "BackDropColorTransformer"
+
+                override suspend fun transform(pool: BitmapPool, input: Bitmap, size: Size): Bitmap {
+                    val p = Palette.from(input).generate()
+                    if (recycler != null) {
                         val colorBack = view.context.getResourceColor(
                             android.R.attr.colorBackground
                         )
                         // this makes the color more consistent regardless of theme
                         val backDropColor =
-                            ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
-
+                            ColorUtils.blendARGB(p.getVibrantColor(colorBack), colorBack, .35f)
                         coverColor = backDropColor
                         getHeader()?.setBackDrop(backDropColor)
                         if (toolbarIsColored) {
@@ -333,17 +337,9 @@ class MangaDetailsController :
                             activity?.window?.statusBarColor = translucentColor
                         }
                     }
-                    manga_cover_full.setImageDrawable(drawable)
-                    getHeader()?.updateCover(presenter.manga)
-                },
-                onError = {
-                    val file = presenter.coverCache.getCoverFile(presenter.manga)
-                    if (file.exists()) {
-                        file.delete()
-                        setPaletteColor()
-                    }
+                    return input
                 }
-            ).build()
+            }).target(manga_cover_full).build()
         Coil.imageLoader(view.context).execute(request)
     }
 
