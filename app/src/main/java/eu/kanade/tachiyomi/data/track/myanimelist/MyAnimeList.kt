@@ -113,7 +113,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     // Attempt to login again if cookies have been cleared but credentials are still filled
     suspend fun ensureLoggedIn() {
         if (isAuthorized) return
-        if (!isLogged) throw Exception("MAL Login Credentials not found")
+        if (!isLogged) throw Exception(context.getString(R.string.myanimelist_creds_missing))
     }
 
     override fun logout() {

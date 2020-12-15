@@ -8,6 +8,7 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -17,7 +18,6 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.main_activity.*
-import com.elvishew.xlog.XLog
 
 class SearchActivity : MainActivity() {
 
@@ -52,7 +52,7 @@ class SearchActivity : MainActivity() {
         to: Controller?,
         from: Controller?,
         isPush:
-            Boolean
+        Boolean
     ) {
         if (from is DialogController || to is DialogController) {
             return

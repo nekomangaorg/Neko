@@ -5,7 +5,11 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
+import eu.kanade.tachiyomi.util.system.toast
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 object Migrations {
 
@@ -37,6 +41,12 @@ object Migrations {
                 LibraryUpdateJob.setupTask()
                 BackupCreatorJob.setupTask()
                 SimilarUpdateJob.setupTask(true)
+            }
+            if (oldVersion < 95) {
+                // Force MAL log out due to login flow change
+                val trackManager = Injekt.get<TrackManager>()
+                trackManager.myAnimeList.logout()
+                context.toast(R.string.myanimelist_relogin)
             }
 
             return true
