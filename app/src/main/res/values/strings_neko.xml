@@ -77,6 +77,11 @@
         Download the latest similar manga database.
         This is around 9MB in size and is updated daily.
     </string>
+    <string name="similar_from_file">Load database from file</string>
+    <string name="similar_from_file_message">
+        Load a local JSON file from disk.
+        Use this if the network download isn\'t working.
+    </string>
     <string name="similar_update_fequency">Similar update frequency</string>
     <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
     <string name="similar_loading_complete">Updating similar manga complete</string>
