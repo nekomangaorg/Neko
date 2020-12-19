@@ -1453,6 +1453,7 @@ class MangaDetailsController :
     }
 
     fun clearCoverCache() {
+        backdrop.setImageDrawable(null)
         manga_cover_full.setImageDrawable(null)
         manga_cover.setImageDrawable(null)
     }
