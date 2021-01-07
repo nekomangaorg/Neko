@@ -103,11 +103,11 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
     }
 
     private fun apiRequest(manga: SManga): Request {
-        return GET(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.includeChapters, headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.apiUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.includeChapters, headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun coverRequest(manga: SManga): Request {
-        return GET(MdUtil.baseUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.apiCovers, headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.apiUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.apiCovers, headers, CacheControl.FORCE_NETWORK)
     }
 
     companion object {

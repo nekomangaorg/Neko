@@ -9,8 +9,8 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowsPageResult
-import eu.kanade.tachiyomi.source.online.handlers.serializers.Result
+import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowPage
+import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowsPageSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
@@ -45,21 +45,21 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      */
     private fun followsParseMangaPage(response: Response, forceHd: Boolean = false): MangasPage {
 
-        var followsPageResult: FollowsPageResult? = null
+        var followsPageResult: FollowsPageSerializer? = null
 
         try {
-            followsPageResult = MdUtil.jsonParser.decodeFromString(FollowsPageResult.serializer(), response.body!!.string())
+            followsPageResult = MdUtil.jsonParser.decodeFromString(FollowsPageSerializer.serializer(), response.body!!.string())
         } catch (e: Exception) {
             XLog.e("error parsing follows", e)
         }
-        val empty = followsPageResult?.result?.isEmpty()
+        val empty = followsPageResult?.data?.isEmpty()
 
         if (empty == null || empty) {
             return MangasPage(mutableListOf(), false)
         }
         val lowQualityCovers = if (forceHd) false else preferences.lowQualityCovers()
 
-        val follows = followsPageResult!!.result.map {
+        val follows = followsPageResult!!.data.map {
             followFromElement(it, lowQualityCovers)
         }
 
@@ -75,25 +75,25 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      */
 
     private fun followStatusParse(response: Response): Track {
-        var followsPageResult: FollowsPageResult? = null
+        var followsPageResult: FollowsPageSerializer? = null
 
         try {
-            followsPageResult = MdUtil.jsonParser.decodeFromString(FollowsPageResult.serializer(), response.body!!.string())
+            followsPageResult = MdUtil.jsonParser.decodeFromString(FollowsPageSerializer.serializer(), response.body!!.string())
         } catch (e: Exception) {
             XLog.e("error parsing follows", e)
         }
         val track = Track.create(TrackManager.MDLIST)
-        val result = followsPageResult?.result
+        val result = followsPageResult?.data
         if (result.isNullOrEmpty()) {
             track.status = FollowStatus.UNFOLLOWED.int
         } else {
             val follow = result.first()
-            track.status = follow.follow_type
+            track.status = follow.mangaId
             if (result[0].chapter.isNotBlank()) {
                 track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()
             }
-            track.tracking_url = MdUtil.baseUrl + follow.manga_id.toString()
-            track.title = follow.title
+            track.tracking_url = MdUtil.baseUrl + follow.mangaId.toString()
+            track.title = follow.mangaTitle
         }
         return track
     }
@@ -102,17 +102,17 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      *
      */
     private fun followsListRequest(): Request {
-        return GET("${MdUtil.baseUrl}${MdUtil.followsAllApi}", headers, CacheControl.FORCE_NETWORK)
+        return GET("${MdUtil.apiUrl}${MdUtil.followsAllApi}", headers, CacheControl.FORCE_NETWORK)
     }
 
     /**
      * Parse result element  to manga
      */
-    private fun followFromElement(result: Result, lowQualityCovers: Boolean): SManga {
+    private fun followFromElement(result: FollowPage, lowQualityCovers: Boolean): SManga {
         val manga = SManga.create()
-        manga.title = MdUtil.cleanString(result.title)
-        manga.url = "/manga/${result.manga_id}/"
-        manga.follow_status = FollowStatus.fromInt(result.follow_type)
+        manga.title = MdUtil.cleanString(result.mangaTitle)
+        manga.url = "/manga/${result.mangaId}/"
+        manga.follow_status = FollowStatus.fromInt(result.followType)
         manga.thumbnail_url = MdUtil.formThumbUrl(manga.url, lowQualityCovers)
         return manga
     }
@@ -163,7 +163,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                     formBody.build()
                 )
             ).execute()
-            
+
             response.body!!.string().isEmpty()
         }
     }
@@ -199,7 +199,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     suspend fun fetchTrackingInfo(url: String): Track {
         return withContext(Dispatchers.IO) {
             val request = GET(
-                "${MdUtil.baseUrl}${MdUtil.followsMangaApi}" + getMangaId(url),
+                "${MdUtil.apiUrl}${MdUtil.followsMangaApi}" + getMangaId(url),
                 headers,
                 CacheControl.FORCE_NETWORK
             )
