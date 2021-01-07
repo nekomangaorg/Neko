@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.similar
 
+import android.net.Uri
 import android.content.Context
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -7,6 +8,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.Data
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -19,7 +21,8 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
     Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        SimilarUpdateService.start(context)
+        val localFile =  inputData.getString("localFile")
+        SimilarUpdateService.start(context, localFile)
         return Result.success()
     }
 
@@ -69,5 +72,14 @@ class SimilarUpdateJob(private val context: Context, workerParams: WorkerParamet
         fun doWorkNow() {
             WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<SimilarUpdateJob>().build())
         }
+
+        fun doWorkNowLocal(localFile: Uri) {
+            val data = Data.Builder()
+            data.putString("localFile", localFile.toString())
+            val work = OneTimeWorkRequestBuilder<SimilarUpdateJob>()
+            work.setInputData(data.build())
+            WorkManager.getInstance().enqueue(work.build())
+        }
+
     }
 }

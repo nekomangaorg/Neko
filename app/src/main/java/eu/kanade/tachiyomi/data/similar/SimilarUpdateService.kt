@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.similar
 import android.app.Service
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
@@ -29,10 +30,14 @@ import kotlinx.coroutines.withContext
 import okio.buffer
 import okio.sink
 import okio.source
+import okio.BufferedSource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
+import java.io.InputStream
+import java.util.zip.GZIPInputStream
 import java.util.concurrent.TimeUnit
+import java.nio.charset.StandardCharsets.UTF_8
 
 class SimilarUpdateService(
     val db: DatabaseHelper = Injekt.get()
@@ -114,17 +119,18 @@ class SimilarUpdateService(
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return Service.START_NOT_STICKY
+        val localFile = intent.getStringExtra("localFile")
 
         // Unsubscribe from any previous subscription if needed.
         job?.cancel()
         val handler = CoroutineExceptionHandler { _, exception ->
             XLog.e(exception)
             stopSelf(startId)
-            showResultNotification(true)
+            showResultNotification(true, exception.message)
             cancelProgressNotification()
         }
         job = similarServiceScope.launch(handler) {
-            updateSimilar()
+            updateSimilar(localFile)
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 
@@ -134,38 +140,52 @@ class SimilarUpdateService(
     /**
      * Method that updates the similar database for manga
      */
-    private suspend fun updateSimilar() = withContext(Dispatchers.IO) {
+    private suspend fun updateSimilar(localFile: String?) = withContext(Dispatchers.IO) {
 
-        val response = SimilarHttpService.create().getSimilarResults().execute()
-        if (!response.isSuccessful) {
-            throw Exception("Error trying to download similar file")
-        }
-        val destinationFile = File(filesDir, "neko-similar.json")
-        val buffer = destinationFile.sink().buffer()
-
-        // write json to file
-        response.body()?.byteStream()?.source()?.use { input ->
-            buffer.use { output ->
-                output.writeAll(input)
+        // If we do not have a local file, then we should fetch it from network
+        // Otherwise try to load it from the local file destination
+        // NOTE: the path is a URI if we are loading it locally
+        // NOTE: the URI requires us to use android content resolver to stream it
+        val listSimilar: List<SimilarFromJson>
+        if (localFile == null) {
+            val response = SimilarHttpService.create().getSimilarResults().execute()
+            if (!response.isSuccessful) {
+                throw Exception("Error trying to download similar file")
             }
+            val destinationFile = File(filesDir, "neko-similar.json")
+            val buffer = destinationFile.sink().buffer()
+            // write json to file
+            response.body()?.byteStream()?.source()?.use { input ->
+                buffer.use { output ->
+                    output.writeAll(input)
+                }
+            }
+            val reader = JsonReader.of(destinationFile.source().buffer())
+            listSimilar = getSimilar(reader)
+            destinationFile.delete()
+            reader.close()
+        } else {
+            if(localFile.substring(localFile.lastIndexOf(".") + 1) != "json") {
+                throw Exception("We can only load .json similar database files")
+            }
+            val localFileUri = Uri.parse(localFile)
+            val localFileStream: InputStream? = contentResolver.openInputStream(localFileUri)
+            if (localFileStream == null) {
+                throw Exception("Unable to open file from disk")
+            }
+            val source: BufferedSource = localFileStream.source().buffer()
+            val reader = JsonReader.of(source)
+            listSimilar = getSimilar(reader)
+            reader.close()
         }
 
-        val listSimilar = getSimilar(destinationFile)
-
-        // Delete the old similar table
-        db.deleteAllSimilar().executeAsBlocking()
-
+        // Loop through each and insert into the databas
         val totalManga = listSimilar.size
-
-        // Loop through each and insert into the database
-
         val dataToInsert = listSimilar.mapIndexed { index, similarFromJson ->
             showProgressNotification(index, totalManga)
-
             if (similarFromJson.similarIds.size != similarFromJson.similarTitles.size) {
                 return@mapIndexed null
             }
-
             val similar = MangaSimilarImpl()
             similar.id = index.toLong()
             similar.manga_id = similarFromJson.id.toLong()
@@ -174,18 +194,17 @@ class SimilarUpdateService(
             return@mapIndexed similar
         }.filterNotNull()
 
+        // Delete the old similar table, and then insert into the database
         showProgressNotification(dataToInsert.size, totalManga)
-
         if (dataToInsert.isNotEmpty()) {
+            db.deleteAllSimilar().executeAsBlocking()
             db.insertSimilar(dataToInsert).executeAsBlocking()
         }
-        destinationFile.delete()
         showResultNotification(!this.isActive)
         cancelProgressNotification()
     }
 
-    private fun getSimilar(destinationFile: File): List<SimilarFromJson> {
-        val reader = JsonReader.of(destinationFile.source().buffer())
+    private fun getSimilar(reader: JsonReader): List<SimilarFromJson> {
 
         var processingManga = false
         var processingTitles = false
@@ -264,10 +283,10 @@ class SimilarUpdateService(
      *
      * @param updates a list of manga with new updates.
      */
-    private fun showResultNotification(error: Boolean = false) {
+    private fun showResultNotification(error: Boolean = false, message: String? = null) {
 
         val title = if (error) {
-            getString(R.string.similar_loading_complete_error)
+            message ?: getString(R.string.similar_loading_complete_error)
         } else {
             getString(
                 R.string.similar_loading_complete
@@ -305,12 +324,12 @@ class SimilarUpdateService(
          * running.
          *
          * @param context the application context.
-         * @param category a specific category to update, or null for global update.
-         * @param target defines what should be updated.
+         * @param localFile URI of the file we want to load locally, or null to get from the network
          */
-        fun start(context: Context) {
+        fun start(context: Context, localFile: String? = null) {
             if (!isRunning(context)) {
                 val intent = Intent(context, SimilarUpdateService::class.java)
+                intent.putExtra("localFile", localFile)
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
