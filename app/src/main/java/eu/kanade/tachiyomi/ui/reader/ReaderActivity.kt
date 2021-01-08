@@ -12,8 +12,6 @@ import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
-import android.view.Menu
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -29,8 +27,8 @@ import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import com.mikepenz.iconics.utils.inflateWithIconics
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -64,6 +62,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -75,6 +74,8 @@ import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_activity.*
 import kotlinx.android.synthetic.main.reader_chapters_sheet.*
+import kotlinx.android.synthetic.main.reader_chapters_sheet.view.*
+import kotlinx.android.synthetic.main.reader_nav.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -272,32 +273,6 @@ class ReaderActivity :
         }
     }
 
-    /**
-     * Called when the options menu of the toolbar is being created. It adds our custom menu.
-     */
-    override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        menuInflater.inflateWithIconics(this, R.menu.reader, menu)
-        return true
-    }
-
-    /**
-     * Called when an item of the options menu was clicked. Used to handle clicks on our menu
-     * entries.
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        coroutine?.cancel()
-        bottomSheet = when (item.itemId) {
-            R.id.action_settings -> ReaderSettingsSheet(this)
-            R.id.action_custom_filter -> ReaderColorFilterSheet(this)
-            else -> return super.onOptionsItemSelected(item)
-        }
-        bottomSheet?.show()
-        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
-            chapters_bottom_sheet.sheetBehavior?.collapse()
-        }
-        return true
-    }
-
     fun popToMain() {
         presenter.onBackPressed()
         if (fromUrl) {
@@ -378,10 +353,59 @@ class ReaderActivity :
             }
         })
 
+        settings_button.setOnClickListener {
+            bottomSheet = ReaderSettingsSheet(this)
+            bottomSheet?.show()
+            if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+                chapters_bottom_sheet.sheetBehavior?.collapse()
+            }
+        }
+        brightness_button.setOnClickListener {
+            bottomSheet = ReaderColorFilterSheet(this)
+            bottomSheet?.show()
+            if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
+                chapters_bottom_sheet.sheetBehavior?.collapse()
+            }
+        }
+        left_chapter.setImageDrawable(this.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_chevron_double_left))
+        left_chapter.setOnClickListener {
+            viewer?.let {
+                when (it is R2LPagerViewer) {
+                    true -> presenter.loadNextChapter()
+                    false -> presenter.loadPreviousChapter()
+                }
+            }
+        }
+        right_chapter.setImageDrawable(this.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_chevron_double_right))
+        right_chapter.setOnClickListener {
+            viewer?.let {
+                when (it is R2LPagerViewer) {
+                    true -> presenter.loadPreviousChapter()
+                    false -> presenter.loadNextChapter()
+                }
+            }
+        }
+
+        comment_button.setImageDrawable(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment))
+
+        comment_button.setOnClickListener {
+            openComments()
+        }
+
+        chapters_button.setOnClickListener {
+            if (chapters_bottom_sheet.sheetBehavior?.isExpanded() ?: false) {
+                chapters_bottom_sheet.sheetBehavior?.collapse()
+            } else {
+                chapters_bottom_sheet.sheetBehavior?.expand()
+            }
+        }
+
         // Set initial visibility
         setMenuVisibility(menuVisible)
         chapters_bottom_sheet.sheetBehavior?.isHideable = !menuVisible
-        if (!menuVisible) chapters_bottom_sheet.sheetBehavior?.hide()
+        if (!menuVisible) {
+            chapters_bottom_sheet.sheetBehavior?.hide()
+        }
         val peek = chapters_bottom_sheet.sheetBehavior?.peekHeight ?: 30.dpToPx
         reader_layout.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = when {
@@ -429,6 +453,10 @@ class ReaderActivity :
             snackbar?.dismiss()
             systemUi?.show()
             reader_menu.visible()
+            reader_nav.visible()
+
+            val readerNavAnim = AnimationUtils.loadAnimation(this, R.anim.readernav_enter)
+            reader_nav.startAnimation(readerNavAnim)
 
             if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
                 chapters_bottom_sheet.sheetBehavior?.isHideable = false
@@ -461,6 +489,13 @@ class ReaderActivity :
                 appbar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
                 chapters_bottom_sheet.sheetBehavior?.hide()
+                val readerNavAnimation = AnimationUtils.loadAnimation(this, R.anim.readernav_exit)
+                readerNavAnimation.setAnimationListener(object : SimpleAnimationListener() {
+                    override fun onAnimationEnd(animation: Animation) {
+                        reader_nav.gone()
+                    }
+                })
+                reader_nav.startAnimation(readerNavAnimation)
             } else {
                 reader_menu.gone()
             }
@@ -597,9 +632,14 @@ class ReaderActivity :
         val pages = page.chapter.pages ?: return
 
         // Set bottom page number
-        page_number.text = "${page.number}/${pages.size}"
         // Set seekbar page number
-        page_text.text = "${page.number} / ${pages.size}"
+        if (viewer !is R2LPagerViewer) {
+            left_page_text.text = "${page.number}"
+            right_page_text.text = "${pages.size}"
+        } else {
+            right_page_text.text = "${page.number}"
+            left_page_text.text = "${pages.size}"
+        }
 
         if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet
                 .sheetBehavior.isExpanded()

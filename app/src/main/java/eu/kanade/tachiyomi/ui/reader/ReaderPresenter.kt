@@ -311,7 +311,7 @@ class ReaderPresenter(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdUtil.apiChapter + urlChapterId).executeOnIO()
+        val dbChapter = db.getChapter(MdUtil.oldApiChapter + urlChapterId).executeOnIO()
         if (dbChapter?.manga_id != null) {
             val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {
@@ -344,7 +344,7 @@ class ReaderPresenter(
 
         if (chapters.isNotEmpty()) {
             val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
-            val currentChapter = newChapters.find { it.url == MdUtil.apiChapter + urlChapterId }
+            val currentChapter = newChapters.find { it.url == MdUtil.oldApiChapter + urlChapterId }
             if (currentChapter?.id != null) {
                 withContext(Dispatchers.Main) {
                     init(manga, currentChapter.id!!)

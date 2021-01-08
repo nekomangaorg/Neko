@@ -26,10 +26,10 @@
             android:alpha="0.25"
             android:contentDescription="@string/drag_handle"
             android:src="@drawable/draggable_pill"
-            android:tint="?actionBarTintColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            app:tint="?actionBarTintColor" />
 
         <ImageButton
             android:id="@+id/chapters_button"
@@ -40,9 +40,9 @@
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
             android:tint="?actionBarTintColor"
             android:tooltipText="@string/view_chapters"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/comment_button"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_format_list_numbered_24dp" />
 
         <ImageButton
@@ -53,32 +53,42 @@
             android:contentDescription="@string/next"
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
             android:tint="?actionBarTintColor"
-            android:tooltipText="@string/filter"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            android:alpha="0.0" />
+            android:tooltipText="@string/view_comments"
+            app:layout_constraintEnd_toStartOf="@+id/pill"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/chapters_button"
+            tools:srcCompat="@drawable/ic_format_list_numbered_24dp" />
 
-        <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
-            android:id="@+id/page_seekbar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/page_text"
-            app:layout_constraintStart_toEndOf="@id/chapters_button"
-            app:layout_constraintTop_toTopOf="parent" />
+        <ImageButton
+            android:id="@+id/brightness_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            android:tint="?actionBarTintColor"
+            android:tooltipText="@string/custom_filter"
+            app:layout_constraintEnd_toStartOf="@+id/settings_button"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/pill"
+            app:srcCompat="@drawable/ic_brightness_day_24dp" />
 
-        <TextView
-            android:id="@+id/page_text"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textColor="?actionBarTintColor"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
+
+        <ImageButton
+            android:id="@+id/settings_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            android:tint="?actionBarTintColor"
+            android:tooltipText="@string/settings"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="100 / 105" />
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toEndOf="@+id/brightness_button"
+            app:srcCompat="@drawable/ic_settings_24dp" />
+
+
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView

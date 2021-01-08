@@ -62,7 +62,7 @@ class ReaderSettingsSheet(private val activity: ReaderActivity) :
         }
 
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 550.dpToPx + height
+        sheetBehavior.peekHeight = 450.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {

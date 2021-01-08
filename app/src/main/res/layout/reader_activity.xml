@@ -25,8 +25,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:padding="4dp"
         android:layout_marginBottom="8dp"
+        android:padding="4dp"
         android:textStyle="bold" />
 
     <eu.kanade.tachiyomi.ui.reader.ReaderColorFilterView
@@ -39,7 +39,7 @@
         android:id="@+id/reader_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <FrameLayout
             android:id="@+id/appbar"
@@ -56,7 +56,13 @@
         </FrameLayout>
     </FrameLayout>
 
+
+    <include
+        layout="@layout/reader_nav"
+        android:visibility="gone" />
+
     <include layout="@layout/reader_chapters_sheet" />
+
 
     <View
         android:id="@+id/brightness_overlay"
