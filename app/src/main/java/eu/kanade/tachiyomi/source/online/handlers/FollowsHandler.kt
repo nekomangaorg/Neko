@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowPage
+import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowsIndividualSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.FollowsPageSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -54,12 +55,12 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         }
         val empty = followsPageResult?.data?.isEmpty()
 
-        if (empty == null || empty) {
+        if (empty == null || empty || followsPageResult?.code != 200) {
             return MangasPage(mutableListOf(), false)
         }
         val lowQualityCovers = if (forceHd) false else preferences.lowQualityCovers()
 
-        val follows = followsPageResult!!.data.map {
+        val follows = followsPageResult.data!!.map {
             followFromElement(it, lowQualityCovers)
         }
 
@@ -75,21 +76,20 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      */
 
     private fun followStatusParse(response: Response): Track {
-        var followsPageResult: FollowsPageSerializer? = null
+        var followsPageResult: FollowsIndividualSerializer? = null
 
         try {
-            followsPageResult = MdUtil.jsonParser.decodeFromString(FollowsPageSerializer.serializer(), response.body!!.string())
+            followsPageResult = MdUtil.jsonParser.decodeFromString(FollowsIndividualSerializer.serializer(), response.body!!.string())
         } catch (e: Exception) {
             XLog.e("error parsing follows", e)
         }
         val track = Track.create(TrackManager.MDLIST)
-        val result = followsPageResult?.data
-        if (result.isNullOrEmpty()) {
+        if (followsPageResult!!.code == 404) {
             track.status = FollowStatus.UNFOLLOWED.int
         } else {
-            val follow = result.first()
-            track.status = follow.mangaId
-            if (result[0].chapter.isNotBlank()) {
+            val follow = followsPageResult.data!!
+            track.status = follow.followType
+            if (follow.chapter.isNotBlank()) {
                 track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()
             }
             track.tracking_url = MdUtil.baseUrl + follow.mangaId.toString()
