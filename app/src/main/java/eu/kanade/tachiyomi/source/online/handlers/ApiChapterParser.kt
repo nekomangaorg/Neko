@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.string
 import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.source.model.Page
@@ -30,7 +31,7 @@ class ApiChapterParser {
     fun externalParse(response: Response): String {
         val jsonData = response.body!!.string()
         val json = JsonParser.parseString(jsonData).asJsonObject
-        val external = json.get("external").string
+        val external = json.get("data").get("pages").string
         return external.substringAfterLast("/")
     }
 }
