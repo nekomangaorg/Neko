@@ -10,7 +10,6 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
@@ -21,7 +20,7 @@ import kotlinx.android.synthetic.main.chapter_sort_bottom_sheet.*
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
-(controller.activity!!, R.style.BottomSheetDialogTheme) {
+    (controller.activity!!, R.style.BottomSheetDialogTheme) {
 
     val activity = controller.activity!!
 
@@ -36,8 +35,6 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
 
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(activity, view)
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 415.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onSlide(bottomSheet: View, progress: Float) {
