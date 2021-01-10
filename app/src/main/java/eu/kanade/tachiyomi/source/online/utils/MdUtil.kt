@@ -76,6 +76,7 @@ class MdUtil {
             "French - ",
             "French:",
             "French / ",
+            "R&Eacute;SUM&Eacute; FRANCAIS :",
             "German/",
             "German /",
             "Hindi /",
