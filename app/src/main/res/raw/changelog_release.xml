@@ -2,6 +2,12 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.5.1">
+        <changelogtext>Fix: MangaPlus Chapters</changelogtext>
+        <changelogtext>Fix: Adjust layout of reader nav a little</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.5">
         <changelogtext>New: Switch to v2 of MangaDex api and use MangaDex Api Server</changelogtext>
         <changelogtext>New: Ability to load json manually for similar manga</changelogtext>

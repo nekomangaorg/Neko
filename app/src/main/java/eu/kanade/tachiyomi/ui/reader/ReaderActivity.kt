@@ -386,14 +386,14 @@ class ReaderActivity :
             }
         }
 
-        comment_button.setImageDrawable(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment))
+        comment_button.setImageDrawable(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment, size = 22))
 
         comment_button.setOnClickListener {
             openComments()
         }
 
         chapters_button.setOnClickListener {
-            if (chapters_bottom_sheet.sheetBehavior?.isExpanded() ?: false) {
+            if (chapters_bottom_sheet.sheetBehavior?.isExpanded() == true) {
                 chapters_bottom_sheet.sheetBehavior?.collapse()
             } else {
                 chapters_bottom_sheet.sheetBehavior?.expand()
