@@ -123,7 +123,9 @@ class Downloader(
         queue.filter { it.status == Download.DOWNLOADING }.forEach { it.status = Download.ERROR }
 
         if (reason != null) {
-            notifier.onWarning(reason)
+            if (reason != "**") {
+                notifier.onWarning(reason)
+            }
         } else {
             if (notifier.paused) {
                 if (queue.isEmpty()) {
@@ -183,7 +185,7 @@ class Downloader(
         queue.remove(manga)
         if (queue.isEmpty()) {
             if (DownloadService.isRunning(context)) DownloadService.stop(context)
-            stop()
+            stop("**")
         }
         notifier.dismissProgress()
     }

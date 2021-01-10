@@ -134,7 +134,7 @@ object Libs {
         const val materialDialogsInput = "com.afollestad.material-dialogs:input:${Versions.materialDialogs}"
         const val numberSlidingPicker = "com.github.sephiroth74:NumberSlidingPicker:${Versions.numberSlidingPicker}"
         const val photoView = "com.github.chrisbanes:PhotoView:${Versions.photoView}"
-        const val subsamplingScaleImageView = "com.github.jays2kings:subsampling-scale-image-view:${Versions.subsamplingImageScale}"
+        const val subsamplingScaleImageView = "com.github.tachiyomiorg:subsampling-scale-image-view:${Versions.subsamplingImageScale}"
         const val systemUiHelper = "me.zhanghai.android.systemuihelper:library:${Versions.systemUiHelper}"
         const val tapTargetView = "com.getkeepsafe.taptargetview:taptargetview:${Versions.tapTargetView}"
         const val viewStatePager = "com.nightlynexus.viewstatepageradapter:viewstatepageradapter:${Versions.viewStatePagerAdapter}"
