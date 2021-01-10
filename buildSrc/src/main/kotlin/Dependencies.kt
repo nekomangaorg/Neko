@@ -223,7 +223,7 @@ object Versions {
     const val storioCommon = "8be19de@aar"
     const val storioSqlite = "8be19de@aar"
     const val stringSimilarity = "2.0.0"
-    const val subsamplingImageScale = "60b3a2b"
+    const val subsamplingImageScale = "cd257f3"
     const val systemUiHelper = "1.0.0"
     const val tagGroup = "1.6.0"
     const val tapTargetView = "1.13.0"

@@ -2,6 +2,15 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.5">
+        <changelogtext>New: Switch to v2 of MangaDex api and use MangaDex Api Server</changelogtext>
+        <changelogtext>New: Ability to load json manually for similar manga</changelogtext>
+        <changelogtext>New: Changed reader ui some</changelogtext>
+        <changelogtext>Fix: No more downloader notification when removing a manga</changelogtext>
+        <changelogtext>Fix: Make chapter filter sheet expanded by default</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.4.4">
         <changelogtext>Fix: Manga that contained null chapter groups not loading</changelogtext>
     </changelogversion>
