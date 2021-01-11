@@ -5,13 +5,13 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class FollowsPageSerializer(
     val code: Int,
-    val data: List<FollowPage>?
+    val data: List<FollowPage>? = null
 )
 
 @Serializable
 data class FollowsIndividualSerializer(
     val code: Int,
-    val data: FollowPage?
+    val data: FollowPage? = null
 )
 
 @Serializable
