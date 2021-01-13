@@ -56,10 +56,7 @@
         </FrameLayout>
     </FrameLayout>
 
-
-    <include
-        layout="@layout/reader_nav"
-        android:visibility="gone" />
+    <include layout="@layout/reader_nav" />
 
     <include layout="@layout/reader_chapters_sheet" />
 

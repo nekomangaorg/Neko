@@ -367,7 +367,7 @@ class ReaderActivity :
                 chapters_bottom_sheet.sheetBehavior?.collapse()
             }
         }
-        left_chapter.setImageDrawable(this.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_chevron_double_left))
+        left_chapter.setImageDrawable(this.iconicsDrawableMedium(CommunityMaterial.Icon2.cmd_skip_previous))
         left_chapter.setOnClickListener {
             viewer?.let {
                 when (it is R2LPagerViewer) {
@@ -376,7 +376,7 @@ class ReaderActivity :
                 }
             }
         }
-        right_chapter.setImageDrawable(this.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_chevron_double_right))
+        right_chapter.setImageDrawable(this.iconicsDrawableMedium(CommunityMaterial.Icon2.cmd_skip_next))
         right_chapter.setOnClickListener {
             viewer?.let {
                 when (it is R2LPagerViewer) {
@@ -436,6 +436,7 @@ class ReaderActivity :
                 height = 280.dpToPx + insets.systemWindowInsetBottom
             }
             chapters_bottom_sheet.sheetBehavior?.peekHeight = peek + insets.getBottomGestureInsets()
+
             chapter_recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             viewer_container.requestLayout()
         }
