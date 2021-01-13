@@ -203,7 +203,7 @@ class ApiMangaParser(val langs: List<String>) {
             }
 
             val jsonObject = JsonParser.parseString(body).obj
-            return jsonObject["manga_id"]?.nullInt ?: throw Exception("No manga associated with chapter")
+            return jsonObject["data"].asJsonObject["mangaId"]?.nullInt ?: throw Exception("No manga associated with chapter")
         } catch (e: Exception) {
             XLog.e(e)
             throw e
