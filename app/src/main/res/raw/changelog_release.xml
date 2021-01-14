@@ -2,8 +2,23 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.5.3">
+        <changelogtext>***NOTE: MangaDex's API server is having caching issues. So it will sometimes reset followed, chapter statuses in app even after***</changelogtext>
+        <changelogtext>***sending the request to update them the website is updated, and when the cache does fix or reset it will be reflected in the app***</changelogtext>
+        <changelogtext>Fix: Reader floating nav bar to be more consistent with spacing</changelogtext>
+        <changelogtext>Fix: Changed icons for floating nav bar</changelogtext>
+        <changelogtext>Fix: Chapter deeplinking</changelogtext>
+        <changelogtext>Fix: Bottom page number not showing</changelogtext>
+        <changelogtext>Fix: Lag when unfavoriting manga that had downloaded chapters</changelogtext>
+        <changelogtext>Fix: MDList chapter numbers not updating the website</changelogtext>
+        <changelogtext>Fix: MDList not being updated to Complete automatically on the website</changelogtext>
+        <changelogtext>Fix: Raise rate limiting some since API server is giving more 429s</changelogtext>
+        <changelogtext>Fix: Adjust experimental mark as read</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.5.2">
-        <changelogtext>Fix: Follows failing library updates when unfollowed</changelogtext>
+        <changelogtext>Fix: Fix unfollowed manga causing an issue with library updates</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
