@@ -3,8 +3,9 @@
     <changelogversion
         changeDate=""
         versionName="v2.1.5.3">
-        <changelogtext>***NOTE: MangaDex's API server is having caching issues. So it will sometimes reset followed, chapter statuses in app even after***</changelogtext>
-        <changelogtext>***sending the request to update them the website is updated, and when the cache does fix or reset it will be reflected in the app***</changelogtext>
+        <changelogtext>***NOTE: MangaDex's API server is having caching issues. So it will reset followed and chapter statuses in app even after***</changelogtext>
+        <changelogtext>***sending the request to update them. The website is updated, and when the cache does fix or reset (in some unknown amount of time) it will be reflected in the app***
+        </changelogtext>
         <changelogtext>Fix: Reader floating nav bar to be more consistent with spacing</changelogtext>
         <changelogtext>Fix: Changed icons for floating nav bar</changelogtext>
         <changelogtext>Fix: Chapter deeplinking</changelogtext>
