@@ -154,6 +154,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)
             val formBody = FormBody.Builder()
+                .add("volume", "0")
                 .add("chapter", track.last_chapter_read.toString())
             XLog.d("chapter to update %s", track.last_chapter_read.toString())
             val response = client.newCall(
@@ -163,8 +164,9 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                     formBody.build()
                 )
             ).execute()
-
-            response.body!!.string().isEmpty()
+            val body = response.body!!.string()
+            XLog.d(body)
+            body.isEmpty()
         }
     }
 
