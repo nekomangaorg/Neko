@@ -68,6 +68,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
             if (followStatus != FollowStatus.UNFOLLOWED) {
                 if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
                     track.status = FollowStatus.COMPLETED.int
+                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), FollowStatus.COMPLETED)
                 }
                 if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
                     val newFollowStatus = FollowStatus.READING
