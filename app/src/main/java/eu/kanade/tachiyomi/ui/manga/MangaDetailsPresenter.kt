@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -724,10 +725,13 @@ class MangaDetailsPresenter(
     }
 
     fun confirmDeletion() {
-        coverCache.deleteFromCache(manga)
+        GlobalScope.launch(Dispatchers.IO) {
+            coverCache.deleteFromCache(manga)
+        }
+        GlobalScope.launch(Dispatchers.IO) {
+            downloadManager.deleteManga(manga, source)
+        }
         db.resetMangaInfo(manga).executeAsBlocking()
-        downloadManager.deleteManga(manga, source)
-        customMangaManager.saveMangaInfo(CustomMangaManager.MangaJson(manga.id!!))
         asyncUpdateMangaAndChapters(true)
     }
 
