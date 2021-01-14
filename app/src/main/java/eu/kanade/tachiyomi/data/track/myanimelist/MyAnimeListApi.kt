@@ -108,7 +108,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     suspend fun getLibManga(track: Track): Track {
         val result = findLibManga(track)
         if (result == null) {
-            throw Exception("Could not find manga")
+            throw Exception("Could not find manga myanimlist tracking")
         } else {
             return result
         }

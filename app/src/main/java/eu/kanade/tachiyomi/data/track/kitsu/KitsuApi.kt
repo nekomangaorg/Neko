@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
+import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.int
@@ -26,7 +27,6 @@ import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
-import com.elvishew.xlog.XLog
 
 class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
@@ -141,7 +141,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             val manga = json["included"].array[0].obj
             return KitsuLibManga(data[0].obj, manga).toTrack()
         } else {
-            throw Exception("Could not find manga")
+            throw Exception("Could not find manga kitsu tracking")
         }
     }
 

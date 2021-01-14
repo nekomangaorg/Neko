@@ -123,7 +123,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     suspend fun getLibManga(track: Track, userid: Int): Track {
         val remoteTrack = findLibManga(track, userid)
         if (remoteTrack == null) {
-            throw Exception("Could not find manga")
+            throw Exception("Could not find manga anilist tracking")
         } else {
             return remoteTrack
         }
