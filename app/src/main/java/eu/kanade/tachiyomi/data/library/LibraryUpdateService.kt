@@ -52,6 +52,7 @@ import java.io.File
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.math.ceil
 
 /**
  * This class will take care of updating the chapters of the manga from the library. It can be
@@ -464,7 +465,7 @@ class LibraryUpdateService(
                 tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
                     if (FollowStatus.fromInt(it.status) == FollowStatus.READING) {
                         val chapters = db.getChapters(manga).executeAsBlocking()
-                        val filteredChp = chapters.filter { chp -> chp.chapter_number.toInt() <= it.last_chapter_read && !chp.read }
+                        val filteredChp = chapters.filter { chp -> ceil(chp.chapter_number.toDouble()).toInt() <= it.last_chapter_read && !chp.read && chp.chapter_number.toInt() != 0 }
                         if (filteredChp.isNotEmpty()) {
                             filteredChp.forEach {
                                 it.read = true
