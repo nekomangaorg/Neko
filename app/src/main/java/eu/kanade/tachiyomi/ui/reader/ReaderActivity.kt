@@ -633,6 +633,7 @@ class ReaderActivity :
         val pages = page.chapter.pages ?: return
 
         // Set bottom page number
+        page_number.text = "${page.number}/${pages.size}"
         // Set seekbar page number
         if (viewer !is R2LPagerViewer) {
             left_page_text.text = "${page.number}"
