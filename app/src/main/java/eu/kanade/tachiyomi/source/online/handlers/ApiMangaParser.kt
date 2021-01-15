@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
-import com.github.salomonbrys.kotson.nullInt
-import com.github.salomonbrys.kotson.obj
-import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.network.consumeBody
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiChapterSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterSerializer
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -197,13 +195,13 @@ class ApiMangaParser(val langs: List<String>) {
     fun chapterParseForMangaId(response: Response): Int {
         try {
             if (response.code != 200) throw Exception("HTTP error ${response.code}")
-            val body = response.body?.string().orEmpty()
-            if (body.isEmpty()) {
+            val jsonBody = response.body?.string().orEmpty()
+            if (jsonBody.isEmpty()) {
                 throw Exception("Null Response")
             }
 
-            val jsonObject = JsonParser.parseString(body).obj
-            return jsonObject["data"].asJsonObject["mangaId"]?.nullInt ?: throw Exception("No manga associated with chapter")
+            val apiChapter = MdUtil.jsonParser.decodeFromString(ApiChapterSerializer.serializer(), jsonBody)
+            return apiChapter.data.mangaId
         } catch (e: Exception) {
             XLog.e(e)
             throw e
