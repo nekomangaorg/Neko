@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.recently_read
 
 import android.view.View
-import coil.api.clear
+import coil.clear
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga

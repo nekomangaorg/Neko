@@ -19,7 +19,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
-import coil.api.loadAny
+import coil.loadAny
 import coil.request.CachePolicy
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -258,9 +258,9 @@ class PagerPageHolder(
                     if (viewer.config.readerTheme >= 2) {
                         val imageView = initSubsamplingImageView()
                         if (page.bg != null && page.bgType == getBGType(
-                            viewer.config.readerTheme,
-                            context
-                        )
+                                viewer.config.readerTheme,
+                                context
+                            )
                         ) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
                             imageView.background = page.bg
@@ -293,7 +293,10 @@ class PagerPageHolder(
             // Keep the Rx stream alive to close the input stream only when unsubscribed
             .flatMap { Observable.never<Unit>() }
             .doOnUnsubscribe {
-                try { openStream?.close() } catch (e: Exception) {}
+                try {
+                    openStream?.close()
+                } catch (e: Exception) {
+                }
             }
             .subscribe({}, {})
     }

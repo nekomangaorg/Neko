@@ -71,7 +71,9 @@ class MangaDetailsPresenter(
     private val chapterFilter: ChapterFilter = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+    var scope = CoroutineScope(Job() + Dispatchers.Default)
+
+    var coverColor: Int? = null
 
     private val customMangaManager: CustomMangaManager by injectLazy()
 
@@ -448,9 +450,6 @@ class MangaDetailsPresenter(
                     withContext(Dispatchers.Main) {
                         controller.clearCoverCache()
                     }
-                }
-                withContext(Dispatchers.Main) {
-                    controller.setPaletteColor()
                 }
                 db.insertManga(manga).executeOnIO()
             }

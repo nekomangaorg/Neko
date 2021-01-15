@@ -9,7 +9,7 @@ import android.os.PowerManager
 import android.widget.Toast
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -397,9 +397,9 @@ class LibraryUpdateService(
                 coverCache.deleteFromCache(thumbnailUrl)
                 // load new covers in background
                 val request =
-                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                    ImageRequest.Builder(this@LibraryUpdateService).data(manga)
                         .memoryCachePolicy(CachePolicy.DISABLED).build()
-                Coil.imageLoader(this@LibraryUpdateService).execute(request)
+                Coil.imageLoader(this@LibraryUpdateService).enqueue(request)
             }
             db.insertManga(manga).executeAsBlocking()
             // add mdlist tracker if manga in library has it missing

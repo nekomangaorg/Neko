@@ -41,10 +41,7 @@ import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import coil.Coil
-import coil.bitmappool.BitmapPool
-import coil.request.LoadRequest
-import coil.size.Size
-import coil.transform.Transformation
+import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
@@ -111,6 +108,9 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_grid_item.*
 import kotlinx.android.synthetic.main.manga_header_item.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -155,7 +155,6 @@ class MangaDetailsController :
 
     var colorAnimator: ValueAnimator? = null
     val presenter: MangaDetailsPresenter
-    var coverColor: Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
@@ -188,11 +187,9 @@ class MangaDetailsController :
     //region UI Methods
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        coverColor = null
         fullCoverActive = false
 
         setRecycler(view)
-        setPaletteColor()
         adapter?.fastScroller = fast_scroller
         fast_scroller.addOnScrollStateChangeListener {
             activity?.appbar?.y = 0f
@@ -285,7 +282,7 @@ class MangaDetailsController :
             return
         }
         val color =
-            coverColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
+            presenter.coverColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
         val colorFrom =
             if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
                 ?: color
@@ -310,37 +307,6 @@ class MangaDetailsController :
             (activity as MainActivity).toolbar.setBackgroundColor(colorTo)
             activity?.window?.statusBarColor = colorTo
         }
-    }
-
-    /** Get the color of the manga cover*/
-    fun setPaletteColor() {
-        val view = view ?: return
-
-        val request = LoadRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
-            .transformations(object : Transformation {
-                override fun key() = "BackDropColorTransformer"
-
-                override suspend fun transform(pool: BitmapPool, input: Bitmap, size: Size): Bitmap {
-                    val p = Palette.from(input).generate()
-                    if (recycler != null) {
-                        val colorBack = view.context.getResourceColor(
-                            android.R.attr.colorBackground
-                        )
-                        // this makes the color more consistent regardless of theme
-                        val backDropColor =
-                            ColorUtils.blendARGB(p.getVibrantColor(colorBack), colorBack, .35f)
-                        coverColor = backDropColor
-                        getHeader()?.setBackDrop(backDropColor)
-                        if (toolbarIsColored) {
-                            val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
-                            (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
-                            activity?.window?.statusBarColor = translucentColor
-                        }
-                    }
-                    return input
-                }
-            }).target(manga_cover_full).build()
-        Coil.imageLoader(view.context).execute(request)
     }
 
     /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
@@ -378,7 +344,7 @@ class MangaDetailsController :
 
     private fun setStatusBarAndToolbar() {
         activity?.window?.statusBarColor = if (toolbarIsColored) {
-            val translucentColor = ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
+            val translucentColor = ColorUtils.setAlphaComponent(presenter.coverColor ?: Color.TRANSPARENT, 175)
             (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
             translucentColor
         } else Color.TRANSPARENT
@@ -407,8 +373,6 @@ class MangaDetailsController :
             presenter.refreshTracking()
             refreshTracker = null
         }
-        // fetch cover again in case the user set a new cover while reading
-        setPaletteColor()
         val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
             this
         if (isCurrentController) {
@@ -815,7 +779,7 @@ class MangaDetailsController :
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val request = LoadRequest.Builder(activity!!).data(presenter.manga).target(
+            val request = ImageRequest.Builder(activity!!).data(presenter.manga).target(
                 onError = {
                     shareManga()
                 },
@@ -823,7 +787,7 @@ class MangaDetailsController :
                     presenter.shareManga((it as BitmapDrawable).bitmap)
                 }
             ).build()
-            Coil.imageLoader(activity!!).execute(request)
+            Coil.imageLoader(activity!!).enqueue(request)
         } else {
             shareManga()
         }
@@ -931,7 +895,7 @@ class MangaDetailsController :
     }
 
     //region Interface methods
-    override fun coverColor(): Int? = coverColor
+    override fun coverColor(): Int? = presenter.coverColor
     override fun topCoverHeight(): Int = headerHeight
 
     override fun startDownloadNow(position: Int) {
@@ -1185,6 +1149,30 @@ class MangaDetailsController :
         externalBottomSheet =
             ExternalBottomSheet(this)
         externalBottomSheet?.show()
+    }
+
+    override fun generatePalette(input: Bitmap) {
+        val view = view ?: return
+        presenter.scope.launch(Dispatchers.Main) {
+            val p = async(Dispatchers.IO) { Palette.from(input).generate() }
+            if (recycler != null) {
+                val colorBack = view.context.getResourceColor(
+                    android.R.attr.colorBackground
+                )
+
+                // this makes the color more consistent regardless of theme
+                val backDropColor =
+                    ColorUtils.blendARGB(p.await().getVibrantColor(colorBack), colorBack, .35f)
+                presenter.coverColor = backDropColor
+                getHeader()?.setBackDrop(backDropColor)
+                setStatusBarAndToolbar()
+                if (toolbarIsColored) {
+                    val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
+                    (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
+                    activity?.window?.statusBarColor = translucentColor
+                }
+            }
+        }
     }
 
     //endregion
@@ -1454,6 +1442,7 @@ class MangaDetailsController :
 
     fun clearCoverCache() {
         backdrop.setImageDrawable(null)
+        true_backdrop.setBackgroundColor(Color.TRANSPARENT)
         manga_cover_full.setImageDrawable(null)
         manga_cover.setImageDrawable(null)
     }

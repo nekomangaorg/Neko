@@ -12,7 +12,7 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.GetRequest
+import coil.request.ImageRequest
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -136,22 +136,24 @@ class LibraryUpdateNotifier(private val context: Context) {
                         context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
                             setSmallIcon(R.drawable.ic_neko_notification)
                             try {
-                                val request = GetRequest.Builder(context).data(manga)
+                                val request = ImageRequest.Builder(context).data(manga)
                                     .networkCachePolicy(CachePolicy.DISABLED)
                                     .transformations(CircleCropTransformation()).size(width = ICON_SIZE, height = ICON_SIZE)
                                     .build()
                                 Coil.imageLoader(context)
                                     .execute(request).drawable?.let { drawable ->
-                                    setLargeIcon((drawable as BitmapDrawable).bitmap)
-                                }
+                                        setLargeIcon((drawable as BitmapDrawable).bitmap)
+                                    }
                             } catch (e: Exception) {
                             }
                             setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                             setContentTitle(manga.title)
                             color = ContextCompat.getColor(context, R.color.colorAccent)
                             val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
-                                "${chapterNames.take(MAX_CHAPTERS - 1)
-                                    .joinToString(", ")}, " + context.resources.getQuantityString(
+                                "${
+                                    chapterNames.take(MAX_CHAPTERS - 1)
+                                        .joinToString(", ")
+                                }, " + context.resources.getQuantityString(
                                     R.plurals.notification_and_n_more,
                                     (chapterNames.size - (MAX_CHAPTERS - 1)),
                                     (chapterNames.size - (MAX_CHAPTERS - 1))

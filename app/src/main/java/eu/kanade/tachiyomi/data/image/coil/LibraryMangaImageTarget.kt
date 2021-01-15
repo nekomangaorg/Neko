@@ -5,9 +5,9 @@ import android.graphics.drawable.Drawable
 import android.widget.ImageView
 import coil.Coil
 import coil.ImageLoader
-import coil.request.LoadRequest
-import coil.request.LoadRequestBuilder
-import coil.request.RequestDisposable
+import coil.memory.MemoryCache
+import coil.request.Disposable
+import coil.request.ImageRequest
 import coil.target.ImageViewTarget
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -30,7 +30,8 @@ class LibraryMangaImageTarget(
             BitmapFactory.decodeFile(file.path, options)
             if (options.outWidth == -1 || options.outHeight == -1) {
                 file.delete()
-                Coil.imageLoader(view.context).invalidate(manga.key())
+
+                Coil.imageLoader(view.context).memoryCache.remove(MemoryCache.Key(manga.key()))
             }
         }
     }
@@ -40,12 +41,12 @@ class LibraryMangaImageTarget(
 inline fun ImageView.loadLibraryManga(
     manga: Manga,
     imageLoader: ImageLoader = Coil.imageLoader(context),
-    builder: LoadRequestBuilder.() -> Unit = {}
-): RequestDisposable {
-    val request = LoadRequest.Builder(context)
+    builder: ImageRequest.Builder.() -> Unit = {}
+): Disposable {
+    val request = ImageRequest.Builder(context)
         .data(manga)
         .target(LibraryMangaImageTarget(this, manga))
         .apply(builder)
         .build()
-    return imageLoader.execute(request)
+    return imageLoader.enqueue(request)
 }

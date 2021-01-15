@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.data.image.coil
 
-import coil.bitmappool.BitmapPool
+import coil.bitmap.BitmapPool
 import coil.decode.DataSource
 import coil.decode.Options
 import coil.fetch.FetchResult

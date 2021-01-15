@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.graphics.Bitmap
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -132,5 +133,6 @@ class MangaDetailsAdapter(
         fun updateScroll()
         fun setFavButtonPopup(popupView: View)
         fun showExternalSheet()
+        fun generatePalette(input: Bitmap)
     }
 }

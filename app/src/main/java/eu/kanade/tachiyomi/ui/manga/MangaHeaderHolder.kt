@@ -2,12 +2,17 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.graphics.Bitmap
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import coil.api.loadAny
+import androidx.core.graphics.drawable.toBitmap
+import coil.bitmap.BitmapPool
+import coil.loadAny
 import coil.request.CachePolicy
+import coil.size.Size
+import coil.transform.Transformation
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -177,10 +182,6 @@ class MangaHeaderHolder(
             setImageDrawable(context.iconicsDrawableLarge(icon))
             adapter.delegate.setFavButtonPopup(this)
         }
-        true_backdrop.setBackgroundColor(
-            adapter.delegate.coverColor()
-                ?: itemView.context.getResourceColor(android.R.attr.colorBackground)
-        )
 
         val tracked = presenter.isTracked() && !item.isLocked
 
@@ -305,20 +306,37 @@ class MangaHeaderHolder(
 
     fun updateCover(manga: Manga) {
         if (!manga.initialized) return
-        val drawable = adapter.controller.manga_cover_full?.drawable
+
+
+        adapter.controller.manga_cover?.drawable?.let {
+            adapter.delegate.generatePalette(it.toBitmap(10, 10))
+        }
+
         manga_cover.loadAny(
-            manga,
-            builder = {
-                placeholder(drawable)
-                error(drawable)
-                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+            manga
+        ) {
+            if (manga.favorite) {
+                networkCachePolicy(CachePolicy.DISABLED)
+                memoryCachePolicy(CachePolicy.DISABLED)
             }
-        )
+            transformations(
+                object : Transformation {
+                    override fun key() = "paletteTransformer"
+                    override suspend fun transform(
+                        pool: BitmapPool,
+                        input: Bitmap,
+                        size: Size
+                    ): Bitmap {
+                        adapter.delegate.generatePalette(input)
+                        return input
+                    }
+                }
+            )
+        }
+
         backdrop.loadAny(
             manga,
             builder = {
-                placeholder(drawable)
-                error(drawable)
                 if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
             }
         )

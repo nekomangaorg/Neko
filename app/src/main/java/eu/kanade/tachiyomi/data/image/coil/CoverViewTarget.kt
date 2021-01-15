@@ -5,7 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import coil.target.ImageViewTarget
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
@@ -25,9 +25,9 @@ class CoverViewTarget(
             view.scaleType = ImageView.ScaleType.CENTER
             view.setImageDrawable(view.context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_broken_image, color = android.R.attr.textColorSecondary))
         } else {
-            val request = LoadRequest.Builder(view.context).data(errorUrl).memoryCachePolicy(CachePolicy.ENABLED)
+            val request = ImageRequest.Builder(view.context).data(errorUrl).memoryCachePolicy(CachePolicy.ENABLED)
                 .target(CoverViewTarget(view, progress)).build()
-            Coil.imageLoader(view.context).execute(request)
+            Coil.imageLoader(view.context).enqueue(request)
         }
     }
 
