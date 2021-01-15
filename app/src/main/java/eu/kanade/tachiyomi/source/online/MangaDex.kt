@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
-import com.github.salomonbrys.kotson.string
-import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -25,6 +23,7 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiChapterSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -222,7 +221,8 @@ open class MangaDex() : HttpSource() {
                         CacheControl.FORCE_CACHE
                     }
                     val jsonData = client.newCall(GET(tokenRequestUrl, headers, cacheControl)).execute().body!!.string()
-                    tokenedServer = JsonParser.parseString(jsonData).asJsonObject.get("server").string
+                    val networkApiChapter = MdUtil.jsonParser.decodeFromString(ApiChapterSerializer.serializer(), jsonData)
+                    tokenedServer = networkApiChapter.data.server
                     XLog.d("new MD@Home token %s", tokenedServer)
                 }
                 tokenedServer + page.imageUrl
