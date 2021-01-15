@@ -2,6 +2,13 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.5.4">
+        <changelogtext>Fix: Raise Rate limit again to 1 request a second, to help prevent 429s</changelogtext>
+        <changelogtext>Fix: json parse error server on some cases of downloading chapters</changelogtext>
+        <changelogtext>Fix: backdrop color not always showing in manga info</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.5.3">
         <changelogtext>***NOTE: MangaDex's API server is having caching issues. So it will reset followed and chapter statuses in app even after***</changelogtext>
         <changelogtext>***sending the request to update them. The website is updated, and when the cache does fix or reset (in some unknown amount of time) it will be reflected in the app***

@@ -7,7 +7,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.graphics.drawable.toBitmap
 import coil.bitmap.BitmapPool
 import coil.loadAny
 import coil.request.CachePolicy
@@ -306,12 +305,7 @@ class MangaHeaderHolder(
 
     fun updateCover(manga: Manga) {
         if (!manga.initialized) return
-
-
-        adapter.controller.manga_cover?.drawable?.let {
-            adapter.delegate.generatePalette(it.toBitmap(10, 10))
-        }
-
+        
         manga_cover.loadAny(
             manga
         ) {
