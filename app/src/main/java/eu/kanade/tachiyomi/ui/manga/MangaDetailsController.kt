@@ -41,6 +41,8 @@ import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import coil.Coil
+import coil.loadAny
+import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
@@ -1282,6 +1284,12 @@ class MangaDetailsController :
 
         // Load the high-resolution "zoomed-in" image.
         val expandedImageView = manga_cover_full ?: return
+        manga_cover_full.loadAny(
+            presenter.manga,
+            builder = {
+                if (presenter.manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+            }
+        )
         val fullBackdrop = full_backdrop
 
         // Hide the thumbnail and show the zoomed-in view. When the animation

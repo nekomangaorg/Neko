@@ -305,7 +305,7 @@ class MangaHeaderHolder(
 
     fun updateCover(manga: Manga) {
         if (!manga.initialized) return
-        
+
         manga_cover.loadAny(
             manga
         ) {
