@@ -130,7 +130,7 @@ class TrackSearchDialog : DialogController {
         val view = dialogView ?: return
         view.progress.visibility = View.VISIBLE
         view.track_search_list.visibility = View.INVISIBLE
-        presenter.trackSearch(query, service)
+        presenter.trackSearch(query, service, wasPreviouslyTracked)
     }
 
     fun onSearchResults(results: List<TrackSearch>) {

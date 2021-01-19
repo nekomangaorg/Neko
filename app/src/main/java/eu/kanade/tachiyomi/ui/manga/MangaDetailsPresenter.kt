@@ -932,11 +932,11 @@ class MangaDetailsPresenter(
         }
     }
 
-    fun trackSearch(query: String, service: TrackService) {
+    fun trackSearch(query: String, service: TrackService, wasPreviouslyTracked: Boolean) {
         if (!controller.isNotOnline()) {
             scope.launch(Dispatchers.IO) {
                 val results = try {
-                    service.search(query)
+                    service.search(query, manga, wasPreviouslyTracked)
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) { controller.trackSearchError(e) }
                     null

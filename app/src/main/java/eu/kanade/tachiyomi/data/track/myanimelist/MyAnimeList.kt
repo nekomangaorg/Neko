@@ -4,6 +4,7 @@ import android.content.Context
 import android.graphics.Color
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -85,8 +86,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return api.remove(track)
     }
 
-    override suspend fun search(query: String): List<TrackSearch> {
-        return api.search(query)
+    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
+        return api.search(query, manga, wasPreviouslyTracked)
     }
 
     override suspend fun refresh(track: Track): Track {

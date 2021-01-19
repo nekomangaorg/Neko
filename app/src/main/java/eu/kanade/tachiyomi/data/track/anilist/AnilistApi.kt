@@ -10,6 +10,7 @@ import com.github.salomonbrys.kotson.nullString
 import com.github.salomonbrys.kotson.obj
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.jsonType
@@ -75,15 +76,17 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         }
     }
 
-    suspend fun search(search: String): List<TrackSearch> {
+    suspend fun search(search: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         return withContext(Dispatchers.IO) {
+
             val variables = jsonObject(
-                "query" to search
+                "query" to if(manga.anilist_id != null && !wasPreviouslyTracked) manga.anilist_id else search
             )
             val payload = jsonObject(
-                "query" to searchQuery(),
+                "query" to if(manga.anilist_id != null && !wasPreviouslyTracked) findQuery() else searchQuery(),
                 "variables" to variables
             )
+
             val body = payload.toString().toRequestBody(MediaType.jsonType())
             val request = Request.Builder().url(apiUrl).post(body).build()
             val netResponse = authClient.newCall(request).execute()
@@ -272,6 +275,32 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             |query Search(${'$'}query: String) {
                 |Page (perPage: 50) {
                     |media(search: ${'$'}query, type: MANGA, format_not_in: [NOVEL]) {
+                        |id
+                        |title {
+                            |romaji
+                        |}
+                        |coverImage {
+                            |large
+                        |}
+                        |type
+                        |status
+                        |chapters
+                        |description
+                        |startDate {
+                            |year
+                            |month
+                            |day
+                        |}
+                    |}
+                |}
+            |}
+            |""".trimMargin()
+
+        fun findQuery() =
+            """
+            |query Media(${'$'}query: Int) {
+                |Page (perPage: 50) {
+                    |media(id: ${'$'}query, type: MANGA, format_not_in: [NOVEL]) {
                         |id
                         |title {
                             |romaji
