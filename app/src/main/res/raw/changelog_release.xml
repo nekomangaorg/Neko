@@ -3,7 +3,7 @@
     <changelogversion
         changeDate=""
         versionName="v2.1.5.6">
-        <changelogtext>New: Better tracking by id for anilist/mal/kitsu</changelogtext>
+        <changelogtext>New: Better tracking for anilist/mal/kitsu (if the id exists on dex it will map it when adding)</changelogtext>
         <changelogtext>New: Option to dump crash logs</changelogtext>
         <changelogtext>Fix: Use the old api server with option to new use one. Will fix cache issue temporarily</changelogtext>
         <changelogtext>Fix: Use super high for manga plus chapters</changelogtext>
