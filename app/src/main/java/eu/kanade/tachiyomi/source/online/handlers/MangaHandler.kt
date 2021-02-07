@@ -15,7 +15,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 
-class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>, val useNewApiServer: Boolean, val forceLatestCovers: Boolean = false) {
+class MangaHandler(val client: OkHttpClient, val headers: Headers, private val langs: List<String>, private val useNewApiServer: Boolean, private val forceLatestCovers: Boolean = false) {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {

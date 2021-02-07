@@ -122,17 +122,17 @@ open class MangaDex() : HttpSource() {
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
             manga
         )
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
+        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
             manga
         )
         return pair
