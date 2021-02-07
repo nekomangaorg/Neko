@@ -3,6 +3,7 @@
     <changelogversion
         changeDate=""
         versionName="v2.1.5.6">
+        <changelogtext>New: Better tracking by id for anilist/mal/kitsu</changelogtext>
         <changelogtext>Fix: Use the old api server with option to new use one. Will fix cache issue temporarily</changelogtext>
         <changelogtext>Fix: Use super high for manga plus chapters</changelogtext>
         <changelogtext>Fix: Minor UI issue when marking chapters read</changelogtext>
