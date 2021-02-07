@@ -108,7 +108,7 @@ class LibraryUpdateService(
     // Boolean to determine if DownloadManager has downloads
     private var hasDownloads = false
 
-    private var requestSemaphore = Semaphore(1)
+    private var requestSemaphore = Semaphore(5)
 
     // For updates delete removed chapters if not preference is set as well
     private val deleteRemoved by lazy {
