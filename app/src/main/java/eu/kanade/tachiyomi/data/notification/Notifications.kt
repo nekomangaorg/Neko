@@ -66,6 +66,12 @@ object Notifications {
     const val ID_BACKUP_RESTORE_ERROR = -505
 
     /**
+     * Notification channel used for crash log file sharing.
+     */
+    const val CHANNEL_CRASH_LOGS = "crash_logs_channel"
+    const val ID_CRASH_LOGS = -601
+
+    /**
      * Creates the notification channels introduced in Android Oreo.
      *
      * @param context The application context.
@@ -145,7 +151,12 @@ object Notifications {
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)
-            }
+            },
+            NotificationChannel(
+                CHANNEL_CRASH_LOGS,
+                context.getString(R.string.channel_crash_logs),
+                NotificationManager.IMPORTANCE_HIGH
+            )
         ).forEach(context.notificationManager::createNotificationChannel)
     }
 }

@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.log.XLogLevel
+import eu.kanade.tachiyomi.util.system.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.Dispatchers
@@ -63,6 +64,16 @@ class SettingsAdvancedController : SettingsController() {
             defaultValue = true
             onClick {
                 FirebaseCrashlytics.getInstance().setCrashlyticsCollectionEnabled(isEnabled)
+            }
+        }
+
+        preference {
+            key = "dump_crash_logs"
+            titleRes = R.string.pref_dump_crash_logs
+            summaryRes = R.string.pref_dump_crash_logs_summary
+
+            onClick {
+                CrashLogUtil(context).dumpLogs()
             }
         }
 
