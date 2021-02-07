@@ -2,16 +2,15 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.graphics.Bitmap
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import coil.bitmap.BitmapPool
+import androidx.core.graphics.drawable.toBitmap
+import coil.Coil
 import coil.loadAny
 import coil.request.CachePolicy
-import coil.size.Size
-import coil.transform.Transformation
+import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -307,26 +306,23 @@ class MangaHeaderHolder(
         if (!manga.initialized) return
 
         manga_cover.loadAny(
-            manga
-        ) {
-            if (manga.favorite) {
-                networkCachePolicy(CachePolicy.DISABLED)
-                memoryCachePolicy(CachePolicy.DISABLED)
+            manga,
+            builder = {
+                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
             }
-            transformations(
-                object : Transformation {
-                    override fun key() = "paletteTransformer"
-                    override suspend fun transform(
-                        pool: BitmapPool,
-                        input: Bitmap,
-                        size: Size
-                    ): Bitmap {
-                        adapter.delegate.generatePalette(input)
-                        return input
-                    }
-                }
-            )
-        }
+        )
+
+        val request = ImageRequest.Builder(view.context)
+            .data(manga)
+            .allowHardware(false) // Disable hardware bitmaps.
+            .target { drawable ->
+                // Generate the Palette on a background thread.
+                adapter.delegate.generatePalette(drawable.toBitmap())
+            }
+            .build()
+
+        Coil.imageLoader(view.context).enqueue(request)
+
 
         backdrop.loadAny(
             manga,

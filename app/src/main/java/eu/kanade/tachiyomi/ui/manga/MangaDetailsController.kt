@@ -1094,16 +1094,22 @@ class MangaDetailsController :
         ) {
             setAction(R.string.undo) {
                 presenter.setFavorite(true)
+                presenter.confirmDelete = false
             }
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     super.onDismissed(transientBottomBar, event)
-                    if (!presenter.manga.favorite) presenter.confirmDeletion()
+                    if (!presenter.manga.favorite) presenter.confirmDelete = true
                 }
             })
         }
         val favButton = getHeader()?.favorite_button
         (activity as? MainActivity)?.setUndoSnackBar(snack, favButton)
+    }
+
+    override fun onDestroy() {
+        if (!presenter.manga.favorite) presenter.clearMangaFromStorage()
+        super.onDestroy()
     }
 
     override fun mangaPresenter(): MangaDetailsPresenter = presenter

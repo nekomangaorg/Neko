@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -53,7 +52,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -75,7 +73,7 @@ class MangaDetailsPresenter(
 
     var coverColor: Int? = null
 
-    private val customMangaManager: CustomMangaManager by injectLazy()
+    var confirmDelete = false
 
     val source = sourceManager.getMangadex()
 
@@ -725,14 +723,20 @@ class MangaDetailsPresenter(
     }
 
     fun confirmDeletion() {
-        GlobalScope.launch(Dispatchers.IO) {
-            coverCache.deleteFromCache(manga)
-        }
-        GlobalScope.launch(Dispatchers.IO) {
-            downloadManager.deleteManga(manga, source)
-        }
+        confirmDelete = true
         db.resetMangaInfo(manga).executeAsBlocking()
         asyncUpdateMangaAndChapters(true)
+    }
+
+    fun clearMangaFromStorage() {
+        if (confirmDelete) {
+            GlobalScope.launch(Dispatchers.IO) {
+                coverCache.deleteFromCache(manga)
+            }
+            GlobalScope.launch(Dispatchers.IO) {
+                downloadManager.deleteManga(manga, source)
+            }
+        }
     }
 
     fun setFavorite(favorite: Boolean) {
