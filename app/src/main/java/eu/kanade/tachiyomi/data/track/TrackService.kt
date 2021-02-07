@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track
 
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
@@ -45,7 +46,7 @@ abstract class TrackService(val id: Int) {
 
     abstract suspend fun bind(track: Track): Track
 
-    abstract suspend fun search(query: String): List<TrackSearch>
+    abstract suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch>
 
     abstract suspend fun refresh(track: Track): Track
 

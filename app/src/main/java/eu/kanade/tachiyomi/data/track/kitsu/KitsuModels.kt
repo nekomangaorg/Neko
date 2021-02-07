@@ -15,7 +15,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-class KitsuSearchManga(obj: JsonObject) {
+class KitsuSearchManga(obj: JsonObject, api: Boolean = false) {
     val id by obj.byInt
     private val canonicalTitle by obj.byString
     private val chapterCount = obj.get("chapterCount").nullInt
@@ -23,8 +23,12 @@ class KitsuSearchManga(obj: JsonObject) {
     val original = obj.get("posterImage").nullObj?.get("original")?.asString
     private val synopsis by obj.byString
     private var startDate = obj.get("startDate").nullString?.let {
-        val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-        outputDf.format(Date(it.toLong() * 1000))
+        if(!api) {
+            val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            outputDf.format(Date(it.toLong() * 1000))
+        } else {
+            it
+        }
     }
     private val endDate = obj.get("endDate").nullString
 

@@ -2,14 +2,11 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 
 import androidx.core.net.toUri
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.consumeBody
-import eu.kanade.tachiyomi.network.consumeXmlBody
+import eu.kanade.tachiyomi.network.*
 import eu.kanade.tachiyomi.util.selectInt
 import eu.kanade.tachiyomi.util.selectText
 import kotlinx.coroutines.Dispatchers
@@ -24,35 +21,58 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
+import java.text.DateFormat
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
 
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
-    suspend fun search(query: String): List<TrackSearch> {
+    suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         return withContext(Dispatchers.IO) {
             if (query.startsWith(PREFIX_MY)) {
                 queryUsersList(query)
             } else {
-                val realQuery = query.take(100)
-                val response = client.newCall(GET(searchUrl(realQuery))).await()
-                val matches = Jsoup.parse(response.consumeBody())
-                    .select("div.js-categories-seasonal.js-block-list.list").select("table")
-                    .select("tbody").select("tr").drop(1)
+                if(manga.my_anime_list_id !== null && !wasPreviouslyTracked) {
+                    val response = client.newCall(GET(mangaUrl(manga.my_anime_list_id!!.toInt()))).await()
+                    val soup =  Jsoup.parse(response.consumeBody())
+                    val DFormat: DateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+                    val malDate = DFormat.parse(soup.select("span:contains(published:)").first().parent().ownText().split('?')[0].split("to")[0].trim())
+                    val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                    val parsedDate = outputDf.format(malDate)
+                    listOf<TrackSearch>(TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                        title = soup.select("span.h1-title > span[itemprop='name']").first().ownText().trim()
+                        media_id = manga.my_anime_list_id!!.toInt()
+                        total_chapters = soup.select("#totalChaps").attr("data-num").toInt()
+                        summary = soup.select("span[itemprop='description']").first().ownText().trim()
+                        cover_url = soup.select("img[itemprop='image']").first().attr("data-src")
+                        tracking_url = mangaUrl(manga.my_anime_list_id!!.toInt())
+                        publishing_status = soup.select("span:contains(status:)").first().parent().ownText().trim()
+                        publishing_type = soup.select("span:contains(type:)").first().parent().select("a").first().ownText().trim()
+                        start_date = parsedDate
+                    })
+                } else {
+                    val realQuery = query.take(100)
+                    val response = client.newCall(GET(searchUrl(realQuery))).await()
+                    val matches = Jsoup.parse(response.consumeBody())
+                            .select("div.js-categories-seasonal.js-block-list.list").select("table")
+                            .select("tbody").select("tr").drop(1)
 
-                matches.filter { row -> row.select(TD)[2].text() != "Novel" }.map { row ->
-                    TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                        title = row.searchTitle()
-                        media_id = row.searchMediaId()
-                        total_chapters = row.searchTotalChapters()
-                        summary = row.searchSummary()
-                        cover_url = row.searchCoverUrl()
-                        tracking_url = mangaUrl(media_id)
-                        publishing_status = row.searchPublishingStatus()
-                        publishing_type = row.searchPublishingType()
-                        start_date = row.searchStartDate()
-                    }
-                }.toList()
+                    matches.filter { row -> row.select(TD)[2].text() != "Novel" }.map { row ->
+                        TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                            title = row.searchTitle()
+                            media_id = row.searchMediaId()
+                            total_chapters = row.searchTotalChapters()
+                            summary = row.searchSummary()
+                            cover_url = row.searchCoverUrl()
+                            tracking_url = mangaUrl(media_id)
+                            publishing_status = row.searchPublishingStatus()
+                            publishing_type = row.searchPublishingType()
+                            start_date = row.searchStartDate()
+                        }
+                    }.toList()
+                }
             }
         }
     }
