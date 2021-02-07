@@ -15,7 +15,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 
-class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>, val forceLatestCovers: Boolean = false) {
+class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: List<String>, val useNewApiServer: Boolean, val forceLatestCovers: Boolean = false) {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
@@ -51,7 +51,7 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
 
     suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
         return withContext(Dispatchers.IO) {
-            val request = GET(MdUtil.apiUrl + MdUtil.newApiChapter + urlChapterId + MdUtil.apiChapterSuffix, headers, CacheControl.FORCE_NETWORK)
+            val request = GET(MdUtil.apiUrl(useNewApiServer) + MdUtil.newApiChapter + urlChapterId + MdUtil.apiChapterSuffix, headers, CacheControl.FORCE_NETWORK)
             val response = client.newCall(request).execute()
             ApiMangaParser(langs).chapterParseForMangaId(response)
         }
@@ -103,11 +103,11 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val langs: Li
     }
 
     private fun apiRequest(manga: SManga): Request {
-        return GET(MdUtil.apiUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.includeChapters, headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.apiUrl(useNewApiServer) + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.includeChapters, headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun coverRequest(manga: SManga): Request {
-        return GET(MdUtil.apiUrl + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.apiCovers, headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.apiUrl(useNewApiServer) + MdUtil.apiManga + MdUtil.getMangaId(manga.url) + MdUtil.apiCovers, headers, CacheControl.FORCE_NETWORK)
     }
 
     companion object {

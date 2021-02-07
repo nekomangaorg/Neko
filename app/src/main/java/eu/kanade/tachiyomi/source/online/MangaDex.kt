@@ -98,7 +98,7 @@ open class MangaDex() : HttpSource() {
     }
 
     fun fetchRandomMangaId(): Observable<String> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchRandomMangaId()
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).fetchRandomMangaId()
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
@@ -142,16 +142,17 @@ open class MangaDex() : HttpSource() {
         return MangaHandler(
             clientBuilder(),
             headers,
-            getLangsToShow()
+            getLangsToShow(),
+            useNewApiServer()
         ).fetchChapterListObservable(manga)
     }
 
     suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).getMangaIdFromChapterId(urlChapterId)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).getMangaIdFromChapterId(urlChapterId)
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchChapterList(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).fetchChapterList(manga)
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
@@ -161,7 +162,7 @@ open class MangaDex() : HttpSource() {
             true -> "1"
             false -> "0"
         }
-        return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
+        return PageHandler(clientBuilder(), headers, imageServer, dataSaver, useNewApiServer()).fetchPageList(chapter)
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
@@ -315,6 +316,8 @@ open class MangaDex() : HttpSource() {
     }
 
     fun getLangsToShow() = preferences.langsToShow().get().split(",")
+
+    fun useNewApiServer() = preferences.useNewApiServer()
 
     override fun getFilterList(): FilterList {
         return FilterHandler(preferences).getFilterList()

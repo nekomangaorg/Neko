@@ -102,7 +102,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      *
      */
     private fun followsListRequest(): Request {
-        return GET("${MdUtil.apiUrl}${MdUtil.followsAllApi}", headers, CacheControl.FORCE_NETWORK)
+        return GET("${MdUtil.apiUrl(preferences.useNewApiServer())}${MdUtil.followsAllApi}", headers, CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -201,7 +201,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     suspend fun fetchTrackingInfo(url: String): Track {
         return withContext(Dispatchers.IO) {
             val request = GET(
-                "${MdUtil.apiUrl}${MdUtil.followsMangaApi}" + getMangaId(url),
+                "${MdUtil.apiUrl(preferences.useNewApiServer())}${MdUtil.followsMangaApi}" + getMangaId(url),
                 headers,
                 CacheControl.FORCE_NETWORK
             )

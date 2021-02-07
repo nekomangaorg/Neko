@@ -12,7 +12,15 @@ class MdUtil {
         const val cdnUrl = "https://mangadex.org" // "https://s0.mangadex.org"
         const val baseUrl = "https://mangadex.org"
         const val randMangaPage = "/manga/"
-        const val apiUrl = "https://api.mangadex.org"
+        fun apiUrl(useNew: Boolean): String {
+            return when (useNew) {
+                false -> oldApiUrl
+                true -> newApiUrl
+            }
+        }
+
+        private const val oldApiUrl = "https://mangadex.org/api"
+        private const val newApiUrl = "https://api.mangadex.org"
         const val apiManga = "/v2/manga/"
         const val includeChapters = "?include=chapters"
         const val oldApiChapter = "/api/chapter/"
