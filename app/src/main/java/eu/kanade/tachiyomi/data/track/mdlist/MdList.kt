@@ -112,7 +112,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         return track
     }
 
-    override suspend fun search(query: String): List<TrackSearch> = throw Exception("not used")
+    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> = throw Exception("not used")
 
     override suspend fun login(username: String, password: String): Boolean = throw Exception("not used")
 

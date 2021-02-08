@@ -3,15 +3,15 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
-import coil.api.clear
-import coil.request.LoadRequest
+import coil.clear
+import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.potentialAltThumbnail
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlinx.android.synthetic.main.manga_list_item.*
 
 /**
@@ -48,9 +48,9 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
             cover_thumbnail.clear()
         } else {
             val id = manga.id ?: return
-            val request = LoadRequest.Builder(view.context).data(manga)
+            val request = ImageRequest.Builder(view.context).data(manga)
                 .target(CoverViewTarget(cover_thumbnail, errorUrl = manga.potentialAltThumbnail())).build()
-            Coil.imageLoader(view.context).execute(request)
+            Coil.imageLoader(view.context).enqueue(request)
         }
     }
 }

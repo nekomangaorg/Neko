@@ -333,4 +333,6 @@ class PreferencesHelper(val context: Context) {
     fun showR18Filter(): Boolean = prefs.getBoolean(Keys.showR18Filter, true)
 
     fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
+
+    fun useNewApiServer(): Boolean = prefs.getBoolean(Keys.useNewApiServer, false)
 }

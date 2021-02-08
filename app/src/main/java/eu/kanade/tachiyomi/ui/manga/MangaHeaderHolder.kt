@@ -6,8 +6,11 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import coil.api.loadAny
+import androidx.core.graphics.drawable.toBitmap
+import coil.Coil
+import coil.loadAny
 import coil.request.CachePolicy
+import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -177,10 +180,6 @@ class MangaHeaderHolder(
             setImageDrawable(context.iconicsDrawableLarge(icon))
             adapter.delegate.setFavButtonPopup(this)
         }
-        true_backdrop.setBackgroundColor(
-            adapter.delegate.coverColor()
-                ?: itemView.context.getResourceColor(android.R.attr.colorBackground)
-        )
 
         val tracked = presenter.isTracked() && !item.isLocked
 
@@ -305,20 +304,29 @@ class MangaHeaderHolder(
 
     fun updateCover(manga: Manga) {
         if (!manga.initialized) return
-        val drawable = adapter.controller.manga_cover_full?.drawable
+
         manga_cover.loadAny(
             manga,
             builder = {
-                placeholder(drawable)
-                error(drawable)
                 if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
             }
         )
+
+        val request = ImageRequest.Builder(view.context)
+            .data(manga)
+            .allowHardware(false) // Disable hardware bitmaps.
+            .target { drawable ->
+                // Generate the Palette on a background thread.
+                adapter.delegate.generatePalette(drawable.toBitmap())
+            }
+            .build()
+
+        Coil.imageLoader(view.context).enqueue(request)
+
+
         backdrop.loadAny(
             manga,
             builder = {
-                placeholder(drawable)
-                error(drawable)
                 if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
             }
         )

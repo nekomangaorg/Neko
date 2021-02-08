@@ -4,7 +4,7 @@ import android.app.Activity
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
-import coil.api.clear
+import coil.clear
 import coil.size.Precision
 import coil.size.Scale
 import eu.kanade.tachiyomi.data.database.models.Manga

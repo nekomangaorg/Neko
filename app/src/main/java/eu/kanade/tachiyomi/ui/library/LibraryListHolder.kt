@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
 import android.view.ViewGroup
-import coil.api.clear
+import coil.clear
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.util.system.dpToPx

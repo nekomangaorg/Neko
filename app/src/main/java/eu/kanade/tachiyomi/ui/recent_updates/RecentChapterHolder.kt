@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.recent_updates
 import android.app.Activity
 import android.view.View
 import androidx.core.content.ContextCompat
-import coil.api.clear
+import coil.clear
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga

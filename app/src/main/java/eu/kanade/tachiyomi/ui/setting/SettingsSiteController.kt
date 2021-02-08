@@ -85,6 +85,13 @@ class SettingsSiteController :
         }
 
         switchPreference {
+            key = PreferenceKeys.useNewApiServer
+            titleRes = R.string.use_new_api_server
+            summaryRes = R.string.use_new_api_server_summary
+            defaultValue = false
+        }
+
+        switchPreference {
             key = PreferenceKeys.dataSaver
             titleRes = R.string.data_saver
             defaultValue = false

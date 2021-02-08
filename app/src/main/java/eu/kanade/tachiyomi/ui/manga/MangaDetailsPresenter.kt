@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -53,7 +52,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
@@ -71,9 +69,11 @@ class MangaDetailsPresenter(
     private val chapterFilter: ChapterFilter = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+    var scope = CoroutineScope(Job() + Dispatchers.Default)
 
-    private val customMangaManager: CustomMangaManager by injectLazy()
+    var coverColor: Int? = null
+
+    var confirmDelete = false
 
     val source = sourceManager.getMangadex()
 
@@ -449,9 +449,6 @@ class MangaDetailsPresenter(
                         controller.clearCoverCache()
                     }
                 }
-                withContext(Dispatchers.Main) {
-                    controller.setPaletteColor()
-                }
                 db.insertManga(manga).executeOnIO()
             }
             fetchExternalLinks()
@@ -726,14 +723,20 @@ class MangaDetailsPresenter(
     }
 
     fun confirmDeletion() {
-        GlobalScope.launch(Dispatchers.IO) {
-            coverCache.deleteFromCache(manga)
-        }
-        GlobalScope.launch(Dispatchers.IO) {
-            downloadManager.deleteManga(manga, source)
-        }
+        confirmDelete = true
         db.resetMangaInfo(manga).executeAsBlocking()
         asyncUpdateMangaAndChapters(true)
+    }
+
+    fun clearMangaFromStorage() {
+        if (confirmDelete) {
+            GlobalScope.launch(Dispatchers.IO) {
+                coverCache.deleteFromCache(manga)
+            }
+            GlobalScope.launch(Dispatchers.IO) {
+                downloadManager.deleteManga(manga, source)
+            }
+        }
     }
 
     fun setFavorite(favorite: Boolean) {
@@ -933,11 +936,11 @@ class MangaDetailsPresenter(
         }
     }
 
-    fun trackSearch(query: String, service: TrackService) {
+    fun trackSearch(query: String, service: TrackService, wasPreviouslyTracked: Boolean) {
         if (!controller.isNotOnline()) {
             scope.launch(Dispatchers.IO) {
                 val results = try {
-                    service.search(query)
+                    service.search(query, manga, wasPreviouslyTracked)
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) { controller.trackSearchError(e) }
                     null

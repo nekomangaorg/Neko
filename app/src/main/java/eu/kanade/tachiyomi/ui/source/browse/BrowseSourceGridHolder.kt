@@ -4,15 +4,15 @@ import android.app.Activity
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
-import coil.api.clear
-import coil.request.LoadRequest
+import coil.clear
+import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.potentialAltThumbnail
+import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import kotlinx.android.synthetic.main.manga_grid_item.*
 import kotlinx.android.synthetic.main.unread_download_badge.*
 
@@ -66,9 +66,9 @@ class BrowseSourceGridHolder(
             cover_thumbnail.clear()
         } else {
             val id = manga.id ?: return
-            val request = LoadRequest.Builder(view.context).data(manga)
+            val request = ImageRequest.Builder(view.context).data(manga)
                 .target(CoverViewTarget(cover_thumbnail, progress, manga.potentialAltThumbnail())).build()
-            Coil.imageLoader(view.context).execute(request)
+            Coil.imageLoader(view.context).enqueue(request)
         }
     }
 }

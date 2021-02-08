@@ -2,6 +2,28 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.1.5.6.1">
+        <changelogtext>New: Better tracking for anilist/mal/kitsu (if the id exists on dex it will map it when adding)</changelogtext>
+        <changelogtext>New: Option to dump crash logs</changelogtext>
+        <changelogtext>Fix: Use the old api server with option to new use one. Will fix cache issue temporarily</changelogtext>
+        <changelogtext>Fix: Use super high for manga plus chapters</changelogtext>
+        <changelogtext>Fix: Minor UI issue when marking chapters read</changelogtext>
+        <changelogtext>Fix: Manga descriptions</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v2.1.5.5">
+        <changelogtext>Fix: Enlarging cover in manga info not working</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
+        versionName="v2.1.5.4">
+        <changelogtext>Fix: Raise Rate limit again to 1 request a second, to help prevent 429s</changelogtext>
+        <changelogtext>Fix: json parse error server on some cases of downloading chapters</changelogtext>
+        <changelogtext>Fix: backdrop color not always showing in manga info</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.1.5.3">
         <changelogtext>***NOTE: MangaDex's API server is having caching issues. So it will reset followed and chapter statuses in app even after***</changelogtext>
         <changelogtext>***sending the request to update them. The website is updated, and when the cache does fix or reset (in some unknown amount of time) it will be reflected in the app***

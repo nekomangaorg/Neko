@@ -9,7 +9,7 @@ import android.os.PowerManager
 import android.widget.Toast
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -108,7 +108,7 @@ class LibraryUpdateService(
     // Boolean to determine if DownloadManager has downloads
     private var hasDownloads = false
 
-    private var requestSemaphore = Semaphore(1)
+    private var requestSemaphore = Semaphore(5)
 
     // For updates delete removed chapters if not preference is set as well
     private val deleteRemoved by lazy {
@@ -397,9 +397,9 @@ class LibraryUpdateService(
                 coverCache.deleteFromCache(thumbnailUrl)
                 // load new covers in background
                 val request =
-                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                    ImageRequest.Builder(this@LibraryUpdateService).data(manga)
                         .memoryCachePolicy(CachePolicy.DISABLED).build()
-                Coil.imageLoader(this@LibraryUpdateService).execute(request)
+                Coil.imageLoader(this@LibraryUpdateService).enqueue(request)
             }
             db.insertManga(manga).executeAsBlocking()
             // add mdlist tracker if manga in library has it missing

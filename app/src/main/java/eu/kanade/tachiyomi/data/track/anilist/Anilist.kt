@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.data.database.models.Manga
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {
@@ -156,7 +157,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return api.remove(track)
     }
 
-    override suspend fun search(query: String) = api.search(query)
+    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked : Boolean) = api.search(query, manga, wasPreviouslyTracked)
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track, getUsername().toInt())

@@ -4,8 +4,8 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
-import coil.api.clear
-import coil.api.load
+import coil.clear
+import coil.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.util.view.gone

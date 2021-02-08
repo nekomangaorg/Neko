@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
-import com.github.salomonbrys.kotson.string
-import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -25,6 +23,7 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiChapterSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -99,7 +98,7 @@ open class MangaDex() : HttpSource() {
     }
 
     fun fetchRandomMangaId(): Observable<String> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchRandomMangaId()
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).fetchRandomMangaId()
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
@@ -123,17 +122,17 @@ open class MangaDex() : HttpSource() {
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
             manga
         )
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
+        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
             manga
         )
         return pair
@@ -143,16 +142,17 @@ open class MangaDex() : HttpSource() {
         return MangaHandler(
             clientBuilder(),
             headers,
-            getLangsToShow()
+            getLangsToShow(),
+            useNewApiServer()
         ).fetchChapterListObservable(manga)
     }
 
     suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).getMangaIdFromChapterId(urlChapterId)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).getMangaIdFromChapterId(urlChapterId)
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchChapterList(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).fetchChapterList(manga)
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
@@ -162,7 +162,7 @@ open class MangaDex() : HttpSource() {
             true -> "1"
             false -> "0"
         }
-        return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
+        return PageHandler(clientBuilder(), headers, imageServer, dataSaver, useNewApiServer()).fetchPageList(chapter)
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
@@ -222,7 +222,8 @@ open class MangaDex() : HttpSource() {
                         CacheControl.FORCE_CACHE
                     }
                     val jsonData = client.newCall(GET(tokenRequestUrl, headers, cacheControl)).execute().body!!.string()
-                    tokenedServer = JsonParser.parseString(jsonData).asJsonObject.get("server").string
+                    val networkApiChapter = MdUtil.jsonParser.decodeFromString(ApiChapterSerializer.serializer(), jsonData)
+                    tokenedServer = networkApiChapter.data.server
                     XLog.d("new MD@Home token %s", tokenedServer)
                 }
                 tokenedServer + page.imageUrl
@@ -315,6 +316,8 @@ open class MangaDex() : HttpSource() {
     }
 
     fun getLangsToShow() = preferences.langsToShow().get().split(",")
+
+    fun useNewApiServer() = preferences.useNewApiServer()
 
     override fun getFilterList(): FilterList {
         return FilterHandler(preferences).getFilterList()
