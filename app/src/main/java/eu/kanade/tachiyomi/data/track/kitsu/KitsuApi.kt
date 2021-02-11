@@ -101,12 +101,12 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
     suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         if(manga.kitsu_id !== null && !wasPreviouslyTracked) {
-            val response = client.newCall(GET(apiMangaUrl(manga.kitsu_id!!.toInt()))).await()
+            val response = client.newCall(GET(apiMangaUrl(manga.kitsu_id!!))).await()
             val jsonData = response.body!!.string()
             var json = JsonParser.parseString(jsonData).asJsonObject
-            json["data"]["attributes"]["id"] = manga.kitsu_id!!
+            json["data"][0]["attributes"]["id"] = json["data"][0]["id"]
 
-            return listOf<TrackSearch>(KitsuSearchManga(json["data"]["attributes"].obj, true).toTrack())
+            return listOf<TrackSearch>(KitsuSearchManga(json["data"][0]["attributes"].obj, true).toTrack())
         } else {
             val key = searchRest.getKey()["media"].asJsonObject["key"].string
 
@@ -246,8 +246,8 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             return baseMangaUrl + remoteId
         }
 
-        fun apiMangaUrl(remoteId: Int): String {
-            return baseUrl + "/manga/" + remoteId
+        fun apiMangaUrl(remoteId: String): String {
+            return baseUrl + "/manga?filter[slug]=" + remoteId
         }
 
         fun refreshTokenRequest(token: String) = POST(
