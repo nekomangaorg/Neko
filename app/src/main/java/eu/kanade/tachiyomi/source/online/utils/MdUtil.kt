@@ -50,10 +50,16 @@ class MdUtil {
         val englishDescriptionTags = listOf(
             "[b][u]English:",
             "[b][u]English",
+            "English:",
+            "English :",
             "[English]:",
+            "English Translaton:",
             "[B][ENG][/B]"
         )
 
+        val bbCodeToRemove = listOf(
+            "list", "*", "hr", "u", "b", "i", "s", "center", "spoiler="
+        )
         val descriptionLanguages = listOf(
             "=FRANCAIS=",
             "[b] Spanish: [/ b]",
@@ -77,19 +83,22 @@ class MdUtil {
             "\r\n\r\nItalian\r\n",
             "Arabic /",
             "Descriptions in Other Languages",
-            "Espa&ntilde;ol /",
-            "Espa&ntilde;ol:",
+            "Espanol",
+            "[Espa&ntilde;",
+            "Espa&ntilde;",
             "Farsi/",
             "Fran&ccedil;ais",
             "French - ",
             "Francois",
             "French:",
+            "French/",
             "French /",
             "German/",
             "German /",
             "Hindi /",
             "Indonesia:",
             "Indonesian:",
+            "Indonesian :",
             "Indo:",
             "[u]Indonesian",
             "Italian / ",
@@ -97,9 +106,16 @@ class MdUtil {
             "Italian/",
             "Italiano",
             "Italian:",
+            "Italian summary:",
             "Japanese /",
+            "Original Japanese",
+            "Official Japanese Translation",
+            "Official Chinese Translation",
+            "Official French Translation",
+            "Official Indonesian Translation",
             "Links:",
             "Pasta-Pizza-Mandolino/Italiano",
+            "Persian/فارسی",
             "Persian /فارسی",
             "Polish /",
             "Polish Summary /",
@@ -107,6 +123,7 @@ class MdUtil {
             "Polski",
             "Portugu&ecirc;s",
             "Portuguese (BR)",
+            "Pt/Br:",
             "Pt-Br:",
             "Portuguese /",
             "[right]",
@@ -114,6 +131,8 @@ class MdUtil {
             "R&eacute;sume Fran&ccedil;ais",
             "R&Eacute;SUM&Eacute; FRANCAIS :",
             "RUS:",
+            "Ru/Pyc",
+            "\\r\\nRUS\\r\\n",
             "Russia/",
             "Russian /",
             "Spanish:",
@@ -158,23 +177,22 @@ class MdUtil {
             url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
 
         fun cleanString(string: String): String {
+            var cleanedString = string
+
+            bbCodeToRemove.forEach {
+                cleanedString = cleanedString.replace("[$it]", "", true)
+                    .replace("[/$it]", "", true)
+            }
+
             val bbRegex =
                 """\[(\w+)[^]]*](.*?)\[/\1]""".toRegex()
-            var intermediate = string
-                .replace("[list]", "", true)
-                .replace("[/list]", "", true)
-                .replace("[*]", "")
-                .replace("[hr]", "", true)
-                .replace("[u]", "", true)
-                .replace("[/u]", "", true)
-                .replace("[b]", "", true)
-                .replace("[/b]", "", true)
 
             // Recursively remove nested bbcode
-            while (bbRegex.containsMatchIn(intermediate)) {
-                intermediate = intermediate.replace(bbRegex, "$2")
+            while (bbRegex.containsMatchIn(cleanedString)) {
+                cleanedString = cleanedString.replace(bbRegex, "$2")
             }
-            return Parser.unescapeEntities(intermediate, false)
+
+            return Parser.unescapeEntities(cleanedString, false)
         }
 
         fun cleanDescription(string: String): String {

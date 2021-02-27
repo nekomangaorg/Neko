@@ -589,9 +589,9 @@ class MangaDetailsPresenter(
             }
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
 
-
-            if (read && deleteNow && preferences.removeAfterMarkedAsRead()) {
-                deleteChapters(selectedChapters.filter { it.bookmark.not() }.toList(), false)
+            val numberOfNonBookmarkedChapters = selectedChapters.filter { it.bookmark.not() }.toList()
+            if (read && deleteNow && preferences.removeAfterMarkedAsRead() && numberOfNonBookmarkedChapters.size > 0) {
+                deleteChapters(numberOfNonBookmarkedChapters, false)
             }
             getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }

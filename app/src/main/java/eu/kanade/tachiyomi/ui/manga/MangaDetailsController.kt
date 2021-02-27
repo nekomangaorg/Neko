@@ -654,7 +654,7 @@ class MangaDetailsController :
             addCallback(object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                 override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                     super.onDismissed(transientBottomBar, event)
-                    if (!undoing && !read && presenter.preferences.removeAfterMarkedAsRead()) {
+                    if (!undoing && !read && presenter.preferences.removeAfterMarkedAsRead() && item.chapter.bookmark.not()) {
                         presenter.deleteChapters(listOf(item))
                     }
                 }
