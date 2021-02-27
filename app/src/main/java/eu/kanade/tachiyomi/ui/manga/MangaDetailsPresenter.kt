@@ -579,6 +579,7 @@ class MangaDetailsPresenter(
         pagesLeft: Int? = null
     ) {
         scope.launch(Dispatchers.IO) {
+
             selectedChapters.forEach {
                 it.read = read
                 if (!read) {
@@ -587,8 +588,10 @@ class MangaDetailsPresenter(
                 }
             }
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
+
+
             if (read && deleteNow && preferences.removeAfterMarkedAsRead()) {
-                deleteChapters(selectedChapters, false)
+                deleteChapters(selectedChapters.filter { it.bookmark.not() }.toList(), false)
             }
             getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
