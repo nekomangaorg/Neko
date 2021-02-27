@@ -600,6 +600,7 @@
     <string name="view_changelog">View changelog</string>
     <string name="view_release_notes">View release notes</string>
     <string name="website">Website</string>
+    <string name="dex_donations">Donate to MangaDex</string>
     <string name="open_source_licenses">Open source licenses</string>
 
     <!-- Login/Logout dialog -->
