@@ -17,7 +17,6 @@ class SettingsSimilarController : SettingsController() {
         titleRes = R.string.similar_settings
 
         preference {
-            titleRes = R.string.similar_screen
             summary = context.resources.getString(R.string.similar_screen_summary_message)
             isIconSpaceReserved = true
         }
