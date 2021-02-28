@@ -85,7 +85,7 @@ class SettingsSimilarController : SettingsController() {
         }
 
         preference {
-            title = "Credits"
+            titleRes = R.string.similar_credit_title
             val url = "https://github.com/goldbattle/MangadexRecomendations"
             summary = context.resources.getString(R.string.similar_credit_message, url)
             onClick {
@@ -117,5 +117,4 @@ class SettingsSimilarController : SettingsController() {
     private companion object {
         const val RELATED_FILE_PATH_L = 105
     }
-
 }
