@@ -17,7 +17,6 @@ class SettingsSimilarController : SettingsController() {
         titleRes = R.string.similar_settings
 
         preference {
-            titleRes = R.string.similar_screen
             summary = context.resources.getString(R.string.similar_screen_summary_message)
             isIconSpaceReserved = true
         }
@@ -85,7 +84,7 @@ class SettingsSimilarController : SettingsController() {
         }
 
         preference {
-            title = "Credits"
+            titleRes = R.string.similar_credit_title
             val url = "https://github.com/goldbattle/MangadexRecomendations"
             summary = context.resources.getString(R.string.similar_credit_message, url)
             onClick {
@@ -117,5 +116,4 @@ class SettingsSimilarController : SettingsController() {
     private companion object {
         const val RELATED_FILE_PATH_L = 105
     }
-
 }
