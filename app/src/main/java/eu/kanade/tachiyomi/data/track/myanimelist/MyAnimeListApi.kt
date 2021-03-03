@@ -37,10 +37,17 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 if(manga.my_anime_list_id !== null && !wasPreviouslyTracked) {
                     val response = client.newCall(GET(mangaUrl(manga.my_anime_list_id!!.toInt()))).await()
                     val soup =  Jsoup.parse(response.consumeBody())
-                    val DFormat: DateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
-                    val malDate = DFormat.parse(soup.select("span:contains(published:)").first().parent().ownText().split('?')[0].split("to")[0].trim())
-                    val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
-                    val parsedDate = outputDf.format(malDate)
+                    val fullDFormat: DateFormat = SimpleDateFormat("MMM dd, yyyy", Locale.US)
+                    val shortDFormat: DateFormat = SimpleDateFormat("yyyy", Locale.US)
+                    val malDate = soup.select("span:contains(published:)").first().parent().ownText().split('?')[0].split("to")[0].trim()
+                    var malDateParsed: Date
+                    try {
+                        malDateParsed = fullDFormat.parse(malDate)
+                    } catch (error: Exception) {
+                        malDateParsed = shortDFormat.parse(malDate)
+                    }
+                    val outputDFormat = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                    val parsedDate = outputDFormat.format(malDateParsed)
                     listOf<TrackSearch>(TrackSearch.create(TrackManager.MYANIMELIST).apply {
                         title = soup.select("span.h1-title > span[itemprop='name']").first().ownText().trim()
                         media_id = manga.my_anime_list_id!!.toInt()
