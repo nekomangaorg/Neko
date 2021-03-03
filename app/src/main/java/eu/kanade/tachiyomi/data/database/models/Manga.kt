@@ -35,6 +35,10 @@ interface Manga : SManga {
 
     fun isBlank() = id == Long.MIN_VALUE
 
+    fun getGenres(): List<String>? {
+        return genre?.split(", ")?.map { it.trim() }
+    }
+
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
         setFlags(SORT_LOCAL, SORT_SELF_MASK)

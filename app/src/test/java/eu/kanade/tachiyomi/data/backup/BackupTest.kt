@@ -8,6 +8,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.CustomRobolectricGradleTestRunner
+import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupManager
 import eu.kanade.tachiyomi.data.backup.models.Backup
 import eu.kanade.tachiyomi.data.backup.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -40,7 +41,7 @@ import uy.kohesive.injekt.api.InjektRegistrar
 import uy.kohesive.injekt.api.addSingleton
 
 /**
- * Test class for the [BackupManager].
+ * Test class for the [LegacyBackupManager].
  * Note that this does not include the backup create/restore services.
  */
 @Config(constants = BuildConfig::class, sdk = intArrayOf(Build.VERSION_CODES.LOLLIPOP))
@@ -62,7 +63,7 @@ class BackupTest {
     lateinit var context: Context
     lateinit var source: HttpSource
 
-    lateinit var backupManager: BackupManager
+    lateinit var backupManager: LegacyBackupManager
 
     lateinit var db: DatabaseHelper
 
@@ -70,7 +71,7 @@ class BackupTest {
     fun setup() {
         app = RuntimeEnvironment.application
         context = app.applicationContext
-        backupManager = BackupManager(context)
+        backupManager = LegacyBackupManager(context)
         db = backupManager.databaseHelper
 
         // Mock the source manager

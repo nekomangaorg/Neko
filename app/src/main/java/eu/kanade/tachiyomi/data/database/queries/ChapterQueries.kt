@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterBackupPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.ChapterKnownBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterProgressPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterSourceOrderPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterGetResolver
@@ -97,6 +98,11 @@ interface ChapterQueries : DbProvider {
     fun updateChaptersBackup(chapters: List<Chapter>) = db.put()
         .objects(chapters)
         .withPutResolver(ChapterBackupPutResolver())
+        .prepare()
+
+    fun updateKnownChaptersBackup(chapters: List<Chapter>) = db.put()
+        .objects(chapters)
+        .withPutResolver(ChapterKnownBackupPutResolver())
         .prepare()
 
     fun updateChapterProgress(chapter: Chapter) = db.put()

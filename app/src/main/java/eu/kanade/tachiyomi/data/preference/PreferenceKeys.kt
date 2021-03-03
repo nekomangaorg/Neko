@@ -185,6 +185,8 @@ object PreferenceKeys {
 
     const val useNewApiServer = "use_new_api_server"
 
+    const val createLegacyBackup = "create_legacy_backup"
+
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"

@@ -1,7 +1,8 @@
-package eu.kanade.tachiyomi.data.backup
+package eu.kanade.tachiyomi.data.backup.legacy
 
 import android.content.Context
 import android.net.Uri
+import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.fromJson
 import com.github.salomonbrys.kotson.registerTypeAdapter
 import com.github.salomonbrys.kotson.registerTypeHierarchyAdapter
@@ -53,25 +54,13 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.Observable
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
 
-class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
+class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) {
 
-    /**
-     * Database.
-     */
     internal val databaseHelper: DatabaseHelper by injectLazy()
-
-    /**
-     * Source manager.
-     */
     internal val sourceManager: SourceManager by injectLazy()
-
-    /**
-     * Tracking manager
-     */
     internal val trackManager: TrackManager by injectLazy()
 
     /**
@@ -139,7 +128,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
 
         databaseHelper.inTransaction {
             // Get manga from database
-            val mangas = getFavoriteManga()
+            val mangas = databaseHelper.getFavoriteMangas().executeAsBlocking()
 
             // Backup library manga and its dependencies
             mangas.forEach { manga ->
@@ -485,14 +474,6 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      */
     internal fun getMangaFromDatabase(manga: Manga): Manga? =
         databaseHelper.getManga(manga.url, manga.source).executeAsBlocking()
-
-    /**
-     * Returns list containing manga from library
-     *
-     * @return [Manga] from library
-     */
-    internal fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangas().executeAsBlocking()
 
     /**
      * Inserts manga and returns id

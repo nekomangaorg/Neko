@@ -501,23 +501,29 @@
     <string name="backup">Backup</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
+    <string name="create_backup_legacy">Create legacy backup</string>
+    <string name="can_be_used_to_restore_legacy">Can be used to restore in older versions of Neko and Tachiyomi</string>
     <string name="restore_backup">Restore backup</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
+    <string name="backup_in_progress">Backup is already in progress</string>
     <string name="backup_location">Backup location</string>
     <string name="service">Service</string>
     <string name="backup_frequency">Backup frequency</string>
     <string name="max_auto_backups">Max automatic backups</string>
+    <string name="invalid_backup_file">Invalid backup file</string>
+    <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="backup_failed">Backup failed</string>
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Restore error</string>
     <string name="restore_completed_content">%1$s Restored. %2$s errors found</string>
     <string name="restore_content_skipped">%1$d skipped</string>
-    <string name="restore_message">Restore uses the network to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
+    <string name="restore_message">json file restores use the network to fetch data, and carrier costs may apply.\n\nMake sure you are logged into MangaDex and any Trackers before restoring.</string>
     <string name="creating_backup">Creating backup</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restoring_progress">Restoring (%1$d/%2$d)</string>
+    <string name="restore_in_progress">Restore is already in progress</string>
     <string name="backup_restore_progress">Backup restore</string>
     <string name="backup_restore_complete">Backup restore complete</string>
     <string name="group_backup_restore">Backup and restore</string>
@@ -690,6 +696,7 @@
     <!-- File Picker Titles -->
     <string name="select_cover_image">Select cover image</string>
     <string name="select_backup_file">Select backup file</string>
+    <string name="file_picker_error">No file picker app found</string>
 
     <!-- Webview -->
     <string name="failed_to_bypass_cloudflare">Failed to bypass Cloudflare</string>

@@ -1,13 +1,5 @@
 package eu.kanade.tachiyomi.util.system
 
-/*
- * Copyright (C) 2020 The Neko Manga Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 import android.content.Context
 import android.net.Uri
 import eu.kanade.tachiyomi.R
@@ -43,7 +35,7 @@ class CrashLogUtil(private val context: Context) {
 
         with(notificationBuilder) {
             setContentTitle(context.getString(R.string.crash_log_saved))
-            
+
             addAction(
                 R.drawable.ic_folder_24dp,
                 context.getString(R.string.open_log),
