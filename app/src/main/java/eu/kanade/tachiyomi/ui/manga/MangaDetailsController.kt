@@ -1455,10 +1455,10 @@ class MangaDetailsController :
     }
 
     fun clearCoverCache() {
-        backdrop.setImageDrawable(null)
-        true_backdrop.setBackgroundColor(Color.TRANSPARENT)
-        manga_cover_full.setImageDrawable(null)
-        manga_cover.setImageDrawable(null)
+        backdrop?.setImageDrawable(null)
+        true_backdrop?.setBackgroundColor(Color.TRANSPARENT)
+        manga_cover_full?.setImageDrawable(null)
+        manga_cover?.setImageDrawable(null)
     }
 
     companion object {
