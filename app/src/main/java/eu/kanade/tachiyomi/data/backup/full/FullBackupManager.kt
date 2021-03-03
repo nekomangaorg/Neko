@@ -174,6 +174,7 @@ class FullBackupManager(val context: Context) {
     fun restoreMangaNoFetch(manga: Manga, dbManga: Manga) {
         manga.id = dbManga.id
         manga.copyFrom(dbManga)
+        manga.initialized = false
         manga.favorite = true
         databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
     }

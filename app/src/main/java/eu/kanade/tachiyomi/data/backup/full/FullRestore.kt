@@ -111,8 +111,8 @@ class FullRestore(val context: Context, val job: Job?) {
             if (dbMangaExists) {
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)
             } else {
+                manga.initialized = false
                 manga.favorite = true
-                manga.initialized = true
                 manga.id = backupManager.insertManga(manga)
             }
             backupManager.restoreChaptersForMangaOffline(manga, chapters)
