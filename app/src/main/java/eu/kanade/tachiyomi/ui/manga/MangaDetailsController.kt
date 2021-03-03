@@ -1001,6 +1001,7 @@ class MangaDetailsController :
 
     override fun favoriteManga(longPress: Boolean) {
         if (isLocked()) return
+        view ?: return
         val manga = presenter.manga
         val categories = presenter.getCategories()
         if (!manga.favorite) {
@@ -1014,6 +1015,7 @@ class MangaDetailsController :
 
     override fun setFavButtonPopup(popupView: View) {
         if (isLocked()) return
+        view ?: return
         val manga = presenter.manga
         if (!manga.favorite) {
             popupView.setOnTouchListener(null)
