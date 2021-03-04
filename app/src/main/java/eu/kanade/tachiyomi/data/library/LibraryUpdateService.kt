@@ -540,7 +540,7 @@ class LibraryUpdateService(
     /**
      * Method that updates the syncs reading and rereading manga into neko library
      */
-    private suspend fun syncFollows(plannedToReadEnabled: Boolean = true) {
+    private suspend fun syncFollows(plannedToReadEnabled: Boolean = false) {
         var count = AtomicInteger(0)
         var countNew = AtomicInteger(0)
         val listManga = sourceManager.getMangadex().fetchAllFollows(true)

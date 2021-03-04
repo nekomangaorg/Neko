@@ -42,7 +42,7 @@ object Migrations {
                 BackupCreatorJob.setupTask()
                 SimilarUpdateJob.setupTask(true)
             }
-            if (oldVersion < 95) {
+            if (oldVersion < 95 && oldVersion != 0) {
                 // Force MAL log out due to login flow change
                 val trackManager = Injekt.get<TrackManager>()
                 trackManager.myAnimeList.logout()
