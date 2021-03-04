@@ -472,7 +472,7 @@ class MangaDetailsController :
     }
 
     fun setRefresh(enabled: Boolean) {
-        swipe_refresh.isRefreshing = enabled
+        swipe_refresh?.isRefreshing = enabled
     }
 
     //region Recycler methods
