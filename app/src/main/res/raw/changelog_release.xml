@@ -4,7 +4,6 @@
         changeDate=""
         versionName="v2.2.1">
         <changelogtext>New: Option to sync planned to read from MangaDex when syncing from setting</changelogtext>
-        <changelogtext>New: Full backup option</changelogtext>
         <changelogtext>Fix: mal date tracking issue</changelogtext>
         <changelogtext>Fix: New backup not creating correctly</changelogtext>
         <changelogtext>Fix: minor bug fixes</changelogtext>
