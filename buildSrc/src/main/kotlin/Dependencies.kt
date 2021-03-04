@@ -70,7 +70,7 @@ object Libs {
         const val coroutines = "org.jetbrains.kotlinx:kotlinx-coroutines-android:${Versions.kotlinCoroutines}"
         const val flowPreferences = "com.github.tfcporciuncula.flow-preferences:flow-preferences:${Versions.flowPreferences}"
         const val stdLib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
-        const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-core:${Versions.kotlinSerialization}"
+        const val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinSerialization}"
         const val serializationProtobuf = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.kotlinSerialization}"
     }
 
@@ -195,7 +195,7 @@ object Versions {
     const val junit = "4.13"
     const val kotlin = "1.4.10"
     const val kotlinCoroutines = "1.3.9"
-    const val kotlinSerialization = "1.0.0-RC"
+    const val kotlinSerialization = "1.0.1"
     const val kotson = "2.5.0"
     const val ktlint = "9.4.0"
     const val loadingButton = "2.2.0"

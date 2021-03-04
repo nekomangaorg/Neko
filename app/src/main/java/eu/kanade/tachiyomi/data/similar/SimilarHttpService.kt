@@ -30,7 +30,7 @@ interface SimilarHttpService {
             val contentType = "application/json".toMediaType()
             val restAdapter = Retrofit.Builder()
                 .baseUrl("https://raw.githubusercontent.com")
-                .addConverterFactory(Json.asConverterFactory(contentType))
+                .addConverterFactory(Json {}.asConverterFactory(contentType))
                 .client(
                     Injekt.get<NetworkHelper>().client
                         .newBuilder()

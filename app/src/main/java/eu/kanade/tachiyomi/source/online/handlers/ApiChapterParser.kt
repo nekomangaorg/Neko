@@ -21,7 +21,7 @@ class ApiChapterParser {
         val server = networkApiChapter.data.server
 
         pageArray.forEach {
-            val url = "$hash/${it}"
+            val url = "$hash/$it"
             pages.add(Page(pages.size, "$server,${response.request.url},${Date().time}", url))
         }
 
