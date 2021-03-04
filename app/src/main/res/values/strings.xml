@@ -516,6 +516,7 @@
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Restore error</string>
+    <string name="backup_auto_create_legacy">Also create legacy backup</string>
     <string name="restore_completed_content">%1$s Restored. %2$s errors found</string>
     <string name="restore_content_skipped">%1$d skipped</string>
     <string name="restore_message">json file restores use the network to fetch data, and carrier costs may apply.\n\nMake sure you are logged into MangaDex and any Trackers before restoring.</string>

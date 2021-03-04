@@ -131,10 +131,17 @@ class SettingsBackupController : SettingsController() {
                 defaultValue = 1
             }
 
+            val createLegacy = switchPreference {
+                key = Keys.createLegacyBackup
+                titleRes = R.string.backup_auto_create_legacy
+                defaultValue = true
+            }
+
             preferences.backupInterval().asObservable()
                 .subscribeUntilDestroy {
                     backupDir.isVisible = it > 0
                     backupNumber.isVisible = it > 0
+                    createLegacy.isVisible = it > 0
                 }
         }
     }
