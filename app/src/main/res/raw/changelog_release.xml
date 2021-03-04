@@ -2,6 +2,15 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.2.1">
+        <changelogtext>New: Option to sync planned to read from MangaDex when syncing from setting</changelogtext>
+        <changelogtext>New: Full backup option</changelogtext>
+        <changelogtext>Fix: mal date tracking issue</changelogtext>
+        <changelogtext>Fix: New backup not creating correctly</changelogtext>
+        <changelogtext>Fix: minor bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.2">
         <changelogtext>New: Add donate to MangaDex link in about section</changelogtext>
         <changelogtext>New: Bookmarked chapters downloads are not deleted when marked read or read anymore</changelogtext>

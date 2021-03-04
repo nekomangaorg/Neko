@@ -122,7 +122,7 @@
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
     <string name="sync_follows_to_library">Sync MangaDex manga to Neko</string>
-    <string name="sync_follows_to_library_summary">Pulls reading/rereading manga from MangaDex into your Neko library if they are not already added.</string>
+    <string name="sync_follows_to_library_summary">Pulls reading/rereading/planned to read manga from MangaDex into your Neko library if they are not already added.</string>
     <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
     <string name="push_favorites_to_mangadex">Sync Neko manga to MangaDex</string>
     <string name="push_favorites_to_mangadex_summary">Sync any non MdList tracked manga to MangaDex as reading.</string>
