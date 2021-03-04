@@ -4,6 +4,8 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
+import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -115,12 +117,22 @@ class SettingsSiteController :
             summaryRes = R.string.sync_follows_to_library_summary
 
             onClick {
-                LibraryUpdateService.start(
-                    context,
-                    target = LibraryUpdateService.Target.SYNC_FOLLOWS
-                )
+                MaterialDialog(activity!!).show {
+                    checkBoxPrompt(text = "Sync planned to read also?", onToggle = null)
+                    positiveButton(android.R.string.ok) { dialog ->
+                        val type = when {
+                            dialog.isCheckPromptChecked() -> LibraryUpdateService.Target.SYNC_FOLLOWS_PLUS
+                            else -> LibraryUpdateService.Target.SYNC_FOLLOWS
+                        }
+                        LibraryUpdateService.start(
+                            context,
+                            target = type
+                        )
+                    }
+                }
             }
         }
+
 
         preference {
             titleRes = R.string.push_favorites_to_mangadex

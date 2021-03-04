@@ -280,6 +280,7 @@ class LibraryUpdateService(
         job = GlobalScope.launch(handler) {
             when (target) {
                 Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
+                Target.SYNC_FOLLOWS_PLUS -> syncFollows(true)
                 Target.SYNC_FOLLOWS -> syncFollows()
                 Target.PUSH_FAVORITES -> pushFavorites()
                 else -> updateTrackings(mangaToAdd)
@@ -539,13 +540,13 @@ class LibraryUpdateService(
     /**
      * Method that updates the syncs reading and rereading manga into neko library
      */
-    private suspend fun syncFollows() {
+    private suspend fun syncFollows(plannedToReadEnabled: Boolean = true) {
         var count = AtomicInteger(0)
         var countNew = AtomicInteger(0)
         val listManga = sourceManager.getMangadex().fetchAllFollows(true)
         // filter all follows from Mangadex and only add reading or rereading manga to library
         listManga.filter { it ->
-            it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING
+            it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING || (plannedToReadEnabled && it.follow_status == FollowStatus.PLAN_TO_READ)
         }
             .forEach { networkManga ->
                 showProgressNotification(networkManga, count.andIncrement, listManga.size)
@@ -649,6 +650,7 @@ class LibraryUpdateService(
     enum class Target {
         CHAPTERS, // Manga meta data and  chapters
         SYNC_FOLLOWS, // Manga in reading, rereading
+        SYNC_FOLLOWS_PLUS, //Manga in reading/rereading and planned to read
         PUSH_FAVORITES, // Manga in reading
         TRACKING // Tracking metadata
     }
