@@ -228,33 +228,37 @@ class DownloadManager(val context: Context) {
      */
     fun deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
         GlobalScope.launch(Dispatchers.IO) {
-            val wasPaused = isPaused()
-            if (chapters.isEmpty()) {
-                DownloadService.stop(context)
-                downloader.queue.clear()
-                return@launch
+            try {
+                val wasPaused = isPaused()
+                if (chapters.isEmpty()) {
+                    DownloadService.stop(context)
+                    downloader.queue.clear()
+                    return@launch
+                }
+                downloader.pause()
+                downloader.queue.remove(chapters)
+                if (!wasPaused && downloader.queue.isNotEmpty()) {
+                    downloader.start()
+                } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
+                    DownloadService.stop(context)
+                } else if (downloader.queue.isEmpty()) {
+                    DownloadService.callListeners(false)
+                    downloader.stop()
+                }
+                queue.remove(chapters)
+                val chapterDirs =
+                    provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
+                        chapters, manga, source
+                    )
+                chapterDirs.forEach { it.delete() }
+                cache.removeChapters(chapters, manga)
+                if (cache.getDownloadCount(manga, true) == 0) { // Delete manga directory if empty
+                    chapterDirs.firstOrNull()?.parentFile?.delete()
+                }
+                queue.updateListeners()
+            } catch (e: Exception) {
+                XLog.e("error deleting chapters", e)
             }
-            downloader.pause()
-            downloader.queue.remove(chapters)
-            if (!wasPaused && downloader.queue.isNotEmpty()) {
-                downloader.start()
-            } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
-                DownloadService.stop(context)
-            } else if (downloader.queue.isEmpty()) {
-                DownloadService.callListeners(false)
-                downloader.stop()
-            }
-            queue.remove(chapters)
-            val chapterDirs =
-                provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
-                    chapters, manga, source
-                )
-            chapterDirs.forEach { it.delete() }
-            cache.removeChapters(chapters, manga)
-            if (cache.getDownloadCount(manga, true) == 0) { // Delete manga directory if empty
-                chapterDirs.firstOrNull()?.parentFile?.delete()
-            }
-            queue.updateListeners()
         }
     }
 
