@@ -118,9 +118,9 @@ class SettingsLibraryController : SettingsController() {
                 // The following array lines up with the list rankingScheme in:
                 // ../../data/library/LibraryUpdateRanker.kt
                 entriesRes = arrayOf(
-                    R.string.alphabetically, R.string.last_updated
+                    R.string.alphabetically, R.string.last_updated, R.string.next_updated
                 )
-                entryRange = 0..1
+                entryRange = 0..2
                 defaultValue = 0
                 summaryRes = R.string.select_order_to_update
             }
