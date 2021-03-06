@@ -28,6 +28,8 @@ object MangaTable {
 
     const val COL_LAST_UPDATE = "last_update"
 
+    const val COL_NEXT_UPDATE = "next_update"
+
     const val COL_INITIALIZED = "initialized"
 
     const val COL_VIEWER = "viewer"
@@ -83,6 +85,7 @@ object MangaTable {
             $COL_THUMBNAIL_URL TEXT,
             $COL_FAVORITE INTEGER NOT NULL,
             $COL_LAST_UPDATE LONG,
+            $COL_NEXT_UPDATE LONG,
             $COL_INITIALIZED BOOLEAN NOT NULL,
             $COL_VIEWER INTEGER NOT NULL,
             $COL_CHAPTER_FLAGS INTEGER NOT NULL,
@@ -111,6 +114,9 @@ object MangaTable {
 
     val addDateAddedCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_DATE_ADDED} LONG DEFAULT 0"
+
+    val addNextUpdateCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_NEXT_UPDATE} LONG DEFAULT 0"
 
     val addLangFlagCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_LANG_FLAG} TEXT DEFAULT NULL"

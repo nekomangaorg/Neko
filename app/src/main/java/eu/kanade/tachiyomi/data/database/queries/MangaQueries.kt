@@ -6,15 +6,7 @@ import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.resolvers.LibraryMangaGetResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaDateAddedPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaFavoritePutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaFlagsPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaInfoPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaLastUpdatedPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaScanlatorFilterFlagsPutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaTitlePutResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaViewerPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.*
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
@@ -100,6 +92,11 @@ interface MangaQueries : DbProvider {
         .`object`(manga)
         .withPutResolver(MangaScanlatorFilterFlagsPutResolver())
         .prepare()
+
+    fun updateNextUpdated(manga: Manga) = db.put()
+            .`object`(manga)
+            .withPutResolver(MangaNextUpdatedPutResolver())
+            .prepare()
 
     fun updateLastUpdated(manga: Manga) = db.put()
         .`object`(manga)

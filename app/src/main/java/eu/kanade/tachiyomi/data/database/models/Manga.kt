@@ -25,6 +25,8 @@ interface Manga : SManga {
 
     var last_update: Long
 
+    var next_update: Long
+
     var date_added: Long
 
     var viewer: Int
