@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track.mdlist
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -48,39 +49,43 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
 
     override suspend fun update(track: Track): Track {
         return withContext(Dispatchers.IO) {
-            val manga = db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
-                .executeAsBlocking() ?: return@withContext track
-            val followStatus = FollowStatus.fromInt(track.status)
+            try {
+                val manga = db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
+                    .executeAsBlocking() ?: return@withContext track
+                val followStatus = FollowStatus.fromInt(track.status)
 
-            // allow follow status to update
-            if (manga.follow_status != followStatus) {
-                mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
-                manga.follow_status = followStatus
-                db.insertManga(manga).executeAsBlocking()
-            }
-
-            if (track.score.toInt() > 0) {
-                mdex.updateRating(track)
-            }
-
-            // mangadex wont update chapters if manga is not follows this prevents unneeded network call
-
-            if (followStatus != FollowStatus.UNFOLLOWED) {
-                if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
-                    track.status = FollowStatus.COMPLETED.int
-                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), FollowStatus.COMPLETED)
-                }
-                if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
-                    val newFollowStatus = FollowStatus.READING
-                    track.status = FollowStatus.READING.int
-                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), newFollowStatus)
-                    manga.follow_status = newFollowStatus
+                // allow follow status to update
+                if (manga.follow_status != followStatus) {
+                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
+                    manga.follow_status = followStatus
                     db.insertManga(manga).executeAsBlocking()
                 }
-                mdex.updateReadingProgress(track)
-            } else if (track.last_chapter_read != 0) {
-                // When followStatus has been changed to unfollowed 0 out read chapters since dex does
-                track.last_chapter_read = 0
+
+                if (track.score.toInt() > 0) {
+                    mdex.updateRating(track)
+                }
+
+                // mangadex wont update chapters if manga is not follows this prevents unneeded network call
+
+                if (followStatus != FollowStatus.UNFOLLOWED) {
+                    if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+                        track.status = FollowStatus.COMPLETED.int
+                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), FollowStatus.COMPLETED)
+                    }
+                    if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
+                        val newFollowStatus = FollowStatus.READING
+                        track.status = FollowStatus.READING.int
+                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), newFollowStatus)
+                        manga.follow_status = newFollowStatus
+                        db.insertManga(manga).executeAsBlocking()
+                    }
+                    mdex.updateReadingProgress(track)
+                } else if (track.last_chapter_read != 0) {
+                    // When followStatus has been changed to unfollowed 0 out read chapters since dex does
+                    track.last_chapter_read = 0
+                }
+            } catch (e: Exception) {
+                XLog.e("error updating MDList", e)
             }
             db.insertTrack(track).executeAsBlocking()
             track
