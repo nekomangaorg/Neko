@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.POSTWithCookie
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.asObservableSuccess
+import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
@@ -25,6 +26,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiChapterSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
+import eu.kanade.tachiyomi.source.online.handlers.serializers.IsLoggedInSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
@@ -276,14 +278,19 @@ open class MangaDex() : HttpSource() {
                 formBody.add("two_factor", it)
             }
 
-            val response = clientBuilder().newCall(
-                POST(
-                    "$baseUrl/ajax/actions.ajax.php?function=login",
-                    headers,
-                    formBody.build()
-                )
-            ).execute()
-            response.body!!.string().isEmpty()
+            runCatching {
+                clientBuilder().newCall(
+                    POST(
+                        "$baseUrl/ajax/actions.ajax.php?function=login",
+                        headers,
+                        formBody.build()
+                    )
+                ).await()
+            }
+            val response = clientBuilder().newCall(GET(MdUtil.apiUrl(true) + MdUtil.isLoggedInApi, headers)).await()
+            val jsonData = response.body!!.string()
+            val result = MdUtil.jsonParser.decodeFromString(IsLoggedInSerializer.serializer(), jsonData)
+            return@withContext result.code == 200
         }
     }
 
