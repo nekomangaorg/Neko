@@ -19,7 +19,7 @@ class MdUtil {
         const val newApiChapter = "/v2/chapter/"
         const val apiChapterSuffix = "?mark_read=0"
         const val groupSearchUrl = "$baseUrl/groups/0/1/"
-        val followsAllApi = "/v2/user/me/"
+        const val followsAllApi = "/v2/user/me/followed-manga"
         const val isLoggedInApi = "/v2/user/me"
         const val followsMangaApi = "/v2/user/me/manga/"
         const val apiCovers = "/covers"
