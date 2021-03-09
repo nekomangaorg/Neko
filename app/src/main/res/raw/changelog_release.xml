@@ -2,6 +2,16 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.2.2">
+        <changelogtext>New: Option to update library by next predicted update order</changelogtext>
+        <changelogtext>New: Full back up works on merged chapters and scanlator filters</changelogtext>
+        <changelogtext>Change: Adjust rate limiting</changelogtext>
+        <changelogtext>Change: Removed option to use old api server</changelogtext>
+        <changelogtext>Change: Moved donation link to main settings screen</changelogtext>
+        <changelogtext>Fix: Minor bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.2.1">
         <changelogtext>New: Option to sync planned to read from MangaDex when syncing from setting</changelogtext>
         <changelogtext>Fix: mal date tracking issue</changelogtext>
