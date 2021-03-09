@@ -490,6 +490,9 @@ class MangaDetailsPresenter(
             withContext(Dispatchers.IO) {
                 val allChaps = db.getChapters(manga).executeAsBlocking()
                 updateScanlators(allChaps.map { it.toModel() })
+                manga.scanlator_filter?.let {
+                    filteredScanlators = MdUtil.getScanlators(it).toSet()
+                }
                 val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
                 if (missingChapters != manga.missing_chapters) {
                     manga.missing_chapters = missingChapters
