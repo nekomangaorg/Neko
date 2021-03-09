@@ -100,16 +100,6 @@ class AboutController : SettingsController() {
         preferenceCategory {
 
             preference {
-                titleRes = R.string.dex_donations
-                val url = "https://mangadex.org/support"
-                summary = url
-                onClick {
-                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                    startActivity(intent)
-                }
-            }
-
-            preference {
                 titleRes = R.string.website
                 val url = "https://tachiyomi.org/forks/Neko/"
                 summary = url

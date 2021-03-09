@@ -100,7 +100,7 @@ open class MangaDex() : HttpSource() {
     }
 
     fun fetchRandomMangaId(): Observable<String> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).fetchRandomMangaId()
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchRandomMangaId()
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
@@ -124,17 +124,17 @@ open class MangaDex() : HttpSource() {
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
             manga
         )
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
+        val pair = MangaHandler(clientBuilder(), headers, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
             manga
         )
         return pair
@@ -145,16 +145,15 @@ open class MangaDex() : HttpSource() {
             clientBuilder(),
             headers,
             getLangsToShow(),
-            useNewApiServer()
         ).fetchChapterListObservable(manga)
     }
 
     suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).getMangaIdFromChapterId(urlChapterId)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).getMangaIdFromChapterId(urlChapterId)
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
-        return MangaHandler(clientBuilder(), headers, getLangsToShow(), useNewApiServer()).fetchChapterList(manga)
+        return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchChapterList(manga)
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
@@ -164,7 +163,7 @@ open class MangaDex() : HttpSource() {
             true -> "1"
             false -> "0"
         }
-        return PageHandler(clientBuilder(), headers, imageServer, dataSaver, useNewApiServer()).fetchPageList(chapter)
+        return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
@@ -287,7 +286,7 @@ open class MangaDex() : HttpSource() {
                     )
                 ).await()
             }
-            val response = clientBuilder().newCall(GET(MdUtil.apiUrl(true) + MdUtil.isLoggedInApi, headers)).await()
+            val response = clientBuilder().newCall(GET(MdUtil.apiUrl + MdUtil.isLoggedInApi, headers)).await()
             val jsonData = response.body!!.string()
             val result = MdUtil.jsonParser.decodeFromString(IsLoggedInSerializer.serializer(), jsonData)
             return@withContext result.code == 200
@@ -323,8 +322,6 @@ open class MangaDex() : HttpSource() {
     }
 
     fun getLangsToShow() = preferences.langsToShow().get().split(",")
-
-    fun useNewApiServer() = preferences.useNewApiServer()
 
     override fun getFilterList(): FilterList {
         return FilterHandler(preferences).getFilterList()

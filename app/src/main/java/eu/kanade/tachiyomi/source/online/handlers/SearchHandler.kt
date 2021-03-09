@@ -192,7 +192,7 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
     }
 
     private fun searchMangaByIdRequest(id: String): Request {
-        return GET(MdUtil.apiUrl(preferences.useNewApiServer()) + MdUtil.apiManga + id + MdUtil.includeChapters, headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.apiUrl + MdUtil.apiManga + id + MdUtil.includeChapters, headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun searchMangaByGroupRequest(group: String): Request {

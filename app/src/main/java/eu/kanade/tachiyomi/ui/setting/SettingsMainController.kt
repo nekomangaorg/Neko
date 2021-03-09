@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -74,6 +76,14 @@ class SettingsMainController : SettingsController() {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_info)
             titleRes = R.string.about
             onClick { navigateTo(AboutController()) }
+        }
+        preference {
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_volunteer_activism)
+            titleRes = R.string.dex_donations
+            onClick {
+                val intent = Intent(Intent.ACTION_VIEW, "https://mangadex.org/support".toUri())
+                startActivity(intent)
+            }
         }
     }
 

@@ -29,12 +29,11 @@ class NetworkHelper(val context: Context) {
 
     val cookieManager = AndroidCookieJar()
 
-    private val bucket = TokenBuckets.builder().withCapacity(1)
-        .withFixedIntervalRefillStrategy(1, 1, TimeUnit.SECONDS).build()
+    private val bucket = TokenBuckets.builder().withCapacity(2)
+        .withFixedIntervalRefillStrategy(2, 1, TimeUnit.SECONDS).build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
-
         it.proceed(it.request())
     }
 
