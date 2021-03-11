@@ -25,6 +25,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
+import java.io.EOFException
 import kotlin.math.floor
 
 class FollowsHandler(val client: OkHttpClient, val headers: Headers, val preferences: PreferencesHelper) {
@@ -123,7 +124,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
 
-            val response: Response =
+            val result = kotlin.runCatching {
                 if (followStatus == FollowStatus.UNFOLLOWED) {
                     client.newCall(
                         GET(
@@ -145,8 +146,18 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                     )
                         .execute()
                 }
+            }
 
-            response.body!!.string().isEmpty()
+            result.exceptionOrNull()?.let {
+                if (it is EOFException) {
+                    return@withContext true
+                } else {
+                    XLog.e("error updating follow status", it)
+                    return@withContext false
+                }
+            }
+            return@withContext result.isSuccess
+
         }
     }
 
@@ -157,31 +168,49 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                 .add("volume", "0")
                 .add("chapter", track.last_chapter_read.toString())
             XLog.d("chapter to update %s", track.last_chapter_read.toString())
-            val response = client.newCall(
-                POST(
-                    "$baseUrl/ajax/actions.ajax.php?function=edit_progress&id=$mangaID",
-                    headers,
-                    formBody.build()
-                )
-            ).execute()
-            val body = response.body!!.string()
-            XLog.d(body)
-            body.isEmpty()
+            val result = runCatching {
+                client.newCall(
+                    POST(
+                        "$baseUrl/ajax/actions.ajax.php?function=edit_progress&id=$mangaID",
+                        headers,
+                        formBody.build()
+                    )
+                ).execute()
+            }
+            result.exceptionOrNull()?.let {
+                if (it is EOFException) {
+                    return@withContext true
+                } else {
+                    XLog.e("error updating reading progress", it)
+                    return@withContext false
+                }
+            }
+            return@withContext result.isSuccess
         }
     }
 
     suspend fun updateRating(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)
-            val response = client.newCall(
-                GET(
-                    "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
-                    headers
+            val result = runCatching {
+                client.newCall(
+                    GET(
+                        "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
+                        headers
+                    )
                 )
-            )
-                .execute()
+                    .execute()
+            }
 
-            response.body!!.string().isEmpty()
+            result.exceptionOrNull()?.let {
+                if (it is EOFException) {
+                    return@withContext true
+                } else {
+                    XLog.e("error updating rating", it)
+                    return@withContext false
+                }
+            }
+            return@withContext result.isSuccess
         }
     }
 

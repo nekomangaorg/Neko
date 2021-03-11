@@ -42,6 +42,7 @@ import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
+import java.io.EOFException
 import java.net.URLEncoder
 import java.util.Date
 import kotlin.collections.set
@@ -303,16 +304,28 @@ open class MangaDex() : HttpSource() {
             if (token.isNullOrEmpty()) {
                 return@withContext true
             }
-            val result = clientBuilder().newCall(
-                POSTWithCookie(
-                    "$baseUrl/ajax/actions.ajax.php?function=logout",
-                    REMEMBER_ME,
-                    token,
-                    headers
-                )
-            ).execute()
-            val resultStr = result.body!!.string()
-            if (resultStr.contains("success", true)) {
+            val catch = runCatching {
+                val result = clientBuilder().newCall(
+                    POSTWithCookie(
+                        "$baseUrl/ajax/actions.ajax.php?function=logout",
+                        REMEMBER_ME,
+                        token,
+                        headers
+                    )
+                ).execute()
+            }
+
+            catch.exceptionOrNull()?.let {
+                if (!(it is EOFException)) {
+                    XLog.e("error logging out", it)
+                    return@withContext false
+                }
+            }
+
+            val response = clientBuilder().newCall(GET(MdUtil.apiUrl + MdUtil.isLoggedInApi, headers)).await()
+            val jsonData = response.body!!.string()
+            val result = MdUtil.jsonParser.decodeFromString(IsLoggedInSerializer.serializer(), jsonData)
+            if (result.code == 403) {
                 network.cookieManager.remove(httpUrl)
                 return@withContext true
             }
