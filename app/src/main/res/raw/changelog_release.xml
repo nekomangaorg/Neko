@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.2.2.2">
+        <changelogtext>General bug fixes</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.2.2.1">
         <changelogtext>Fix: Sync from Dex issue</changelogtext>
     </changelogversion>
