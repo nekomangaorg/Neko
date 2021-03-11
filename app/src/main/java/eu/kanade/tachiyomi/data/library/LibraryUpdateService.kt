@@ -464,7 +464,7 @@ class LibraryUpdateService(
             }
             if (preferences.markChaptersReadFromMDList()) {
                 tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
-                    if (FollowStatus.fromInt(it.status) == FollowStatus.READING) {
+                    if (FollowStatus.fromInt(it.status) == FollowStatus.READING && it.last_chapter_read > 0) {
                         val chapters = db.getChapters(manga).executeAsBlocking()
                         val filteredChp = chapters.filter { chp -> ceil(chp.chapter_number.toDouble()).toInt() <= it.last_chapter_read && !chp.read && chp.chapter_number.toInt() != 0 }
                         if (filteredChp.isNotEmpty()) {
@@ -545,6 +545,13 @@ class LibraryUpdateService(
         var countNew = AtomicInteger(0)
         val listManga = sourceManager.getMangadex().fetchAllFollows(true)
         // filter all follows from Mangadex and only add reading or rereading manga to library
+
+        /*  val defaultCategoryId = preferences.defaultCategory()
+          val defaultCategory = db.getCategories().executeAsBlocking().find { it.id == defaultCategoryId }
+
+          val addToDefaultCategory = defaultCategory != null || defaultCategoryId == 0*/
+
+
         listManga.filter { it ->
             it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING || (plannedToReadEnabled && it.follow_status == FollowStatus.PLAN_TO_READ)
         }
@@ -567,6 +574,7 @@ class LibraryUpdateService(
                     countNew.incrementAndGet()
                     dbManga.favorite = true
                     dbManga.copyFrom(networkManga)
+
                     db.insertManga(dbManga).executeAsBlocking()
                 }
             }
