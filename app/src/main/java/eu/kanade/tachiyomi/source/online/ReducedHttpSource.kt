@@ -12,21 +12,33 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.Headers
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
+import org.isomorphism.util.TokenBuckets
 import rx.Observable
 import java.util.concurrent.TimeUnit
 
 abstract class ReducedHttpSource : HttpSource() {
 
+    private val bucket = TokenBuckets.builder().withCapacity(2)
+        .withFixedIntervalRefillStrategy(1, 3, TimeUnit.SECONDS).build()
+
+    private val rateLimitInterceptor = Interceptor {
+        bucket.consume()
+        it.proceed(it.request())
+    }
+
     override val client: OkHttpClient = network.cloudFlareClient.newBuilder()
         .connectTimeout(1, TimeUnit.MINUTES)
         .readTimeout(1, TimeUnit.MINUTES)
         .writeTimeout(1, TimeUnit.MINUTES)
+        .addNetworkInterceptor(rateLimitInterceptor)
         .build()
 
     override val headers = Headers.Builder()
-        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:71.0) Gecko/20100101 Firefox/77.0").build()
+        .add("Referer", "https://manga4life.com/")
+        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36").build()
 
     override fun fetchImage(page: Page): Observable<Response> {
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)

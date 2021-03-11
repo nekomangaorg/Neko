@@ -150,7 +150,7 @@ class MergeSource : ReducedHttpSource() {
 
         val pageTotal = curChapter["Page"].string.toInt()
 
-        val host = "https://" + script.substringAfter("vm.CurPathName = \"").substringBefore("\"")
+        val host = "https://" + """vm\.[A-z]+ *= *"([^",.() ]+\.[^",.() ]+\.[^",.() ]+)"""".toRegex().find(script)!!.destructured.toList()[0]
         val titleURI = script.substringAfter("vm.IndexName = \"").substringBefore("\"")
         val seasonURI = curChapter["Directory"].string
             .let { if (it.isEmpty()) "" else "$it/" }

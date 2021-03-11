@@ -483,8 +483,8 @@ class LibraryUpdateService(
             return hasDownloads
         } catch (e: Exception) {
             if (e !is CancellationException) {
-                failedUpdates[manga] = e.message
-                XLog.e("Failed updating: ${manga.title}: $e")
+                failedUpdates[manga] = e.message ?: "unknown error"
+                XLog.e("Failed updating: ${manga.title}", e)
             }
             return false
         }
@@ -629,7 +629,7 @@ class LibraryUpdateService(
     private fun writeErrorFile(errors: Map<Manga, String?>): File {
         try {
             if (errors.isNotEmpty()) {
-                val destFile = File(externalCacheDir, "tachiyomi_update_errors.txt")
+                val destFile = File(externalCacheDir, "neko_update_errors.txt")
 
                 destFile.bufferedWriter().use { out ->
                     errors.forEach { (manga, error) ->
