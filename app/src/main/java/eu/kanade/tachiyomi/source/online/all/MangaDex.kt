@@ -34,7 +34,7 @@ class MangaDex : DelegatedHttpSource() {
 
     override fun chapterUrl(uri: Uri): String? {
         val chapterNumber = uri.pathSegments.getOrNull(1) ?: return null
-        return "/api/chapter/$chapterNumber"
+        return "/chapter/$chapterNumber"
     }
 
     override fun pageNumber(uri: Uri): Int? {
@@ -44,7 +44,7 @@ class MangaDex : DelegatedHttpSource() {
     override suspend fun fetchMangaFromChapterUrl(uri: Uri): Triple<Chapter, Manga, List<SChapter>>? {
         val url = chapterUrl(uri) ?: return null
         val request =
-            GET("https://mangadex.org$url", delegate!!.headers, CacheControl.FORCE_NETWORK)
+            GET("https:///api.mangadex.org/v2$url", delegate!!.headers, CacheControl.FORCE_NETWORK)
         val response = network.client.newCall(request).await()
         if (response.code != 200) throw Exception("HTTP error ${response.code}")
         val body = response.body?.string().orEmpty()
@@ -53,10 +53,11 @@ class MangaDex : DelegatedHttpSource() {
         }
 
         val jsonObject = JsonParser.parseString(body).obj
-        val mangaId = jsonObject["manga_id"]?.nullInt ?: throw Exception(
+        val dataObject = jsonObject["data"].asJsonObject ?: throw Exception("Chapter not found")
+        val mangaId = dataObject["mangaId"]?.nullInt ?: throw Exception(
             "No manga associated with chapter"
         )
-        val langCode = getRealLangCode(jsonObject["lang_code"]?.nullString ?: "en").toUpperCase()
+        val langCode = getRealLangCode(dataObject["language"]?.nullString ?: "en").toUpperCase()
         // Use the correct MangaDex source based on the language code, or the api will not return
         // the correct chapter list
         delegate = sourceManager.getOnlineSources().find { it.toString() == "MangaDex ($langCode)" }
@@ -70,7 +71,7 @@ class MangaDex : DelegatedHttpSource() {
             val manga = deferredManga.await()
             val chapters = deferredChapters.await()
             val context = Injekt.get<PreferencesHelper>().context
-            val trueChapter = chapters?.find { it.url == url }?.toChapter() ?: error(
+            val trueChapter = chapters?.find { it.url == "/api$url" }?.toChapter() ?: error(
                 context.getString(R.string.chapter_not_found)
             )
             if (manga != null) {
