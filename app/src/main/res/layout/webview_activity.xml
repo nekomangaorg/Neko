@@ -13,6 +13,7 @@
         android:orientation="vertical"
         android:id="@+id/web_linear_layout"
         android:layout_width="match_parent"
+        android:fitsSystemWindows="true"
         android:layout_height="wrap_content">
 
         <androidx.appcompat.widget.Toolbar
@@ -22,7 +23,7 @@
             android:background="?attr/colorSecondary"
             android:theme="?attr/actionBarTheme"
             app:navigationIcon="@drawable/ic_close_24dp"
-            app:layout_scrollFlags="scroll|enterAlways|snap" />
+            app:layout_scrollFlags="scroll|enterAlways" />
 
     </com.google.android.material.appbar.AppBarLayout>
 
@@ -38,8 +39,9 @@
         android:layout_height="match_parent">
         <WebView
             android:id="@+id/webview"
+            android:nestedScrollingEnabled="true"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" >
+            android:layout_height="wrap_content" >
 
             <ProgressBar
                 android:id="@+id/progressBar"

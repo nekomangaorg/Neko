@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -11,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.LinearLayout
+import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
@@ -69,6 +71,9 @@ open class WebViewActivity : BaseWebViewActivity() {
                     title = view?.title
                     swipe_refresh.isEnabled = true
                     swipe_refresh?.isRefreshing = false
+                    val thing = view?.evaluateJavascript("getComputedStyle(document.querySelector('body')).backgroundColor") {
+                        nested_view.setBackgroundColor(parseHTMLColor(it))
+                    }
                 }
 
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
@@ -85,6 +90,16 @@ open class WebViewActivity : BaseWebViewActivity() {
             webview.settings.userAgentString = source.headers["User-Agent"]
             webview.loadUrl(url, headers)
         }
+    }
+
+    @ColorInt
+    fun parseHTMLColor(color: String): Int {
+        val trimmedColor = color.trim('"')
+        val rgb = Regex("""^rgb\((\d+),\s*(\d+),\s*(\d+)\)$""").find(trimmedColor)
+        val red = rgb?.groupValues?.getOrNull(1)?.toIntOrNull() ?: return getResourceColor(android.R.attr.colorBackground)
+        val green = rgb.groupValues.getOrNull(2)?.toIntOrNull() ?: return getResourceColor(android.R.attr.colorBackground)
+        val blue = rgb.groupValues.getOrNull(3)?.toIntOrNull() ?: return getResourceColor(android.R.attr.colorBackground)
+        return Color.rgb(red, green, blue)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

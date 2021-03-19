@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.view.invisible
@@ -88,12 +89,13 @@ open class BaseWebViewActivity : BaseActivity() {
                 else getResourceColor(android.R.attr.colorPrimary)
             }
             // if the android q+ device has gesture nav, transparent nav bar
-            else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
-                (v.rootWindowInsets.systemWindowInsetBottom != v.rootWindowInsets.tappableElementInsets.bottom)
-            ) {
+            else if (v.rootWindowInsets.isBottomTappable()) {
                 getColor(android.R.color.transparent)
             } else {
-                getResourceColor(android.R.attr.colorBackground)
+                ColorUtils.setAlphaComponent(
+                    getResourceColor(R.attr.colorPrimaryVariant),
+                    179
+                )
             }
             v.setPadding(
                 insets.systemWindowInsetLeft,
@@ -123,9 +125,7 @@ open class BaseWebViewActivity : BaseActivity() {
             }
             val marginB = webview.marginBottom
             webview.setOnApplyWindowInsetsListener { v, insets ->
-                val bottomInset =
-                    if (Build.VERSION.SDK_INT >= 29) insets.tappableElementInsets.bottom
-                    else insets.systemWindowInsetBottom
+                val bottomInset = insets.systemWindowInsetBottom
                 v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = marginB + bottomInset
                 }
