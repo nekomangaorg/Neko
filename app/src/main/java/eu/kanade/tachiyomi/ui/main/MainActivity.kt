@@ -238,6 +238,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 top = insets.systemWindowInsetTop
             )
             bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
+            bottom_view.updateLayoutParams<ViewGroup.LayoutParams> {
+                height = insets.systemWindowInsetBottom
+            }
         }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
@@ -270,6 +273,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
 
                     syncActivityViewWithController(to, from, isPush)
                     appbar.y = 0f
+                    bottom_nav.translationY = 0f
                     snackBar?.dismiss()
                 }
 
@@ -281,6 +285,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     handler: ControllerChangeHandler
                 ) {
                     appbar.y = 0f
+                    bottom_nav.translationY = 0f
                     showDLQueueTutorial()
                 }
             }

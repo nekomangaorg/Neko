@@ -289,5 +289,7 @@ class PreferencesHelper(val context: Context) {
 
     fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
 
+    fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
+
     fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
 }

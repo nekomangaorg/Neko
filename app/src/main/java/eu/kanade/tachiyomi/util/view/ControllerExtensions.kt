@@ -19,11 +19,14 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlinx.android.synthetic.main.main_activity.*
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -210,6 +213,8 @@ fun Controller.scrollViewWith(
                         ) ?: 0
                         activity!!.appbar.animate().y(0f).setDuration(shortAnimationDuration.toLong())
                             .start()
+                        activity!!.bottom_nav?.animate()?.translationYBy(0f)?.setDuration(shortAnimationDuration.toLong())
+                            ?.start()
                         lastY = 0f
                         if (elevate) elevateFunc(false)
                     } else {
@@ -219,14 +224,32 @@ fun Controller.scrollViewWith(
                             -activity!!.appbar.height.toFloat(),
                             0f
                         )
-                        if ((
-                            (
-                                activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
-                                    dy == 0 && activity!!.appbar.y == 0f
-                                ) || dy == 0
-                            ) && !elevate
-                        )
+                        val tabBar = activity!!.bottom_nav
+                        if (tabBar != null && tabBar.isVisible()) {
+                            val preferences: PreferencesHelper = Injekt.get()
+                            if (preferences.hideBottomNavOnScroll().get()) {
+                                tabBar.translationY += dy
+                                tabBar.translationY = MathUtils.clamp(
+                                    tabBar.translationY,
+                                    0f,
+                                    tabBar.height.toFloat()
+                                )
+                                activity!!.bottom_view?.translationY = tabBar.translationY
+                            } else if (tabBar.translationY != 0f) {
+                                tabBar.translationY = 0f
+                                activity!!.bottom_view?.translationY = 0f
+                            }
+                        }
+                        if (!elevate && (
+                            dy == 0 ||
+                                (
+                                    activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
+                                        dy == 0 && activity!!.appbar.y == 0f
+                                    )
+                            )
+                        ) {
                             elevateFunc(true)
+                        }
                         lastY = activity!!.appbar.y
                     }
                 }

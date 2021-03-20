@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
@@ -32,7 +33,8 @@ import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
+import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -41,11 +43,17 @@ import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
+import kotlinx.android.synthetic.main.extensions_bottom_sheet.sheet_layout
+import kotlinx.android.synthetic.main.filter_bottom_sheet.*
+import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.rounded_category_hopper.*
 import kotlinx.android.synthetic.main.source_controller.*
+import kotlinx.android.synthetic.main.source_controller.shadow2
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.max
@@ -112,7 +120,6 @@ class SourceController :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
 
         adapter = SourceAdapter(this)
 
@@ -129,6 +136,19 @@ class SourceController :
             recycler,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
+                recycler.updatePaddingRelative(bottom = activity?.bottom_nav?.height ?: 0)
+            }
+        )
+
+        recycler?.post {
+            setBottomPadding()
+        }
+        recycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    setBottomPadding()
+                }
             }
         )
 
@@ -154,6 +174,9 @@ class SourceController :
                         setTitle()
                         activity?.invalidateOptionsMenu()
                     }
+                    val bottomBar = activity?.bottom_nav ?: return
+                    val pad = bottomBar.translationY - bottomBar.height
+                    ext_bottom_sheet.updatePaddingRelative(bottom = (pad * (1 - max(progress, 0f))).toInt())
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
@@ -187,6 +210,22 @@ class SourceController :
         }
     }
 
+    fun setBottomPadding() {
+        val bottomBar = activity?.bottom_nav ?: return
+        ext_bottom_sheet.updatePaddingRelative(
+            bottom =
+                if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else
+                    max(
+                        (-bottomBar.translationY + bottomBar.height).toInt(),
+                        this@SourceController.view?.rootWindowInsets?.getBottomGestureInsets()
+                            ?: 0
+                    )
+        )
+        val pad = bottomBar.translationY - bottomBar.height
+        shadow2.translationY = pad
+        ext_bottom_sheet.sheetBehavior?.peekHeight = 48.spToPx + ext_bottom_sheet.paddingBottom
+    }
+
     override fun showSheet() {
         ext_bottom_sheet.sheetBehavior?.expand()
     }
@@ -217,7 +256,6 @@ class SourceController :
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (!type.isPush && handler is SettingsSourcesFadeChangeHandler) {
-            view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
             ext_bottom_sheet.updateExtTitle()
             ext_bottom_sheet.presenter.refreshExtensions()
         }

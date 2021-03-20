@@ -9,16 +9,18 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.source.SourceController
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
+import kotlinx.android.synthetic.main.main_activity.*
 
 class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs),
@@ -51,9 +53,12 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         ext_recycler.adapter = adapter
         ext_recycler.setHasFixedSize(true)
         ext_recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
-        ext_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         adapter?.fastScroller = fast_scroller
         this.controller = controller
+        ext_recycler.doOnApplyWindowInsets { view, _, _ ->
+            val bottomBar = (this@ExtensionBottomSheet.controller.activity as? MainActivity)?.bottom_nav
+            view.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
+        }
         presenter.onCreate()
         updateExtTitle()
 

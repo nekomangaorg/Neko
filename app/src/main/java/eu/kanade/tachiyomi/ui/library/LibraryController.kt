@@ -69,14 +69,15 @@ import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.isVisible
@@ -86,18 +87,24 @@ import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
+import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
+import kotlinx.android.synthetic.main.library_grid_recycler.recycler
 import kotlinx.android.synthetic.main.library_list_controller.*
+import kotlinx.android.synthetic.main.library_list_controller.shadow2
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.rounded_category_hopper.*
+import kotlinx.android.synthetic.main.source_controller.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.roundToInt
 import kotlin.random.Random
 import kotlin.random.nextInt
@@ -167,6 +174,7 @@ class LibraryController(
     private var scrollDistance = 0f
     private val scrollDistanceTilHidden = 1000.dpToPx
     private var textAnim: ViewPropertyAnimator? = null
+    var startingFiltersY = 0f
     var hopperGravity: Int = preferences.hopperGravity().get()
         set(value) {
             field = value
@@ -201,6 +209,7 @@ class LibraryController(
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val recyclerCover = recycler_cover ?: return
+            val bottomBar = activity?.bottom_nav
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
                 category_hopper_frame.translationY += dy
                 category_hopper_frame.translationY =
@@ -222,6 +231,23 @@ class LibraryController(
                     showCategoryText(currentCategory.name)
                 }
             }
+            if (bottomBar != null) {
+                if (filter_bottom_sheet.sheetBehavior.isHidden()) {
+                    val pad = bottomBar.translationY - bottomBar.height
+                    filter_bottom_sheet.translationY = pad
+                } else {
+                    filter_bottom_sheet.translationY = 0f
+                }
+                val pad = bottomBar.translationY - bottomBar.height
+                shadow2.translationY = pad
+                filter_bottom_sheet.updatePaddingRelative(
+                    bottom = max(
+                        (-bottomBar.translationY + bottomBar.height).toInt(),
+                        view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                    )
+                )
+                filter_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + filter_bottom_sheet.paddingBottom
+            }
             val savedCurrentCategory = getHeader(true)?.category ?: return
             if (savedCurrentCategory.order != lastUsedCategory) {
                 lastUsedCategory = savedCurrentCategory.order
@@ -237,18 +263,20 @@ class LibraryController(
                     fast_scroller.showScrollbar()
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
-                    val shortAnimationDuration = resources?.getInteger(
-                        android.R.integer.config_shortAnimTime
-                    ) ?: 0
-                    if (!recyclerCover.isClickable) {
-                        category_hopper_frame.animate().translationY(
-                            if (category_hopper_frame.translationY > 25f.dpToPx) 50f.dpToPx
-                            else 0f
-                        ).setDuration(shortAnimationDuration.toLong()).start()
-                    }
+                    updateHopperPosition()
                 }
             }
         }
+    }
+
+    fun updateHopperPosition(show: Boolean = false) {
+        val shortAnimationDuration = resources?.getInteger(
+            android.R.integer.config_shortAnimTime
+        ) ?: 0
+        category_hopper_frame.animate().translationY(
+            if (!show && category_hopper_frame.translationY > 25f.dpToPx) 50f.dpToPx
+            else 0f
+        ).setDuration(shortAnimationDuration.toLong()).start()
     }
 
     fun saveActiveCategory(category: Category) {
@@ -322,7 +350,6 @@ class LibraryController(
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
 
         adapter = LibraryCategoryAdapter(this)
@@ -643,7 +670,9 @@ class LibraryController(
     }
 
     private fun setRecyclerLayout() {
-        recycler.updatePaddingRelative(bottom = 50.dpToPx)
+        recycler.post {
+            recycler.updatePaddingRelative(bottom = 50.dpToPx + (activity?.bottom_nav?.height ?: 0))
+        }
         if (libraryLayout == 0) {
             recycler.spanCount = 1
             recycler.updatePaddingRelative(
@@ -668,7 +697,7 @@ class LibraryController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
+            filter_bottom_sheet.visible()
             presenter.getLibrary()
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
@@ -677,6 +706,9 @@ class LibraryController(
             showDropdown()
         } else {
             closeTip()
+            if (filter_bottom_sheet.sheetBehavior.isHidden()) {
+                filter_bottom_sheet.invisible()
+            }
             activity?.toolbar?.hideDropdown()
         }
     }

@@ -153,6 +153,8 @@ object PreferenceKeys {
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
+    const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
+
     const val enableDoh = "enable_doh"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"

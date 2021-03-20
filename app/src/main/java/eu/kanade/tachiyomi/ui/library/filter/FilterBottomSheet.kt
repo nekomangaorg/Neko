@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
@@ -34,6 +35,7 @@ import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
+import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -94,6 +96,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var onGroupClicked: (Int) -> Unit = { _ -> }
     var pager: View? = null
     var controller: LibraryController? = null
+    var bottomBarHeight = 0
 
     fun onCreate(controller: LibraryController) {
         clearButton = clear_button
@@ -102,6 +105,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         sheetBehavior?.isHideable = true
         this.controller = controller
         pager = controller.recycler
+        pager?.post {
+            bottomBarHeight = (this@FilterBottomSheet.controller?.activity as? MainActivity)?.bottom_nav?.height ?: 0
+        }
         val shadow2: View = controller.shadow2
         val shadow: View = controller.shadow
         sheetBehavior?.addBottomSheetCallback(
@@ -111,6 +117,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                     shadow.alpha = 1 + min(0f, progress)
                     updateRootPadding(progress)
+                    val bottomBar = (this@FilterBottomSheet.controller?.activity as? MainActivity)?.bottom_nav ?: return
+                    val pad = bottomBar.translationY - bottomBar.height
+                    translationY = pad * -min(0f, progress)
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
@@ -183,7 +192,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val shadow = controller?.shadow ?: return
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = 1f
-            pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx)
+            pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             pill.alpha = 0f
@@ -192,7 +201,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             onGroupClicked(ACTION_HIDE_FILTER_TIP)
             reSortViews()
             shadow.alpha = 0f
-            pager?.updatePaddingRelative(bottom = 10.dpToPx)
+            pager?.updatePaddingRelative(bottom = 10.dpToPx + bottomBarHeight)
         }
     }
 
@@ -210,9 +219,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         if (trueProgress >= 0)
-            pager?.updatePaddingRelative(bottom = value + 10.dpToPx)
+            pager?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         else
-            pager?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt())
+            pager?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
     }
 
     fun hasActiveFilters() = filterItems.any { it.isActivated }

@@ -62,6 +62,16 @@
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
     </com.google.android.material.appbar.AppBarLayout>
 
+    <View
+        android:id="@+id/bottom_view"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        tools:ignore="KeyboardInaccessibleWidget" />
+
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"

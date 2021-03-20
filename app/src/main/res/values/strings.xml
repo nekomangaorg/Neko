@@ -494,6 +494,8 @@
     <string name="check_for_updates">Check for updates</string>
     <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
     <string name="secure_screen">Secure screen</string>
+    <string name="hide_bottom_nav">Auto-Hide bottom navigation</string>
+    <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
     <string name="security">Security</string>
 

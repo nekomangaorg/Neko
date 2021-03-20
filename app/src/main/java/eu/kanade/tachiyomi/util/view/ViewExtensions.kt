@@ -183,25 +183,6 @@ fun View.checkHeightThen(f: () -> Unit) {
     )
 }
 
-fun View.applyWindowInsetsForRootController(bottomNav: View) {
-    viewTreeObserver.addOnGlobalLayoutListener(
-        object : ViewTreeObserver.OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                if (bottomNav.height > 0) {
-                    viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    setOnApplyWindowInsetsListener { view, insets ->
-                        view.updateLayoutParams<FrameLayout.LayoutParams> {
-                            bottomMargin = bottomNav.height
-                        }
-                        insets
-                    }
-                    requestApplyInsetsWhenAttached()
-                }
-            }
-        }
-    )
-}
-
 fun View.requestApplyInsetsWhenAttached() {
     if (isAttachedToWindow) {
         requestApplyInsets()

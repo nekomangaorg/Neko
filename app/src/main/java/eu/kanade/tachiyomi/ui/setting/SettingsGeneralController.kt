@@ -44,29 +44,6 @@ class SettingsGeneralController : SettingsController() {
             }
         }
 
-        intListPreference(activity) {
-            key = Keys.theme
-            titleRes = R.string.app_theme
-            entriesRes = arrayOf(
-                R.string.white_theme,
-                R.string.light_blue,
-                R.string.dark,
-                R.string.amoled_black,
-                R.string.dark_blue,
-                R.string.system_default,
-                R.string
-                    .system_default_amoled,
-                R.string.system_default_all_blue
-            )
-            entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
-            defaultValue = 5
-
-            onChange {
-                activity?.recreate()
-                true
-            }
-        }
-
         listPreference(activity) {
             key = Keys.dateFormat
             titleRes = R.string.date_format
@@ -151,6 +128,40 @@ class SettingsGeneralController : SettingsController() {
                     SecureActivityDelegate.setSecure(activity, it)
                     true
                 }
+            }
+        }
+
+        preferenceCategory {
+            titleRes = R.string.display
+
+            intListPreference(activity) {
+                key = Keys.theme
+                titleRes = R.string.app_theme
+                entriesRes = arrayOf(
+                    R.string.white_theme,
+                    R.string.light_blue,
+                    R.string.dark,
+                    R.string.amoled_black,
+                    R.string.dark_blue,
+                    R.string.system_default,
+                    R.string
+                        .system_default_amoled,
+                    R.string.system_default_all_blue
+                )
+                entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
+                defaultValue = 5
+
+                onChange {
+                    activity?.recreate()
+                    true
+                }
+            }
+
+            switchPreference {
+                key = Keys.hideBottomNavOnScroll
+                titleRes = R.string.hide_bottom_nav
+                summaryRes = R.string.hides_on_scroll
+                defaultValue = true
             }
         }
     }

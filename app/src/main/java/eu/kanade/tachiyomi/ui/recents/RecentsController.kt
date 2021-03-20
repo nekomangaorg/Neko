@@ -38,7 +38,6 @@ import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.recently_read.RemoveHistoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
@@ -103,7 +102,6 @@ class RecentsController(bundle: Bundle? = null) :
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         // Initialize adapter
         adapter = RecentMangaAdapter(this)
         recycler.adapter = adapter
@@ -127,6 +125,7 @@ class RecentsController(bundle: Bundle? = null) :
             swipeRefreshLayout = swipe_refresh,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
+                recycler.updatePaddingRelative(bottom = activity!!.bottom_nav.height)
             }
         )
 
@@ -432,7 +431,6 @@ class RecentsController(bundle: Bundle? = null) :
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            view?.applyWindowInsetsForRootController(activity!!.bottom_nav)
             if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
             dl_bottom_sheet.dismiss()
         } else {
