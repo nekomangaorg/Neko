@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -942,8 +943,19 @@ class LibraryPresenter(
     fun syncMangaToDex(mangaList: List<Manga>) {
         scope.launch {
             withContext(Dispatchers.IO) {
-                mangaList.forEach {
-                    source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
+                val isDexUp = source.checkIfUp()
+
+                if (isDexUp) {
+                    mangaList.forEach {
+                        source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
+                    }
+                }
+                withContext(Dispatchers.Main) {
+                    if (isDexUp.not()) {
+                        view.view?.snack("502: MangaDex appears to be down")
+                    } else {
+                        view.view?.snack("Adding to MangaDex follows as reading")
+                    }
                 }
             }
         }

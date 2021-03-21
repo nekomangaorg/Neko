@@ -2,6 +2,13 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.2.2.3">
+        <changelogtext>Don't update library when Dex is down</changelogtext>
+        <changelogtext>Don't try to sync follows when Dex is down</changelogtext>
+        <changelogtext>Add better error messages when site is down</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.2.2.2">
         <changelogtext>General bug fixes</changelogtext>
     </changelogversion>

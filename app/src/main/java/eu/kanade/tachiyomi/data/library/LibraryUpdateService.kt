@@ -556,44 +556,53 @@ class LibraryUpdateService(
     private suspend fun syncFollows(plannedToReadEnabled: Boolean = false) {
         var count = AtomicInteger(0)
         var countNew = AtomicInteger(0)
-        val listManga = sourceManager.getMangadex().fetchAllFollows(true)
-        // filter all follows from Mangadex and only add reading or rereading manga to library
 
-        /*  val defaultCategoryId = preferences.defaultCategory()
+        val isDexUp = sourceManager.getMangadex().checkIfUp()
+
+        if (isDexUp) {
+            val listManga = sourceManager.getMangadex().fetchAllFollows(true)
+            // filter all follows from Mangadex and only add reading or rereading manga to library
+
+            /*  val defaultCategoryId = preferences.defaultCategory()
           val defaultCategory = db.getCategories().executeAsBlocking().find { it.id == defaultCategoryId }
 
           val addToDefaultCategory = defaultCategory != null || defaultCategoryId == 0*/
 
 
-        listManga.filter { it ->
-            it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING || (plannedToReadEnabled && it.follow_status == FollowStatus.PLAN_TO_READ)
-        }
-            .forEach { networkManga ->
-                showProgressNotification(networkManga, count.andIncrement, listManga.size)
-
-                var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
-                    .executeAsBlocking()
-                if (dbManga == null) {
-                    dbManga = Manga.create(
-                        networkManga.url,
-                        networkManga.title,
-                        sourceManager.getMangadex().id
-                    )
-                    dbManga.date_added = Date().time
-                }
-
-                // Increment and update if it is not already favorited
-                if (!dbManga.favorite) {
-                    countNew.incrementAndGet()
-                    dbManga.favorite = true
-                    dbManga.copyFrom(networkManga)
-
-                    db.insertManga(dbManga).executeAsBlocking()
-                }
+            listManga.filter { it ->
+                it.follow_status == FollowStatus.RE_READING || it.follow_status == FollowStatus.READING || (plannedToReadEnabled && it.follow_status == FollowStatus.PLAN_TO_READ)
             }
+                .forEach { networkManga ->
+                    showProgressNotification(networkManga, count.andIncrement, listManga.size)
+
+                    var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
+                        .executeAsBlocking()
+                    if (dbManga == null) {
+                        dbManga = Manga.create(
+                            networkManga.url,
+                            networkManga.title,
+                            sourceManager.getMangadex().id
+                        )
+                        dbManga.date_added = Date().time
+                    }
+
+                    // Increment and update if it is not already favorited
+                    if (!dbManga.favorite) {
+                        countNew.incrementAndGet()
+                        dbManga.favorite = true
+                        dbManga.copyFrom(networkManga)
+
+                        db.insertManga(dbManga).executeAsBlocking()
+                    }
+                }
+        }
         notifier.cancelProgressNotification()
         withContext(Dispatchers.Main) {
-            toast(getString(R.string.sync_follows_to_library_toast, countNew.toInt()), Toast.LENGTH_LONG)
+            if (isDexUp.not()) {
+                toast("502: MangaDex appears to be down, skipping sync", Toast.LENGTH_LONG)
+            } else {
+                toast(getString(R.string.sync_follows_to_library_toast, countNew.toInt()), Toast.LENGTH_LONG)
+            }
         }
     }
 
@@ -603,33 +612,42 @@ class LibraryUpdateService(
     private suspend fun pushFavorites() {
         val count = AtomicInteger(0)
         var countNew = AtomicInteger(0)
-        val listManga = db.getLibraryMangas().executeAsBlocking()
-        // filter all follows from Mangadex and only add reading or rereading manga to library
 
-        listManga.forEach { manga ->
-            showProgressNotification(manga, count.andIncrement, listManga.size)
+        val isDexUp = sourceManager.getMangadex().checkIfUp()
 
-            // Get this manga's trackers from the database
-            val dbTracks = db.getTracks(manga).executeAsBlocking()
-            val trackList = loggedServices.map { service ->
-                TrackItem(dbTracks.find { it.sync_id == service.id }, service)
-            }
+        if (isDexUp) {
+            val listManga = db.getLibraryMangas().executeAsBlocking()
+            // filter all follows from Mangadex and only add reading or rereading manga to library
 
-            //find the mdlist entry if its unfollowed the follow it
+            listManga.forEach { manga ->
+                showProgressNotification(manga, count.andIncrement, listManga.size)
 
-            trackList.firstOrNull { it.service.isMdList() }?.let { tracker ->
-                if (tracker.track?.status == FollowStatus.UNFOLLOWED.int) {
-                    tracker.track.status = FollowStatus.READING.int
-                    val returnedTracker = tracker.service.update(tracker.track)
-                    db.insertTrack(returnedTracker)
-                    countNew.incrementAndGet()
+                // Get this manga's trackers from the database
+                val dbTracks = db.getTracks(manga).executeAsBlocking()
+                val trackList = loggedServices.map { service ->
+                    TrackItem(dbTracks.find { it.sync_id == service.id }, service)
                 }
-            }
 
+                //find the mdlist entry if its unfollowed the follow it
+
+                trackList.firstOrNull { it.service.isMdList() }?.let { tracker ->
+                    if (tracker.track?.status == FollowStatus.UNFOLLOWED.int) {
+                        tracker.track.status = FollowStatus.READING.int
+                        val returnedTracker = tracker.service.update(tracker.track)
+                        db.insertTrack(returnedTracker)
+                        countNew.incrementAndGet()
+                    }
+                }
+
+            }
+            notifier.cancelProgressNotification()
         }
-        notifier.cancelProgressNotification()
         withContext(Dispatchers.Main) {
-            toast(getString(R.string.push_favorites_to_mangadex_toast, countNew.toInt()), Toast.LENGTH_LONG)
+            if (isDexUp.not()) {
+                toast("502: MangaDex appears to be down, skipping sync", Toast.LENGTH_LONG)
+            } else {
+                toast(getString(R.string.push_favorites_to_mangadex_toast, countNew.toInt()), Toast.LENGTH_LONG)
+            }
         }
     }
 
