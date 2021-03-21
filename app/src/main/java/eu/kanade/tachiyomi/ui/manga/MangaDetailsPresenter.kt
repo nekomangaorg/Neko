@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
@@ -25,9 +26,8 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.fetchChapterListAsync
-import eu.kanade.tachiyomi.source.fetchMangaDetailsAsync
-import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.toSChapter
+import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.lang.trimOrNull
+import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -316,16 +317,16 @@ class MangaDetailsPresenter(
             var chapterError: java.lang.Exception? = null
             val chapters = async(Dispatchers.IO) {
                 try {
-                    source.fetchChapterListAsync(manga)
+                    source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() }
                 } catch (e: Exception) {
                     chapterError = e
-                    emptyList<SChapter>()
-                } ?: emptyList()
+                    emptyList()
+                }
             }
             val thumbnailUrl = manga.thumbnail_url
             val nManga = async(Dispatchers.IO) {
                 try {
-                    source.fetchMangaDetailsAsync(manga)
+                    source.getMangaDetails(manga.toMangaInfo()).toSManga()
                 } catch (e: java.lang.Exception) {
                     mangaError = e
                     null
@@ -350,16 +351,11 @@ class MangaDetailsPresenter(
             if (finChapters.isNotEmpty()) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga, source)
                 if (newChapters.first.isNotEmpty()) {
-                    val downloadNew = preferences.downloadNew().getOrDefault()
-                    if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                        val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
-                        val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }
-                        if (shouldDownload) {
-                            downloadChapters(
+                    if (manga.shouldDownloadNewChapters(db, preferences)) {
+                        downloadChapters(
                                 newChapters.first.sortedBy { it.chapter_number }
-                                    .map { it.toModel() }
-                            )
-                        }
+                                        .map { it.toModel() }
+                        )
                     }
                 }
                 if (newChapters.second.isNotEmpty()) {
@@ -403,7 +399,7 @@ class MangaDetailsPresenter(
 
         scope.launch(Dispatchers.IO) {
             val chapters = try {
-                source.fetchChapterListAsync(manga)
+                source.getChapterList(manga.toMangaInfo()).map { it.toSChapter() }
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller.showError(trimException(e)) }
                 return@launch

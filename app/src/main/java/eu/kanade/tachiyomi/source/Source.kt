@@ -41,6 +41,7 @@ interface Source : tachiyomi.source.Source {
      *
      * @param manga the manga to update.
      */
+    @Deprecated("Use getMangaDetails instead")
     fun fetchMangaDetails(manga: SManga): Observable<SManga>
 
     /**
@@ -48,6 +49,7 @@ interface Source : tachiyomi.source.Source {
      *
      * @param manga the manga to update.
      */
+    @Deprecated("Use getChapterList instead")
     fun fetchChapterList(manga: SManga): Observable<List<SChapter>>
 
     /**
@@ -55,6 +57,7 @@ interface Source : tachiyomi.source.Source {
      *
      * @param chapter the chapter.
      */
+    @Deprecated("Use getPageList instead")
     fun fetchPageList(chapter: SChapter): Observable<List<Page>>
 
     /**
@@ -89,18 +92,6 @@ interface Source : tachiyomi.source.Source {
             fetchPageList(chapter.toSChapter()).toBlocking().single()
                 .map { it.toPageUrl() }
         }
-    }
-}
-
-suspend fun Source.fetchMangaDetailsAsync(manga: SManga): SManga? {
-    return withContext(Dispatchers.IO) {
-        fetchMangaDetails(manga).toBlocking().single()
-    }
-}
-
-suspend fun Source.fetchChapterListAsync(manga: SManga): List<SChapter>? {
-    return withContext(Dispatchers.IO) {
-        fetchChapterList(manga).toBlocking().single()
     }
 }
 

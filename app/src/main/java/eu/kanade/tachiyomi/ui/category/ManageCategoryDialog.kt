@@ -6,7 +6,7 @@ import android.view.View
 import android.widget.CompoundButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
-import com.f2prateek.rx.preferences.Preference
+import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -99,18 +99,18 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         view.title.hint = category.name
         view.title.append(category.name)
-        val downloadNew = preferences.downloadNew().getOrDefault()
+        val downloadNew = preferences.downloadNew().get()
         setCheckbox(
             view.download_new,
             preferences.downloadNewCategories(),
             true
         )
-        if (downloadNew && preferences.downloadNewCategories().getOrDefault().isEmpty())
+        if (downloadNew && preferences.downloadNewCategories().get().isEmpty())
             view.download_new.gone()
         else if (!downloadNew)
             view.download_new.visible()
         view.download_new.isChecked =
-            preferences.downloadNew().getOrDefault() && view.download_new.isChecked
+            preferences.downloadNew().get() && view.download_new.isChecked
         setCheckbox(
             view.include_global,
             preferences.libraryUpdateCategories(),
@@ -121,7 +121,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     /** Update a pref based on checkbox, and return if the pref is not empty */
     private fun updatePref(categories: Preference<Set<String>>, box: CompoundButton): Boolean {
         val categoryId = category.id ?: return true
-        val updateCategories = categories.getOrDefault().toMutableSet()
+        val updateCategories = categories.get().toMutableSet()
         if (box.isChecked) {
             updateCategories.add(categoryId.toString())
         } else {
@@ -132,11 +132,11 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     private fun setCheckbox(
-        box: CompoundButton,
-        categories: Preference<Set<String>>,
-        shouldShow: Boolean
+            box: CompoundButton,
+            categories: Preference<Set<String>>,
+            shouldShow: Boolean
     ) {
-        val updateCategories = categories.getOrDefault()
+        val updateCategories = categories.get()
         box.visibleIf(updateCategories.isNotEmpty() && shouldShow)
         if (updateCategories.isNotEmpty() && shouldShow) box.isChecked =
             updateCategories.any { category.id == it.toIntOrNull() }

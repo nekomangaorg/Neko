@@ -174,7 +174,7 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdateRestriction() = prefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
 
-    fun libraryUpdateCategories() = rxPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
+    fun libraryUpdateCategories() = flowPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
@@ -212,9 +212,9 @@ class PreferencesHelper(val context: Context) {
 
     fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())
 
-    fun downloadNew() = rxPrefs.getBoolean(Keys.downloadNew, false)
+    fun downloadNew() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
-    fun downloadNewCategories() = rxPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
+    fun downloadNewCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
 
     fun lang() = prefs.getString(Keys.lang, "")
 

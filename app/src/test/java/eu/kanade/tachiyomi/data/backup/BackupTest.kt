@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.backup
 
 import android.app.Application
+import android.app.backup.BackupManager
 import android.content.Context
 import android.os.Build
 import com.github.salomonbrys.kotson.fromJson
@@ -8,8 +9,9 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.CustomRobolectricGradleTestRunner
-import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.DHistory
+import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupManager
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
+import eu.kanade.tachiyomi.data.backup.legacy.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -62,7 +64,7 @@ class BackupTest {
     lateinit var context: Context
     lateinit var source: HttpSource
 
-    lateinit var backupManager: BackupManager
+    lateinit var backupManager: LegacyBackupManager
 
     lateinit var db: DatabaseHelper
 
@@ -70,7 +72,7 @@ class BackupTest {
     fun setup() {
         app = RuntimeEnvironment.application
         context = app.applicationContext
-        backupManager = BackupManager(context)
+        backupManager = LegacyBackupManager(context)
         db = backupManager.databaseHelper
 
         // Mock the source manager
@@ -93,9 +95,6 @@ class BackupTest {
      */
     @Test
     fun testRestoreEmptyCategory() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         // Create backup of empty database
         backupManager.backupCategories(categoryEntries)
 
@@ -112,9 +111,6 @@ class BackupTest {
      */
     @Test
     fun testRestoreSingleCategory() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         // Create category and add to json
         val category = addSingleCategory("category")
 
@@ -132,9 +128,6 @@ class BackupTest {
      */
     @Test
     fun testRestoreMultipleCategories() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         // Create category and add to json
         val category = addSingleCategory("category")
         val category2 = addSingleCategory("category2")
@@ -163,9 +156,6 @@ class BackupTest {
      */
     @Test
     fun testRestoreManga() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         // Add manga to database
         val manga = getSingleManga("One Piece")
         manga.viewer = 3
@@ -215,7 +205,7 @@ class BackupTest {
 
         GlobalScope.launch {
             try {
-                backupManager.restoreMangaFetch(source, jsonManga)
+                backupManager.fetchManga(source, jsonManga)
             } catch (e: Exception) {
                 fail("Unexpected onError events")
             }
@@ -233,9 +223,6 @@ class BackupTest {
      */
     @Test
     fun testRestoreChapters() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         // Insert manga
         val manga = getSingleManga("One Piece")
         manga.id = backupManager.databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
@@ -261,7 +248,7 @@ class BackupTest {
         // Call restoreChapterFetchObservable
         GlobalScope.launch {
             try {
-                backupManager.restoreChapterFetch(source, manga, restoredChapters)
+                backupManager.restoreChapters(source, manga, restoredChapters)
             } catch (e: Exception) {
                 fail("Unexpected onError events")
             }
@@ -277,9 +264,6 @@ class BackupTest {
      */
     @Test
     fun restoreHistoryForManga() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         val manga = getSingleManga("One Piece")
         manga.id = backupManager.databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
 
@@ -311,9 +295,6 @@ class BackupTest {
      */
     @Test
     fun restoreTrackForManga() {
-        // Initialize json with version 2
-        initializeJsonTest(2)
-
         // Create mangas
         val manga = getSingleManga("One Piece")
         val manga2 = getSingleManga("Bleach")
@@ -375,11 +356,6 @@ class BackupTest {
         information = JsonObject()
         mangaEntries = JsonArray()
         categoryEntries = JsonArray()
-    }
-
-    fun initializeJsonTest(version: Int) {
-        clearJson()
-        backupManager.setVersion(version)
     }
 
     fun addSingleCategory(name: String): Category {

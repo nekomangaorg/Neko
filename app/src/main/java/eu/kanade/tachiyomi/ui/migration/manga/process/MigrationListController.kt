@@ -18,6 +18,7 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.smartsearch.SmartSearchEngine
@@ -25,6 +26,8 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.toSChapter
+import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -184,10 +187,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                                         source.id
                                                     )
                                                 val chapters =
-                                                    source.fetchChapterList(localManga).toSingle()
-                                                        .await(
-                                                            Schedulers.io()
-                                                        )
+                                                    source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
                                                 try {
                                                     syncChaptersWithSource(
                                                         db,
@@ -226,8 +226,7 @@ class MigrationListController(bundle: Bundle? = null) :
                                             source.id
                                         )
                                         val chapters = try {
-                                            source.fetchChapterList(localManga).toSingle()
-                                                .await(Schedulers.io())
+                                            source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
                                         } catch (e: java.lang.Exception) {
                                             Timber.e(e)
                                             emptyList<SChapter>()
@@ -260,8 +259,7 @@ class MigrationListController(bundle: Bundle? = null) :
                 if (result != null && result.thumbnail_url == null) {
                     try {
                         val newManga =
-                            sourceManager.getOrStub(result.source).fetchMangaDetails(result)
-                                .toSingle().await()
+                            sourceManager.getOrStub(result.source).getMangaDetails(result.toMangaInfo()).toSManga()
                         result.copyFrom(newManga)
 
                         db.insertManga(result).executeAsBlocking()
@@ -366,9 +364,7 @@ class MigrationListController(bundle: Bundle? = null) :
         launchUI {
             val result = CoroutineScope(migratingManga.manga.migrationJob).async {
                 val localManga = smartSearchEngine.networkToLocalManga(manga, source.id)
-                val chapters = source.fetchChapterList(localManga).toSingle().await(
-                    Schedulers.io()
-                )
+                val chapters = source.getChapterList(localManga.toMangaInfo()).map { it.toSChapter() }
                 try {
                     syncChaptersWithSource(db, chapters, localManga, source)
                 } catch (e: Exception) {
@@ -380,8 +376,8 @@ class MigrationListController(bundle: Bundle? = null) :
             if (result != null) {
                 try {
                     val newManga =
-                        sourceManager.getOrStub(result.source).fetchMangaDetails(result).toSingle()
-                            .await()
+                        sourceManager.getOrStub(result.source).getMangaDetails(result.toMangaInfo())
+                                .toSManga()
                     result.copyFrom(newManga)
 
                     db.insertManga(result).executeAsBlocking()
