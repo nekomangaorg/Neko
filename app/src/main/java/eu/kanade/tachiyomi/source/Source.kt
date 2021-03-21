@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.Logout
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.Response
 import rx.Observable
@@ -127,5 +128,5 @@ interface Source {
 
     suspend fun login(username: String, password: String, twoFactorCode: String = ""): Boolean
 
-    suspend fun logout(): Boolean
+    suspend fun logout(): Logout
 }

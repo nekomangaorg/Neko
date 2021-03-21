@@ -32,12 +32,12 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
                     val loggedOut = withContext(Dispatchers.IO) { source.logout() }
 
-                    if (loggedOut) {
+                    if (loggedOut.loggedOut) {
                         preferences.setSourceCredentials(source, "", "")
                         activity?.toast(R.string.successfully_logged_out)
                         (targetController as? Listener)?.siteLogoutDialogClosed(source)
                     } else {
-                        activity?.toast(R.string.unknown_error)
+                        activity?.toast(loggedOut.error)
                     }
                 }
             }

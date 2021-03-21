@@ -272,10 +272,10 @@ class ReaderPresenter(
                 Observable.fromCallable {
                     val chapterPos = chapterList.indexOf(chapter)
                     if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
-                        XLog.nst().d("ChapterList in loadObservable")
-                        XLog.nst().d("chapter position $chapterPos")
+                        XLog.disableStackTrace().d("ChapterList in loadObservable")
+                        XLog.disableStackTrace().d("chapter position $chapterPos")
                         chapterList.forEach {
-                            XLog.nst().d(it.urlAndName() + " source order: " + it.chapter.source_order)
+                            XLog.disableStackTrace().d(it.urlAndName() + " source order: " + it.chapter.source_order)
                         }
                     }
                     ViewerChapters(
@@ -290,21 +290,21 @@ class ReaderPresenter(
 
                 val oldChapters = viewerChaptersRelay.value
 
-                XLog.nst().d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
-                XLog.nst().d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
-                XLog.nst().d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
 
-                XLog.nst().d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
-                XLog.nst().d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
-                XLog.nst().d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
 
                 // Add new references first to avoid unnecessary recycling
                 newChapters.ref()
                 oldChapters?.unref()
 
-                XLog.nst().d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
-                XLog.nst().d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
-                XLog.nst().d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
+                XLog.disableStackTrace().d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
+                XLog.disableStackTrace().d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
 
                 viewerChaptersRelay.call(newChapters)
             }

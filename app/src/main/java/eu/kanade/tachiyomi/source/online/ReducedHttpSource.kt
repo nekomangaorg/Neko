@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 abstract class ReducedHttpSource : HttpSource() {
 
     private val bucket = TokenBuckets.builder().withCapacity(1)
-        .withFixedIntervalRefillStrategy(1, 3, TimeUnit.SECONDS).build()
+        .withFixedIntervalRefillStrategy(1, 10, TimeUnit.SECONDS).build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
@@ -53,7 +53,7 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun logout(): Boolean {
+    override suspend fun logout(): Logout {
         TODO("Not yet implemented")
     }
 

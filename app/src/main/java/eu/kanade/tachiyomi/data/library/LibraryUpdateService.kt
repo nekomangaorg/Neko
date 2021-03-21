@@ -298,6 +298,7 @@ class LibraryUpdateService(
         mangaToUpdateMap.putAll(mangaToAdd.groupBy { it.source })
 
         coroutineScope {
+
             jobCount.andIncrement
             val results = mangaToUpdateMap.keys.map { source ->
                 try {

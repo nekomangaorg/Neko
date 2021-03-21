@@ -71,9 +71,9 @@ class NetworkHelper(val context: Context) {
                         override fun log(message: String) {
                             try {
                                 Gson().fromJson(message, Any::class.java)
-                                XLog.tag("||NEKO-NETWORK-JSON").nst().json(message)
+                                XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace().json(message)
                             } catch (ex: Exception) {
-                                XLog.tag("||NEKO-NETWORK").nb().nst().d(message)
+                                XLog.tag("||NEKO-NETWORK").nb().disableStackTrace().d(message)
                             }
                         }
                     }

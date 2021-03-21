@@ -294,7 +294,7 @@ open class MangaDex() : HttpSource() {
         }
     }
 
-    override suspend fun logout(): Boolean {
+    override suspend fun logout(): Logout {
         return withContext(Dispatchers.IO) {
             // https://mangadex.org/ajax/actions.ajax.php?function=logout
             val httpUrl = baseUrl.toHttpUrlOrNull()!!
@@ -302,7 +302,7 @@ open class MangaDex() : HttpSource() {
             val cookie = listOfDexCookies.find { it.name == REMEMBER_ME }
             val token = cookie?.value
             if (token.isNullOrEmpty()) {
-                return@withContext true
+                return@withContext Logout(true)
             }
             val catch = runCatching {
                 val result = clientBuilder().newCall(
@@ -318,19 +318,23 @@ open class MangaDex() : HttpSource() {
             catch.exceptionOrNull()?.let {
                 if (!(it is EOFException)) {
                     XLog.e("error logging out", it)
-                    return@withContext false
+                    return@withContext Logout(false, "Unknown error")
                 }
             }
 
             val response = clientBuilder().newCall(GET(MdUtil.apiUrl + MdUtil.isLoggedInApi, headers)).await()
+            if (response.code == 502) {
+                return@withContext Logout(false, "MangaDex appears to be down, unable to logout")
+            }
+
             val jsonData = response.body!!.string()
+
             val result = MdUtil.jsonParser.decodeFromString(IsLoggedInSerializer.serializer(), jsonData)
             if (result.code == 403) {
                 network.cookieManager.remove(httpUrl)
-                return@withContext true
+                return@withContext Logout(true)
             }
-
-            false
+            return@withContext Logout(false, "Unknown error")
         }
     }
 

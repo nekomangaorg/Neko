@@ -82,9 +82,16 @@ suspend fun Call.await(): Response {
 
 fun Call.asObservableSuccess(): Observable<Response> {
     return asObservable().doOnNext { response ->
+
         if (!response.isSuccessful) {
             response.close()
-            throw Exception("HTTP error ${response.code}")
+            if (response.code == 502) {
+                throw Exception("MangaDex appears to be down, or under heavy load")
+            } else if (response.code == 404) {
+                throw Exception("Http error 404.  It is possible that MangaDex is down, or under heavy load")
+            } else {
+                throw Exception("HTTP error ${response.code}")
+            }
         }
     }
 }

@@ -25,8 +25,12 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, private val l
 
             val jsonData = response.body!!.string()
             if (response.code != 200) {
-                XLog.e("error from MangaDex with response code ${response.code} \n body: \n$jsonData")
-                throw Exception("Error from MangaDex Response code ${response.code} ")
+                if (response.code == 502) {
+                    throw Exception("MangaDex appears to be down, or under heavy load")
+                } else {
+                    XLog.e("error from MangaDex with response code ${response.code} \n body: \n$jsonData")
+                    throw Exception("Error from MangaDex Response code ${response.code} ")
+                }
             }
 
             val detailsManga = parser.mangaDetailsParse(jsonData, covers)

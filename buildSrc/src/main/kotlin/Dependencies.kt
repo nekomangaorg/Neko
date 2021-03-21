@@ -230,6 +230,6 @@ object Versions {
     const val versionCompare = "1.3.4"
     const val viewStatePagerAdapter = "1.1.0"
     const val viewToolTip = "1.2.2"
-    const val xlog = "1.6.1"
+    const val xlog = "1.8.0"
 }
 
