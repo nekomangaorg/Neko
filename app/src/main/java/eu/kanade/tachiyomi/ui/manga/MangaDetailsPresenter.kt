@@ -4,6 +4,7 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
+import coil.Coil
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -341,6 +342,8 @@ class MangaDetailsPresenter(
 
                 if (thumbnailUrl != networkManga.thumbnail_url) {
                     coverCache.deleteFromCache(thumbnailUrl)
+                } else {
+                    coverCache.deleteFromCache(manga, false)
                 }
                 withContext(Dispatchers.Main) {
                     controller.setPaletteColor()

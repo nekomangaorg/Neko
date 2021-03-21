@@ -228,7 +228,10 @@ class CoverCache(val context: Context) {
         // Remove file
         val file = getCoverFile(manga)
         if (deleteCustom) deleteCustomCover(manga)
-        if (file.exists()) file.delete()
+        if (file.exists()) {
+            Coil.imageLoader(context).invalidate(file.name)
+            file.delete()
+        }
     }
 
     private fun getCacheDir(dir: String): File {
