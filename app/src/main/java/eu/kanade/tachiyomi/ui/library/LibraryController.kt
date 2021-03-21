@@ -209,7 +209,6 @@ class LibraryController(
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
             val recyclerCover = recycler_cover ?: return
-            val bottomBar = activity?.bottom_nav
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
                 category_hopper_frame.translationY += dy
                 category_hopper_frame.translationY =
@@ -231,23 +230,7 @@ class LibraryController(
                     showCategoryText(currentCategory.name)
                 }
             }
-            if (bottomBar != null) {
-                if (filter_bottom_sheet.sheetBehavior.isHidden()) {
-                    val pad = bottomBar.translationY - bottomBar.height
-                    filter_bottom_sheet.translationY = pad
-                } else {
-                    filter_bottom_sheet.translationY = 0f
-                }
-                val pad = bottomBar.translationY - bottomBar.height
-                shadow2.translationY = pad
-                filter_bottom_sheet.updatePaddingRelative(
-                    bottom = max(
-                        (-bottomBar.translationY + bottomBar.height).toInt(),
-                        view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
-                    )
-                )
-                filter_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + filter_bottom_sheet.paddingBottom
-            }
+            updateFilterSheetY()
             val savedCurrentCategory = getHeader(true)?.category ?: return
             if (savedCurrentCategory.order != lastUsedCategory) {
                 lastUsedCategory = savedCurrentCategory.order
@@ -265,6 +248,30 @@ class LibraryController(
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     updateHopperPosition()
                 }
+            }
+        }
+    }
+
+    fun updateFilterSheetY() {
+        val bottomBar = activity?.bottom_nav
+        if (bottomBar != null) {
+            if (filter_bottom_sheet.sheetBehavior.isHidden()) {
+                val pad = bottomBar.translationY - bottomBar.height
+                filter_bottom_sheet.translationY = pad
+            } else {
+                filter_bottom_sheet.translationY = 0f
+            }
+            val pad = bottomBar.translationY - bottomBar.height
+            shadow2.translationY = pad
+            filter_bottom_sheet.updatePaddingRelative(
+                bottom = max(
+                    (-bottomBar.translationY + bottomBar.height).toInt(),
+                    view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                )
+            )
+            filter_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + filter_bottom_sheet.paddingBottom
+            fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = -pad.toInt()
             }
         }
     }
@@ -354,6 +361,9 @@ class LibraryController(
 
         adapter = LibraryCategoryAdapter(this)
         setRecyclerLayout()
+        recycler.post {
+            updateFilterSheetY()
+        }
 
         recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {

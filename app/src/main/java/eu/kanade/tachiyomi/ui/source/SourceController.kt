@@ -43,11 +43,13 @@ import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.sheet_layout
+import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
@@ -224,6 +226,9 @@ class SourceController :
         val pad = bottomBar.translationY - bottomBar.height
         shadow2.translationY = pad
         ext_bottom_sheet.sheetBehavior?.peekHeight = 48.spToPx + ext_bottom_sheet.paddingBottom
+        ext_bottom_sheet.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = -pad.toInt()
+        }
     }
 
     override fun showSheet() {
