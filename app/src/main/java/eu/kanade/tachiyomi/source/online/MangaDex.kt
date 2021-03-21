@@ -294,6 +294,13 @@ open class MangaDex() : HttpSource() {
         }
     }
 
+    suspend fun checkIfUp(): Boolean {
+        return withContext(Dispatchers.IO) {
+            val response = clientBuilder().newCall(GET(MdUtil.apiUrl + MdUtil.apiManga + 1)).await()
+            response.isSuccessful
+        }
+    }
+
     override suspend fun logout(): Logout {
         return withContext(Dispatchers.IO) {
             // https://mangadex.org/ajax/actions.ajax.php?function=logout

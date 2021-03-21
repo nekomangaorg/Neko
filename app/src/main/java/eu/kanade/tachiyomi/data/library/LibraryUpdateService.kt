@@ -299,22 +299,28 @@ class LibraryUpdateService(
 
         coroutineScope {
 
+            val isDexUp = sourceManager.getMangadex().checkIfUp()
+
             jobCount.andIncrement
-            val results = mangaToUpdateMap.keys.map { source ->
-                try {
-                    updateMangaInSource(source, downloadNew, categoriesToDownload)
-                } catch (e: Exception) {
-                    XLog.e(e)
-                    false
+            if (isDexUp) {
+                val results = mangaToUpdateMap.keys.map { source ->
+                    try {
+                        updateMangaInSource(source, downloadNew, categoriesToDownload)
+                    } catch (e: Exception) {
+                        XLog.e(e)
+                        false
+                    }
                 }
+                hasDownloads = hasDownloads || results.any { it }
+            } else {
+                mangaToUpdateMap.clear()
             }
-            hasDownloads = hasDownloads || results.any { it }
             jobCount.andDecrement
-            finishUpdates()
+            finishUpdates(isDexUp)
         }
     }
 
-    private suspend fun finishUpdates() {
+    private fun finishUpdates(isDexUp: Boolean = true) {
         if (jobCount.get() != 0) return
         if (newUpdates.isNotEmpty()) {
             notifier.showResultNotification(newUpdates)
@@ -328,6 +334,12 @@ class LibraryUpdateService(
             notifier.showUpdateErrorNotification(
                 failedUpdates.map { it.key.title },
                 errorFile.getUriCompat(this)
+            )
+        }
+        if (isDexUp.not()) {
+            notifier.showUpdateErrorNotification(
+                listOf("Skipping library update"),
+                null
             )
         }
         failedUpdates.clear()

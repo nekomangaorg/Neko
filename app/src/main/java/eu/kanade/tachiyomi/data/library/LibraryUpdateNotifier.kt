@@ -90,7 +90,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param errors List of entry titles that failed to update.
      * @param uri Uri for error log file containing all titles that failed.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
+    fun showUpdateErrorNotification(errors: List<String>, uri: Uri?) {
         if (errors.isEmpty()) {
             return
         }
@@ -98,7 +98,16 @@ class LibraryUpdateNotifier(private val context: Context) {
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
             context.notificationBuilder(Notifications.CHANNEL_LIBRARY) {
-                setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
+                if (uri == null) {
+                    setContentTitle("502: MangaDex appears to be down")
+                } else {
+                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
+                    addAction(
+                        R.drawable.nnf_ic_file_folder,
+                        context.getString(R.string.view_all_errors),
+                        NotificationReceiver.openErrorLogPendingActivity(context, uri)
+                    )
+                }
                 setStyle(
                     NotificationCompat.BigTextStyle().bigText(
                         errors.joinToString("\n") {
@@ -107,11 +116,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                 )
                 setSmallIcon(R.drawable.ic_neko_notification)
-                addAction(
-                    R.drawable.nnf_ic_file_folder,
-                    context.getString(R.string.view_all_errors),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri)
-                )
+
             }
                 .build()
         )
