@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -62,6 +63,10 @@ interface Manga : SManga {
                 else -> R.string.manga
             }
         ).toLowerCase(Locale.getDefault())
+    }
+
+    fun getGenres(): List<String>? {
+        return genre?.split(", ")?.map { it.trim() }
     }
 
     /**
@@ -220,4 +225,17 @@ interface Manga : SManga {
             this.source = source
         }
     }
+}
+
+fun Manga.toMangaInfo(): MangaInfo {
+    return MangaInfo(
+        artist = this.artist ?: "",
+        author = this.author ?: "",
+        cover = this.thumbnail_url ?: "",
+        description = this.description ?: "",
+        genres = this.getGenres() ?: emptyList(),
+        key = this.url,
+        status = this.status,
+        title = this.title
+    )
 }

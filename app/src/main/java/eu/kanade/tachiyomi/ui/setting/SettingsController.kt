@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import kotlinx.coroutines.MainScope
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
@@ -25,6 +26,7 @@ import uy.kohesive.injekt.api.get
 abstract class SettingsController : PreferenceController() {
 
     val preferences: PreferencesHelper = Injekt.get()
+    val viewScope = MainScope()
 
     var untilDestroySubscriptions = CompositeSubscription()
         private set

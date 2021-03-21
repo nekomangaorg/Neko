@@ -269,7 +269,7 @@ class LibraryPresenter(
                 tracks.any { it.sync_id == service.id }
             }
             val service = if (filterTrackers.isNotEmpty()) loggedServices.find {
-                it.name == filterTrackers
+                context.getString(it.nameRes()) == filterTrackers
             } else null
             if (filterTracked == STATE_INCLUDE) {
                 if (!hasTrack) return false

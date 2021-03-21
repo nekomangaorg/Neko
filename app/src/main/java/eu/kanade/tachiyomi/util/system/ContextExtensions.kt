@@ -30,6 +30,7 @@ import androidx.core.net.toUri
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
+import java.io.File
 
 /**
  * Display a toast in this context.
@@ -161,6 +162,15 @@ fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Bu
 }
 
 /**
+ * Convenience method to acquire a partial wake lock.
+ */
+fun Context.acquireWakeLock(tag: String): PowerManager.WakeLock {
+    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag:WakeLock")
+    wakeLock.acquire()
+    return wakeLock
+}
+
+/**
  * Property to get the notification manager from the context.
  */
 val Context.notificationManager: NotificationManager
@@ -289,4 +299,13 @@ fun Context.isOnline(): Boolean {
         result = (NetworkCapabilities.TRANSPORT_CELLULAR..maxTransport).any(actNw::hasTransport)
     }
     return result
+}
+
+fun Context.createFileInCacheDir(name: String): File {
+    val file = File(externalCacheDir, name)
+    if (file.exists()) {
+        file.delete()
+    }
+    file.createNewFile()
+    return file
 }

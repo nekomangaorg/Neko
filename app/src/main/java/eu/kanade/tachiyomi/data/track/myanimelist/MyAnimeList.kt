@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 
 import android.content.Context
 import android.graphics.Color
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -15,7 +16,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     private val interceptor by lazy { MyAnimeListInterceptor(this) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
-    override val name = "MyAnimeList"
+    @StringRes
+    override fun nameRes() = R.string.myanimelist
 
     override fun getLogo() = R.drawable.ic_tracker_mal
 

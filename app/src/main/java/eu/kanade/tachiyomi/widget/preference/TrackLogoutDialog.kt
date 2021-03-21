@@ -18,8 +18,9 @@ class TrackLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
     constructor(service: TrackService) : this(Bundle().apply { putInt("key", service.id) })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+        val serviceName = activity!!.getString(service.nameRes())
         return MaterialDialog(activity!!)
-            .title(text = activity!!.getString(R.string.logout_from_, service.name))
+            .title(text = activity!!.getString(R.string.logout_from_, serviceName))
             .negativeButton(R.string.cancel)
             .positiveButton(R.string.logout) { _ ->
                 service.logout()

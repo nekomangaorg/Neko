@@ -42,10 +42,11 @@ class TrackRemoveDialog<T> : DialogController
             .negativeButton(android.R.string.cancel)
 
         if (item.service.canRemoveFromService()) {
+            val serviceName = activity!!.getString(item.service.nameRes())
             dialog.checkBoxPrompt(
                 text = activity!!.getString(
                     R.string.remove_tracking_from_,
-                    item.service.name
+                    serviceName
                 ),
                 isCheckedDefault = true,
                 onToggle = null

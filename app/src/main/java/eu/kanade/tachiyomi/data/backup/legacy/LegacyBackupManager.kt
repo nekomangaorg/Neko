@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.backup
+package eu.kanade.tachiyomi.data.backup.legacy
 
 import android.content.Context
 import android.net.Uri
@@ -12,6 +12,7 @@ import com.google.gson.JsonArray
 import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.data.backup.AbstractBackupManager
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CHAPTER
@@ -20,21 +21,20 @@ import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_HIST
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_HISTORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_TRACK
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_TRACK_MASK
-import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.Backup.CATEGORIES
-import eu.kanade.tachiyomi.data.backup.models.Backup.CHAPTERS
-import eu.kanade.tachiyomi.data.backup.models.Backup.CURRENT_VERSION
-import eu.kanade.tachiyomi.data.backup.models.Backup.EXTENSIONS
-import eu.kanade.tachiyomi.data.backup.models.Backup.HISTORY
-import eu.kanade.tachiyomi.data.backup.models.Backup.MANGA
-import eu.kanade.tachiyomi.data.backup.models.Backup.TRACK
-import eu.kanade.tachiyomi.data.backup.models.DHistory
-import eu.kanade.tachiyomi.data.backup.serializer.CategoryTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.ChapterTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.HistoryTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.MangaTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.TrackTypeAdapter
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.CATEGORIES
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.CHAPTERS
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.CURRENT_VERSION
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.EXTENSIONS
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.HISTORY
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.MANGA
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.TRACK
+import eu.kanade.tachiyomi.data.backup.legacy.models.DHistory
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.CategoryTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.ChapterTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.HistoryTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.MangaTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.TrackTypeAdapter
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
@@ -44,65 +44,16 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.database.models.toMangaInfo
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.fetchMangaDetailsAsync
-import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import rx.Observable
+import eu.kanade.tachiyomi.source.model.toSManga
 import timber.log.Timber
-import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
 
-class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
+class LegacyBackupManager(context: Context, version: Int = CURRENT_VERSION) : AbstractBackupManager(context) {
 
-    /**
-     * Database.
-     */
-    internal val databaseHelper: DatabaseHelper by injectLazy()
-
-    /**
-     * Source manager.
-     */
-    internal val sourceManager: SourceManager by injectLazy()
-
-    /**
-     * Tracking manager
-     */
-    internal val trackManager: TrackManager by injectLazy()
-
-    /**
-     * Version of parser
-     */
-    var version: Int = version
-        private set
-
-    /**
-     * Json Parser
-     */
-    var parser: Gson = initParser()
-
-    /**
-     * Preferences
-     */
-    private val preferences: PreferencesHelper by injectLazy()
-
-    /**
-     * Set version of parser
-     *
-     * @param version version of parser
-     */
-    internal fun setVersion(version: Int) {
-        this.version = version
-        parser = initParser()
-    }
-
-    private fun initParser(): Gson = when (version) {
-        1 -> GsonBuilder().create()
+    val parser: Gson = when (version) {
         2 ->
             GsonBuilder()
                 .registerTypeAdapter<MangaImpl>(MangaTypeAdapter.build())
@@ -111,7 +62,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
                 .registerTypeAdapter<DHistory>(HistoryTypeAdapter.build())
                 .registerTypeHierarchyAdapter<TrackImpl>(TrackTypeAdapter.build())
                 .create()
-        else -> throw Exception("Json version unknown")
+        else -> throw Exception("Unknown backup version")
     }
 
     /**
@@ -120,7 +71,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      * @param uri path of Uri
      * @param isJob backup called from job
      */
-    fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String? {
+    override fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String? {
         // Create root object
         val root = JsonObject()
 
@@ -140,7 +91,6 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         root[EXTENSIONS] = extensionEntries
 
         databaseHelper.inTransaction {
-            // Get manga from database
             val mangas = getFavoriteManga()
 
             val extensions: MutableSet<String> = mutableSetOf()
@@ -150,7 +100,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
                 mangaEntries.add(backupMangaObject(manga, flags))
 
                 // Maintain set of extensions/sources used (excludes local source)
-                if (manga.source != 0L) {
+                if (manga.source != LocalSource.ID) {
                     sourceManager.get(manga.source)?.let {
                         extensions.add("${manga.source}:${it.name}")
                     }
@@ -167,39 +117,33 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         }
 
         try {
-            // When BackupCreatorJob
-            if (isJob) {
-                // Get dir of file and create
-                var dir = UniFile.fromUri(context, uri)
-                dir = dir.createDirectory("automatic")
+            val file: UniFile = (
+                if (isJob) {
+                    // Get dir of file and create
+                    var dir = UniFile.fromUri(context, uri)
+                    dir = dir.createDirectory("automatic")
 
-                // Delete older backups
-                val numberOfBackups = numberOfBackups()
-                val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.json""")
-                dir.listFiles { _, filename -> backupRegex.matches(filename) }
-                    .orEmpty()
-                    .sortedByDescending { it.name }
-                    .drop(numberOfBackups - 1)
-                    .forEach { it.delete() }
+                    // Delete older backups
+                    val numberOfBackups = numberOfBackups()
+                    val backupRegex = Regex("""tachiyomi_\d+-\d+-\d+_\d+-\d+.json""")
+                    dir.listFiles { _, filename -> backupRegex.matches(filename) }
+                        .orEmpty()
+                        .sortedByDescending { it.name }
+                        .drop(numberOfBackups - 1)
+                        .forEach { it.delete() }
 
-                // Create new file to place backup
-                val newFile = dir.createFile(Backup.getDefaultFilename())
-                    ?: throw Exception("Couldn't create backup file")
-
-                newFile.openOutputStream().bufferedWriter().use {
-                    parser.toJson(root, it)
+                    // Create new file to place backup
+                    dir.createFile(Backup.getDefaultFilename())
+                } else {
+                    UniFile.fromUri(context, uri)
                 }
+                )
+                ?: throw Exception("Couldn't create backup file")
 
-                return newFile.uri.toString()
-            } else {
-                val file = UniFile.fromUri(context, uri)
-                    ?: throw Exception("Couldn't create backup file")
-                file.openOutputStream().bufferedWriter().use {
-                    parser.toJson(root, it)
-                }
-
-                return file.uri.toString()
+            file.openOutputStream().bufferedWriter().use {
+                parser.toJson(root, it)
             }
+            return file.uri.toString()
         } catch (e: Exception) {
             Timber.e(e)
             throw e
@@ -291,55 +235,20 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
     }
 
     /**
-     * [Observable] that fetches manga information
+     * Fetches manga information
      *
      * @param source source of manga
      * @param manga manga that needs updating
-     * @return [Observable] that contains manga
+     * @return Updated manga.
      */
-    suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
-        return withContext(Dispatchers.IO) {
-            val networkManga = source.fetchMangaDetailsAsync(manga)!!
-            manga.copyFrom(networkManga)
-            manga.favorite = true
-            manga.initialized = true
-            manga.id = insertManga(manga)
-            manga
+    suspend fun fetchManga(source: Source, manga: Manga): Manga {
+        val networkManga = source.getMangaDetails(manga.toMangaInfo())
+        return manga.also {
+            it.copyFrom(networkManga.toSManga())
+            it.favorite = true
+            it.initialized = true
+            it.id = insertManga(manga)
         }
-    }
-
-    /**
-     * [Observable] that fetches chapter information
-     *
-     * @param source source of manga
-     * @param manga manga that needs updating
-     * @return [Observable] that contains manga
-     */
-    suspend fun restoreChapterFetch(source: Source, manga: Manga, chapters: List<Chapter>) {
-        withContext(Dispatchers.IO) {
-            val fetchChapters = source.fetchChapterList(manga).toBlocking().single()
-            val syncChaptersWithSource =
-                syncChaptersWithSource(databaseHelper, fetchChapters, manga, source)
-            if (syncChaptersWithSource.first.isNotEmpty()) {
-                chapters.forEach { it.manga_id = manga.id }
-                insertChapters(chapters)
-            }
-        }
-    }
-
-    /**
-     * Restore extensions list from json and map them
-     */
-    internal fun getExtensionsMap(extensions: JsonArray): Map<String, String> {
-        val extensionsList = parser.fromJson<List<String>>(extensions)
-        return extensionsList.mapNotNull {
-            val split = it.split(":")
-            if (split.size == 2) {
-                split.first() to split.last()
-            } else {
-                null
-            }
-        }.toMap()
     }
 
     /**
@@ -359,7 +268,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
             for (dbCategory in dbCategories) {
                 // If the category is already in the db, assign the id to the file's category
                 // and do nothing
-                if (category.nameLower == dbCategory.nameLower) {
+                if (category.name == dbCategory.name) {
                     category.id = dbCategory.id
                     found = true
                     break
@@ -384,10 +293,10 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      */
     internal fun restoreCategoriesForManga(manga: Manga, categories: List<String>) {
         val dbCategories = databaseHelper.getCategories().executeAsBlocking()
-        val mangaCategoriesToUpdate = ArrayList<MangaCategory>()
+        val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
         for (backupCategoryStr in categories) {
             for (dbCategory in dbCategories) {
-                if (backupCategoryStr.toLowerCase() == dbCategory.nameLower) {
+                if (backupCategoryStr == dbCategory.name) {
                     mangaCategoriesToUpdate.add(MangaCategory.create(manga, dbCategory))
                     break
                 }
@@ -396,9 +305,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
 
         // Update database
         if (mangaCategoriesToUpdate.isNotEmpty()) {
-            val mangaAsList = ArrayList<Manga>()
-            mangaAsList.add(manga)
-            databaseHelper.deleteOldMangasCategories(mangaAsList).executeAsBlocking()
+            databaseHelper.deleteOldMangasCategories(listOf(manga)).executeAsBlocking()
             databaseHelper.insertMangasCategories(mangaCategoriesToUpdate).executeAsBlocking()
         }
     }
@@ -410,7 +317,7 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      */
     internal fun restoreHistoryForManga(history: List<DHistory>) {
         // List containing history to be updated
-        val historyToBeUpdated = ArrayList<History>()
+        val historyToBeUpdated = ArrayList<History>(history.size)
         for ((url, lastRead) in history) {
             val dbHistory = databaseHelper.getHistoryByChapterUrl(url).executeAsBlocking()
             // Check if history already in database and update
@@ -439,14 +346,14 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
      * @param tracks the track list to restore.
      */
     internal fun restoreTrackForManga(manga: Manga, tracks: List<Track>) {
-        // Fix foreign keys with the current manga id
-        tracks.map { it.manga_id = manga.id!! }
-
         // Get tracks from database
         val dbTracks = databaseHelper.getTracks(manga).executeAsBlocking()
-        val trackToUpdate = ArrayList<Track>()
+        val trackToUpdate = ArrayList<Track>(tracks.size)
 
-        for (track in tracks) {
+        tracks.forEach { track ->
+            // Fix foreign keys with the current manga id
+            track.manga_id = manga.id!!
+
             val service = trackManager.getService(track.sync_id)
             if (service != null && service.isLogged) {
                 var isInDatabase = false
@@ -489,8 +396,9 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         // Return if fetch is needed
-        if (dbChapters.isEmpty() || dbChapters.size < chapters.size)
+        if (dbChapters.isEmpty() || dbChapters.size < chapters.size) {
             return false
+        }
 
         for (chapter in chapters) {
             val pos = dbChapters.indexOf(chapter)
@@ -500,50 +408,13 @@ class BackupManager(val context: Context, version: Int = CURRENT_VERSION) {
                 chapter.copyFrom(dbChapter)
                 break
             }
-        }
-        // Filter the chapters that couldn't be found.
-        chapters.filter { it.id != null }
-        chapters.map { it.manga_id = manga.id }
 
-        insertChapters(chapters)
+            chapter.manga_id = manga.id
+        }
+
+        // Filter the chapters that couldn't be found.
+        updateChapters(chapters.filter { it.id != null })
+
         return true
     }
-
-    /**
-     * Returns manga
-     *
-     * @return [Manga], null if not found
-     */
-    internal fun getMangaFromDatabase(manga: Manga): Manga? =
-        databaseHelper.getManga(manga.url, manga.source).executeAsBlocking()
-
-    /**
-     * Returns list containing manga from library
-     *
-     * @return [Manga] from library
-     */
-    internal fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangas().executeAsBlocking()
-
-    /**
-     * Inserts manga and returns id
-     *
-     * @return id of [Manga], null if not found
-     */
-    internal fun insertManga(manga: Manga): Long? =
-        databaseHelper.insertManga(manga).executeAsBlocking().insertedId()
-
-    /**
-     * Inserts list of chapters
-     */
-    private fun insertChapters(chapters: List<Chapter>) {
-        databaseHelper.updateChaptersBackup(chapters).executeAsBlocking()
-    }
-
-    /**
-     * Return number of backups.
-     *
-     * @return number of backups selected by user
-     */
-    fun numberOfBackups(): Int = preferences.numberOfBackups().getOrDefault()
 }

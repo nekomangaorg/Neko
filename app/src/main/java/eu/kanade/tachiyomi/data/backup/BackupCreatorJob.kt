@@ -7,8 +7,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
+import eu.kanade.tachiyomi.data.backup.full.FullBackupManager
+import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -18,11 +19,13 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
 
     override fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
-        val backupManager = BackupManager(context)
-        val uri = preferences.backupsDirectory().getOrDefault().toUri()
+        val uri = preferences.backupsDirectory().get().toUri()
         val flags = BackupCreateService.BACKUP_ALL
         return try {
-            backupManager.createBackup(uri, flags, true)
+            FullBackupManager(context).createBackup(uri, flags, true)
+            if (preferences.createLegacyBackup().get()) {
+                LegacyBackupManager(context).createBackup(uri, flags, true)
+            }
             Result.success()
         } catch (e: Exception) {
             Result.failure()
@@ -32,9 +35,9 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     companion object {
         private const val TAG = "BackupCreator"
 
-        fun setupTask(prefInterval: Int? = null) {
+        fun setupTask(context: Context, prefInterval: Int? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
-            val interval = prefInterval ?: preferences.backupInterval().getOrDefault()
+            val interval = prefInterval ?: preferences.backupInterval().get()
             if (interval > 0) {
                 val request = PeriodicWorkRequestBuilder<BackupCreatorJob>(
                     interval.toLong(),

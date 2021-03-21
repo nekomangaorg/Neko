@@ -289,6 +289,8 @@ class NotificationReceiver : BroadcastReceiver() {
         // Value containing chapter url.
         private const val EXTRA_CHAPTER_URL = "$ID.$NAME.EXTRA_CHAPTER_URL"
 
+        private const val EXTRA_IS_LEGACY_BACKUP = "$ID.$NAME.EXTRA_IS_LEGACY_BACKUP"
+
         /**
          * Returns a [PendingIntent] that resumes the download of a chapter
          *
@@ -551,24 +553,27 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun shareBackupPendingBroadcast(context: Context, uri: Uri, notificationId: Int): PendingIntent {
+        internal fun shareBackupPendingBroadcast(context: Context, uri: Uri, isLegacyFormat: Boolean, notificationId: Int): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_SHARE_BACKUP
                 putExtra(EXTRA_URI, uri)
+                putExtra(EXTRA_IS_LEGACY_BACKUP, isLegacyFormat)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which stops the restore service
+         * Returns [PendingIntent] that cancels a backup restore job.
          *
          * @param context context of application
+         * @param notificationId id of notification
          * @return [PendingIntent]
          */
-        internal fun cancelRestorePendingBroadcast(context: Context): PendingIntent {
+        internal fun cancelRestorePendingBroadcast(context: Context, notificationId: Int): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_RESTORE
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }

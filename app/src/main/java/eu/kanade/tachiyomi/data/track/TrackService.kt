@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track
 
 import androidx.annotation.CallSuper
 import androidx.annotation.DrawableRes
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
@@ -18,7 +19,8 @@ abstract class TrackService(val id: Int) {
         get() = networkService.client
 
     // Name of the manga sync service to display
-    abstract val name: String
+    @StringRes
+    abstract fun nameRes(): Int
 
     @DrawableRes
     abstract fun getLogo(): Int

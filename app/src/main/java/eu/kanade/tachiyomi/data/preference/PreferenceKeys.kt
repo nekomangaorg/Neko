@@ -155,6 +155,8 @@ object PreferenceKeys {
 
     const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
+    const val createLegacyBackup = "create_legacy_backup"
+
     const val enableDoh = "enable_doh"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"

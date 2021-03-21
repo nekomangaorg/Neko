@@ -49,6 +49,7 @@
     <string name="removed_bookmark">Removed bookmark</string>
     <string name="chapters_removed">Chapters removed.</string>
     <string name="chapter_not_found">Chapter not found</string>
+    <string name="no_chapters_error">No chapters found</string>
     <plurals name="remove_n_chapters">
         <item quantity="one">Remove %1$d downloaded chapter?</item>
         <item quantity="other">Remove %1$d downloaded chapters?</item>
@@ -427,6 +428,11 @@
     <string name="add_tracking">Add tracking</string>
     <string name="remove_tracking">Remove tracking from app</string>
     <string name="remove_tracking_from_">Also remove from %1$s</string>
+    <string name="anilist" translatable="false">AniList</string>
+    <string name="myanimelist" translatable="false">MyAnimeList</string>
+    <string name="kitsu" translatable="false">Kitsu</string>
+    <string name="bangumi" translatable="false">Bangumi</string>
+    <string name="shikimori" translatable="false">Shikimori</string>
 
     <!-- Migration -->
     <string name="select_sources">Select sources</string>
@@ -503,23 +509,42 @@
     <string name="backup">Backup</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
+    <string name="create_legacy_backup">Create legacy backup</string>
+    <string name="can_be_used_in_older_tachi">Can be used in older versions of Tachiyomi</string>
     <string name="restore_backup">Restore backup</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
+    <string name="restore_in_progress">Restore already in progress</string>
+    <string name="backup_in_progress">Backup already in progress</string>
     <string name="backup_location">Backup location</string>
+    <string name="automatic_backups">Automatic backups</string>
     <string name="service">Service</string>
     <string name="backup_frequency">Backup frequency</string>
     <string name="max_auto_backups">Max automatic backups</string>
+    <string name="also_create_legacy_backup">Also create legacy backup</string>
+    <string name="invalid_backup_file">Invalid backup file</string>
+    <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
+    <string name="file_is_missing_data">File is missing data.</string>
+    <string name="backup_has_no_manga">Backup does not contain any manga.</string>
     <string name="backup_failed">Backup failed</string>
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
-    <string name="restore_error">Restore error</string>
-    <string name="restore_completed_content">%1$s Restored. %2$s errors found</string>
+    <string name="restore_error">Failed to restore backup</string>
     <string name="restore_content_skipped">%1$d skipped</string>
     <string name="restore_message">Restore uses the network to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
+    <string name="restore_missing_sources">Missing sources:</string>
+    <string name="restore_missing_trackers">Trackers not logged into:</string>
+    <string name="restore_content">Restore uses sources to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
+    <string name="restore_content_full">Data from the backup file will be restored.\n\nYou will need to install any missing extensions and log in to tracking services afterwards to use them.</string>
+    <string name="restoring_backup_canceled">Canceled restore</string>
     <string name="creating_backup">Creating backup</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restoring_progress">Restoring (%1$d/%2$d)</string>
+    <string name="restore_duration">%02d min, %02d sec</string>
+    <plurals name="restore_completed_message">
+        <item quantity="one">Done in %1$s with %2$s error</item>
+        <item quantity="other">Done in %1$s with %2$s errors</item>
+    </plurals>
     <plurals name="sources_missing">
         <item quantity="one">%d source missing</item>
         <item quantity="other">%d sources missing</item>
@@ -682,6 +707,7 @@
     <!-- File Picker Titles -->
     <string name="select_cover_image">Select cover image</string>
     <string name="select_backup_file">Select backup file</string>
+    <string name="file_picker_error">No file picker app found</string>
 
     <!-- Webview -->
     <string name="failed_to_bypass_cloudflare">Failed to bypass Cloudflare</string>
@@ -744,6 +770,7 @@
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>
     <string name="open_in_browser">Open in browser</string>
+    <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
     <string name="options">Options</string>
     <string name="pause">Pause</string>

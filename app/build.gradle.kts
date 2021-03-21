@@ -4,13 +4,14 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
 plugins {
-    id("com.android.application")
-    id("com.google.android.gms.oss-licenses-plugin")
-    kotlin("android")
-    kotlin("android.extensions")
-    kotlin("kapt")
-    id("com.google.gms.google-services") apply false
-    id("org.jmailen.kotlinter")
+    id(Plugins.androidApplication)
+    kotlin(Plugins.kotlinAndroid)
+    kotlin(Plugins.kotlinExtensions)
+    kotlin(Plugins.kapt)
+    id(Plugins.kotlinSerialization)
+    id(Plugins.aboutLibraries)
+    id(Plugins.firebaseCrashlytics)
+    id(Plugins.googleServices) apply false
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -45,7 +46,7 @@ android {
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
         ndk {
-            abiFilters("armeabi-v7a", "arm64-v8a", "x86")
+            abiFilters += setOf("armeabi-v7a", "arm64-v8a", "x86")
         }
     }
     buildTypes {
@@ -90,23 +91,26 @@ dependencies {
     implementation("com.github.tachiyomiorg:subsampling-scale-image-view:6caf219")
     implementation("com.github.inorichi:junrar-android:634c1f5")
 
+    // Source models and interfaces from Tachiyomi 1.x
+    implementation("tachiyomi.sourceapi:source-api:1.1")
+
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.1.0")
+    implementation("androidx.appcompat:appcompat:1.2.0")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.1.0")
+    implementation("com.google.android.material:material:1.3.0")
     implementation("androidx.recyclerview:recyclerview:1.1.0")
     implementation("androidx.preference:preference:1.1.1")
     implementation("androidx.annotation:annotation:1.1.0")
-    implementation("androidx.browser:browser:1.2.0")
-    implementation("androidx.biometric:biometric:1.0.1")
+    implementation("androidx.browser:browser:1.3.0")
+    implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation ("androidx.core:core-ktx:$1.3.1")
+    implementation("androidx.core:core-ktx:1.5.0-beta03")
 
     implementation("androidx.constraintlayout:constraintlayout:1.1.3")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:17.4.4")
+    implementation("com.google.firebase:firebase-core:18.0.2")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
@@ -121,13 +125,13 @@ dependencies {
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
     // Coroutines
-    implementation("com.github.tfcporciuncula:flow-preferences:1.1.1")
+    implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
 
     // Network client
     implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
     implementation("com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${Versions.OKHTTP}")
-    implementation("com.squareup.okio:okio:2.7.0")
+    implementation("com.squareup.okio:okio:2.10.0")
 
     // Chucker
     val chuckerVersion = "3.2.0"
@@ -153,6 +157,8 @@ dependencies {
     implementation("com.squareup.retrofit2:converter-gson:${Versions.RETROFIT}")
 
     // JSON
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLINSERIALIZATION}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.KOTLINSERIALIZATION}")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
@@ -167,7 +173,6 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
     // Job scheduling
-    implementation("android.arch.work:work-runtime:${Versions.WORKMANAGER}")
     implementation("android.arch.work:work-runtime-ktx:${Versions.WORKMANAGER}")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
@@ -255,12 +260,8 @@ dependencies {
     implementation("org.conscrypt:conscrypt-android:2.4.0")
 }
 
-
 tasks.preBuild {
-    dependsOn(tasks.lintKotlin)
-}
-tasks.lintKotlin {
-    dependsOn(tasks.formatKotlin)
+    dependsOn(tasks.ktlintFormat)
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {

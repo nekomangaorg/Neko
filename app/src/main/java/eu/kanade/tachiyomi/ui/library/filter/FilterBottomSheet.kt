@@ -36,6 +36,7 @@ import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.track_item.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -311,7 +312,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (filterItems.contains(tracked)) {
                 val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
                 if (loggedServices.size > 1) {
-                    val serviceNames = loggedServices.map { it.name }
+                    val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
                     withContext(Dispatchers.Main) {
                         trackers = inflate(R.layout.filter_buttons) as FilterTagGroup
                         trackers?.setup(

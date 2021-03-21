@@ -31,7 +31,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         logo_container.updateLayoutParams<ConstraintLayout.LayoutParams> {
             bottomToBottom = if (track != null) divider.id else track_details.id
         }
-        track_logo.contentDescription = item.service.name
+        val serviceName = track_logo.context.getString(item.service.nameRes())
+        track_logo.contentDescription = serviceName
         track_group.visibleIf(track != null)
         add_tracking.visibleIf(track == null)
         if (track != null) {

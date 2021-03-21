@@ -5,26 +5,36 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.toChapterInfo
+import eu.kanade.tachiyomi.source.model.toMangaInfo
+import eu.kanade.tachiyomi.source.model.toPageUrl
+import eu.kanade.tachiyomi.source.model.toSChapter
+import eu.kanade.tachiyomi.source.model.toSManga
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.Observable
+import tachiyomi.source.model.ChapterInfo
+import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 /**
  * A basic interface for creating a source. It could be an online source, a local source, etc...
  */
-interface Source {
+interface Source : tachiyomi.source.Source {
 
     /**
      * Id for the source. Must be unique.
      */
-    val id: Long
+    override val id: Long
 
     /**
      * Name of the source.
      */
-    val name: String
+    override val name: String
+
+    override val lang: String
+        get() = ""
 
     /**
      * Returns an observable with the updated details for a manga.
@@ -46,6 +56,40 @@ interface Source {
      * @param chapter the chapter.
      */
     fun fetchPageList(chapter: SChapter): Observable<List<Page>>
+
+    /**
+     * [1.x API] Get the updated details for a manga.
+     */
+    @Suppress("DEPRECATION")
+    override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
+        return withContext(Dispatchers.IO) {
+            val sManga = manga.toSManga()
+            val networkManga = fetchMangaDetails(sManga).toBlocking().single()
+            sManga.copyFrom(networkManga)
+            sManga.toMangaInfo()
+        }
+    }
+
+    /**
+     * [1.x API] Get all the available chapters for a manga.
+     */
+    @Suppress("DEPRECATION")
+    override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
+        return withContext(Dispatchers.IO) {
+            fetchChapterList(manga.toSManga()).toBlocking().single().map { it.toChapterInfo() }
+        }
+    }
+
+    /**
+     * [1.x API] Get the list of pages a chapter has.
+     */
+    @Suppress("DEPRECATION")
+    override suspend fun getPageList(chapter: ChapterInfo): List<tachiyomi.source.model.Page> {
+        return withContext(Dispatchers.IO) {
+            fetchPageList(chapter.toSChapter()).toBlocking().single()
+                .map { it.toPageUrl() }
+        }
+    }
 }
 
 suspend fun Source.fetchMangaDetailsAsync(manga: SManga): SManga? {

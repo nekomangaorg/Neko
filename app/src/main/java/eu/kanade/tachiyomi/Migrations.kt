@@ -78,7 +78,7 @@ object Migrations {
                     UpdaterJob.setupTask()
                 }
                 LibraryUpdateJob.setupTask()
-                BackupCreatorJob.setupTask()
+                BackupCreatorJob.setupTask(context)
                 ExtensionUpdateJob.setupTask()
             }
             if (oldVersion < 66) {

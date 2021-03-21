@@ -10,6 +10,8 @@ import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.onEach
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -18,6 +20,11 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 fun <T> Preference<T>.getOrDefault(): T = get() ?: defaultValue()!!
 
+fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
+    block(get())
+    return asFlow()
+        .onEach { block(it) }
+}
 fun Preference<Boolean>.invert(): Boolean = getOrDefault().let { set(!it); !it }
 
 private class DateFormatConverter : Preference.Adapter<DateFormat> {
@@ -147,7 +154,7 @@ class PreferencesHelper(val context: Context) {
 
     fun anilistScoreType() = rxPrefs.getString("anilist_score_type", "POINT_10")
 
-    fun backupsDirectory() = rxPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
+    fun backupsDirectory() = flowPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
     fun dateFormat() = rxPrefs.getObject(Keys.dateFormat, DateFormat.getDateInstance(DateFormat.SHORT), DateFormatConverter())
 
@@ -155,9 +162,9 @@ class PreferencesHelper(val context: Context) {
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
-    fun numberOfBackups() = rxPrefs.getInteger(Keys.numberOfBackups, 1)
+    fun numberOfBackups() = flowPrefs.getInt(Keys.numberOfBackups, 1)
 
-    fun backupInterval() = rxPrefs.getInteger(Keys.backupInterval, 0)
+    fun backupInterval() = flowPrefs.getInt(Keys.backupInterval, 0)
 
     fun removeAfterReadSlots() = prefs.getInt(Keys.removeAfterReadSlots, -1)
 
@@ -291,5 +298,6 @@ class PreferencesHelper(val context: Context) {
 
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
+    fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
 }

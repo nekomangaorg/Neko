@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.shikimori
 
 import android.content.Context
 import android.graphics.Color
+import androidx.annotation.StringRes
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -11,7 +12,8 @@ import uy.kohesive.injekt.injectLazy
 
 class Shikimori(private val context: Context, id: Int) : TrackService(id) {
 
-    override val name = "Shikimori"
+    @StringRes
+    override fun nameRes() = R.string.shikimori
 
     private val gson: Gson by injectLazy()
 
