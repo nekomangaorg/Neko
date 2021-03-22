@@ -929,7 +929,7 @@ class LibraryPresenter(
                 libraryManga.forEach { manga ->
                     if (manga.date_added == 0L) {
                         val chapters = db.getChapters(manga).executeAsBlocking()
-                        manga.date_added = chapters.minBy { it.date_fetch }?.date_fetch ?: 0L
+                        manga.date_added = chapters.minByOrNull { it.date_fetch }?.date_fetch ?: 0L
                         db.insertManga(manga).executeAsBlocking()
                     }
                     db.resetMangaInfo(manga).executeAsBlocking()

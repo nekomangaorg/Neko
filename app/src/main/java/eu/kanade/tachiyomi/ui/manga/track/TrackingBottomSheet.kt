@@ -187,14 +187,26 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         val item = adapter?.getItem(position) ?: return
         if (item.track == null) return
 
-        SetTrackReadingDatesDialog(controller, this, SetTrackReadingDatesDialog.ReadingDate.Start, item).showDialog(controller.router)
+        val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Start)
+        SetTrackReadingDatesDialog(controller,
+            this,
+            SetTrackReadingDatesDialog.ReadingDate.Start,
+            item,
+            suggestedDate)
+            .showDialog(controller.router)
     }
 
     override fun onFinishDateClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
         if (item.track == null) return
 
-        SetTrackReadingDatesDialog(controller, this, SetTrackReadingDatesDialog.ReadingDate.Finish, item).showDialog(controller.router)
+        val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
+        SetTrackReadingDatesDialog(controller,
+            this,
+            SetTrackReadingDatesDialog.ReadingDate.Finish,
+            item,
+            suggestedDate)
+            .showDialog(controller.router)
     }
 
     override fun setStatus(item: TrackItem, selection: Int) {
