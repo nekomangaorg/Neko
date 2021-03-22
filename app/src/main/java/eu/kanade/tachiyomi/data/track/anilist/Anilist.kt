@@ -122,6 +122,12 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
+    override suspend fun add(track: Track): Track {
+        track.score = DEFAULT_SCORE.toFloat()
+        track.status = DEFAULT_STATUS
+        return api.addLibManga(track)
+    }
+
     override suspend fun update(track: Track): Track {
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
@@ -145,10 +151,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             track.library_id = remoteTrack.library_id
             update(track)
         } else {
-            // Set default fields if it's not found in the list
-            track.score = DEFAULT_SCORE.toFloat()
-            track.status = DEFAULT_STATUS
-            api.addLibManga(track)
+            add(track)
         }
     }
 
@@ -187,7 +190,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
     override fun logout() {
         super.logout()
-        preferences.trackToken(this).set(null)
+        preferences.trackToken(this).delete()
         interceptor.setAuth(null)
     }
 

@@ -22,6 +22,9 @@ abstract class TrackService(val id: Int) {
     @StringRes
     abstract fun nameRes(): Int
 
+    // Application and remote support for reading dates
+    open val supportsReadingDates: Boolean = false
+
     @DrawableRes
     abstract fun getLogo(): Int
 
@@ -42,6 +45,8 @@ abstract class TrackService(val id: Int) {
     }
 
     abstract fun displayScore(track: Track): String
+
+    abstract suspend fun add(track: Track): Track
 
     abstract suspend fun update(track: Track): Track
 

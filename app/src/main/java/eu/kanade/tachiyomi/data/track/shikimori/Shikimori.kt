@@ -70,20 +70,21 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
         return api.updateLibManga(track, getUsername())
     }
 
+    override suspend fun add(track: Track): Track {
+        track.score = DEFAULT_SCORE.toFloat()
+        track.status = DEFAULT_STATUS
+        return api.addLibManga(track, getUsername())
+    }
     override suspend fun bind(track: Track): Track {
         val remoteTrack = api.findLibManga(track, getUsername())
 
-        if (remoteTrack != null) {
+        return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
             track.library_id = remoteTrack.library_id
             update(track)
         } else {
-            // Set default fields if it's not found in the list
-            track.score = DEFAULT_SCORE.toFloat()
-            track.status = DEFAULT_STATUS
-            return api.addLibManga(track, getUsername())
+            add(track)
         }
-        return track
     }
 
     override suspend fun search(query: String) = api.search(query)
@@ -130,7 +131,7 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
 
     override fun logout() {
         super.logout()
-        preferences.trackToken(this).set(null)
+        preferences.trackToken(this).delete()
         interceptor.newAuth(null)
     }
 

@@ -14,14 +14,17 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import androidx.core.app.NotificationCompat
@@ -235,14 +238,37 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
         .any { className == it.service.className }
 }
 
+fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
+    this.openInBrowser(url.toUri(), toolbarColor)
+}
+
+fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
+    try {
+        val intent = CustomTabsIntent.Builder()
+                .setDefaultColorSchemeParams(
+                        CustomTabColorSchemeParams.Builder()
+                                .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
+                                .build()
+                )
+                .build()
+        intent.launchUrl(this, uri)
+    } catch (e: Exception) {
+        toast(e.message)
+    }
+}
+
 /**
  * Opens a URL in a custom tab.
  */
-fun Context.openInBrowser(url: String, forceBrowser: Boolean = false): Boolean {
+fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
     try {
         val parsedUrl = url.toUri()
         val intent = CustomTabsIntent.Builder()
-            .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+                .setDefaultColorSchemeParams(
+                        CustomTabColorSchemeParams.Builder()
+                                .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+                                .build()
+                )
             .build()
         if (forceBrowser) {
             val packages = getCustomTabsPackages().maxBy { it.preferredOrder }

@@ -150,7 +150,7 @@ class PreferencesHelper(val context: Context) {
             .apply()
     }
 
-    fun trackToken(sync: TrackService) = rxPrefs.getString(Keys.trackToken(sync.id), "")
+    fun trackToken(sync: TrackService) = flowPrefs.getString(Keys.trackToken(sync.id), "")
 
     fun anilistScoreType() = rxPrefs.getString("anilist_score_type", "POINT_10")
 

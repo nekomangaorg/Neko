@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.widget.preference
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.StringRes
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -19,8 +20,8 @@ import rx.Subscription
 import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(
-    private val usernameLabel: String? = null,
-    bundle: Bundle? = null
+        @StringRes private val usernameLabelRes: Int? = null,
+        bundle: Bundle? = null
 ) :
     DialogController(bundle) {
 
@@ -48,8 +49,8 @@ abstract class LoginDialogPreference(
     fun onViewCreated(view: View) {
         v = view.apply {
 
-            if (!usernameLabel.isNullOrEmpty()) {
-                username_input.hint = usernameLabel
+            if (usernameLabelRes != null) {
+                username_input.hint = view.context.getString(usernameLabelRes)
             }
 
             login.setOnClickListener {

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.track.myanimelist
 
+import android.net.Uri
 import androidx.core.net.toUri
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -9,13 +10,26 @@ import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.consumeBody
 import eu.kanade.tachiyomi.network.consumeXmlBody
+import eu.kanade.tachiyomi.network.parseAs
+import eu.kanade.tachiyomi.util.PkceUtil
 import eu.kanade.tachiyomi.util.selectInt
 import eu.kanade.tachiyomi.util.selectText
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.boolean
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import org.json.JSONObject
@@ -24,52 +38,202 @@ import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
 import timber.log.Timber
+import java.text.SimpleDateFormat
+import java.util.*
 
 class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListInterceptor) {
 
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
-    suspend fun search(query: String): List<TrackSearch> {
-        return withContext(Dispatchers.IO) {
-            if (query.startsWith(PREFIX_MY)) {
-                queryUsersList(query)
-            } else {
-                val realQuery = query.take(100)
-                val response = client.newCall(GET(searchUrl(realQuery))).await()
-                val matches = Jsoup.parse(response.consumeBody())
-                    .select("div.js-categories-seasonal.js-block-list.list").select("table")
-                    .select("tbody").select("tr").drop(1)
+    suspend fun getAccessToken(authCode: String): OAuth {
+        return withIOContext {
+            val formBody: RequestBody = FormBody.Builder()
+                    .add("client_id", clientId)
+                    .add("code", authCode)
+                    .add("code_verifier", codeVerifier)
+                    .add("grant_type", "authorization_code")
+                    .build()
+            client.newCall(POST("$baseOAuthUrl/token", body = formBody))
+                    .await()
+                    .parseAs()
+        }
+    }
 
-                matches.filter { row -> row.select(TD)[2].text() != "Novel" }.map { row ->
-                    TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                        title = row.searchTitle()
-                        media_id = row.searchMediaId()
-                        total_chapters = row.searchTotalChapters()
-                        summary = row.searchSummary()
-                        cover_url = row.searchCoverUrl()
-                        tracking_url = mangaUrl(media_id)
-                        publishing_status = row.searchPublishingStatus()
-                        publishing_type = row.searchPublishingType()
-                        start_date = row.searchStartDate()
+    suspend fun getCurrentUser(): String {
+        return withIOContext {
+            val request = Request.Builder()
+                    .url("$baseApiUrl/users/@me")
+                    .get()
+                    .build()
+            authClient.newCall(request)
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let { it["name"]!!.jsonPrimitive.content }
+        }
+    }
+
+    suspend fun search(query: String): List<TrackSearch> {
+        return withIOContext {
+            val url = "$baseApiUrl/manga".toUri().buildUpon()
+                    .appendQueryParameter("q", query)
+                    .appendQueryParameter("nsfw", "true")
+                    .build()
+            authClient.newCall(GET(url.toString()))
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let {
+                        it["data"]!!.jsonArray
+                                .map { data -> data.jsonObject["node"]!!.jsonObject }
+                                .map { node ->
+                                    val id = node["id"]!!.jsonPrimitive.int
+                                    async { getMangaDetails(id) }
+                                }
+                                .awaitAll()
+                                .filter { trackSearch -> trackSearch.publishing_type != "novel" }
                     }
-                }.toList()
+        }
+    }
+
+
+    suspend fun getMangaDetails(id: Int): TrackSearch {
+        return withIOContext {
+            val url = "$baseApiUrl/manga".toUri().buildUpon()
+                    .appendPath(id.toString())
+                    .appendQueryParameter("fields", "id,title,synopsis,num_chapters,main_picture,status,media_type,start_date")
+                    .build()
+            authClient.newCall(GET(url.toString()))
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let {
+                        val obj = it.jsonObject
+                        TrackSearch.create(TrackManager.MYANIMELIST).apply {
+                            media_id = obj["id"]!!.jsonPrimitive.int
+                            title = obj["title"]!!.jsonPrimitive.content
+                            summary = obj["synopsis"]?.jsonPrimitive?.content ?: ""
+                            total_chapters = obj["num_chapters"]!!.jsonPrimitive.int
+                            cover_url = obj["main_picture"]?.jsonObject?.get("large")?.jsonPrimitive?.content ?: ""
+                            tracking_url = "https://myanimelist.net/manga/$media_id"
+                            publishing_status = obj["status"]!!.jsonPrimitive.content.replace("_", " ")
+                            publishing_type = obj["media_type"]!!.jsonPrimitive.content.replace("_", " ")
+                            start_date = try {
+                                val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+                                outputDf.format(obj["start_date"]!!)
+                            } catch (e: Exception) {
+                                ""
+                            }
+                        }
+                    }
+        }
+    }
+
+    suspend fun updateItem(track: Track): Track {
+        return withIOContext {
+            val formBodyBuilder = FormBody.Builder()
+                    .add("status", track.toMyAnimeListStatus() ?: "reading")
+                    .add("is_rereading", (track.status == MyAnimeList.REREADING).toString())
+                    .add("score", track.score.toString())
+                    .add("num_chapters_read", track.last_chapter_read.toString())
+
+            val request = Request.Builder()
+                    .url(mangaUrl(track.media_id).toString())
+                    .put(formBodyBuilder.build())
+                    .build()
+            authClient.newCall(request)
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let { parseMangaItem(it, track) }
+        }
+    }
+
+
+    suspend fun findListItem(track: Track): Track? {
+        return withIOContext {
+            val uri = "$baseApiUrl/manga".toUri().buildUpon()
+                    .appendPath(track.media_id.toString())
+                    .appendQueryParameter("fields", "num_chapters,my_list_status{start_date,finish_date}")
+                    .build()
+            authClient.newCall(GET(uri.toString()))
+                    .await()
+                    .parseAs<JsonObject>()
+                    .let { obj ->
+                        track.total_chapters = obj["num_chapters"]!!.jsonPrimitive.int
+                        obj.jsonObject["my_list_status"]?.jsonObject?.let {
+                            parseMangaItem(it, track)
+                        }
+                    }
+        }
+    }
+
+    suspend fun findListItems(query: String, offset: Int = 0): List<TrackSearch> {
+        return withIOContext {
+            val json = getListPage(offset)
+            val obj = json.jsonObject
+
+            val matches = obj["data"]!!.jsonArray
+                    .filter {
+                        it.jsonObject["node"]!!.jsonObject["title"]!!.jsonPrimitive.content.contains(
+                                query,
+                                ignoreCase = true
+                        )
+                    }
+                    .map {
+                        val id = it.jsonObject["node"]!!.jsonObject["id"]!!.jsonPrimitive.int
+                        async { getMangaDetails(id) }
+                    }
+                    .awaitAll()
+
+            // Check next page if there's more
+            if (!obj["paging"]!!.jsonObject["next"]?.jsonPrimitive?.contentOrNull.isNullOrBlank()) {
+                matches + findListItems(query, offset + listPaginationAmount)
+            } else {
+                matches
             }
         }
     }
 
-    private suspend fun queryUsersList(query: String): List<TrackSearch> {
-        val realQuery = query.removePrefix(PREFIX_MY).take(100)
-        return getList().filter { it.title.contains(realQuery, true) }.toList()
+    private suspend fun getListPage(offset: Int): JsonObject {
+        return withIOContext {
+            val urlBuilder = "$baseApiUrl/users/@me/mangalist".toUri().buildUpon()
+                    .appendQueryParameter("fields", "list_status{start_date,finish_date}")
+                    .appendQueryParameter("limit", listPaginationAmount.toString())
+            if (offset > 0) {
+                urlBuilder.appendQueryParameter("offset", offset.toString())
+            }
+
+            val request = Request.Builder()
+                    .url(urlBuilder.build().toString())
+                    .get()
+                    .build()
+            authClient.newCall(request)
+                    .await()
+                    .parseAs()
+        }
     }
 
-    suspend fun addLibManga(track: Track): Track {
-        authClient.newCall(POST(url = addUrl(), body = mangaPostPayload(track))).await()
-        return track
+    private fun parseMangaItem(response: JsonObject, track: Track): Track {
+        val obj = response.jsonObject
+        return track.apply {
+            val isRereading = obj["is_rereading"]!!.jsonPrimitive.boolean
+            status = if (isRereading) MyAnimeList.REREADING else getStatus(obj["status"]!!.jsonPrimitive.content)
+            last_chapter_read = obj["num_chapters_read"]!!.jsonPrimitive.int
+            score = obj["score"]!!.jsonPrimitive.int.toFloat()
+        }
     }
 
-    suspend fun updateLibManga(track: Track): Track {
-        authClient.newCall(POST(url = updateUrl(), body = mangaPostPayload(track))).await()
-        return track
+    private fun parseDate(isoDate: String): Long {
+        return SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
+    }
+
+    private fun convertToIsoDate(epochTime: Long): String? {
+        if (epochTime == 0L) {
+            return ""
+        }
+        return try {
+            val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
+            outputDf.format(epochTime)
+        } catch (e: Exception) {
+            null
+        }
     }
 
     suspend fun remove(track: Track): Boolean {
@@ -82,152 +246,43 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return false
     }
 
-    suspend fun findLibManga(track: Track): Track? {
-        return withContext(Dispatchers.IO) {
-            val response = authClient.newCall(GET(url = listEntryUrl(track.media_id))).await()
-            var remoteTrack: Track? = null
-            response.use {
-                if (it.priorResponse?.isRedirect != true) {
-                    val trackForm = Jsoup.parse(it.consumeBody())
-
-                    remoteTrack = Track.create(TrackManager.MYANIMELIST).apply {
-                        last_chapter_read =
-                            trackForm.select("#add_manga_num_read_chapters").`val`().toInt()
-                        total_chapters = trackForm.select("#totalChap").text().toInt()
-                        status =
-                            trackForm.select("#add_manga_status > option[selected]").`val`().toInt()
-                        score = trackForm.select("#add_manga_score > option[selected]").`val`()
-                            .toFloatOrNull() ?: 0f
-                    }
-                }
-            }
-            remoteTrack
-        }
-    }
-
-    suspend fun getLibManga(track: Track): Track {
-        val result = findLibManga(track)
-        if (result == null) {
-            throw Exception("Could not find manga")
-        } else {
-            return result
-        }
-    }
-
-    private suspend fun getList(): List<TrackSearch> {
-        val results = getListXml(getListUrl()).select("manga")
-
-        return results.map {
-            TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                title = it.selectText("manga_title")!!
-                media_id = it.selectInt("manga_mangadb_id")
-                last_chapter_read = it.selectInt("my_read_chapters")
-                status = getStatus(it.selectText("my_status")!!)
-                score = it.selectInt("my_score").toFloat()
-                total_chapters = it.selectInt("manga_chapters")
-                tracking_url = mangaUrl(media_id)
-            }
-        }.toList()
-    }
-
-    private suspend fun getListUrl(): String {
-        return withContext(Dispatchers.IO) {
-            val response =
-                authClient.newCall(POST(url = exportListUrl(), body = exportPostBody())).execute()
-
-            baseUrl + Jsoup.parse(response.consumeBody()).select("div.goodresult").select("a")
-                .attr("href")
-        }
-    }
-
-    private suspend fun getListXml(url: String): Document {
-        val response = authClient.newCall(GET(url)).await()
-        return Jsoup.parse(response.consumeXmlBody(), "", Parser.xmlParser())
-    }
-
-    companion object {
-        const val CSRF = "csrf_token"
-
-        const val baseUrl = "https://myanimelist.net"
-        private const val baseMangaUrl = "$baseUrl/manga/"
-        private const val baseModifyListUrl = "$baseUrl/ownlist/manga"
-        private const val PREFIX_MY = "my:"
-        private const val TD = "td"
-
-        private fun mangaUrl(remoteId: Int) = baseMangaUrl + remoteId
-
-        fun loginUrl() = baseUrl.toUri().buildUpon().appendPath("login.php").build()
-
-        private fun searchUrl(query: String): String {
-            val col = "c[]"
-            return baseUrl.toUri().buildUpon().appendPath("manga.php")
-                .appendQueryParameter("q", query).appendQueryParameter(col, "a")
-                .appendQueryParameter(col, "b").appendQueryParameter(col, "c")
-                .appendQueryParameter(col, "d").appendQueryParameter(col, "e")
-                .appendQueryParameter(col, "g").toString()
-        }
-
-        private fun exportListUrl() = baseUrl.toUri().buildUpon().appendPath("panel.php")
-            .appendQueryParameter("go", "export").toString()
-
-        private fun updateUrl() =
-            baseModifyListUrl.toUri().buildUpon().appendPath("edit.json").toString()
-
-        private fun removeUrl(mediaId: Int) = baseModifyListUrl.toUri().buildUpon().appendPath(mediaId.toString())
+    private fun removeUrl(mediaId: Int) = "$baseApiUrl/manga".toUri().buildUpon().appendPath(mediaId.toString())
             .appendPath("delete").toString()
 
-        private fun addUrl() =
-            baseModifyListUrl.toUri().buildUpon().appendPath("add.json").toString()
+    companion object {
+        // Registered under jay's MAL account
+        private const val clientId = "8d3821c90edb495432a5ecb61de59200"
 
-        private fun listEntryUrl(mediaId: Int) =
-            baseModifyListUrl.toUri().buildUpon().appendPath(mediaId.toString())
-                .appendPath("edit").toString()
+        private const val baseOAuthUrl = "https://myanimelist.net/v1/oauth2"
+        private const val baseApiUrl = "https://api.myanimelist.net/v2"
 
-        private fun loginPostBody(username: String, password: String, csrf: String): RequestBody {
-            return FormBody.Builder().add("user_name", username).add("password", password)
-                .add("cookie", "1").add("sublogin", "Login").add("submit", "1").add(CSRF, csrf)
+        private const val listPaginationAmount = 250
+
+        private var codeVerifier: String = ""
+
+        fun authUrl(): Uri = "$baseOAuthUrl/authorize".toUri().buildUpon()
+                .appendQueryParameter("client_id", clientId)
+                .appendQueryParameter("code_challenge", getPkceChallengeCode())
+                .appendQueryParameter("response_type", "code")
                 .build()
+
+        fun mangaUrl(id: Int): Uri = "$baseApiUrl/manga".toUri().buildUpon()
+                .appendPath(id.toString())
+                .appendPath("my_list_status")
+                .build()
+
+        fun refreshTokenRequest(refreshToken: String): Request {
+            val formBody: RequestBody = FormBody.Builder()
+                    .add("client_id", clientId)
+                    .add("refresh_token", refreshToken)
+                    .add("grant_type", "refresh_token")
+                    .build()
+            return POST("$baseOAuthUrl/token", body = formBody)
         }
 
-        private fun exportPostBody(): RequestBody {
-            return FormBody.Builder().add("type", "2").add("subexport", "Export My List").build()
-        }
-
-        private fun mangaPostPayload(track: Track): RequestBody {
-            val body = JSONObject().put("manga_id", track.media_id).put("status", track.status)
-                .put("score", track.score).put("num_read_chapters", track.last_chapter_read)
-
-            return body.toString()
-                .toRequestBody("application/json; charset=utf-8".toMediaTypeOrNull())
-        }
-
-        private fun Element.searchTitle() = select("strong").text()!!
-
-        private fun Element.searchTotalChapters() =
-            if (select(TD)[4].text() == "-") 0 else select(TD)[4].text().toInt()
-
-        private fun Element.searchCoverUrl() =
-            select("img").attr("data-src").split("\\?")[0].replace("/r/50x70/", "/")
-
-        private fun Element.searchMediaId() =
-            select("div.picSurround").select("a").attr("id").replace("sarea", "").toInt()
-
-        private fun Element.searchSummary() = select("div.pt4").first().ownText()!!
-
-        private fun Element.searchPublishingStatus() =
-            if (select(TD).last().text() == "-") "Publishing" else "Finished"
-
-        private fun Element.searchPublishingType() = select(TD)[2].text()!!
-
-        private fun Element.searchStartDate() = select(TD)[6].text()!!
-
-        private fun getStatus(status: String) = when (status) {
-            "Reading" -> 1
-            "Completed" -> 2
-            "On-Hold" -> 3
-            "Dropped" -> 4
-            "Plan to Read" -> 6
-            else -> 1
+        private fun getPkceChallengeCode(): String {
+            codeVerifier = PkceUtil.generateCodeVerifier()
+            return codeVerifier
         }
     }
 }

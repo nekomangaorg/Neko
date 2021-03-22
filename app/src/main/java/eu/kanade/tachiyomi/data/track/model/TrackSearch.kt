@@ -36,6 +36,10 @@ class TrackSearch : Track {
 
     var start_date: String = ""
 
+    override var started_reading_date: Long = 0
+
+    override var finished_reading_date: Long = 0
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false

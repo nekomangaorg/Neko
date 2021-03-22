@@ -10,9 +10,10 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.bangumi.BangumiApi
+import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
-import eu.kanade.tachiyomi.ui.setting.track.MyAnimeListLoginActivity
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
@@ -38,49 +39,45 @@ class SettingsTrackingController :
             titleRes = R.string.services
 
             trackPreference(trackManager.myAnimeList) {
-                onClick {
-                    if (trackManager.myAnimeList.isLogged) {
-                        val dialog = TrackLogoutDialog(trackManager.myAnimeList)
-                        dialog.targetController = this@SettingsTrackingController
-                        dialog.showDialog(router)
-                    } else {
-                        startActivity(MyAnimeListLoginActivity.newIntent(context))
-                    }
-                }
+                activity?.openInBrowser(MyAnimeListApi.authUrl(), trackManager.myAnimeList.getLogoColor())
             }
             trackPreference(trackManager.aniList) {
-                onClick {
-                    showDialog(trackManager.aniList, AnilistApi.authUrl())
-                }
+                activity?.openInBrowser(AnilistApi.authUrl(), trackManager.aniList.getLogoColor())
             }
             trackPreference(trackManager.kitsu) {
-                onClick {
-                    showDialog(trackManager.kitsu, userNameLabel = context.getString(R.string.email))
-                }
+                val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)
+                dialog.targetController = this@SettingsTrackingController
+                dialog.showDialog(router)
             }
             trackPreference(trackManager.shikimori) {
-                onClick {
-                    showDialog(trackManager.shikimori, ShikimoriApi.authUrl())
-                }
+                activity?.openInBrowser(ShikimoriApi.authUrl(), trackManager.shikimori.getLogoColor())
             }
             trackPreference(trackManager.bangumi) {
-                onClick {
-                    showDialog(trackManager.bangumi, BangumiApi.authUrl())
-                }
+                activity?.openInBrowser(BangumiApi.authUrl(), trackManager.bangumi.getLogoColor())
             }
         }
     }
 
-    inline fun PreferenceScreen.trackPreference(
+    private inline fun PreferenceScreen.trackPreference(
         service: TrackService,
-        block: (@DSL LoginPreference).() -> Unit
+        crossinline login: () -> Unit
     ): LoginPreference {
         return initThenAdd(
-            LoginPreference(context).apply {
-                key = Keys.trackUsername(service.id)
-                title = context.getString(service.nameRes())
-            },
-            block
+                LoginPreference(context).apply {
+                    key = Keys.trackUsername(service.id)
+                    title = context.getString(service.nameRes())
+                },
+                {
+                    onClick {
+                        if (service.isLogged) {
+                            val dialog = TrackLogoutDialog(service)
+                            dialog.targetController = this@SettingsTrackingController
+                            dialog.showDialog(router)
+                        } else {
+                            login()
+                        }
+                    }
+                }
         )
     }
 
@@ -90,24 +87,6 @@ class SettingsTrackingController :
         updatePreference(trackManager.aniList.id)
         updatePreference(trackManager.shikimori.id)
         updatePreference(trackManager.bangumi.id)
-    }
-
-    private fun showDialog(trackService: TrackService, url: Uri? = null, userNameLabel: String? = null) {
-        if (trackService.isLogged) {
-            val dialog = TrackLogoutDialog(trackService)
-            dialog.targetController = this@SettingsTrackingController
-            dialog.showDialog(router)
-        } else if (url == null) {
-            val dialog = TrackLoginDialog(trackService, userNameLabel)
-            dialog.targetController = this@SettingsTrackingController
-            dialog.showDialog(router)
-        } else {
-            val tabsIntent = CustomTabsIntent.Builder()
-                .setToolbarColor(activity!!.getResourceColor(R.attr.colorPrimaryVariant))
-                .build()
-            tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-            tabsIntent.launchUrl(activity!!, url)
-        }
     }
 
     private fun updatePreference(id: Int) {

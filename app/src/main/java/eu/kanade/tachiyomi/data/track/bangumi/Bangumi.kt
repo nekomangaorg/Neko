@@ -37,22 +37,25 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
         return api.updateLibManga(track)
     }
 
+    override suspend fun add(track: Track): Track {
+        track.score = DEFAULT_SCORE.toFloat()
+        track.status = DEFAULT_STATUS
+        api.addLibManga(track)
+        return update(track)
+    }
+
     override suspend fun bind(track: Track): Track {
         val statusTrack = api.statusLibManga(track)
         val remoteTrack = api.findLibManga(track)
-        if (statusTrack != null && remoteTrack != null) {
+        return if (statusTrack != null && remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
             track.library_id = remoteTrack.library_id
             track.status = remoteTrack.status
             track.last_chapter_read = remoteTrack.last_chapter_read
             refresh(track)
         } else {
-            track.score = DEFAULT_SCORE.toFloat()
-            track.status = DEFAULT_STATUS
-            api.addLibManga(track)
-            update(track)
+            add(track)
         }
-        return track
     }
 
     override suspend fun search(query: String): List<TrackSearch> {
@@ -133,8 +136,7 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
 
     override fun logout() {
         super.logout()
-        preferences.trackToken(this).set(null)
-        interceptor.clearOauth()
+        preferences.trackToken(this).delete()
     }
 
     companion object {
