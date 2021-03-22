@@ -264,6 +264,9 @@ class SourceController :
             ext_bottom_sheet.updateExtTitle()
             ext_bottom_sheet.presenter.refreshExtensions()
         }
+        if (!type.isEnter) {
+            setBottomPadding()
+        }
     }
 
     override fun onActivityResumed(activity: Activity) {

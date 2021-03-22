@@ -715,6 +715,7 @@ class LibraryController(
             recycler_cover.isFocusable = false
             showDropdown()
         } else {
+            updateFilterSheetY()
             closeTip()
             if (filter_bottom_sheet.sheetBehavior.isHidden()) {
                 filter_bottom_sheet.invisible()
