@@ -468,6 +468,8 @@ class LibraryUpdateService(
                                     LoadRequest.Builder(this@LibraryUpdateService).data(manga)
                                         .memoryCachePolicy(CachePolicy.DISABLED).build()
                                 Coil.imageLoader(this@LibraryUpdateService).execute(request)
+                            } else {
+                                coverCache.deleteFromCache(manga, false)
                             }
                             db.insertManga(manga).executeAsBlocking()
                         }
