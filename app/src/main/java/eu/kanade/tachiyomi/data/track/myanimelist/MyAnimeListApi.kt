@@ -133,6 +133,12 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     .add("is_rereading", (track.status == MyAnimeList.REREADING).toString())
                     .add("score", track.score.toString())
                     .add("num_chapters_read", track.last_chapter_read.toString())
+            convertToIsoDate(track.started_reading_date)?.let {
+                formBodyBuilder.add("start_date", it)
+            }
+            convertToIsoDate(track.finished_reading_date)?.let {
+                formBodyBuilder.add("finish_date", it)
+            }
 
             val request = Request.Builder()
                     .url(mangaUrl(track.media_id).toString())
@@ -217,6 +223,12 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             status = if (isRereading) MyAnimeList.REREADING else getStatus(obj["status"]!!.jsonPrimitive.content)
             last_chapter_read = obj["num_chapters_read"]!!.jsonPrimitive.int
             score = obj["score"]!!.jsonPrimitive.int.toFloat()
+            obj["start_date"]?.let {
+                started_reading_date = parseDate(it.jsonPrimitive.content)
+            }
+            obj["finish_date"]?.let {
+                finished_reading_date = parseDate(it.jsonPrimitive.content)
+            }
         }
     }
 

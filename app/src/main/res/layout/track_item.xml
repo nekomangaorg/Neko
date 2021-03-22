@@ -84,7 +84,7 @@
                 android:layout_marginEnd="4dp"
                 android:contentDescription="@string/open_in_webview"
                 android:src="@drawable/ic_close_circle_24dp"
-                android:tint="@color/text_color_secondary"
+                app:tint="@color/text_color_secondary"
                 android:tooltipText="@string/remove_tracking"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -124,7 +124,6 @@
                 android:paddingTop="16dp"
                 android:paddingEnd="6dp"
                 android:paddingBottom="16dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/track_chapters"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
@@ -134,13 +133,14 @@
                 android:id="@+id/track_chapters"
                 style="@style/TextAppearance.Regular.Body1.Secondary"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/card_item_selector"
                 android:gravity="center"
                 android:maxLines="2"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
                 android:paddingStart="6dp"
                 android:paddingEnd="6dp"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@id/score_container"
                 app:layout_constraintStart_toEndOf="@id/track_status"
                 app:layout_constraintTop_toTopOf="parent"
@@ -149,9 +149,10 @@
             <FrameLayout
                 android:id="@+id/score_container"
                 android:layout_width="0dp"
-                android:layout_height="0dp"
+                android:paddingTop="16dp"
+                android:paddingBottom="16dp"
+                android:layout_height="wrap_content"
                 android:background="@drawable/card_item_selector"
-                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toEndOf="@id/track_chapters"
                 app:layout_constraintTop_toTopOf="parent">
@@ -162,9 +163,9 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
-                    android:drawableEnd="@drawable/ic_star_12dp"
-                    android:drawableTint="?android:attr/textColorPrimary"
-                    tools:text="10" />
+                    app:drawableTint="?android:attr/textColorPrimary"
+                    tools:text="10"
+                    app:drawableEndCompat="@drawable/ic_star_12dp" />
             </FrameLayout>
 
             <View
@@ -174,7 +175,7 @@
                 android:layout_marginBottom="10dp"
                 android:alpha="0.25"
                 android:background="@color/strong_divider"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/bottom_divider"
                 app:layout_constraintEnd_toStartOf="@id/track_chapters"
                 app:layout_constraintStart_toEndOf="@+id/track_status"
                 app:layout_constraintTop_toTopOf="parent" />
@@ -186,10 +187,69 @@
                 android:layout_marginBottom="10dp"
                 android:alpha="0.25"
                 android:background="@color/strong_divider"
-                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintBottom_toTopOf="@+id/bottom_divider"
                 app:layout_constraintEnd_toStartOf="@id/score_container"
                 app:layout_constraintStart_toEndOf="@+id/track_chapters"
                 app:layout_constraintTop_toTopOf="parent" />
+
+            <View
+                android:id="@+id/bottom_divider"
+                android:layout_width="0dp"
+                android:layout_height="1dp"
+                android:alpha="0.25"
+                android:background="@color/strong_divider"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/score_container" />
+
+            <TextView
+                android:id="@+id/track_start_date"
+                style="@style/TextAppearance.Regular.Body1.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/list_item_selector"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:padding="16dp"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toStartOf="@+id/vert_divider_3"
+                app:layout_constraintTop_toBottomOf="@+id/bottom_divider"
+                tools:text="4/16/2020" />
+
+            <View
+                android:id="@+id/vert_divider_3"
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginBottom="8dp"
+                android:alpha="0.25"
+                android:background="@color/strong_divider"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/track_start_date"
+                app:layout_constraintEnd_toStartOf="@+id/track_finish_date"
+                app:layout_constraintTop_toTopOf="@+id/bottom_divider" />
+
+            <TextView
+                android:id="@+id/track_finish_date"
+                style="@style/TextAppearance.Regular.Body1.Secondary"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:background="@drawable/list_item_selector"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:padding="16dp"
+                app:layout_constraintStart_toEndOf="@+id/vert_divider_3"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/bottom_divider"
+                tools:text="4/16/2020" />
+
+            <androidx.constraintlayout.widget.Group
+                android:id="@+id/date_group"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:constraint_referenced_ids="vert_divider_3,bottom_divider,track_start_date,track_finish_date" />
         </androidx.constraintlayout.widget.ConstraintLayout>
 
         <com.google.android.material.button.MaterialButton

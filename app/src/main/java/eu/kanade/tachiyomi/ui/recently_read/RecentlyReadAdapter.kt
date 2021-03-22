@@ -39,7 +39,9 @@ class RecentlyReadAdapter(controller: RecentlyReadController) :
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    val dateFormat: DateFormat = preferences.dateFormat().getOrDefault()
+    val dateFormat: DateFormat by lazy {
+        preferences.dateFormat()
+    }
 
     interface OnResumeClickListener {
         fun onResumeClick(position: Int)

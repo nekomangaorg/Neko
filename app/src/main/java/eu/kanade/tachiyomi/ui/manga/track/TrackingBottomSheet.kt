@@ -26,7 +26,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     SetTrackStatusDialog.Listener,
     SetTrackChaptersDialog.Listener,
     SetTrackScoreDialog.Listener,
-    TrackRemoveDialog.Listener {
+    TrackRemoveDialog.Listener,
+    SetTrackReadingDatesDialog.Listener {
 
     val activity = controller.activity!!
 
@@ -182,6 +183,20 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         SetTrackScoreDialog(this, item).showDialog(controller.router)
     }
 
+    override fun onStartDateClick(position: Int) {
+        val item = adapter?.getItem(position) ?: return
+        if (item.track == null) return
+
+        SetTrackReadingDatesDialog(controller, this, SetTrackReadingDatesDialog.ReadingDate.Start, item).showDialog(controller.router)
+    }
+
+    override fun onFinishDateClick(position: Int) {
+        val item = adapter?.getItem(position) ?: return
+        if (item.track == null) return
+
+        SetTrackReadingDatesDialog(controller, this, SetTrackReadingDatesDialog.ReadingDate.Finish, item).showDialog(controller.router)
+    }
+
     override fun setStatus(item: TrackItem, selection: Int) {
         presenter.setStatus(item, selection)
         refreshItem(item)
@@ -218,7 +233,15 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         presenter.removeTracker(item, fromServiceAlso)
     }
 
+    override fun setReadingDate(item: TrackItem, type: SetTrackReadingDatesDialog.ReadingDate, date: Long) {
+        when (type) {
+            SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(item, date)
+            SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(item, date)
+        }
+    }
+
     private companion object {
         const val TAG_SEARCH_CONTROLLER = "track_search_controller"
     }
+
 }

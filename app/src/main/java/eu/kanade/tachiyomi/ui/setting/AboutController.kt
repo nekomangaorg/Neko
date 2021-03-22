@@ -41,7 +41,9 @@ class AboutController : SettingsController() {
 
     private val userPreferences: PreferencesHelper by injectLazy()
 
-    private val dateFormat: DateFormat = userPreferences.dateFormat().getOrDefault()
+    private val dateFormat: DateFormat by lazy {
+        preferences.dateFormat()
+    }
 
     /**
      * The subscribtion service of the obtained release object

@@ -433,6 +433,8 @@
     <string name="kitsu" translatable="false">Kitsu</string>
     <string name="bangumi" translatable="false">Bangumi</string>
     <string name="shikimori" translatable="false">Shikimori</string>
+    <string name="started_reading_date">Started reading date</string>
+    <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please login to MAL again</string>
 
     <!-- Migration -->
