@@ -139,11 +139,10 @@
                 android:maxLines="2"
                 android:paddingTop="16dp"
                 android:paddingBottom="16dp"
-                android:paddingStart="6dp"
-                android:paddingEnd="6dp"
                 app:layout_constraintEnd_toStartOf="@id/score_container"
                 app:layout_constraintStart_toEndOf="@id/track_status"
                 app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintBottom_toBottomOf="@+id/track_status"
                 tools:text="Chapter 12 of 24" />
 
             <FrameLayout
