@@ -294,6 +294,7 @@ class LibraryController(
     }
 
     private fun setActiveCategory() {
+        category_recycler ?: return
         val currentCategory = presenter.categories.indexOfFirst {
             if (presenter.showAllCategories) it.order == activeCategory else presenter.currentCategory == it.id
         }
