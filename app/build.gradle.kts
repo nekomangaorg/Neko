@@ -106,7 +106,7 @@ dependencies {
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.5.0-beta03")
 
-    implementation("androidx.constraintlayout:constraintlayout:1.1.3")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
