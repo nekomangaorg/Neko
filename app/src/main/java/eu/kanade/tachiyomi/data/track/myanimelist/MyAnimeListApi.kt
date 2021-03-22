@@ -37,6 +37,7 @@ import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.nodes.Element
 import org.jsoup.parser.Parser
+import retrofit2.http.DELETE
 import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.*
@@ -249,17 +250,20 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     }
 
     suspend fun remove(track: Track): Boolean {
-        try {
-            authClient.newCall(POST(url = removeUrl(track.media_id))).await()
-            return true
-        } catch (e: Exception) {
-            Timber.w(e)
+        return withIOContext {
+             try {
+                val request = Request.Builder()
+                    .url(mangaUrl(track.media_id).toString())
+                    .delete()
+                    .build()
+                authClient.newCall(request).await()
+                true
+            } catch (e: Exception) {
+                Timber.w(e)
+                false
+            }
         }
-        return false
     }
-
-    private fun removeUrl(mediaId: Int) = "$baseApiUrl/manga".toUri().buildUpon().appendPath(mediaId.toString())
-            .appendPath("delete").toString()
 
     companion object {
         // Registered under jay's MAL account
