@@ -12,12 +12,16 @@ class BackupCategory(
     // @ProtoNumber(3) val updateInterval: Int = 0, 1.x value not used in 0.x
     // Bump by 100 to specify this is a 0.x value
     @ProtoNumber(100) var flags: Int = 0,
+
+    // J2K Specific values
+    @ProtoNumber(800) var mangaSort: Char?,
 ) {
     fun getCategoryImpl(): CategoryImpl {
         return CategoryImpl().apply {
             name = this@BackupCategory.name
             flags = this@BackupCategory.flags
             order = this@BackupCategory.order
+            mangaSort = this@BackupCategory.mangaSort
         }
     }
 
@@ -26,7 +30,8 @@ class BackupCategory(
             return BackupCategory(
                 name = category.name,
                 order = category.order,
-                flags = category.flags
+                flags = category.flags,
+                mangaSort = category.mangaSort
             )
         }
     }
