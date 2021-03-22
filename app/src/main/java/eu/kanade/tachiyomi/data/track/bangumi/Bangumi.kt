@@ -8,6 +8,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
@@ -40,6 +42,7 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE.toFloat()
         track.status = DEFAULT_STATUS
+        updateNewTrackInfo(track)
         api.addLibManga(track)
         return update(track)
     }
@@ -82,6 +85,8 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
+    override fun completedStatus(): Int = MyAnimeList.COMPLETED
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {

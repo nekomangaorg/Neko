@@ -19,13 +19,15 @@ import java.util.Date
 
 interface ChapterQueries : DbProvider {
 
-    fun getChapters(manga: Manga) = db.get()
+    fun getChapters(manga: Manga) = getChapters(manga.id)
+
+    fun getChapters(mangaId: Long?) = db.get()
         .listOfObjects(Chapter::class.java)
         .withQuery(
             Query.builder()
                 .table(ChapterTable.TABLE)
                 .where("${ChapterTable.COL_MANGA_ID} = ?")
-                .whereArgs(manga.id)
+                .whereArgs(mangaId)
                 .build()
         )
         .prepare()

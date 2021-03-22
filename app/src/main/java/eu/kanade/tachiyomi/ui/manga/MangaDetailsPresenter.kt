@@ -899,8 +899,8 @@ class MangaDetailsPresenter(
     fun getSuggestedDate(readingDate: SetTrackReadingDatesDialog.ReadingDate): Long? {
         val chapters = db.getHistoryByMangaId(manga.id ?: 0L).executeAsBlocking()
         val date = when (readingDate) {
-            SetTrackReadingDatesDialog.ReadingDate.Start -> chapters.minByOrNull { it.last_read }?.last_read
-            SetTrackReadingDatesDialog.ReadingDate.Finish -> chapters.maxByOrNull { it.last_read }?.last_read
+            SetTrackReadingDatesDialog.ReadingDate.Start -> chapters.minOfOrNull { it.last_read }
+            SetTrackReadingDatesDialog.ReadingDate.Finish -> chapters.maxOfOrNull { it.last_read }
         } ?: return null
         return if (date <= 0L) null else date
     }

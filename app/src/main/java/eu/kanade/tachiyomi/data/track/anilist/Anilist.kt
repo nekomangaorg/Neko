@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
@@ -43,6 +44,8 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override fun getStatusList() = listOf(READING, PLANNING, COMPLETED, REPEATING, PAUSED, DROPPED)
 
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
+    override fun completedStatus() = COMPLETED
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
@@ -127,6 +130,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE.toFloat()
         track.status = DEFAULT_STATUS
+        updateNewTrackInfo(track)
         return api.addLibManga(track)
     }
 

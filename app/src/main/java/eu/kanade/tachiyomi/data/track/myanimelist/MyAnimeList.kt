@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -58,6 +59,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
+    override fun completedStatus(): Int = COMPLETED
+
     override fun getScoreList(): List<String> {
         return IntRange(0, 10).map(Int::toString)
     }
@@ -69,6 +72,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.status = READING
         track.score = 0F
+        updateNewTrackInfo(track)
         return api.updateItem(track)
     }
 

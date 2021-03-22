@@ -38,7 +38,9 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val variables = jsonObject(
                 "mangaId" to track.media_id,
                 "progress" to track.last_chapter_read,
-                "status" to track.toAnilistStatus()
+                "status" to track.toAnilistStatus(),
+                "startedAt" to createDate(track.started_reading_date),
+                "completedAt" to createDate(track.finished_reading_date)
             )
             val payload = jsonObject(
                 "query" to addToLibraryQuery(),
@@ -264,8 +266,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
         fun addToLibraryQuery() =
             """
-            |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus) {
-                |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status) { 
+            |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus, ${'$'}startedAt: FuzzyDateInput, ${'$'}completedAt: FuzzyDateInput) {
+                |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) { 
                 |   id 
                 |   status 
                 |} 
