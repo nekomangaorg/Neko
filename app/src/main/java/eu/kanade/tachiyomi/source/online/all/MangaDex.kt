@@ -99,7 +99,8 @@ class MangaDex : DelegatedHttpSource() {
             "ir" -> "fa"
             "rs" -> "sh"
             "ua" -> "uk"
-            "cn" -> "zh-Hans" "hk" -> "zh-Hant"
+            "cn" -> "zh-Hans"
+            "hk" -> "zh-Hant"
             else -> langCode
         }
     }
