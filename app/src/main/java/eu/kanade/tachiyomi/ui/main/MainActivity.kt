@@ -172,7 +172,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 bottom_nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller() as? BottomSheetController
-                    controller?.toggleSheet()
+                    controller?.showSheet()
                 }
                 true
             }
