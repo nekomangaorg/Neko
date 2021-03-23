@@ -73,8 +73,6 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     lateinit var controller: SourceController
 
-    private val pAdapter = FlexibleAdapter<IFlexible<*>>(null, this, true)
-
     val extensionFrameLayout =
         inflate(context, R.layout.recycler_with_scroller, null) as FrameLayout
     val migrationFrameLayout =
@@ -143,10 +141,6 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.onCreate()
         updateExtTitle()
 
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-        val array = context.obtainStyledAttributes(attrsArray)
-        val headerHeight = array.getDimensionPixelSize(0, 0)
-        array.recycle()
         sheet_layout.setOnClickListener {
             if (!sheetBehavior.isExpanded()) {
                 sheetBehavior?.expand()
