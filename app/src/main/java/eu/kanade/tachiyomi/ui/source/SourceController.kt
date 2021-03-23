@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -255,13 +256,7 @@ class SourceController :
                 progress)
         )
         val pad = bottomBar.translationY - bottomBar.height
-        val padding = (max(
-            (-pad).toInt(),
-            this@SourceController.view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
-        ) * (1f - progress)).toInt()
-        ext_bottom_sheet.updatePaddingRelative(
-            bottom = padding
-        )
+
         ext_bottom_sheet.sheet_layout.backgroundTintList = ColorStateList.valueOf(
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.colorPrimaryVariant),
@@ -277,14 +272,10 @@ class SourceController :
         val padding = max(
             (-pad).toInt(),
             if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else
-                this@SourceController.view?.rootWindowInsets?.getBottomGestureInsets()
-                    ?: 0
-        )
-        ext_bottom_sheet.updatePaddingRelative(
-            bottom = padding
+                this@SourceController.view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
         )
         shadow2.translationY = pad
-        ext_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + padding
+        ext_bottom_sheet.sheetBehavior?.peekHeight = 58.spToPx + padding
         ext_bottom_sheet.extensionFrameLayout.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
