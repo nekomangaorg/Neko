@@ -255,6 +255,7 @@ class LibraryController(
 
     fun updateFilterSheetY() {
         val bottomBar = activity?.bottom_nav
+        filter_bottom_sheet ?: return
         if (bottomBar != null) {
             if (filter_bottom_sheet.sheetBehavior.isHidden()) {
                 val pad = bottomBar.translationY - bottomBar.height
