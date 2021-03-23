@@ -148,6 +148,7 @@
     <string name="download_badge">Download badges</string>
     <string name="hide_start_reading_button">Hide start reading button</string>
     <string name="unread_badges">Unread badges</string>
+    <string name="badges">Badges</string>
     <string name="uniform_covers">Uniform covers</string>
     <string name="x_small">XS</string>
     <string name="small">S</string>
@@ -155,9 +156,9 @@
     <string name="large">L</string>
     <string name="x_large">XL</string>
     <string name="grid_options">Grid options</string>
-    <string name="hide_badges">Hide badges</string>
-    <string name="show_badges">Show badges</string>
-    <string name="show_count">Show count</string>
+    <string name="hide_unread_badges">Hide unread badges</string>
+    <string name="show_unread_badges">Show unread badges</string>
+    <string name="show_unread_count">Show unread count</string>
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
     <string name="hide_category_hopper">Hide category hopper</string>

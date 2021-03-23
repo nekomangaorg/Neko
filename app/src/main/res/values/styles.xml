@@ -104,6 +104,11 @@
         <item name="android:textColor">?android:attr/textColorHint</item>
     </style>
 
+    <style name="TextAppearance.Widget.Tab" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
     <!--=======-->
     <!--Widgets-->
     <!--=======-->
@@ -197,6 +202,22 @@
         <item name="boxStrokeColor">@color/text_input_stroke</item>
         <item name="hintTextColor">?colorAccent</item>
         <item name="android:textColorHint">?android:attr/textColorHint</item>
+    </style>
+
+    <!--=================-->
+    <!--Widgets.TabLayout-->
+    <!--=================-->
+    <style name="Theme.Widget.Tabs" parent="Widget.MaterialComponents.TabLayout.Colored">
+        <item name="tabGravity">center</item>
+        <item name="tabIndicator">@drawable/tab_indicator</item>
+        <item name="tabIndicatorColor">?attr/colorAccent</item>
+        <item name="tabTextColor">@color/tabs_selector</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabIndicatorHeight">3dp</item>
+        <item name="tabInlineLabel">true</item>
+        <item name="tabMinWidth">75dp</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabTextAppearance">@style/TextAppearance.Widget.Tab</item>
     </style>
 
     <!--==============-->

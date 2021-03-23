@@ -5,6 +5,7 @@ import android.content.res.Configuration
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -21,7 +22,10 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
+import eu.kanade.tachiyomi.ui.library.display.LibraryBadgesView
+import eu.kanade.tachiyomi.ui.library.display.LibraryDisplayView
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
@@ -32,10 +36,13 @@ import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 import kotlinx.android.synthetic.main.track_item.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -95,7 +102,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     var onGroupClicked: (Int) -> Unit = { _ -> }
-    var pager: View? = null
+    var libraryRecyler: View? = null
     var controller: LibraryController? = null
     var bottomBarHeight = 0
 
@@ -105,8 +112,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         sheetBehavior = BottomSheetBehavior.from(this)
         sheetBehavior?.isHideable = true
         this.controller = controller
-        pager = controller.recycler
-        pager?.post {
+        libraryRecyler = controller.recycler
+        libraryRecyler?.post {
             bottomBarHeight = (this@FilterBottomSheet.controller?.activity as? MainActivity)?.bottom_nav?.height ?: 0
         }
         val shadow2: View = controller.shadow2
@@ -193,7 +200,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val shadow = controller?.shadow ?: return
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = 1f
-            pager?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             pill.alpha = 0f
@@ -202,7 +209,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             onGroupClicked(ACTION_HIDE_FILTER_TIP)
             reSortViews()
             shadow.alpha = 0f
-            pager?.updatePaddingRelative(bottom = 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = 10.dpToPx + bottomBarHeight)
         }
     }
 
@@ -220,9 +227,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
         if (trueProgress >= 0)
-            pager?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         else
-            pager?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
     }
 
     fun hasActiveFilters() = filterItems.any { it.isActivated }

@@ -60,6 +60,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
+import eu.kanade.tachiyomi.ui.library.display.TabbedLibraryDisplaySheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -485,7 +486,7 @@ class LibraryController(
                 FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
                 FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> showFilterTip()
-                FilterBottomSheet.ACTION_DISPLAY -> DisplayBottomSheet(this).show()
+                FilterBottomSheet.ACTION_DISPLAY -> TabbedLibraryDisplaySheet(this).show()
                 FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL -> presenter.toggleAllCategoryVisibility()
                 FilterBottomSheet.ACTION_GROUP_BY -> {
                     val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
@@ -1287,7 +1288,7 @@ class LibraryController(
         when {
             filter_bottom_sheet.sheetBehavior.isHidden() -> filter_bottom_sheet.sheetBehavior?.collapse()
             !filter_bottom_sheet.sheetBehavior.isExpanded() -> filter_bottom_sheet.sheetBehavior?.expand()
-            else -> DisplayBottomSheet(this).show()
+            else -> TabbedLibraryDisplaySheet(this).show()
         }
     }
 
