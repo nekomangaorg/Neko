@@ -248,6 +248,7 @@
     <string name="extensions">Extensions</string>
     <string name="extension_updates">Extension Updates</string>
     <string name="extension_info">Extension info</string>
+    <string name="filter_languages">Filter Languages</string>
     <string name="details">Details</string>
     <string name="obsolete">Obsolete</string>
     <string name="pending">Pending</string>

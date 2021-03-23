@@ -128,6 +128,9 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
                 }.recycler?.isNestedScrollingEnabled = false
+                if (tab?.position == 1) {
+                    presenter.deselectSource()
+                }
             }
             override fun onTabReselected(tab: TabLayout.Tab?) {
                 this@ExtensionBottomSheet.sheetBehavior?.expand()
@@ -260,7 +263,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             migRecyler.adapter = migAdapter
             migAdapter?.fastScroller = migrationFrameLayout.fast_scroller
         }
-        migAdapter?.updateDataSet(sources)
+        migAdapter?.updateDataSet(sources, true)
     }
 
     fun setMigrationManga(manga: List<MangaItem>?) {
@@ -270,7 +273,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             migRecyler.adapter = migAdapter
             migAdapter?.fastScroller = migrationFrameLayout.fast_scroller
         }
-        migAdapter?.updateDataSet(manga)
+        migAdapter?.updateDataSet(manga, true)
     }
 
     fun drawExtensions() {
