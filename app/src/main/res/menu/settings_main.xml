@@ -6,11 +6,11 @@
         android:id="@+id/action_bug_report"
         android:title="@string/bug_report"
         android:icon="@drawable/ic_bug_report_24dp"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
 
     <item
         android:id="@+id/action_help"
         android:title="@string/help"
         android:icon="@drawable/ic_help_24dp"
-        app:showAsAction="always"/>
+        app:showAsAction="ifRoom"/>
 </menu>
