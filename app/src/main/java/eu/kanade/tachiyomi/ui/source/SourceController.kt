@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.source
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
+import android.content.res.ColorStateList
 import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,6 +11,8 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -29,12 +32,15 @@ import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
+import eu.kanade.tachiyomi.ui.setting.SettingsBrowseController
 import eu.kanade.tachiyomi.ui.setting.SettingsSourcesController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
-import eu.kanade.tachiyomi.util.system.spToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -48,17 +54,20 @@ import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.parcel.Parcelize
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
+import kotlinx.android.synthetic.main.extensions_bottom_sheet.ext_bottom_sheet
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.sheet_layout
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.android.synthetic.main.recycler_with_scroller.view.*
 import kotlinx.android.synthetic.main.rounded_category_hopper.*
 import kotlinx.android.synthetic.main.source_controller.*
 import kotlinx.android.synthetic.main.source_controller.shadow2
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.
@@ -101,7 +110,12 @@ class SourceController :
 
     override fun getTitle(): String? {
         return if (showingExtensions)
-            view?.context?.getString(R.string.extensions)
+            view?.context?.getString(
+                when (ext_bottom_sheet.tabs.selectedTabPosition) {
+                    0 -> R.string.extensions
+                    else -> R.string.source_migration
+                }
+            )
         else view?.context?.getString(R.string.sources)
     }
 
@@ -144,6 +158,7 @@ class SourceController :
 
         recycler?.post {
             setBottomPadding()
+            setBottomSheetTabs(if (ext_bottom_sheet?.sheetBehavior.isCollapsed()) 0f else 1f)
         }
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
@@ -163,12 +178,10 @@ class SourceController :
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     val recycler = recycler ?: return
                     shadow2?.alpha = (1 - max(0f, progress)) * 0.25f
-                    activity?.appbar?.elevation = max(
-                        progress * 15f,
+                    activity?.appbar?.elevation = min(
+                        (1f - progress) * 15f,
                         if (recycler.canScrollVertically(-1)) 15f else 0f
                     )
-
-                    sheet_layout?.alpha = 1 - progress
                     activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
                     val oldShow = showingExtensions
                     showingExtensions = progress > 0.92f
@@ -176,9 +189,7 @@ class SourceController :
                         setTitle()
                         activity?.invalidateOptionsMenu()
                     }
-                    val bottomBar = activity?.bottom_nav ?: return
-                    val pad = bottomBar.translationY - bottomBar.height
-                    ext_bottom_sheet.updatePaddingRelative(bottom = (pad * (1 - max(progress, 0f))).toInt())
+                    setBottomSheetTabs(max(0f, progress))
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
@@ -189,8 +200,6 @@ class SourceController :
                     if (state == BottomSheetBehavior.STATE_EXPANDED ||
                         state == BottomSheetBehavior.STATE_COLLAPSED
                     ) {
-                        sheet_layout?.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
                         showingExtensions = state == BottomSheetBehavior.STATE_EXPANDED
                         setTitle()
                         if (state == BottomSheetBehavior.STATE_EXPANDED)
@@ -203,6 +212,7 @@ class SourceController :
                         RetainViewMode.RETAIN_DETACH else RetainViewMode.RELEASE_DETACH
                     sheet_layout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                     sheet_layout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                    setBottomSheetTabs(if (state == BottomSheetBehavior.STATE_COLLAPSED) 0f else 1f)
                 }
             }
         )
@@ -212,21 +222,73 @@ class SourceController :
         }
     }
 
-    fun setBottomPadding() {
+    fun updateTitleAndMenu() {
+        setTitle()
+        activity?.invalidateOptionsMenu()
+    }
+
+    fun setBottomSheetTabs(progress: Float) {
+        val bottomSheet = ext_bottom_sheet ?: return
         val bottomBar = activity?.bottom_nav ?: return
-        ext_bottom_sheet.updatePaddingRelative(
-            bottom =
-                if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else
-                    max(
-                        (-bottomBar.translationY + bottomBar.height).toInt(),
-                        this@SourceController.view?.rootWindowInsets?.getBottomGestureInsets()
-                            ?: 0
-                    )
+        ext_bottom_sheet.tabs.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            topMargin = ((activity?.appbar?.height?.minus(9f.dpToPx) ?: 0f) * progress).toInt()
+        }
+        val selectedColor = ColorUtils.setAlphaComponent(
+            ContextCompat.getColor(ext_bottom_sheet.tabs.context, R.color.colorAccent),
+            (progress * 255).toInt()
+        )
+        val unselectedColor = ColorUtils.setAlphaComponent(
+            bottomSheet.context.getResourceColor(R.attr.colorOnBackground),
+            153
+        )
+        ext_bottom_sheet.sheet_layout.elevation = progress * 5
+        ext_bottom_sheet.pager.alpha = progress * 10
+        ext_bottom_sheet.tabs.setSelectedTabIndicatorColor(selectedColor)
+        ext_bottom_sheet.tabs.setTabTextColors(
+            ColorUtils.blendARGB(
+                bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
+                unselectedColor,
+                progress),
+            ColorUtils.blendARGB(
+                bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
+                selectedColor,
+                progress)
         )
         val pad = bottomBar.translationY - bottomBar.height
+        val padding = (max(
+            (-pad).toInt(),
+            this@SourceController.view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+        ) * (1f - progress)).toInt()
+        ext_bottom_sheet.updatePaddingRelative(
+            bottom = padding
+        )
+        ext_bottom_sheet.sheet_layout.backgroundTintList = ColorStateList.valueOf(
+            ColorUtils.blendARGB(
+                bottomSheet.context.getResourceColor(R.attr.colorPrimaryVariant),
+                bottomSheet.context.getResourceColor(R.attr.colorSecondary),
+                progress)
+        )
+    }
+
+    fun setBottomPadding() {
+        val bottomBar = activity?.bottom_nav ?: return
+        ext_bottom_sheet ?: return
+        val pad = bottomBar.translationY - bottomBar.height
+        val padding = max(
+            (-pad).toInt(),
+            if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else
+                this@SourceController.view?.rootWindowInsets?.getBottomGestureInsets()
+                    ?: 0
+        )
+        ext_bottom_sheet.updatePaddingRelative(
+            bottom = padding
+        )
         shadow2.translationY = pad
-        ext_bottom_sheet.sheetBehavior?.peekHeight = 48.spToPx + ext_bottom_sheet.paddingBottom
-        ext_bottom_sheet.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        ext_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + padding
+        ext_bottom_sheet.extensionFrameLayout.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = -pad.toInt()
+        }
+        ext_bottom_sheet.migrationFrameLayout.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
     }
@@ -247,7 +309,9 @@ class SourceController :
 
     override fun handleSheetBack(): Boolean {
         if (!ext_bottom_sheet.sheetBehavior.isCollapsed()) {
-            ext_bottom_sheet.sheetBehavior?.collapse()
+            if (ext_bottom_sheet.canGoBack()) {
+                ext_bottom_sheet.sheetBehavior?.collapse()
+            }
             return true
         }
         return false
@@ -265,6 +329,23 @@ class SourceController :
             ext_bottom_sheet.presenter.refreshExtensions()
         }
         if (!type.isEnter) {
+            ext_bottom_sheet.canExpand = false
+            activity?.appbar?.elevation =
+                when {
+                    ext_bottom_sheet.sheetBehavior.isExpanded() -> 0f
+                    recycler.canScrollVertically(-1) -> 15f
+                    else -> 0f
+                }
+        } else {
+            ext_bottom_sheet.presenter.refreshMigrations()
+        }
+        setBottomPadding()
+    }
+
+    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
+        super.onChangeEnded(handler, type)
+        if (type.isEnter) {
+            ext_bottom_sheet.canExpand = true
             setBottomPadding()
         }
     }
@@ -272,6 +353,8 @@ class SourceController :
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         ext_bottom_sheet?.presenter?.refreshExtensions()
+        ext_bottom_sheet?.presenter?.refreshMigrations()
+        setBottomPadding()
     }
 
     override fun onItemClick(view: View, position: Int): Boolean {
@@ -351,21 +434,25 @@ class SourceController :
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingExtensions)
         if (showingExtensions) {
-            // Inflate menu
-            inflater.inflate(R.menu.extension_main, menu)
+            if (ext_bottom_sheet.tabs.selectedTabPosition == 0) {
+                // Inflate menu
+                inflater.inflate(R.menu.extension_main, menu)
 
-            // Initialize search option.
-            val searchItem = menu.findItem(R.id.action_search)
-            val searchView = searchItem.actionView as SearchView
+                // Initialize search option.
+                val searchItem = menu.findItem(R.id.action_search)
+                val searchView = searchItem.actionView as SearchView
 
-            // Change hint to show global search.
-            searchView.queryHint = view?.context?.getString(R.string.search_extensions)
+                // Change hint to show global search.
+                searchView.queryHint = view?.context?.getString(R.string.search_extensions)
 
-            // Create query listener which opens the global search view.
-            setOnQueryTextChangeListener(searchView) {
-                extQuery = it ?: ""
-                ext_bottom_sheet.drawExtensions()
-                true
+                // Create query listener which opens the global search view.
+                setOnQueryTextChangeListener(searchView) {
+                    extQuery = it ?: ""
+                    ext_bottom_sheet.drawExtensions()
+                    true
+                }
+            } else {
+                inflater.inflate(R.menu.migration_main, menu)
             }
         } else {
             // Inflate menu
@@ -410,6 +497,12 @@ class SourceController :
                     ).pushChangeHandler(FadeChangeHandler())
                 )
             }
+            R.id.action_migration_guide -> {
+                activity?.openInBrowser(HELP_URL)
+            }
+            R.id.action_sources_settings -> {
+                router.pushController(SettingsBrowseController().withFadeTransaction())
+            }
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -437,4 +530,8 @@ class SourceController :
 
     @Parcelize
     data class SmartSearchConfig(val origTitle: String, val origMangaId: Long) : Parcelable
+
+    companion object {
+        const val HELP_URL = "https://tachiyomi.org/help/guides/source-migration/"
+    }
 }

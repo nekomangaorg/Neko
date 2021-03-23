@@ -9,7 +9,7 @@
     android:background="@drawable/bottom_sheet_rounded_background"
     android:backgroundTint="?android:attr/colorBackground"
     android:orientation="vertical"
-    app:behavior_peekHeight="48sp"
+    app:behavior_peekHeight="60sp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <LinearLayout
@@ -19,6 +19,7 @@
         android:background="@drawable/bottom_sheet_rounded_background"
         android:backgroundTint="?attr/colorPrimaryVariant"
         android:orientation="vertical"
+        android:elevation="5dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -37,41 +38,25 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/title_text"
-            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabs"
+            style="@style/Theme.Widget.Tabs"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginTop="6dp"
-            android:layout_marginBottom="10dp"
-            android:ellipsize="end"
-            android:gravity="center"
-            android:maxLines="1"
-            android:textAlignment="center"
-            android:textColor="?actionBarTintColor"
-            android:textSize="18sp"
-            tools:text="Extensions" />
+            android:background="@android:color/transparent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/menu"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:tabTextColor="@color/tabs_selector_background"
+            app:tabIndicatorColor="?attr/colorAccent"
+            app:tabRippleColor="@color/rippleColor"
+            app:tabGravity="fill"
+            app:tabMode="fixed" />
     </LinearLayout>
 
-    <FrameLayout
-        android:id="@+id/ext_recycler_layout"
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/pager"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/ext_recycler"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:background="?android:attr/colorBackground"
-            android:clipToPadding="false"
-            tools:listitem="@layout/extension_card_header" />
-
-        <eu.kanade.tachiyomi.ui.base.MaterialFastScroll
-            android:id="@+id/fast_scroller"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            app:fastScrollerBubbleEnabled="false" />
-
-    </FrameLayout>
+        android:layout_height="match_parent" />
 </eu.kanade.tachiyomi.ui.extension.ExtensionBottomSheet>

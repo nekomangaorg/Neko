@@ -8,19 +8,14 @@ import eu.davidea.flexibleadapter.items.IFlexible
  *
  * @param controller instance of [MigrationController].
  */
-class SourceAdapter(val controller: MigrationController) :
-    FlexibleAdapter<IFlexible<*>>(null, controller, true) {
+class SourceAdapter(val allClickListener: OnAllClickListener) :
+    FlexibleAdapter<IFlexible<*>>(null, allClickListener, true) {
 
     private var items: List<IFlexible<*>>? = null
 
     init {
         setDisplayHeadersAtStartUp(true)
     }
-
-    /**
-     * Listener for auto item clicks.
-     */
-    val allClickListener: OnAllClickListener? = controller
 
     /**
      * Listener which should be called when user clicks select.

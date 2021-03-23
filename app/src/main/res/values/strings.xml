@@ -620,6 +620,7 @@
     <string name="migration_sources_changed">Migration sources changed</string>
     <string name="you_can_migrate_in_library">You can also migrate by selecting manga in your
         library</string>
+    <string name="source_migration_guide">Source migration guide</string>
 
     <!-- About section -->
     <string name="version">Version</string>
