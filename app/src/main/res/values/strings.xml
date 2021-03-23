@@ -263,6 +263,9 @@
     <string name="version_">Version: %1$s</string>
     <string name="language_">Language: %1$s</string>
     <string name="empty_preferences_for_extension">No preferences to edit for this extension</string>
+    <string name="nsfw_short">18+</string>
+    <string name="unofficial">Unofficial</string>
+    <string name="may_contain_nsfw">May contain NSFW (18+) content</string>
     <plurals name="extension_updates_available">
         <item quantity="one">Extension update available</item>
         <item quantity="other">%d extension updates available</item>
@@ -622,6 +625,11 @@
     <string name="you_can_migrate_in_library">You can also migrate by selecting manga in your
         library</string>
     <string name="source_migration_guide">Source migration guide</string>
+    <string name="nsfw_sources">NSFW (18+) sources</string>
+    <string name="show_in_sources">Show in sources list</string>
+    <string name="show_in_extensions">Show in extensions list</string>
+    <string name="label_in_extensions">Label in extensions list</string>
+    <string name="does_not_prevent_unofficial_nsfw">This does not prevent unofficial or potentially incorrectly flagged extensions from surfacing NSFW (18+) content within the app.</string>
 
     <!-- About section -->
     <string name="version">Version</string>

@@ -14,8 +14,12 @@ import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlinx.android.synthetic.main.extension_card_item.*
 import kotlinx.android.synthetic.main.source_global_search_controller_card_item.*
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
@@ -26,17 +30,24 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         }
     }
 
+    private val shouldLabelNsfw by lazy {
+        Injekt.get<PreferencesHelper>().labelNsfwExtension()
+    }
+
     fun bind(item: ExtensionItem) {
         val extension = item.extension
 
         // Set source name
         ext_title.text = extension.name
         version.text = extension.versionName
-        lang.text = if (extension !is Extension.Untrusted) {
-            LocaleHelper.getDisplayName(extension.lang, itemView.context)
-        } else {
-            itemView.context.getString(R.string.untrusted).toUpperCase()
-        }
+        lang.text = LocaleHelper.getDisplayName(extension.lang, itemView.context)
+        warning.text = when {
+            extension is Extension.Untrusted -> itemView.context.getString(R.string.untrusted)
+            extension is Extension.Installed && extension.isObsolete -> itemView.context.getString(R.string.obsolete)
+            extension is Extension.Installed && extension.isUnofficial -> itemView.context.getString(R.string.unofficial)
+            extension.isNsfw && shouldLabelNsfw -> itemView.context.getString(R.string.nsfw_short)
+            else -> ""
+        }.toUpperCase(Locale.ROOT)
 
         edit_button.clear()
 
@@ -86,14 +97,8 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
                     strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
                     setText(R.string.update)
                 }
-                extension.isObsolete -> {
-                    // Red outline
-                    setTextColor(ContextCompat.getColorStateList(context, R.drawable.button_bg_error))
-
-                    setText(R.string.obsolete)
-                }
                 else -> {
-                    setText(R.string.details)
+                    setText(R.string.settings)
                 }
             }
         } else if (extension is Extension.Untrusted) {
