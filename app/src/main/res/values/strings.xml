@@ -506,6 +506,8 @@
     <string name="white_theme">Pure White</string>
     <string name="system_default_amoled">System default (White + Black)</string>
     <string name="system_default_all_blue">System default (All Blue)</string>
+    <string name="locale">Locale</string>
+    <string name="last_used_library_recents">Last used (Library or Recents)</string>
     <string name="language">Language</string>
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
@@ -516,6 +518,9 @@
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
     <string name="security">Security</string>
+    <string name="starting_screen">Starting screen</string>
+    <string name="back_to_start">Back to start</string>
+    <string name="pressing_back_to_start">Pressing back to starting screen</string>
 
     <!-- Backup -->
     <string name="backup">Backup</string>

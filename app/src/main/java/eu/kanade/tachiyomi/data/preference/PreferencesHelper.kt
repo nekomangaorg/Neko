@@ -77,7 +77,8 @@ class PreferencesHelper(val context: Context) {
     fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
     fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
 
-    fun lastTab() = rxPrefs.getInteger("last_tab", 0)
+    fun startingTab() = flowPrefs.getInt(Keys.startingTab, 0)
+    fun backReturnsToStart() = flowPrefs.getBoolean(Keys.backToStart, true)
 
     fun clear() = prefs.edit().clear().apply()
 

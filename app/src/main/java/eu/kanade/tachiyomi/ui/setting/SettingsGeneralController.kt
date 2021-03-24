@@ -18,45 +18,24 @@ class SettingsGeneralController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.general
 
-        listPreference(activity) {
-            key = Keys.lang
-            titleRes = R.string.language
-            entryValues = listOf(
-                "", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
-                "es", "fr", "hi", "hu", "in", "it", "ja", "ko", "lv", "ms", "nb-rNO", "nl", "pl", "pt",
-                "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN"
+        intListPreference(activity) {
+            key = Keys.startingTab
+            titleRes = R.string.starting_screen
+            entriesRes = arrayOf(
+                R.string.last_used_library_recents,
+                R.string.library,
+                R.string.recents,
+                R.string.browse
             )
-            entries = entryValues.map { value ->
-                val locale = LocaleHelper.getLocaleFromString(value.toString())
-                locale?.getDisplayName(locale)?.capitalize()
-                    ?: context.getString(R.string.system_default)
-            }
-            defaultValue = ""
-            summary = "%s"
-
-            onChange { newValue ->
-                val activity = activity ?: return@onChange false
-                val app = activity.application
-                LocaleHelper.changeLocale(newValue.toString())
-                LocaleHelper.updateConfiguration(app, app.resources.configuration)
-                activity.recreate()
-                true
-            }
+            entryValues = (0 downTo -3).toList()
+            defaultValue = 0
         }
 
-        listPreference(activity) {
-            key = Keys.dateFormat
-            titleRes = R.string.date_format
-            entryValues = listOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd")
-            entries = entryValues.map { value ->
-                if (value == "") {
-                    context.getString(R.string.system_default)
-                } else {
-                    value
-                }
-            }
-            defaultValue = ""
-            summary = "%s"
+        switchPreference {
+            key = Keys.backToStart
+            titleRes = R.string.back_to_start
+            summaryRes = R.string.pressing_back_to_start
+            defaultValue = true
         }
 
         switchPreference {
@@ -77,6 +56,40 @@ class SettingsGeneralController : SettingsController() {
                 }
             } else {
                 isVisible = false
+            }
+        }
+
+        preferenceCategory {
+            titleRes = R.string.display
+
+            intListPreference(activity) {
+                key = Keys.theme
+                titleRes = R.string.app_theme
+                entriesRes = arrayOf(
+                    R.string.white_theme,
+                    R.string.light_blue,
+                    R.string.dark,
+                    R.string.amoled_black,
+                    R.string.dark_blue,
+                    R.string.system_default,
+                    R.string
+                        .system_default_amoled,
+                    R.string.system_default_all_blue
+                )
+                entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
+                defaultValue = 5
+
+                onChange {
+                    activity?.recreate()
+                    true
+                }
+            }
+
+            switchPreference {
+                key = Keys.hideBottomNavOnScroll
+                titleRes = R.string.hide_bottom_nav
+                summaryRes = R.string.hides_on_scroll
+                defaultValue = true
             }
         }
 
@@ -132,36 +145,47 @@ class SettingsGeneralController : SettingsController() {
         }
 
         preferenceCategory {
-            titleRes = R.string.display
+            titleRes = R.string.locale
 
-            intListPreference(activity) {
-                key = Keys.theme
-                titleRes = R.string.app_theme
-                entriesRes = arrayOf(
-                    R.string.white_theme,
-                    R.string.light_blue,
-                    R.string.dark,
-                    R.string.amoled_black,
-                    R.string.dark_blue,
-                    R.string.system_default,
-                    R.string
-                        .system_default_amoled,
-                    R.string.system_default_all_blue
+            listPreference(activity) {
+                key = Keys.lang
+                titleRes = R.string.language
+                entryValues = listOf(
+                    "", "ar", "bg", "bn", "ca", "cs", "de", "el", "en-US", "en-GB",
+                    "es", "fr", "hi", "hu", "in", "it", "ja", "ko", "lv", "ms", "nb-rNO", "nl", "pl", "pt",
+                    "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN"
                 )
-                entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
-                defaultValue = 5
+                entries = entryValues.map { value ->
+                    val locale = LocaleHelper.getLocaleFromString(value.toString())
+                    locale?.getDisplayName(locale)?.capitalize()
+                        ?: context.getString(R.string.system_default)
+                }
+                defaultValue = ""
+                summary = "%s"
 
-                onChange {
-                    activity?.recreate()
+                onChange { newValue ->
+                    val activity = activity ?: return@onChange false
+                    val app = activity.application
+                    LocaleHelper.changeLocale(newValue.toString())
+                    LocaleHelper.updateConfiguration(app, app.resources.configuration)
+                    activity.recreate()
                     true
                 }
             }
 
-            switchPreference {
-                key = Keys.hideBottomNavOnScroll
-                titleRes = R.string.hide_bottom_nav
-                summaryRes = R.string.hides_on_scroll
-                defaultValue = true
+            listPreference(activity) {
+                key = Keys.dateFormat
+                titleRes = R.string.date_format
+                entryValues = listOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd")
+                entries = entryValues.map { value ->
+                    if (value == "") {
+                        context.getString(R.string.system_default)
+                    } else {
+                        value
+                    }
+                }
+                defaultValue = ""
+                summary = "%s"
             }
         }
     }

@@ -18,6 +18,7 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
+import androidx.annotation.IdRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -188,8 +189,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 ) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
-            if (item.itemId != R.id.nav_browse)
-                preferences.lastTab().set(item.itemId)
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
                 setRoot(
@@ -247,8 +246,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                val lastItemId = bottom_nav.menu.findItem(preferences.lastTab().getOrDefault())?.itemId
-                bottom_nav.selectedItemId = lastItemId ?: R.id.nav_library
+                goToStartingTab()
             }
         }
 
@@ -413,6 +411,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     override fun onPause() {
         super.onPause()
         snackBar?.dismiss()
+        setStartingTab()
     }
 
     private fun getAppUpdates() {
@@ -515,9 +514,42 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
-            SecureActivityDelegate.locked = true
-            super.onBackPressed()
+            if (preferences.backReturnsToStart().get() &&
+                startingTab() != bottom_nav?.selectedItemId) {
+                goToStartingTab()
+            }
+            else {
+                if (!preferences.backReturnsToStart().get()) {
+                    setStartingTab()
+                }
+                SecureActivityDelegate.locked = true
+                super.onBackPressed()
+            }
         }
+    }
+
+    private fun setStartingTab() {
+        if (bottom_nav?.selectedItemId != R.id.nav_browse
+            && bottom_nav?.selectedItemId != null
+            && preferences.startingTab().get() >= 0)
+            preferences.startingTab().set(when (bottom_nav?.selectedItemId) {
+                R.id.nav_library -> 0
+                else -> 1
+            })
+    }
+
+    @IdRes
+    private fun startingTab(): Int {
+        return when (preferences.startingTab().get()) {
+            0, -1 -> R.id.nav_library
+            1, -2 -> R.id.nav_recents
+            -3 -> R.id.nav_browse
+            else -> R.id.nav_library
+        }
+    }
+
+    private fun goToStartingTab() {
+        bottom_nav.selectedItemId = startingTab()
     }
 
     private fun setRoot(controller: Controller, id: Int) {
