@@ -117,9 +117,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"
-        android:elevation="6dp"
-        app:layout_anchor="@id/filter_bottom_sheet"
-        app:layout_anchorGravity="top|center">
+        android:elevation="6dp">
 
         <include layout="@layout/rounded_category_hopper" />
 

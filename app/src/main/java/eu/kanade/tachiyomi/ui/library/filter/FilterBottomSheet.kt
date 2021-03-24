@@ -115,16 +115,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
+                    this@FilterBottomSheet.controller?.updateFilterSheetY()
                     pill.alpha = (1 - max(0f, progress)) * 0.25f
                     shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                     shadow.alpha = 1 + min(0f, progress)
                     updateRootPadding(progress)
-                    val bottomBar = (this@FilterBottomSheet.controller?.activity as? MainActivity)?.bottom_nav ?: return
-                    val pad = bottomBar.translationY - bottomBar.height
-                    translationY = pad * -min(0f, progress)
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
+                    this@FilterBottomSheet.controller?.updateFilterSheetY()
                     stateChanged(state)
                 }
             }
@@ -190,6 +189,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun stateChanged(state: Int) {
         val shadow = controller?.shadow ?: return
+        controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = 1f
             libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)

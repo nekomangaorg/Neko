@@ -42,9 +42,9 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         ) {
             if (diffX <= 0) {
                 controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                    anchorGravity =
+                    gravity =
                         Gravity.TOP or (
-                        if (anchorGravity == Gravity.TOP or Gravity.RIGHT) {
+                        if (gravity == Gravity.TOP or Gravity.RIGHT) {
                             controller.preferences.hopperGravity().set(1)
                             Gravity.CENTER
                         } else {
@@ -55,9 +55,9 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                 }
             } else {
                 controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-                    anchorGravity =
-                        Gravity.TOP or Gravity.TOP or (
-                        if (anchorGravity == Gravity.TOP or Gravity.LEFT) {
+                    gravity =
+                        Gravity.TOP or (
+                        if (gravity == Gravity.TOP or Gravity.LEFT) {
                             controller.preferences.hopperGravity().set(1)
                             Gravity.CENTER
                         } else {

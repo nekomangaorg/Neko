@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
@@ -198,6 +199,7 @@ class LibraryController(
     private val showCategoryInTitle
         get() = preferences.showCategoryInTitle().get() && presenter.showAllCategories
     private lateinit var elevateAppBar: ((Boolean) -> Unit)
+    private var hopperOffset = 0f
 
     override fun getTitle(): String? {
         return if (!showCategoryInTitle || header_title.text.isNullOrBlank() || recycler_cover?.isClickable == true) {
@@ -213,9 +215,8 @@ class LibraryController(
             val recyclerCover = recycler_cover ?: return
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
                 if (preferences.autohideHopper().get()) {
-                    category_hopper_frame.translationY += dy
-                    category_hopper_frame.translationY =
-                        category_hopper_frame.translationY.coerceIn(0f, 50f.dpToPx)
+                    hopperOffset += dy
+                    hopperOffset = hopperOffset.coerceIn(0f, 55f.dpToPx)
                 }
                 up_category.alpha = if (isAtTop()) 0.25f else 1f
                 down_category.alpha = if (isAtBottom()) 0.25f else 1f
@@ -244,13 +245,14 @@ class LibraryController(
 
         override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
             super.onScrollStateChanged(recyclerView, newState)
-            val recyclerCover = recycler_cover ?: return
+            recycler_cover ?: return
             when (newState) {
                 RecyclerView.SCROLL_STATE_DRAGGING -> {
                     fast_scroller.showScrollbar()
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     updateHopperPosition()
+                    updateFilterSheetY()
                 }
             }
         }
@@ -260,6 +262,7 @@ class LibraryController(
         val bottomBar = activity?.bottom_nav
         filter_bottom_sheet ?: return
         if (bottomBar != null) {
+            updateHopperY()
             if (filter_bottom_sheet.sheetBehavior.isHidden()) {
                 val pad = bottomBar.translationY - bottomBar.height
                 filter_bottom_sheet.translationY = pad
@@ -270,11 +273,16 @@ class LibraryController(
             shadow2.translationY = pad
             filter_bottom_sheet.updatePaddingRelative(
                 bottom = max(
-                    (-bottomBar.translationY + bottomBar.height).toInt(),
+                    (-pad).toInt(),
                     view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
                 )
             )
-            filter_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + filter_bottom_sheet.paddingBottom
+
+            val padding = max(
+                (-pad).toInt(),
+                view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+            )
+            filter_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + padding
             fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = -pad.toInt()
             }
@@ -285,10 +293,22 @@ class LibraryController(
         val shortAnimationDuration = resources?.getInteger(
             android.R.integer.config_shortAnimTime
         ) ?: 0
-        category_hopper_frame.animate().translationY(
-            if (!show && category_hopper_frame.translationY > 25f.dpToPx) 50f.dpToPx
-            else 0f
-        ).setDuration(shortAnimationDuration.toLong()).start()
+        if (preferences.autohideHopper().get()) {
+            val end = if (!show && hopperOffset > 25f.dpToPx) 55f.dpToPx else 0f
+            val alphaAnimation = ValueAnimator.ofFloat(hopperOffset, end)
+            alphaAnimation.addUpdateListener { valueAnimator ->
+                hopperOffset = valueAnimator.animatedValue as Float
+                updateHopperY()
+            }
+            alphaAnimation.addListener(
+                EndAnimatorListener {
+                    hopperOffset = end
+                    updateHopperY()
+                }
+            )
+            alphaAnimation.duration = shortAnimationDuration.toLong()
+            alphaAnimation.start()
+        }
     }
 
     fun saveActiveCategory(category: Category) {
@@ -569,7 +589,7 @@ class LibraryController(
         }
         hideHopper(preferences.hideHopper().get())
         category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
-            anchorGravity = Gravity.TOP or when (gravityPref) {
+            gravity = Gravity.TOP or when (gravityPref) {
                 0 -> Gravity.LEFT
                 2 -> Gravity.RIGHT
                 else -> Gravity.CENTER
@@ -585,8 +605,29 @@ class LibraryController(
         }
     }
 
+    fun updateHopperY() {
+        val view = view ?: return
+        val listOfYs = mutableListOf(
+            filter_bottom_sheet.y,
+            activity?.bottom_nav?.y ?: filter_bottom_sheet.y
+        )
+        val insetBottom = view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+        if (!preferences.autohideHopper().get()) {
+            listOfYs.add(view.height - (insetBottom).toFloat())
+        }
+        category_hopper_frame.y = -category_hopper_frame.height +
+            (listOfYs.minOrNull() ?: filter_bottom_sheet.y) +
+            hopperOffset
+        if (view.height - insetBottom < category_hopper_frame.y) {
+            jumper_category_text.translationY = -(category_hopper_frame.y  - (view.height - insetBottom))
+        } else {
+            jumper_category_text.translationY = 0f
+        }
+    }
+
+
     fun resetHopperY() {
-        category_hopper_frame.translationY = 0f
+        hopperOffset = 0f
     }
 
     fun hideHopper(hide: Boolean) {
