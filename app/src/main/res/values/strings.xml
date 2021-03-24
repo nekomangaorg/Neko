@@ -278,6 +278,11 @@
     <!-- Reader -->
     <string name="custom_filter">Custom filter</string>
     <string name="set_as_cover">Set as cover</string>
+    <string name="set_page_as_cover">Set page as cover</string>
+    <string name="share_page">Share page</string>
+    <string name="save_page">Save page</string>
+    <string name="_details">%1$s details</string>
+    <string name="reader_settings">Reader settings</string>
     <string name="set_as_default_for_all">Set as default for all</string>
     <string name="cover_updated">Cover updated</string>
     <string name="page_">Page %1$d</string>

@@ -1,18 +1,42 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
-        android:id="@+id/action_custom_filter"
-        android:icon="@drawable/ic_brightness_night_24dp"
-        android:title="@string/custom_filter"
+        android:id="@+id/action_display_settings"
+        android:icon="@drawable/ic_tune_24dp"
+        android:title="@string/display_options"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_settings"
+        android:id="@+id/action_manga_details"
+        android:icon="@drawable/ic_book_24dp"
+        android:title="@string/details"
+        app:showAsAction="ifRoom" />
+
+
+    <item
+        android:id="@+id/action_share_page"
+        android:icon="@drawable/ic_share_24dp"
+        android:title="@string/share_page"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_save_page"
+        android:icon="@drawable/ic_save_24dp"
+        android:title="@string/save_page"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_set_page_as_cover"
+        android:icon="@drawable/ic_photo_24dp"
+        android:title="@string/set_page_as_cover"
+        app:showAsAction="never" />
+
+    <item
+        android:id="@+id/action_reader_settings"
         android:icon="@drawable/ic_settings_24dp"
-        android:title="@string/settings"
-        app:showAsAction="ifRoom"
-        />
+        android:title="@string/reader_settings"
+        app:showAsAction="never" />
 
 </menu>

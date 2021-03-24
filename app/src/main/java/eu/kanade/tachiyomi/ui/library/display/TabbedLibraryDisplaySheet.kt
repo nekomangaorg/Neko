@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
 open class TabbedLibraryDisplaySheet(controller: LibraryController):
-    TabbedBottomSheetDialog(controller) {
+    TabbedBottomSheetDialog(controller.activity!!) {
 
     private val displayView: LibraryDisplayView = inflate(controller.activity!!, R.layout.library_display_layout, null) as LibraryDisplayView
     private val badgesView: LibraryBadgesView = inflate(controller.activity!!, R.layout.library_badges_layout, null) as LibraryBadgesView

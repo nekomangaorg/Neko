@@ -693,6 +693,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
+        const val SHORTCUT_READER_SETTINGS = "eu.kanade.tachiyomi.READER_SETTINGS"
         const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
 
         const val INTENT_SEARCH = "eu.kanade.tachiyomi.SEARCH"

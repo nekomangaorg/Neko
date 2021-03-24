@@ -1,27 +1,32 @@
 package eu.kanade.tachiyomi.widget
 
+import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
+import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
 
-abstract class TabbedBottomSheetDialog(private val controller: BaseController) :
+abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     BottomSheetDialog
-        (controller.activity!!, R.style.BottomSheetDialogTheme) {
+        (activity, R.style.BottomSheetDialogTheme) {
 
     private var sheetBehavior: BottomSheetBehavior<*>
 
-    val activity = controller.activity!!
-
+    open var offset = -1
     init {
         // Use activity theme for this layout
         val view = activity.layoutInflater.inflate(R.layout.tabbed_bottom_sheet, null)
@@ -29,7 +34,9 @@ abstract class TabbedBottomSheetDialog(private val controller: BaseController) :
         setContentView(view)
         sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
         setEdgeToEdge(activity, view)
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+
+        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+        pager.maxHeight = activity.window.decorView.height  - height - 125.dpToPx
 
         val adapter = TabbedSheetAdapter()
         pager.offscreenPageLimit = 2
@@ -41,6 +48,7 @@ abstract class TabbedBottomSheetDialog(private val controller: BaseController) :
         super.onStart()
         sheetBehavior.skipCollapsed = true
         sheetBehavior.expand()
+        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
     }
 
     abstract fun getTabViews(): List<View>
@@ -64,6 +72,13 @@ abstract class TabbedBottomSheetDialog(private val controller: BaseController) :
 }
 
 class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null): ViewPager(context, attrs) {
+
+    var maxHeight = 0
+        set(value) {
+            field = value
+            requestLayout()
+        }
+
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         var heightMeasureSpec = heightMeasureSpec
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
@@ -83,6 +98,9 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
         }
         if (height != 0) {
             heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY) + (rootWindowInsets?.systemWindowInsetBottom ?: 0)
+        }
+        if (maxHeight < height) {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST) + (rootWindowInsets?.systemWindowInsetBottom ?: 0)
         }
         super.onMeasure(widthMeasureSpec, heightMeasureSpec)
     }

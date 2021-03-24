@@ -106,20 +106,6 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 else -> activity.toggleMenu()
             }
         }
-        recycler.longTapListener = f@{ event ->
-            if (activity.menuVisible || config.longTapEnabled) {
-                val child = recycler.findChildViewUnder(event.x, event.y)
-                if (child != null) {
-                    val position = recycler.getChildAdapterPosition(child)
-                    val item = adapter.items.getOrNull(position)
-                    if (item is ReaderPage) {
-                        activity.onPageLongTap(item)
-                        return@f true
-                    }
-                }
-            }
-            false
-        }
 
         config.imagePropertyChangedListener = {
             refreshAdapter()

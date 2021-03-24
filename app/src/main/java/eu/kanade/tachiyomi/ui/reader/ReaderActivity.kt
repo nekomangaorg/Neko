@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
@@ -279,20 +280,45 @@ class ReaderActivity :
         return true
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val detailsItem = menu?.findItem(R.id.action_manga_details)
+        if (presenter.manga?.mangaType(this) != null) {
+            detailsItem?.title = getString(R.string._details,
+                presenter.manga?.mangaType(this)?.capitalize(Locale.ROOT) ?: "")
+        } else {
+            detailsItem?.title = getString(R.string.details)
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     /**
      * Called when an item of the options menu was clicked. Used to handle clicks on our menu
      * entries.
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         coroutine?.cancel()
-        bottomSheet = when (item.itemId) {
-            R.id.action_settings -> ReaderSettingsSheet(this)
-            R.id.action_custom_filter -> ReaderColorFilterSheet(this)
+        when (item.itemId) {
+            R.id.action_display_settings -> TabbedReaderSettingsSheet(this).show()
+            R.id.action_manga_details -> {
+                presenter.manga?.id?.let { id ->
+                    val intent = SearchActivity.openMangaIntent(this, id)
+                    startActivity(intent)
+                }
+            }
+            R.id.action_share_page, R.id.action_set_page_as_cover, R.id.action_save_page -> {
+                val currentChapter = presenter.getCurrentChapter() ?: return true
+                val page = currentChapter.pages?.getOrNull(page_seekbar.progress) ?: return true
+                when (item.itemId) {
+                    R.id.action_share_page -> shareImage(page)
+                    R.id.action_set_page_as_cover -> showSetCoverPrompt(page)
+                    R.id.action_save_page -> saveImage(page)
+                }
+            }
+            R.id.action_reader_settings -> {
+                val intent = SearchActivity.openReaderSettings(this)
+                startActivity(intent)
+            }
             else -> return super.onOptionsItemSelected(item)
-        }
-        bottomSheet?.show()
-        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
-            chapters_bottom_sheet.sheetBehavior?.collapse()
         }
         return true
     }
@@ -355,13 +381,6 @@ class ReaderActivity :
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             popToMain()
-        }
-
-        toolbar.setOnClickListener {
-            presenter.manga?.id?.let { id ->
-                val intent = SearchActivity.openMangaIntent(this, id)
-                startActivity(intent)
-            }
         }
 
         // Init listeners on bottom menu
@@ -477,6 +496,7 @@ class ReaderActivity :
         val prevViewer = viewer
         val noDefault = manga.viewer == -1
         val mangaViewer = presenter.getMangaViewer()
+        invalidateOptionsMenu()
         val newViewer = when (mangaViewer) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
@@ -613,41 +633,6 @@ class ReaderActivity :
         // Set seekbar progress
         page_seekbar.max = pages.lastIndex
         page_seekbar.progress = page.index
-    }
-
-    /**
-     * Called from the viewer whenever a [page] is long clicked. A bottom sheet with a list of
-     * actions to perform is shown.
-     */
-    fun onPageLongTap(page: ReaderPage) {
-        val items = listOf(
-            MaterialMenuSheet.MenuSheetItem(
-                0,
-                R.drawable.ic_photo_24dp,
-                R.string.set_as_cover
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                1,
-                R.drawable.ic_share_24dp,
-                R.string.share
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                2,
-                R.drawable.ic_save_24dp,
-                R.string.save
-            )
-        )
-        MaterialMenuSheet(this, items) { _, item ->
-            when (item) {
-                0 -> showSetCoverPrompt(page)
-                1 -> shareImage(page)
-                2 -> saveImage(page)
-            }
-            true
-        }.show()
-        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
-            chapters_bottom_sheet.sheetBehavior?.collapse()
-        }
     }
 
     /**

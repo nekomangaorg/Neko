@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library.display
 
 import android.content.Context
 import android.util.AttributeSet
+import eu.kanade.tachiyomi.util.bindToPreference
 import kotlinx.android.synthetic.main.library_display_layout.view.*
 
 class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :

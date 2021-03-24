@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -35,7 +36,7 @@ class SearchActivity : MainActivity() {
     }
 
     private fun popToRoot() {
-        if (intent.action == SHORTCUT_MANGA) {
+        if (intent.action == SHORTCUT_MANGA || intent.action == SHORTCUT_READER_SETTINGS) {
             onBackPressed()
         } else if (!router.handleBack()) {
             val intent = Intent(this, MainActivity::class.java).apply {
@@ -97,6 +98,13 @@ class SearchActivity : MainActivity() {
                         .popChangeHandler(FadeChangeHandler())
                 )
             }
+            SHORTCUT_READER_SETTINGS -> {
+                router.replaceTopController(
+                    RouterTransaction.with(SettingsReaderController())
+                        .pushChangeHandler(SimpleSwapChangeHandler())
+                        .popChangeHandler(FadeChangeHandler())
+                )
+            }
             else -> return false
         }
         return true
@@ -111,6 +119,15 @@ class SearchActivity : MainActivity() {
             .apply {
                 action = SHORTCUT_MANGA
                 putExtra(MangaDetailsController.MANGA_EXTRA, id)
+            }
+
+        fun openReaderSettings(context: Context) = Intent(
+            context,
+            SearchActivity::class
+                .java
+        )
+            .apply {
+                action = SHORTCUT_READER_SETTINGS
             }
     }
 }

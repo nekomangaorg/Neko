@@ -189,11 +189,6 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = true
             }
             switchPreference {
-                key = Keys.readWithLongTap
-                titleRes = R.string.long_tap_dialog
-                defaultValue = true
-            }
-            switchPreference {
                 key = Keys.readWithVolumeKeys
                 titleRes = R.string.volume_keys
                 defaultValue = false
