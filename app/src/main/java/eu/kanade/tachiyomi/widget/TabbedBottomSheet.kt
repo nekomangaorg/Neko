@@ -3,20 +3,17 @@ package eu.kanade.tachiyomi.widget
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
-import androidx.coordinatorlayout.widget.CoordinatorLayout
+import androidx.core.widget.NestedScrollView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
 
@@ -48,7 +45,25 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
         super.onStart()
         sheetBehavior.skipCollapsed = true
         sheetBehavior.expand()
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
+                view?.isNestedScrollingEnabled = true
+                view?.requestLayout()
+            }
+
+            override fun onTabUnselected(tab: TabLayout.Tab?) {
+                val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
+                view?.isNestedScrollingEnabled = false
+                view?.requestLayout()
+            }
+
+            override fun onTabReselected(tab: TabLayout.Tab?) {
+                val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
+                view?.isNestedScrollingEnabled = true
+                view?.requestLayout()
+            }
+        })
     }
 
     abstract fun getTabViews(): List<View>

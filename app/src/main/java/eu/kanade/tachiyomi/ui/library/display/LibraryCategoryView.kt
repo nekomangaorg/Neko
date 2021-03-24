@@ -3,10 +3,11 @@ package eu.kanade.tachiyomi.ui.library.display
 import android.content.Context
 import android.util.AttributeSet
 import eu.kanade.tachiyomi.util.bindToPreference
+import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
 import kotlinx.android.synthetic.main.library_category_layout.view.*
 
 class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    LibraryPreferenceView(context, attrs) {
+    BaseLibraryDisplayView(context, attrs) {
 
     override fun initGeneralPreferences() {
         show_all.bindToPreference(preferences.showAllCategories()) {

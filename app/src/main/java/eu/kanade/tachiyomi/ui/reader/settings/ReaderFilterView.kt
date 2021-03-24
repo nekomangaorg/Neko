@@ -6,11 +6,11 @@ import android.widget.SeekBar
 import androidx.annotation.ColorInt
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
+import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_color_filter.*
 import kotlinx.android.synthetic.main.reader_color_filter.view.*
-import kotlinx.android.synthetic.main.reader_color_filter.view.settings_scroll_view
 import kotlinx.android.synthetic.main.reader_general_layout.view.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -21,7 +21,6 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
 
     override fun initGeneralPreferences() {
         activity = context as ReaderActivity
-        settings_scroll_view.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         preferences.colorFilter().asFlow()
             .onEach { setColorFilter(it) }
             .launchIn(activity.scope)

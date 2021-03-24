@@ -4,15 +4,10 @@ import android.content.Context
 import android.util.AttributeSet
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.bindToIntPreference
 import eu.kanade.tachiyomi.util.bindToPreference
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 import kotlinx.android.synthetic.main.reader_paged_layout.view.*
-import kotlinx.android.synthetic.main.reader_paged_layout.view.crop_borders_webtoon
-import kotlinx.android.synthetic.main.reader_paged_layout.view.settings_scroll_view
-import kotlinx.android.synthetic.main.reader_paged_layout.view.webtoon_enable_zoom_out
-import kotlinx.android.synthetic.main.reader_paged_layout.view.webtoon_side_padding
 
 class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseReaderSettingsView(context, attrs) {
@@ -23,7 +18,6 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         crop_borders.bindToPreference(preferences.cropBorders())
         page_transitions.bindToPreference(preferences.pageTransitions())
 
-        settings_scroll_view.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         val mangaViewer = (context as ReaderActivity).presenter.getMangaViewer()
         val isWebtoonView = mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
         val hasMargins = mangaViewer == ReaderActivity.VERTICAL_PLUS

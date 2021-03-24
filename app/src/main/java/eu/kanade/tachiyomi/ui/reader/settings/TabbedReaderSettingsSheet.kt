@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.view.View
+import androidx.core.widget.NestedScrollView
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.library.display.LibraryBadgesView
@@ -66,22 +67,13 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity): TabbedBotto
         tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 window?.setDimAmount(if (tab?.position == 2) 0f else ogDim)
-                val view = getTabViews()[tab?.position ?: 0]
-                view.settings_scroll_view?.isNestedScrollingEnabled = true
-                view.settings_scroll_view?.requestLayout()
                 readerActivity.appbar.visInvisIf(tab?.position != 2)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
-                val view = getTabViews()[tab?.position ?: 0]
-                view.settings_scroll_view?.isNestedScrollingEnabled = false
-                view.settings_scroll_view?.requestLayout()
             }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
-                val view = getTabViews()[tab?.position ?: 0]
-                view.settings_scroll_view?.isNestedScrollingEnabled = true
-                view.settings_scroll_view?.requestLayout()
             }
         })
     }
