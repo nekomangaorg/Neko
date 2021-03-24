@@ -12,6 +12,6 @@ class LangHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.Vie
     BaseFlexibleViewHolder(view, adapter) {
 
     fun bind(item: LangItem) {
-        title.text = LocaleHelper.getDisplayName(item.code, itemView.context)
+        title.text = LocaleHelper.getDisplayName(item.code)
     }
 }

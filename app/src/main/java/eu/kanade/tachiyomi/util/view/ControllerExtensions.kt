@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.view
 
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.view.View
 import android.view.ViewGroup
@@ -11,6 +12,7 @@ import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
+import androidx.core.net.toUri
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
@@ -24,6 +26,7 @@ import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -120,6 +123,11 @@ fun Controller.scrollViewWith(
     val randomTag = Random.nextLong()
     var lastY = 0f
     var fakeToolbarView: View? = null
+    if (!customPadding) {
+        recycler.updatePaddingRelative(
+            top = activity!!.toolbar.y.toInt() + appBarHeight
+        )
+    }
     recycler.doOnApplyWindowInsets { view, insets, _ ->
         val headerHeight = insets.systemWindowInsetTop + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
@@ -295,3 +303,13 @@ fun Controller.withFadeTransaction(): RouterTransaction {
         .pushChangeHandler(FadeChangeHandler())
         .popChangeHandler(FadeChangeHandler())
 }
+
+fun Controller.openInBrowser(url: String) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+        startActivity(intent)
+    } catch (e: Throwable) {
+        activity?.toast(e.message)
+    }
+}
+

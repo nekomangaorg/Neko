@@ -101,8 +101,8 @@ open class GlobalSearchPresenter(
      * @return list containing enabled sources.
      */
     protected open fun getEnabledSources(): List<CatalogueSource> {
-        val languages = preferencesHelper.enabledLanguages().getOrDefault()
-        val hiddenCatalogues = preferencesHelper.hiddenSources().getOrDefault()
+        val languages = preferencesHelper.enabledLanguages().get()
+        val hiddenCatalogues = preferencesHelper.hiddenSources().get()
         val pinnedCatalogues = preferencesHelper.pinnedCatalogues().getOrDefault()
 
         val list = sourceManager.getCatalogueSources()

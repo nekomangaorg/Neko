@@ -18,7 +18,7 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
 
     fun bind(source: HttpSource, sourceEnabled: Boolean) {
         val preferences by injectLazy<PreferencesHelper>()
-        val isMultiLanguage = preferences.enabledLanguages().getOrDefault().size > 1
+        val isMultiLanguage = preferences.enabledLanguages().get().size > 1
         // Set capitalized title.
         val sourceName = if (isMultiLanguage) source.toString() else source.name.capitalize()
         title.text = sourceName

@@ -88,8 +88,8 @@ class SettingsBrowseController : SettingsController() {
                 summaryRes = R.string.only_enable_enabled_for_migration
                 onClick {
                     val ogSources = preferences.migrationSources().get()
-                    val languages = preferences.enabledLanguages().getOrDefault()
-                    val hiddenCatalogues = preferences.hiddenSources().getOrDefault()
+                    val languages = preferences.enabledLanguages().get()
+                    val hiddenCatalogues = preferences.hiddenSources().get()
                     val enabledSources =
                         sourceManager.getCatalogueSources().filter { it.lang in languages }
                             .filterNot { it.id.toString() in hiddenCatalogues }

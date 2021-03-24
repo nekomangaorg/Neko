@@ -146,7 +146,7 @@ class ExtensionBottomPresenter(
     @Synchronized
     private fun toItems(tuple: ExtensionTuple): List<ExtensionItem> {
         val context = bottomSheet.context
-        val activeLangs = preferences.enabledLanguages().getOrDefault()
+        val activeLangs = preferences.enabledLanguages().get()
 
         val (installed, untrusted, available) = tuple
 
@@ -174,7 +174,7 @@ class ExtensionBottomPresenter(
         }
         if (availableSorted.isNotEmpty()) {
             val availableGroupedByLang = availableSorted
-                .groupBy { LocaleHelper.getDisplayName(it.lang, context) }
+                .groupBy { LocaleHelper.getSourceDisplayName(it.lang, context) }
                 .toSortedMap()
 
             availableGroupedByLang

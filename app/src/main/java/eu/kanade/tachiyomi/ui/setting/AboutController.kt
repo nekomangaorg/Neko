@@ -85,7 +85,7 @@ class AboutController : SettingsController() {
         }
         preferenceCategory {
             preference {
-                titleRes = R.string.whats_new
+                titleRes = R.string.whats_new_this_release
                 onClick {
                     val intent = Intent(
                         Intent.ACTION_VIEW,

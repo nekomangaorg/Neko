@@ -111,8 +111,8 @@ class SourcePresenter(
      * @return list containing enabled sources.
      */
     private fun getEnabledSources(): List<CatalogueSource> {
-        val languages = preferences.enabledLanguages().getOrDefault()
-        val hiddenCatalogues = preferences.hiddenSources().getOrDefault()
+        val languages = preferences.enabledLanguages().get()
+        val hiddenCatalogues = preferences.hiddenSources().get()
 
         return sourceManager.getCatalogueSources()
             .filter { it.lang in languages }

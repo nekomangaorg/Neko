@@ -53,13 +53,25 @@ object LocaleHelper {
     /**
      * Returns Display name of a string language code
      */
-    fun getDisplayName(lang: String?, context: Context): String {
+    fun getSourceDisplayName(lang: String?, context: Context): String {
+        return when (lang) {
+            "" -> context.getString(R.string.other)
+            SourcePresenter.LAST_USED_KEY -> context.getString(R.string.last_used)
+            SourcePresenter.PINNED_KEY -> context.getString(R.string.pinned)
+            "all" -> context.getString(R.string.all)
+            else -> getDisplayName(lang)
+        }
+    }
+
+    /**
+     * Returns Display name of a string language code
+     */
+    fun getDisplayName(lang: String?): String {
         return when (lang) {
             null -> ""
-            "" -> context.getString(R.string.other)
-            SourcePresenter.PINNED_KEY -> context.getString(R.string.pinned)
-            SourcePresenter.LAST_USED_KEY -> context.getString(R.string.last_used)
-            "all" -> context.getString(R.string.all)
+            "" -> {
+                systemLocale!!.getDisplayName(systemLocale).capitalize()
+            }
             else -> {
                 val locale = getLocale(lang)
                 locale.getDisplayName(locale).capitalize()

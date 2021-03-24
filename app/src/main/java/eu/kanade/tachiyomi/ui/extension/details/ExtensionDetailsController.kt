@@ -1,11 +1,17 @@
-package eu.kanade.tachiyomi.ui.extension
+package eu.kanade.tachiyomi.ui.extension.details
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.provider.Settings
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.preference.DialogPreference
@@ -19,20 +25,33 @@ import androidx.preference.Preference
 import androidx.preference.PreferenceGroupAdapter
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
-import androidx.recyclerview.widget.DividerItemDecoration.VERTICAL
-import com.jakewharton.rxbinding.view.clicks
+import androidx.preference.SwitchPreferenceCompat
+import androidx.recyclerview.widget.ConcatAdapter
+import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.EmptyPreferenceDataStore
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.SharedPreferencesDataStore
+import eu.kanade.tachiyomi.data.preference.minusAssign
+import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.getPreferenceKey
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.setting.preferenceCategory
+import eu.kanade.tachiyomi.ui.setting.DSL
+import eu.kanade.tachiyomi.ui.setting.onChange
+import eu.kanade.tachiyomi.ui.setting.switchPreference
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForController
+import eu.kanade.tachiyomi.util.view.openInBrowser
+import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import kotlinx.android.synthetic.main.extension_detail_controller.*
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 @SuppressLint("RestrictedApi")
 class ExtensionDetailsController(bundle: Bundle? = null) :
@@ -43,6 +62,13 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private var lastOpenPreferencePosition: Int? = null
 
     private var preferenceScreen: PreferenceScreen? = null
+
+    private val preferences: PreferencesHelper = Injekt.get()
+
+    private val viewScope = MainScope()
+    init {
+        setHasOptionsMenu(true)
+    }
 
     constructor(pkgName: String) : this(
         Bundle().apply {
@@ -67,23 +93,10 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     @SuppressLint("PrivateResource")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        view.applyWindowInsetsForController()
+        scrollViewWith(extension_prefs_recycler, padBottom = true)
 
         val extension = presenter.extension ?: return
         val context = view.context
-
-        extension_title.text = extension.name
-        extension_version.text = context.getString(R.string.version_, extension.versionName)
-        extension_lang.text = context.getString(R.string.language_, LocaleHelper.getDisplayName(extension.lang, context))
-        extension_pkg.text = extension.pkgName
-        extension.getApplicationIcon(context)?.let { extension_icon.setImageDrawable(it) }
-        extension_uninstall_button.clicks().subscribeUntilDestroy {
-            presenter.uninstallExtension()
-        }
-
-        if (extension.isObsolete) {
-            extension_obsolete.visibility = View.VISIBLE
-        }
 
         val themedContext by lazy { getPreferenceThemeContext() }
         val manager = PreferenceManager(themedContext)
@@ -93,10 +106,12 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         preferenceScreen = screen
 
         val multiSource = extension.sources.size > 1
+        val isMultiLangSingleSource = multiSource && extension.sources.map { it.name }.distinct().size == 1
+        val langauges = preferences.enabledLanguages().get()
 
-        for (source in extension.sources) {
+        for (source in extension.sources.sortedByDescending { it.isLangEnabled(langauges) }) {
             if (source is ConfigurableSource) {
-                addPreferencesForSource(screen, source, multiSource)
+                addPreferencesForSource(screen, source, multiSource, isMultiLangSingleSource)
             }
         }
 
@@ -104,16 +119,17 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         extension_prefs_recycler.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(context)
-        extension_prefs_recycler.adapter = PreferenceGroupAdapter(screen)
-        extension_prefs_recycler.addItemDecoration(androidx.recyclerview.widget.DividerItemDecoration(context, VERTICAL))
-        extension_prefs_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-
-        if (screen.preferenceCount == 0) {
-            extension_prefs_empty_view.show(
-                R.drawable.ic_no_settings_24dp,
-                R.string.empty_preferences_for_extension
-            )
-        }
+        val concatAdapterConfig = ConcatAdapter.Config.Builder()
+            .setStableIdMode(ConcatAdapter.Config.StableIdMode.ISOLATED_STABLE_IDS)
+            .build()
+        screen.setShouldUseGeneratedIds(true)
+        val extHeaderAdapter = ExtensionDetailsHeaderAdapter(presenter)
+        extHeaderAdapter.setHasStableIds(true)
+        extension_prefs_recycler.adapter = ConcatAdapter(concatAdapterConfig,
+            extHeaderAdapter,
+            PreferenceGroupAdapter(screen)
+        )
+        extension_prefs_recycler.addItemDecoration(ExtensionSettingsDividerItemDecoration(context))
     }
 
     override fun onDestroyView(view: View) {
@@ -135,38 +151,110 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         lastOpenPreferencePosition = savedInstanceState.get(LASTOPENPREFERENCE_KEY) as? Int
     }
 
-    private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, multiSource: Boolean) {
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.extension_details, menu)
+
+        menu.findItem(R.id.action_history).isVisible = presenter.extension?.isUnofficial == false
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_history -> openCommitHistory()
+            R.id.action_app_info -> openInSettings()
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    private fun openCommitHistory() {
+        val pkgName = presenter.extension!!.pkgName.substringAfter("eu.kanade.tachiyomi.extension.")
+        val pkgFactory = presenter.extension!!.pkgFactory
+        val url = when {
+            !pkgFactory.isNullOrEmpty() -> "$URL_EXTENSION_COMMITS/multisrc/src/main/java/eu/kanade/tachiyomi/multisrc/$pkgFactory"
+            else -> "$URL_EXTENSION_COMMITS/src/${pkgName.replace(".", "/")}"
+        }
+        openInBrowser(url)
+    }
+
+    private fun openInSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", presenter.pkgName, null)
+        }
+        startActivity(intent)
+    }
+
+    private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, isMultiSource: Boolean, isMultiLangSingleSource: Boolean) {
         val context = screen.context
 
         // TODO
-        val dataStore = SharedPreferencesDataStore(/*if (source is HttpSource) {
-            source.preferences
-        } else {*/
+        val dataStore = SharedPreferencesDataStore(
             context.getSharedPreferences("source_${source.id}", Context.MODE_PRIVATE)
-            /*}*/
         )
 
         if (source is ConfigurableSource) {
-            if (multiSource) {
-                screen.preferenceCategory {
-                    title = source.toString()
+            val prefs = mutableListOf<Preference>()
+            val block: (@DSL SwitchPreferenceCompat).() -> Unit = {
+                key = source.getPreferenceKey()
+                title = when {
+                    isMultiSource && !isMultiLangSingleSource -> source.toString()
+                    else -> LocaleHelper.getSourceDisplayName(source.lang, context)
                 }
+                isPersistent = false
+                isChecked = source.isEnabled()
+
+                onChange { newValue ->
+                    if (source.isLangEnabled()) {
+                        val checked = newValue as Boolean
+                        toggleSource(source, checked)
+                        prefs.forEach { it.isVisible = checked }
+                        true
+                    }
+                    else {
+                        coordinator.snack(context.getString(R.string._must_be_enabled_first, title), Snackbar.LENGTH_LONG) {
+                            setAction(R.string.enable) {
+                                preferences.enabledLanguages() += source.lang
+                                isChecked = true
+                                toggleSource(source, true)
+                                prefs.forEach { it.isVisible = true }
+                            }
+                        }
+                        false
+                    }
+                }
+
+                // React to enable/disable all changes
+                preferences.hiddenSources().asFlow()
+                    .onEach {
+                        val enabled = source.isEnabled()
+                        isChecked = enabled
+                    }
+                    .launchIn(viewScope)
             }
 
             val newScreen = screen.preferenceManager.createPreferenceScreen(context)
+            screen.switchPreference(block)
             source.setupPreferenceScreen(newScreen)
 
             // Reparent the preferences
             while (newScreen.preferenceCount != 0) {
                 val pref = newScreen.getPreference(0)
-                pref.isIconSpaceReserved = false
+                pref.isIconSpaceReserved = true
                 pref.preferenceDataStore = dataStore
                 pref.fragment = "source_${source.id}"
-                pref.order = Int.MAX_VALUE // reset to default order
-
+                pref.order = Int.MAX_VALUE
+                pref.isVisible = source.isEnabled()
+                prefs.add(pref)
                 newScreen.removePreference(pref)
                 screen.addPreference(pref)
             }
+        }
+    }
+
+    private fun toggleSource(source: Source, enable: Boolean) {
+        if (enable) {
+            preferences.hiddenSources() -= source.id.toString()
+        } else {
+            preferences.hiddenSources() += source.id.toString()
         }
     }
 
@@ -216,6 +304,15 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         f.showDialog(router)
     }
 
+    private fun Source.isEnabled(): Boolean {
+        return id.toString() !in preferences.hiddenSources().get() && isLangEnabled()
+    }
+
+
+    private fun Source.isLangEnabled(langs: Set<String>? = null): Boolean {
+        return (lang in langs ?: preferences.enabledLanguages().get())
+    }
+
     @Suppress("UNCHECKED_CAST")
     override fun <T : Preference> findPreference(key: CharSequence): T? {
         // We track [lastOpenPreferencePosition] when displaying the dialog
@@ -226,5 +323,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private companion object {
         const val PKGNAME_KEY = "pkg_name"
         const val LASTOPENPREFERENCE_KEY = "last_open_preference"
+        private const val URL_EXTENSION_COMMITS =
+            "https://github.com/tachiyomiorg/tachiyomi-extensions/commits/master"
     }
 }

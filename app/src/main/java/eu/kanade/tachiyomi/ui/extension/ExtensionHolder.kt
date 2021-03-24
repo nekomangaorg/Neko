@@ -40,7 +40,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         // Set source name
         ext_title.text = extension.name
         version.text = extension.versionName
-        lang.text = LocaleHelper.getDisplayName(extension.lang, itemView.context)
+        lang.text = LocaleHelper.getDisplayName(extension.lang)
         warning.text = when {
             extension is Extension.Untrusted -> itemView.context.getString(R.string.untrusted)
             extension is Extension.Installed && extension.isObsolete -> itemView.context.getString(R.string.obsolete)

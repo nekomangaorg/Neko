@@ -11,6 +11,8 @@ import androidx.preference.PreferenceScreen
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChanges
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.preference.minusAssign
+import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -39,7 +41,7 @@ class SettingsSourcesController : SettingsController() {
         sorting = SourcesSort.from(preferences.sourceSorting().getOrDefault()) ?: SourcesSort.Alpha
         activity?.invalidateOptionsMenu()
         // Get the list of active language codes.
-        val activeLangsCodes = preferences.enabledLanguages().getOrDefault()
+        val activeLangsCodes = preferences.enabledLanguages().get()
 
         // Get a map of sources grouped by language.
         sourcesByLang = onlineSources.groupByTo(TreeMap(), { it.lang })
@@ -55,7 +57,7 @@ class SettingsSourcesController : SettingsController() {
                     lang,
                     SwitchPreferenceCategory(context).apply {
                         preferenceScreen.addPreference(this)
-                        title = LocaleHelper.getDisplayName(lang, context)
+                        title = LocaleHelper.getSourceDisplayName(lang, context)
                         isPersistent = false
                         if (lang in activeLangsCodes) {
                             setChecked(true)
@@ -64,12 +66,12 @@ class SettingsSourcesController : SettingsController() {
 
                         onChange { newValue ->
                             val checked = newValue as Boolean
-                            val current = preferences.enabledLanguages().getOrDefault()
+                            val current = preferences.enabledLanguages().get()
                             if (!checked) {
-                                preferences.enabledLanguages().set(current - lang)
+                                preferences.enabledLanguages() -= lang
                                 removeAll()
                             } else {
-                                preferences.enabledLanguages().set(current + lang)
+                                preferences.enabledLanguages() += lang
                                 addLanguageSources(this, sortedSources(sourcesByLang[lang]))
                             }
                             true
@@ -90,7 +92,7 @@ class SettingsSourcesController : SettingsController() {
      * @param group the language category.
      */
     private fun addLanguageSources(group: PreferenceGroup, sources: List<HttpSource>) {
-        val hiddenCatalogues = preferences.hiddenSources().getOrDefault()
+        val hiddenCatalogues = preferences.hiddenSources().get()
 
         val selectAllPreference = CheckBoxPreference(group.context).apply {
 
@@ -102,7 +104,7 @@ class SettingsSourcesController : SettingsController() {
 
             onChange { newValue ->
                 val checked = newValue as Boolean
-                val current = preferences.hiddenSources().get() ?: mutableSetOf()
+                val current = preferences.hiddenSources().get().toMutableSet()
                 if (checked)
                     current.removeAll(sources.map { it.id.toString() })
                 else
@@ -131,7 +133,7 @@ class SettingsSourcesController : SettingsController() {
 
                 onChange { newValue ->
                     val checked = newValue as Boolean
-                    val current = preferences.hiddenSources().getOrDefault()
+                    val current = preferences.hiddenSources().get()
 
                     preferences.hiddenSources().set(
                         if (checked) current - id
@@ -215,7 +217,7 @@ class SettingsSourcesController : SettingsController() {
     }
 
     private fun drawSources() {
-        val activeLangsCodes = preferences.enabledLanguages().getOrDefault()
+        val activeLangsCodes = preferences.enabledLanguages().get()
         langPrefs.forEach { group ->
             if (group.first in activeLangsCodes) {
                 group.second.removeAll()
@@ -227,7 +229,7 @@ class SettingsSourcesController : SettingsController() {
     private fun sortedSources(sources: List<HttpSource>?): List<HttpSource> {
         val sourceAlpha = sources.orEmpty().sortedBy { it.name }
         return if (sorting == SourcesSort.Enabled) {
-            val hiddenCatalogues = preferences.hiddenSources().getOrDefault()
+            val hiddenCatalogues = preferences.hiddenSources().get()
             sourceAlpha.filter { it.id.toString() !in hiddenCatalogues } +
                 sourceAlpha.filterNot { it.id.toString() !in hiddenCatalogues }
         } else {

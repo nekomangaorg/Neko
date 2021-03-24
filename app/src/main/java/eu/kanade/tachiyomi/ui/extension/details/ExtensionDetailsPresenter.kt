@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.extension
+package eu.kanade.tachiyomi.ui.extension.details
 
 import android.os.Bundle
 import eu.kanade.tachiyomi.extension.ExtensionManager

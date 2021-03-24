@@ -2,38 +2,30 @@ package eu.kanade.tachiyomi.ui.extension
 
 import android.content.Context
 import android.util.AttributeSet
-import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.LinearLayout
-import androidx.core.view.get
-import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
-import com.google.android.material.tabs.TabLayoutMediator
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.model.Extension
+import eu.kanade.tachiyomi.ui.extension.details.ExtensionDetailsController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MangaAdapter
 import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SourceAdapter
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
-import eu.kanade.tachiyomi.ui.recents.RecentMangaHolder
 import eu.kanade.tachiyomi.ui.source.SourceController
-import eu.kanade.tachiyomi.util.system.await
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
@@ -42,9 +34,6 @@ import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.migration_controller.*
 import kotlinx.android.synthetic.main.recents_controller.*
 import kotlinx.android.synthetic.main.recycler_with_scroller.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -244,9 +233,11 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             .showDialog(controller.router)
     }
 
-    fun setExtensions(extensions: List<ExtensionItem>) {
+    fun setExtensions(extensions: List<ExtensionItem>, updateController: Boolean = true) {
         this.extensions = extensions
-        controller.presenter.updateSources()
+        if (updateController) {
+            controller.presenter.updateSources()
+        }
         drawExtensions()
     }
 

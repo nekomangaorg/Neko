@@ -315,9 +315,10 @@ class SourceController :
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
-        if (!type.isPush && handler is SettingsSourcesFadeChangeHandler) {
+        if (!type.isPush) {
             ext_bottom_sheet.updateExtTitle()
             ext_bottom_sheet.presenter.refreshExtensions()
+            presenter.updateSources()
         }
         if (!type.isEnter) {
             ext_bottom_sheet.canExpand = false
@@ -358,7 +359,7 @@ class SourceController :
 
     fun hideCatalogue(position: Int) {
         val source = (adapter?.getItem(position) as? SourceItem)?.source ?: return
-        val current = preferences.hiddenSources().getOrDefault()
+        val current = preferences.hiddenSources().get()
         preferences.hiddenSources().set(current + source.id.toString())
 
         presenter.updateSources()
@@ -366,7 +367,7 @@ class SourceController :
         snackbar = view?.snack(R.string.source_hidden, Snackbar.LENGTH_INDEFINITE) {
             anchorView = ext_bottom_sheet
             setAction(R.string.undo) {
-                val newCurrent = preferences.hiddenSources().getOrDefault()
+                val newCurrent = preferences.hiddenSources().get()
                 preferences.hiddenSources().set(newCurrent - source.id.toString())
                 presenter.updateSources()
             }

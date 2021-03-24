@@ -89,6 +89,10 @@ inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).
     )
 }
 
+inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
+    return initThenAdd(SwitchPreferenceCompat(context), block)
+}
+
 inline fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
     return initThenAdd(
         Preference(context),

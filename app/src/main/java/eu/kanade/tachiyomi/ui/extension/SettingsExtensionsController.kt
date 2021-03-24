@@ -17,7 +17,7 @@ class SettingsExtensionsController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.filter
 
-        val activeLangs = preferences.enabledLanguages().getOrDefault()
+        val activeLangs = preferences.enabledLanguages().get()
 
         val availableLangs =
             Injekt.get<ExtensionManager>().availableExtensions.groupBy {
@@ -31,13 +31,13 @@ class SettingsExtensionsController : SettingsController() {
         availableLangs.forEach {
             SwitchPreference(context).apply {
                 preferenceScreen.addPreference(this)
-                title = LocaleHelper.getDisplayName(it, context)
+                title = LocaleHelper.getSourceDisplayName(it, context)
                 isPersistent = false
                 isChecked = it in activeLangs
 
                 onChange { newValue ->
                     val checked = newValue as Boolean
-                    val currentActiveLangs = preferences.enabledLanguages().getOrDefault()
+                    val currentActiveLangs = preferences.enabledLanguages().get()
 
                     if (checked) {
                         preferences.enabledLanguages().set(currentActiveLangs + it)

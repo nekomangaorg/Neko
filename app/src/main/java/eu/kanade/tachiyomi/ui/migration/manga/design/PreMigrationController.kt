@@ -142,7 +142,7 @@ class PreMigrationController(bundle: Bundle? = null) :
      * @return list containing enabled sources.
      */
     private fun getEnabledSources(): List<HttpSource> {
-        val languages = prefs.enabledLanguages().getOrDefault()
+        val languages = prefs.enabledLanguages().get()
         val sourcesSaved = prefs.migrationSources().get().split("/")
         var sources = sourceManager.getCatalogueSources()
             .filterIsInstance<HttpSource>()
@@ -162,7 +162,7 @@ class PreMigrationController(bundle: Bundle? = null) :
 
     fun isEnabled(id: String): Boolean {
         val sourcesSaved = prefs.migrationSources().get()
-        val hiddenCatalogues = prefs.hiddenSources().getOrDefault()
+        val hiddenCatalogues = prefs.hiddenSources().get()
         return if (sourcesSaved.isEmpty()) id !in hiddenCatalogues
         else sourcesSaved.split("/").contains(id)
     }
@@ -181,7 +181,7 @@ class PreMigrationController(bundle: Bundle? = null) :
             }
             R.id.action_match_enabled, R.id.action_match_pinned -> {
                 val enabledSources = if (item.itemId == R.id.action_match_enabled) {
-                    prefs.hiddenSources().getOrDefault().mapNotNull { it.toLongOrNull() }
+                    prefs.hiddenSources().get().mapNotNull { it.toLongOrNull() }
                 } else {
                     prefs.pinnedCatalogues().get()?.mapNotNull { it.toLongOrNull() } ?: emptyList()
                 }

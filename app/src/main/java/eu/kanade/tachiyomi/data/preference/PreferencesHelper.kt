@@ -43,6 +43,14 @@ private class DateFormatConverter : Preference.Adapter<DateFormat> {
     }
 }
 
+operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.plusAssign(item: T) {
+    set(get() + item)
+}
+
+operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.minusAssign(item: T) {
+    set(get() - item)
+}
+
 class PreferencesHelper(val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -135,7 +143,7 @@ class PreferencesHelper(val context: Context) {
 
     fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
-    fun enabledLanguages() = rxPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
+    fun enabledLanguages() = flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
 
@@ -211,7 +219,7 @@ class PreferencesHelper(val context: Context) {
 
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
-    fun hiddenSources() = rxPrefs.getStringSet("hidden_catalogues", mutableSetOf())
+    fun hiddenSources() = flowPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 
     fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())
 
