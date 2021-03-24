@@ -28,7 +28,6 @@
     <string name="delete">ลบ</string>
     <string name="edit">แก้ไข</string>
     <string name="add">เพิ่ม</string>
-    <string name="add_category">เพิ่มประเภท</string>
     <string name="edit_categories">แก้ไขประเภท</string>
     <string name="rename_category">เปลี่ยนชื่อประเภท</string>
     <string name="close">ปิด</string>
@@ -82,7 +81,6 @@
     <string name="clear">ล้าง</string>
     <string name="remove">ลบออก</string>
     <string name="resume">เล่นต่อ</string>
-    <string name="add_to_home_screen">เพิ่มไปที่หน้าหลัก</string>
     <string name="display">การแสดงผล</string>
     <string name="download_badge">ดาวน์โหลดป้าย</string>
     <string name="sort">การจัดเรียง</string>
@@ -131,7 +129,6 @@
     <string name="right_to_left_viewer">จากขวาไปซ้าย</string>
     <string name="vertical_viewer">แนวตั้ง</string>
     <string name="webtoon">เว็บตูน</string>
-    <string name="pager_viewer">การแสดงหน้า</string>
     <string name="scale_type">ชนิดของมาตราส่วน</string>
     <string name="fit_screen">หน้าจอพอดี</string>
     <string name="stretch">ยืด</string>
@@ -180,9 +177,6 @@
     <string name="max_auto_backups">จำนวนการสำรองข้อมูลอัตโนมัติสูงสุด</string>
     <string name="backup_created">การสำรองข้อมูลที่สร้างขึ้น</string>
     <string name="restore_completed">การคืนค่าเสร็จสมบูรณ์</string>
-    <string name="restore_completed_content">การคืนค่าเอา %1$s
-\nพบข้อผิดพลาด %2$s</string>
-    <string name="file_saved_at_">แฟ้มที่บันทึกไว้ที่ %1$s</string>
     <string name="what_should_backup">คุณต้องการสำรองข้อมูลอะไร\?</string>
     <string name="restoring_backup">กำลังคืนค่าการสำรองข้อมูล</string>
     <string name="clear_chapter_cache">ล้างแคชของบท</string>
@@ -229,13 +223,6 @@
     <string name="author">ผู้เขียน</string>
     <string name="artist">ศิลปิน</string>
     <string name="status">สถานะ</string>
-    <string name="circular">ไอคอนวงกลม</string>
-    <string name="rounded">ไอคอนโค้งมน</string>
-    <string name="square">ไอคอนสี่เหลี่ยม</string>
-    <string name="star">ไอคอนดาว</string>
-    <string name="shortcut_created">เพิ่มทางลัดไปยังหน้าจอหลักแล้ว</string>
-    <string name="icon_shape">รูปร่างไอคอน</string>
-    <string name="could_not_create_shortcut">ไม่สามารถสร้างทางลัดได้!</string>
     <string name="_copied_to_clipboard">%1$s ถูกคัดลอกไปยังคลิปบอร์ด</string>
     <string name="source_not_installed_">ไม่ได้ติดตั้ง: %1$s</string>
     <string name="chapter_">บทที่ %1$s</string>
@@ -293,7 +280,6 @@
     <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <string name="select">เลือก</string>
     <string name="migrate">โยกย้าย</string>
-    <string name="copy">คัดลอก</string>
     <string name="could_not_download_chapter_can_try_again">เกิดข้อผิดพลาดขณะดาวน์โหลดบท คุณสามารถลองอีกครั้งในส่วนการดาวน์โหลด</string>
     <string name="new_chapters_found">พบบทใหม่</string>
     <string name="failed_to_update_cover">ไม่สามารถอัปเดตหน้าปก</string>
@@ -318,5 +304,10 @@
     <string name="common">ร่วมกัน</string>
     <string name="multiply">หลากหลาย</string>
     <string name="burn_darken">มืดมิด</string>
-    <string name="select_a_source_to_migrate_from">เลือกแหล่งที่มา</string>
+    <string name="update">อัพเดท</string>
+    <string name="mark_as_unread">ตั้งเป็นยังไม่ได้อ่าน</string>
+    <string name="remove_from_library">ลบออกจากห้องสมุด</string>
+    <string name="copy_value">คัดลอก</string>
+    <string name="creating_backup">กำลังสร้างการสำรองข้อมูล</string>
+    <string name="pref_global_search">ค้นหา</string>
 </resources>

@@ -28,7 +28,6 @@
     <string name="delete">हटाये</string>
     <string name="edit">संपादित करें</string>
     <string name="add">जोड़े</string>
-    <string name="add_category">श्रेणियाँ जोड़े</string>
     <string name="edit_categories">श्रेणियाँ संपादित करें</string>
     <string name="rename_category">श्रेणियाँ का पुन:नामकरण</string>
     <string name="move_to_categories">श्रेणियाँ का स्थान-परिवर्तन</string>
@@ -41,7 +40,6 @@
     <string name="remove">हटाए</string>
     <string name="resume">दुबारा आरम्भ करना</string>
     <string name="open_in_browser">ब्राउज़र में खोलें</string>
-    <string name="add_to_home_screen">होम स्क्रीन में शामिल करें</string>
     <string name="display">प्रदर्शन</string>
     <string name="compact_grid">ग्रिड</string>
     <string name="list">सूची</string>
@@ -154,11 +152,8 @@
     <string name="max_auto_backups">अधिकतम स्वचालित बैकअप</string>
     <string name="backup_created">बैकअप बनाया</string>
     <string name="restore_completed">पुनर्स्थापना पूर्ण हुआ</string>
-    <string name="restore_completed_content">पुनर्स्थापित किया गया %1$s.
-\n%2$s त्रुटियां मिलीं.</string>
     <string name="restore_message">पुनर्स्थापना डेटा प्राप्त करने के लिए स्रोत का उपयोग करता है, वाहक की लागत लागू हो सकती है
 \nयह भी सुनिश्चित करें कि आप संसाधनों में ठीक से लॉग इन कर रहे हैं जो बहाल करने से पहले की आवश्यकता होती है।</string>
-    <string name="file_saved_at_">फ़ाइल को %1$s पर सहेजा गया</string>
     <string name="what_should_backup">आप बैकअप के लिए क्या चाहते हैं?</string>
     <string name="restoring_backup">बैकअप को पुनर्स्थापित करना</string>
     <string name="clear_chapter_cache">अध्याय कैश साफ़ करें</string>
@@ -190,7 +185,7 @@
     <string name="unknown_error">अज्ञात त्रुटि</string>
     <string name="local">लोकल</string>
     <string name="no_more_results">कोई और परिणाम नहीं है</string>
-    <string name="local_source">लोकल मंगा</string>
+    <string name="local_source">स्थानीय स्रोत</string>
     <string name="other">अन्य</string>
     <string name="global_search">वैश्विक खोज …</string>
     <string name="latest">नवीनतम</string>
@@ -202,17 +197,10 @@
     <string name="author">लेखक</string>
     <string name="artist">कलाकार</string>
     <string name="status">स्थिति</string>
-    <string name="circular">परिपत्र आइकन</string>
-    <string name="rounded">गोल आइकन</string>
-    <string name="square">स्क्वायर आइकन</string>
-    <string name="star">स्टार आइकन</string>
-    <string name="shortcut_created">शॉर्टकट को होम स्क्रीन पर जोड़ा गया था.</string>
-    <string name="icon_shape">चिह्न आकार</string>
-    <string name="could_not_create_shortcut">शॉर्टकट बनाने में विफल!</string>
     <string name="chapter_">अध्याय %1$s</string>
     <string name="downloading">डाउनलोड कर रहा है</string>
     <string name="downloading_progress">डाउनलोड किया जा रहा है (%1$d/%2$d)</string>
-    <string name="paused">रोके गए</string>
+    <string name="paused">रोका हुआ</string>
     <string name="next_5_unread">अगले ५ अध्याय डाउनलोड करें</string>
     <string name="all_chapters">सभी डाउनलोड करे</string>
     <string name="all_unread_chapters">अपठित डाउनलोड करें</string>
@@ -269,8 +257,10 @@
     <string name="untrusted">अविश्वस्त</string>
     <string name="uninstall">स्थापना रद्द करें</string>
     <string name="untrusted_extension">अविश्वस्त एक्सटेंशन</string>
-    <string name="untrusted_extension_message">यह एक्सटेंशन एक अविश्वस्त प्रमाणपत्र के साथ हस्ताक्षरित हुआ था और यह सक्रिय नहीं हुआ था।
+    <string name="untrusted_extension_message">यह एक्सटेंशन एक अविश्वस्त प्रमाणपत्र के साथ हस्ताक्षरित हुआ था और सक्रिय नहीं हुआ था।
+\n
 \nदुर्भावनापूर्ण विस्तार, किसी भी लॉगिन क्रेडेंशियल्स को तचीयोमी में संग्रहीत या मनमाना कोड निष्पादित कर सकता है
+\n
 \nइस प्रमाणपत्र पर विश्वास करके आप इन जोखिमों को स्वीकार करते हैं।</string>
     <string name="version_">संस्करण: %1$s</string>
     <string name="language_">भाषा: %1$s</string>
@@ -286,8 +276,6 @@
     <string name="custom_range">कस्टम डाउनलोड करें</string>
     <string name="select">चयन</string>
     <string name="migrate">प्रवास</string>
-    <string name="copy">नकल</string>
-    <string name="pager_viewer">पृष्ठक</string>
     <string name="source_not_installed_">स्रोत स्थापित नहीं है : %1$s</string>
     <string name="rereading">फिर से पढाना</string>
     <string name="started">शुरू कर दिया है</string>
@@ -318,5 +306,77 @@
     <string name="system_default_all_blue">डिफ़ॉल्ट प्रणाली (गहरा नीला)</string>
     <string name="system_default_amoled">डिफ़ॉल्ट प्रणाली (अलौकिक)</string>
     <string name="no_results_found">कोई परिणाम नहीं मिला</string>
-    <string name="select_a_source_to_migrate_from">से माइग्रेट करने के लिए एक स्रोत का चयन करें</string>
+    <string name="lock_with_biometrics">बायोमेट्रिक्स के साथ लॉक करें</string>
+    <string name="lock_when_idle">निष्क्रिय होने पर लॉक करें</string>
+    <string name="refresh_tracking">रिफ्रेश ट्रैकिंग</string>
+    <string name="add_tracking">ट्रैकिंग जोड़ें</string>
+    <string name="copy_value">नकल</string>
+    <string name="date_format">दिनांक स्वरूप</string>
+    <string name="secure_screen">स्क्रीन सुरक्षित करें</string>
+    <string name="security">सुरक्षा</string>
+    <string name="backup_failed">बैकअप फेल</string>
+    <string name="creating_backup">बैकअप बनाना</string>
+    <string name="update">अद्यतन</string>
+    <string name="updating_library">अद्यतन पुस्तकालय</string>
+    <string name="date_added">तारीख को जोड़ा गया</string>
+    <string name="latest_chapter">नवीनतम अध्याय</string>
+    <string name="unread_badges">अपठित बैज</string>
+    <plurals name="notification_update_failed">
+        <item quantity="one">1 अद्यतन विफल हुआ%1$d अपडेट विफल रहे</item>
+        <item quantity="other"/>
+    </plurals>
+    <string name="local_source_help_guide">स्थानीय स्रोत गाइड</string>
+    <string name="check_site_in_web">वेबव्यू में वेबसाइट देखें</string>
+    <string name="obsolete">अप्रचलित</string>
+    <string name="obsolete_extension_message">यह एक्सटेंशन अब उपलब्ध नहीं है।</string>
+    <plurals name="extension_updates_available">
+        <item quantity="one">एक्सटेंशन अपडेट उपलब्ध%d एक्सटेंशन अपडेट उपलब्ध</item>
+        <item quantity="other"/>
+    </plurals>
+    <string name="reduces_banding_impacts_performance">बैंडिंग को कम करता है, लेकिन प्रदर्शन को प्रभावित करता है</string>
+    <string name="skip_filtered_chapters">फ़िल्टर किए गए अध्यायों को छोड़ें</string>
+    <string name="continuous_vertical">लगातार लंबवत</string>
+    <string name="paged">पृष्ठांकित</string>
+    <string name="always_show_chapter_transition">हमेशा अध्याय संक्रमण दिखाएं</string>
+    <string name="pref_webtoon_side_padding">साइड पैडिंग</string>
+    <string name="webtoon_side_padding_0">कुछ नहीं</string>
+    <string name="webtoon_side_padding_10">10%</string>
+    <string name="webtoon_side_padding_15">15%</string>
+    <string name="webtoon_side_padding_20">20%</string>
+    <string name="webtoon_side_padding_25">25%</string>
+    <string name="chapters_">अध्याय %1$s</string>
+    <string name="remove_from_library">लाइब्रेरी से निकालें</string>
+    <string name="network">नेटवर्क</string>
+    <string name="requires_app_restart">प्रभावी होने के लिए एप्लिकेशन पुनरारंभ की आवश्यकता होती है</string>
+    <string name="disable_battery_optimization">बैटरी अनुकूलन को अक्षम करना</string>
+    <string name="battery_optimization_disabled">बैटरी अनुकूलन पहले से ही अक्षम है</string>
+    <string name="pref_global_search">विश्वीय खोज</string>
+    <string name="check_for_extension_updates">एक्सटेंशन अपडेट की जांच करें</string>
+    <string name="website">वेबसाइट</string>
+    <string name="open_source_licenses">ओपन सोर्स लाइसेंस</string>
+    <string name="email">ईमेल पता</string>
+    <string name="successfully_logged_out">अब आप लॉग आउट है</string>
+    <string name="cancel_all">सब रद्द करो</string>
+    <string name="invalid_download_location">अमान्य डाउनलोड निर्देशिका</string>
+    <string name="failed_to_bypass_cloudflare">Cloudflare को बायपास करने में विफल</string>
+    <string name="please_update_webview">बेहतर संगतता के लिए कृपया WebView ऐप को अपडेट करें</string>
+    <string name="always">हमेशा</string>
+    <string name="app_not_available">ऐप उपलब्ध नहीं</string>
+    <string name="back">पिछली तरफ</string>
+    <string name="forward">आगे की ओर</string>
+    <string name="less">कम</string>
+    <string name="mark_as_unread">अपठित चिह्न करे</string>
+    <string name="more">अधिक</string>
+    <string name="move_to_bottom">नीचे की ओर ले जाएं</string>
+    <string name="move_to_top">शीर्ष पर ले जाएँ</string>
+    <string name="never">कभी नहीँ</string>
+    <string name="newest">नवीनतम</string>
+    <string name="oldest">सबसे पुराना</string>
+    <string name="pin">पिन</string>
+    <string name="pinned">पिन की गई</string>
+    <string name="refresh">रीफ़्रेश करें</string>
+    <string name="reorder">पुनःक्रमित</string>
+    <string name="unpin">अनपिन</string>
+    <string name="view_chapters">अध्याय देखें</string>
+    <string name="tracked">ट्रैक किए गए</string>
 </resources>
