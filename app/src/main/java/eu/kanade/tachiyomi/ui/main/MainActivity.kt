@@ -514,7 +514,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
-            if (preferences.backReturnsToStart().get() &&
+            if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
                 startingTab() != bottom_nav?.selectedItemId) {
                 goToStartingTab()
             }
