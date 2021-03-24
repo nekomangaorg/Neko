@@ -519,10 +519,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 goToStartingTab()
             }
             else {
-                if (!preferences.backReturnsToStart().get()) {
+                if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
                     setStartingTab()
                 }
-                SecureActivityDelegate.locked = true
+                SecureActivityDelegate.locked = this !is SearchActivity
                 super.onBackPressed()
             }
         }
