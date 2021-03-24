@@ -255,7 +255,6 @@ class SourceController :
                 selectedColor,
                 progress)
         )
-        val pad = bottomBar.translationY - bottomBar.height
 
         ext_bottom_sheet.sheet_layout.backgroundTintList = ColorStateList.valueOf(
             ColorUtils.blendARGB(
@@ -272,7 +271,7 @@ class SourceController :
         val padding = max(
             (-pad).toInt(),
             if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else
-                this@SourceController.view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
+                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
         )
         shadow2.translationY = pad
         ext_bottom_sheet.sheetBehavior?.peekHeight = 58.spToPx + padding
