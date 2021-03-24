@@ -37,8 +37,10 @@ import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
 import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.recently_read.RemoveHistoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -49,8 +51,15 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
+import kotlinx.android.synthetic.main.download_bottom_sheet.sheet_layout
+import kotlinx.android.synthetic.main.download_bottom_sheet.view.*
+import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recents_controller.*
+import kotlinx.android.synthetic.main.recents_controller.recycler
+import kotlinx.android.synthetic.main.recents_controller.shadow
+import kotlinx.android.synthetic.main.recents_controller.shadow2
+import kotlinx.android.synthetic.main.source_controller.*
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -136,6 +145,17 @@ class RecentsController(bundle: Bundle? = null) :
                 adapter.addScrollableHeader(presenter.generalHeader)
             }
         }
+        recycler?.post {
+            setBottomPadding()
+        }
+        recycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    setBottomPadding()
+                }
+            }
+        )
 
         dl_bottom_sheet.onCreate(this)
 
@@ -215,6 +235,22 @@ class RecentsController(bundle: Bundle? = null) :
         }
         setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
+    }
+
+    fun setBottomPadding() {
+        val bottomBar = activity?.bottom_nav ?: return
+        dl_bottom_sheet ?: return
+        val pad = bottomBar.translationY - bottomBar.height
+        val padding = max(
+            (-pad).toInt(),
+            if (dl_bottom_sheet.sheetBehavior.isExpanded()) 0 else
+                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
+        )
+        shadow2.translationY = pad
+        dl_bottom_sheet.sheetBehavior?.peekHeight = 48.spToPx + padding
+        dl_bottom_sheet.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = -pad.toInt()
+        }
     }
 
     fun setRefreshing(refresh: Boolean) {
@@ -437,6 +473,12 @@ class RecentsController(bundle: Bundle? = null) :
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
             snack?.dismiss()
         }
+        setBottomPadding()
+    }
+
+    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType ) {
+        super.onChangeEnded(handler, type)
+        if (type == ControllerChangeType.POP_ENTER) setBottomPadding()
     }
 
     fun hasQueue() = presenter.downloadManager.hasQueue()
