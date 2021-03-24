@@ -1,6 +1,14 @@
 package eu.kanade.tachiyomi.util.lang
 
+import android.graphics.Color
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.BackgroundColorSpan
+import androidx.annotation.ColorInt
+import androidx.annotation.ColorRes
 import kotlin.math.floor
+
 
 /**
  * Replaces the given string to have at most [count] characters using [replacement] at its end.
@@ -53,4 +61,26 @@ fun String.capitalizeWords(): String {
  */
 fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
     return String.CASE_INSENSITIVE_ORDER.then(naturalOrder()).compare(this, other)
+}
+
+fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {
+    val wordToSpan: Spannable = SpannableString(this)
+    indexesOf(highlight).forEach {
+        wordToSpan.setSpan(BackgroundColorSpan(color), it, it + highlight.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+    return wordToSpan
+}
+
+fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
+    val list = mutableListOf<Int>()
+    if (substr.isBlank()) return list
+
+    var i = -1
+    while(true) {
+        i = indexOf(substr, i + 1, ignoreCase)
+        when (i) {
+            -1 -> return list
+            else -> list.add(i)
+        }
+    }
 }

@@ -36,7 +36,7 @@ class SettingsSourcesController : SettingsController() {
     private var sourcesByLang: TreeMap<String, MutableList<HttpSource>> = TreeMap()
     private var sorting = SourcesSort.Alpha
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.filter
         sorting = SourcesSort.from(preferences.sourceSorting().getOrDefault()) ?: SourcesSort.Alpha
         activity?.invalidateOptionsMenu()

@@ -156,6 +156,8 @@ dependencies {
     implementation("com.squareup.retrofit2:retrofit:${Versions.RETROFIT}")
     implementation("com.squareup.retrofit2:converter-gson:${Versions.RETROFIT}")
 
+    implementation(kotlin("reflect", version = BuildPluginsVersion.KOTLIN))
+
     // JSON
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLINSERIALIZATION}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.KOTLINSERIALIZATION}")

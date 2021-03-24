@@ -19,7 +19,7 @@ class SettingsBrowseController : SettingsController() {
 
     val sourceManager: SourceManager by injectLazy()
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.sources
 
         preferenceCategory {
@@ -64,6 +64,7 @@ class SettingsBrowseController : SettingsController() {
                 }
             }
             preference {
+                key = "match_pinned_sources"
                 titleRes = R.string.match_pinned_sources
                 summaryRes = R.string.only_enable_pinned_for_migration
                 onClick {
@@ -84,6 +85,7 @@ class SettingsBrowseController : SettingsController() {
             }
 
             preference {
+                key = "match_enabled_sources"
                 titleRes = R.string.match_enabled_sources
                 summaryRes = R.string.only_enable_enabled_for_migration
                 onClick {

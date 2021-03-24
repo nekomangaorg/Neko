@@ -15,7 +15,7 @@ class SettingsGeneralController : SettingsController() {
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.general
 
         intListPreference(activity) {

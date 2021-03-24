@@ -50,7 +50,7 @@ class SettingsAdvancedController : SettingsController() {
     private val coverCache: CoverCache by injectLazy()
 
     @SuppressLint("BatteryLife")
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.advanced
 
         switchPreference {
@@ -70,6 +70,7 @@ class SettingsAdvancedController : SettingsController() {
             }
 
             preference {
+                key = "clean_cached_covers"
                 titleRes = R.string.clean_up_cached_covers
                 summary = context.getString(
                     R.string.delete_old_covers_in_library_used_,
@@ -82,6 +83,7 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             preference {
+                key = "clear_cached_not_library"
                 titleRes = R.string.clear_cached_covers_non_library
                 summary = context.getString(
                     R.string.delete_all_covers__not_in_library_used_,
@@ -94,6 +96,7 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             preference {
+                key = "clean_downloaded_chapters"
                 titleRes = R.string.clean_up_downloaded_chapters
 
                 summaryRes = R.string.delete_unused_chapters
@@ -105,6 +108,7 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
             preference {
+                key = "clear_database"
                 titleRes = R.string.clear_database
                 summaryRes = R.string.clear_database_summary
 
@@ -119,6 +123,7 @@ class SettingsAdvancedController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.network
             preference {
+                key = "clear_cookies"
                 titleRes = R.string.clear_cookies
 
                 onClick {
@@ -128,6 +133,7 @@ class SettingsAdvancedController : SettingsController() {
             }
 
             switchPreference {
+                key = "enable_doh"
                 key = PreferenceKeys.enableDoh
                 titleRes = R.string.dns_over_https
                 summaryRes = R.string.requires_app_restart
@@ -138,12 +144,14 @@ class SettingsAdvancedController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.library
             preference {
+                key = "refresh_lib_meta"
                 titleRes = R.string.refresh_library_metadata
                 summaryRes = R.string.updates_covers_genres_desc
 
                 onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
             }
             preference {
+                key = "refresh_teacking_meta"
                 titleRes = R.string.refresh_tracking_metadata
                 summaryRes = R.string.updates_tracking_details
 
@@ -155,6 +163,7 @@ class SettingsAdvancedController : SettingsController() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
                 if (pm != null) preference {
+                    key = "disable_batt_opt"
                     titleRes = R.string.disable_battery_optimization
                     summaryRes = R.string.disable_if_issues_with_updating
 

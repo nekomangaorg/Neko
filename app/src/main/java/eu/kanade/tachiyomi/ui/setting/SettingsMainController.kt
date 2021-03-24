@@ -3,10 +3,14 @@ package eu.kanade.tachiyomi.ui.setting
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.RouterTransaction
+import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -76,16 +80,38 @@ class SettingsMainController : SettingsController() {
             titleRes = R.string.about
             onClick { navigateTo(AboutController()) }
         }
+        this
     }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
-        menu.findItem(R.id.action_bug_report).isVisible = BuildConfig.DEBUG
+
+        // Initialize search option.
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.maxWidth = Int.MAX_VALUE
+
+        // Change hint to show global search.
+        searchView.queryHint = applicationContext?.getString(R.string.search_settings)
+
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                    SettingsSearchController.lastSearch = "" // reset saved search query
+                    router.pushController(
+                        RouterTransaction.with(SettingsSearchController()))
+                    return true
+                }
+
+                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                    return true
+                }
+            }
+        )
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_help -> activity?.openInBrowser(URL_HELP)
-            R.id.action_bug_report -> activity?.openInBrowser(URL_BUG_REPORT)
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -97,6 +123,5 @@ class SettingsMainController : SettingsController() {
 
     private companion object {
         private const val URL_HELP = "https://tachiyomi.org/help/"
-        private const val URL_BUG_REPORT = "https://github.com/Jays2Kings/tachiyomiJ2K/issues"
     }
 }

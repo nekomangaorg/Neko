@@ -14,7 +14,7 @@ import uy.kohesive.injekt.api.get
 
 class SettingsExtensionsController : SettingsController() {
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.filter
 
         val activeLangs = preferences.enabledLanguages().get()

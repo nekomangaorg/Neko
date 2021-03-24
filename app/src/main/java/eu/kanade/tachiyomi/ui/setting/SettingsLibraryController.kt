@@ -17,7 +17,7 @@ class SettingsLibraryController : SettingsController() {
 
     private val db: DatabaseHelper = Injekt.get()
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.library
         preferenceCategory {
             titleRes = R.string.general
@@ -34,6 +34,7 @@ class SettingsLibraryController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.categories
             preference {
+                key = "edit_categories"
                 val catCount = db.getCategories().executeAsBlocking().size
                 titleRes = if (catCount > 0) R.string.edit_categories else R.string.add_categories
                 if (catCount > 0) summary = context.resources.getQuantityString(R.plurals.category, catCount, catCount)

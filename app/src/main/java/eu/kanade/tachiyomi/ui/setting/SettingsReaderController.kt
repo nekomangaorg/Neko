@@ -3,11 +3,13 @@ package eu.kanade.tachiyomi.ui.setting
 import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsReaderController : SettingsController() {
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.reader
 
         preferenceCategory {
@@ -200,7 +202,9 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.readWithVolumeKeysInverted
                 titleRes = R.string.invert_volume_keys
                 defaultValue = false
-            }.apply { dependency = Keys.readWithVolumeKeys }
+
+                preferences.readWithVolumeKeys().asImmediateFlow { isVisible = it }.launchIn(viewScope)
+            }
         }
     }
 }

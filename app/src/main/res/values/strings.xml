@@ -496,6 +496,7 @@
     <string name="advanced">Advanced</string>
     <string name="about">About</string>
     <string name="help">Help</string>
+    <string name="search_settings">Search settings</string>
 
     <!-- General settings -->
     <string name="app_theme">App theme</string>
