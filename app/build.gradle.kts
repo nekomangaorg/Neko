@@ -66,6 +66,9 @@ android {
         }
         create("dev") {
             resConfig("en")
+            lintOptions {
+                disable("MissingTranslation")
+            }
         }
     }
 
