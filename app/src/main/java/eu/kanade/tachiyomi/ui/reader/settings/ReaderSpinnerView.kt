@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.R
 import kotlinx.android.synthetic.main.reader_preference.view.*
 
 
-class ReaderPreferenceView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
+class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
 
 

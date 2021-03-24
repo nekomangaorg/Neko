@@ -16,7 +16,7 @@
         android:paddingTop="0dp"
         android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area">
 
-        <eu.kanade.tachiyomi.ui.reader.settings.ReaderPreferenceView
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/scale_type"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -24,7 +24,7 @@
             app:title="@string/scale_type"
             android:entries="@array/image_scale_type" />
 
-        <eu.kanade.tachiyomi.ui.reader.settings.ReaderPreferenceView
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/zoom_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -52,7 +52,7 @@
 
         <!-- Webtoon Prefs -->
 
-        <eu.kanade.tachiyomi.ui.reader.settings.ReaderPreferenceView
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/webtoon_side_padding"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -171,7 +171,7 @@
 
         <!-- Filter mode -->
 
-        <eu.kanade.tachiyomi.ui.reader.settings.ReaderPreferenceView
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/color_filter_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
