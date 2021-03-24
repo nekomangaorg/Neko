@@ -16,7 +16,7 @@ class SettingsReaderController : SettingsController() {
             titleRes = R.string.general
             intListPreference(activity) {
                 key = Keys.defaultViewer
-                titleRes = R.string.default_viewer
+                titleRes = R.string.default_reading_mode
                 entriesRes = arrayOf(
                     R.string.left_to_right_viewer,
                     R.string.right_to_left_viewer,
@@ -27,6 +27,38 @@ class SettingsReaderController : SettingsController() {
                 entryRange = 1..5
                 defaultValue = 1
             }
+            intListPreference(activity) {
+                key = Keys.doubleTapAnimationSpeed
+                titleRes = R.string.double_tap_anim_speed
+                entries = listOf(
+                    context.getString(R.string.no_animation),
+                    context.getString(
+                        R.string.fast
+                    ),
+                    context.getString(R.string.normal)
+                )
+                entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
+                // min is 1
+                defaultValue = 500
+            }
+            switchPreference {
+                key = Keys.enableTransitions
+                titleRes = R.string.page_transitions
+                defaultValue = true
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                switchPreference {
+                    key = Keys.trueColor
+                    titleRes = R.string.true_32bit_color
+                    summaryRes = R.string.reduces_banding_impacts_performance
+                    defaultValue = false
+                }
+            }
+        }
+
+        preferenceCategory {
+            titleRes = R.string.display
+
             intListPreference(activity) {
                 key = Keys.rotation
                 titleRes = R.string.rotation
@@ -51,20 +83,6 @@ class SettingsReaderController : SettingsController() {
                 entryRange = 0..3
                 defaultValue = 2
             }
-            intListPreference(activity) {
-                key = Keys.doubleTapAnimationSpeed
-                titleRes = R.string.double_tap_anim_speed
-                entries = listOf(
-                    context.getString(R.string.no_animation),
-                    context.getString(
-                        R.string.fast
-                    ),
-                    context.getString(R.string.normal)
-                )
-                entryValues = listOf(1, 250, 500) // using a value of 0 breaks the image viewer, so
-                // min is 1
-                defaultValue = 500
-            }
             switchPreference {
                 key = Keys.fullscreen
                 titleRes = R.string.fullscreen
@@ -79,14 +97,6 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.showPageNumber
                 titleRes = R.string.show_page_number
                 defaultValue = true
-            }
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                switchPreference {
-                    key = Keys.trueColor
-                    titleRes = R.string.true_32bit_color
-                    summaryRes = R.string.reduces_banding_impacts_performance
-                    defaultValue = false
-                }
             }
         }
 
@@ -139,11 +149,6 @@ class SettingsReaderController : SettingsController() {
                 )
                 entryRange = 1..4
                 defaultValue = 1
-            }
-            switchPreference {
-                key = Keys.enableTransitions
-                titleRes = R.string.page_transitions
-                defaultValue = true
             }
             switchPreference {
                 key = Keys.cropBorders
