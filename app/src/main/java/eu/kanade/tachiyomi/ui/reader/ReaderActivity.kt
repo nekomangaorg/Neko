@@ -804,10 +804,13 @@ class ReaderActivity :
 
             val currentOrientation = resources.configuration.orientation
 
+            val params = window.attributes
             if (currentOrientation == Configuration.ORIENTATION_LANDSCAPE) {
-                val params = window.attributes
                 params.layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_NEVER
+            } else {
+                params.layoutInDisplayCutoutMode =
+                    WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES
             }
         }
     }
