@@ -162,6 +162,7 @@
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
     <string name="hide_category_hopper">Hide category hopper</string>
+    <string name="hide_hopper_on_scroll">Hide category hopper on scroll</string>
     <string name="more_library_settings">More library settings</string>
 
     <!-- Library update service notifications -->
@@ -515,7 +516,7 @@
     <string name="check_for_updates">Check for updates</string>
     <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
     <string name="secure_screen">Secure screen</string>
-    <string name="hide_bottom_nav">Auto-Hide bottom navigation</string>
+    <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
     <string name="security">Security</string>

@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.ui.library.display
 
 import android.content.Context
 import android.util.AttributeSet
-import kotlinx.android.synthetic.main.library_other_layout.view.*
+import kotlinx.android.synthetic.main.library_category_layout.view.*
 
-class LibraryOtherView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LibraryPreferenceView(context, attrs) {
 
     override fun initGeneralPreferences() {
@@ -19,6 +19,8 @@ class LibraryOtherView @JvmOverloads constructor(context: Context, attrs: Attrib
         hide_hopper.bindToPreference(preferences.hideHopper()) {
             controller.hideHopper(it)
         }
-        hide_filters.bindToPreference(preferences.hideFiltersAtStart())
+        auto_hide_hopper.bindToPreference(preferences.autohideHopper()) {
+            controller.resetHopperY()
+        }
     }
 }

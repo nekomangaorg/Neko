@@ -5,7 +5,6 @@ import android.content.res.Configuration
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
-import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -22,10 +21,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
-import eu.kanade.tachiyomi.ui.library.display.LibraryBadgesView
-import eu.kanade.tachiyomi.ui.library.display.LibraryDisplayView
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
@@ -36,8 +32,6 @@ import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.library_grid_recycler.*
 import kotlinx.android.synthetic.main.library_list_controller.*
@@ -144,9 +138,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             second_layout.gone()
         }
 
-        if (preferences.hideFiltersAtStart().getOrDefault()) {
-            sheetBehavior?.hide()
-        }
+        sheetBehavior?.hide()
         expand_categories.setOnClickListener {
             onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
         }

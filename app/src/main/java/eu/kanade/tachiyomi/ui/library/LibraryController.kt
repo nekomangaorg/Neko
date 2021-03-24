@@ -175,7 +175,8 @@ class LibraryController(
     private var scrollDistance = 0f
     private val scrollDistanceTilHidden = 1000.dpToPx
     private var textAnim: ViewPropertyAnimator? = null
-    var startingFiltersY = 0f
+    private var hasExpanded = false
+
     var hopperGravity: Int = preferences.hopperGravity().get()
         set(value) {
             field = value
@@ -211,9 +212,11 @@ class LibraryController(
             super.onScrolled(recyclerView, dx, dy)
             val recyclerCover = recycler_cover ?: return
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
-                category_hopper_frame.translationY += dy
-                category_hopper_frame.translationY =
-                    category_hopper_frame.translationY.coerceIn(0f, 50f.dpToPx)
+                if (preferences.autohideHopper().get()) {
+                    category_hopper_frame.translationY += dy
+                    category_hopper_frame.translationY =
+                        category_hopper_frame.translationY.coerceIn(0f, 50f.dpToPx)
+                }
                 up_category.alpha = if (isAtTop()) 0.25f else 1f
                 down_category.alpha = if (isAtBottom()) 0.25f else 1f
             }
@@ -337,7 +340,7 @@ class LibraryController(
     }
 
     private fun showFilterTip() {
-        if (preferences.shownFilterTutorial().get()) return
+        if (preferences.shownFilterTutorial().get() || !hasExpanded) return
         val activity = activity ?: return
         val icon = activity.bottom_nav.getItemView(R.id.nav_library) ?: return
         filterTooltip =
@@ -580,6 +583,10 @@ class LibraryController(
                 gestureDetector.onTouchEvent(event)
             }
         }
+    }
+
+    fun resetHopperY() {
+        category_hopper_frame.translationY = 0f
     }
 
     fun hideHopper(hide: Boolean) {
@@ -1339,7 +1346,10 @@ class LibraryController(
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
-            R.id.action_filter -> filter_bottom_sheet.sheetBehavior?.expand()
+            R.id.action_filter -> {
+                hasExpanded = true
+                filter_bottom_sheet.sheetBehavior?.expand()
+            }
             else -> return super.onOptionsItemSelected(item)
         }
         return true

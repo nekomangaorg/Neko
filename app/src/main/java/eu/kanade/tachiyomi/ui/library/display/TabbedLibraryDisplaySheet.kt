@@ -16,12 +16,12 @@ open class TabbedLibraryDisplaySheet(controller: LibraryController):
 
     private val displayView: LibraryDisplayView = inflate(controller.activity!!, R.layout.library_display_layout, null) as LibraryDisplayView
     private val badgesView: LibraryBadgesView = inflate(controller.activity!!, R.layout.library_badges_layout, null) as LibraryBadgesView
-    private val otherView: LibraryOtherView = inflate(controller.activity!!, R.layout.library_other_layout, null) as LibraryOtherView
+    private val categoryView: LibraryCategoryView = inflate(controller.activity!!, R.layout.library_category_layout, null) as LibraryCategoryView
 
     init {
         displayView.controller = controller
         badgesView.controller = controller
-        otherView.controller = controller
+        categoryView.controller = controller
         menu.visible()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             menu.tooltipText = context.getString(R.string.more_library_settings)
@@ -39,12 +39,12 @@ open class TabbedLibraryDisplaySheet(controller: LibraryController):
     override fun getTabViews(): List<View> = listOf(
         displayView,
         badgesView,
-        otherView
+        categoryView
     )
 
     override fun getTabTitles(): List<Int> = listOf(
         R.string.display,
         R.string.badges,
-        R.string.other
+        R.string.categories
     )
 }

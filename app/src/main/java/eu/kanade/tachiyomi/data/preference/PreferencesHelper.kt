@@ -275,8 +275,6 @@ class PreferencesHelper(val context: Context) {
 
     fun hideStartReadingButton() = rxPrefs.getBoolean("hide_reading_button", false)
 
-    fun hideFiltersAtStart() = rxPrefs.getBoolean("hide_filters_at_start", false)
-
     fun alwaysShowChapterTransition() = flowPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
 
     fun deleteRemovedChapters() = flowPrefs.getInt(Keys.deleteRemovedChapters, 0)
@@ -288,6 +286,8 @@ class PreferencesHelper(val context: Context) {
     fun filterOrder() = flowPrefs.getString("filter_order", "rudcmt")
 
     fun hideHopper() = flowPrefs.getBoolean("hide_hopper", false)
+
+    fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)
 
     fun groupLibraryBy() = flowPrefs.getInt("group_library_by", 0)
 
