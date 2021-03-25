@@ -254,6 +254,8 @@ fun BottomSheetDialog.setEdgeToEdge(
         window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
     window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
         false
+    window?.findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows =
+        false
     contentView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View
         .SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
