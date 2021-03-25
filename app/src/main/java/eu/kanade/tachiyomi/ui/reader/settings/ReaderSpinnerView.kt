@@ -80,16 +80,6 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    inline fun <reified T : Enum<T>> bindToPreference(pref: Preference<T>, crossinline block: ((Int) -> Unit)) {
-        val enumConstants = T::class.java.enumConstants
-        enumConstants?.indexOf(pref.get())?.let { setSelection(it) }
-        val popup = makeSettingsPopup(pref, block)
-        setOnTouchListener(popup.dragToOpenListener)
-        setOnClickListener {
-            popup.show()
-        }
-    }
-
     fun bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int, block: ((Int) -> Unit)? = null) {
         setSelection(pref.get())
         this.pref = pref
@@ -116,19 +106,6 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
             val enumConstants = T::class.java.enumConstants
             val pos = popup.menuClicked(menuItem)
             enumConstants?.get(pos)?.let { preference.set(it) }
-            true
-        }
-        return popup
-    }
-
-    inline fun <reified T : Enum<T>> makeSettingsPopup(preference: Preference<T>, crossinline block: ((Int) -> Unit)): PopupMenu {
-        val popup = popup()
-        // Set a listener so we are notified if a menu item is clicked
-        popup.setOnMenuItemClickListener { menuItem ->
-            val enumConstants = T::class.java.enumConstants
-            val pos = popup.menuClicked(menuItem)
-            enumConstants?.get(pos)?.let { preference.set(it) }
-            block(pos)
             true
         }
         return popup

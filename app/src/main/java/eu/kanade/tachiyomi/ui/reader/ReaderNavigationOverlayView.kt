@@ -22,7 +22,7 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
     var isLTR = true
 
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
-        if (!showOnStart && (this.navigation == null || this.navigation === navigation) && !forceShowOverlay) {
+        if (!showOnStart && (this.navigation == null || this.navigation === navigation)) {
             if (this.navigation == null) {
                 this.navigation = navigation
                 isVisible = false
@@ -30,8 +30,11 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
             return
         }
 
-        forceShowOverlay = false
         this.navigation = navigation
+        showNavigationAgain()
+    }
+
+    fun showNavigationAgain() {
         invalidate()
 
         if (isVisible) return
@@ -120,10 +123,6 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
         // Hide overlay if user start tapping or swiping
         performClick()
         return super.onTouchEvent(event)
-    }
-
-    companion object {
-        var forceShowOverlay = false
     }
 }
 

@@ -13,11 +13,12 @@ import kotlinx.coroutines.flow.onEach
  */
 abstract class ViewerConfig(preferences: PreferencesHelper) {
 
-    private val scope = CoroutineScope(Job() + Dispatchers.Main)
+    protected val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var imagePropertyChangedListener: (() -> Unit)? = null
 
     var navigationModeChangedListener: (() -> Unit)? = null
+    var navigationModeInvertedListener: (() -> Unit)? = null
 
     var tappingEnabled = true
     var tappingInverted = ViewerNavigation.TappingInvertMode.NONE
