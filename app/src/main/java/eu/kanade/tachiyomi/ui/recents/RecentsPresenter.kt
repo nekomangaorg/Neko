@@ -56,8 +56,9 @@ class RecentsPresenter(
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         if (lastRecents != null) {
-            if (recentItems.isEmpty())
+            if (recentItems.isEmpty()) {
                 recentItems = lastRecents ?: emptyList()
+            }
             lastRecents = null
         }
         getRecents()
@@ -95,14 +96,15 @@ class RecentsPresenter(
                 }
             }
 
-            val cReading = if (viewType != 3)
-                if (query.isEmpty() && viewType != 2)
+            val cReading = if (viewType != 3) {
+                if (query.isEmpty() && viewType != 2) {
                     db.getRecentsWithUnread(cal.time, query, isUngrouped).executeOnIO()
-                else db.getRecentMangaLimit(
+                } else db.getRecentMangaLimit(
                     cal.time,
                     if (viewType == 2) 200 else 8,
                     query
-                ).executeOnIO() else emptyList()
+                ).executeOnIO()
+            } else emptyList()
             val rUpdates = when {
                 viewType == 3 -> db.getRecentChapters(calWeek.time).executeOnIO().map {
                     MangaChapterHistory(it.manga, it.chapter, HistoryImpl())
@@ -113,8 +115,9 @@ class RecentsPresenter(
             rUpdates.forEach {
                 it.history.last_read = it.chapter.date_fetch
             }
-            val nAdditions = if (viewType < 2)
-                db.getRecentlyAdded(calDay.time, query, isUngrouped).executeOnIO() else emptyList()
+            val nAdditions = if (viewType < 2) {
+                db.getRecentlyAdded(calDay.time, query, isUngrouped).executeOnIO()
+            } else emptyList()
             nAdditions.forEach {
                 it.history.last_read = it.manga.date_added
             }
@@ -144,10 +147,11 @@ class RecentsPresenter(
                             Comparator<Pair<MangaChapterHistory, Chapter>> { f1, f2 ->
                                 if (abs(f1.second.date_fetch - f2.second.date_fetch) <=
                                     TimeUnit.HOURS.toMillis(12)
-                                )
+                                ) {
                                     f2.second.date_upload.compareTo(f1.second.date_upload)
-                                else
+                                } else {
                                     f2.second.date_fetch.compareTo(f1.second.date_fetch)
+                                }
                             }
                         )
                         .take(4).map {

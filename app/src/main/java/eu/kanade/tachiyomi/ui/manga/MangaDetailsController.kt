@@ -434,8 +434,9 @@ class MangaDetailsController :
             setActionBar(true)
             setStatusBarAndToolbar()
         } else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
-            if (router.backstack.lastOrNull()?.controller() is DialogController)
+            if (router.backstack.lastOrNull()?.controller() is DialogController) {
                 return
+            }
             if (type == ControllerChangeType.POP_EXIT) {
                 setActionBar(false)
                 presenter.cancelScope()
@@ -1042,10 +1043,11 @@ class MangaDetailsController :
         if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
             presenter.deleteChapter(chapter)
         } else {
-            if (chapter.status == Download.ERROR)
+            if (chapter.status == Download.ERROR) {
                 DownloadService.start(view.context)
-            else
+            } else {
                 downloadChapters(listOf(chapter))
+            }
         }
     }
 
@@ -1279,8 +1281,9 @@ class MangaDetailsController :
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
         mode?.title = view?.context?.getString(
-            if (startingDLChapterPos == null)
-                R.string.select_starting_chapter else R.string.select_ending_chapter
+            if (startingDLChapterPos == null) {
+                R.string.select_starting_chapter
+            } else R.string.select_ending_chapter
         )
         return false
     }

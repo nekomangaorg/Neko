@@ -27,7 +27,6 @@ fun syncChaptersWithSource(
     manga: Manga,
     source: Source
 ): Pair<List<Chapter>, List<Chapter>> {
-
     if (rawSourceChapters.isEmpty()) {
         throw Exception("No chapters found")
     }
@@ -151,8 +150,9 @@ fun syncChaptersWithSource(
         val newestChapter = db.getChapters(manga).executeAsBlocking().maxBy { it.date_upload }
         val dateFetch = newestChapter?.date_upload ?: manga.last_update
         if (dateFetch == 0L) {
-            if (toAdd.isNotEmpty())
+            if (toAdd.isNotEmpty()) {
                 manga.last_update = Date().time
+            }
         } else manga.last_update = dateFetch
         db.updateLastUpdated(manga).executeAsBlocking()
     }

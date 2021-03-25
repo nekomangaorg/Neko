@@ -70,8 +70,9 @@ class LibraryGridHolder(
             if (cover_thumbnail.height == 0) {
                 val oldPos = adapterPosition
                 adapter.recyclerView.post {
-                    if (oldPos == adapterPosition)
+                    if (oldPos == adapterPosition) {
                         setCover(item.manga)
+                    }
                 }
             } else setCover(item.manga)
         }

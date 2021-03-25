@@ -1,12 +1,9 @@
 package eu.kanade.tachiyomi.util
 
-import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.source.model.SManga
-import java.util.Date
 
 fun Manga.isLocal() = source == LocalSource.ID
 

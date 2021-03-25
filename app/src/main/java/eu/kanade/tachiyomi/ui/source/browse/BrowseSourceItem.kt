@@ -28,10 +28,11 @@ class BrowseSourceItem(
     AbstractFlexibleItem<BrowseSourceHolder>() {
 
     override fun getLayoutRes(): Int {
-        return if (catalogueAsList.getOrDefault())
+        return if (catalogueAsList.getOrDefault()) {
             R.layout.manga_list_item
-        else
+        } else {
             R.layout.manga_grid_item
+        }
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): BrowseSourceHolder {
@@ -81,7 +82,6 @@ class BrowseSourceItem(
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-
         holder.onSetValues(manga)
     }
 

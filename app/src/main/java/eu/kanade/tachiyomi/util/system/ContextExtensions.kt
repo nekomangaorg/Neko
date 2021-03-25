@@ -245,12 +245,12 @@ fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
 fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
     try {
         val intent = CustomTabsIntent.Builder()
-                .setDefaultColorSchemeParams(
-                        CustomTabColorSchemeParams.Builder()
-                                .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
-                                .build()
-                )
-                .build()
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
+                    .build()
+            )
+            .build()
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
@@ -264,11 +264,11 @@ fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
     try {
         val parsedUrl = url.toUri()
         val intent = CustomTabsIntent.Builder()
-                .setDefaultColorSchemeParams(
-                        CustomTabColorSchemeParams.Builder()
-                                .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
-                                .build()
-                )
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+                    .build()
+            )
             .build()
         if (forceBrowser) {
             val packages = getCustomTabsPackages().maxBy { it.preferredOrder }

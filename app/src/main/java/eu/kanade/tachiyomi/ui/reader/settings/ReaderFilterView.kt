@@ -5,9 +5,7 @@ import android.util.AttributeSet
 import android.widget.SeekBar
 import androidx.annotation.ColorInt
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
-import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.android.synthetic.main.reader_color_filter.*
 import kotlinx.android.synthetic.main.reader_color_filter.view.*
@@ -115,7 +113,6 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
         )
     }
 
-
     /**
      * Set enabled status of seekBars belonging to color filter
      * @param enabled determines if seekBar gets enabled
@@ -202,7 +199,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
      * Sets the color filter overlay of the screen. Determined by HEX of integer
      * @param color hex of color.
      */
-    private fun setColorFilterValue(@ColorInt color: Int)  {
+    private fun setColorFilterValue(@ColorInt color: Int) {
         setValues(color)
     }
 

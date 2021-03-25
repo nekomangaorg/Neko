@@ -6,7 +6,6 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
 import androidx.annotation.ArrayRes
-import androidx.appcompat.widget.AppCompatSpinner
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
@@ -49,7 +48,6 @@ inline fun <reified T> SharedPreferences.getItem(key: String, default: T): T {
         else -> throw IllegalArgumentException("Generic type not handled: ${T::class.java.name}")
     }
 }
-
 
 /**
  * Binds a checkbox or switch view with a boolean preference.

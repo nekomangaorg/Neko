@@ -79,8 +79,9 @@ class ChapterCache(private val context: Context) {
      */
     fun removeFileFromCache(file: String): Boolean {
         // Make sure we don't delete the journal file (keeps track of cache).
-        if (file == "journal" || file.startsWith("journal."))
+        if (file == "journal" || file.startsWith("journal.")) {
             return false
+        }
 
         try {
             // Remove the extension from the file to get the key of the cache

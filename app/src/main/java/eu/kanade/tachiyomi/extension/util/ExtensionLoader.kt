@@ -144,10 +144,11 @@ internal object ExtensionLoader {
             .split(";")
             .map {
                 val sourceClass = it.trim()
-                if (sourceClass.startsWith("."))
+                if (sourceClass.startsWith(".")) {
                     pkgInfo.packageName + sourceClass
-                else
+                } else {
                     sourceClass
+                }
             }
             .flatMap {
                 try {

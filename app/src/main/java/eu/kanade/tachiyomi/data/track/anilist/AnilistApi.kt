@@ -25,7 +25,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import timber.log.Timber
 import java.util.Calendar
-import java.util.Date
 import java.util.concurrent.TimeUnit
 
 class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
@@ -34,7 +33,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     suspend fun addLibManga(track: Track): Track {
         return withContext(Dispatchers.IO) {
-
             val variables = jsonObject(
                 "mangaId" to track.media_id,
                 "progress" to track.last_chapter_read,
@@ -105,7 +103,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     }
 
     suspend fun findLibManga(track: Track, userid: Int): Track? {
-
         return withContext(Dispatchers.IO) {
             val variables = jsonObject(
                 "id" to userid,
@@ -141,7 +138,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     suspend fun remove(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-
                 val variables = jsonObject(
                     "listId" to track.library_id
                 )

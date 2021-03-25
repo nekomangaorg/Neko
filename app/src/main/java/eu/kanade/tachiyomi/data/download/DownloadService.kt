@@ -201,10 +201,11 @@ class DownloadService : Service() {
      */
     private fun listenDownloaderState() {
         subscriptions += downloadManager.runningRelay.subscribe { running ->
-            if (running)
+            if (running) {
                 wakeLock.acquireIfNeeded()
-            else
+            } else {
                 wakeLock.releaseIfNeeded()
+            }
         }
     }
 

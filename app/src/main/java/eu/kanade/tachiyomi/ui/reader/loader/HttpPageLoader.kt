@@ -192,10 +192,11 @@ class HttpPageLoader(
      * @param page the page whose source image has to be downloaded.
      */
     private fun HttpSource.fetchImageFromCacheThenNet(page: ReaderPage): Observable<ReaderPage> {
-        return if (page.imageUrl.isNullOrEmpty())
+        return if (page.imageUrl.isNullOrEmpty()) {
             getImageUrl(page).flatMap { getCachedImage(it) }
-        else
+        } else {
             getCachedImage(page)
+        }
     }
 
     private fun HttpSource.getImageUrl(page: ReaderPage): Observable<ReaderPage> {

@@ -40,10 +40,11 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    if (progress.isNaN())
+                    if (progress.isNaN()) {
                         pill.alpha = 0f
-                    else
+                    } else {
                         pill.alpha = (1 - max(0f, progress)) * 0.25f
+                    }
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
@@ -92,14 +93,16 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
 
         var defPref = presenter.globalSort()
         sort_group.check(
-            if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else
+            if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else {
                 R.id.sort_oldest
+            }
         )
 
         hide_titles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
         sort_method_group.check(
-            if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else
+            if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else {
                 R.id.sort_by_number
+            }
         )
 
         set_as_default_sort.visInvisIf(

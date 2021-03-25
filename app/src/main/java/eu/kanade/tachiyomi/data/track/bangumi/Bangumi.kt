@@ -114,7 +114,6 @@ class Bangumi(private val context: Context, id: Int) : TrackService(id) {
 
     suspend fun login(code: String): Boolean {
         try {
-
             val oauth = api.accessToken(code)
             interceptor.newAuth(oauth)
             saveCredentials(oauth.user_id.toString(), oauth.access_token)

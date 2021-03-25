@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.setting.search
 
-import android.text.Html
 import android.view.View
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -18,7 +17,6 @@ import kotlin.reflect.full.createInstance
  */
 class SettingsSearchHolder(view: View, val adapter: SettingsSearchAdapter) :
     FlexibleViewHolder(view, adapter) {
-
 
     init {
         view.title_wrapper.setOnClickListener {

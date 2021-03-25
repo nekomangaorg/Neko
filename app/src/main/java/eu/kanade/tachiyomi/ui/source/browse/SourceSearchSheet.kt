@@ -119,8 +119,9 @@ class SourceSearchSheet(activity: Activity) :
 
     override fun dismiss() {
         super.dismiss()
-        if (filterChanged)
+        if (filterChanged) {
             onSearchClicked()
+        }
     }
 
     fun setFilters(items: List<IFlexible<*>>) {

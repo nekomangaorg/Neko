@@ -46,8 +46,8 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
 
 inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit):
     DropDownPreference {
-        return initThenAdd(DropDownPreference(context), block).also(::initDialog)
-    }
+    return initThenAdd(DropDownPreference(context), block).also(::initDialog)
+}
 
 inline fun PreferenceGroup.listPreference(
     activity: Activity?,
@@ -55,8 +55,8 @@ inline fun PreferenceGroup.listPreference(
     -> Unit
 ):
     ListMatPreference {
-        return initThenAdd(ListMatPreference(activity, context), block)
-    }
+    return initThenAdd(ListMatPreference(activity, context), block)
+}
 
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
@@ -66,8 +66,8 @@ inline fun PreferenceGroup.intListPreference(
     ).() -> Unit
 ):
     IntListMatPreference {
-        return initThenAdd(IntListMatPreference(activity, context), block)
-    }
+    return initThenAdd(IntListMatPreference(activity, context), block)
+}
 
 inline fun PreferenceGroup.multiSelectListPreferenceMat(
     activity: Activity?,

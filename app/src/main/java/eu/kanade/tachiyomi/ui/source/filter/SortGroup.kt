@@ -32,10 +32,11 @@ class SortGroup(val filter: Filter.Sort) : AbstractExpandableHeaderItem<SortGrou
         holder.title.text = filter.name
 
         holder.icon.setVectorCompat(
-            if (isExpanded)
+            if (isExpanded) {
                 R.drawable.ic_expand_more_24dp
-            else
+            } else {
                 R.drawable.ic_chevron_right_24dp
+            }
         )
 
         holder.itemView.setOnClickListener(holder)

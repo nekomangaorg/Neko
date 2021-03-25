@@ -448,19 +448,19 @@ class NotificationReceiver : BroadcastReceiver() {
          */
         internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int):
             PendingIntent {
-                val newIntent =
-                    Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
-                        .putExtra("notificationId", manga.id.hashCode())
-                        .putExtra("groupId", groupId)
-                return PendingIntent.getActivity(
-                    context,
-                    manga.id.hashCode(),
-                    newIntent,
-                    PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            val newIntent =
+                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
+                    .putExtra("notificationId", manga.id.hashCode())
+                    .putExtra("groupId", groupId)
+            return PendingIntent.getActivity(
+                context,
+                manga.id.hashCode(),
+                newIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
         /**
          * Returns [PendingIntent] that opens the error log file in an external viewer
@@ -522,15 +522,15 @@ class NotificationReceiver : BroadcastReceiver() {
             groupId: Int
         ):
             PendingIntent {
-                val newIntent = Intent(context, NotificationReceiver::class.java).apply {
-                    action = ACTION_MARK_AS_READ
-                    putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
-                    putExtra(EXTRA_MANGA_ID, manga.id)
-                    putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
-                    putExtra(EXTRA_GROUP_ID, groupId)
-                }
-                return PendingIntent.getBroadcast(context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val newIntent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_MARK_AS_READ
+                putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
+                putExtra(EXTRA_MANGA_ID, manga.id)
+                putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
+                putExtra(EXTRA_GROUP_ID, groupId)
             }
+            return PendingIntent.getBroadcast(context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
 
         /**
          * Returns [PendingIntent] that starts a service which stops the library update

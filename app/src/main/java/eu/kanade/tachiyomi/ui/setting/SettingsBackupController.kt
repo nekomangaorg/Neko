@@ -151,7 +151,7 @@ class SettingsBackupController : SettingsController() {
                 defaultValue = true
 
                 preferences.backupInterval().asImmediateFlow { isVisible = it > 0 }
-                        .launchIn(viewScope)
+                    .launchIn(viewScope)
             }
         }
     }

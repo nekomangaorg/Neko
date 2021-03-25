@@ -1,9 +1,6 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.content.Intent
-import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -12,7 +9,6 @@ import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
 import eu.kanade.tachiyomi.data.track.bangumi.BangumiApi
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.data.track.shikimori.ShikimoriApi
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
@@ -63,21 +59,21 @@ class SettingsTrackingController :
         crossinline login: () -> Unit
     ): LoginPreference {
         return initThenAdd(
-                LoginPreference(context).apply {
-                    key = Keys.trackUsername(service.id)
-                    title = context.getString(service.nameRes())
-                },
-                {
-                    onClick {
-                        if (service.isLogged) {
-                            val dialog = TrackLogoutDialog(service)
-                            dialog.targetController = this@SettingsTrackingController
-                            dialog.showDialog(router)
-                        } else {
-                            login()
-                        }
+            LoginPreference(context).apply {
+                key = Keys.trackUsername(service.id)
+                title = context.getString(service.nameRes())
+            },
+            {
+                onClick {
+                    if (service.isLogged) {
+                        val dialog = TrackLogoutDialog(service)
+                        dialog.targetController = this@SettingsTrackingController
+                        dialog.showDialog(router)
+                    } else {
+                        login()
                     }
                 }
+            }
         )
     }
 

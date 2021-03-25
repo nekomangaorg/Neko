@@ -38,7 +38,6 @@ data class ExtensionGroupItem(val name: String, val size: Int) : AbstractHeaderI
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-
         holder.bind(this)
     }
 

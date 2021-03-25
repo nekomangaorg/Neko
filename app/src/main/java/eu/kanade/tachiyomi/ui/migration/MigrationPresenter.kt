@@ -93,7 +93,6 @@ class MigrationPresenter(
         manga: Manga,
         replace: Boolean
     ) {
-
         val flags = preferences.migrateFlags().getOrDefault()
         val migrateChapters = MigrationFlags.hasChapters(flags)
         val migrateCategories = MigrationFlags.hasCategories(flags)

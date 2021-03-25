@@ -70,12 +70,14 @@ class SetTrackReadingDatesDialog<T> : DialogController
                 listener.setReadingDate(item, dateToUpdate, 0L)
             }.apply {
                 getSuggestedDate()?.let {
-                    message(text = it,
-                    applySettings = {
-                        messageTextView.setOnClickListener {
-                            this@apply.setDate(suggestedDate ?: 0L)
+                    message(
+                        text = it,
+                        applySettings = {
+                            messageTextView.setOnClickListener {
+                                this@apply.setDate(suggestedDate ?: 0L)
+                            }
                         }
-                    })
+                    )
                 }
             }
     }
@@ -93,9 +95,11 @@ class SetTrackReadingDatesDialog<T> : DialogController
                 val suggestedCalendar = Calendar.getInstance()
                 suggestedCalendar.timeInMillis = suggestedDate
                 return if (date > suggestedDate &&
-                    (suggestedCalendar.year != calendar.year ||
-                        suggestedCalendar.month != calendar.month ||
-                        suggestedCalendar.dayOfMonth != calendar.dayOfMonth)
+                    (
+                        suggestedCalendar.year != calendar.year ||
+                            suggestedCalendar.month != calendar.month ||
+                            suggestedCalendar.dayOfMonth != calendar.dayOfMonth
+                        )
                 ) {
                     activity?.getString(
                         R.string.suggested_date_,

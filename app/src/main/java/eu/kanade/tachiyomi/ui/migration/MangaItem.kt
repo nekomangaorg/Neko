@@ -24,7 +24,6 @@ class MangaItem(val manga: Manga) : AbstractFlexibleItem<MangaHolder>() {
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-
         holder.bind(this)
     }
 

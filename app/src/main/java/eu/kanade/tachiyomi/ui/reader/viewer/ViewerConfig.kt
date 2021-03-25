@@ -27,7 +27,6 @@ abstract class ViewerConfig(preferences: PreferencesHelper) {
     var volumeKeysInverted = false
     var alwaysShowChapterTransition = true
 
-
     var navigationOverlayForNewUser = false
     var navigationMode = 0
         protected set

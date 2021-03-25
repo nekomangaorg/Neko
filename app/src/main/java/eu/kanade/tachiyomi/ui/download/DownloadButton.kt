@@ -59,8 +59,9 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             isAnimating = false
         }
         download_icon.setImageDrawable(
-            if (state == Download.CHECKED)
-                checkDrawable else downloadDrawable
+            if (state == Download.CHECKED) {
+                checkDrawable
+            } else downloadDrawable
         )
         when (state) {
             Download.CHECKED -> {

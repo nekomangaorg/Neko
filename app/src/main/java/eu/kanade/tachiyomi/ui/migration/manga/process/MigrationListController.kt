@@ -54,7 +54,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
-import rx.schedulers.Schedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.atomic.AtomicInteger
@@ -99,7 +98,6 @@ class MigrationListController(bundle: Bundle? = null) :
     }
 
     override fun onViewCreated(view: View) {
-
         super.onViewCreated(view)
         liftAppbarWith(recycler)
         setTitle()
@@ -324,7 +322,6 @@ class MigrationListController(bundle: Bundle? = null) :
     }
 
     override fun onMenuItemClick(position: Int, item: MenuItem) {
-
         when (item.itemId) {
             R.id.action_search_manually -> {
                 launchUI {
@@ -377,7 +374,7 @@ class MigrationListController(bundle: Bundle? = null) :
                 try {
                     val newManga =
                         sourceManager.getOrStub(result.source).getMangaDetails(result.toMangaInfo())
-                                .toSManga()
+                            .toSManga()
                     result.copyFrom(newManga)
 
                     db.insertManga(result).executeAsBlocking()

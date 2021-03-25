@@ -33,7 +33,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
@@ -283,8 +282,10 @@ class ReaderActivity :
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val detailsItem = menu?.findItem(R.id.action_manga_details)
         if (presenter.manga?.mangaType(this) != null) {
-            detailsItem?.title = getString(R.string._details,
-                presenter.manga?.mangaType(this)?.capitalize(Locale.ROOT) ?: "")
+            detailsItem?.title = getString(
+                R.string._details,
+                presenter.manga?.mangaType(this)?.capitalize(Locale.ROOT) ?: ""
+            )
         } else {
             detailsItem?.title = getString(R.string.details)
         }
@@ -798,7 +799,6 @@ class ReaderActivity :
      */
     private fun setNotchCutoutMode() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
-
             val currentOrientation = resources.configuration.orientation
 
             val params = window.attributes
@@ -941,10 +941,11 @@ class ReaderActivity :
          * Sets the 32-bit color mode according to [enabled].
          */
         private fun setTrueColor(enabled: Boolean) {
-            if (enabled)
+            if (enabled) {
                 SubsamplingScaleImageView.setPreferredBitmapConfig(Bitmap.Config.ARGB_8888)
-            else
+            } else {
                 SubsamplingScaleImageView.setPreferredBitmapConfig(Bitmap.Config.RGB_565)
+            }
         }
 
         /**

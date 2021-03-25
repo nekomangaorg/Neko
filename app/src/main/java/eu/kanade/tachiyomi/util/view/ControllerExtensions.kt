@@ -312,4 +312,3 @@ fun Controller.openInBrowser(url: String) {
         activity?.toast(e.message)
     }
 }
-

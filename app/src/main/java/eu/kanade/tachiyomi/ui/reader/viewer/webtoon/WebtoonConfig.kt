@@ -37,9 +37,12 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfi
             .register({ navigationMode = it }, { updateNavigation(it) })
 
         preferences.webtoonNavInverted()
-            .register({ tappingInverted = it }, {
-                navigator.invertMode = it
-            })
+            .register(
+                { tappingInverted = it },
+                {
+                    navigator.invertMode = it
+                }
+            )
 
         preferences.webtoonNavInverted().asFlow()
             .drop(1)

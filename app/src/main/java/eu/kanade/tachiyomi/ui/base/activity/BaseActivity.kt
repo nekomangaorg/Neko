@@ -29,7 +29,8 @@ abstract class BaseActivity : AppCompatActivity() {
 
     override fun onResume() {
         super.onResume()
-        if (this !is BiometricActivity && this !is SearchActivity)
+        if (this !is BiometricActivity && this !is SearchActivity) {
             SecureActivityDelegate.promptLockIfNeeded(this)
+        }
     }
 }

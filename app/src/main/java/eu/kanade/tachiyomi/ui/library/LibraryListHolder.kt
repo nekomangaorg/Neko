@@ -36,7 +36,6 @@ class LibraryListHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
-
         title.visible()
         constraint_layout.minHeight = 56.dpToPx
         if (item.manga.isBlank()) {
@@ -47,8 +46,9 @@ class LibraryListHolder(
             if (item.manga.status == -1) {
                 title.text = null
                 title.gone()
-            } else
+            } else {
                 title.text = itemView.context.getString(R.string.category_is_empty)
+            }
             title.textAlignment = View.TEXT_ALIGNMENT_CENTER
             card.gone()
             badge_view.gone()

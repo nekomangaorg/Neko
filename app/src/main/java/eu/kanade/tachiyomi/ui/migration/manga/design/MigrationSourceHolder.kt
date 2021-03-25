@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 import android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
 import android.view.View
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder

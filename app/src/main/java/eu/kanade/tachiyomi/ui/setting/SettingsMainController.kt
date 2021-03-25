@@ -7,8 +7,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -98,7 +96,8 @@ class SettingsMainController : SettingsController() {
                 override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                     SettingsSearchController.lastSearch = "" // reset saved search query
                     router.pushController(
-                        RouterTransaction.with(SettingsSearchController()))
+                        RouterTransaction.with(SettingsSearchController())
+                    )
                     return true
                 }
 

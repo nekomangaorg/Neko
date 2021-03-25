@@ -729,8 +729,9 @@ class LibraryPresenter(
                 db.resetMangaInfo(manga).executeOnIO()
                 coverCache.deleteFromCache(manga)
                 val source = sourceManager.get(manga.source) as? HttpSource
-                if (source != null)
+                if (source != null) {
                     downloadManager.deleteManga(manga, source)
+                }
             }
         }
     }
@@ -825,9 +826,10 @@ class LibraryPresenter(
             val mc = ArrayList<MangaCategory>()
             val categories =
                 if (catId == 0) emptyList()
-                else
+                else {
                     db.getCategoriesForManga(manga).executeOnIO()
                         .filter { it.id != oldCatId } + listOf(category)
+                }
 
             for (cat in categories) {
                 mc.add(MangaCategory.create(manga, cat))
@@ -858,10 +860,11 @@ class LibraryPresenter(
         val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
             it.toIntOrNull()
         }.toMutableSet()
-        if (categoryId in categoriesHidden)
+        if (categoryId in categoriesHidden) {
             categoriesHidden.remove(categoryId)
-        else
+        } else {
             categoriesHidden.add(categoryId)
+        }
         preferences.collapsedCategories().set(categoriesHidden.map { it.toString() }.toMutableSet())
         getLibrary()
     }

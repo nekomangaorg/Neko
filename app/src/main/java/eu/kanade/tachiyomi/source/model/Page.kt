@@ -15,14 +15,16 @@ open class Page(
     val number: Int
         get() = index + 1
 
-    @Transient @Volatile var status: Int = 0
+    @Transient @Volatile
+    var status: Int = 0
         set(value) {
             field = value
             statusSubject?.onNext(value)
             statusCallback?.invoke(this)
         }
 
-    @Transient @Volatile var progress: Int = 0
+    @Transient @Volatile
+    var progress: Int = 0
         set(value) {
             field = value
             statusCallback?.invoke(this)

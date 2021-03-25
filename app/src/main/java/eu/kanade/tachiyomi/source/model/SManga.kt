@@ -36,25 +36,31 @@ interface SManga : Serializable {
         get() = (this as? MangaImpl)?.ogGenre ?: genre
 
     fun copyFrom(other: SManga) {
-        if (other.author != null)
+        if (other.author != null) {
             author = other.originalAuthor
+        }
 
-        if (other.artist != null)
+        if (other.artist != null) {
             artist = other.originalArtist
+        }
 
-        if (other.description != null)
+        if (other.description != null) {
             description = other.originalDescription
+        }
 
-        if (other.genre != null)
+        if (other.genre != null) {
             genre = other.originalGenre
+        }
 
-        if (other.thumbnail_url != null)
+        if (other.thumbnail_url != null) {
             thumbnail_url = other.thumbnail_url
+        }
 
         status = other.status
 
-        if (!initialized)
+        if (!initialized) {
             initialized = other.initialized
+        }
     }
 
     companion object {

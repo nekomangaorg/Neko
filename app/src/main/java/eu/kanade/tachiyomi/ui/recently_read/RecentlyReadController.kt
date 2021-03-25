@@ -44,6 +44,7 @@ class RecentlyReadController(bundle: Bundle? = null) :
     init {
         setHasOptionsMenu(true)
     }
+
     /**
      * Adapter containing the recent manga.
      */
@@ -85,8 +86,9 @@ class RecentlyReadController(bundle: Bundle? = null) :
         resetProgressItem()
         scrollViewWith(recycler, padBottom = true)
 
-        if (recentItems != null)
+        if (recentItems != null) {
             adapter?.updateDataSet(recentItems!!.toList())
+        }
 
         launchUI {
             val manga = presenter.refresh(query)
@@ -106,6 +108,7 @@ class RecentlyReadController(bundle: Bundle? = null) :
             observeLater = false
         }
     }
+
     /**
      * Populate adapter with chapters
      *
@@ -115,8 +118,9 @@ class RecentlyReadController(bundle: Bundle? = null) :
         val adapter = adapter ?: return
         adapter.updateDataSet(mangaHistory)
         adapter.onLoadMoreComplete(null)
-        if (recentItems == null)
+        if (recentItems == null) {
             resetProgressItem()
+        }
         recentItems = mangaHistory.toMutableList()
     }
 

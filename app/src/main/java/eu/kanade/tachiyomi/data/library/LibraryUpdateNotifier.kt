@@ -195,7 +195,6 @@ class LibraryUpdateNotifier(private val context: Context) {
             }
 
             NotificationManagerCompat.from(context).apply {
-
                 notify(
                     Notifications.ID_NEW_CHAPTERS,
                     context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {

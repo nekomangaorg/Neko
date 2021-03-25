@@ -16,10 +16,9 @@ import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
-
 abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     BottomSheetDialog
-        (activity, R.style.BottomSheetDialogTheme) {
+    (activity, R.style.BottomSheetDialogTheme) {
 
     private var sheetBehavior: BottomSheetBehavior<*>
 
@@ -33,7 +32,7 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
         setEdgeToEdge(activity, view)
 
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
-        pager.maxHeight = activity.window.decorView.height  - height - 125.dpToPx
+        pager.maxHeight = activity.window.decorView.height - height - 125.dpToPx
 
         val adapter = TabbedSheetAdapter()
         pager.offscreenPageLimit = 2
@@ -86,7 +85,7 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     }
 }
 
-class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null): ViewPager(context, attrs) {
+class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : ViewPager(context, attrs) {
 
     var maxHeight = 0
         set(value) {
@@ -100,7 +99,8 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
         var height = 0
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
             Math.max(
-                0, MeasureSpec.getSize(widthMeasureSpec) -
+                0,
+                MeasureSpec.getSize(widthMeasureSpec) -
                     paddingLeft - paddingRight
             ),
             MeasureSpec.getMode(widthMeasureSpec)

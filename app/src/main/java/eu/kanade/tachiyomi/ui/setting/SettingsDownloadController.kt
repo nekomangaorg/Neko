@@ -97,15 +97,16 @@ class SettingsDownloadController : SettingsController() {
                 preferences.downloadNew().asImmediateFlow { isVisible = it }
 
                 preferences.downloadNewCategories().asImmediateFlow { list ->
-                        val selectedCategories = list
-                            .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
-                            .sortedBy { it.order }
+                    val selectedCategories = list
+                        .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
+                        .sortedBy { it.order }
 
-                        customSummary = if (selectedCategories.isEmpty())
-                            resources?.getString(R.string.all)
-                        else
-                            selectedCategories.joinToString { it.name }
+                    customSummary = if (selectedCategories.isEmpty()) {
+                        resources?.getString(R.string.all)
+                    } else {
+                        selectedCategories.joinToString { it.name }
                     }
+                }
             }
             preferenceCategory {
                 intListPreference(activity) {

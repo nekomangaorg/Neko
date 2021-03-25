@@ -46,7 +46,6 @@ data class ExtensionItem(
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-
         if (payloads == null || payloads.isEmpty()) {
             holder.bind(this)
         } else {

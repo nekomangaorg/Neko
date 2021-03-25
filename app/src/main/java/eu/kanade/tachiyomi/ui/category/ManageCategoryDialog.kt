@@ -105,10 +105,11 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             preferences.downloadNewCategories(),
             true
         )
-        if (downloadNew && preferences.downloadNewCategories().get().isEmpty())
+        if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
             view.download_new.gone()
-        else if (!downloadNew)
+        } else if (!downloadNew) {
             view.download_new.visible()
+        }
         view.download_new.isChecked =
             preferences.downloadNew().get() && view.download_new.isChecked
         setCheckbox(
@@ -132,9 +133,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     private fun setCheckbox(
-            box: CompoundButton,
-            categories: Preference<Set<String>>,
-            shouldShow: Boolean
+        box: CompoundButton,
+        categories: Preference<Set<String>>,
+        shouldShow: Boolean
     ) {
         val updateCategories = categories.get()
         box.visibleIf(updateCategories.isNotEmpty() && shouldShow)

@@ -5,14 +5,12 @@ import android.graphics.Color
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
@@ -89,7 +87,6 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             // Set default fields if it's not found in the list
             add(track)
         }
-
     }
 
     override fun canRemoveFromService(): Boolean = true

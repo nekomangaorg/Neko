@@ -70,8 +70,8 @@ class MangaHeaderHolder(
                 }
                 if (event.actionMasked == MotionEvent.ACTION_UP) {
                     hadSelection = manga_summary.hasSelection()
-                        (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled =
-                            true
+                    (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled =
+                        true
                 }
                 false
             }
@@ -320,9 +320,9 @@ class MangaHeaderHolder(
     fun collapse() {
         sub_item_group.gone()
         start_reading_button.gone()
-        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE)
+        if (more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE) {
             more_button_group.invisible()
-        else {
+        } else {
             less_button.gone()
             manga_genres_tags.gone()
         }

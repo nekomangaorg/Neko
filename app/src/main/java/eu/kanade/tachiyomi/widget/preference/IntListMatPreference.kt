@@ -47,8 +47,9 @@ class IntListMatPreference @JvmOverloads constructor(
             ) {
                 _, pos, _ ->
                 val value = entryValues[pos]
-                if (key != null)
+                if (key != null) {
                     prefs.getInt(key, defValue).set(value)
+                }
                 callChangeListener(value)
                 this@IntListMatPreference.summary = this@IntListMatPreference.summary
                 dismiss()

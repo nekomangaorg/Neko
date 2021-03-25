@@ -118,8 +118,9 @@ open class BaseWebViewActivity : BaseActivity() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
                     progressBar.visible()
                     progressBar.progress = newProgress
-                    if (newProgress == 100)
+                    if (newProgress == 100) {
                         progressBar.invisible()
+                    }
                     super.onProgressChanged(view, newProgress)
                 }
             }
@@ -160,10 +161,11 @@ open class BaseWebViewActivity : BaseActivity() {
         toolbar.setTitleTextColor(tintColor)
         toolbar.overflowIcon?.setTint(tintColor)
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
-        else if (window.navigationBarColor != getColor(android.R.color.transparent))
+        } else if (window.navigationBarColor != getColor(android.R.color.transparent)) {
             window.navigationBarColor = getResourceColor(android.R.attr.colorBackground)
+        }
 
         web_linear_layout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
@@ -177,12 +179,13 @@ open class BaseWebViewActivity : BaseActivity() {
         val typedValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
 
-        if (typedValue.data == -1)
+        if (typedValue.data == -1) {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        else
+        } else {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
     }
     override fun onBackPressed() {
         if (webview.canGoBack()) webview.goBack()

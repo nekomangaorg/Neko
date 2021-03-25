@@ -4,7 +4,6 @@ import android.app.Application
 import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
-import coil.Coil
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -88,7 +87,6 @@ class MangaDetailsPresenter(
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
     fun onCreate() {
-
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
@@ -218,8 +216,9 @@ class MangaDetailsPresenter(
      * @return an observable of the list of chapters filtered and sorted.
      */
     private fun applyChapterFilters(chapterList: List<ChapterItem>): List<ChapterItem> {
-        if (isLockedFromSearch)
+        if (isLockedFromSearch) {
             return chapterList
+        }
 
         val chapters = chapterFilter.filterChapters(chapterList, manga)
 
@@ -357,8 +356,8 @@ class MangaDetailsPresenter(
                 if (newChapters.first.isNotEmpty()) {
                     if (manga.shouldDownloadNewChapters(db, preferences)) {
                         downloadChapters(
-                                newChapters.first.sortedBy { it.chapter_number }
-                                        .map { it.toModel() }
+                            newChapters.first.sortedBy { it.chapter_number }
+                                .map { it.toModel() }
                         )
                     }
                 }
@@ -867,8 +866,9 @@ class MangaDetailsPresenter(
     fun setStatus(item: TrackItem, index: Int) {
         val track = item.track!!
         track.status = item.service.getStatusList()[index]
-        if (item.service.isCompletedStatus(index) && track.total_chapters > 0)
+        if (item.service.isCompletedStatus(index) && track.total_chapters > 0) {
             track.last_chapter_read = track.total_chapters
+        }
         updateRemote(track, item.service)
     }
 

@@ -3,16 +3,10 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.runBlocking
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
-import okhttp3.Request
-import okhttp3.RequestBody
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import okio.Buffer
-import org.json.JSONObject
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var token: String?) : Interceptor {
@@ -51,8 +45,8 @@ class MyAnimeListInterceptor(private val myanimelist: MyAnimeList, private var t
 
         // Add the authorization header to the original request.
         val authRequest = originalRequest.newBuilder()
-                .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
-                .build()
+            .addHeader("Authorization", "Bearer ${oauth!!.access_token}")
+            .build()
 
         return chain.proceed(authRequest)
     }

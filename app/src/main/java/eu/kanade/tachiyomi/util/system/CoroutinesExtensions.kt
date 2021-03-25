@@ -15,7 +15,7 @@ fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
 
 fun CoroutineScope.launchIO(block: suspend CoroutineScope.() -> Unit): Job =
-        launch(Dispatchers.IO, block = block)
+    launch(Dispatchers.IO, block = block)
 
 suspend fun <T> withUIContext(block: suspend CoroutineScope.() -> T) = withContext(Dispatchers.Main, block)
 

@@ -84,8 +84,9 @@ abstract class BaseController(bundle: Bundle? = null) :
             parentController = parentController.parentController
         }
 
-        if (router.backstack.lastOrNull()?.controller() == this)
+        if (router.backstack.lastOrNull()?.controller() == this) {
             (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        }
     }
 
     private fun Controller.instance(): String {

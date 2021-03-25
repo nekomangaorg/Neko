@@ -24,10 +24,11 @@ open class MatPreference @JvmOverloads constructor(
     var customSummary: String? = null
 
     override fun onClick() {
-        if (!isShowing)
+        if (!isShowing) {
             dialog().apply {
                 onDismiss { this@MatPreference.isShowing = false }
             }.show()
+        }
         isShowing = true
     }
 
@@ -37,8 +38,9 @@ open class MatPreference @JvmOverloads constructor(
 
     open fun dialog(): MaterialDialog {
         return MaterialDialog(activity ?: context).apply {
-            if (title != null)
+            if (title != null) {
                 title(text = title.toString())
+            }
             negativeButton(android.R.string.cancel)
         }
     }

@@ -114,7 +114,9 @@ class LibraryUpdateService(
     enum class Target {
 
         CHAPTERS, // Manga chapters
+
         DETAILS, // Manga metadata
+
         TRACKING // Tracking metadata
     }
 
@@ -172,8 +174,9 @@ class LibraryUpdateService(
      */
     override fun onDestroy() {
         job?.cancel()
-        if (instance == this)
+        if (instance == this) {
             instance = null
+        }
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
@@ -380,47 +383,47 @@ class LibraryUpdateService(
         shouldDownload: Boolean
     ):
         Boolean {
-            try {
-                var hasDownloads = false
-                if (job?.isCancelled == true) {
-                    return false
-                }
-                notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
-                val source = sourceManager.get(manga.source) as? HttpSource ?: return false
-                val fetchedChapters = withContext(Dispatchers.IO) {
-                    source.fetchChapterList(manga).toBlocking().single()
-                } ?: emptyList()
-                if (fetchedChapters.isNotEmpty()) {
-                    val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
-                    if (newChapters.first.isNotEmpty()) {
-                        if (shouldDownload) {
-                            downloadChapters(manga, newChapters.first.sortedBy { it.chapter_number })
-                            hasDownloads = true
-                        }
-                        newUpdates[manga] =
-                            newChapters.first.sortedBy { it.chapter_number }.toTypedArray()
-                    }
-                    if (deleteRemoved && newChapters.second.isNotEmpty()) {
-                        val removedChapters = newChapters.second.filter {
-                            downloadManager.isChapterDownloaded(it, manga)
-                        }
-                        if (removedChapters.isNotEmpty()) {
-                            downloadManager.deleteChapters(removedChapters, manga, source)
-                        }
-                    }
-                    if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                        manga
-                    )
-                }
-                return hasDownloads
-            } catch (e: Exception) {
-                if (e !is CancellationException) {
-                    failedUpdates[manga] = e.message
-                    Timber.e("Failed updating: ${manga.title}: $e")
-                }
+        try {
+            var hasDownloads = false
+            if (job?.isCancelled == true) {
                 return false
             }
+            notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
+            val source = sourceManager.get(manga.source) as? HttpSource ?: return false
+            val fetchedChapters = withContext(Dispatchers.IO) {
+                source.fetchChapterList(manga).toBlocking().single()
+            } ?: emptyList()
+            if (fetchedChapters.isNotEmpty()) {
+                val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, source)
+                if (newChapters.first.isNotEmpty()) {
+                    if (shouldDownload) {
+                        downloadChapters(manga, newChapters.first.sortedBy { it.chapter_number })
+                        hasDownloads = true
+                    }
+                    newUpdates[manga] =
+                        newChapters.first.sortedBy { it.chapter_number }.toTypedArray()
+                }
+                if (deleteRemoved && newChapters.second.isNotEmpty()) {
+                    val removedChapters = newChapters.second.filter {
+                        downloadManager.isChapterDownloaded(it, manga)
+                    }
+                    if (removedChapters.isNotEmpty()) {
+                        downloadManager.deleteChapters(removedChapters, manga, source)
+                    }
+                }
+                if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
+                    manga
+                )
+            }
+            return hasDownloads
+        } catch (e: Exception) {
+            if (e !is CancellationException) {
+                failedUpdates[manga] = e.message
+                Timber.e("Failed updating: ${manga.title}: $e")
+            }
+            return false
         }
+    }
 
     private fun downloadChapters(manga: Manga, chapters: List<Chapter>) {
         // We don't want to start downloading while the library is updating, because websites

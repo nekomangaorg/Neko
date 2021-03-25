@@ -121,8 +121,9 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             ) {
                 isEditing(false)
                 edit_text.inputType = InputType.TYPE_NULL
-                if (!createCategory)
+                if (!createCategory) {
                     title.text = edit_text.text.toString()
+                }
             }
         } else {
             itemView.performClick()

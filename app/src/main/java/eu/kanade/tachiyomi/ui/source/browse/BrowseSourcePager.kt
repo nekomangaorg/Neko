@@ -12,10 +12,11 @@ open class BrowseSourcePager(val source: CatalogueSource, val query: String, val
     override fun requestNext(): Observable<MangasPage> {
         val page = currentPage
 
-        val observable = if (query.isBlank() && filters.isEmpty())
+        val observable = if (query.isBlank() && filters.isEmpty()) {
             source.fetchPopularManga(page)
-        else
+        } else {
             source.fetchSearchManga(page, query, filters)
+        }
 
         return observable
             .subscribeOn(Schedulers.io())

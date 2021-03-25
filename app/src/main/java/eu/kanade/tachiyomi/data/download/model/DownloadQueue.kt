@@ -37,8 +37,9 @@ class DownloadQueue(
         store.remove(download)
         download.setStatusSubject(null)
         download.setStatusCallback(null)
-        if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE)
+        if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE) {
             download.status = Download.NOT_DOWNLOADED
+        }
         downloadListeners.forEach { it.updateDownload(download) }
         if (removed) {
             updatedRelay.call(Unit)
@@ -65,8 +66,9 @@ class DownloadQueue(
         queue.forEach { download ->
             download.setStatusSubject(null)
             download.setStatusCallback(null)
-            if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE)
+            if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE) {
                 download.status = Download.NOT_DOWNLOADED
+            }
             downloadListeners.forEach { it.updateDownload(download) }
         }
         queue.clear()
@@ -85,11 +87,12 @@ class DownloadQueue(
 
     private fun setPagesFor(download: Download) {
         if (download.status == Download.DOWNLOADING) {
-            if (download.pages != null)
+            if (download.pages != null) {
                 for (page in download.pages!!)
                     page.setStatusCallback {
                         callListeners(download)
                     }
+            }
             downloadListeners.forEach { it.updateDownload(download) }
         } else if (download.status == Download.DOWNLOADED || download.status == Download.ERROR) {
             setPagesSubject(download.pages, null)

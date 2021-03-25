@@ -44,8 +44,9 @@ abstract class LibraryHolder(
     }
 
     fun setReadingButton(item: LibraryItem) {
-        play_layout?.visibility = if (item.manga.unread > 0 && item.unreadType > 0 && !item.hideReadingButton)
-            View.VISIBLE else View.GONE
+        play_layout?.visibility = if (item.manga.unread > 0 && item.unreadType > 0 && !item.hideReadingButton) {
+            View.VISIBLE
+        } else View.GONE
     }
 
     /**

@@ -55,8 +55,9 @@ internal class DownloadNotifier(private val context: Context) {
      * Clear old actions if they exist.
      */
     private fun clearActions() = with(notification) {
-        if (!mActions.isEmpty())
+        if (!mActions.isEmpty()) {
             mActions.clear()
+        }
     }
 
     /**

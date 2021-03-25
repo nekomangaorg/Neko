@@ -34,6 +34,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     fun show(@DrawableRes drawable: Int, @StringRes textResource: Int, actions: List<Action>? = null) {
         show(drawable, context.getString(textResource), actions)
     }
+
     /**
      * Show the information view
      * @param drawable icon of information view

@@ -1,24 +1,22 @@
 package eu.kanade.tachiyomi.util.lang
 
-import android.graphics.Color
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import androidx.annotation.ColorInt
-import androidx.annotation.ColorRes
 import kotlin.math.floor
-
 
 /**
  * Replaces the given string to have at most [count] characters using [replacement] at its end.
  * If [replacement] is longer than [count] an exception will be thrown when `length > count`.
  */
 fun String.chop(count: Int, replacement: String = "..."): String {
-    return if (length > count)
+    return if (length > count) {
         take(count - replacement.length) + replacement
-    else
+    } else {
         this
+    }
 }
 
 fun String.removeArticles(): String {
@@ -43,8 +41,9 @@ fun String.trimOrNull(): String? {
  * If [replacement] is longer than [count] an exception will be thrown when `length > count`.
  */
 fun String.truncateCenter(count: Int, replacement: String = "..."): String {
-    if (length <= count)
+    if (length <= count) {
         return this
+    }
 
     val pieceLength: Int = floor((count - replacement.length).div(2.0)).toInt()
 
@@ -76,7 +75,7 @@ fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
     if (substr.isBlank()) return list
 
     var i = -1
-    while(true) {
+    while (true) {
         i = indexOf(substr, i + 1, ignoreCase)
         when (i) {
             -1 -> return list

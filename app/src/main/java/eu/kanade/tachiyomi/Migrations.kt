@@ -70,8 +70,9 @@ object Migrations {
                     }
                 }
             }
-            if (oldVersion < 54)
+            if (oldVersion < 54) {
                 DownloadProvider(context).renameChapters()
+            }
             if (oldVersion < 62) {
                 LibraryPresenter.updateDB()
                 // Restore jobs after migrating from Evernote's job scheduler to WorkManager.

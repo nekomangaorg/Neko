@@ -122,8 +122,9 @@ class CategoryController(bundle: Bundle? = null) :
 
     override fun onCategoryRename(position: Int, newName: String): Boolean {
         val category = adapter?.getItem(position)?.category ?: return false
-        if (category.order == CREATE_CATEGORY_ORDER)
+        if (category.order == CREATE_CATEGORY_ORDER) {
             return (presenter.createCategory(newName))
+        }
         return (presenter.renameCategory(category, newName))
     }
 
@@ -185,6 +186,7 @@ class CategoryController(bundle: Bundle? = null) :
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int): Boolean {
         return toPosition > 0
     }
+
     /**
      * Called from the presenter when a category with the given name already exists.
      */

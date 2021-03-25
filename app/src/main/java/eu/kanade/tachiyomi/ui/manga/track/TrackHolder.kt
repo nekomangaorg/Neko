@@ -72,9 +72,9 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             date_group.visibleIf(item.service.supportsReadingDates)
             if (item.service.supportsReadingDates) {
                 track_start_date.text =
-                        if (track.started_reading_date != 0L) dateFormat.format(track.started_reading_date) else "-"
+                    if (track.started_reading_date != 0L) dateFormat.format(track.started_reading_date) else "-"
                 track_finish_date.text =
-                        if (track.finished_reading_date != 0L) dateFormat.format(track.finished_reading_date) else "-"
+                    if (track.finished_reading_date != 0L) dateFormat.format(track.finished_reading_date) else "-"
             } else {
             }
         }

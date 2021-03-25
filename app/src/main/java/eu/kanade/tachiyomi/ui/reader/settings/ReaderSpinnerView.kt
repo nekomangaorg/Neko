@@ -12,16 +12,14 @@ import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import kotlinx.android.synthetic.main.reader_preference.view.*
 
-
 class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
-
 
     private var entries = emptyList<String>()
     private var selectedPosition = 0
     private var pref: Preference<Int>? = null
     private var prefOffset = 0
-    private var popup:PopupMenu? = null
+    private var popup: PopupMenu? = null
 
     var onItemSelectedListener: ((Int) -> Unit)? = null
         set(value) {
@@ -159,7 +157,7 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun popup(): PopupMenu {
         val popup = PopupMenu(context, this, Gravity.END)
-        entries.forEachIndexed {  index, entry ->
+        entries.forEachIndexed { index, entry ->
             popup.menu.add(0, index, 0, entry)
         }
         popup.menu[selectedPosition].isCheckable = true

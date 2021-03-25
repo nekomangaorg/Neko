@@ -137,7 +137,7 @@ class SettingsLibraryController : SettingsController() {
 
                 preferences.libraryUpdateCategories().asImmediateFlow { list ->
                     val selectedCategories =
-                            list.mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
+                        list.mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
                             .sortedBy { it.order }
 
                     customSummary =

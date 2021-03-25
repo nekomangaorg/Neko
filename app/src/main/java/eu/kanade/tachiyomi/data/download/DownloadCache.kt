@@ -90,7 +90,6 @@ class DownloadCache(
         checkRenew()
 
         if (forceCheckFolder) {
-
             val source = sourceManager.get(manga.source) ?: return 0
             val mangaDir = provider.findMangaDir(manga, source)
 
@@ -173,7 +172,6 @@ class DownloadCache(
      */
     @Synchronized
     fun addChapter(chapterDirName: String, mangaUniFile: UniFile, manga: Manga) {
-
         val id = manga.id ?: return
         val files = mangaFiles[id]
         if (files == null) {

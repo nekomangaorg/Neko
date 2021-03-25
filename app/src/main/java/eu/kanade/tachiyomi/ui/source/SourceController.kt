@@ -38,7 +38,6 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.latest.LatestUpdatesController
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.spToPx
@@ -110,14 +109,14 @@ class SourceController :
     }
 
     override fun getTitle(): String? {
-        return if (showingExtensions)
+        return if (showingExtensions) {
             view?.context?.getString(
                 when (ext_bottom_sheet.tabs.selectedTabPosition) {
                     0 -> R.string.extensions
                     else -> R.string.source_migration
                 }
             )
-        else view?.context?.getString(R.string.sources)
+        } else view?.context?.getString(R.string.sources)
     }
 
     override fun createPresenter(): SourcePresenter {
@@ -203,14 +202,15 @@ class SourceController :
                     ) {
                         showingExtensions = state == BottomSheetBehavior.STATE_EXPANDED
                         setTitle()
-                        if (state == BottomSheetBehavior.STATE_EXPANDED)
+                        if (state == BottomSheetBehavior.STATE_EXPANDED) {
                             extBottomSheet.fetchOnlineExtensionsIfNeeded()
-                        else extBottomSheet.shouldCallApi = true
+                        } else extBottomSheet.shouldCallApi = true
                         activity?.invalidateOptionsMenu()
                     }
 
-                    retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED)
-                        RetainViewMode.RETAIN_DETACH else RetainViewMode.RELEASE_DETACH
+                    retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED) {
+                        RetainViewMode.RETAIN_DETACH
+                    } else RetainViewMode.RELEASE_DETACH
                     sheet_layout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                     sheet_layout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
                     setBottomSheetTabs(if (state == BottomSheetBehavior.STATE_COLLAPSED) 0f else 1f)
@@ -249,18 +249,21 @@ class SourceController :
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
                 unselectedColor,
-                progress),
+                progress
+            ),
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
                 selectedColor,
-                progress)
+                progress
+            )
         )
 
         ext_bottom_sheet.sheet_layout.backgroundTintList = ColorStateList.valueOf(
             ColorUtils.blendARGB(
                 bottomSheet.context.getResourceColor(R.attr.colorPrimaryVariant),
                 bottomSheet.context.getResourceColor(R.attr.colorSecondary),
-                progress)
+                progress
+            )
         )
     }
 
@@ -270,8 +273,9 @@ class SourceController :
         val pad = bottomBar.translationY - bottomBar.height
         val padding = max(
             (-pad).toInt(),
-            if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else
+            if (ext_bottom_sheet.sheetBehavior.isExpanded()) 0 else {
                 view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
+            }
         )
         shadow2.translationY = pad
         ext_bottom_sheet.sheetBehavior?.peekHeight = 58.spToPx + padding
@@ -479,9 +483,9 @@ class SourceController :
             // Initialize option to open catalogue settings.
             R.id.action_filter -> {
                 val controller =
-                    if (showingExtensions)
+                    if (showingExtensions) {
                         SettingsExtensionsController()
-                    else SettingsSourcesController()
+                    } else SettingsSourcesController()
                 router.pushController(
                     (RouterTransaction.with(controller)).popChangeHandler(
                         SettingsSourcesFadeChangeHandler()

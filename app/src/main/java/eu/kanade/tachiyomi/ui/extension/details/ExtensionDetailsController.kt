@@ -125,7 +125,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         screen.setShouldUseGeneratedIds(true)
         val extHeaderAdapter = ExtensionDetailsHeaderAdapter(presenter)
         extHeaderAdapter.setHasStableIds(true)
-        extension_prefs_recycler.adapter = ConcatAdapter(concatAdapterConfig,
+        extension_prefs_recycler.adapter = ConcatAdapter(
+            concatAdapterConfig,
             extHeaderAdapter,
             PreferenceGroupAdapter(screen)
         )
@@ -150,7 +151,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         super.onRestoreInstanceState(savedInstanceState)
         lastOpenPreferencePosition = savedInstanceState.get(LASTOPENPREFERENCE_KEY) as? Int
     }
-
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.extension_details, menu)
@@ -208,8 +208,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                         toggleSource(source, checked)
                         prefs.forEach { it.isVisible = checked }
                         true
-                    }
-                    else {
+                    } else {
                         coordinator.snack(context.getString(R.string._must_be_enabled_first, title), Snackbar.LENGTH_LONG) {
                             setAction(R.string.enable) {
                                 preferences.enabledLanguages() += source.lang
@@ -307,7 +306,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private fun Source.isEnabled(): Boolean {
         return id.toString() !in preferences.hiddenSources().get() && isLangEnabled()
     }
-
 
     private fun Source.isLangEnabled(langs: Set<String>? = null): Boolean {
         return (lang in langs ?: preferences.enabledLanguages().get())

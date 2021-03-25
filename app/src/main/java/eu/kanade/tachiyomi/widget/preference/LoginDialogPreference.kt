@@ -20,8 +20,8 @@ import rx.Subscription
 import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(
-        @StringRes private val usernameLabelRes: Int? = null,
-        bundle: Bundle? = null
+    @StringRes private val usernameLabelRes: Int? = null,
+    bundle: Bundle? = null
 ) :
     DialogController(bundle) {
 
@@ -48,7 +48,6 @@ abstract class LoginDialogPreference(
 
     fun onViewCreated(view: View) {
         v = view.apply {
-
             if (usernameLabelRes != null) {
                 username_input.hint = view.context.getString(usernameLabelRes)
             }

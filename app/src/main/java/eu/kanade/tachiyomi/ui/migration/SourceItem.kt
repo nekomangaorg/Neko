@@ -40,7 +40,6 @@ data class SourceItem(val source: Source, val header: SelectionHeader? = null) :
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-
         holder.bind(this)
     }
 }

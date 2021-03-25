@@ -40,7 +40,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -95,9 +94,9 @@ class RecentsController(bundle: Bundle? = null) :
     var headerHeight = 0
 
     override fun getTitle(): String? {
-        return if (showingDownloads)
+        return if (showingDownloads) {
             resources?.getString(R.string.download_queue)
-        else resources?.getString(R.string.recents)
+        } else resources?.getString(R.string.recents)
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
@@ -243,8 +242,9 @@ class RecentsController(bundle: Bundle? = null) :
         val pad = bottomBar.translationY - bottomBar.height
         val padding = max(
             (-pad).toInt(),
-            if (dl_bottom_sheet.sheetBehavior.isExpanded()) 0 else
+            if (dl_bottom_sheet.sheetBehavior.isExpanded()) 0 else {
                 view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
+            }
         )
         shadow2.translationY = pad
         dl_bottom_sheet.sheetBehavior?.peekHeight = 48.spToPx + padding
@@ -303,8 +303,9 @@ class RecentsController(bundle: Bundle? = null) :
         swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.updateItems(recents)
         adapter.removeAllScrollableHeaders()
-        if (presenter.viewType > 0)
+        if (presenter.viewType > 0) {
             adapter.addScrollableHeader(presenter.generalHeader)
+        }
         if (lastChapterId != null) {
             refreshItem(lastChapterId ?: 0L)
             lastChapterId = null
@@ -380,8 +381,9 @@ class RecentsController(bundle: Bundle? = null) :
         val manga = item.mch.manga
         val history = item.mch.history
         val chapter = item.mch.chapter
-        if (history.id != null)
+        if (history.id != null) {
             RemoveHistoryDialog(this, manga, history, chapter).showDialog(router)
+        }
     }
 
     override fun removeHistory(manga: Manga, history: History, all: Boolean) {
@@ -476,7 +478,7 @@ class RecentsController(bundle: Bundle? = null) :
         setBottomPadding()
     }
 
-    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType ) {
+    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeEnded(handler, type)
         if (type == ControllerChangeType.POP_ENTER) setBottomPadding()
     }
@@ -484,8 +486,9 @@ class RecentsController(bundle: Bundle? = null) :
     fun hasQueue() = presenter.downloadManager.hasQueue()
 
     override fun showSheet() {
-        if (dl_bottom_sheet.sheetBehavior?.isHideable == false || hasQueue())
+        if (dl_bottom_sheet.sheetBehavior?.isHideable == false || hasQueue()) {
             dl_bottom_sheet.sheetBehavior?.expand()
+        }
     }
 
     override fun toggleSheet() {
@@ -498,13 +501,15 @@ class RecentsController(bundle: Bundle? = null) :
     override fun expandSearch() {
         if (showingDownloads) {
             dl_bottom_sheet.dismiss()
-        } else
+        } else {
             activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (showingDownloads)
+        if (showingDownloads) {
             return dl_bottom_sheet.onOptionsItemSelected(item)
+        }
         when (item.itemId) {
             R.id.action_group_all, R.id.action_ungroup_all, R.id.action_only_history,
             R.id.action_only_updates -> {
@@ -516,8 +521,9 @@ class RecentsController(bundle: Bundle? = null) :
                         else -> 0
                     }
                 )
-                if (item.itemId == R.id.action_only_history)
+                if (item.itemId == R.id.action_only_history) {
                     activity?.toast(R.string.press_and_hold_to_reset_history, Toast.LENGTH_LONG)
+                }
                 activity?.invalidateOptionsMenu()
             }
         }

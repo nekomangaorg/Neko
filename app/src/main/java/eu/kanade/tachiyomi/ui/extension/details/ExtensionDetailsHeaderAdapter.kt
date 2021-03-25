@@ -45,7 +45,7 @@ class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPrese
             view.extension_pkg.text = extension.pkgName
 
             view.extension_uninstall_button.setOnClickListener {
-                 presenter.uninstallExtension()
+                presenter.uninstallExtension()
             }
 
             if (extension.isObsolete) {

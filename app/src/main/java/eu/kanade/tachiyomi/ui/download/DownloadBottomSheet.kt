@@ -202,8 +202,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
                 val adapter = adapter ?: return false
                 val items = adapter.currentItems.sortedBy { it.download.chapter.date_upload }
                     .toMutableList()
-                if (item.itemId == R.id.newest)
+                if (item.itemId == R.id.newest) {
                     items.reverse()
+                }
                 adapter.updateDataSet(items)
                 val downloads = items.mapNotNull { it.download }
                 presenter.reorder(downloads)
@@ -266,10 +267,11 @@ class DownloadBottomSheet @JvmOverloads constructor(
                 val items = adapter?.currentItems?.toMutableList() ?: return
                 val item = items[position]
                 items.remove(item)
-                if (menuItem.itemId == R.id.move_to_top)
+                if (menuItem.itemId == R.id.move_to_top) {
                     items.add(0, item)
-                else
+                } else {
                     items.add(item)
+                }
                 adapter?.updateDataSet(items)
                 val downloads = items.mapNotNull { it.download }
                 presenter.reorder(downloads)

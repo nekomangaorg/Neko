@@ -43,8 +43,9 @@ class MultiListMatPreference @JvmOverloads constructor(
         }
             .toIntArray()
         if (allSelectionRes != null && default.isEmpty()) default = intArrayOf(0)
-        val items = if (allSelectionRes != null)
-            (listOf(context.getString(allSelectionRes!!)) + entries) else entries
+        val items = if (allSelectionRes != null) {
+            (listOf(context.getString(allSelectionRes!!)) + entries)
+        } else entries
         positiveButton(android.R.string.ok) {
             val pos = mutableListOf<Int>()
             for (i in items.indices)

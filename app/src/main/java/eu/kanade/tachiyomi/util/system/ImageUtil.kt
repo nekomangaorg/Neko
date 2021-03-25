@@ -37,8 +37,9 @@ object ImageUtil {
                 stream.read(bytes, 0, bytes.size)
             }
 
-            if (length == -1)
+            if (length == -1) {
                 return null
+            }
 
             if (bytes.compareWith(charByteArrayOf(0xFF, 0xD8, 0xFF))) {
                 return ImageType.JPG
@@ -58,11 +59,13 @@ object ImageUtil {
     }
 
     fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, context: Context): Drawable {
-        val backgroundColor = if (alwaysUseWhite) Color.WHITE else
+        val backgroundColor = if (alwaysUseWhite) Color.WHITE else {
             context.getResourceColor(R.attr.readerBackground)
+        }
         if (image == null) return ColorDrawable(backgroundColor)
-        if (image.width < 50 || image.height < 50)
+        if (image.width < 50 || image.height < 50) {
             return ColorDrawable(backgroundColor)
+        }
         val top = 5
         val bot = image.height - 5
         val left = (image.width * 0.0275).toInt()
@@ -88,15 +91,17 @@ object ImageUtil {
             !isWhite(image.getPixel(right, bot)) && pixelIsClose(image.getPixel(right, bot), image.getPixel(midX, bot)) &&
             !isWhite(image.getPixel(midX, bot)) && pixelIsClose(image.getPixel(midX, bot), image.getPixel(left, bot)) &&
             !isWhite(image.getPixel(left, bot)) && pixelIsClose(image.getPixel(left, bot), image.getPixel(left, top))
-        )
+        ) {
             return ColorDrawable(image.getPixel(left, top))
+        }
 
         if (isWhite(image.getPixel(left, top)).toInt() +
             isWhite(image.getPixel(right, top)).toInt() +
             isWhite(image.getPixel(left, bot)).toInt() +
             isWhite(image.getPixel(right, bot)).toInt() > 2
-        )
+        ) {
             darkBG = false
+        }
 
         var blackPixel = when {
             topLeftIsDark -> image.getPixel(left, top)
@@ -126,52 +131,61 @@ object ImageUtil {
                 if (isWhite(pixel)) {
                     whitePixelsStreak++
                     whitePixels++
-                    if (notOffset)
+                    if (notOffset) {
                         overallWhitePixels++
-                    if (whitePixelsStreak > 14)
+                    }
+                    if (whitePixelsStreak > 14) {
                         whiteStrak = true
-                    if (whitePixelsStreak > 6 && whitePixelsStreak >= index - 1)
+                    }
+                    if (whitePixelsStreak > 6 && whitePixelsStreak >= index - 1) {
                         topWhiteStreak = whitePixelsStreak
+                    }
                 } else {
                     whitePixelsStreak = 0
                     if (isDark(pixel) && isDark(pixelOff)) {
                         blackPixels++
-                        if (notOffset)
+                        if (notOffset) {
                             overallBlackPixels++
+                        }
                         blackPixelsStreak++
-                        if (blackPixelsStreak >= 14)
+                        if (blackPixelsStreak >= 14) {
                             blackStreak = true
+                        }
                         continue
                     }
                 }
-                if (blackPixelsStreak > 6 && blackPixelsStreak >= index - 1)
+                if (blackPixelsStreak > 6 && blackPixelsStreak >= index - 1) {
                     topBlackStreak = blackPixelsStreak
+                }
                 blackPixelsStreak = 0
             }
-            if (blackPixelsStreak > 6)
+            if (blackPixelsStreak > 6) {
                 botBlackStreak = blackPixelsStreak
-            else if (whitePixelsStreak > 6)
+            } else if (whitePixelsStreak > 6) {
                 botWhiteStreak = whitePixelsStreak
+            }
             when {
                 blackPixels > 22 -> {
-                    if (x == right || x == right + offsetX)
+                    if (x == right || x == right + offsetX) {
                         blackPixel = when {
                             topRightIsDark -> image.getPixel(right, top)
                             botRightIsDark -> image.getPixel(right, bot)
                             else -> blackPixel
                         }
+                    }
                     darkBG = true
                     overallWhitePixels = 0
                     break@outer
                 }
                 blackStreak -> {
                     darkBG = true
-                    if (x == right || x == right + offsetX)
+                    if (x == right || x == right + offsetX) {
                         blackPixel = when {
                             topRightIsDark -> image.getPixel(right, top)
                             botRightIsDark -> image.getPixel(right, bot)
                             else -> blackPixel
                         }
+                    }
                     if (blackPixels > 18) {
                         overallWhitePixels = 0
                         break@outer
@@ -183,10 +197,12 @@ object ImageUtil {
 
         val topIsBlackStreak = topBlackStreak > topWhiteStreak
         val bottomIsBlackStreak = botBlackStreak > botWhiteStreak
-        if (overallWhitePixels > 9 && overallWhitePixels > overallBlackPixels)
+        if (overallWhitePixels > 9 && overallWhitePixels > overallBlackPixels) {
             darkBG = false
-        if (topIsBlackStreak && bottomIsBlackStreak)
+        }
+        if (topIsBlackStreak && bottomIsBlackStreak) {
             darkBG = true
+        }
         if (darkBG) {
             return if (isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
@@ -203,21 +219,22 @@ object ImageUtil {
                 isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top)) &&
                 (topMidIsDark || overallBlackPixels > 9)
             )
-        )
+        ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
             )
-        else if (bottomIsBlackStreak || (
+        } else if (bottomIsBlackStreak || (
             botLeftIsDark && botRightIsDark &&
                 isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot)) &&
                 (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
             )
-        )
+        ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
             )
+        }
         return ColorDrawable(backgroundColor)
     }
 

@@ -90,8 +90,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         list.add(unread)
         list.add(downloaded)
         list.add(completed)
-        if (hasTracking)
+        if (hasTracking) {
             tracked?.let { list.add(it) }
+        }
         list
     }
 
@@ -152,8 +153,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         val activeFilters = hasActiveFiltersFromPref()
-        if (activeFilters && sheetBehavior.isHidden() && sheetBehavior?.skipCollapsed == false)
+        if (activeFilters && sheetBehavior.isHidden() && sheetBehavior?.skipCollapsed == false) {
             sheetBehavior?.collapse()
+        }
 
         post {
             updateRootPadding(
@@ -218,10 +220,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             ?: if (sheetBehavior.isExpanded()) 1f else 0f
         val percent = (trueProgress * 100).roundToInt()
         val value = (percent * (maxHeight - minHeight) / 100) + minHeight
-        if (trueProgress >= 0)
+        if (trueProgress >= 0) {
             libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
-        else
+        } else {
             libraryRecyler?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
+        }
     }
 
     fun hasActiveFilters() = filterItems.any { it.isActivated }
@@ -235,7 +238,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun createTags() {
-
         downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
         downloaded.setup(this, R.string.downloaded, R.string.not_downloaded)
 
@@ -372,8 +374,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun manageFilterPopup() {
         val recycler = RecyclerView(context)
-        if (filterOrder.count() != 6)
+        if (filterOrder.count() != 6) {
             filterOrder = "urdcmt"
+        }
         val adapter = FlexibleAdapter(
             filterOrder.toCharArray().map(::ManageFilterItem),
             this,
@@ -493,8 +496,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private fun reSortViews() {
         filter_layout.removeAllViews()
-        if (filterItems.any { it.isActivated })
+        if (filterItems.any { it.isActivated }) {
             filter_layout.addView(clearButton)
+        }
         filterItems.filter { it.isActivated }.forEach {
             filter_layout.addView(it)
         }

@@ -29,6 +29,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     init {
         setDisplayHeadersAtStartUp(true)
     }
+
     /**
      * The list of manga in this category.
      */

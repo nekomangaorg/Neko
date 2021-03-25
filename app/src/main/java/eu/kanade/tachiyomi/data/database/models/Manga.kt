@@ -105,17 +105,17 @@ interface Manga : SManga {
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true || isWebtoonSource(sourceName)
-        )
+        ) {
             ReaderActivity.WEBTOON
-        else if (currentTags?.any
+        } else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true || (isComicSource(sourceName) && !sourceName.contains("tapas", true)) ||
             sourceName.contains("manhua", true)
-        )
+        ) {
             ReaderActivity.LEFT_TO_RIGHT
-        else 0
+        } else 0
     }
 
     fun isMangaTag(tag: String): Boolean {
@@ -127,7 +127,7 @@ interface Manga : SManga {
     }
 
     fun isManhwaTag(tag: String): Boolean {
-        return tag in listOf("long strip", "manhwa", "манхва", "kr")  || tag.startsWith("korean")
+        return tag in listOf("long strip", "manhwa", "манхва", "kr") || tag.startsWith("korean")
     }
 
     fun isComicTag(tag: String): Boolean {

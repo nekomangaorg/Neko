@@ -268,7 +268,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                     container: ViewGroup,
                     handler: ControllerChangeHandler
                 ) {
-
                     syncActivityViewWithController(to, from, isPush)
                     appbar.y = 0f
                     bottom_nav.translationY = 0f
@@ -318,9 +317,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
             // basically if in landscape on a phone
             // For lollipop, draw opaque nav bar
-            if (insets.hasSideNavBar())
+            if (insets.hasSideNavBar()) {
                 Color.BLACK
-            else Color.argb(179, 0, 0, 0)
+            } else Color.argb(179, 0, 0, 0)
         }
         // if the android q+ device has gesture nav, transparent nav bar
         // this is here in case some crazy with a notch uses landscape
@@ -515,10 +514,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             else !router.handleBack()
         ) {
             if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
-                startingTab() != bottom_nav?.selectedItemId) {
+                startingTab() != bottom_nav?.selectedItemId
+            ) {
                 goToStartingTab()
-            }
-            else {
+            } else {
                 if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
                     setStartingTab()
                 }
@@ -529,13 +528,17 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
     }
 
     private fun setStartingTab() {
-        if (bottom_nav?.selectedItemId != R.id.nav_browse
-            && bottom_nav?.selectedItemId != null
-            && preferences.startingTab().get() >= 0)
-            preferences.startingTab().set(when (bottom_nav?.selectedItemId) {
-                R.id.nav_library -> 0
-                else -> 1
-            })
+        if (bottom_nav?.selectedItemId != R.id.nav_browse &&
+            bottom_nav?.selectedItemId != null &&
+            preferences.startingTab().get() >= 0
+        ) {
+            preferences.startingTab().set(
+                when (bottom_nav?.selectedItemId) {
+                    R.id.nav_library -> 0
+                    else -> 1
+                }
+            )
+        }
     }
 
     @IdRes

@@ -406,13 +406,15 @@ open class BrowseSourcePresenter(
      */
     fun updateMangaCategories(manga: Manga, selectedCategories: List<Category>) {
         if (selectedCategories.isNotEmpty()) {
-            if (!manga.favorite)
+            if (!manga.favorite) {
                 changeMangaFavorite(manga)
+            }
 
             moveMangaToCategories(manga, selectedCategories.filter { it.id != 0 })
         } else {
-            if (!manga.favorite)
+            if (!manga.favorite) {
                 changeMangaFavorite(manga)
+            }
         }
     }
 }

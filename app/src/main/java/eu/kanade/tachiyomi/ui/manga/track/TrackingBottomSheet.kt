@@ -1,8 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
 import android.content.Intent
-import android.graphics.Color
-import android.graphics.drawable.ColorDrawable
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
@@ -190,11 +188,13 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         if (item.track == null) return
 
         val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Start)
-        SetTrackReadingDatesDialog(controller,
+        SetTrackReadingDatesDialog(
+            controller,
             this,
             SetTrackReadingDatesDialog.ReadingDate.Start,
             item,
-            suggestedDate)
+            suggestedDate
+        )
             .showDialog(controller.router)
     }
 
@@ -203,11 +203,13 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         if (item.track == null) return
 
         val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
-        SetTrackReadingDatesDialog(controller,
+        SetTrackReadingDatesDialog(
+            controller,
             this,
             SetTrackReadingDatesDialog.ReadingDate.Finish,
             item,
-            suggestedDate)
+            suggestedDate
+        )
             .showDialog(controller.router)
     }
 
@@ -257,5 +259,4 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     private companion object {
         const val TAG_SEARCH_CONTROLLER = "track_search_controller"
     }
-
 }

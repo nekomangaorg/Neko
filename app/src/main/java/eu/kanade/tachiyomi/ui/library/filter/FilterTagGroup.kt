@@ -84,8 +84,9 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     private fun toggleButton(index: Int, callBack: Boolean = true) {
         if (index < 0 || itemCount == 0 ||
             (isActivated && index != buttons.indexOfFirst { it.isActivated })
-        )
+        ) {
             return
+        }
         if (callBack) {
             val transition = androidx.transition.AutoTransition()
             transition.duration = 150

@@ -69,8 +69,9 @@ class ExtensionManager(
     }
 
     fun removeListener(listener: ExtensionsChangedListener) {
-        if (this.listener == listener)
+        if (this.listener == listener) {
             this.listener = null
+        }
     }
 
     fun getAppIconForSource(source: Source): Drawable? {

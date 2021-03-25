@@ -250,8 +250,9 @@ fun BottomSheetDialog.setEdgeToEdge(
     window?.navigationBarColor = activity.window.navigationBarColor
     val isLight = (activity.window?.decorView?.systemUiVisibility ?: 0) and View
         .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR == View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isLight)
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isLight) {
         window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+    }
     window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
         false
     window?.findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows =

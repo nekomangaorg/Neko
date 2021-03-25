@@ -31,10 +31,11 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
             if (interval > 0) {
                 val restrictions = preferences.libraryUpdateRestriction()!!
                 val acRestriction = "ac" in restrictions
-                val wifiRestriction = if ("wifi" in restrictions)
+                val wifiRestriction = if ("wifi" in restrictions) {
                     NetworkType.UNMETERED
-                else
+                } else {
                     NetworkType.CONNECTED
+                }
 
                 val constraints = Constraints.Builder()
                     .setRequiredNetworkType(wifiRestriction)

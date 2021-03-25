@@ -31,7 +31,6 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
     }
 
     override fun checkLogin() {
-
         v?.apply {
             login.apply {
                 progressType = ProgressType.INDETERMINATE

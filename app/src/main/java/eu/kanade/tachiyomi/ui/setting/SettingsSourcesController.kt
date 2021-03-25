@@ -95,7 +95,6 @@ class SettingsSourcesController : SettingsController() {
         val hiddenCatalogues = preferences.hiddenSources().get()
 
         val selectAllPreference = CheckBoxPreference(group.context).apply {
-
             title = "\t\t${context.getString(R.string.all_sources)}"
             key = "all_${sources.first().lang}"
             isPersistent = false
@@ -105,10 +104,11 @@ class SettingsSourcesController : SettingsController() {
             onChange { newValue ->
                 val checked = newValue as Boolean
                 val current = preferences.hiddenSources().get().toMutableSet()
-                if (checked)
+                if (checked) {
                     current.removeAll(sources.map { it.id.toString() })
-                else
+                } else {
                     current.addAll(sources.map { it.id.toString() })
+                }
                 preferences.hiddenSources().set(current)
                 group.removeAll()
                 addLanguageSources(group, sortedSources(sources))

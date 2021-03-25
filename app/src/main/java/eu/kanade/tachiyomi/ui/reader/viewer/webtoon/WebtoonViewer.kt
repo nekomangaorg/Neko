@@ -98,7 +98,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 }
             }
         )
-        recycler.tapListener =  f@{ event ->
+        recycler.tapListener = f@{ event ->
             if (!config.tappingEnabled) {
                 activity.toggleMenu()
                 return@f

@@ -62,17 +62,17 @@ internal class ExtensionGithubApi {
                 libVersion >= ExtensionLoader.LIB_VERSION_MIN && libVersion <= ExtensionLoader.LIB_VERSION_MAX
             }
             .map { element ->
-            val name = element.jsonObject["name"]!!.jsonPrimitive.content.substringAfter("Tachiyomi: ")
-            val pkgName = element.jsonObject["pkg"]!!.jsonPrimitive.content
-            val apkName = element.jsonObject["apk"]!!.jsonPrimitive.content
-            val versionName = element.jsonObject["version"]!!.jsonPrimitive.content
-            val versionCode = element.jsonObject["code"]!!.jsonPrimitive.int
-            val lang = element.jsonObject["lang"]!!.jsonPrimitive.content
-            val nsfw = element.jsonObject["nsfw"]!!.jsonPrimitive.int == 1
-            val icon = "${REPO_URL_PREFIX}icon/${apkName.replace(".apk", ".png")}"
+                val name = element.jsonObject["name"]!!.jsonPrimitive.content.substringAfter("Tachiyomi: ")
+                val pkgName = element.jsonObject["pkg"]!!.jsonPrimitive.content
+                val apkName = element.jsonObject["apk"]!!.jsonPrimitive.content
+                val versionName = element.jsonObject["version"]!!.jsonPrimitive.content
+                val versionCode = element.jsonObject["code"]!!.jsonPrimitive.int
+                val lang = element.jsonObject["lang"]!!.jsonPrimitive.content
+                val nsfw = element.jsonObject["nsfw"]!!.jsonPrimitive.int == 1
+                val icon = "${REPO_URL_PREFIX}icon/${apkName.replace(".apk", ".png")}"
 
-            Extension.Available(name, pkgName, versionName, versionCode, lang, nsfw, apkName, icon)
-        }
+                Extension.Available(name, pkgName, versionName, versionCode, lang, nsfw, apkName, icon)
+            }
     }
 
     fun getApkUrl(extension: Extension.Available): String {

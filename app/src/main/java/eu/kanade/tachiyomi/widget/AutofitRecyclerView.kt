@@ -15,8 +15,9 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     var columnWidth = -1f
         set(value) {
             field = value
-            if (measuredWidth > 0)
+            if (measuredWidth > 0) {
                 setSpan(true)
+            }
         }
 
     var spanCount = 0

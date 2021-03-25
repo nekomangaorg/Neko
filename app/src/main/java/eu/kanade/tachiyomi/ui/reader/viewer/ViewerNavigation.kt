@@ -17,8 +17,7 @@ abstract class ViewerNavigation {
         fun directionalRegion(LTR: Boolean): NavigationRegion {
             return if (this === LEFT || this === RIGHT) {
                 if (if (LTR) this === LEFT else this === RIGHT) NEXT else PREV
-            }
-            else this
+            } else this
         }
     }
 

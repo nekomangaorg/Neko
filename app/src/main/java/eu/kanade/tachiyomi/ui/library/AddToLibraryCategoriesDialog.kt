@@ -41,7 +41,6 @@ class AddToLibraryCategoriesDialog<T>(bundle: Bundle? = null) :
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-
         return MaterialDialog(activity!!).title(R.string.add_to_library).message(R.string.add_to_categories)
             .listItemsMultiChoice(
                 items = categories.map { it.name },

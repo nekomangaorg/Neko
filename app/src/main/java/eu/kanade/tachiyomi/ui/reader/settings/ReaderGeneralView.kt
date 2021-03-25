@@ -4,9 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
-import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 import kotlinx.android.synthetic.main.reader_general_layout.view.*
 
 class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :

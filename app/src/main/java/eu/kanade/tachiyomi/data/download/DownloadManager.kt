@@ -110,10 +110,11 @@ class DownloadManager(val context: Context) {
         queue.add(0, download)
         reorderQueue(queue)
         if (isPaused()) {
-            if (DownloadService.isRunning(context))
+            if (DownloadService.isRunning(context)) {
                 downloader.start()
-            else
+            } else {
                 DownloadService.start(context)
+            }
         }
     }
 

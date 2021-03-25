@@ -69,8 +69,9 @@ class EditMangaDialog : DialogController {
         val isLocal = manga.source == LocalSource.ID
 
         if (isLocal) {
-            if (manga.title != manga.url)
+            if (manga.title != manga.url) {
                 view.title.append(manga.title)
+            }
             view.title.hint = "${resources?.getString(R.string.title)}: ${manga.url}"
             view.manga_author.append(manga.author ?: "")
             view.manga_artist.append(manga.artist ?: "")

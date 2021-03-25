@@ -46,10 +46,11 @@ class LibraryItem(
         get() = preferences.hideStartReadingButton().getOrDefault()
 
     override fun getLayoutRes(): Int {
-        return if (libraryLayout == 0 || manga.isBlank())
+        return if (libraryLayout == 0 || manga.isBlank()) {
             R.layout.manga_list_item
-        else
+        } else {
             R.layout.manga_grid_item
+        }
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
@@ -141,11 +142,13 @@ class LibraryItem(
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
-        if (manga.isBlank() && manga.title.isBlank())
+        if (manga.isBlank() && manga.title.isBlank()) {
             return constraint.isEmpty()
+        }
         val sourceManager by injectLazy<SourceManager>()
-        val sourceName = if (manga.source == 0L) "Local" else
+        val sourceName = if (manga.source == 0L) "Local" else {
             sourceManager.getOrStub(manga.source).name
+        }
         return manga.title.contains(constraint, true) ||
             (manga.author?.contains(constraint, true) ?: false) ||
             (manga.artist?.contains(constraint, true) ?: false) ||
@@ -159,14 +162,15 @@ class LibraryItem(
     @SuppressLint("DefaultLocale")
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
-        return if (tag.startsWith("-"))
+        return if (tag.startsWith("-")) {
             genres?.find {
                 it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
             } == null
-        else
+        } else {
             genres?.find {
                 it.trim().toLowerCase() == tag.toLowerCase()
             } != null
+        }
     }
 
     override fun equals(other: Any?): Boolean {

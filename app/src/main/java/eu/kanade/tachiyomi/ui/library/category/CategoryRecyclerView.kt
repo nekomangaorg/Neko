@@ -47,8 +47,9 @@ class CategoryRecyclerView @JvmOverloads constructor(
                 }
                 )
         fastAdapter.onClickListener = { _, _, item, _ ->
-            if (item.category.id != -1)
+            if (item.category.id != -1) {
                 onCategoryClicked(item.category.order)
+            }
             true
         }
     }

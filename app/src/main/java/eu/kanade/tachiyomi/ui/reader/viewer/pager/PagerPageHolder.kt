@@ -340,7 +340,6 @@ class PagerPageHolder(
     @SuppressLint("PrivateResource")
     private fun createProgressBar(): ReaderProgressBar {
         return ReaderProgressBar(context, null).apply {
-
             val size = 48.dpToPx
             layoutParams = LayoutParams(size, size).apply {
                 gravity = Gravity.CENTER

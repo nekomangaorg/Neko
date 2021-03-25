@@ -308,10 +308,12 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         }
 
         override fun getPageTitle(position: Int): CharSequence {
-            return context.getString(when (position) {
-                0 -> R.string.extensions
-                else -> R.string.migration
-            })
+            return context.getString(
+                when (position) {
+                    0 -> R.string.extensions
+                    else -> R.string.migration
+                }
+            )
         }
     }
 }

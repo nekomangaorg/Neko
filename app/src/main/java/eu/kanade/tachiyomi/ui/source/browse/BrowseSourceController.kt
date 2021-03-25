@@ -71,11 +71,13 @@ open class BrowseSourceController(bundle: Bundle) :
         Bundle().apply {
             putLong(SOURCE_ID_KEY, source.id)
 
-            if (searchQuery != null)
+            if (searchQuery != null) {
                 putString(SEARCH_QUERY_KEY, searchQuery)
+            }
 
-            if (smartSearchConfig != null)
+            if (smartSearchConfig != null) {
                 putParcelable(SMART_SEARCH_CONFIG_KEY, smartSearchConfig)
+            }
         }
     )
 
@@ -206,10 +208,11 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (dy <= 0)
+                    if (dy <= 0) {
                         fab.extend()
-                    else
+                    } else {
                         fab.shrink()
+                    }
                 }
             }
         )
@@ -260,10 +263,11 @@ open class BrowseSourceController(bundle: Bundle) :
 
         // Show next display mode
         menu.findItem(R.id.action_display_mode).apply {
-            val icon = if (presenter.isListMode)
+            val icon = if (presenter.isListMode) {
                 R.drawable.ic_view_module_24dp
-            else
+            } else {
                 R.drawable.ic_view_list_24dp
+            }
             setIcon(icon)
         }
     }
@@ -367,8 +371,9 @@ open class BrowseSourceController(bundle: Bundle) :
      */
     private fun searchWithQuery(newQuery: String) {
         // If text didn't change, do nothing
-        if (presenter.query == newQuery)
+        if (presenter.query == newQuery) {
             return
+        }
 
         showProgressBar()
         adapter?.clear()
@@ -407,7 +412,6 @@ open class BrowseSourceController(bundle: Bundle) :
 
         val message = getErrorMessage(error)
         val retryAction = View.OnClickListener {
-
             // If not the first page, show bottom progress bar.
             if (adapter.mainItemCount > 0 && progressItem != null) {
                 adapter.addScrollableFooterWithDelay(progressItem!!, 0, true)

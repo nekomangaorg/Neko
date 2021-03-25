@@ -469,7 +469,6 @@ class Downloader(
         tmpDir: UniFile,
         dirname: String
     ) {
-
         // Ensure that the chapter folder has all the images.
         val downloadedImages = tmpDir.listFiles().orEmpty().filterNot { it.name!!.endsWith(".tmp") }
 

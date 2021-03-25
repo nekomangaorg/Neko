@@ -186,9 +186,7 @@ class SettingsAdvancedController : SettingsController() {
 
     class CleanupDownloadsDialogController() : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-
             return MaterialDialog(activity!!).show {
-
                 title(R.string.clean_up_downloaded_chapters)
                     .listItemsMultiChoice(R.array.clean_up_downloads, disabledIndices = intArrayOf(0), initialSelection = intArrayOf(0, 1, 2)) { dialog, selections, items ->
                         val deleteRead = selections.contains(1)

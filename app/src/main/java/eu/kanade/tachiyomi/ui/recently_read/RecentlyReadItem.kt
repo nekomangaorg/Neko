@@ -24,7 +24,6 @@ class RecentlyReadItem(val mch: MangaChapterHistory) : AbstractFlexibleItem<Rece
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-
         holder.bind(mch)
     }
 

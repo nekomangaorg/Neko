@@ -1,22 +1,19 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.view.View
-import androidx.core.widget.NestedScrollView
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.library.display.LibraryBadgesView
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 import kotlinx.android.synthetic.main.reader_activity.*
 import kotlinx.android.synthetic.main.reader_color_filter.view.*
 import kotlinx.android.synthetic.main.recycler_with_scroller.view.*
 import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
-class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity): TabbedBottomSheetDialog(
+class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBottomSheetDialog(
     readerActivity
 ) {
     private val generalView: ReaderGeneralView = View.inflate(

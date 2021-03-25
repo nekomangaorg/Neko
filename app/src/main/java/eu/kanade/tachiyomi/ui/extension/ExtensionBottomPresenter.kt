@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SelectionHeader
 import eu.kanade.tachiyomi.ui.migration.SourceItem
-import eu.kanade.tachiyomi.util.lang.combineLatest
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
@@ -26,8 +25,6 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Observable
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -76,14 +73,15 @@ class ExtensionBottomPresenter(
             val migrationJob = async {
                 val favs = db.getFavoriteMangas().executeOnIO()
                 sourceItems = findSourcesWithManga(favs)
-                mangaItems = HashMap(sourceItems.associate {
-                    it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
-                })
+                mangaItems = HashMap(
+                    sourceItems.associate {
+                        it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
+                    }
+                )
                 withContext(Dispatchers.Main) {
                     if (selectedSource != null) {
                         bottomSheet.setMigrationManga(mangaItems[selectedSource])
-                    }
-                    else {
+                    } else {
                         bottomSheet.setMigrationSources(sourceItems)
                     }
                 }
@@ -125,14 +123,15 @@ class ExtensionBottomPresenter(
         scope.launch {
             val favs = db.getFavoriteMangas().executeOnIO()
             sourceItems = findSourcesWithManga(favs)
-            mangaItems = HashMap(sourceItems.associate {
-                it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
-            })
+            mangaItems = HashMap(
+                sourceItems.associate {
+                    it.source.id to this@ExtensionBottomPresenter.libraryToMigrationItem(favs, it.source.id)
+                }
+            )
             withContext(Dispatchers.Main) {
                 if (selectedSource != null) {
                     bottomSheet.setMigrationManga(mangaItems[selectedSource])
-                }
-                else {
+                } else {
                     bottomSheet.setMigrationSources(sourceItems)
                 }
             }

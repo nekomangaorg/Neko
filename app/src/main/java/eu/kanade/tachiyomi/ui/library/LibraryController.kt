@@ -619,12 +619,11 @@ class LibraryController(
             (listOfYs.minOrNull() ?: filter_bottom_sheet.y) +
             hopperOffset
         if (view.height - insetBottom < category_hopper_frame.y) {
-            jumper_category_text.translationY = -(category_hopper_frame.y  - (view.height - insetBottom))
+            jumper_category_text.translationY = -(category_hopper_frame.y - (view.height - insetBottom))
         } else {
             jumper_category_text.translationY = 0f
         }
     }
-
 
     fun resetHopperY() {
         hopperOffset = 0f
@@ -821,10 +820,11 @@ class LibraryController(
             )
         }
         adapter.setItems(mangaMap)
-        if (recycler.itemAnimator == null)
+        if (recycler.itemAnimator == null) {
             recycler.post {
                 recycler.itemAnimator = DefaultItemAnimator()
             }
+        }
         singleCategory = presenter.categories.size <= 1
         showDropdown()
         progress.gone()
