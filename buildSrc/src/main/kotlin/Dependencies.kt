@@ -91,6 +91,7 @@ object Versions {
     const val viewStatePagerAdapter = "1.1.0"
     const val viewToolTip = "1.2.2"
     const val xlog = "1.6.1"
+    const val kotlinter = "3.4.0"
 }
 
 object LegacyPluginClassPath {
@@ -124,6 +125,7 @@ object Plugins {
     const val kotlinSerialization = "org.jetbrains.kotlin.plugin.serialization"
     val gradleVersions = PluginClass("com.github.ben-manes.versions", Versions.gradleVersions)
     val ktLint = PluginClass("org.jlleitschuh.gradle.ktlint", Versions.ktlint)
+    val kotlinter = PluginClass("org.jmailen.kotlinter", Versions.kotlinter)
 }
 
 data class PluginClass(val name: String, val version: String)
@@ -144,7 +146,7 @@ object BuildPluginsVersion {
     const val KOTLIN = "1.4.10"
     const val ANDROID_EXTENSIONS = "org.jetbrains.kotlin:kotlin-android-extensions:$KOTLIN"
     const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
-    const val KOTLINTER = "org.jmailen.gradle:kotlinter-gradle:3.0.2"
+    const val KOTLINTER = "3.3.0"
     const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
     const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.2"
     const val VERSIONS_PLUGIN = "0.28.0"

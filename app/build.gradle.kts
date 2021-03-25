@@ -264,8 +264,32 @@ dependencies {
     implementation("org.conscrypt:conscrypt-android:2.4.0")
 }
 
-tasks.preBuild {
-    dependsOn(tasks.ktlintFormat)
+
+
+tasks {
+    // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api(-markers)
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.freeCompilerArgs += listOf(
+            "-Xopt-in=kotlin.Experimental",
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
+            "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+        )
+    }
+
+    // Duplicating Hebrew string assets due to some locale code issues on different devices
+    val copyHebrewStrings = task("copyHebrewStrings", type = Copy::class) {
+        from("./src/main/res/values-he")
+        into("./src/main/res/values-iw")
+        include("**/*")
+    }
+
+    preBuild {
+        dependsOn(formatKotlin, copyHebrewStrings)
+    }
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {

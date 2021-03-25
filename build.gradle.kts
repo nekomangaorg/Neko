@@ -1,7 +1,5 @@
-import Versions.ktlint
-
 plugins {
-    id(Plugins.ktLint.name) version Plugins.ktLint.version
+    id(Plugins.kotlinter.name) version Plugins.kotlinter.version
     id(Plugins.gradleVersions.name) version Plugins.gradleVersions.version
 }
 allprojects {
@@ -15,22 +13,10 @@ allprojects {
 }
 
 subprojects {
-    apply(plugin = Plugins.ktLint.name)
-    ktlint {
-        debug.set(true)
-        verbose.set(true)
-        android.set(false)
-        outputToConsole.set(true)
-        ignoreFailures.set(true)
-        enableExperimentalRules.set(false)
-        reporters {
-            reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.CHECKSTYLE)
-            reporter(org.jlleitschuh.gradle.ktlint.reporter.ReporterType.JSON)
-        }
-        filter {
-            exclude("**/generated/**")
-            include("**/kotlin/**")
-        }
+    apply(plugin = Plugins.kotlinter.name)
+
+    kotlinter {
+        experimentalRules = true
     }
 }
 
