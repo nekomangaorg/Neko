@@ -296,8 +296,8 @@
     <string name="dark_blue">Biru gelap</string>
     <string name="finished_chapter">Selesai:</string>
     <string name="current_chapter">Saat ini:</string>
-    <string name="next_chapter">Selanjutnya:</string>
-    <string name="previous_chapter">Sebelumnya:</string>
+    <string name="next_title">Selanjutnya:</string>
+    <string name="previous_title">Sebelumnya:</string>
     <string name="theres_no_next_chapter">Tidak ada chapter lanjutannya</string>
     <string name="theres_no_previous_chapter">Tidak ada chapter sebelumnya</string>
     <string name="loading_pages">Memuat halaman…</string>

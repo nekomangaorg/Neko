@@ -292,14 +292,18 @@
     <string name="viewer_for_this_series">Viewer for this series</string>
     <string name="finished_chapter">Finished:</string>
     <string name="current_chapter">Current:</string>
-    <string name="next_chapter">Next:</string>
-    <string name="previous_chapter">Previous:</string>
+    <string name="next_title">Next:</string>
+    <string name="previous_title">Previous:</string>
     <string name="theres_no_next_chapter">There\'s no next chapter</string>
     <string name="theres_no_previous_chapter">There\'s no previous chapter</string>
     <string name="loading_pages">Loading pages…</string>
     <string name="failed_to_load_pages_">Failed to load pages: %1$s</string>
     <string name="reading_">Reading %1$s</string>
     <string name="webtoon_style">webtoon style</string>
+    <string name="next_page">Next page</string>
+    <string name="previous_page">Previous page</string>
+    <string name="next_chapter">Next page</string>
+    <string name="previous_chapter">Previous page</string>
 
     <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>

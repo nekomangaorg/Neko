@@ -274,8 +274,8 @@
     <string name="viewer_for_this_series">Lector per a aquesta sèrie</string>
     <string name="finished_chapter">Finalitzat:</string>
     <string name="current_chapter">Actual:</string>
-    <string name="next_chapter">Següent:</string>
-    <string name="previous_chapter">Anterior:</string>
+    <string name="next_title">Següent:</string>
+    <string name="previous_title">Anterior:</string>
     <string name="theres_no_next_chapter">No hi ha capítol següent</string>
     <string name="theres_no_previous_chapter">No hi ha capítol anterior</string>
     <string name="loading_pages">S\'estan carregant les pàgines…</string>

@@ -330,8 +330,8 @@
     <string name="common">Comune</string>
     <string name="finished_chapter">Finito:</string>
     <string name="current_chapter">Corrente:</string>
-    <string name="next_chapter">Prossimo:</string>
-    <string name="previous_chapter">Precedente:</string>
+    <string name="next_title">Prossimo:</string>
+    <string name="previous_title">Precedente:</string>
     <string name="theres_no_next_chapter">Nessun capitolo successivo</string>
     <string name="theres_no_previous_chapter">Nessun capitolo precedente</string>
     <string name="loading_pages">Caricamento pagine…</string>

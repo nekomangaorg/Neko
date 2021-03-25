@@ -272,8 +272,8 @@
     <string name="viewer_for_this_series">阅读模式</string>
     <string name="finished_chapter">已读完:</string>
     <string name="current_chapter">"当前: "</string>
-    <string name="next_chapter">下一章:</string>
-    <string name="previous_chapter">"上一章: "</string>
+    <string name="next_title">下一章:</string>
+    <string name="previous_title">"上一章: "</string>
     <string name="theres_no_next_chapter">下面没有啦</string>
     <string name="theres_no_previous_chapter">前面没有啦</string>
     <string name="loading_pages">页面加载中…</string>

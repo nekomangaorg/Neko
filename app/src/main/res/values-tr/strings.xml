@@ -297,8 +297,8 @@
     <string name="common">Genel</string>
     <string name="finished_chapter">Biten:</string>
     <string name="current_chapter">Şu anki:</string>
-    <string name="next_chapter">Sonraki:</string>
-    <string name="previous_chapter">Önceki:</string>
+    <string name="next_title">Sonraki:</string>
+    <string name="previous_title">Önceki:</string>
     <string name="theres_no_next_chapter">Sonraki bölüm yok</string>
     <string name="theres_no_previous_chapter">Önceki bölüm yok</string>
     <string name="loading_pages">Sayfalar yükleniyor…</string>

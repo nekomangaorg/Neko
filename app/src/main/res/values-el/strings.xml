@@ -272,8 +272,8 @@
     <string name="viewer_for_this_series">Αναγνώστης για αυτήν τη σειρά</string>
     <string name="finished_chapter">Διαβασμένο:</string>
     <string name="current_chapter">Τρέχον:</string>
-    <string name="next_chapter">Επόμενο:</string>
-    <string name="previous_chapter">Προηγούμενο:</string>
+    <string name="next_title">Επόμενο:</string>
+    <string name="previous_title">Προηγούμενο:</string>
     <string name="theres_no_next_chapter">Δεν υπάρχει επόμενο κεφάλαιο</string>
     <string name="theres_no_previous_chapter">Δεν υπάρχει προηγούμενο κεφάλαιο</string>
     <string name="loading_pages">Φόρτωση σελίδων…</string>

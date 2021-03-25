@@ -329,8 +329,8 @@ Assurez-vous que vous êtes connecté à des sources qui le demande avant de com
     <string name="rereading">Relecture</string>
     <string name="finished_chapter">A jour :</string>
     <string name="current_chapter">En cours :</string>
-    <string name="next_chapter">Suivant :</string>
-    <string name="previous_chapter">Précédent :</string>
+    <string name="next_title">Suivant :</string>
+    <string name="previous_title">Précédent :</string>
     <string name="theres_no_next_chapter">C\'était le dernier chapitre</string>
     <string name="theres_no_previous_chapter">Il n\'y a pas de chapitre précédent</string>
     <string name="loading_pages">Chargement des pages…</string>

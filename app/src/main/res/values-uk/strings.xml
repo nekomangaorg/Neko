@@ -272,8 +272,8 @@
     <string name="viewer_for_this_series">Відображення для цієї серії</string>
     <string name="finished_chapter">Завершено:</string>
     <string name="current_chapter">Поточна:</string>
-    <string name="next_chapter">Наступна:</string>
-    <string name="previous_chapter">Попередня:</string>
+    <string name="next_title">Наступна:</string>
+    <string name="previous_title">Попередня:</string>
     <string name="theres_no_next_chapter">Наступної частини немає</string>
     <string name="theres_no_previous_chapter">Попередньої частини немає</string>
     <string name="loading_pages">Завантаження сторінок…</string>

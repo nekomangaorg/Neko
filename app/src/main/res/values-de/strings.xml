@@ -271,8 +271,8 @@
     <string name="viewer_for_this_series">Leser dieser Serie</string>
     <string name="finished_chapter">Beendet:</string>
     <string name="current_chapter">Aktuell:</string>
-    <string name="next_chapter">Nächste:</string>
-    <string name="previous_chapter">Vorherige:</string>
+    <string name="next_title">Nächste:</string>
+    <string name="previous_title">Vorherige:</string>
     <string name="theres_no_next_chapter">Es gibt kein nächstes Kapitel</string>
     <string name="theres_no_previous_chapter">Es gibt kein vorheriges Kapitel</string>
     <string name="loading_pages">Lade Seiten…</string>

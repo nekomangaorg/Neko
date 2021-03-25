@@ -285,8 +285,8 @@
     <string name="viewer_for_this_series">Viewer para sa seryeng ito</string>
     <string name="finished_chapter">Natapos:</string>
     <string name="current_chapter">Kasalukuyan:</string>
-    <string name="next_chapter">Susunod:</string>
-    <string name="previous_chapter">Nakaraan:</string>
+    <string name="next_title">Susunod:</string>
+    <string name="previous_title">Nakaraan:</string>
     <string name="theres_no_next_chapter">Walang susunod na kabanata</string>
     <string name="theres_no_previous_chapter">Walang nakaraang kabanata</string>
     <string name="loading_pages">Kinakarga ang mga pahina…</string>

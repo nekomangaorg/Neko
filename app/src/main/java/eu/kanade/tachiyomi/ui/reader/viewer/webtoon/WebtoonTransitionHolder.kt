@@ -99,7 +99,7 @@ class WebtoonTransitionHolder(
                 setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
-                append(context.getString(R.string.next_chapter))
+                append(context.getString(R.string.next_title))
                 setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${nextChapter.chapter.name}\n\n")
             }
@@ -124,7 +124,7 @@ class WebtoonTransitionHolder(
                 setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
-                append(context.getString(R.string.previous_chapter))
+                append(context.getString(R.string.previous_title))
                 setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${prevChapter.chapter.name}\n\n")
             }

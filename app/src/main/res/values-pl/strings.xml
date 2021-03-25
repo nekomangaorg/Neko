@@ -282,8 +282,8 @@
     <string name="viewer_for_this_series">Widok dla tej serii</string>
     <string name="finished_chapter">Przeczytany:</string>
     <string name="current_chapter">Obecny:</string>
-    <string name="next_chapter">Następny:</string>
-    <string name="previous_chapter">Poprzedni:</string>
+    <string name="next_title">Następny:</string>
+    <string name="previous_title">Poprzedni:</string>
     <string name="theres_no_next_chapter">Brak następnego rozdziału</string>
     <string name="theres_no_previous_chapter">Brak wcześniejszych rozdziałów</string>
     <string name="loading_pages">Ładowanie stron...</string>

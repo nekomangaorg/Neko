@@ -357,6 +357,17 @@ class ReaderActivity :
         return handled || super.dispatchKeyEvent(event)
     }
 
+    override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KeyEvent.KEYCODE_N) {
+            presenter.loadNextChapter()
+            return true
+        } else if (keyCode == KeyEvent.KEYCODE_P) {
+            presenter.loadPreviousChapter()
+            return true
+        }
+        return super.onKeyUp(keyCode, event)
+    }
+
     /**
      * Dispatches a generic motion event. If the viewer doesn't handle it, call the default
      * implementation.

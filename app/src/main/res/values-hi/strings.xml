@@ -295,8 +295,8 @@
     <string name="url_not_set_click_again">मंगा यूआरएल सेट नहीं है कृपया शीर्षक पर क्लिक करें और फिर मंगा का चयन करें</string>
     <string name="finished_chapter">समाप्त:</string>
     <string name="current_chapter">प्रचलित:</string>
-    <string name="next_chapter">अगला:</string>
-    <string name="previous_chapter">पिछला:</string>
+    <string name="next_title">अगला:</string>
+    <string name="previous_title">पिछला:</string>
     <string name="theres_no_next_chapter">कोई अगला अध्याय नहीं है</string>
     <string name="theres_no_previous_chapter">कोई पिछला अध्याय नहीं है</string>
     <string name="loading_pages">पेज लोड हो रहे है …</string>

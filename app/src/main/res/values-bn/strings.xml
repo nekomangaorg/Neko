@@ -298,8 +298,8 @@
     <string name="dark_blue">গাঢ় নীল</string>
     <string name="finished_chapter">"শেষ  :"</string>
     <string name="current_chapter">"এখনকার  :"</string>
-    <string name="next_chapter">আসছে :</string>
-    <string name="previous_chapter">পূর্ববর্তী :</string>
+    <string name="next_title">আসছে :</string>
+    <string name="previous_title">পূর্ববর্তী :</string>
     <string name="theres_no_next_chapter">কোন পরের অধ্যায় আছে</string>
     <string name="theres_no_previous_chapter">কোন পূর্ববর্তী অধ্যায় আছে</string>
     <string name="loading_pages">পৃষ্ঠা লোড হচ্ছে …</string>

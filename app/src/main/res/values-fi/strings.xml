@@ -29,8 +29,8 @@
     <string name="viewer_for_this_series">Katselin tälle sarjalle</string>
     <string name="finished_chapter">Valmistunut:</string>
     <string name="current_chapter">Nykyinen:</string>
-    <string name="next_chapter">Seuraava:</string>
-    <string name="previous_chapter">Aiempi:</string>
+    <string name="next_title">Seuraava:</string>
+    <string name="previous_title">Aiempi:</string>
     <string name="theres_no_next_chapter">Seuraavaa lukua ei ole</string>
     <string name="theres_no_previous_chapter">Aiempaa lukua ei ole</string>
     <string name="loading_pages">Ladataan sivuja…</string>

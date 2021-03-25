@@ -272,8 +272,8 @@
     <string name="viewer_for_this_series">Visare för denna serie</string>
     <string name="finished_chapter">Färdig:</string>
     <string name="current_chapter">Nuvarande:</string>
-    <string name="next_chapter">Nästa:</string>
-    <string name="previous_chapter">Tidigare:</string>
+    <string name="next_title">Nästa:</string>
+    <string name="previous_title">Tidigare:</string>
     <string name="theres_no_next_chapter">Det finns inget mer kapitel</string>
     <string name="theres_no_previous_chapter">Det finns inget tidigare kapitel</string>
     <string name="loading_pages">Laddar sidor…</string>
