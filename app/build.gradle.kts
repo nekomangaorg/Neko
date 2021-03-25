@@ -66,13 +66,11 @@ android {
         }
         create("dev") {
             resConfig("en")
-            lintOptions {
-                disable("MissingTranslation")
-            }
         }
     }
 
     lintOptions {
+        disable("MissingTranslation")
         isAbortOnError = false
         isCheckReleaseBuilds = false
     }
@@ -98,12 +96,12 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.2.0")
+    implementation("androidx.appcompat:appcompat:1.3.0-beta01")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.3.0")
     implementation("androidx.recyclerview:recyclerview:1.2.0-beta02")
     implementation("androidx.preference:preference:1.1.1")
-    implementation("androidx.annotation:annotation:1.1.0")
+    implementation("androidx.annotation:annotation:1.2.0-rc01")
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
@@ -232,7 +230,7 @@ dependencies {
     implementation("com.bluelinelabs:conductor-support:2.1.5") {
         exclude("group", "com.android.support")
     }
-    implementation("com.github.tachiyomiorg:conductor-support-preference:1.1.1")
+    implementation("com.github.tachiyomiorg:conductor-support-preference:2.0.0")
 
     // RxBindings
     implementation("com.jakewharton.rxbinding:rxbinding-kotlin:${Versions.RX_BINDING}")
