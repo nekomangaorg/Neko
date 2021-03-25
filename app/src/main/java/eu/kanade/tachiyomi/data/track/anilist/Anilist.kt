@@ -135,7 +135,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun update(track: Track): Track {
-        if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+        if (track.status == READING && track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
         }
         // If user was using API v1 fetch library_id
