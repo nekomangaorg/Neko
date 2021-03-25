@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -43,7 +44,7 @@ class SettingsReaderController : SettingsController() {
             }
             switchPreference {
                 key = Keys.enableTransitions
-                titleRes = R.string.page_transitions
+                titleRes = R.string.animate_page_transitions
                 defaultValue = true
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -125,6 +126,38 @@ class SettingsReaderController : SettingsController() {
             titleRes = R.string.paged
 
             intListPreference(activity) {
+                key = Keys.navigationModePager
+                titleRes = R.string.nav_layout
+                entries = context.resources.getStringArray(R.array.reader_nav).also { values ->
+                    entryRange = 0..values.size
+                }.toList()
+                defaultValue = "0"
+                summary = "%s"
+
+                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
+            }
+            listPreference(activity) {
+                key = Keys.pagerNavInverted
+                titleRes = R.string.invert_tapping
+                entriesRes = arrayOf(
+                    R.string.none,
+                    R.string.horizontally,
+                    R.string.vertically,
+                    R.string.both_axes
+                )
+                entryValues = listOf(
+                    ViewerNavigation.TappingInvertMode.NONE.name,
+                    ViewerNavigation.TappingInvertMode.HORIZONTAL.name,
+                    ViewerNavigation.TappingInvertMode.VERTICAL.name,
+                    ViewerNavigation.TappingInvertMode.BOTH.name
+                )
+                defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
+                summary = "%s"
+
+                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
+            }
+
+            intListPreference(activity) {
                 key = Keys.imageScaleType
                 titleRes = R.string.scale_type
                 entriesRes = arrayOf(
@@ -158,6 +191,38 @@ class SettingsReaderController : SettingsController() {
         }
         preferenceCategory {
             titleRes = R.string.webtoon
+
+            intListPreference(activity) {
+                key = Keys.navigationModeWebtoon
+                titleRes = R.string.nav_layout
+                entries = context.resources.getStringArray(R.array.reader_nav).also { values ->
+                    entryRange = 0..values.size
+                }.toList()
+                defaultValue = "0"
+                summary = "%s"
+
+                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
+            }
+            listPreference(activity) {
+                key = Keys.webtoonNavInverted
+                titleRes = R.string.invert_tapping
+                entriesRes = arrayOf(
+                    R.string.none,
+                    R.string.horizontally,
+                    R.string.vertically,
+                    R.string.both_axes
+                )
+                entryValues = listOf(
+                    ViewerNavigation.TappingInvertMode.NONE.name,
+                    ViewerNavigation.TappingInvertMode.HORIZONTAL.name,
+                    ViewerNavigation.TappingInvertMode.VERTICAL.name,
+                    ViewerNavigation.TappingInvertMode.BOTH.name
+                )
+                defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
+                summary = "%s"
+
+                preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
+            }
 
             switchPreference {
                 key = Keys.cropBordersWebtoon

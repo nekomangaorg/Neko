@@ -270,10 +270,10 @@
     <string name="decode_image_error">Δεν ήταν δυνατή η αποκωδικοποίηση της εικόνας</string>
     <string name="use_image_as_cover">Θέλετε να ορίσετε αυτήν την εικόνα ως εξώφυλλο;</string>
     <string name="viewer_for_this_series">Αναγνώστης για αυτήν τη σειρά</string>
-    <string name="finished">Διαβασμένο:</string>
-    <string name="current">Τρέχον:</string>
-    <string name="next">Επόμενο:</string>
-    <string name="previous">Προηγούμενο:</string>
+    <string name="finished_chapter">Διαβασμένο:</string>
+    <string name="current_chapter">Τρέχον:</string>
+    <string name="next_chapter">Επόμενο:</string>
+    <string name="previous_chapter">Προηγούμενο:</string>
     <string name="theres_no_next_chapter">Δεν υπάρχει επόμενο κεφάλαιο</string>
     <string name="theres_no_previous_chapter">Δεν υπάρχει προηγούμενο κεφάλαιο</string>
     <string name="loading_pages">Φόρτωση σελίδων…</string>

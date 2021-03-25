@@ -17,6 +17,22 @@
         android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area">
 
         <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
+            android:id="@+id/pager_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/nav_layout"
+            android:entries="@array/reader_nav" />
+
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
+            android:id="@+id/pager_invert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/invert_tapping"
+            android:entries="@array/invert_tapping_mode" />
+
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/scale_type"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -46,11 +62,26 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="0dp"
-            android:text="@string/page_transitions"
+            android:text="@string/animate_page_transitions"
             android:textColor="?android:attr/textColorPrimary" />
 
 
         <!-- Webtoon Prefs -->
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
+            android:id="@+id/webtoon_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/nav_layout"
+            android:entries="@array/reader_nav" />
+
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
+            android:id="@+id/webtoon_invert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/invert_tapping"
+            android:entries="@array/invert_tapping_mode" />
 
         <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/webtoon_side_padding"

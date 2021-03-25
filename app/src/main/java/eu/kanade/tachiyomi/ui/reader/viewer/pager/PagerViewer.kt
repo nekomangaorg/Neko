@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
+import android.graphics.PointF
 import android.view.InputDevice
 import android.view.KeyEvent
 import android.view.MotionEvent
@@ -12,8 +13,10 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.android.synthetic.main.reader_activity.*
 import timber.log.Timber
 
 /**
@@ -81,17 +84,30 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                 }
             }
         )
-        pager.tapListener = { event ->
-            val positionX = event.x
-            when {
-                positionX < pager.width * 0.33f && config.tappingEnabled -> moveLeft()
-                positionX > pager.width * 0.66f && config.tappingEnabled -> moveRight()
-                else -> activity.toggleMenu()
+        pager.tapListener = f@{ event ->
+            if (!config.tappingEnabled) {
+                activity.toggleMenu()
+                return@f
+            }
+
+            val pos = PointF(event.rawX / pager.width, event.rawY / pager.height)
+            val navigator = config.navigator
+            when (navigator.getAction(pos)) {
+                ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
+                ViewerNavigation.NavigationRegion.NEXT -> moveToNext()
+                ViewerNavigation.NavigationRegion.PREV -> moveToPrevious()
+                ViewerNavigation.NavigationRegion.RIGHT -> moveRight()
+                ViewerNavigation.NavigationRegion.LEFT -> moveLeft()
             }
         }
 
         config.imagePropertyChangedListener = {
             refreshAdapter()
+        }
+
+        config.navigationModeChangedListener = {
+            val showOnStart = config.navigationOverlayForNewUser
+            activity.navigation_overlay.setNavigation(config.navigator, showOnStart)
         }
     }
 

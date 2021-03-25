@@ -2,6 +2,11 @@ package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.navigation.LNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.navigation.RightAndLeftNavigation
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -21,9 +26,19 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfi
 
     var enableZoomOut = false
         private set
+
     var zoomPropertyChangedListener: ((Boolean) -> Unit)? = null
 
     init {
+        preferences.navigationModeWebtoon()
+            .register({ navigationMode = it }, { updateNavigation(it) })
+
+        preferences.webtoonNavInverted()
+            .register({ tappingInverted = it }, {
+                navigator.invertMode = it
+                navigationModeChangedListener?.invoke()
+            })
+
         preferences.cropBordersWebtoon()
             .register({ webtoonCropBorders = it }, { imagePropertyChangedListener?.invoke() })
 
@@ -35,5 +50,31 @@ class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfi
 
         preferences.webtoonEnableZoomOut()
             .register({ enableZoomOut = it }, { zoomPropertyChangedListener?.invoke(it) })
+
+        navigationOverlayForNewUser = preferences.showNavigationOverlayNewUserWebtoon().get()
+        if (navigationOverlayForNewUser) {
+            preferences.showNavigationOverlayNewUserWebtoon().set(false)
+        }
+    }
+
+    override var navigator: ViewerNavigation = defaultNavigation()
+        set(value) {
+            field = value.also { it.invertMode = tappingInverted }
+        }
+
+    override fun defaultNavigation(): ViewerNavigation {
+        return LNavigation()
+    }
+
+    override fun updateNavigation(navigationMode: Int) {
+        this.navigator = when (navigationMode) {
+            0 -> defaultNavigation()
+            1 -> LNavigation()
+            2 -> KindlishNavigation()
+            3 -> EdgeNavigation()
+            4 -> RightAndLeftNavigation()
+            else -> defaultNavigation()
+        }
+        navigationModeChangedListener?.invoke()
     }
 }

@@ -471,14 +471,14 @@
 
 
 
-    <string name="current">Текущая:</string>
-    <string name="finished">Закончена:</string>
-    <string name="next">Следующая:</string>
+    <string name="current_chapter">Текущая:</string>
+    <string name="finished_chapter">Закончена:</string>
+    <string name="next_chapter">Следующая:</string>
     <string name="theres_no_next_chapter">Следующей части нет</string>
     <string name="theres_no_previous_chapter">Предыдущей части нет</string>
     <string name="failed_to_load_pages_">Не удалось загрузить страницы: %1$s</string>
     <string name="loading_pages">Идёт загрузка страниц…</string>
-    <string name="previous">Предыдущая:</string>
+    <string name="previous_chapter">Предыдущая:</string>
 
     <string name="unknown">Неизвестно</string>
     <string name="unknown_error">Неизвестная ошибка</string>

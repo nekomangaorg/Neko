@@ -261,10 +261,10 @@
     <string name="page_">Side: %1$d</string>
     <string name="next_chapter_not_found">Fant ikke neste kapittel</string>
     <string name="decode_image_error">Kunne ikke dekode bildet</string>
-    <string name="finished">Fullført:</string>
-    <string name="current">Nåværende:</string>
-    <string name="next">Neste:</string>
-    <string name="previous">Forrige:</string>
+    <string name="finished_chapter">Fullført:</string>
+    <string name="current_chapter">Nåværende:</string>
+    <string name="next_chapter">Neste:</string>
+    <string name="previous_chapter">Forrige:</string>
     <string name="theres_no_next_chapter">Det finnes ikke flere kapittel</string>
     <string name="theres_no_previous_chapter">Det er ikke noe tidligere kapittel</string>
     <string name="loading_pages">Laster inn sider…</string>

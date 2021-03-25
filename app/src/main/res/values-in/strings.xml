@@ -294,10 +294,10 @@
     <string name="type">Tipe</string>
     <string name="url_not_set_click_again">URL Manga belum siap, silahkan klik judul dan pilih manga lagi</string>
     <string name="dark_blue">Biru gelap</string>
-    <string name="finished">Selesai:</string>
-    <string name="current">Saat ini:</string>
-    <string name="next">Selanjutnya:</string>
-    <string name="previous">Sebelumnya:</string>
+    <string name="finished_chapter">Selesai:</string>
+    <string name="current_chapter">Saat ini:</string>
+    <string name="next_chapter">Selanjutnya:</string>
+    <string name="previous_chapter">Sebelumnya:</string>
     <string name="theres_no_next_chapter">Tidak ada chapter lanjutannya</string>
     <string name="theres_no_previous_chapter">Tidak ada chapter sebelumnya</string>
     <string name="loading_pages">Memuat halaman…</string>

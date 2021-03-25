@@ -295,10 +295,10 @@
     <string name="no_network_connection">Ağ bağlantısı yok</string>
     <string name="download_paused">İndirme duraklatıldı</string>
     <string name="common">Genel</string>
-    <string name="finished">Biten:</string>
-    <string name="current">Şu anki:</string>
-    <string name="next">Sonraki:</string>
-    <string name="previous">Önceki:</string>
+    <string name="finished_chapter">Biten:</string>
+    <string name="current_chapter">Şu anki:</string>
+    <string name="next_chapter">Sonraki:</string>
+    <string name="previous_chapter">Önceki:</string>
     <string name="theres_no_next_chapter">Sonraki bölüm yok</string>
     <string name="theres_no_previous_chapter">Önceki bölüm yok</string>
     <string name="loading_pages">Sayfalar yükleniyor…</string>

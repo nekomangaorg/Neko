@@ -296,10 +296,10 @@
     <string name="started">শুরু হয়েছে</string>
     <string name="type">ধরণ</string>
     <string name="dark_blue">গাঢ় নীল</string>
-    <string name="finished">"শেষ  :"</string>
-    <string name="current">"এখনকার  :"</string>
-    <string name="next">আসছে :</string>
-    <string name="previous">পূর্ববর্তী :</string>
+    <string name="finished_chapter">"শেষ  :"</string>
+    <string name="current_chapter">"এখনকার  :"</string>
+    <string name="next_chapter">আসছে :</string>
+    <string name="previous_chapter">পূর্ববর্তী :</string>
     <string name="theres_no_next_chapter">কোন পরের অধ্যায় আছে</string>
     <string name="theres_no_previous_chapter">কোন পূর্ববর্তী অধ্যায় আছে</string>
     <string name="loading_pages">পৃষ্ঠা লোড হচ্ছে …</string>

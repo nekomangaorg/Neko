@@ -271,10 +271,10 @@
     <string name="decode_image_error">No est istadu possìbile decodificare s\'immàgine</string>
     <string name="use_image_as_cover">Cheres impostare custa immàgine comente cobertedda\?</string>
     <string name="viewer_for_this_series">Visualizadore pro custa sèrie</string>
-    <string name="finished">Acabadu:</string>
-    <string name="current">Atuale:</string>
-    <string name="next">Imbeniente:</string>
-    <string name="previous">Antepostu:</string>
+    <string name="finished_chapter">Acabadu:</string>
+    <string name="current_chapter">Atuale:</string>
+    <string name="next_chapter">Imbeniente:</string>
+    <string name="previous_chapter">Antepostu:</string>
     <string name="theres_no_next_chapter">Non b\'at unu capìtulu imbeniente</string>
     <string name="theres_no_previous_chapter">Non b\'at unu capìtulu antepostu</string>
     <string name="loading_pages">Carrighende pàginas…</string>

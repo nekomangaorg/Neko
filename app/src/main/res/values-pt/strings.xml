@@ -321,10 +321,10 @@
     <string name="set_as_cover">Usar como capa</string>
     <string name="cover_updated">Capa atualizada</string>
     <string name="use_image_as_cover">Deseja usar esta imagem como capa\?</string>
-    <string name="finished">Concluído:</string>
-    <string name="current">Atual:</string>
-    <string name="next">Próximo:</string>
-    <string name="previous">Anterior:</string>
+    <string name="finished_chapter">Concluído:</string>
+    <string name="current_chapter">Atual:</string>
+    <string name="next_chapter">Próximo:</string>
+    <string name="previous_chapter">Anterior:</string>
     <string name="theres_no_next_chapter">Não há próximo capítulo</string>
     <string name="theres_no_previous_chapter">Não há capítulo anterior</string>
     <string name="loading_pages">Carregando páginas…</string>

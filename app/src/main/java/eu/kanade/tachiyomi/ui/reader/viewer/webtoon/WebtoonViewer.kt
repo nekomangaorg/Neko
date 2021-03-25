@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.graphics.Color
+import android.graphics.PointF
 import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
@@ -13,7 +14,9 @@ import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.android.synthetic.main.reader_activity.*
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import kotlin.math.max
@@ -95,15 +98,21 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 }
             }
         )
-        recycler.tapListener = { event ->
-            val positionX = event.rawX
-            val positionY = event.rawY
-            when {
-                positionY < recycler.height * 0.25 && config.tappingEnabled -> scrollUp()
-                positionY > recycler.height * 0.75 && config.tappingEnabled -> scrollDown()
-                positionX < recycler.width * 0.33 && config.tappingEnabled -> scrollUp()
-                positionX > recycler.width * 0.66 && config.tappingEnabled -> scrollDown()
-                else -> activity.toggleMenu()
+        recycler.tapListener =  f@{ event ->
+            if (!config.tappingEnabled) {
+                activity.toggleMenu()
+                return@f
+            }
+
+            val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
+            if (!config.tappingEnabled) activity.toggleMenu()
+            else {
+                val navigator = config.navigator
+                when (navigator.getAction(pos)) {
+                    ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
+                    ViewerNavigation.NavigationRegion.NEXT, ViewerNavigation.NavigationRegion.RIGHT -> scrollDown()
+                    ViewerNavigation.NavigationRegion.PREV, ViewerNavigation.NavigationRegion.LEFT -> scrollUp()
+                }
             }
         }
 
@@ -113,6 +122,11 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
 
         config.zoomPropertyChangedListener = {
             frame.enableZoomOut = it
+        }
+
+        config.navigationModeChangedListener = {
+            val showOnStart = config.navigationOverlayForNewUser
+            activity.navigation_overlay.setNavigation(config.navigator, showOnStart)
         }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)

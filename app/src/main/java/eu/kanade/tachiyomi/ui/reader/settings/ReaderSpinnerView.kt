@@ -21,26 +21,28 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
     private var selectedPosition = 0
     private var pref: Preference<Int>? = null
     private var prefOffset = 0
+    private var popup:PopupMenu? = null
+
     var onItemSelectedListener: ((Int) -> Unit)? = null
         set(value) {
             field = value
             if (value != null) {
-                val popup = makeSettingsPopup()
-                setOnTouchListener(popup.dragToOpenListener)
+                popup = makeSettingsPopup()
+                setOnTouchListener(popup?.dragToOpenListener)
                 setOnClickListener {
-                    popup.show()
+                    popup?.show()
                 }
             }
         }
 
     init {
         inflate(context, R.layout.reader_preference, this)
-        val a = context.obtainStyledAttributes(attrs, R.styleable.ReaderPreferenceView, 0, 0)
+        val a = context.obtainStyledAttributes(attrs, R.styleable.ReaderSpinnerView, 0, 0)
 
-        val str = a.getString(R.styleable.ReaderPreferenceView_title) ?: ""
+        val str = a.getString(R.styleable.ReaderSpinnerView_title) ?: ""
         title_view.text = str
 
-        val entries = (a.getTextArray(R.styleable.ReaderPreferenceView_android_entries) ?: emptyArray()).map { it.toString() }
+        val entries = (a.getTextArray(R.styleable.ReaderSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
         this.entries = entries
 
         detail_view.text = entries.firstOrNull().orEmpty()
@@ -49,15 +51,39 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun setSelection(selection: Int) {
+        popup?.menu?.get(selectedPosition)?.isCheckable = false
+        popup?.menu?.get(selectedPosition)?.isChecked = false
         selectedPosition = selection
         detail_view.text = entries.getOrNull(selection).orEmpty()
+        popup?.menu?.get(selectedPosition)?.isCheckable = true
+        popup?.menu?.get(selectedPosition)?.isChecked = true
     }
 
     fun bindToPreference(pref: Preference<Int>, offset: Int = 0, block: ((Int) -> Unit)? = null) {
         setSelection(pref.get() - offset)
         this.pref = pref
         prefOffset = offset
-        val popup = makeSettingsPopup(pref, prefOffset, block)
+        popup = makeSettingsPopup(pref, prefOffset, block)
+        setOnTouchListener(popup?.dragToOpenListener)
+        setOnClickListener {
+            popup?.show()
+        }
+    }
+
+    inline fun <reified T : Enum<T>> bindToPreference(pref: Preference<T>) {
+        val enumConstants = T::class.java.enumConstants
+        enumConstants?.indexOf(pref.get())?.let { setSelection(it) }
+        val popup = makeSettingsPopup(pref)
+        setOnTouchListener(popup.dragToOpenListener)
+        setOnClickListener {
+            popup.show()
+        }
+    }
+
+    inline fun <reified T : Enum<T>> bindToPreference(pref: Preference<T>, crossinline block: ((Int) -> Unit)) {
+        val enumConstants = T::class.java.enumConstants
+        enumConstants?.indexOf(pref.get())?.let { setSelection(it) }
+        val popup = makeSettingsPopup(pref, block)
         setOnTouchListener(popup.dragToOpenListener)
         setOnClickListener {
             popup.show()
@@ -69,11 +95,43 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
         this.pref = pref
         prefOffset = 0
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
-        val popup = makeSettingsPopup(pref, intValues, block)
-        setOnTouchListener(popup.dragToOpenListener)
+        popup = makeSettingsPopup(pref, intValues, block)
+        setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {
-            popup.show()
+            popup?.show()
         }
+    }
+
+    inline fun <reified T : Enum<T>> makeSettingsPopup(preference: Preference<T>): PopupMenu {
+        val popup = popup()
+
+        // Set a listener so we are notified if a menu item is clicked
+        popup.setOnMenuItemClickListener { menuItem ->
+            val pos = popup.menuClicked(menuItem)
+            onItemSelectedListener?.invoke(pos)
+            true
+        }
+        // Set a listener so we are notified if a menu item is clicked
+        popup.setOnMenuItemClickListener { menuItem ->
+            val enumConstants = T::class.java.enumConstants
+            val pos = popup.menuClicked(menuItem)
+            enumConstants?.get(pos)?.let { preference.set(it) }
+            true
+        }
+        return popup
+    }
+
+    inline fun <reified T : Enum<T>> makeSettingsPopup(preference: Preference<T>, crossinline block: ((Int) -> Unit)): PopupMenu {
+        val popup = popup()
+        // Set a listener so we are notified if a menu item is clicked
+        popup.setOnMenuItemClickListener { menuItem ->
+            val enumConstants = T::class.java.enumConstants
+            val pos = popup.menuClicked(menuItem)
+            enumConstants?.get(pos)?.let { preference.set(it) }
+            block(pos)
+            true
+        }
+        return popup
     }
 
     private fun makeSettingsPopup(preference: Preference<Int>, intValues: List<Int?>, block: ((Int) -> Unit)? = null): PopupMenu {
@@ -112,7 +170,7 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
         return popup
     }
 
-    private fun PopupMenu.menuClicked(menuItem: MenuItem): Int {
+    fun PopupMenu.menuClicked(menuItem: MenuItem): Int {
         val pos = menuItem.itemId
         menu[selectedPosition].isCheckable = false
         menu[selectedPosition].isChecked = false
@@ -122,7 +180,7 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
         return pos
     }
 
-    private fun popup(): PopupMenu {
+    fun popup(): PopupMenu {
         val popup = PopupMenu(context, this, Gravity.END)
         entries.forEachIndexed {  index, entry ->
             popup.menu.add(0, index, 0, entry)

@@ -280,10 +280,10 @@
     <string name="decode_image_error">Nie udało się wczytać obrazka</string>
     <string name="use_image_as_cover">Czy chcesz ustawić ten obrazek jako okładkę?</string>
     <string name="viewer_for_this_series">Widok dla tej serii</string>
-    <string name="finished">Przeczytany:</string>
-    <string name="current">Obecny:</string>
-    <string name="next">Następny:</string>
-    <string name="previous">Poprzedni:</string>
+    <string name="finished_chapter">Przeczytany:</string>
+    <string name="current_chapter">Obecny:</string>
+    <string name="next_chapter">Następny:</string>
+    <string name="previous_chapter">Poprzedni:</string>
     <string name="theres_no_next_chapter">Brak następnego rozdziału</string>
     <string name="theres_no_previous_chapter">Brak wcześniejszych rozdziałów</string>
     <string name="loading_pages">Ładowanie stron...</string>

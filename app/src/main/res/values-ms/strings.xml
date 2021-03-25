@@ -297,10 +297,10 @@
     <string name="started">Bermula</string>
     <string name="type">Jenis</string>
     <string name="url_not_set_click_again">Manga url tidak ditetapkan, sila klik tajuk dan pilih manga sekali lagi</string>
-    <string name="finished">Selesai:</string>
-    <string name="current">Sekarang:</string>
-    <string name="next">Seterusnya:</string>
-    <string name="previous">Sebelumnya:</string>
+    <string name="finished_chapter">Selesai:</string>
+    <string name="current_chapter">Sekarang:</string>
+    <string name="next_chapter">Seterusnya:</string>
+    <string name="previous_chapter">Sebelumnya:</string>
     <string name="theres_no_next_chapter">Tiada bab seterusnya dijumpai</string>
     <string name="theres_no_previous_chapter">Tiada bab sebelumnya dijumpai</string>
     <string name="loading_pages">Memuatkan halaman…</string>

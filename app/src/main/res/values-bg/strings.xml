@@ -331,10 +331,10 @@
     <string name="started">Начало</string>
     <string name="type">Тип</string>
     <string name="url_not_set_click_again">Мангата няма връзка с акаунта, молим отново да натиснете заглавието и да изберете мангата</string>
-    <string name="finished">Завършени:</string>
-    <string name="current">Текущи:</string>
-    <string name="next">Следва:</string>
-    <string name="previous">Предишна:</string>
+    <string name="finished_chapter">Завършени:</string>
+    <string name="current_chapter">Текущи:</string>
+    <string name="next_chapter">Следва:</string>
+    <string name="previous_chapter">Предишна:</string>
     <string name="theres_no_next_chapter">Няма повече глави</string>
     <string name="theres_no_previous_chapter">Няма предишна глава</string>
     <string name="loading_pages">Зареждане на страниците…</string>

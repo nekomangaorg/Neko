@@ -269,10 +269,10 @@
     <string name="decode_image_error">Imaginea nu a putu fi decodată</string>
     <string name="use_image_as_cover">Doriți să setați această imagine drept copertă\?</string>
     <string name="viewer_for_this_series">Cititor al acestei serii</string>
-    <string name="finished">Terminat:</string>
-    <string name="current">Actual:</string>
-    <string name="next">Următorul:</string>
-    <string name="previous">Precedent:</string>
+    <string name="finished_chapter">Terminat:</string>
+    <string name="current_chapter">Actual:</string>
+    <string name="next_chapter">Următorul:</string>
+    <string name="previous_chapter">Precedent:</string>
     <string name="theres_no_next_chapter">Nu există capitolul următor</string>
     <string name="theres_no_previous_chapter">Nu există capitolul precedent</string>
     <string name="loading_pages">Încărcând paginile…</string>

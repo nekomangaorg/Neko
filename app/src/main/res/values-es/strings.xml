@@ -304,8 +304,8 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="language_">Idioma: %1$s</string>
     <string name="normal">Normal</string>
     <string name="fast">Rápida</string>
-    <string name="next">Siguiente:</string>
-    <string name="previous">Anterior:</string>
+    <string name="next_chapter">Siguiente:</string>
+    <string name="previous_chapter">Anterior:</string>
     <string name="theres_no_next_chapter">No hay capítulo siguiente</string>
     <string name="theres_no_previous_chapter">No hay capítulo anterior</string>
     <string name="migrate">Migrar</string>
@@ -325,8 +325,8 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="started">Empezado</string>
     <string name="type">Tipo</string>
     <string name="url_not_set_click_again">La dirección del manga no está fijada, por favor haga clic en el título y seleccione el manga de nuevo</string>
-    <string name="finished">Finalizado:</string>
-    <string name="current">Actual:</string>
+    <string name="finished_chapter">Finalizado:</string>
+    <string name="current_chapter">Actual:</string>
     <string name="loading_pages">Cargando páginas…</string>
     <string name="failed_to_load_pages_">Error al cargar páginas: %1$s</string>
     <string name="select">Seleccionar</string>

@@ -294,10 +294,10 @@ Zorg ook dat je ingelogd bent voor bronnen die dit vereisen alvorens je het teru
     <string name="started">Gestart</string>
     <string name="type">Soort</string>
     <string name="url_not_set_click_again">Manga url is niet ingesteld, klik alstublieft op de titel en selecteer de manga opnieuw</string>
-    <string name="finished">Afgerond:</string>
-    <string name="current">Huidige:</string>
-    <string name="next">Volgende:</string>
-    <string name="previous">Vorige:</string>
+    <string name="finished_chapter">Afgerond:</string>
+    <string name="current_chapter">Huidige:</string>
+    <string name="next_chapter">Volgende:</string>
+    <string name="previous_chapter">Vorige:</string>
     <string name="theres_no_next_chapter">Er is geen volgend hoofdstuk</string>
     <string name="theres_no_previous_chapter">Er is geen vorig hoofdstuk</string>
     <string name="loading_pages">Pagina\'s aan het laden…</string>

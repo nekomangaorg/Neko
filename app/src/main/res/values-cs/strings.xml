@@ -138,10 +138,10 @@
     <string name="page_">Stránka: %1$d</string>
     <string name="next_chapter_not_found">Další kapitola nenalezena</string>
     <string name="decode_image_error">Obrázek nemohl být dekódován</string>
-    <string name="finished">Dokončeno:</string>
-    <string name="current">Aktuální:</string>
-    <string name="next">Následující:</string>
-    <string name="previous">Předchozí:</string>
+    <string name="finished_chapter">Dokončeno:</string>
+    <string name="current_chapter">Aktuální:</string>
+    <string name="next_chapter">Následující:</string>
+    <string name="previous_chapter">Předchozí:</string>
     <string name="theres_no_next_chapter">Žádná další kapitola</string>
     <string name="theres_no_previous_chapter">Žádná předchozí kapitola</string>
     <string name="loading_pages">Načítání stránek…</string>

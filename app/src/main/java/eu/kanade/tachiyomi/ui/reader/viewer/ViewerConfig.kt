@@ -17,11 +17,22 @@ abstract class ViewerConfig(preferences: PreferencesHelper) {
 
     var imagePropertyChangedListener: (() -> Unit)? = null
 
+    var navigationModeChangedListener: (() -> Unit)? = null
+
     var tappingEnabled = true
+    var tappingInverted = ViewerNavigation.TappingInvertMode.NONE
     var doubleTapAnimDuration = 500
     var volumeKeysEnabled = false
     var volumeKeysInverted = false
     var alwaysShowChapterTransition = true
+
+
+    var navigationOverlayForNewUser = false
+    var navigationMode = 0
+        protected set
+
+    abstract var navigator: ViewerNavigation
+        protected set
 
     init {
         preferences.readWithTapping()
@@ -51,4 +62,8 @@ abstract class ViewerConfig(preferences: PreferencesHelper) {
             }
             .launchIn(scope)
     }
+
+    protected abstract fun defaultNavigation(): ViewerNavigation
+
+    abstract fun updateNavigation(navigationMode: Int)
 }

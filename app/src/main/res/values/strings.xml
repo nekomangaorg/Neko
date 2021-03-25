@@ -290,10 +290,10 @@
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
     <string name="viewer_for_this_series">Viewer for this series</string>
-    <string name="finished">Finished:</string>
-    <string name="current">Current:</string>
-    <string name="next">Next:</string>
-    <string name="previous">Previous:</string>
+    <string name="finished_chapter">Finished:</string>
+    <string name="current_chapter">Current:</string>
+    <string name="next_chapter">Next:</string>
+    <string name="previous_chapter">Previous:</string>
     <string name="theres_no_next_chapter">There\'s no next chapter</string>
     <string name="theres_no_previous_chapter">There\'s no previous chapter</string>
     <string name="loading_pages">Loading pages…</string>
@@ -303,7 +303,7 @@
 
     <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>
-    <string name="page_transitions">Page transitions</string>
+    <string name="animate_page_transitions">Animate page transitions</string>
     <string name="enable_zoom_out">Enable zoom out</string>
     <string name="double_tap_anim_speed">Double tap animation speed</string>
     <string name="show_page_number">Show page number</string>
@@ -339,6 +339,7 @@
     <string name="continuous_vertical">Continuous vertical</string>
     <string name="paged">Paged</string>
     <string name="scale_type">Scale type</string>
+    <string name="nav_layout">Navigation layout</string>
     <string name="fit_screen">Fit screen</string>
     <string name="stretch">Stretch</string>
     <string name="fit_width">Fit width</string>
@@ -363,6 +364,15 @@
     <string name="webtoon_side_padding_15">15%</string>
     <string name="webtoon_side_padding_20">20%</string>
     <string name="webtoon_side_padding_25">25%</string>
+    <string name="l_nav">L shaped</string>
+    <string name="kindlish_nav">Kindle-ish</string>
+    <string name="edge_nav">Edge</string>
+    <string name="right_and_left_nav">Right and Left</string>
+    <string name="invert_tapping">Invert tapping</string>
+    <string name="none">None</string>
+    <string name="horizontally">Horizontally</string>
+    <string name="vertically">Vertically</string>
+    <string name="both_axes">Both Axes</string>
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>
@@ -792,12 +802,14 @@
     <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_previous_as_read">Mark previous as read</string>
     <string name="mark_previous_as_unread">Mark previous as unread</string>
+    <string name="menu">menu</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>
     <string name="move_to_top">Move to top</string>
     <string name="moved_to_">Moved to %1$s</string>
     <string name="never">Never</string>
     <string name="newest">Newest</string>
+    <string name="next">Next</string>
     <string name="no_animation">No animation</string>
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>
@@ -809,6 +821,7 @@
     <string name="picture_saved">Picture saved</string>
     <string name="pin">Pin</string>
     <string name="pinned">Pinned</string>
+    <string name="previous">Previous</string>
     <string name="refresh">Refresh</string>
     <string name="refreshing">Refreshing</string>
     <string name="remove">Remove</string>

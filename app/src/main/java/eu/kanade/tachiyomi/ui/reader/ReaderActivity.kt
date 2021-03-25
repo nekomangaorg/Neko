@@ -534,6 +534,7 @@ class ReaderActivity :
         viewer = newViewer
         viewer_container.addView(newViewer.getView())
 
+        navigation_overlay.isLTR = !(viewer is L2RPagerViewer)
         viewer_container.setBackgroundColor(
             if (viewer is WebtoonViewer) {
                 Color.BLACK

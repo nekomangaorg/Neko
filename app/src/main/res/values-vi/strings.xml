@@ -326,10 +326,10 @@
     <string name="started">Đã bắt đầu</string>
     <string name="type">Loại</string>
     <string name="url_not_set_click_again">Đường dẫn truyện chưa được đặt, vui lòng nhấn vào tiêu đề và chọn lại truyện một lần nữa</string>
-    <string name="finished">Đã đọc xong:</string>
-    <string name="current">Đang đọc:</string>
-    <string name="next">Chương kế:</string>
-    <string name="previous">Chương trước:</string>
+    <string name="finished_chapter">Đã đọc xong:</string>
+    <string name="current_chapter">Đang đọc:</string>
+    <string name="next_chapter">Chương kế:</string>
+    <string name="previous_chapter">Chương trước:</string>
     <string name="theres_no_next_chapter">Không có chương tiếp theo</string>
     <string name="theres_no_previous_chapter">Không có chương trước đó</string>
     <string name="loading_pages">Đang tải trang…</string>

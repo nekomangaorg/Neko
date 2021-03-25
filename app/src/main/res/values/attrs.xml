@@ -16,7 +16,7 @@
     <attr name="tabBarIconColor" format="reference|integer"/>
     <attr name="tabBarIconInactive" format="reference|integer"/>
 
-    <declare-styleable name="ReaderPreferenceView">
+    <declare-styleable name="ReaderSpinnerView">
         <attr name="title" format="reference|string"/>
         <attr name="android:entries"/>
         <attr name="summary" format="reference|string" />

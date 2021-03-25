@@ -299,10 +299,10 @@
     <string name="select">تحديد</string>
     <string name="migrate">ترحيل</string>
     <string name="copy">نسخ</string>
-    <string name="finished">تمَّ الانتهاء من:</string>
-    <string name="current">الحالي:</string>
-    <string name="next">التّالي:</string>
-    <string name="previous">السّابق:</string>
+    <string name="finished_chapter">تمَّ الانتهاء من:</string>
+    <string name="current_chapter">الحالي:</string>
+    <string name="next_chapter">التّالي:</string>
+    <string name="previous_chapter">السّابق:</string>
     <string name="theres_no_next_chapter">لا يوجدُ فصل تالي</string>
     <string name="theres_no_previous_chapter">لا يوجدُ فصل سابق</string>
     <string name="loading_pages">جار تحميل الصّفحات…</string>

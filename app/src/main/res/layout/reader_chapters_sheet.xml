@@ -36,7 +36,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="@string/next"
+            android:contentDescription="@string/next_chapter"
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
             android:tint="?actionBarTintColor"
             android:tooltipText="@string/view_chapters"

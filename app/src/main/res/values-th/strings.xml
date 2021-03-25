@@ -282,10 +282,10 @@
     <string name="decode_image_error">ไม่สามารถถอดรหัสรูปภาพได้</string>
     <string name="use_image_as_cover">คุณต้องการที่จะตั้งค่าภาพเป็นภาพที่ปกใช่มั้ย\?</string>
     <string name="viewer_for_this_series">ตัวแสดงสำหรับชุดนี้</string>
-    <string name="finished">เสร็จแล้ว:</string>
-    <string name="current">ปัจจุบัน:</string>
-    <string name="next">ต่อไป:</string>
-    <string name="previous">ก่อนหน้า:</string>
+    <string name="finished_chapter">เสร็จแล้ว:</string>
+    <string name="current_chapter">ปัจจุบัน:</string>
+    <string name="next_chapter">ต่อไป:</string>
+    <string name="previous_chapter">ก่อนหน้า:</string>
     <string name="theres_no_next_chapter">ไม่มีบทต่อไป</string>
     <string name="theres_no_previous_chapter">ไม่มีบทก่อนหน้านี้</string>
     <string name="loading_pages">กำลังโหลดหน้า …</string>

@@ -24,7 +24,7 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
                 initPagerPreferences()
             }
         }
-        viewer_series.setSelection((context as? ReaderActivity)?.presenter?.manga?.viewer ?: 0)
+        viewer_series.setSelection((context as? ReaderActivity)?.presenter?.getMangaViewer() ?: 0)
         rotation_mode.bindToPreference(preferences.rotation(), 1)
         background_color.bindToPreference(preferences.readerTheme(), 0)
         show_page_number.bindToPreference(preferences.showPageNumber())

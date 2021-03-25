@@ -62,6 +62,21 @@
         <item>@string/screen</item>
     </string-array>
 
+    <string-array name="reader_nav">
+        <item>@string/default_value</item>
+        <item>@string/l_nav</item>
+        <item>@string/kindlish_nav</item>
+        <item>@string/edge_nav</item>
+        <item>@string/right_and_left_nav</item>
+    </string-array>
+
+    <string-array name="invert_tapping_mode">
+        <item>@string/none</item>
+        <item>@string/horizontally</item>
+        <item>@string/vertically</item>
+        <item>@string/both_axes</item>
+    </string-array>
+
     <string-array name="clean_up_downloads">
         <item>@string/clean_orphaned_downloads</item>
         <item>@string/clean_read_downloads</item>
