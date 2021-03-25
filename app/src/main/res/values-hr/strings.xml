@@ -114,9 +114,9 @@
     </plurals>
     <string name="custom_filter">Prilagođeni filtar</string>
     <string name="set_as_cover">Postavi kao naslovnicu</string>
-    <string name="cover_updated">Naslovnica ažurirana</string>
+    <string name="cover_updated">Naslovnica aktualizirana</string>
     <string name="next_chapter_not_found">Sljedeće poglavlje nije pronađeno</string>
-    <string name="use_image_as_cover">Ovu sliku koristiti kao naslovnicu\?</string>
+    <string name="use_image_as_cover">Ovu sliku koristiti kao ilustraciju naslovnice\?</string>
     <string name="finished">Završeno:</string>
     <string name="current">Trenutačno:</string>
     <string name="next">Sljedeće:</string>
@@ -179,7 +179,7 @@
     <string name="removed_from_library">Uklonjeno iz biblioteke</string>
     <string name="source_not_installed_">Izvor nije instaliran: %1$s</string>
     <string name="remove_from_library">Ukloni iz biblioteke</string>
-    <string name="failed_to_update_cover">Neuspjelo ažuriranje naslovnice</string>
+    <string name="failed_to_update_cover">Neuspjelo aktualiziranje naslovnice</string>
     <string name="tracking">Praćenje</string>
     <string name="tracked">Praćeno</string>
     <string name="services">Usluge</string>
@@ -255,7 +255,7 @@
     <string name="every_6_hours">Svakih 6 sati</string>
     <string name="every_12_hours">Svakih 12 sati</string>
     <string name="daily">Dnevno</string>
-    <string name="every_2_days">Svaki drugi dan</string>
+    <string name="every_2_days">Svaka 2 dana</string>
     <string name="weekly">Tjedno</string>
     <string name="select_cover_image">Odaberi sliku naslovnice</string>
     <string name="select_backup_file">Odaberi datoteku sigurnosne kopije</string>
@@ -429,8 +429,8 @@
     <string name="newly_added">Novo dodani</string>
     <string name="recents">Nedavni</string>
     <string name="show_notification_error">Prikaži obavijest za greške</string>
-    <string name="auto_refresh_covers_summary">Također osvježi omote u biblioteci prilikom ažuriranje biblioteke</string>
-    <string name="auto_refresh_covers">Automatski osvježi omote</string>
+    <string name="auto_refresh_covers_summary">Također osvježi naslovnice u biblioteci prilikom aktualiziranja biblioteke</string>
+    <string name="auto_refresh_covers">Automatski osvježi naslovnice</string>
     <string name="include_in_global_update">Uključi u globalno ažuriranje</string>
     <string name="when_sorting_ignore_articles">Prilikom razvrtavanja po abecedi, razvrstaj naslove mange bez člana (engl. a, an, the)</string>
     <string name="sort_by_ignoring_articles">Razvrstaj bez člana</string>
@@ -448,7 +448,6 @@
     <string name="more_library_settings">Daljnje postavke biblioteke</string>
     <string name="display_as">Prikaži kao</string>
     <string name="tap_library_to_show_filters">Dodirni ikonu biblioteke za prikazivanje filtara</string>
-    <string name="show_badges">Prikaži značke</string>
     <string name="x_large">XL</string>
     <string name="large">L</string>
     <string name="medium">M</string>
@@ -480,7 +479,7 @@
     <string name="webtoon_style">webtoon stil</string>
     <string name="reading_">Čita se %1$s</string>
     <string name="viewer_for_this_series">Prikaz za ovu seriju</string>
-    <string name="decode_image_error">Slika se nije mogla dešifrirati</string>
+    <string name="decode_image_error">Slika se nije mogla dekodirati</string>
     <string name="page_">Stranica %1$d</string>
     <string name="set_as_default_for_all">Postavi kao standardno za sve</string>
     <string name="empty_preferences_for_extension">Ovaj dodatak nema postavke koje bi se mogle promijeniti</string>
@@ -490,7 +489,7 @@
     <string name="last_read_">Zadnje pročitano %1$s</string>
     <string name="hide_category_hopper">Sakrij prebacivač kategorija</string>
     <string name="grid_options">Opcije mreže</string>
-    <string name="uniform_covers">Jednolike korice</string>
+    <string name="uniform_covers">Jednolike naslovnice</string>
     <string name="hide_start_reading_button">Sakrij gumb za pokretanje čitanja</string>
     <string name="compact_grid">Kompaktno</string>
     <string name="comfortable_grid">Popločeno</string>
@@ -498,4 +497,53 @@
     <string name="_already_in_queue">%1$s se već nalazi u popisu</string>
     <string name="adding_category_to_queue">%1$s se dodaje u popis</string>
     <string name="visit_recents_for_download_queue">Za pristup popisu preuzimanja pogledaj karticu nedavnih preuzimanja. Za brži pristup dodirni dvaput ili dodirni i drži</string>
+    <string name="no_folders_to_cleanup">Nema mapa za brisanje</string>
+    <string name="starting_cleanup">Pokretanje brisanja</string>
+    <string name="clean_read_manga_not_in_library">Izbriši mange koje nisu u biblioteci</string>
+    <string name="clean_read_downloads">Izbriši pročitane</string>
+    <string name="clean_orphaned_downloads">Izbriši nepovezane</string>
+    <string name="delete_unused_chapters">Izbriši mape nepostojećih, djelomično preuzetih i pročitanih poglavlja</string>
+    <string name="clean_up_downloaded_chapters">Izbriši preuzeta poglavlja</string>
+    <string name="refresh_tracking_metadata">Aktualiziraj metapodatke praćenja</string>
+    <string name="refresh_library_metadata">Aktualiziraj metapodatke biblioteke</string>
+    <string name="clear_database_summary">Izbriši manga i poglavlja koja se ne nalaze u tvojoj biblioteci</string>
+    <plurals name="cleanup_done">
+        <item quantity="one">Brisanje je gotovo. Uklonjena je %d mapa</item>
+        <item quantity="few">Brisanje je gotovo. Uklonjene su %d mape</item>
+        <item quantity="other">Brisanje je gotovo. Uklonjeno je %d mapa</item>
+    </plurals>
+    <string name="disable_if_issues_with_updating">Deaktiviraj ovo ako imaš problema s aktualiziranjem ili obnavljanjem tvoje knjižnice</string>
+    <string name="delete_old_covers_in_library_used_">Izbriši stare i nekorištene predmemorirane manga naslovnice koje nisu u tvojoj biblioteci koje su aktualizirane.
+\nTrenutačno se koristi: %1$s</string>
+    <string name="delete_all_covers__not_in_library_used_">Izbriši sve predmemorirane naslovnice koje nisu u tvojoj biblioteci
+\nTrenutačno se koristi: %1$s</string>
+    <string name="clear_cached_covers_non_library">Izbriši predmemorirane naslovnice koje nisu u biblioteci</string>
+    <string name="clean_up_cached_covers">Izbriši predmemorirane naslovnice</string>
+    <string name="updates_covers_genres_desc">Aktualizira naslovnice, žanrove, opis i podatke o stanju mange</string>
+    <string name="error_sharing_cover">Greška tijekom dijeljenja naslovnice</string>
+    <string name="error_saving_cover">Greška tijekom spremanja naslovnice</string>
+    <string name="cover_saved">Naslovnica spremljena</string>
+    <string name="reset_cover">Obnovi naslovnicu</string>
+    <plurals name="after_minutes">
+        <item quantity="one">Nakon %1$s minute</item>
+        <item quantity="few">Nakon %1$s minute</item>
+        <item quantity="other">Nakon %1$s minuta</item>
+    </plurals>
+    <string name="sort_by_chapter_number">Poredaj po broju poglavlja</string>
+    <string name="sort_by_source_s_order">Poredaj po redoslijedu izvora</string>
+    <string name="hide_chapter_titles">Sakrij naslove poglavlja</string>
+    <string name="show_read_chapters">Prikaži pročitana poglavlja</string>
+    <string name="show_unread_chapters">Prikaži nepročitana poglavlja</string>
+    <string name="show_downloaded_chapters">Prikaži preuzeta poglavlja</string>
+    <string name="all_but_bookmarked_chapters">Sva poglavlja, osim zabilježenih</string>
+    <string name="show_bookmarked_chapters">Prikaži zabilježena poglavlja</string>
+    <string name="show_all">Prikaži sve</string>
+    <string name="add_x_to_library">Dodati %1$s u biblioteku\?</string>
+    <string name="all_read_chapters">Sva pročitana poglavlja</string>
+    <string name="all_unread_chapters">Sva nepročitana poglavlja</string>
+    <string name="all_chapters">Sva poglavlja</string>
+    <string name="custom_range">Prilagođeni raspon</string>
+    <string name="next_5_unread">Sljedećih 5 nepročitanih poglavlja</string>
+    <string name="next_unread_chapter">Sljedeće nepročitano poglavlje</string>
+    <string name="search_chapters">Traži poglavlja</string>
 </resources>
