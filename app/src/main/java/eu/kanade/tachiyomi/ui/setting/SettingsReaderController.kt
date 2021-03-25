@@ -26,7 +26,7 @@ class SettingsReaderController : SettingsController() {
                     R.string.continuous_vertical
                 )
                 entryRange = 1..5
-                defaultValue = 1
+                defaultValue = 2
             }
             intListPreference(activity) {
                 key = Keys.doubleTapAnimationSpeed
