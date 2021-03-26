@@ -22,7 +22,6 @@
     <string name="delete">삭제</string>
     <string name="edit">편집</string>
     <string name="add">추가</string>
-    <string name="add_category">카테고리 추가</string>
     <string name="edit_categories">카테고리 편집</string>
     <string name="rename_category">카테고리 이름 바꾸기</string>
     <string name="move_to_categories">카테고리로 이동</string>
@@ -46,7 +45,6 @@
     <string name="clear">기록 지우기</string>
     <string name="close">닫기</string>
     <string name="retry">재시도</string>
-    <string name="add_to_home_screen">홈 화면에 추가</string>
     <string name="share">공유</string>
     <string name="save">저장</string>
     <string name="reset">리셋</string>
@@ -190,8 +188,6 @@
     <string name="author">저자</string>
     <string name="artist">그림</string>
     <string name="status">상태</string>
-    <string name="shortcut_created">바로가기가 홈 화면에 추가되었습니다.</string>
-    <string name="could_not_create_shortcut">바로가기 생성 실패!</string>
     <string name="source_not_installed_">소스 미설치: %1$s</string>
     <string name="chapter_">챕터 %1$s</string>
     <string name="downloading">다운로드 중</string>
@@ -252,7 +248,6 @@
     <string name="background_color">배경 색상</string>
     <string name="white">흰색</string>
     <string name="black">검은색</string>
-    <string name="pager_viewer">페이저</string>
     <string name="scale_type">스케일 종류</string>
     <string name="fit_screen">화면 맞춤</string>
     <string name="smart_fit">자동 맞춤</string>
@@ -267,11 +262,8 @@
     <string name="fourth_to_last">네번째 챕터에서 끝까지</string>
     <string name="fifth_to_last">다섯번째 챕터에서 끝까지</string>
     <string name="categories_to_include_in_download">다운로드에 포함할 카테고리</string>
-    <string name="restore_completed_content">복원에 %1$s 소요됨.
-\n%2$s 오류 발견됨.</string>
     <string name="restore_message">복원시 소스에서 데이터를 가져오며, 통신 비용이 청구 될 수 있습니다.
 \n또한 복원 전에 필요한 소스에 제대로 로그인이 되어있는지 확인하십시오.</string>
-    <string name="file_saved_at_">%1$s에 파일 저장됨</string>
     <string name="what_should_backup">어떤 항목들을 백업하겠습니까\?</string>
     <string name="clear_database_completed">항목 삭제됨</string>
     <string name="local">로컬</string>
@@ -279,11 +271,6 @@
     <string name="other">기타</string>
     <string name="browse">찾아보기</string>
     <string name="licensed">판권작</string>
-    <string name="circular">원형 아이콘</string>
-    <string name="rounded">둥근 아이콘</string>
-    <string name="square">사각형 아이콘</string>
-    <string name="star">별 아이콘</string>
-    <string name="icon_shape">아이콘 모양</string>
     <string name="_copied_to_clipboard">클립보드에 %1$s 복사됨</string>
     <string name="custom_range">사용자 정의 다운로드</string>
     <string name="reading">읽는중</string>
@@ -297,7 +284,6 @@
     <string name="url_not_set_click_again">만화 URL이 설정 되지 않았습니다. 제목을 클릭하고 만화를 다시 선택해주세요</string>
     <string name="category_with_name_exists">같은 이름을 가진 카테고리가 이미 존재합니다!</string>
     <string name="migrate">이동</string>
-    <string name="copy">복사</string>
     <string name="could_not_download_chapter_can_try_again">챕터 다운로드 도중 오류가 발생했습니다. 다운로드 섹션에서 다시시도 할 수 있습니다</string>
     <string name="must_be_in_library_to_edit">이 행동을 하기 전 서재에 만화를 추가해주세요</string>
     <string name="library_is_empty_add_from_browse">서재가 비어있습니다. 카탈로그에서 만화 시리즈를 서재에 추가 할 수 있습니다.</string>
@@ -317,4 +303,12 @@
     <string name="help">도움</string>
     <string name="system_default_all_blue">시스템 기본값 (다크 블루)</string>
     <string name="system_default_amoled">시스템 기본값 (AMOLED)</string>
+    <string name="update">업데이트</string>
+    <string name="remove_from_library">서재에서 제거</string>
+    <string name="copy_value">복사</string>
+    <string name="creating_backup">백업 생성중</string>
+    <string name="pref_global_search">전역 검색</string>
+    <string name="email">이메일 주소</string>
+    <string name="mark_as_unread">읽지 않음으로 표시</string>
+    <string name="website">웹사이트</string>
 </resources>

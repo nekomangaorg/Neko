@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="selected_">Elektitaj: %1$d</string>
+    <string name="library">Biblioteko</string>
+    <plurals name="pages_left">
+        <item quantity="one">Cetere %1$d paĝo</item>
+        <item quantity="other">Cetere %1$d paĝoj</item>
+    </plurals>
+    <plurals name="remove_n_chapters">
+        <item quantity="one">Forigi %1$d elŝutitan ĉapitron\?</item>
+        <item quantity="other">Forigi %1$d elŝutitajn ĉapitrojn\?</item>
+    </plurals>
+    <string name="chapter_not_found">Ĉapitro netrovebla</string>
+    <string name="marked_as_unread">Marki kiel nelegita</string>
+    <string name="marked_as_read">Marki kiel legita</string>
+    <string name="all_chapters_read">Ĉiuj ĉapitroj estas legitaj</string>
+    <string name="chapter_x_of_y">Ĉapitro %1$d de %2$d</string>
+    <string name="chapter_">Ĉapitro %1$s</string>
+    <string name="last_read_chapter_">Lastatempe legis ĉapitro %1$s</string>
+    <string name="unread">Nelegita</string>
+    <string name="new_chapters">Novaj ĉapitroj</string>
+    <plurals name="chapters">
+        <item quantity="one">Ĉapitroj</item>
+        <item quantity="other"/>
+    </plurals>
+    <string name="description">Priskribo</string>
+    <string name="artist">Desegnisto</string>
+    <string name="author">Aŭtoro</string>
+    <string name="title">Titolo</string>
+    <string name="read">Legi</string>
+    <string name="comic">Komikso</string>
+    <string name="manga">Mangao</string>
+    <string name="name">Nomo</string>
+    <string name="categories">Kategorioj</string>
+    <string name="download_queue">Elŝutos</string>
+    <string name="more">Plu</string>
+    <string name="updates">Ĝisdatigoj</string>
+    <string name="history">Historio</string>
+    <string name="sources">Fontoj</string>
+    <string name="extensions">Konektoprogramaro</string>
+    <string name="extension_info">Konektprogramaro Informaĵo</string>
+    <string name="migrate">Migri</string>
+    <string name="settings">Agordoj</string>
+    <string name="help">Asistado</string>
+    <string name="backup">Arĥivo</string>
+</resources>

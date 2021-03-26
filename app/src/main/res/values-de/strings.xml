@@ -1,18 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-																	  
-																		
-
     <!-- Models -->
     <string name="name">Name</string>
-
     <!-- Manga Type -->
     <string name="manga">Manga</string>
     <string name="manhwa">Manhwa</string>
     <string name="manhua">Manhua</string>
     <string name="comic">Comic</string>
     <string name="webtoon">Webtoon</string>
-
     <!-- Manga -->
     <string name="not_started">Nicht angefangen</string>
     <string name="in_progress">Am Lesen</string>
@@ -21,20 +16,17 @@
     <string name="author">Autor</string>
     <string name="artist">Künstler</string>
     <string name="description">Beschreibung</string>
-
     <!-- Status -->
     <string name="ongoing">Fortlaufend</string>
     <string name="unknown">Unbekannt</string>
     <string name="unknown_status">Unbekannter Status</string>
     <string name="licensed">Lizenziert</string>
     <string name="completed">Abgeschlossen</string>
-
     <!-- Security -->
     <string name="unlock_library">Entsperre den Bibliothekszugriff</string>
     <string name="unlock">Entsperren</string>
     <string name="lock_with_biometrics">Mit Biometrie sperren</string>
     <string name="lock_when_idle">Während Inaktivität sperren</string>
-
     <!-- Chapters -->
     <string name="chapters">Kapitel</string>
     <string name="new_chapters">Neue Kapitel</string>
@@ -54,14 +46,13 @@
         <item quantity="other">Entferne %1$d heruntergeladene Kapitel?</item>
     </plurals>
     <plurals name="chapters">
-        <item quantity="one">%1$d Kapitel</item>
-        <item quantity="other">%1$d Kapitel</item>
+        <item quantity="one">Kapitel</item>
+        <item quantity="other"/>
     </plurals>
     <plurals name="pages_left">
         <item quantity="one">%1$d Seite über</item>
         <item quantity="other">%1$d Seiten über</item>
     </plurals>
-
     <!-- Category -->
     <string name="category">Kategorie</string>
     <string name="categories">Kategorien</string>
@@ -70,7 +61,7 @@
     <string name="create_new_category">Neue Kategorie erstellen</string>
     <string name="category_is_empty">Kategorie ist leer</string>
     <string name="category_is_hidden">Kategorie ist versteckt</string>
-    <string name="top_category">Top Kategorie (%1$s)</string>
+    <string name="top_category">Beste Kategorie (%1$s)</string>
     <string name="default_category">Standardkategorie</string>
     <string name="first_category">Erste Kategorie</string>
     <string name="categories_on_manual">Kategorien zum Aktualisieren wenn manuell aktualisiert wird</string>
@@ -83,16 +74,15 @@
     <string name="manage_category">Kategorie verwalten</string>
     <string name="rename_category">Kategorie umbenennen</string>
     <string name="move_to_categories">Zu Kategorien hinzufügen</string>
-    <string name="add_to_categories">Kategorie wählen in welche hinzugefügt wird. Wenn nichts ausgewählt wird, wird die Standardkategorie genutzt.</string>
+    <string name="add_to_categories">Wähle, in welche Kategorien dies hinzugefügt wird. Wenn nichts ausgewählt ist, wird die Standardkategorie genutzt</string>
     <plurals name="category">
-        <item quantity="one">%d Kategorie</item>
-        <item quantity="other">%d Kategorien</item>
+        <item quantity="one">Kategorie</item>
+        <item quantity="other">Kategorien</item>
     </plurals>
     <string name="category_with_name_exists">Eine Kategorie mit diesem Namen existiert bereits!</string>
     <string name="category_deleted">Kategorie gelöscht</string>
     <string name="long_press_category">Drücken und halten um Kategorie zu bearbeiten</string>
     <string name="jump_to_category">Zu Kategorie springen</string>
-
     <!-- Updates -->
     <string name="update">Aktualisierung</string>
     <string name="what_should_update">Was soll aktualisiert werden?</string>
@@ -100,17 +90,15 @@
     <string name="update_available">Aktualisierung verfügbar</string>
     <string name="new_version_available">Neue Aktualisierung verfügbar!</string>
     <string name="no_new_updates_available">Keine neue Aktualisierung verfügbar</string>
-    <string name="searching_for_updates">Suche nach Aktualisierungen…</string>
-
+    <string name="searching_for_updates">Suche nach Aktualisierungen …</string>
     <!-- Main Screens -->
-
     <!-- Library -->
     <string name="library">Meine Bibliothek</string>
-    <string name="updating_library">Aktualisiere Bibliothek</string>
+    <string name="updating_library">Bibliothek wird aktualisiert</string>
     <string name="selected_">Ausgewählt: %1$d</string>
     <string name="local">Lokal</string>
     <string name="remove_from_library_question">Aus Bibliothek entfernen?</string>
-    <string name="library_search_hint">Titel oder Autor…</string>
+    <string name="library_search_hint">Titel, Markierung, Quelle suchen</string>
     <string name="library_is_empty_add_from_browse">Ihre Bibliothek ist leer, Sie können neue Serien über den Katalog hinzufügen.</string>
     <string name="no_matches_for_filters">Keine Ergebnisse für die ausgewählten Filtereinstellungen</string>
     <string name="show_all_categories">Alle Kategorien anzeigen</string>
@@ -119,14 +107,12 @@
     <string name="collapse_all_categories">Alle Kategorien einklappen</string>
     <string name="reorder_filters">Filter neuordnen</string>
     <string name="_unread">%d ungelesen</string>
-    <string name="search_globally">Suche \"%1$s\" global</string>
-
+    <string name="search_globally">„%1$s“ global suchen</string>
     <string name="read_progress">Lesefortschritt</string>
     <string name="series_type">Serientyp</string>
-    <string name="group_library_by">Gruppiere Bibliothek nach…</string>
+    <string name="group_library_by">Gruppiere Bibliothek nach …</string>
     <string name="tracking_status">Synchronisierungsstatus</string>
     <string name="ungrouped">Ungruppiert</string>
-
     <!-- Library Sort -->
     <string name="sort_by">Sortieren nach</string>
     <string name="total_chapters">Kapitelanzahl</string>
@@ -135,7 +121,6 @@
     <string name="last_updated">Zuletzt aktualisiert</string>
     <string name="latest_chapter">Letztes Kapitel</string>
     <string name="drag_and_drop">Ziehen &amp; Ablegen</string>
-
     <!-- Library Display -->
     <string name="display_options">Anzeigeeinstellungen</string>
     <string name="list">Liste</string>
@@ -143,7 +128,7 @@
     <string name="compact_grid">Kompaktes Raster</string>
     <string name="start_with_filters_hidden">Filtermenu verstecken</string>
     <string name="download_badge">Downloadzähler</string>
-    <string name="hide_start_reading_button">\"Jetzt Lesen\"-Symbol verstecken</string>
+    <string name="hide_start_reading_button">„Jetzt lesen“-Symbol verstecken</string>
     <string name="unread_badges">Kennzeichnungen für ungelesen</string>
     <string name="uniform_covers">Einheitliche Vorschaubilder</string>
     <string name="x_small">XS</string>
@@ -152,14 +137,11 @@
     <string name="large">L</string>
     <string name="x_large">XL</string>
     <string name="grid_options">Raster-Einstellungen</string>
-    <string name="hide_badges">Kennzeichnungen verstecken</string>
     <string name="show_badges">Kennzeichnungen anzeigen</string>
-    <string name="show_count">Anzahl anzeigen</string>
-    <string name="tap_library_to_show_filters">Das \"Meine Bibliothek\"-Symbol antippen zum Anzeigen des Filtermenus</string>
+    <string name="tap_library_to_show_filters">Das „Meine Bibliothek“-Symbol antippen zum Anzeigen des Filtermenus</string>
     <string name="display_as">Anzeigen als</string>
     <string name="hide_category_hopper">Kategorienhüpfer verstecken</string>
     <string name="more_library_settings">Weitere Bibliothekseinstellungen</string>
-
     <!-- Library update service notifications -->
     <string name="new_chapters_found">Neue Kapitel gefunden</string>
     <plurals name="for_n_titles">
@@ -174,7 +156,6 @@
         <item quantity="one">%1$d Aktualisierung fehlgeschlagen</item>
         <item quantity="other">%1$d Aktualisierungen fehlgeschlagen</item>
     </plurals>
-
     <!-- Library settings -->
     <string name="library_update_frequency">Häufigkeit der Bibliotheksaktualisierung</string>
     <string name="library_update_order">Reihenfolge der Bibliotheksaktualisierung</string>
@@ -189,15 +170,14 @@
     <string name="auto_refresh_covers">Vorschaubilder automatisch aktualisieren</string>
     <string name="auto_refresh_covers_summary">Vorschaubilder automatisch aktualisieren wenn die Bibliothek aktualisiert wird</string>
     <string name="show_notification_error">Push-Nachrichten für Fehler anzeigen</string>
-
     <!-- Recents -->
     <string name="recents">Neues</string>
     <string name="updates">Aktualisierungen</string>
     <string name="newly_added">Neu hinzugefügt</string>
     <string name="history">Verlauf</string>
     <string name="recent_updates">Neu verfügbare Kapitel</string>
-    <string name="this_will_remove_the_read_date_for_x_question">Das Lesedatum von \"%1$s\" wird gelöscht. Sind Sie sicher?</string>
-    <string name="this_will_remove_the_read_date_question">Das Lesedatum dieses Kapitels wird gelöscht. Sind Sie sicher?</string>
+    <string name="this_will_remove_the_read_date_for_x_question">Das Lesedatum von „%1$s“ wird gelöscht. Bist du sicher\?</string>
+    <string name="this_will_remove_the_read_date_question">Das Lesedatum dieses Kapitels wird gelöscht. Bist du sicher\?</string>
     <string name="reset_all_chapters_for_this_">Alle Kapitel für %1$s</string>
     <string name="source_dash_chapter_">%1$s - Kap.%2$s</string>
     <string name="last_read_">Zuletzt gelesen %1$s</string>
@@ -206,7 +186,7 @@
     <string name="added_">%1$s hinzugefügt</string>
     <string name="view_history">Verlauf anzeigen</string>
     <string name="view_all_updates">Alle Aktualisierungen anzeigen</string>
-    <string name="search_recents">Neues durchsuchen…</string>
+    <string name="search_recents">Neues durchsuchen …</string>
     <string name="no_recent_chapters">Keine neuen Kapitel</string>
     <string name="no_recently_read_manga">Keine kürzlich gelesene Manga</string>
     <string name="group_all">Gruppiert</string>
@@ -215,27 +195,24 @@
     <string name="only_updates">Nur Aktualisierungen</string>
     <string name="reset_chapter_question">Kapitel zurücksetzen?</string>
     <string name="press_and_hold_to_reset_history">Drücken und halten um Kapitelhistorie zurückzusetzen</string>
-
     <!-- Browse -->
     <string name="search_filters">Suchfilter</string>
     <string name="no_more_results">Keine weiteren Ergebnisse</string>
     <string name="no_results_found">Keine Ergebnisse gefunden</string>
-    <string name="local_source">Lokale Manga</string>
+    <string name="local_source">Lokale Quelle</string>
     <string name="other">Andere</string>
-    <string name="global_search">Globale Suche…</string>
-    <string name="latest">Letzte</string>
-    <string name="browse">Umsehen</string>
+    <string name="global_search">Globale Suche …</string>
+    <string name="latest">Neueste</string>
+    <string name="browse">Stöbern</string>
     <string name="in_library">In Bibliothek</string>
-    <string name="search_extensions">Erweiterungen suchen…</string>
+    <string name="search_extensions">Erweiterungen suchen …</string>
     <string name="all_sources">Alle Quellen</string>
     <string name="sources">Quellen</string>
     <string name="source_hidden">Quelle verstecken</string>
     <string name="last_used">Zuletzt genutzt</string>
     <string name="local_source_help_guide">Anleitung für lokale Quellen</string>
     <string name="check_site_in_web">Webseite in Webansicht prüfen</string>
-
     <!-- Other Screens -->
-
     <!-- Extensions -->
     <string name="extensions">Erweiterungen</string>
     <string name="extension_updates">Erweiterungsaktualisierungen</string>
@@ -249,7 +226,11 @@
     <string name="untrusted">Nicht vertrauenswürdig</string>
     <string name="uninstall">Deinstallieren</string>
     <string name="untrusted_extension">Nicht vertrauenswürdige Erweiterung</string>
-    <string name="untrusted_extension_message">Diese Erweiterungen wurde mit einem nicht vertrauenswürdigen Zertifikat unterschrieben und wurde nicht aktiviert.\n\nEine bösartige Erweiterungen könnte in Tachiyomi gespeicherte Login-Daten auslesen oder einen schadhaften Code ausführen.\n\nIndem Sie diesem Zertifikat vertrauen, akzeptieren Sie die Risiken.</string>
+    <string name="untrusted_extension_message">Diese Erweiterung ist mit einem nicht vertrauenswürdigen Zertifikat unterschrieben und wurde nicht aktiviert.
+\n
+\nEine bösartige Erweiterung könnte in Tachiyomi gespeicherte Anmeldedaten auslesen oder einen schädlichen Code ausführen.
+\n
+\nDurch das Vertrauen dieses Zertifikats akzeptierst du diese Risiken.</string>
     <string name="obsolete_extension_message">Diese Erweiterung ist nicht länger verfügbar.</string>
     <string name="version_">Version: %1$s</string>
     <string name="language_">Sprache: %1$s</string>
@@ -258,7 +239,6 @@
         <item quantity="one">Erweiterungsaktualisierung verfügbar</item>
         <item quantity="other">%d Erweiterungsaktualisierungen verfügbar</item>
     </plurals>
-
     <!-- Reader -->
     <string name="custom_filter">Eigener Filter</string>
     <string name="set_as_cover">Als Vorschaubild festlegen</string>
@@ -275,15 +255,13 @@
     <string name="previous_title">Vorherige:</string>
     <string name="theres_no_next_chapter">Es gibt kein nächstes Kapitel</string>
     <string name="theres_no_previous_chapter">Es gibt kein vorheriges Kapitel</string>
-    <string name="loading_pages">Lade Seiten…</string>
+    <string name="loading_pages">Lade Seiten …</string>
     <string name="failed_to_load_pages_">Seiten konnten nicht geladen werden: %1$s</string>
     <string name="reading_">Lese %1$s</string>
     <string name="webtoon_style">Webtoonstil</string>
-
     <!-- Reader settings -->
     <string name="fullscreen">Vollbild</string>
     <string name="page_transitions">Seitenübergänge</string>
-    <string name="disable_zoom">Zoom deaktivieren</string>
     <string name="double_tap_anim_speed">Doppeltipp Animationsgeschwindigkeit</string>
     <string name="show_page_number">Seitennummer zeigen</string>
     <string name="true_32bit_color">32-bit Farbe</string>
@@ -334,13 +312,12 @@
     <string name="smart_based_on_page_and_theme">Schlau (basierend auf Seite und Thema)</string>
     <string name="always_show_chapter_transition">Kapitelübergang immer anzeigen</string>
     <string name="if_disabled_transition_will_skip">Wenn deaktiviert wird die Kapitelübergangsseite, sollte das nächste Kapitel geladen sein, übersprungen</string>
-    <string name="pref_webtoon_side_padding">Seitenpolsterung</string>
+    <string name="pref_webtoon_side_padding">Seitenränder</string>
     <string name="webtoon_side_padding_0">Keine</string>
-    <string name="webtoon_side_padding_10">10%</string>
-    <string name="webtoon_side_padding_15">15%</string>
-    <string name="webtoon_side_padding_20">20%</string>
-    <string name="webtoon_side_padding_25">25%</string>
-
+    <string name="webtoon_side_padding_10">10 %</string>
+    <string name="webtoon_side_padding_15">15 %</string>
+    <string name="webtoon_side_padding_20">20 %</string>
+    <string name="webtoon_side_padding_25">25 %</string>
     <!-- Manga details -->
     <string name="about_this_">Über diesen %1$s</string>
     <string name="start_reading">Anfangen zu lesen</string>
@@ -379,18 +356,22 @@
     <string name="sort_by_chapter_number">Sortiert nach Kapitelanzahl</string>
     <string name="newest_first">Neu nach alt</string>
     <string name="oldest_first">Alt nach neu</string>
-    <string name="clear_tags">Tags löschen</string>
-    <string name="reset_tags">Tags zurücksetzen</string>
+    <string name="clear_tags">Markierungen löschen</string>
+    <string name="reset_tags">Markierungen zurücksetzen</string>
     <string name="reset_cover">Vorschaubild zurücksetzen</string>
     <string name="failed_to_update_cover">Konnte Vorschaubild nicht ändern</string>
     <string name="must_be_in_library_to_edit">Zum Bearbeiten muss der Manga in Ihrer Bibliothek sein</string>
     <string name="remember_this_choice">Diese Auswahl merken</string>
     <string name="source_not_installed">Quelle nicht installiert</string>
     <plurals name="deleted_chapters">
-        <item quantity="one">Ein Kapitel wurde von der Quelle entfernt:\n%2$s\nDiesen Download löschen?</item>
-        <item quantity="other">%1$s Kapitel wurden von der Quelle entfernt::\n%2$s\n\nDiese Downloads löschen?</item>
+        <item quantity="one">Ein Kapitel wurde von der Quelle entfernt:
+\n%2$s
+\nDiese heruntergeladene Datei löschen\?</item>
+        <item quantity="other">%1$s Kapitel wurden von der Quelle entfernt:
+\n%2$s
+\n
+\nDiese heruntergeladenen Dateien löschen\?</item>
     </plurals>
-
     <!-- Tracking -->
     <string name="tracking">Synchronisation</string>
     <string name="tracked">Synchronisiert</string>
@@ -411,10 +392,9 @@
     <string name="type">Typ</string>
     <string name="url_not_set_click_again">Manga URL ist nicht gesetzt. Bitte auf den Titel drücken und den Manga erneut wählen</string>
     <string name="refresh_tracking">Synchronisation aktualisieren</string>
-    <string name="add_tracking">Synchronisation hinzufügen</string>
+    <string name="add_tracking">Verfolgung hinzufügen</string>
     <string name="remove_tracking">Synchronisation aus App entfernen</string>
     <string name="remove_tracking_from_">Auch aus %1$s entfernen</string>
-
     <!-- Migration -->
     <string name="select_sources">Quellen auswählen</string>
     <string name="source_migration">Quellenmigration</string>
@@ -427,7 +407,7 @@
     <string name="use_most_chapters">Quelle mit den meisten Kapiteln nutzen (langsamer)</string>
     <string name="use_first_source">Erste Quelle als Alternative nutzen</string>
     <string name="skip_this_step_next_time">Diesen Schritt beim Nächsten mal überspringen</string>
-    <string name="to_show_again_setting_sources">Um diesen Bildschirm wieder anzuzeigen: Einstellungen => Quellen</string>
+    <string name="to_show_again_setting_sources">Um diesen Bildschirm wieder anzuzeigen: Einstellungen =&gt; Quellen.</string>
     <string name="latest_">Neueste: %1$s</string>
     <string name="migrating_to">migriere zu</string>
     <string name="dont_migrate">Nicht migrieren</string>
@@ -438,7 +418,7 @@
     <string name="migrate">Migrieren</string>
     <string name="migrate_">Migriere %1$s</string>
     <string name="copy_value">Kopieren</string>
-    <string name="no_chapters_found_for_migration">Keine Kapitel gefunden. Dieser Manga kann nicht für das Migrieren genutzt werden.</string>
+    <string name="no_chapters_found_for_migration">Keine Kapitel gefunden. Dieser Manga kann nicht für das Migrieren genutzt werden</string>
     <string name="no_alternatives_found">Keine alternative gefunden</string>
     <string name="stop_migrating">Migration stoppen?</string>
     <plurals name="migrate_manga">
@@ -454,7 +434,6 @@
         <item quantity="one">%d Manga migriert</item>
         <item quantity="other">%d Manga migriert</item>
     </plurals>
-
     <!-- Settings -->
     <string name="settings">Einstellungen</string>
     <string name="general">Allgemein</string>
@@ -462,7 +441,6 @@
     <string name="advanced">Erweitert</string>
     <string name="about">Über</string>
     <string name="help">Hilfe</string>
-
     <!-- General settings -->
     <string name="app_theme">App-Design</string>
     <string name="light_blue">Hellblau</string>
@@ -477,30 +455,28 @@
     <string name="date_format">Datumsformat</string>
     <string name="check_for_updates">Nach Aktualisierungen suchen</string>
     <string name="auto_check_for_app_versions">Automatisch nach App Aktualisierung suchen</string>
-    <string name="secure_screen">Sicherheitsbildschirm</string>
+    <string name="secure_screen">Sicherer Bildschirm</string>
     <string name="hide_tachi_from_recents">Verstecke Tachiyomi auf dem letzte Aktivitäten-Bildschirm</string>
     <string name="security">Sicherheit</string>
-
     <!-- Backup -->
-    <string name="backup">Backup</string>
-    <string name="create_backup">Backup erstellen</string>
+    <string name="backup">Sichern</string>
+    <string name="create_backup">Sicherung erstellen</string>
     <string name="can_be_used_to_restore">Kann benutzt werden, um die aktuelle Bibliothek wiederherzustellen</string>
-    <string name="restore_backup">Backup wiederherstellen</string>
-    <string name="restore_from_backup_file">Bibliothek mit Hilfe eines Backups wiederherstellen</string>
-    <string name="backup_location">Backupordner</string>
+    <string name="restore_backup">Datensicherung wiederherstellen</string>
+    <string name="restore_from_backup_file">Bibliothek mit Hilfe einer Datensicherung wiederherstellen</string>
+    <string name="backup_location">Sicherungsordner</string>
     <string name="service">Service</string>
-    <string name="backup_frequency">Backuphäufigkeit</string>
-    <string name="max_auto_backups">Maximale Anzahl automatischer Backups</string>
-    <string name="backup_failed">Backup fehlgeschlagen</string>
-    <string name="backup_created">Backup erstellt</string>
+    <string name="backup_frequency">Sicherungshäufigkeit</string>
+    <string name="max_auto_backups">Maximale Anzahl automatischer Sicherungen</string>
+    <string name="backup_failed">Datensicherung fehlgeschlagen</string>
+    <string name="backup_created">Datensicherung erstellt</string>
     <string name="restore_completed">Wiederherstellen abgeschlossen</string>
     <string name="restore_error">Wiederherstellungsfehler</string>
-    <string name="restore_completed_content">Das Wiederherstellen hat %1$s gedauert. %2$s Fehler gefunden.</string>
     <string name="restore_content_skipped">%1$d übersprungen</string>
     <string name="restore_message">Beim Wiederherstellen werden Daten von den Quellen abgerufen, wodurch möglicherweise Mobilfunkkosten entstehen können.\n\nVergewissern Sie sich zudem, dass Sie alle benötigen Seitenlogins bereitgestellt haben, bevor Sie mit dem Wiederherstellen beginnen.</string>
-    <string name="creating_backup">Backup wird erstellt</string>
-    <string name="what_should_backup">Was wollen Sie sichern?</string>
-    <string name="restoring_backup">Backup wird wiederhergestellt</string>
+    <string name="creating_backup">Datensicherung wird erstellt</string>
+    <string name="what_should_backup">Was willst du sichern\?</string>
+    <string name="restoring_backup">Datensicherung wird wiederhergestellt</string>
     <string name="restoring_progress">Wiederhergestellt (%1$d / %2$d)</string>
     <plurals name="sources_missing">
         <item quantity="one">%d Quelle fehlt</item>
@@ -511,13 +487,12 @@
         <item quantity="other">%d Manga sind nun lizenziert und konnten nicht wiederhergestellt werden</item>
     </plurals>
     <string name="not_logged_into_">Nicht angemeldet in %1$s</string>
-
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Kapitel-Zwischenspeicher leeren</string>
     <string name="data_management">Datenmanagement</string>
     <string name="network">Netzwerk</string>
     <string name="dns_over_https" translatable="false">DNS über HTTPS (Cloudflare)</string>
-    <string name="requires_app_restart">Erfordert einen Neustart der App, um wirksam zu werden</string>
+    <string name="requires_app_restart">Erfordert einen Neustart der Anwendung, um wirksam zu werden</string>
     <string name="used_">Belegt: %1$s</string>
     <plurals name="cache_cleared">
         <item quantity="one">Zwischenspeicher geleert. %d Datei wurde gelöscht</item>
@@ -528,7 +503,7 @@
     <string name="cookies_cleared">Cookies gelöscht</string>
     <string name="clear_database">Datenbank leeren</string>
     <string name="clear_database_summary">Alle Manga und Kapitel die nicht in der Bibliothek sind löschen</string>
-    <string name="clear_database_confirmation">Sind Sie sicher? Der Lesestatus aller Manga, die nicht in der Bibliothek sind, wird gelöscht</string>
+    <string name="clear_database_confirmation">Bist du sicher\? Der Lesestatus aller Manga, die nicht in der Bibliothek sind, wird gelöscht</string>
     <string name="clear_database_completed">Einträge gelöscht</string>
     <string name="refresh_library_metadata">Bibliotheksmetadaten erneuern</string>
     <string name="updates_covers_genres_desc">Aktualisiert Vorschaubilder, Genres, Beschreibungen und andere Mangainformationen</string>
@@ -552,7 +527,6 @@
     <string name="delete_old_covers_in_library_used_">Alte und ungenutzte zwischengespeicherte Vorschaubilder von Manga in deiner Bibliothek welche aktualisiert wurden löschen.\nAktuell genutzt: %1$s</string>
     <string name="clear_cached_covers_non_library">Zwischengespeicherte Vorschaubilder welche nicht in der Bibliothek sind bereinigen</string>
     <string name="delete_all_covers__not_in_library_used_">Alle zwischengespeicherten Vorschaubilder welche nicht in der Bibliothek sind löschen \nAktuell genutzt: %1$s</string>
-
     <!-- Browse Settings -->
     <string name="pref_global_search">Globale Suche</string>
     <string name="check_for_extension_updates">Erweiterungsaktualisierungen prüfen</string>
@@ -564,16 +538,14 @@
     <string name="use_last_saved_migration_preferences">Zuletzt gespeicherte Vor-Migrierungseinstellungen und Quellen nutzen für Massenmigrierung</string>
     <string name="migration_sources_changed">Migrierungsquellen geändert</string>
     <string name="you_can_migrate_in_library">Migrieren können Sie auch durch Auswählen von Manga in Ihrer Bibliothek</string>
-
     <!-- About section -->
     <string name="version">Version</string>
     <string name="build_time">Erstellt am</string>
     <string name="send_crash_report">Fehlerberichte senden</string>
     <string name="helps_fix_bugs">Hilft Fehler zu beheben. Keine sensiblen Daten werden gesendet</string>
     <string name="whats_new">Was ist neu in dieser Version</string>
-    <string name="website">Webseite</string>
-    <string name="open_source_licenses">Open Source Lizenzen</string>
-
+    <string name="website">Website</string>
+    <string name="open_source_licenses">Quelloffene Lizenzen</string>
     <!-- Login/Logout dialog -->
     <string name="log_in_to_">Bei %1$s anmelden</string>
     <string name="username">Benutzername</string>
@@ -583,42 +555,37 @@
     <string name="login">Anmelden</string>
     <string name="logout">Abmelden</string>
     <string name="logout_from_">Von %1$s abmelden?</string>
-
     <string name="successfully_logged_in">Anmeldung erfolgreich</string>
     <string name="username_must_not_be_blank">Benutzername und Passwort dürfen nicht leer sein</string>
-
-    <string name="successfully_logged_out">Sie sind jetzt abgemeldet</string>
+    <string name="successfully_logged_out">Du bist jetzt abgemeldet</string>
     <string name="could_not_log_in">Anmeldungsfehler</string>
-
     <!-- Downloads -->
-    <string name="downloads">Downloads</string>
-    <string name="download_queue">Downloadwarteschlange</string>
-    <string name="downloading_">Am herunterladen: %1$s</string>
+    <string name="downloads">Heruntergeladene</string>
+    <string name="download_queue">Herunterladen-Warteschlange</string>
+    <string name="downloading_">Am Herunterladen: %1$s</string>
     <string name="cancel_all">Alles abbrechen</string>
     <string name="downloaded">Heruntergeladen</string>
     <string name="not_downloaded">Nicht heruntergeladen</string>
     <string name="downloading">Wird heruntergeladen</string>
     <string name="download">Herunterladen</string>
     <string name="start_downloading_now">Herunterladen jetzt starten</string>
-    <string name="remove_download">Download löschen</string>
-    <string name="remove_downloads">Downloads löschen</string>
+    <string name="remove_download">Heruntergeladene Datei löschen</string>
+    <string name="remove_downloads">Heruntergeladene Dateien löschen</string>
     <string name="downloading_progress">Wird heruntergeladen (%1$d / %2$d)</string>
-    <string name="invalid_download_location">Ungültiger Downloadort</string>
+    <string name="invalid_download_location">Ungültiger Herunterladen-Ort</string>
     <string name="download_paused">Herunterladen pausiert</string>
     <string name="nothing_is_downloading">Nichts wird aktuell heruntergeladen</string>
-    <string name="download_complete">Download abgeschlossen</string>
+    <string name="download_complete">Herunterladenereignis abgeschlossen</string>
     <string name="download_error">Fehler beim Herunterladen</string>
-    <string name="could_not_download_chapter_can_try_again">Beim Herunterladen des Kapitels trat ein Fehler auf. Sie können es in der Downloadsektion erneut versuchen</string>
+    <string name="could_not_download_chapter_can_try_again">Beim Herunterladen des Kapitels trat ein Fehler auf. Sie können es in der Herunterladen-Sektion erneut versuchen</string>
     <string name="manage_whats_downloading">Verwalte was heruntergeladen werden soll</string>
-    <string name="visit_recents_for_download_queue">Die "Neues"-Registerkarte für Zugriff auf die Downloadwarteschlange besuchen. Sie können auch Doppeltippen oder drücken und halten für schnelleren Zugriff</string>
-
+    <string name="visit_recents_for_download_queue">Die Neues-Registerkarte für Zugriff auf die Herunterladen-Warteschlange besuchen. Sie können auch Doppeltippen oder drücken und halten für schnelleren Zugriff</string>
     <!-- Download Notification -->
     <string name="could_not_download_unexpected_error">Während dem Herunterladen ist ein unerwarteter Fehler aufgetreten</string>
     <string name="no_wifi_connection">Keine WLAN-Verbindung verfügbar</string>
     <string name="no_network_connection">Kein Netzwerk verfügbar</string>
-
     <!-- Downloads settings -->
-    <string name="download_location">Downloadordner</string>
+    <string name="download_location">Herunterladenordner</string>
     <string name="only_download_over_wifi">Nur über WLAN herunterladen</string>
     <string name="remove_when_marked_as_read">Gelesene Kapitel löschen</string>
     <string name="remove_after_read">Nach dem Lesen löschen</string>
@@ -635,7 +602,6 @@
     <string name="ask_on_chapters_page">Löschen während globalen Aktualisierungen. Auf Kapitelseite nachfragen.</string>
     <string name="always_keep">Immer behalten</string>
     <string name="always_delete">Immer löschen</string>
-
     <!-- Time -->
     <string name="manual">Manuell</string>
     <string name="hourly">Stündlich</string>
@@ -650,15 +616,12 @@
         <item quantity="one">Nach %1$s Minute</item>
         <item quantity="other">Nach %1$s Minuten</item>
     </plurals>
-
     <!-- File Picker Titles -->
     <string name="select_cover_image">Wähle Vorschaubild</string>
-    <string name="select_backup_file">Wähle Backupdatei</string>
-
+    <string name="select_backup_file">Wähle eine Sicherungsdatei</string>
     <!-- Webview -->
     <string name="failed_to_bypass_cloudflare">Umgehen von Cloudflare fehlgeschlagen</string>
     <string name="please_update_webview">Bitte für bessere Kompatibilität die Webansicht App aktualisieren</string>
-
     <!-- Miscellaneous -->
     <string name="add">Hinzufügen</string>
     <string name="all">Alle</string>
@@ -697,7 +660,7 @@
     <string name="keep">Behalten</string>
     <string name="left">Links</string>
     <string name="less">Weniger</string>
-    <string name="loading">Wird geladen…</string>
+    <string name="loading">Wird geladen …</string>
     <string name="lock">Gesperrt</string>
     <string name="mark_all_as_read">Alle als gelesen markieren</string>
     <string name="mark_all_as_unread">Alle als ungelesen markieren</string>
@@ -735,10 +698,10 @@
     <string name="select_none">Keine auswählen</string>
     <string name="share">Teilen</string>
     <string name="sort">Sortierung</string>
-    <string name="sort_and_filter">Sortierung &amp; Filter</string>
+    <string name="sort_and_filter">Sortierung und Filter</string>
     <string name="start">Start</string>
     <string name="stop">Stopp</string>
-    <string name="tag">Tag</string>
+    <string name="tag">Markierung</string>
     <string name="top">Oben</string>
     <string name="undo">Rückgängig machen</string>
     <string name="unknown_error">Unbekannter Fehler</string>
@@ -748,4 +711,11 @@
     <string name="view_all_errors">Alle Fehler zeigen</string>
     <string name="view_chapters">Kapitel anzeigen</string>
     <string name="wifi">WLAN</string>
+    <string name="mark_as_unread">Als ungelesen markieren</string>
+    <string name="mark_previous_as_unread">Vorherige Kapitel als ungelesen markieren</string>
+    <string name="download_unread">Ungelesene herunterladen</string>
+    <string name="error_sharing_cover">Fehler beim Teilen vom Vorschaubild</string>
+    <string name="error_saving_cover">Fehler beim Speichern vom Vorschaubild</string>
+    <string name="cover_saved">Vorschaubild gespeichert</string>
+    <string name="enable_zoom_out">Rauszoomen aktivieren</string>
 </resources>

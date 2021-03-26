@@ -31,7 +31,6 @@
     <string name="delete">Burahin</string>
     <string name="edit">I-edit</string>
     <string name="add">Idagdag</string>
-    <string name="add_category">Magdagdag ng kategorya</string>
     <string name="edit_categories">I-edit ang mga kategorya</string>
     <string name="rename_category">Baguhin ang pangalan ng kategorya</string>
     <string name="move_to_categories">Ilipat sa (mga) kategorya</string>
@@ -45,7 +44,6 @@
     <string name="resume">Ipagpatuloy</string>
     <string name="open_in_browser">Buksan sa browser</string>
     <string name="open_in_webview">Buksan sa web view</string>
-    <string name="add_to_home_screen">Ilagay sa home screen</string>
     <string name="display">Display</string>
     <string name="compact_grid">Pa-grid</string>
     <string name="list">Pa-listahan</string>
@@ -134,7 +132,6 @@
     <string name="right_to_left_viewer">Kanan pakaliwa</string>
     <string name="vertical_viewer">Patayo</string>
     <string name="webtoon">Pa-webtoon</string>
-    <string name="pager_viewer">Pager</string>
     <string name="scale_type">Uri ng pag-scale</string>
     <string name="fit_screen">Pagkasyahin sa screen</string>
     <string name="stretch">Banatin</string>
@@ -183,8 +180,6 @@
     <string name="max_auto_backups">Hangganan ng mga awtomatikong backup</string>
     <string name="backup_created">Nagawa na ang backup</string>
     <string name="restore_completed">Nakumpleto na ang pagre-restore</string>
-    <string name="restore_completed_content">Tumagal nang %1$s ang pagre-restore
-\nNakita ang %2$s na (mga) error.</string>
     <string name="restore_message">Ginagamit ng pagre-restore ang source para makakuha ng data, maaring magamit ang inyong data.
 \nSiguraduhin din na ikaw ay maayos na naka-login sa mga source that nangangailangan nito bago mag-restore.</string>
     <string name="color_filter_blend_mode">Blend mode ng color filter</string>
@@ -196,7 +191,6 @@
     <string name="help">Tulong</string>
     <string name="library_update_order">Ayos ng pag-update ng Aklatan</string>
     <string name="select_order_to_update">Piliin ang ayos ng pag-check ng mga update ng Tachiyomi</string>
-    <string name="file_saved_at_">Na-save ang file sa %1$s</string>
     <string name="what_should_backup">Ano ang gusto mong i-backup\?</string>
     <string name="restoring_backup">Nire-restore ang backup</string>
     <string name="clear_chapter_cache">Linisin ang cache ng kabanata</string>
@@ -243,13 +237,6 @@
     <string name="author">Gumawa</string>
     <string name="artist">Gumuhit</string>
     <string name="status">Estado</string>
-    <string name="circular">Icon na pabilog</string>
-    <string name="rounded">Icon na paikot</string>
-    <string name="square">Icon na parisukat</string>
-    <string name="star">Icon na bituin</string>
-    <string name="shortcut_created">Nailagay sa home screen ang shortcut.</string>
-    <string name="icon_shape">Hugis ng icon</string>
-    <string name="could_not_create_shortcut">Nabigong gawin ang shortcut!</string>
     <string name="_copied_to_clipboard">Nakopya sa clipboard ang %1$s</string>
     <string name="source_not_installed_">Hindi na-install ang source: %1$s</string>
     <string name="chapter_">Kabanata %1$s</string>
@@ -294,7 +281,6 @@
     <string name="source_dash_chapter_">%1$s - Kab. %2$s</string>
     <string name="select">Pumili</string>
     <string name="migrate">Lumipat</string>
-    <string name="copy">Kopyahin</string>
     <string name="could_not_download_chapter_can_try_again">Nagkaproblema habang nagda-download ng mga kabanata. Maaring mong ulitin ito sa Downloads section.</string>
     <string name="new_chapters_found">May nakitang bagong (mga) kabanata</string>
     <string name="failed_to_update_cover">Pumalya sa pag-update ng pabalat</string>

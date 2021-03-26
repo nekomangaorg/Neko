@@ -25,12 +25,10 @@
     <string name="delete">Odstranit</string>
     <string name="edit">Upravit</string>
     <string name="add">Přidat</string>
-    <string name="add_category">Přidat kategorii</string>
     <string name="edit_categories">Upravit kategorie</string>
     <string name="close">Zavřít</string>
     <string name="remove">Odstranit</string>
     <string name="open_in_browser">Otevřít v prohlížeči</string>
-    <string name="add_to_home_screen">Přidat na plochu</string>
     <string name="compact_grid">Mřížka</string>
     <string name="list">Seznam</string>
     <string name="cancel">Zrušit</string>
@@ -114,8 +112,6 @@
     <string name="added_to_library">Přidáno do knihovny</string>
     <string name="removed_from_library">Odstraněno z knihovny</string>
     <string name="author">Autor</string>
-    <string name="shortcut_created">Zástupce byl přidán na plochu.</string>
-    <string name="could_not_create_shortcut">Nepodařilo se vytvořit zástupce!</string>
     <string name="source_not_installed_">Zdroj není nainstalována: %1$s</string>
     <string name="chapter_">Kapitola %1$s</string>
     <string name="downloading">Stahování</string>
@@ -147,7 +143,6 @@
     <string name="loading_pages">Načítání stránek…</string>
     <string name="select">Vybrat</string>
     <string name="migrate">Migrovat</string>
-    <string name="copy">Kopírovat</string>
     <string name="could_not_download_chapter_can_try_again">Došlo k chybě při stahování kapitol. Zkuste to znovu v sekci stahování</string>
     <string name="new_chapters_found">Nalezeny nové kapitoly</string>
     <string name="select_backup_file">Vybrat záložní soubor</string>
@@ -257,11 +252,6 @@
     <string name="licensed">Licencovaný</string>
     <string name="artist">Kreslíř</string>
     <string name="status">Stav</string>
-    <string name="circular">Kruhová ikona</string>
-    <string name="rounded">Zaoblená ikona</string>
-    <string name="square">Čtvercová ikona</string>
-    <string name="star">Hvězdicová ikona</string>
-    <string name="icon_shape">Tvar ikony</string>
     <string name="_copied_to_clipboard">%1$s zkopírováno do schránky</string>
     <string name="dropped">Upuštěno</string>
     <string name="on_hold">Pozastaveno</string>
@@ -273,7 +263,6 @@
     <string name="library_update_restriction_summary">Aktualizovat pouze pokud jsou splněny podmínky</string>
     <string name="keep_screen_on">Udržovat obrazovku zapnutou</string>
     <string name="navigation">Navigování</string>
-    <string name="pager_viewer">Stránkovač</string>
     <string name="last_read_chapter">Poslední přečtená kapitola</string>
     <string name="second_to_last">Předposlední kapitola</string>
     <string name="third_to_last">Třetí až poslední kapitola</string>
@@ -283,11 +272,8 @@
     <string name="can_be_used_to_restore">Lze použít k obnovení aktuální knihovny</string>
     <string name="restore_from_backup_file">Obnovit knihovnu ze záložního souboru</string>
     <string name="max_auto_backups">Maximální automatické zálohování</string>
-    <string name="restore_completed_content">Obnovení trvalo %1$s.
-\nNalezené chyby: %2$s.</string>
     <string name="restore_message">Obnovení používá zdroje pro načítání dat, mohou být účtovány poplatky od operátora (v případě použití datového připojení).
 \nTaké se před obnovením ujistěte, že jste správně přihlášeni do zdrojů, které to vyžadují.</string>
-    <string name="file_saved_at_">Soubor uložen do %1$s</string>
     <string name="updates_covers_genres_desc">Aktualizuje obaly, žánry, popisy a informace o stavu mangy</string>
     <string name="auto_check_for_app_versions">Automaticky kontrolovat aktualizace aplikace</string>
     <string name="log_in_to_">Přihlášení pro %1$s</string>
@@ -306,4 +292,31 @@
     <string name="common">Běžný</string>
     <string name="system_default_all_blue">Výchozí (Tmavě modrá)</string>
     <string name="system_default_amoled">Výchozí (AMOLED)</string>
+    <string name="creating_backup">Vytváření zálohy</string>
+    <string name="pref_global_search">Globální vyhledávání</string>
+    <string name="app_not_available">Aplikace není k dispozici</string>
+    <string name="back">Zpět</string>
+    <string name="update">Aktualizovat</string>
+    <string name="library_update_order">Pořadí aktualizace knihovny</string>
+    <string name="no_results_found">Nenalezeny žádné výsledky</string>
+    <string name="obsolete">Zastaralý</string>
+    <string name="obsolete_extension_message">Tohle rozšíření již není dostupné.</string>
+    <string name="true_32bit_color">32-bitová barva</string>
+    <string name="color_filter_blend_mode">Režim mísení filtru barev</string>
+    <string name="overlay">Překrytí</string>
+    <string name="multiply">Násobení</string>
+    <string name="screen">Obrazovka</string>
+    <string name="dodge_lighten">Zesvětlit</string>
+    <string name="burn_darken">Ztmavit</string>
+    <string name="skip_read_chapters">Přeskakovat přečtené kapitoly</string>
+    <string name="long_tap_dialog">Nabídka při dlouhém podržení</string>
+    <string name="remove_from_library">Odstranit z knihovny</string>
+    <string name="copy_value">Kopírovat</string>
+    <string name="help">Nápověda</string>
+    <string name="forward">Vpřed</string>
+    <string name="mark_as_unread">Označit jako nepřečtené</string>
+    <string name="more">Více</string>
+    <string name="refresh">Obnovit</string>
+    <string name="open_in_webview">Otevřít ve WebView</string>
+    <string name="lock_when_idle">Uzamknout při nečinnosti</string>
 </resources>
