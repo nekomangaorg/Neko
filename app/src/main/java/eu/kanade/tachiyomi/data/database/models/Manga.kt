@@ -69,6 +69,10 @@ interface Manga : SManga {
         return genre?.split(", ")?.map { it.trim() }
     }
 
+    fun getOriginalGenres(): List<String>? {
+        return (originalGenre ?: genre)?.split(", ")?.map { it.trim() }
+    }
+
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */

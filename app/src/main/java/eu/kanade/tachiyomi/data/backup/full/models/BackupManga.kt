@@ -69,11 +69,11 @@ data class BackupManga(
         fun copyFrom(manga: Manga): BackupManga {
             return BackupManga(
                 url = manga.url,
-                title = manga.title,
-                artist = manga.artist,
-                author = manga.author,
-                description = manga.description,
-                genre = manga.getGenres() ?: emptyList(),
+                title = manga.originalTitle,
+                artist = manga.originalArtist,
+                author = manga.originalAuthor,
+                description = manga.originalDescription,
+                genre = manga.getOriginalGenres() ?: emptyList(),
                 status = manga.status,
                 thumbnailUrl = manga.thumbnail_url,
                 favorite = manga.favorite,
