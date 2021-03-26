@@ -13,7 +13,6 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
@@ -153,21 +152,15 @@ class SourceController :
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
                 recycler.updatePaddingRelative(bottom = activity?.bottom_nav?.height ?: 0)
+            },
+            onBottomNavUpdate = {
+                setBottomPadding()
             }
         )
 
         recycler?.post {
-            setBottomPadding()
             setBottomSheetTabs(if (ext_bottom_sheet?.sheetBehavior.isCollapsed()) 0f else 1f)
         }
-        recycler.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    setBottomPadding()
-                }
-            }
-        )
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
         ext_bottom_sheet.onCreate(this)
@@ -230,7 +223,6 @@ class SourceController :
 
     fun setBottomSheetTabs(progress: Float) {
         val bottomSheet = ext_bottom_sheet ?: return
-        val bottomBar = activity?.bottom_nav ?: return
         ext_bottom_sheet.tabs.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = ((activity?.appbar?.height?.minus(9f.dpToPx) ?: 0f) * progress).toInt()
         }

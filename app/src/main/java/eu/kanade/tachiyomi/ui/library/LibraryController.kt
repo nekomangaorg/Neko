@@ -235,7 +235,6 @@ class LibraryController(
                     showCategoryText(currentCategory.name)
                 }
             }
-            updateFilterSheetY()
             val savedCurrentCategory = getHeader(true)?.category ?: return
             if (savedCurrentCategory.order != lastUsedCategory) {
                 lastUsedCategory = savedCurrentCategory.order
@@ -252,7 +251,6 @@ class LibraryController(
                 }
                 RecyclerView.SCROLL_STATE_IDLE -> {
                     updateHopperPosition()
-                    updateFilterSheetY()
                 }
             }
         }
@@ -262,7 +260,6 @@ class LibraryController(
         val bottomBar = activity?.bottom_nav
         filter_bottom_sheet ?: return
         if (bottomBar != null) {
-            updateHopperY()
             if (filter_bottom_sheet.sheetBehavior.isHidden()) {
                 val pad = bottomBar.translationY - bottomBar.height
                 filter_bottom_sheet.translationY = pad
@@ -283,6 +280,7 @@ class LibraryController(
                 view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
             )
             filter_bottom_sheet.sheetBehavior?.peekHeight = 60.dpToPx + padding
+            updateHopperY()
             fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = -pad.toInt()
             }
@@ -387,9 +385,6 @@ class LibraryController(
 
         adapter = LibraryCategoryAdapter(this)
         setRecyclerLayout()
-        recycler.post {
-            updateFilterSheetY()
-        }
 
         recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {
@@ -442,6 +437,9 @@ class LibraryController(
                 },
                 onLeavingController = {
                     header_title?.gone()
+                },
+                onBottomNavUpdate = {
+                    updateFilterSheetY()
                 }
             )
 

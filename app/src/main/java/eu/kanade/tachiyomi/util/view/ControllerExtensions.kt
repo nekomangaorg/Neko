@@ -104,7 +104,8 @@ fun Controller.scrollViewWith(
     swipeRefreshLayout: SwipeRefreshLayout? = null,
     afterInsets: ((WindowInsets) -> Unit)? = null,
     liftOnScroll: ((Boolean) -> Unit)? = null,
-    onLeavingController: (() -> Unit)? = null
+    onLeavingController: (() -> Unit)? = null,
+    onBottomNavUpdate: (() -> Unit)? = null
 ): ((Boolean) -> Unit) {
     var statusBarHeight = -1
     activity?.appbar?.y = 0f
@@ -119,6 +120,9 @@ fun Controller.scrollViewWith(
             appBarHeight = activity!!.toolbar.height
             recycler.requestApplyInsets()
         }
+    }
+    recycler.post {
+        onBottomNavUpdate?.invoke()
     }
     val randomTag = Random.nextLong()
     var lastY = 0f
@@ -219,10 +223,17 @@ fun Controller.scrollViewWith(
                         val shortAnimationDuration = resources?.getInteger(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
-                        activity!!.appbar.animate().y(0f).setDuration(shortAnimationDuration.toLong())
+                        activity!!.appbar.animate().y(0f)
+                            .setDuration(shortAnimationDuration.toLong())
                             .start()
-                        activity!!.bottom_nav?.animate()?.translationYBy(0f)?.setDuration(shortAnimationDuration.toLong())
-                            ?.start()
+                        activity!!.bottom_nav?.let {
+                            val animator = it.animate()?.translationY(0f)
+                                ?.setDuration(shortAnimationDuration.toLong())
+                            animator?.setUpdateListener {
+                                onBottomNavUpdate?.invoke()
+                            }
+                            animator?.start()
+                        }
                         lastY = 0f
                         if (elevate) elevateFunc(false)
                     } else {
@@ -243,6 +254,7 @@ fun Controller.scrollViewWith(
                                     tabBar.height.toFloat()
                                 )
                                 activity!!.bottom_view?.translationY = tabBar.translationY
+                                onBottomNavUpdate?.invoke()
                             } else if (tabBar.translationY != 0f) {
                                 tabBar.translationY = 0f
                                 activity!!.bottom_view?.translationY = 0f
@@ -279,6 +291,17 @@ fun Controller.scrollViewWith(
                         val atTop = !recycler.canScrollVertically(-1)
                         lastY = if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
                         activity!!.appbar.animate().y(lastY).setDuration(shortAnimationDuration.toLong()).start()
+                        activity!!.bottom_nav?.let {
+                            val halfWayBottom = abs((it.height.toFloat()) / 2)
+                            val closerToBottom = it.translationY > halfWayBottom
+                            val lastBottomY = if (closerToBottom && !atTop) it.height.toFloat() else 0f
+                            val animator = it.animate()?.translationY(lastBottomY)
+                                ?.setDuration(shortAnimationDuration.toLong())
+                            animator?.setUpdateListener {
+                                onBottomNavUpdate?.invoke()
+                            }
+                            animator?.start()
+                        }
                         if (recycler.canScrollVertically(-1) && !elevate) elevateFunc(true)
                         else if (!recycler.canScrollVertically(-1) && elevate) elevateFunc(false)
                     }

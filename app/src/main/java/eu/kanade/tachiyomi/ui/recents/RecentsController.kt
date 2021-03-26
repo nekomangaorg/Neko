@@ -134,6 +134,9 @@ class RecentsController(bundle: Bundle? = null) :
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
                 recycler.updatePaddingRelative(bottom = activity!!.bottom_nav.height)
+            },
+            onBottomNavUpdate = {
+                setBottomPadding()
             }
         )
 
@@ -144,17 +147,6 @@ class RecentsController(bundle: Bundle? = null) :
                 adapter.addScrollableHeader(presenter.generalHeader)
             }
         }
-        recycler?.post {
-            setBottomPadding()
-        }
-        recycler.addOnScrollListener(
-            object : RecyclerView.OnScrollListener() {
-                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    super.onScrolled(recyclerView, dx, dy)
-                    setBottomPadding()
-                }
-            }
-        )
 
         dl_bottom_sheet.onCreate(this)
 
