@@ -4,11 +4,13 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
+import android.widget.FrameLayout
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
@@ -127,6 +129,7 @@ fun Controller.scrollViewWith(
     val randomTag = Random.nextLong()
     var lastY = 0f
     var fakeToolbarView: View? = null
+    var fakeBottomNavView: View? = null
     if (!customPadding) {
         recycler.updatePaddingRelative(
             top = activity!!.toolbar.y.toInt() + appBarHeight
@@ -179,6 +182,11 @@ fun Controller.scrollViewWith(
                         parent.removeView(fakeToolbarView)
                         fakeToolbarView = null
                     }
+                    if (fakeBottomNavView?.parent != null) {
+                        val parent = fakeBottomNavView?.parent as? ViewGroup ?: return
+                        parent.removeView(fakeBottomNavView)
+                        fakeBottomNavView = null
+                    }
                     lastY = 0f
                     activity!!.toolbar.tag = randomTag
                     activity!!.toolbar.setOnClickListener {
@@ -202,6 +210,20 @@ fun Controller.scrollViewWith(
                         v.setBackgroundColor(v.context.getResourceColor(R.attr.colorSecondary))
                         v.layoutParams = params
                         onLeavingController?.invoke()
+                    }
+                    if (!customPadding && router.backstackSize == 2) {
+                        val parent = recycler.parent as? ViewGroup ?: return
+                        val bottomNav = activity!!.bottom_nav ?: return
+                        val v = View(activity)
+                        fakeBottomNavView = v
+                        parent.addView(v, parent.indexOfChild(recycler) + 1)
+                        val params = fakeBottomNavView?.layoutParams
+                        params?.height = recycler.paddingBottom
+                        (params as? FrameLayout.LayoutParams)?.gravity = Gravity.BOTTOM
+                        fakeBottomNavView?.translationY = bottomNav.translationY
+                        params?.width = MATCH_PARENT
+                        v.setBackgroundColor(v.context.getResourceColor(R.attr.colorPrimaryVariant))
+                        v.layoutParams = params
                     }
                     elevationAnim?.cancel()
                     if (activity!!.toolbar.tag == randomTag) activity!!.toolbar.setOnClickListener(null)

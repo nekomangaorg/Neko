@@ -262,7 +262,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 ) {
                     syncActivityViewWithController(to, from, isPush)
                     appbar.y = 0f
-                    bottom_nav.translationY = 0f
+                    if (!isPush) {
+                        bottom_nav.translationY = 0f
+                    }
                     snackBar?.dismiss()
                 }
 
