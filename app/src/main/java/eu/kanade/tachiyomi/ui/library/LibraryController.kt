@@ -222,6 +222,9 @@ class LibraryController(
                     hopperOffset += dy
                     hopperOffset = hopperOffset.coerceIn(0f, 55f.dpToPx)
                 }
+                if (!preferences.hideBottomNavOnScroll().get()) {
+                    updateFilterSheetY()
+                }
                 up_category.alpha = if (isAtTop()) 0.25f else 1f
                 down_category.alpha = if (isAtBottom()) 0.25f else 1f
             }
@@ -291,12 +294,18 @@ class LibraryController(
         }
     }
 
-    fun updateHopperPosition(show: Boolean = false) {
+    fun updateHopperPosition() {
         val shortAnimationDuration = resources?.getInteger(
             android.R.integer.config_shortAnimTime
         ) ?: 0
         if (preferences.autohideHopper().get()) {
-            val end = if (!show && hopperOffset > 25f.dpToPx) 55f.dpToPx else 0f
+            // Flow same snap rules as bottom nav
+            val closerToHopperBottom = hopperOffset > 25f.dpToPx
+            val halfWayBottom = activity!!.bottom_nav.height.toFloat() / 2
+            val closerToBottom = activity!!.bottom_nav.translationY > halfWayBottom
+            val atTop = !recycler.canScrollVertically(-1)
+            val closerToEdge = if (preferences.hideBottomNavOnScroll().get()) (closerToBottom && !atTop) else closerToHopperBottom
+            val end = if (closerToEdge) 55f.dpToPx else 0f
             val alphaAnimation = ValueAnimator.ofFloat(hopperOffset, end)
             alphaAnimation.addUpdateListener { valueAnimator ->
                 hopperOffset = valueAnimator.animatedValue as Float
