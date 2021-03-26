@@ -105,6 +105,8 @@ open class MangaImpl : Manga {
 
     override var merge_manga_url: String? = null
 
+    override var merge_manga_image_url: String? = null
+
     override var last_chapter_number: Int? = null
 
     override fun copyFrom(other: SManga) {

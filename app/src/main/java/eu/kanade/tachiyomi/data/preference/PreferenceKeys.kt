@@ -183,9 +183,9 @@ object PreferenceKeys {
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 
-    const val useNewApiServer = "use_new_api_server"
-
     const val createLegacyBackup = "create_legacy_backup"
+
+    const val useCacheSource = "use_cache_source"
 
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

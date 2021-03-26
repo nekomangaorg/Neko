@@ -3,6 +3,8 @@ package eu.kanade.tachiyomi.ui.manga.merge
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import android.view.ViewGroup
+import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.jakewharton.rxbinding.widget.itemClicks
@@ -21,6 +23,7 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import java.util.concurrent.TimeUnit
+
 
 class MergeSearchDialog : DialogController {
 
@@ -46,9 +49,12 @@ class MergeSearchDialog : DialogController {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
-            customView(viewRes = R.layout.merge_search_dialog, scrollable = false)
+            customView(viewRes = R.layout.merge_search_dialog, scrollable = false, noVerticalPadding = true)
             negativeButton(android.R.string.cancel)
         }
+        val width = ViewGroup.LayoutParams.MATCH_PARENT
+        val height = ViewGroup.LayoutParams.MATCH_PARENT
+        dialog.window!!.setLayout(width, height)
 
         if (subscriptions.isUnsubscribed) {
             subscriptions = CompositeSubscription()
@@ -134,7 +140,7 @@ class MergeSearchDialog : DialogController {
         view.merge_search_list.gone()
         view.empty_view.visible()
         view.empty_view.showMedium(
-            CommunityMaterial.Icon.cmd_compass_off, view.context.getString(R.string.no_results_found)
+                CommunityMaterial.Icon.cmd_compass_off, view.context.getString(R.string.no_results_found)
         )
     }
 

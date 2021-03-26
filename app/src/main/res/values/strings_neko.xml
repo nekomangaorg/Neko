@@ -137,6 +137,7 @@
     <string name="show_r18_filter_in_search">Show R18 filter in search</string>
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
     <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
+    <string name="use_cache_source">Use cached manga api source</string>
 
 
     <!-- Advanced Settings -->

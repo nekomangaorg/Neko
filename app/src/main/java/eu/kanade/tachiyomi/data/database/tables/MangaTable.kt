@@ -70,6 +70,8 @@ object MangaTable {
 
     const val COL_MANGA_LAST_CHAPTER = "manga_last_chapter"
 
+    const val COL_MERGE_MANGA_IMAGE_URL = "merge_manga_image_url"
+
     val createTableQuery: String
         get() =
             """CREATE TABLE $TABLE(
@@ -101,6 +103,7 @@ object MangaTable {
             $COL_RATING TEXT,
             $COL_USERS TEXT,
             $COL_MERGE_MANGA_URL TEXT,
+            $COL_MERGE_MANGA_IMAGE_URL TEXT,
             $COL_MANGA_LAST_CHAPTER INTEGER,
             $COL_FOLLOW_STATUS INTEGER
             )"""
@@ -156,4 +159,8 @@ object MangaTable {
 
     val addMangaLastChapter: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MANGA_LAST_CHAPTER} INTEGER DEFAULT NULL"
+
+    val addMergeMangaImageCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MERGE_MANGA_IMAGE_URL} TEXT DEFAULT NULL"
+
 }

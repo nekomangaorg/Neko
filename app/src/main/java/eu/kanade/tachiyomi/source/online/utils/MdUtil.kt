@@ -13,6 +13,7 @@ class MdUtil {
         const val baseUrl = "https://mangadex.org"
         const val randMangaPage = "/manga/"
         const val apiUrl = "https://api.mangadex.org"
+        const val apiUrlCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
         const val apiManga = "/v2/manga/"
         const val includeChapters = "?include=chapters"
         const val oldApiChapter = "/api/chapter/"
