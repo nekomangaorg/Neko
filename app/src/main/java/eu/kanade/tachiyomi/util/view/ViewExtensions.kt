@@ -265,6 +265,10 @@ fun BottomSheetDialog.setEdgeToEdge(
     contentView.post {
         (contentView.parent as View).background = null
     }
+    contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        leftMargin = insets.systemWindowInsetLeft
+        rightMargin = insets.systemWindowInsetRight
+    }
     if (setTopMargin > 0) (contentView.parent as View).updateLayoutParams<ViewGroup.MarginLayoutParams> {
         height = activity.window.decorView.height - insets.systemWindowInsetTop - setTopMargin
     }

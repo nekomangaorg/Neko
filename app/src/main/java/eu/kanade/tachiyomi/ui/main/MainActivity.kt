@@ -224,6 +224,17 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         bottom_view.gone()
         content.doOnApplyWindowInsets { v, insets, _ ->
             setNavBarColor(insets)
+            val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
+            contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                leftMargin = insets.systemWindowInsetLeft
+                rightMargin = insets.systemWindowInsetRight
+            }
+            // Consume any horizontal insets and pad all content in. There's not much we can do
+            // with horizontal insets
+            v.updatePadding(
+                left = insets.systemWindowInsetLeft,
+                right = insets.systemWindowInsetRight
+            )
             appbar.updatePadding(
                 top = insets.systemWindowInsetTop
             )
