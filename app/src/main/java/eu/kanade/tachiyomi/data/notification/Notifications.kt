@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.notification
 
 import android.app.NotificationChannel
+import android.app.NotificationChannelGroup
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Build
@@ -46,12 +47,13 @@ object Notifications {
     const val CHANNEL_UPDATES_TO_EXTS = "updates_ext_channel"
     const val ID_UPDATES_TO_EXTS = -401
 
-    const val CHANNEL_BACKUP_RESTORE = "backup_restore_channel"
+    private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
+    const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
     const val ID_RESTORE_PROGRESS = -501
     const val ID_RESTORE_COMPLETE = -502
+    const val CHANNEL_BACKUP_RESTORE_COMPLETE = "backup_restore_complete_channel_v2"
     const val ID_BACKUP_PROGRESS = -502
     const val ID_BACKUP_COMPLETE = -503
-    const val ID_RESTORE_ERROR = -504
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -60,6 +62,10 @@ object Notifications {
      */
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
+
+        listOf(
+            NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.backup_and_restore)),
+        ).forEach(context.notificationManager::createNotificationChannelGroup)
 
         val channels = listOf(
             NotificationChannel(
@@ -92,11 +98,21 @@ object Notifications {
                 NotificationManager.IMPORTANCE_DEFAULT
             ),
             NotificationChannel(
-                CHANNEL_BACKUP_RESTORE,
-                context.getString(R.string.restoring_backup),
+                CHANNEL_BACKUP_RESTORE_PROGRESS,
+                context.getString(R.string.progress),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
+                group = GROUP_BACKUP_RESTORE
                 setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_BACKUP_RESTORE_COMPLETE,
+                context.getString(R.string.complete),
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                group = GROUP_BACKUP_RESTORE
+                setShowBadge(false)
+                setSound(null, null)
             }
         )
         context.notificationManager.createNotificationChannels(channels)

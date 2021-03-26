@@ -547,6 +547,7 @@
 
     <!-- Backup -->
     <string name="backup">Backup</string>
+    <string name="backup_and_restore">Backup and restore</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
     <string name="create_legacy_backup">Create legacy backup</string>
@@ -581,6 +582,8 @@
     <string name="restoring_backup">Restoring backup</string>
     <string name="restoring_progress">Restoring (%1$d/%2$d)</string>
     <string name="restore_duration">%02d min, %02d sec</string>
+    <string name="progress">Progress</string>
+    <string name="complete">Complete</string>
     <plurals name="restore_completed_message">
         <item quantity="one">Done in %1$s with %2$s error</item>
         <item quantity="other">Done in %1$s with %2$s errors</item>
