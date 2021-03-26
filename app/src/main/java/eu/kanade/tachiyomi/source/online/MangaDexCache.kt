@@ -21,7 +21,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.Request
+import okhttp3.RequestBody
+import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.json.JSONObject
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
@@ -29,6 +32,8 @@ open class MangaDexCache() : MangaDex() {
 
     private val preferences: PreferencesHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
+    private val clientAnilist = network.client.newBuilder().build()
+    private val clientMyAnimeList = network.client.newBuilder().build()
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         throw Exception("Cache source cannot update follow status")
@@ -176,6 +181,42 @@ open class MangaDexCache() : MangaDex() {
                 genres.add("Hentai")
             }
             mangaReturn.genre = genres.joinToString(", ")
+
+            // Query graph ql endpoint for our image
+            // https://stackoverflow.com/a/58923947
+            if(mangaReturn.anilist_id != null && mangaReturn.thumbnail_url == null) {
+                val query = "{\n" +
+                        "  Media(id: ${mangaReturn.anilist_id}, type: MANGA) {\n" +
+                        "    coverImage {\n" +
+                        "      extraLarge\n" +
+                        "      large\n" +
+                        "    }\n" +
+                        "  }\n" +
+                        "}\n"
+                val json = JSONObject()
+                json.put("query",query)
+                val requestBody = json.toString().toRequestBody(null)
+                val request = Request.Builder().url("https://graphql.anilist.co").post(requestBody)
+                        .addHeader("content-type", "application/json").build()
+                val response = clientAnilist.newCall(request).execute()
+                val data = JSONObject(response.body!!.string())
+                mangaReturn.thumbnail_url = data.getJSONObject("data")
+                        .getJSONObject("Media")
+                        .getJSONObject("coverImage")
+                        .getString("extraLarge")
+            }
+
+            // Query MAL api for an image
+            // https://jikan.docs.apiary.io/#reference/0/manga
+            if(mangaReturn.my_anime_list_id != null && mangaReturn.thumbnail_url == null) {
+                val request = GET("https://api.jikan.moe/v3/manga/${mangaReturn.my_anime_list_id}/pictures",headers, CacheControl.FORCE_NETWORK)
+                val response = clientMyAnimeList.newCall(request).execute()
+                val data = JSONObject(response.body!!.string())
+                val pictures = data.getJSONArray("pictures")
+                if(pictures.length() > 0) {
+                    mangaReturn.thumbnail_url = pictures.getJSONObject(pictures.length()-1).getString("large")
+                }
+            }
 
             return mangaReturn
         } catch (e: Exception) {

@@ -103,9 +103,9 @@ object MangaTable {
             $COL_RATING TEXT,
             $COL_USERS TEXT,
             $COL_MERGE_MANGA_URL TEXT,
-            $COL_MANGA_LAST_CHAPTER INTEGER,
-            $COL_FOLLOW_STATUS INTEGER,
             $COL_MERGE_MANGA_IMAGE_URL TEXT,
+            $COL_MANGA_LAST_CHAPTER INTEGER,
+            $COL_FOLLOW_STATUS INTEGER
             )"""
 
     val createUrlIndexQuery: String
