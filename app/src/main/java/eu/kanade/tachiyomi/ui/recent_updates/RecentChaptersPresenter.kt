@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.recent_updates
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -92,7 +91,7 @@ class RecentChaptersPresenter(
         }
     }
 
-    override fun onUpdateManga(manga: LibraryManga) {
+    override fun onUpdateManga(manga: Manga?) {
         getUpdates()
     }
 

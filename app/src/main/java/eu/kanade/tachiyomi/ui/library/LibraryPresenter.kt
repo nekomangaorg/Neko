@@ -737,7 +737,7 @@ class LibraryPresenter(
     }
 
     /** Called when Library Service updates a manga, update the item as well */
-    fun updateManga(manga: LibraryManga) {
+    fun updateManga() {
         scope.launch {
             getLibrary()
         }

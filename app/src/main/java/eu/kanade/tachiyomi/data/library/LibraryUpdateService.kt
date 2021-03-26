@@ -180,7 +180,7 @@ class LibraryUpdateService(
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
-        listener?.onUpdateManga(LibraryManga())
+        listener?.onUpdateManga()
         super.onDestroy()
     }
 
@@ -225,7 +225,7 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         if (target == Target.CHAPTERS) {
-            listener?.onUpdateManga(LibraryManga())
+            listener?.onUpdateManga()
         }
         job = GlobalScope.launch(handler) {
             when (target) {
@@ -626,9 +626,13 @@ class LibraryUpdateService(
         fun removeListener(listener: LibraryServiceListener) {
             if (this.listener == listener) this.listener = null
         }
+
+        fun callListener(manga: Manga) {
+            listener?.onUpdateManga(manga)
+        }
     }
 }
 
 interface LibraryServiceListener {
-    fun onUpdateManga(manga: LibraryManga)
+    fun onUpdateManga(manga: Manga? = null)
 }

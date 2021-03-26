@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -599,8 +598,8 @@ class MangaDetailsPresenter(
         toggleFavorite()
     }
 
-    override fun onUpdateManga(manga: LibraryManga) {
-        if (manga.id == this.manga.id) {
+    override fun onUpdateManga(manga: Manga?) {
+        if (manga?.id == this.manga.id) {
             fetchChapters()
         }
     }

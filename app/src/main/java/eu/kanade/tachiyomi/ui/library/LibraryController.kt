@@ -1165,9 +1165,9 @@ class LibraryController(
         }
     }
 
-    override fun onUpdateManga(manga: LibraryManga) {
-        if (manga.id == null) adapter.notifyDataSetChanged()
-        else presenter.updateManga(manga)
+    override fun onUpdateManga(manga: Manga?) {
+        if (manga == null) adapter.notifyDataSetChanged()
+        else presenter.updateManga()
     }
 
     private fun setSelection(position: Int, selected: Boolean = true) {

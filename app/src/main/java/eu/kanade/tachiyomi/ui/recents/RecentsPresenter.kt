@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.HistoryImpl
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -265,10 +264,10 @@ class RecentsPresenter(
         }
     }
 
-    override fun onUpdateManga(manga: LibraryManga) {
-        if (manga.id == null && !LibraryUpdateService.isRunning()) {
+    override fun onUpdateManga(manga: Manga?) {
+        if (manga == null && !LibraryUpdateService.isRunning()) {
             scope.launch(Dispatchers.Main) { controller.setRefreshing(false) }
-        } else if (manga.id == null) {
+        } else if (manga == null) {
             scope.launch(Dispatchers.Main) { controller.setRefreshing(true) }
         } else {
             getRecents()

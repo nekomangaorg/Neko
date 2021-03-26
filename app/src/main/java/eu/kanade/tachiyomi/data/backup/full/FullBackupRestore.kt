@@ -77,6 +77,7 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
 
         restoreProgress += 1
         showRestoreProgress(restoreProgress, restoreAmount, manga.title)
+        LibraryUpdateService.callListener(manga)
     }
 
     /**
