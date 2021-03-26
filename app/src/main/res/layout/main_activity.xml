@@ -69,6 +69,7 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         android:layout_width="match_parent"
+        android:visibility="gone"
         android:layout_height="0dp"
         tools:ignore="KeyboardInaccessibleWidget" />
 
