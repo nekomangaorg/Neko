@@ -50,7 +50,6 @@
             app:layout_constraintTop_toTopOf="parent"
             app:tabTextColor="@color/tabs_selector_background"
             app:tabIndicatorColor="?attr/colorAccent"
-            app:tabRippleColor="@color/rippleColor"
             app:tabMaxWidth="0dp"
             app:tabGravity="fill"
             app:tabMode="fixed" />

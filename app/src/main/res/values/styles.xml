@@ -212,6 +212,7 @@
         <item name="tabIndicator">@drawable/tab_indicator</item>
         <item name="tabIndicatorColor">?attr/colorAccent</item>
         <item name="tabTextColor">@color/tabs_selector</item>
+        <item name="tabRippleColor">@color/rippleColor</item>
         <item name="tabIndicatorFullWidth">false</item>
         <item name="tabIndicatorHeight">3dp</item>
         <item name="tabInlineLabel">true</item>
