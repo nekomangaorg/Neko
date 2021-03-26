@@ -2,10 +2,12 @@ package eu.kanade.tachiyomi.data.track.shikimori
 
 import androidx.core.net.toUri
 import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.nullString
 import com.github.salomonbrys.kotson.obj
 import com.google.gson.Gson
+import com.google.gson.JsonArray
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -20,6 +22,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInterceptor) {
@@ -68,6 +71,22 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
         }
     }
 
+    suspend fun remove(track: Track, user_id: String): Boolean {
+        return withContext(Dispatchers.IO) {
+            try {
+                val rates = getUserRates(track, user_id)
+                val id = rates.last()["id"]
+                val url = "$apiUrl/v2/user_rates/$id"
+                val request = Request.Builder().url(url).delete().build()
+                authClient.newCall(request).execute()
+                return@withContext true
+            } catch (e: Exception) {
+                Timber.w(e)
+            }
+            return@withContext false
+        }
+    }
+
     private fun jsonToSearch(obj: JsonObject): TrackSearch {
         return TrackSearch.create(TrackManager.SHIKIMORI).apply {
             media_id = obj["id"].asInt
@@ -94,14 +113,24 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
         }
     }
 
+    private fun getUserRates(track: Track, user_id: String): JsonArray {
+        val url = "$apiUrl/v2/user_rates".toUri().buildUpon()
+            .appendQueryParameter("user_id", user_id)
+            .appendQueryParameter("target_id", track.media_id.toString())
+            .appendQueryParameter("target_type", "Manga").build()
+        val request = Request.Builder().url(url.toString()).get().build()
+
+        val requestResponse = authClient.newCall(request).execute()
+        val requestResponseBody = requestResponse.body?.string().orEmpty()
+
+        if (requestResponseBody.isEmpty()) {
+            throw Exception("Null Response")
+        }
+        return JsonParser.parseString(requestResponseBody).array
+    }
+
     suspend fun findLibManga(track: Track, user_id: String): Track? {
         return withContext(Dispatchers.IO) {
-            val url = "$apiUrl/v2/user_rates".toUri().buildUpon()
-                .appendQueryParameter("user_id", user_id)
-                .appendQueryParameter("target_id", track.media_id.toString())
-                .appendQueryParameter("target_type", "Manga").build()
-            val request = Request.Builder().url(url.toString()).get().build()
-
             val urlMangas = "$apiUrl/mangas".toUri().buildUpon().appendPath(track.media_id.toString())
                 .build()
             val requestMangas = Request.Builder().url(urlMangas.toString()).get().build()
@@ -110,20 +139,10 @@ class ShikimoriApi(private val client: OkHttpClient, interceptor: ShikimoriInter
             val requestMangasBody = requestMangasResponse.body?.string().orEmpty()
             val mangas = JsonParser.parseString(requestMangasBody).obj
 
-            val requestResponse = authClient.newCall(request).execute()
-            val requestResponseBody = requestResponse.body?.string().orEmpty()
-
-            if (requestResponseBody.isEmpty()) {
-                throw Exception("Null Response")
-            }
-            val response = JsonParser.parseString(requestResponseBody).array
-            if (response.size() > 1) {
-                throw Exception("Too much mangas in response")
-            }
-            val entry = response.map {
+            val entry = getUserRates(track, user_id)
+            return@withContext entry.map {
                 jsonToTrack(it.obj, mangas)
-            }
-            entry.firstOrNull()
+            }.firstOrNull()
         }
     }
 

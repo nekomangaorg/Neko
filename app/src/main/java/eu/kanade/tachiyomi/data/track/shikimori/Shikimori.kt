@@ -92,6 +92,12 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
+    override fun canRemoveFromService(): Boolean = true
+
+    override suspend fun removeFromService(track: Track): Boolean {
+        return api.remove(track, getUsername())
+    }
+
     override suspend fun search(query: String) = api.search(query)
 
     override suspend fun refresh(track: Track): Track {
@@ -107,17 +113,17 @@ class Shikimori(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun login(username: String, password: String) = login(password)
 
     suspend fun login(code: String): Boolean {
-        try {
+        return try {
             val oauth = api.accessToken(code)
 
             interceptor.newAuth(oauth)
             val user = api.getCurrentUser()
             saveCredentials(user.toString(), oauth.access_token)
-            return true
+            true
         } catch (e: java.lang.Exception) {
             Timber.e(e)
             logout()
-            return false
+            false
         }
     }
 
