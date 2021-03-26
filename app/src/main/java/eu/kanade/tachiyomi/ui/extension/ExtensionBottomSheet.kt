@@ -150,7 +150,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun updateExtTitle() {
         val extCount = presenter.getExtensionUpdateCount()
-        if (extCount > 0) tabs.getTabAt(0)?.orCreateBadge?.number = extCount
+        if (extCount > 0) tabs.getTabAt(0)?.orCreateBadge
         else tabs.getTabAt(0)?.removeBadge()
     }
 
