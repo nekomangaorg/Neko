@@ -116,8 +116,7 @@
         android:id="@+id/category_hopper_frame"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center"
-        android:translationZ="50dp">
+        android:layout_gravity="top|center">
 
         <include layout="@layout/rounded_category_hopper" />
 

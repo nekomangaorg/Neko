@@ -615,11 +615,12 @@ class LibraryController(
         }
         category_hopper_frame.y = -category_hopper_frame.height +
             (listOfYs.minOrNull() ?: filter_bottom_sheet.y) +
-            hopperOffset
+            hopperOffset +
+            recycler.translationY
         if (view.height - insetBottom < category_hopper_frame.y) {
-            jumper_category_text.translationY = -(category_hopper_frame.y - (view.height - insetBottom))
+            jumper_category_text.translationY = -(category_hopper_frame.y - (view.height - insetBottom)) + recycler.translationY
         } else {
-            jumper_category_text.translationY = 0f
+            jumper_category_text.translationY = recycler.translationY
         }
     }
 
@@ -913,9 +914,9 @@ class LibraryController(
         recycler.animate().translationY(translateY).apply {
             setUpdateListener {
                 activity?.appbar?.y = 0f
+                updateHopperY()
             }
         }.start()
-        category_hopper_frame.animate().translationY(translateY).start()
         recycler_shadow.animate().translationY(translateY - 8.dpToPx).start()
         recycler_cover.animate().translationY(translateY).start()
         recycler_cover.animate().alpha(if (show) 0.75f else 0f).start()
