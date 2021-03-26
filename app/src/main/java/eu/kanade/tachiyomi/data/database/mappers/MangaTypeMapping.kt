@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_NEXT_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_LAST_CHAPTER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_IMAGE_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
@@ -63,7 +64,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         .whereArgs(obj.id)
         .build()
 
-    override fun mapToContentValues(obj: Manga) = ContentValues(15).apply {
+    override fun mapToContentValues(obj: Manga) = ContentValues(16).apply {
         put(COL_ID, obj.id)
         put(COL_SOURCE, obj.source)
         put(COL_URL, obj.url)
@@ -95,6 +96,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_USERS, obj.users)
         put(COL_MERGE_MANGA_URL, obj.merge_manga_url)
         put(COL_MANGA_LAST_CHAPTER, obj.last_chapter_number)
+        put(COL_MERGE_MANGA_IMAGE_URL, obj.merge_manga_image_url)
     }
 }
 
@@ -131,6 +133,7 @@ interface BaseMangaGetResolver {
         last_chapter_number = cursor.getIntOrNull(cursor.getColumnIndex(COL_MANGA_LAST_CHAPTER))
         follow_status =
             cursor.getInt(cursor.getColumnIndex(COL_FOLLOW_STATUS)).let { FollowStatus.fromInt(it) }
+        merge_manga_image_url = cursor.getString(cursor.getColumnIndex(COL_MERGE_MANGA_IMAGE_URL))
     }
 }
 

@@ -30,6 +30,17 @@ interface ChapterQueries : DbProvider {
         )
         .prepare()
 
+    fun getChaptersByMangaId(id: Long) = db.get()
+        .listOfObjects(Chapter::class.java)
+        .withQuery(
+            Query.builder()
+                .table(ChapterTable.TABLE)
+                .where("${ChapterTable.COL_MANGA_ID} = ?")
+                .whereArgs(id)
+                .build()
+        )
+        .prepare()
+
     fun getRecentChapters(date: Date) = db.get()
         .listOfObjects(MangaChapter::class.java)
         .withQuery(

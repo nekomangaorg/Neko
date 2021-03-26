@@ -60,6 +60,12 @@ class SettingsSiteController :
             }
         }
 
+        switchPreference {
+            key = PreferenceKeys.useCacheSource
+            titleRes = R.string.use_cache_source
+            defaultValue = false
+        }
+
         listPreference(activity) {
             key = PreferenceKeys.showR18
             titleRes = R.string.show_r18_title

@@ -61,6 +61,8 @@ interface SManga : Serializable {
 
     var merge_manga_url: String?
 
+    var merge_manga_image_url: String?
+
     var last_chapter_number: Int?
 
     fun copyFrom(other: SManga) {

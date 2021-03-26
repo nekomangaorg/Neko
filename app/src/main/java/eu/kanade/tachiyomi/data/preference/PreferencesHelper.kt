@@ -335,4 +335,6 @@ class PreferencesHelper(val context: Context) {
     fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
+
+    fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
 }

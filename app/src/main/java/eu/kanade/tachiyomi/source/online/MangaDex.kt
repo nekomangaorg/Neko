@@ -100,7 +100,7 @@ open class MangaDex() : HttpSource() {
         return FollowsHandler(clientBuilder(), headers, preferences).updateFollowStatus(mangaID, followStatus)
     }
 
-    fun fetchRandomMangaId(): Observable<String> {
+    open fun fetchRandomMangaId(): Observable<String> {
         return MangaHandler(clientBuilder(), headers, getLangsToShow()).fetchRandomMangaId()
     }
 
@@ -149,7 +149,7 @@ open class MangaDex() : HttpSource() {
         ).fetchChapterListObservable(manga)
     }
 
-    suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
+    open suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
         return MangaHandler(clientBuilder(), headers, getLangsToShow()).getMangaIdFromChapterId(urlChapterId)
     }
 
@@ -202,7 +202,7 @@ open class MangaDex() : HttpSource() {
         }
     }
 
-    fun imageRequest(page: Page): Request {
+    open fun imageRequest(page: Page): Request {
         val url = when {
             // Legacy
             page.url.isEmpty() -> page.imageUrl!!
@@ -238,11 +238,11 @@ open class MangaDex() : HttpSource() {
         return FollowsHandler(clientBuilder(), headers, preferences).fetchAllFollows(forceHd)
     }
 
-    suspend fun updateReadingProgress(track: Track): Boolean {
+    open suspend fun updateReadingProgress(track: Track): Boolean {
         return FollowsHandler(clientBuilder(), headers, preferences).updateReadingProgress(track)
     }
 
-    suspend fun updateRating(track: Track): Boolean {
+    open suspend fun updateRating(track: Track): Boolean {
         return FollowsHandler(clientBuilder(), headers, preferences).updateRating(track)
     }
 

@@ -388,6 +388,7 @@ class MangaDetailsPresenter(
 
     fun attachMergeManga(mergeManga: SManga?) {
         manga.merge_manga_url = mergeManga?.url
+        manga.merge_manga_image_url = mergeManga?.thumbnail_url
         val tempSet = filteredScanlators.toMutableSet()
         tempSet.add(MergeSource.name)
         filteredScanlators = tempSet
@@ -448,6 +449,11 @@ class MangaDetailsPresenter(
                     withContext(Dispatchers.Main) {
                         controller.clearCoverCache()
                     }
+                }
+
+                // If we don't have an image we can try to use the merge source image fallback
+                if(networkManga.thumbnail_url == null && manga.merge_manga_image_url != null) {
+                    manga.thumbnail_url = manga.merge_manga_image_url
                 }
                 db.insertManga(manga).executeOnIO()
             }

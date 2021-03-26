@@ -302,7 +302,7 @@ class LibraryUpdateService(
             val isDexUp = sourceManager.getMangadex().checkIfUp()
 
             jobCount.andIncrement
-            if (isDexUp) {
+            if (isDexUp || preferences.useCacheSource()) {
                 val results = mangaToUpdateMap.keys.map { source ->
                     try {
                         updateMangaInSource(source, downloadNew, categoriesToDownload)
@@ -336,7 +336,7 @@ class LibraryUpdateService(
                 errorFile.getUriCompat(this)
             )
         }
-        if (isDexUp.not()) {
+        if (isDexUp.not() && !preferences.useCacheSource()) {
             notifier.showUpdateErrorNotification(
                 listOf("Skipping library update"),
                 null

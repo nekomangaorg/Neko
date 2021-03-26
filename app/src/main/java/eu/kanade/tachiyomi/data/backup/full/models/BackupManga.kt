@@ -36,6 +36,7 @@ data class BackupManga(
     @ProtoNumber(102) var history: List<BackupHistory> = emptyList(),
     // Neko Values
     @ProtoNumber(900) var mergedMangaUrl: String? = null,
+    @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
     @ProtoNumber(901) var scanlatorFilter: String? = null
 ) {
     fun getMangaImpl(): MangaImpl {
@@ -54,6 +55,7 @@ data class BackupManga(
             viewer = this@BackupManga.viewer
             chapter_flags = this@BackupManga.chapterFlags
             merge_manga_url = this@BackupManga.mergedMangaUrl
+            merge_manga_image_url = this@BackupManga.mergedMangaImageUrl
             scanlator_filter = this@BackupManga.scanlatorFilter
         }
     }
@@ -87,6 +89,7 @@ data class BackupManga(
                 viewer = manga.viewer,
                 chapterFlags = manga.chapter_flags,
                 mergedMangaUrl = manga.merge_manga_url,
+                mergedMangaImageUrl = manga.merge_manga_image_url,
                 scanlatorFilter = manga.scanlator_filter,
             )
         }
