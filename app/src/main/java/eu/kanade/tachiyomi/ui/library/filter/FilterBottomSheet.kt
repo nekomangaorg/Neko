@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
-import android.content.res.Configuration
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
@@ -130,12 +129,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
 
-        if (context.resources.configuration.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-            second_layout.removeView(view_options)
-            second_layout.removeView(reorder_filters)
-            first_layout.addView(reorder_filters)
-            first_layout.addView(view_options)
-            second_layout.gone()
+        post {
+            if (second_layout.width + first_layout.width + 20.dpToPx < width) {
+                second_layout.removeView(view_options)
+                second_layout.removeView(reorder_filters)
+                first_layout.addView(reorder_filters)
+                first_layout.addView(view_options)
+                second_layout.gone()
+            }
         }
 
         sheetBehavior?.hide()
