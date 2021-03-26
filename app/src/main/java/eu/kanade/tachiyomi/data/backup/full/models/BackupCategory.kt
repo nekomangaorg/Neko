@@ -14,7 +14,7 @@ class BackupCategory(
     @ProtoNumber(100) var flags: Int = 0,
 
     // J2K Specific values
-    @ProtoNumber(800) var mangaSort: Char?,
+    @ProtoNumber(800) var mangaSort: Char? = null,
 ) {
     fun getCategoryImpl(): CategoryImpl {
         return CategoryImpl().apply {
