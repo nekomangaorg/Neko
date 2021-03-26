@@ -274,7 +274,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
                 ) {
                     syncActivityViewWithController(to, from, isPush)
                     appbar.y = 0f
-                    if (!isPush) {
+                    if (!isPush || router.backstackSize == 1) {
                         bottom_nav.translationY = 0f
                     }
                     snackBar?.dismiss()

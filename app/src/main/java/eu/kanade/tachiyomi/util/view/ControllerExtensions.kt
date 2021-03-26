@@ -156,6 +156,7 @@ fun Controller.scrollViewWith(
     }
     var elevationAnim: ValueAnimator? = null
     var elevate = false
+    var isInView = true
     val elevateFunc: (Boolean) -> Unit = { el ->
         elevate = el
         if (liftOnScroll != null) {
@@ -180,6 +181,7 @@ fun Controller.scrollViewWith(
                 changeType: ControllerChangeType
             ) {
                 super.onChangeStart(controller, changeHandler, changeType)
+                isInView = changeType.isEnter
                 if (changeType.isEnter) {
                     elevateFunc(elevate)
                     if (fakeToolbarView?.parent != null) {
@@ -253,7 +255,7 @@ fun Controller.scrollViewWith(
                         activity!!.appbar.animate().y(0f)
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
-                        if (router.backstackSize == 1) {
+                        if (router.backstackSize == 1 && isInView) {
                             activity!!.bottom_nav?.let {
                                 val animator = it.animate()?.translationY(0f)
                                     ?.setDuration(shortAnimationDuration.toLong())
@@ -273,7 +275,7 @@ fun Controller.scrollViewWith(
                             0f
                         )
                         val tabBar = activity!!.bottom_nav
-                        if (tabBar != null && tabBar.isVisible()) {
+                        if (tabBar != null && tabBar.isVisible() && isInView) {
                             val preferences: PreferencesHelper = Injekt.get()
                             if (preferences.hideBottomNavOnScroll().get()) {
                                 tabBar.translationY += dy
@@ -322,7 +324,7 @@ fun Controller.scrollViewWith(
                         val closerToEdge = if (activity!!.bottom_nav.isVisible) closerToBottom else closerToTop
                         lastY = if (closerToEdge && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
                         activity!!.appbar.animate().y(lastY).setDuration(shortAnimationDuration.toLong()).start()
-                        if (activity!!.bottom_nav.isVisible) {
+                        if (activity!!.bottom_nav.isVisible && isInView) {
                             activity!!.bottom_nav?.let {
                                 val lastBottomY = if (closerToEdge && !atTop) it.height.toFloat() else 0f
                                 val animator = it.animate()?.translationY(lastBottomY)
