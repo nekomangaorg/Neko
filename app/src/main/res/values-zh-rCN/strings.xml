@@ -257,12 +257,8 @@
     <string name="decode_image_error">无法解码该图片</string>
     <string name="use_image_as_cover">要将此页设为封面吗？</string>
     <string name="viewer_for_this_series">阅读模式</string>
-    <string name="finished_chapter">已读完:</string>
     <string name="current_chapter">"当前: "</string>
-    <string name="next_title">下一章:</string>
-    <string name="previous_title">"上一章: "</string>
     <string name="finished_chapter">已读完:</string>
-    <string name="current">当前:</string>
     <string name="next_title">下一章:</string>
     <string name="previous_title">上一章:</string>
     <string name="theres_no_next_chapter">下面没有啦</string>
