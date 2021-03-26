@@ -1168,7 +1168,7 @@ class LibraryController(
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-        val position = viewHolder?.adapterPosition ?: return
+        val position = viewHolder?.bindingAdapterPosition ?: return
         swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_DRAG
         if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
             if (lastItemPosition != null &&

@@ -16,10 +16,10 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
 
     init {
         source_pin.setOnClickListener {
-            adapter.sourceListener.onPinClick(adapterPosition)
+            adapter.sourceListener.onPinClick(flexibleAdapterPosition)
         }
         source_latest.setOnClickListener {
-            adapter.sourceListener.onLatestClick(adapterPosition)
+            adapter.sourceListener.onLatestClick(flexibleAdapterPosition)
         }
     }
 

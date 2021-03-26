@@ -28,7 +28,7 @@ class ChapterHolder(
 
     init {
         download_button.setOnLongClickListener {
-            adapter.delegate.startDownloadRange(adapterPosition)
+            adapter.delegate.startDownloadRange(flexibleAdapterPosition)
             true
         }
     }
@@ -92,13 +92,13 @@ class ChapterHolder(
         chapter_scanlator.text = statuses.joinToString(" • ")
 
         val status = when {
-            adapter.isSelected(adapterPosition) -> Download.CHECKED
+            adapter.isSelected(flexibleAdapterPosition) -> Download.CHECKED
             else -> item.status
         }
 
         notifyStatus(status, item.isLocked, item.progress)
         resetFrontView()
-        if (adapterPosition == 1) {
+        if (flexibleAdapterPosition == 1) {
             if (!adapter.hasShownSwipeTut.get()) showSlideAnimation()
         }
     }
@@ -147,7 +147,7 @@ class ChapterHolder(
     }
 
     private fun resetFrontView() {
-        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
     fun notifyStatus(status: Int, locked: Boolean, progress: Int) = with(download_button) {

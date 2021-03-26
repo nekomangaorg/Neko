@@ -43,7 +43,7 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
 
     init {
         manga_cover.setOnClickListener {
-            adapter.coverClickListener.onCoverClick(adapterPosition)
+            adapter.coverClickListener.onCoverClick(flexibleAdapterPosition)
         }
     }
 
@@ -89,7 +89,7 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
     }
 
     private fun resetFrontView() {
-        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
     override fun getFrontView(): View {

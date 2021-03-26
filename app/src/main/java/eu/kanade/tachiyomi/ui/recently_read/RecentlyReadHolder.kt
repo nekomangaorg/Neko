@@ -26,15 +26,15 @@ class RecentlyReadHolder(
 
     init {
         remove.setOnClickListener {
-            adapter.removeClickListener.onRemoveClick(adapterPosition)
+            adapter.removeClickListener.onRemoveClick(flexibleAdapterPosition)
         }
 
         resume.setOnClickListener {
-            adapter.resumeClickListener.onResumeClick(adapterPosition)
+            adapter.resumeClickListener.onResumeClick(flexibleAdapterPosition)
         }
 
         cover.setOnClickListener {
-            adapter.coverClickListener.onCoverClick(adapterPosition)
+            adapter.coverClickListener.onCoverClick(flexibleAdapterPosition)
         }
     }
 

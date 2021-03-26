@@ -68,9 +68,9 @@ class LibraryGridHolder(
         if (item.manga.thumbnail_url == null) cover_thumbnail.clear()
         else {
             if (cover_thumbnail.height == 0) {
-                val oldPos = adapterPosition
+                val oldPos = flexibleAdapterPosition
                 adapter.recyclerView.post {
-                    if (oldPos == adapterPosition) {
+                    if (oldPos == flexibleAdapterPosition) {
                         setCover(item.manga)
                     }
                 }
@@ -89,7 +89,7 @@ class LibraryGridHolder(
     }
 
     private fun playButtonClicked() {
-        adapter.libraryListener.startReading(adapterPosition)
+        adapter.libraryListener.startReading(flexibleAdapterPosition)
     }
 
     override fun onActionStateChanged(position: Int, actionState: Int) {

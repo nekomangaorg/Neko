@@ -26,7 +26,7 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
 
     init {
         ext_button.setOnClickListener {
-            adapter.buttonClickListener.onButtonClick(adapterPosition)
+            adapter.buttonClickListener.onButtonClick(flexibleAdapterPosition)
         }
     }
 

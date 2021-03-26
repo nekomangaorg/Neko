@@ -91,7 +91,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                     )
                 )
                 reorder.setOnClickListener {
-                    adapter.categoryItemListener.onItemDelete(adapterPosition)
+                    adapter.categoryItemListener.onItemDelete(flexibleAdapterPosition)
                 }
             }
         } else {
@@ -117,7 +117,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     private fun submitChanges() {
         if (edit_text.visibility == View.VISIBLE) {
             if (adapter.categoryItemListener
-                .onCategoryRename(adapterPosition, edit_text.text.toString())
+                .onCategoryRename(flexibleAdapterPosition, edit_text.text.toString())
             ) {
                 isEditing(false)
                 edit_text.inputType = InputType.TYPE_NULL

@@ -19,7 +19,7 @@ class RecentMangaHolder(
 ) : BaseChapterHolder(view, adapter) {
 
     init {
-        card_layout?.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
+        card_layout?.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
     }
 
     fun bind(recentsType: Int) {
@@ -80,19 +80,19 @@ class RecentMangaHolder(
             cover_thumbnail.loadLibraryManga(item.mch.manga)
         }
         notifyStatus(
-            if (adapter.isSelected(adapterPosition)) Download.CHECKED else item.status,
+            if (adapter.isSelected(flexibleAdapterPosition)) Download.CHECKED else item.status,
             item.progress
         )
         resetFrontView()
     }
 
     private fun resetFrontView() {
-        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
     override fun onLongClick(view: View?): Boolean {
         super.onLongClick(view)
-        val item = adapter.getItem(adapterPosition) as? RecentMangaItem ?: return false
+        val item = adapter.getItem(flexibleAdapterPosition) as? RecentMangaItem ?: return false
         return item.mch.history.id != null
     }
 

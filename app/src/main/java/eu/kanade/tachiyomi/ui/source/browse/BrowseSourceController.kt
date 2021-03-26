@@ -528,7 +528,7 @@ open class BrowseSourceController(bundle: Bundle) :
         val adapter = adapter ?: return null
 
         adapter.allBoundViewHolders.forEach { holder ->
-            val item = adapter.getItem(holder.adapterPosition) as? BrowseSourceItem
+            val item = adapter.getItem(holder.flexibleAdapterPosition) as? BrowseSourceItem
             if (item != null && item.manga.id!! == manga.id!!) {
                 return holder as BrowseSourceHolder
             }

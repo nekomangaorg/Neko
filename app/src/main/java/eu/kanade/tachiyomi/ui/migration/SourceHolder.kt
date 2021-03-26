@@ -12,7 +12,7 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
 
     init {
         migration_all.setOnClickListener {
-            adapter.allClickListener?.onAllClick(adapterPosition)
+            adapter.allClickListener?.onAllClick(flexibleAdapterPosition)
         }
     }
 

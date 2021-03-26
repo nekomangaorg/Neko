@@ -43,8 +43,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         category_header_layout.setOnClickListener { toggleCategory() }
         updateButton.setOnClickListener { addCategoryToUpdate() }
         sectionText.setOnLongClickListener {
-            val category = (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
-            adapter.libraryListener.manageCategory(adapterPosition)
+            val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+            adapter.libraryListener.manageCategory(flexibleAdapterPosition)
             category?.isDynamic == false
         }
         sectionText.setOnClickListener { toggleCategory() }
@@ -54,7 +54,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     }
 
     private fun toggleCategory() {
-        adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
+        adapter.libraryListener.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
             ViewTooltip.on(itemView.context as? Activity, sectionText).autoHide(true, 5000L)
@@ -151,7 +151,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     }
 
     private fun addCategoryToUpdate() {
-        if (adapter.libraryListener.updateCategory(adapterPosition)) {
+        if (adapter.libraryListener.updateCategory(flexibleAdapterPosition)) {
             catProgress.visible()
             updateButton.invisible()
         }
@@ -159,7 +159,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
     private fun showCatSortOptions() {
         val category =
-            (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
+            (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category ?: return
         adapter.controller.activity?.let { activity ->
             val items = mutableListOf(
                 MaterialMenuSheet.MenuSheetItem(
@@ -210,7 +210,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 sortingMode
             ) { sheet, item ->
                 onCatSortClicked(category, item)
-                val nCategory = (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
+                val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
                 val isAscending = nCategory?.isAscending() ?: false
                 val drawableRes = getSortRes(item, isAscending)
                 sheet.setDrawable(item, drawableRes)
@@ -261,11 +261,11 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     }
 
     private fun selectAll() {
-        adapter.libraryListener.selectAll(adapterPosition)
+        adapter.libraryListener.selectAll(flexibleAdapterPosition)
     }
 
     fun setSelection() {
-        val allSelected = adapter.libraryListener.allSelected(adapterPosition)
+        val allSelected = adapter.libraryListener.allSelected(flexibleAdapterPosition)
         val drawable = ContextCompat.getDrawable(
             contentView.context,
             if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp

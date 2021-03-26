@@ -52,7 +52,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             notifyDownloadedPages()
         }
 
-        migration_menu.visibleIf(adapterPosition != 0 || adapterPosition != adapter.itemCount - 1)
+        migration_menu.visibleIf(flexibleAdapterPosition != 0 || flexibleAdapterPosition != adapter.itemCount - 1)
         migration_menu.setVectorCompat(
             R.drawable.ic_more_vert_24dp,
             view.context
@@ -85,7 +85,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     }
 
     private fun showPopupMenu(view: View) {
-        val item = adapter.getItem(adapterPosition) ?: return
+        val item = adapter.getItem(flexibleAdapterPosition) ?: return
 
         // Create a PopupMenu, giving it the clicked view for an anchor
         val popup = PopupMenu(view.context, view)
@@ -95,13 +95,13 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
 
         val download = item.download
 
-        popup.menu.findItem(R.id.move_to_top).isVisible = adapterPosition != 0
-        popup.menu.findItem(R.id.move_to_bottom).isVisible = adapterPosition != adapter
+        popup.menu.findItem(R.id.move_to_top).isVisible = flexibleAdapterPosition != 0
+        popup.menu.findItem(R.id.move_to_bottom).isVisible = flexibleAdapterPosition != adapter
             .itemCount - 1
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            adapter.downloadItemListener.onMenuItemClick(adapterPosition, menuItem)
+            adapter.downloadItemListener.onMenuItemClick(flexibleAdapterPosition, menuItem)
             true
         }
 

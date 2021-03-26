@@ -83,7 +83,7 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
      */
     private fun getHolder(manga: Manga): GlobalSearchMangaHolder? {
         mangaAdapter.allBoundViewHolders.forEach { holder ->
-            val item = mangaAdapter.getItem(holder.adapterPosition)
+            val item = mangaAdapter.getItem(holder.flexibleAdapterPosition)
             if (item != null && item.manga.id!! == manga.id!!) {
                 return holder as GlobalSearchMangaHolder
             }

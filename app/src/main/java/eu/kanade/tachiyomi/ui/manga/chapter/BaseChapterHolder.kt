@@ -17,9 +17,9 @@ open class BaseChapterHolder(
     }
 
     private fun downloadOrRemoveMenu() {
-        val chapter = adapter.getItem(adapterPosition) as? BaseChapterItem<*, *> ?: return
+        val chapter = adapter.getItem(flexibleAdapterPosition) as? BaseChapterItem<*, *> ?: return
         if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
-            adapter.baseDelegate.downloadChapter(adapterPosition)
+            adapter.baseDelegate.downloadChapter(flexibleAdapterPosition)
         } else {
             download_button.post {
                 // Create a PopupMenu, giving it the clicked view for an anchor
@@ -38,8 +38,8 @@ open class BaseChapterHolder(
                 // Set a listener so we are notified if a menu item is clicked
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
-                        R.id.action_delete -> adapter.baseDelegate.downloadChapter(adapterPosition)
-                        R.id.action_start -> adapter.baseDelegate.startDownloadNow(adapterPosition)
+                        R.id.action_delete -> adapter.baseDelegate.downloadChapter(flexibleAdapterPosition)
+                        R.id.action_start -> adapter.baseDelegate.startDownloadNow(flexibleAdapterPosition)
                     }
                     true
                 }
