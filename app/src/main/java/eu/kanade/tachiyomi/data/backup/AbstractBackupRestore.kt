@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.util.chapter.NoChaptersException
@@ -22,6 +23,7 @@ abstract class AbstractBackupRestore<T : AbstractBackupManager>(protected val co
 
     protected val db: DatabaseHelper by injectLazy()
     protected val trackManager: TrackManager by injectLazy()
+    protected val customMangaManager: CustomMangaManager by injectLazy()
 
     var job: Job? = null
 

@@ -12,6 +12,8 @@ import eu.kanade.tachiyomi.data.backup.full.models.BackupSerializer
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import okio.buffer
 import okio.gzip
 import okio.source
@@ -64,9 +66,10 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         val categories = backupManga.categories
         val history = backupManga.history
         val tracks = backupManga.getTrackingImpl()
+        val customManga = backupManga.getCustomMangaInfo()
 
         try {
-            restoreMangaData(manga, chapters, categories, history, tracks, backupCategories)
+            restoreMangaData(manga, chapters, categories, history, tracks, backupCategories, customManga)
         } catch (e: Exception) {
             val sourceName = sourceMapping[manga.source] ?: manga.source.toString()
             errors.add(Date() to "${manga.title} [$sourceName]: ${e.message}")
@@ -91,19 +94,20 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         categories: List<Int>,
         history: List<BackupHistory>,
         tracks: List<Track>,
-        backupCategories: List<BackupCategory>
+        backupCategories: List<BackupCategory>,
+        customManga: CustomMangaManager.MangaJson?
     ) {
         db.inTransaction {
             val dbManga = backupManager.getMangaFromDatabase(manga)
             if (dbManga == null) {
                 // Manga not in database
-                restoreMangaFetch(manga, chapters, categories, history, tracks, backupCategories)
+                restoreMangaFetch(manga, chapters, categories, history, tracks, backupCategories, customManga)
             } else {
                 // Manga in database
                 // Copy information from manga already in database
                 backupManager.restoreMangaNoFetch(manga, dbManga)
                 // Fetch rest of manga information
-                restoreMangaNoFetch(manga, chapters, categories, history, tracks, backupCategories)
+                restoreMangaNoFetch(manga, chapters, categories, history, tracks, backupCategories, customManga)
             }
         }
     }
@@ -121,15 +125,15 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         categories: List<Int>,
         history: List<BackupHistory>,
         tracks: List<Track>,
-        backupCategories: List<BackupCategory>
+        backupCategories: List<BackupCategory>,
+        customManga: CustomMangaManager.MangaJson?
     ) {
         try {
             val fetchedManga = backupManager.restoreManga(manga)
             fetchedManga.id ?: return
-
             backupManager.restoreChaptersForManga(fetchedManga, chapters)
 
-            restoreExtraForManga(fetchedManga, categories, history, tracks, backupCategories)
+            restoreExtraForManga(fetchedManga, categories, history, tracks, backupCategories, customManga)
         } catch (e: Exception) {
             errors.add(Date() to "${manga.title} - ${e.message}")
         }
@@ -141,14 +145,22 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         categories: List<Int>,
         history: List<BackupHistory>,
         tracks: List<Track>,
-        backupCategories: List<BackupCategory>
+        backupCategories: List<BackupCategory>,
+        customManga: CustomMangaManager.MangaJson?
     ) {
         backupManager.restoreChaptersForManga(backupManga, chapters)
 
-        restoreExtraForManga(backupManga, categories, history, tracks, backupCategories)
+        restoreExtraForManga(backupManga, categories, history, tracks, backupCategories, customManga)
     }
 
-    private fun restoreExtraForManga(manga: Manga, categories: List<Int>, history: List<BackupHistory>, tracks: List<Track>, backupCategories: List<BackupCategory>) {
+    private fun restoreExtraForManga(
+        manga: Manga,
+        categories: List<Int>,
+        history: List<BackupHistory>,
+        tracks: List<Track>,
+        backupCategories: List<BackupCategory>,
+        customManga: CustomMangaManager.MangaJson?
+    ) {
         // Restore categories
         backupManager.restoreCategoriesForManga(manga, categories, backupCategories)
 
@@ -157,5 +169,9 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
 
         // Restore tracking
         backupManager.restoreTrackForManga(manga, tracks)
+
+        // Restore Custom Info
+        customManga?.id = manga.id!!
+        customManga?.let { customMangaManager.saveMangaInfo(it) }
     }
 }

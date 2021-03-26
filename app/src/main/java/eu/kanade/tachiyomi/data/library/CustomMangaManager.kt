@@ -94,7 +94,7 @@ class CustomMangaManager(val context: Context) {
     }
 
     data class MangaJson(
-        val id: Long,
+        var id: Long,
         val title: String? = null,
         val author: String? = null,
         val artist: String? = null,

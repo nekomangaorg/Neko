@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.protobuf.ProtoNumber
 
@@ -34,6 +35,13 @@ data class BackupManga(
     @ProtoNumber(100) var favorite: Boolean = true,
     @ProtoNumber(101) var chapterFlags: Int = 0,
     @ProtoNumber(102) var history: List<BackupHistory> = emptyList(),
+
+    // J2K specific values
+    @ProtoNumber(800) var customTitle: String? = null,
+    @ProtoNumber(801) var customArtist: String? = null,
+    @ProtoNumber(802) var customAuthor: String? = null,
+    @ProtoNumber(803) var customDescription: String? = null,
+    @ProtoNumber(803) var customGenre: List<String>? = null
 ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
@@ -59,6 +67,25 @@ data class BackupManga(
         }
     }
 
+    fun getCustomMangaInfo(): CustomMangaManager.MangaJson? {
+        if (customTitle != null ||
+            customArtist != null ||
+            customAuthor != null ||
+            customDescription != null ||
+            customGenre != null
+        ) {
+            return CustomMangaManager.MangaJson(
+                id = 0L,
+                title = customTitle,
+                author = customAuthor,
+                artist = customArtist,
+                description = customDescription,
+                genre = customGenre?.toTypedArray()
+            )
+        }
+        return null
+    }
+
     fun getTrackingImpl(): List<TrackImpl> {
         return tracking.map {
             it.getTrackingImpl()
@@ -66,7 +93,7 @@ data class BackupManga(
     }
 
     companion object {
-        fun copyFrom(manga: Manga): BackupManga {
+        fun copyFrom(manga: Manga, customMangaManager: CustomMangaManager?): BackupManga {
             return BackupManga(
                 url = manga.url,
                 title = manga.originalTitle,
@@ -81,7 +108,15 @@ data class BackupManga(
                 dateAdded = manga.date_added,
                 viewer = manga.viewer,
                 chapterFlags = manga.chapter_flags
-            )
+            ).also { backupManga ->
+                customMangaManager?.getManga(manga)?.let {
+                    backupManga.customTitle = it.title
+                    backupManga.customArtist = it.artist
+                    backupManga.customAuthor = it.author
+                    backupManga.customDescription = it.description
+                    backupManga.customGenre = it.getGenres()
+                }
+            }
         }
     }
 }
