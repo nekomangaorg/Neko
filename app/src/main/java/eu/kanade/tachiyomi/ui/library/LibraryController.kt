@@ -16,6 +16,7 @@ import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
@@ -194,6 +195,7 @@ class LibraryController(
 
     private var filterTooltip: ViewTooltip? = null
     private var isAnimatingHopper: Boolean? = null
+    private var animatorSet: AnimatorSet? = null
     var hasMovedHopper = preferences.shownHopperSwipeTutorial().get()
     private var shouldScrollToTop = false
     private val showCategoryInTitle
@@ -542,7 +544,7 @@ class LibraryController(
         }
     }
 
-    @SuppressLint("RtlHardcoded")
+    @SuppressLint("RtlHardcoded", "ClickableViewAccessibility")
     private fun setUpHopper() {
         category_hopper_frame.gone()
         down_category.setOnClickListener {
@@ -598,7 +600,18 @@ class LibraryController(
         val gestureDetector = GestureDetectorCompat(activity, LibraryGestureDetector(this))
         listOf(category_hopper_layout, up_category, down_category, category_button).forEach {
             it.setOnTouchListener { _, event ->
-                gestureDetector.onTouchEvent(event)
+                if (event?.action == MotionEvent.ACTION_DOWN) {
+                    animatorSet?.end()
+                }
+                if (event?.action == MotionEvent.ACTION_UP) {
+                    val result = gestureDetector.onTouchEvent(event)
+                    if (!result) {
+                        category_hopper_frame.animate().setDuration(150L).translationX(0f).start()
+                    }
+                    result
+                } else {
+                    gestureDetector.onTouchEvent(event)
+                }
             }
         }
     }
@@ -884,6 +897,7 @@ class LibraryController(
         isAnimatingHopper = true
         val slide = 25f.dpToPx
         val animatorSet = AnimatorSet()
+        this.animatorSet = animatorSet
         val animations = listOf(
             slideAnimation(0f, slide, 200),
             slideAnimation(slide, -slide),
@@ -895,7 +909,9 @@ class LibraryController(
         animatorSet.startDelay = 1250
         animatorSet.addListener(
             EndAnimatorListener {
+                category_hopper_frame.translationX = 0f
                 isAnimatingHopper = false
+                this.animatorSet = null
             }
         )
         animatorSet.start()
