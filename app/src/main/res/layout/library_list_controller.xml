@@ -117,7 +117,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center"
-        android:elevation="6dp">
+        android:translationZ="50dp">
 
         <include layout="@layout/rounded_category_hopper" />
 
