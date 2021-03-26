@@ -13,11 +13,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
-import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
-import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -28,7 +24,6 @@ import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import kotlin.math.floor
 
 open class MangaDexCache() : MangaDex() {
 
@@ -125,17 +120,14 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override fun isLogged(): Boolean {
-        XLog.e("CACHE: isLogged() function has been called")
         return true
     }
 
     override suspend fun login(username: String, password: String, twoFactorCode: String): Boolean {
-        XLog.e("CACHE: login() function has been called")
         return true
     }
 
     override suspend fun logout(): Logout {
-        XLog.e("CACHE: logout() function has been called")
         return Logout(true, "Cache source does not have logout")
     }
 
