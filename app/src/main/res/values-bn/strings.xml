@@ -383,7 +383,7 @@
     <string name="category_is_empty">বিভাগটি খালি</string>
     <string name="create_new_category">নতুন বিভাগ তৈরি করুন</string>
     <string name="_already_in_queue">%1$s আগে থেকেই সারিতে আছে</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">বিভাগ</item>
         <item quantity="other"/>
     </plurals>

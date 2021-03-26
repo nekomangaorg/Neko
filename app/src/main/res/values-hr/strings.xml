@@ -12,7 +12,7 @@
     <string name="completed">Završeno</string>
     <string name="lock_with_biometrics">Zaključaj pomoću biometrije</string>
     <string name="lock_when_idle">Zaključaj prilikom mirovanja</string>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Poglavlja</item>
         <item quantity="few"/>
         <item quantity="other"/>
@@ -334,7 +334,7 @@
     <string name="category_is_hidden">Kategorija je skrivena</string>
     <string name="category_is_empty">Kategorija je prazna</string>
     <string name="create_new_category">Stvori novu kategoriju</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Kategorija</item>
         <item quantity="few"/>
         <item quantity="other"/>

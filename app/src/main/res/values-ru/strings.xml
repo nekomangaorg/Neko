@@ -448,7 +448,7 @@
         <item quantity="many">Удалить %1$d загруженных глав\?</item>
         <item quantity="other">Удалить %1$d загруженных глав\?</item>
     </plurals>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Главы</item>
         <item quantity="few"/>
         <item quantity="many"/>
@@ -480,7 +480,7 @@
     <string name="category_deleted">Категория удалена</string>
     <string name="long_press_category">Нажмите и удерживайте, чтобы изменить категорию</string>
     <string name="jump_to_category">Перейти в категорию</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Категория</item>
         <item quantity="few">Категории</item>
         <item quantity="many">Категорий</item>

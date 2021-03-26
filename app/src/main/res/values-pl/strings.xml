@@ -49,7 +49,7 @@
         <item quantity="many">Usunąć %1$d pobranych rozdziałów?</item>
         <item quantity="other">Usunąć %1$d pobranych rozdziałów?</item>
     </plurals>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Rozdziały</item>
         <item quantity="few"/>
         <item quantity="many"/>
@@ -83,7 +83,7 @@
     <string name="rename_category">Zmień nazwę kategorii</string>
     <string name="move_to_categories">Przenieś do kategorii</string>
     <string name="add_to_categories">Wybierz, do których kategorii chcesz to dodać.  Jeżeli żadna nie zostanie wybrana, zostanie to dodane do domyślnej kategorii.</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">%d kategoria</item>
         <item quantity="few">%d kategorie</item>
         <item quantity="many">%d kategorii</item>

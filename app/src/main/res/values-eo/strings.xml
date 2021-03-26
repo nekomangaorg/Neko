@@ -19,7 +19,7 @@
     <string name="last_read_chapter_">Lastatempe legis ĉapitro %1$s</string>
     <string name="unread">Nelegita</string>
     <string name="new_chapters">Novaj ĉapitroj</string>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Ĉapitroj</item>
         <item quantity="other"/>
     </plurals>

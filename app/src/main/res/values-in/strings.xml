@@ -489,7 +489,7 @@
     <string name="manhua">Manhua</string>
     <string name="_already_in_queue">%1$s sudah ada dalam antrian</string>
     <string name="adding_category_to_queue">Menambahkan %1$s ke antrian pembaharuan</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="other">Kategori</item>
     </plurals>
     <plurals name="pages_left">

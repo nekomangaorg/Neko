@@ -409,7 +409,7 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="view_chapters">Ver capítulos</string>
     <string name="manhua">Manhua</string>
     <string name="manhwa">Manhwa</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categorías</item>
         <item quantity="other"/>
     </plurals>

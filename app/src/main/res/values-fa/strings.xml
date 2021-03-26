@@ -323,7 +323,7 @@
     <string name="updating_library">درحال آپدیت کتابخانه</string>
     <string name="default_category">دسته بندی پیشفرض</string>
     <string name="categories">دسته بندی ها</string>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">قسمت ها</item>
         <item quantity="other"></item>
     </plurals>

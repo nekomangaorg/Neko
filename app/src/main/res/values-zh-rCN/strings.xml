@@ -418,7 +418,7 @@
     <string name="create_new_category">创建新分类</string>
     <string name="_already_in_queue">%1$s 已在队列中</string>
     <string name="adding_category_to_queue">正在将 %1$s 添加到更新队列</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="other">分类</item>
     </plurals>
     <string name="chapter_not_found">未找到章节</string>

@@ -393,7 +393,7 @@
     <string name="create_new_category">Створити нову категорію</string>
     <string name="_already_in_queue">%1$s вже в черзі</string>
     <string name="adding_category_to_queue">Додано %1$s до черги оновлення</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Категорія</item>
         <item quantity="few"/>
         <item quantity="many"/>

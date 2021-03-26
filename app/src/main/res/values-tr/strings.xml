@@ -401,7 +401,7 @@
     <string name="category_is_empty">Kategori boş</string>
     <string name="create_new_category">Yeni kategori oluştur</string>
     <string name="_already_in_queue">%1$s zaten kuyrukta</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Kategori</item>
         <item quantity="other"/>
     </plurals>

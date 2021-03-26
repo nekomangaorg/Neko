@@ -54,7 +54,7 @@
         <item quantity="one">Remove %1$d downloaded chapter?</item>
         <item quantity="other">Remove %1$d downloaded chapters?</item>
     </plurals>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">%1$d chapter</item>
         <item quantity="other">%1$d chapters</item>
     </plurals>
@@ -86,7 +86,7 @@
     <string name="rename_category">Rename category</string>
     <string name="move_to_categories">Move to categories</string>
     <string name="add_to_categories">Choose which categories to add this to.  If none are selected, this will be added to the "default" category</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">%d category</item>
         <item quantity="other">%d categories</item>
     </plurals>

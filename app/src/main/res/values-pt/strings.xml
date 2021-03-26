@@ -431,7 +431,7 @@
     <string name="create_new_category">Criar nova categoria</string>
     <string name="_already_in_queue">%1$s já está na fila</string>
     <string name="adding_category_to_queue">Adicionando %1$s para a fila de atualizações</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categoria</item>
         <item quantity="other"/>
     </plurals>

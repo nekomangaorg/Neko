@@ -383,7 +383,7 @@
     <string name="create_new_category">新しいカテゴリーを作成</string>
     <string name="_already_in_queue">%1$sは既にキュー内に存在しています</string>
     <string name="adding_category_to_queue">%1$sをアップデートキューに追加します</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="other">カテゴリー</item>
     </plurals>
     <plurals name="pages_left">

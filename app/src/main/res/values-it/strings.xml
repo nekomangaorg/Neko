@@ -420,7 +420,7 @@
     <string name="create_new_category">Crea una nuova categoria</string>
     <string name="_already_in_queue">%1$s è già nella coda</string>
     <string name="adding_category_to_queue">Aggiungendo %1$s alla coda di aggiornamento</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categoria</item>
         <item quantity="other"/>
     </plurals>

@@ -380,7 +380,7 @@
     <string name="drag_and_drop">拖曳</string>
     <string name="comfortable_grid">鬆散格狀</string>
     <string name="confirm_category_deletion">刪除分類？</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="other">分類</item>
     </plurals>
     <string name="marked_as_unread">標示為未讀</string>

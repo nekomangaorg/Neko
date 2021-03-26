@@ -155,7 +155,7 @@
     <string name="category_is_empty">Kategorija ir tukša</string>
     <string name="create_new_category">Izveido jaunu kategoriju</string>
     <string name="_already_in_queue">%1$s jau ir rindā</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="zero">Kategorija</item>
         <item quantity="one"></item>
         <item quantity="other"></item>

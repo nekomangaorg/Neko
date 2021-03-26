@@ -392,7 +392,7 @@
     <string name="webtoon_side_padding_20">20%</string>
     <string name="webtoon_side_padding_25">25%</string>
     <string name="remove_from_library">Gỡ bỏ khỏi thư viện</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="other">Thể loại</item>
     </plurals>
     <plurals name="pages_left">

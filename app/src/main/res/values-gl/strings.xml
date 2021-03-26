@@ -18,7 +18,7 @@
     <string name="app_not_available">Aplicación non dispoñible</string>
     <string name="loading">Cargando…</string>
     <string name="history">Historial</string>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Capítulos</item>
         <item quantity="other"/>
     </plurals>

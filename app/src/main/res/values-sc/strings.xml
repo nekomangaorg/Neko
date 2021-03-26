@@ -650,7 +650,7 @@
     <string name="create_new_category">Crea una categoria noa</string>
     <string name="_already_in_queue">%1$s est giai in sa lista de isetu</string>
     <string name="adding_category_to_queue">Annanghende %1$s a sa lista de agiornamentu</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categoria</item>
         <item quantity="other"/>
     </plurals>

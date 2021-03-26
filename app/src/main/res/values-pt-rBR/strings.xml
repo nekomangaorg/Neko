@@ -46,7 +46,7 @@
         <item quantity="one">Remover %1$d capítulo baixado?</item>
         <item quantity="other">Remover %1$d capítulos baixados?</item>
     </plurals>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Capítulos</item>
         <item quantity="other"/>
     </plurals>
@@ -76,7 +76,7 @@
     <string name="rename_category">Renomear categoria</string>
     <string name="move_to_categories">Mover para categorias</string>
     <string name="add_to_categories">Escolha quais categorias adicionar isto. Se nenhuma for selecionada, isto será adicionado à categoria padrão</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categoria</item>
         <item quantity="other">Categorias</item>
     </plurals>

@@ -404,7 +404,7 @@
     <string name="new_chapters">Capítols nous</string>
     <string name="unlock">Desbloca</string>
     <string name="unlock_library">Desbloqueu per a accedir a la biblioteca</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categoria</item>
         <item quantity="other"/>
     </plurals>

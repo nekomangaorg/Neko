@@ -160,7 +160,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                     LibrarySort.TOTAL -> {
                         val total = item.manga.totalChapters
                         if (total > 0) recyclerView.resources.getQuantityString(
-                            R.plurals.chapters,
+                            R.plurals.chapters_plural,
                             total,
                             total
                         )

@@ -657,7 +657,7 @@
     <string name="large">L</string>
     <string name="medium">M</string>
     <string name="small">S</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="other">Kategori</item>
     </plurals>
     <string name="unlock">Buka kunci</string>

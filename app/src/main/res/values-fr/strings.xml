@@ -507,7 +507,7 @@
     <string name="create_new_category">Créer une nouvelle catégorie</string>
     <string name="_already_in_queue">%1$s est déjà dans la file d\'attente</string>
     <string name="adding_category_to_queue">Ajout de %1$s à la file d\'attente de mise à jour</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Catégorie</item>
         <item quantity="other"/>
     </plurals>

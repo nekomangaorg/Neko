@@ -139,7 +139,7 @@ class MangaHeaderHolder(
     fun bindChapters() {
         val presenter = adapter.delegate.mangaPresenter()
         val count = presenter.chapters.size
-        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
+        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
         filters_text.text = presenter.currentFilters()
     }
 
@@ -243,7 +243,7 @@ class MangaHeaderHolder(
         }
 
         val count = presenter.chapters.size
-        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
+        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
 
         top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = adapter.delegate.topCoverHeight()

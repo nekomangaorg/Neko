@@ -378,7 +378,7 @@
     <string name="always">Aina</string>
     <string name="app_not_available">Sovellus ei ole saatavilla</string>
     <string name="back">Takaisin</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Kategoria</item>
         <item quantity="other"/>
     </plurals>

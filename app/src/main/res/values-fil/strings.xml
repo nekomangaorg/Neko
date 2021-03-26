@@ -12,7 +12,7 @@
     <string name="completed">Nakumpleto</string>
     <string name="lock_with_biometrics">I-lock gamit biometrics</string>
     <string name="lock_when_idle">I-lock kung nakatambay</string>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Mga Kabanata</item>
         <item quantity="other"/>
     </plurals>
@@ -326,7 +326,7 @@
     <string name="view_chapters">Tingnan ang mga kabanata</string>
     <string name="wifi">Naka-wifi</string>
     <string name="tracked">Sinundan</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Kategorya</item>
         <item quantity="other"></item>
     </plurals>

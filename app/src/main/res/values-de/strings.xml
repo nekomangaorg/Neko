@@ -45,7 +45,7 @@
         <item quantity="one">Entferne %1$d heruntergeladenes Kapitel?</item>
         <item quantity="other">Entferne %1$d heruntergeladene Kapitel?</item>
     </plurals>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Kapitel</item>
         <item quantity="other"/>
     </plurals>
@@ -75,7 +75,7 @@
     <string name="rename_category">Kategorie umbenennen</string>
     <string name="move_to_categories">Zu Kategorien hinzufügen</string>
     <string name="add_to_categories">Wähle, in welche Kategorien dies hinzugefügt wird. Wenn nichts ausgewählt ist, wird die Standardkategorie genutzt</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Kategorie</item>
         <item quantity="other">Kategorien</item>
     </plurals>

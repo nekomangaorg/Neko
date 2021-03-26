@@ -480,7 +480,7 @@
     <string name="create_new_category">Maak nieuwe categorie aan</string>
     <string name="_already_in_queue">%1$s staat al in de wachtrij</string>
     <string name="adding_category_to_queue">%1$s toevoegen aan updatewachtrij</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Categorie</item>
         <item quantity="other"/>
     </plurals>

@@ -324,7 +324,7 @@
     <string name="updating_library">Вулавӑша ҫӗнетни</string>
     <string name="default_category">Яланхилле пухмӑш</string>
     <string name="categories">Пухмӑшсем</string>
-    <plurals name="chapters">
+    <plurals name="chapters_plural">
         <item quantity="one">Сыпӑксем</item>
         <item quantity="other"/>
     </plurals>
@@ -353,7 +353,7 @@
     <string name="comic">Кумӑкс</string>
     <string name="manhua">Киттай манкӑ</string>
     <string name="manhwa">Карей манкӑ</string>
-    <plurals name="category">
+    <plurals name="category_plural">
         <item quantity="one">Пухмӑш</item>
         <item quantity="other"/>
     </plurals>
