@@ -66,6 +66,7 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
+import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
@@ -220,23 +221,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
         setNavBarColor(content.rootWindowInsets)
+        bottom_view.gone()
         content.doOnApplyWindowInsets { v, insets, _ ->
             setNavBarColor(insets)
-            val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
-            contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.systemWindowInsetLeft
-                rightMargin = insets.systemWindowInsetRight
-            }
-            // Consume any horizontal insets and pad all content in. There's not much we can do
-            // with horizontal insets
-            v.updatePadding(
-                left = insets.systemWindowInsetLeft,
-                right = insets.systemWindowInsetRight
-            )
             appbar.updatePadding(
                 top = insets.systemWindowInsetTop
             )
             bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
+            bottom_view.visibleIf(insets.systemWindowInsetBottom > 0)
             bottom_view.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = insets.systemWindowInsetBottom
             }
