@@ -201,7 +201,7 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
-    fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 1)
+    fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 2)
 
     fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 2)
 
