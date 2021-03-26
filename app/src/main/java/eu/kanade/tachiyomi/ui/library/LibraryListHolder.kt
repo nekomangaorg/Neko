@@ -69,7 +69,7 @@ class LibraryListHolder(
 
         subtitle.text = item.manga.author?.trim()
         title.post {
-            if (title.text == item.manga.title) {
+            if (title?.text == item.manga.title) {
                 subtitle.visibleIf(title.lineCount == 1 && !item.manga.author.isNullOrBlank())
             }
         }

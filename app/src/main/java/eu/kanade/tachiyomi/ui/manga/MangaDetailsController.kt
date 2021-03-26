@@ -1390,6 +1390,7 @@ class MangaDetailsController :
 
         expandedImageView.post {
             val defMargin = 16.dpToPx
+            manga_cover_full ?: return@post
             expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 height = ViewGroup.LayoutParams.MATCH_PARENT
                 width = ViewGroup.LayoutParams.MATCH_PARENT

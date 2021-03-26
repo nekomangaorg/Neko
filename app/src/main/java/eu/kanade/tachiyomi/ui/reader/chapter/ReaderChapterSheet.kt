@@ -58,9 +58,9 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         post {
-            chapter_recycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
-            chapter_recycler.isClickable = sheetBehavior.isExpanded()
-            chapter_recycler.isFocusable = sheetBehavior.isExpanded()
+            chapter_recycler?.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
+            chapter_recycler?.isClickable = sheetBehavior.isExpanded()
+            chapter_recycler?.isFocusable = sheetBehavior.isExpanded()
         }
 
         sheetBehavior?.addBottomSheetCallback(

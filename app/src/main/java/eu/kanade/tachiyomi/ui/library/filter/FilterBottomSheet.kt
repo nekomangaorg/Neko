@@ -130,6 +130,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         )
 
         post {
+            second_layout ?: return@post
+            first_layout ?: return@post
+            view_options ?: return@post
             if (second_layout.width + first_layout.width + 20.dpToPx < width) {
                 second_layout.removeView(view_options)
                 second_layout.removeView(reorder_filters)
@@ -159,6 +162,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
         post {
+            libraryRecyler ?: return@post
             updateRootPadding(
                 when (sheetBehavior?.state) {
                     BottomSheetBehavior.STATE_HIDDEN -> -1f

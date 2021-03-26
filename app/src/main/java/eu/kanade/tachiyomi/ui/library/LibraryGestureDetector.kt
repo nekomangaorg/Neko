@@ -67,7 +67,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                     if (hopperGravity == Gravity.TOP or Gravity.LEFT) 0f
                     else (-(controller.view!!.width - controller.category_hopper_frame.width) / 2).toFloat()
                 ).withEndAction {
-                    controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                    controller.category_hopper_frame?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
                             Gravity.TOP or (
                             if (gravity == Gravity.TOP or Gravity.RIGHT) {
@@ -86,7 +86,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
                     if (hopperGravity == Gravity.TOP or Gravity.RIGHT) 0f
                     else ((controller.view!!.width - controller.category_hopper_frame.width) / 2).toFloat()
                 ).withEndAction {
-                    controller.category_hopper_frame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
+                    controller.category_hopper_frame?.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
                             Gravity.TOP or (
                             if (gravity == Gravity.TOP or Gravity.LEFT) {
@@ -107,12 +107,12 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         return result
     }
 
-    fun savePrefs() {
+    private fun savePrefs() {
         if (!controller.hasMovedHopper) {
             controller.preferences.shownHopperSwipeTutorial().set(true)
         }
         controller.hopperGravity = controller.preferences.hopperGravity().get()
-        controller.category_hopper_frame.translationX = 0f
+        controller.category_hopper_frame?.translationX = 0f
     }
 
     private companion object {

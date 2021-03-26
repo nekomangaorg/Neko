@@ -68,9 +68,9 @@ class SourceSearchSheet(activity: Activity) :
         // the spinner in the recycler can break the sheet's layout on change
         // this is to reset it back
         source_filter_sheet.post {
-            (source_filter_sheet.parent as View).fitsSystemWindows = false
+            (source_filter_sheet?.parent as? View)?.fitsSystemWindows = false
             source_filter_sheet.viewTreeObserver.addOnDrawListener {
-                (source_filter_sheet.parent as View).fitsSystemWindows = false
+                (source_filter_sheet?.parent as? View)?.fitsSystemWindows = false
             }
         }
 

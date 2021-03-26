@@ -24,7 +24,7 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
         // Update circle letter image.
         itemView.post {
             val icon = source.icon()
-            if (icon != null) edit_button.setImageDrawable(icon)
+            if (icon != null) edit_button?.setImageDrawable(icon)
         }
 
         if (sourceEnabled) {

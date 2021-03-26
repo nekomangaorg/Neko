@@ -163,6 +163,7 @@ class MangaHeaderHolder(
             else manga.description?.trim()
 
         manga_summary.post {
+            manga_summary ?: return@post
             if (sub_item_group.visibility != View.GONE) {
                 if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) || less_button.isVisible()) {
                     manga_summary.setTextIsSelectable(true)

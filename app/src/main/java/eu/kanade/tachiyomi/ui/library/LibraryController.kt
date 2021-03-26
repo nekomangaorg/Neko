@@ -748,7 +748,7 @@ class LibraryController(
 
     private fun setRecyclerLayout() {
         recycler.post {
-            recycler.updatePaddingRelative(bottom = 50.dpToPx + (activity?.bottom_nav?.height ?: 0))
+            recycler?.updatePaddingRelative(bottom = 50.dpToPx + (activity?.bottom_nav?.height ?: 0))
         }
         if (libraryLayout == 0) {
             recycler.spanCount = 1
@@ -839,7 +839,7 @@ class LibraryController(
         adapter.setItems(mangaMap)
         if (recycler.itemAnimator == null) {
             recycler.post {
-                recycler.itemAnimator = DefaultItemAnimator()
+                recycler?.itemAnimator = DefaultItemAnimator()
             }
         }
         singleCategory = presenter.categories.size <= 1
@@ -914,7 +914,7 @@ class LibraryController(
         animatorSet.startDelay = 1250
         animatorSet.addListener(
             EndAnimatorListener {
-                category_hopper_frame.translationX = 0f
+                category_hopper_frame?.translationX = 0f
                 isAnimatingHopper = false
                 this.animatorSet = null
             }

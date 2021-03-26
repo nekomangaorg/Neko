@@ -107,7 +107,7 @@ class MaterialMenuSheet(
 
         currentIndex?.let {
             view.post {
-                menu_scroll_view.scrollTo(0, it * 48.dpToPx - menu_scroll_view.height / 2)
+                menu_scroll_view?.scrollTo(0, it * 48.dpToPx - menu_scroll_view.height / 2)
             }
         }
 
