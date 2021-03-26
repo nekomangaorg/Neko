@@ -15,6 +15,7 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.bluelinelabs.conductor.Controller
@@ -123,8 +124,12 @@ fun Controller.scrollViewWith(
             recycler.requestApplyInsets()
         }
     }
-    recycler.post {
+    val updateViewsNearBottom = {
         onBottomNavUpdate?.invoke()
+        activity?.bottom_view?.translationY = activity?.bottom_nav?.translationY ?: 0f
+    }
+    recycler.post {
+        updateViewsNearBottom()
     }
     val randomTag = Random.nextLong()
     var lastY = 0f
@@ -248,13 +253,15 @@ fun Controller.scrollViewWith(
                         activity!!.appbar.animate().y(0f)
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
-                        activity!!.bottom_nav?.let {
-                            val animator = it.animate()?.translationY(0f)
-                                ?.setDuration(shortAnimationDuration.toLong())
-                            animator?.setUpdateListener {
-                                onBottomNavUpdate?.invoke()
+                        if (router.backstackSize == 1) {
+                            activity!!.bottom_nav?.let {
+                                val animator = it.animate()?.translationY(0f)
+                                    ?.setDuration(shortAnimationDuration.toLong())
+                                animator?.setUpdateListener {
+                                    updateViewsNearBottom()
+                                }
+                                animator?.start()
                             }
-                            animator?.start()
                         }
                         lastY = 0f
                         if (elevate) elevateFunc(false)
@@ -275,8 +282,7 @@ fun Controller.scrollViewWith(
                                     0f,
                                     tabBar.height.toFloat()
                                 )
-                                activity!!.bottom_view?.translationY = tabBar.translationY
-                                onBottomNavUpdate?.invoke()
+                                updateViewsNearBottom()
                             } else if (tabBar.translationY != 0f) {
                                 tabBar.translationY = 0f
                                 activity!!.bottom_view?.translationY = 0f
@@ -305,24 +311,27 @@ fun Controller.scrollViewWith(
                         activity != null && activity!!.appbar.height > 0 &&
                         recycler.translationY == 0f
                     ) {
-                        val halfWay = abs((-activity!!.appbar.height.toFloat()) / 2)
+                        val halfWay = activity!!.appbar.height.toFloat() / 2
                         val shortAnimationDuration = resources?.getInteger(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
-                        val closerToTop = abs(activity!!.appbar.y) - halfWay > 0
+                        val closerToTop = abs(activity!!.appbar.y) > halfWay
+                        val halfWayBottom = activity!!.bottom_nav.height.toFloat() / 2
+                        val closerToBottom = activity!!.bottom_nav.translationY > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
-                        lastY = if (closerToTop && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
+                        val closerToEdge = if (activity!!.bottom_nav.isVisible) closerToBottom else closerToTop
+                        lastY = if (closerToEdge && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
                         activity!!.appbar.animate().y(lastY).setDuration(shortAnimationDuration.toLong()).start()
-                        activity!!.bottom_nav?.let {
-                            val halfWayBottom = abs((it.height.toFloat()) / 2)
-                            val closerToBottom = it.translationY > halfWayBottom
-                            val lastBottomY = if (closerToBottom && !atTop) it.height.toFloat() else 0f
-                            val animator = it.animate()?.translationY(lastBottomY)
-                                ?.setDuration(shortAnimationDuration.toLong())
-                            animator?.setUpdateListener {
-                                onBottomNavUpdate?.invoke()
+                        if (activity!!.bottom_nav.isVisible) {
+                            activity!!.bottom_nav?.let {
+                                val lastBottomY = if (closerToEdge && !atTop) it.height.toFloat() else 0f
+                                val animator = it.animate()?.translationY(lastBottomY)
+                                    ?.setDuration(shortAnimationDuration.toLong())
+                                animator?.setUpdateListener {
+                                    updateViewsNearBottom()
+                                }
+                                animator?.start()
                             }
-                            animator?.start()
                         }
                         if (recycler.canScrollVertically(-1) && !elevate) elevateFunc(true)
                         else if (!recycler.canScrollVertically(-1) && elevate) elevateFunc(false)

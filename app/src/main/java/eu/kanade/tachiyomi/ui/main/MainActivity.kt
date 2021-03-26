@@ -250,6 +250,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
 
         bottom_nav.visibleIf(!hideBottomNav)
+        bottom_view.visibility = if (hideBottomNav) View.GONE else bottom_view.visibility
         bottom_nav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(
             object : ControllerChangeHandler.ControllerChangeListener {
@@ -625,7 +626,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         }
         alphaAnimation.addListener(
             EndAnimatorListener {
-                bottom_nav.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
+                bottom_nav.visibleIf(!hideBottomNav)
+                bottom_view.visibility = if (hideBottomNav) View.GONE else bottom_view.visibility
             }
         )
         alphaAnimation.duration = 200
