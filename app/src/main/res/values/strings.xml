@@ -81,6 +81,7 @@
         default category.</string>
     <string name="already_in_category">Manga already in category</string>
     <string name="add_categories">Add categories</string>
+    <string name="add_edit_categories">Add/Edit categories</string>
     <string name="edit_categories">Edit categories</string>
     <string name="manage_category">Manage category</string>
     <string name="rename_category">Rename category</string>

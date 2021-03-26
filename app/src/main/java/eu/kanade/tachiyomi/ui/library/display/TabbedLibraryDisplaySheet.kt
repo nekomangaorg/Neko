@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
-open class TabbedLibraryDisplaySheet(controller: LibraryController) :
+open class TabbedLibraryDisplaySheet(val controller: LibraryController) :
     TabbedBottomSheetDialog(controller.activity!!) {
 
     private val displayView: LibraryDisplayView = inflate(controller.activity!!, R.layout.library_display_layout, null) as LibraryDisplayView
@@ -36,6 +36,11 @@ open class TabbedLibraryDisplaySheet(controller: LibraryController) :
             controller.router.pushController(SettingsLibraryController().withFadeTransaction())
             dismiss()
         }
+    }
+
+    override fun dismiss() {
+        super.dismiss()
+        controller.displaySheet = null
     }
 
     override fun getTabViews(): List<View> = listOf(

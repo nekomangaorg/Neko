@@ -24,5 +24,8 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         auto_hide_hopper.bindToPreference(preferences.autohideHopper()) {
             controller.resetHopperY()
         }
+        add_categories_button.setOnClickListener {
+            controller.showCategoriesController()
+        }
     }
 }

@@ -41,5 +41,12 @@
             android:layout_marginStart="12dp"
             android:layout_marginEnd="12dp"
             android:text="@string/hide_hopper_on_scroll" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add_categories_button"
+            style="@style/Theme.Widget.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/add_edit_categories" />
     </LinearLayout>
 </eu.kanade.tachiyomi.ui.library.display.LibraryCategoryView>

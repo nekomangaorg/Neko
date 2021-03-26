@@ -55,6 +55,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
@@ -173,6 +174,7 @@ class LibraryController(
     var searchItem = SearchGlobalItem()
 
     var snack: Snackbar? = null
+    var displaySheet: TabbedLibraryDisplaySheet? = null
 
     private var scrollDistance = 0f
     private val scrollDistanceTilHidden = 1000.dpToPx
@@ -510,7 +512,10 @@ class LibraryController(
                 FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
                 FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> showFilterTip()
-                FilterBottomSheet.ACTION_DISPLAY -> TabbedLibraryDisplaySheet(this).show()
+                FilterBottomSheet.ACTION_DISPLAY -> {
+                    displaySheet = TabbedLibraryDisplaySheet(this)
+                    displaySheet?.show()
+                }
                 FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL -> presenter.toggleAllCategoryVisibility()
                 FilterBottomSheet.ACTION_GROUP_BY -> {
                     val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
@@ -1425,6 +1430,11 @@ class LibraryController(
                     ?: return
             imm.hideSoftInputFromWindow(view.windowToken, 0)
         }
+    }
+
+    fun showCategoriesController() {
+        router.pushController(CategoryController().withFadeTransaction())
+        displaySheet?.dismiss()
     }
 
     /**
