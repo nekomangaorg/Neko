@@ -9,13 +9,6 @@
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_manga_details"
-        android:icon="@drawable/ic_book_24dp"
-        android:title="@string/details"
-        app:showAsAction="ifRoom" />
-
-
-    <item
         android:id="@+id/action_share_page"
         android:icon="@drawable/ic_share_24dp"
         android:title="@string/share_page"

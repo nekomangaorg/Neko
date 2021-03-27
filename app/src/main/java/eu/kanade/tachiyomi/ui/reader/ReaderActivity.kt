@@ -279,19 +279,6 @@ class ReaderActivity :
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val detailsItem = menu?.findItem(R.id.action_manga_details)
-        if (presenter.manga?.mangaType(this) != null) {
-            detailsItem?.title = getString(
-                R.string._details,
-                presenter.manga?.mangaType(this)?.capitalize(Locale.ROOT) ?: ""
-            )
-        } else {
-            detailsItem?.title = getString(R.string.details)
-        }
-        return super.onPrepareOptionsMenu(menu)
-    }
-
     /**
      * Called when an item of the options menu was clicked. Used to handle clicks on our menu
      * entries.
@@ -300,12 +287,6 @@ class ReaderActivity :
         coroutine?.cancel()
         when (item.itemId) {
             R.id.action_display_settings -> TabbedReaderSettingsSheet(this).show()
-            R.id.action_manga_details -> {
-                presenter.manga?.id?.let { id ->
-                    val intent = SearchActivity.openMangaIntent(this, id)
-                    startActivity(intent)
-                }
-            }
             R.id.action_share_page, R.id.action_set_page_as_cover, R.id.action_save_page -> {
                 val currentChapter = presenter.getCurrentChapter() ?: return true
                 val page = currentChapter.pages?.getOrNull(page_seekbar.progress) ?: return true
@@ -393,6 +374,13 @@ class ReaderActivity :
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         toolbar.setNavigationOnClickListener {
             popToMain()
+        }
+
+        toolbar.setOnClickListener {
+            presenter.manga?.id?.let { id ->
+                val intent = SearchActivity.openMangaIntent(this, id)
+                startActivity(intent)
+            }
         }
 
         // Init listeners on bottom menu
