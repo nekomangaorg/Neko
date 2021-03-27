@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.random.Random
 
@@ -157,6 +158,7 @@ fun Controller.scrollViewWith(
     var elevationAnim: ValueAnimator? = null
     var elevate = false
     var isInView = true
+    val preferences: PreferencesHelper by injectLazy()
     val elevateFunc: (Boolean) -> Unit = { el ->
         elevate = el
         if (liftOnScroll != null) {
@@ -321,12 +323,18 @@ fun Controller.scrollViewWith(
                         val halfWayBottom = activity!!.bottom_nav.height.toFloat() / 2
                         val closerToBottom = activity!!.bottom_nav.translationY > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
-                        val closerToEdge = if (activity!!.bottom_nav.isVisible) closerToBottom else closerToTop
-                        lastY = if (closerToEdge && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
-                        activity!!.appbar.animate().y(lastY).setDuration(shortAnimationDuration.toLong()).start()
-                        if (activity!!.bottom_nav.isVisible && isInView) {
+                        val closerToEdge =
+                            if (activity!!.bottom_nav.isVisible &&
+                                preferences.hideBottomNavOnScroll().get()
+                            ) closerToBottom else closerToTop
+                        lastY =
+                            if (closerToEdge && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
+                        activity!!.appbar.animate().y(lastY)
+                            .setDuration(shortAnimationDuration.toLong()).start()
+                        if (activity!!.bottom_nav.isVisible && isInView && preferences.hideBottomNavOnScroll().get()) {
                             activity!!.bottom_nav?.let {
-                                val lastBottomY = if (closerToEdge && !atTop) it.height.toFloat() else 0f
+                                val lastBottomY =
+                                    if (closerToEdge && !atTop) it.height.toFloat() else 0f
                                 val animator = it.animate()?.translationY(lastBottomY)
                                     ?.setDuration(shortAnimationDuration.toLong())
                                 animator?.setUpdateListener {
