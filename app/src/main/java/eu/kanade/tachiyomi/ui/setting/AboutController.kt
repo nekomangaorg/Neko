@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.toast
@@ -115,10 +114,6 @@ class AboutController : SettingsController() {
             preference {
                 titleRes = R.string.build_time
                 summary = getFormattedBuildTime()
-
-                onClick {
-                    ChangelogDialogController().showDialog(router)
-                }
             }
             preference {
                 titleRes = R.string.open_source_licenses

@@ -304,7 +304,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
             // Show changelog if needed
             if (Migrations.upgrade(preferences)) {
                 if (!BuildConfig.DEBUG) {
-                    ChangelogDialogController().showDialog(router)
+                    content.post {
+                        WhatsNewSheet(this).show()
+                    }
                 }
             }
         }

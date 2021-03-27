@@ -31,12 +31,13 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.bottom_menu_sheet.*
 
-class MaterialMenuSheet(
+open class MaterialMenuSheet(
     activity: Activity,
     items: List<MenuSheetItem>,
     title: String? = null,
     selectedId: Int? = null,
     maxHeight: Int? = null,
+    showDivider: Boolean = false,
     onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean
 ) :
     BottomSheetDialog
@@ -56,6 +57,7 @@ class MaterialMenuSheet(
             menu_scroll_view.requestLayout()
         }
 
+        divider.visibleIf(showDivider)
         var currentIndex: Int? = null
         items.forEachIndexed { index, item ->
             val view =

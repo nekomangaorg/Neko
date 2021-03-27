@@ -539,6 +539,7 @@
     <string name="system_default">System default</string>
     <string name="date_format">Date format</string>
     <string name="check_for_updates">Check for updates</string>
+    <string name="updated_to_">Updated to v%1$s</string>
     <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
