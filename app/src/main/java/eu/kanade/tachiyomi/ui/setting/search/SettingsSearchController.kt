@@ -27,7 +27,7 @@ class SettingsSearchController :
     /**
      * Adapter containing search results grouped by lang.
      */
-    protected var adapter: SettingsSearchAdapter? = null
+    private var adapter: SettingsSearchAdapter? = null
     private lateinit var searchView: SearchView
 
     init {

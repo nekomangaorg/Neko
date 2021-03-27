@@ -101,14 +101,13 @@ object SettingsSearchHelper {
                 val title = pref.title.toString()
                 // ListPreferences occasionally run into ArrayIndexOutOfBoundsException issues
                 val summary = try { pref.summary?.toString() ?: "" } catch (e: Throwable) { "" }
-                val breadcrumbsStr = addLocalizedBreadcrumb(breadcrumbs, "${pref.title}")
 
                 prefSearchResultList.add(
                     SettingsSearchResult(
                         key = pref.key,
                         title = title,
                         summary = summary,
-                        breadcrumb = breadcrumbsStr,
+                        breadcrumb = breadcrumbs,
                         searchController = ctrl
                     )
                 )
