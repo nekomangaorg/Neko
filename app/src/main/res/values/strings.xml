@@ -378,6 +378,10 @@
     <string name="horizontally">Horizontally</string>
     <string name="vertically">Vertically</string>
     <string name="both_axes">Both Axes</string>
+    <string name="cutout_area_behavior">Cutout area behavior</string>
+    <string name="pad_cutout_areas">Pad cutout areas</string>
+    <string name="start_past_cutout">Start past cutout</string>
+    <string name="ignore_cutout_areas">Ignore cutout areas</string>
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>

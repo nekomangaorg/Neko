@@ -89,7 +89,7 @@ androidExtensions {
 
 dependencies {
     // Modified dependencies
-    implementation("com.github.tachiyomiorg:subsampling-scale-image-view:6caf219")
+    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43")
     implementation("com.github.inorichi:junrar-android:634c1f5")
 
     // Source models and interfaces from Tachiyomi 1.x

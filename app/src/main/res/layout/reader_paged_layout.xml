@@ -41,6 +41,14 @@
             android:entries="@array/image_scale_type" />
 
         <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
+            android:id="@+id/extend_past_cutout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/cutout_area_behavior"
+            android:entries="@array/cutout_behavior" />
+
+        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
             android:id="@+id/zoom_start"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -64,7 +72,6 @@
             android:layout_marginTop="0dp"
             android:text="@string/animate_page_transitions"
             android:textColor="?android:attr/textColorPrimary" />
-
 
         <!-- Webtoon Prefs -->
         <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView

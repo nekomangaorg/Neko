@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
+import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -34,6 +35,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
     var readerTheme = 0
         private set
 
+    var cutoutBehavior = 0
+        private set
+
     init {
         preferences.pageTransitions()
             .register({ usePageTransitions = it })
@@ -58,6 +62,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
                 navigationModeInvertedListener?.invoke()
             }
             .launchIn(scope)
+
+        preferences.pagerCutoutBehavior()
+            .register({ cutoutBehavior = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.zoomStart()
             .register({ zoomTypeFromPreference(it) }, { imagePropertyChangedListener?.invoke() })
@@ -103,6 +110,15 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
         }
     }
 
+    fun scaleTypeIsFullFit(): Boolean {
+        return when (imageScaleType) {
+            SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
+            SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
+            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
+            else -> false
+        }
+    }
+
     override fun updateNavigation(navigationMode: Int) {
         navigator = when (navigationMode) {
             0 -> defaultNavigation()
@@ -117,5 +133,11 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
 
     enum class ZoomType {
         Left, Center, Right
+    }
+
+    companion object {
+        const val CUTOUT_PAD = 0
+        const val CUTOUT_START_EXTENDED = 1
+        const val CUTOUT_IGNORE = 2
     }
 }

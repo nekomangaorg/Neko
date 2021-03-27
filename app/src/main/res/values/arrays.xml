@@ -77,6 +77,12 @@
         <item>@string/both_axes</item>
     </string-array>
 
+    <string-array name="cutout_behavior">
+        <item>@string/pad_cutout_areas</item>
+        <item>@string/start_past_cutout</item>
+        <item>@string/ignore_cutout_areas</item>
+    </string-array>
+
     <string-array name="clean_up_downloads">
         <item>@string/clean_orphaned_downloads</item>
         <item>@string/clean_read_downloads</item>
