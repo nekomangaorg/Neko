@@ -186,7 +186,6 @@ class SettingsGeneralController : SettingsController() {
                         ?: context.getString(R.string.system_default)
                 }
                 defaultValue = ""
-                summary = "%s"
 
                 onChange { newValue ->
                     val activity = activity ?: return@onChange false
@@ -210,7 +209,6 @@ class SettingsGeneralController : SettingsController() {
                     }
                 }
                 defaultValue = ""
-                summary = "%s"
             }
         }
     }

@@ -132,7 +132,6 @@ class SettingsReaderController : SettingsController() {
                     entryRange = 0..values.size
                 }.toList()
                 defaultValue = "0"
-                summary = "%s"
 
                 preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
@@ -152,7 +151,6 @@ class SettingsReaderController : SettingsController() {
                     ViewerNavigation.TappingInvertMode.BOTH.name
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
-                summary = "%s"
 
                 preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
@@ -199,7 +197,6 @@ class SettingsReaderController : SettingsController() {
                     entryRange = 0..values.size
                 }.toList()
                 defaultValue = "0"
-                summary = "%s"
 
                 preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
@@ -219,7 +216,6 @@ class SettingsReaderController : SettingsController() {
                     ViewerNavigation.TappingInvertMode.BOTH.name
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
-                summary = "%s"
 
                 preferences.readWithTapping().asImmediateFlow { isVisible = it }.launchIn(viewScope)
             }
