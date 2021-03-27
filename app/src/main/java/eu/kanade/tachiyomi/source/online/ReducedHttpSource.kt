@@ -22,7 +22,7 @@ import java.util.concurrent.TimeUnit
 abstract class ReducedHttpSource : HttpSource() {
 
     private val bucket = TokenBuckets.builder().withCapacity(1)
-        .withFixedIntervalRefillStrategy(1, 10, TimeUnit.SECONDS).build()
+        .withFixedIntervalRefillStrategy(1, 2, TimeUnit.SECONDS).build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
