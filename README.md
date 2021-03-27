@@ -1,10 +1,12 @@
+| Release | Contribute | Support Server |
+|-------|----------|---------|
+| [![stable release](https://img.shields.io/github/release/jays2kings/tachiyomi.svg?maxAge=3600&label=download)](https://github.com/jays2kings/tachiyomi/releases) | [![Translation status](https://hosted.weblate.org/widgets/tachiyomi/-/tachiyomi-j2k/svg-badge.svg)](https://hosted.weblate.org/engage/tachiyomi/?utm_source=widget) | [![Discord](https://img.shields.io/discord/349436576037732353.svg?label=discord&labelColor=7289da&color=2c2f33&style=flat)](https://discord.gg/tachiyomi) |
+
+
 # ![app icon](./.github/readme-images/app-icon.png)Tachiyomi
 Tachiyomi is a free and open source manga reader for Android 6.0 and above.
 
 ![screenshots of app](./.github/readme-images/screens.png)
-
-## Newest Release
-[v1.0.10](https://github.com/Jays2Kings/tachiyomiJ2K/releases)
 
 ## Features
 
@@ -26,13 +28,10 @@ Plus some new features in this fork such as:
 * [New material snackbar](.github/readme-images/material%20snackbar.png): Removing manga now auto deletes chapters and has an undo button in case you change your mind
 * Batch Auto-Source Migration (taken from [TachiyomiEH](https://github.com/NerdNumber9/TachiyomiEH))
 * [Share sheets upgrade for Android 10](.github/readme-images/share%20menu.png)
-* View all chapters right in the reader
-* Tri-State Filters on library
+* View all chapters right while reader
 * Drag & Drop Sorting in Library
 * Individual Category sorting
 * Library redesigned as a single list view
-* Read history goes all the way back to the beginning of time
-* Restoring backups in the background (taken from [Neko](https://github.com/CarlosEsco/Neko))
 * Expanding manga thumbnails
 * A lot more Material Design 2 additions
 
