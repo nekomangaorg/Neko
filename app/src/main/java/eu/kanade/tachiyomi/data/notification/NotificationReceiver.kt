@@ -244,6 +244,8 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to launch send intent.
         private const val ACTION_SHARE_BACKUP = "$ID.$NAME.SEND_BACKUP"
 
+        private const val ACTION_SHARE_CRASH_LOG = "$ID.$NAME.SEND_CRASH_LOG"
+
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
 
@@ -558,6 +560,23 @@ class NotificationReceiver : BroadcastReceiver() {
                 action = ACTION_SHARE_BACKUP
                 putExtra(EXTRA_URI, uri)
                 putExtra(EXTRA_IS_LEGACY_BACKUP, isLegacyFormat)
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that starts a share activity for a crash log dump file.
+         *
+         * @param context context of application
+         * @param uri uri of file
+         * @param notificationId id of notification
+         * @return [PendingIntent]
+         */
+        internal fun shareCrashLogPendingBroadcast(context: Context, uri: Uri, notificationId: Int): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_SHARE_CRASH_LOG
+                putExtra(EXTRA_URI, uri)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)

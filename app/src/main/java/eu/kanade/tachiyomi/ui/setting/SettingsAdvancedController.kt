@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CoroutineStart
@@ -58,6 +59,37 @@ class SettingsAdvancedController : SettingsController() {
             titleRes = R.string.send_crash_report
             summaryRes = R.string.helps_fix_bugs
             defaultValue = true
+        }
+
+        preference {
+            key = "dump_crash_logs"
+            titleRes = R.string.dump_crash_logs
+            summaryRes = R.string.saves_error_logs
+
+            onClick {
+                CrashLogUtil(context).dumpLogs()
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
+            if (pm != null) preference {
+                key = "disable_batt_opt"
+                titleRes = R.string.disable_battery_optimization
+                summaryRes = R.string.disable_if_issues_with_updating
+
+                onClick {
+                    val packageName: String = context.packageName
+                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                        val intent = Intent().apply {
+                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                            data = "package:$packageName".toUri()
+                        }
+                        startActivity(intent)
+                    } else {
+                        context.toast(R.string.battery_optimization_disabled)
+                    }
+                }
+            }
         }
         preferenceCategory {
             titleRes = R.string.data_management
@@ -156,30 +188,6 @@ class SettingsAdvancedController : SettingsController() {
                 summaryRes = R.string.updates_tracking_details
 
                 onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
-            }
-        }
-
-        preferenceCategory {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-                if (pm != null) preference {
-                    key = "disable_batt_opt"
-                    titleRes = R.string.disable_battery_optimization
-                    summaryRes = R.string.disable_if_issues_with_updating
-
-                    onClick {
-                        val packageName: String = context.packageName
-                        if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                            val intent = Intent().apply {
-                                action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                                data = "package:$packageName".toUri()
-                            }
-                            startActivity(intent)
-                        } else {
-                            context.toast(R.string.battery_optimization_disabled)
-                        }
-                    }
-                }
             }
         }
     }
