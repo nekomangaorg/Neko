@@ -206,7 +206,9 @@ class SourceController :
                     } else RetainViewMode.RELEASE_DETACH
                     sheet_layout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
                     sheet_layout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
-                    setBottomSheetTabs(if (state == BottomSheetBehavior.STATE_COLLAPSED) 0f else 1f)
+                    if (state == BottomSheetBehavior.STATE_COLLAPSED || state == BottomSheetBehavior.STATE_EXPANDED) {
+                        setBottomSheetTabs(if (state == BottomSheetBehavior.STATE_COLLAPSED) 0f else 1f)
+                    }
                 }
             }
         )
@@ -259,7 +261,7 @@ class SourceController :
         )
     }
 
-    fun setBottomPadding() {
+    private fun setBottomPadding() {
         val bottomBar = activity?.bottom_nav ?: return
         ext_bottom_sheet ?: return
         val pad = bottomBar.translationY - bottomBar.height
