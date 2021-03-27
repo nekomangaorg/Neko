@@ -21,6 +21,12 @@ class SettingsGeneralController : SettingsController() {
         intListPreference(activity) {
             key = Keys.startingTab
             titleRes = R.string.starting_screen
+            summaryRes = when (preferences.startingTab().get()) {
+                -1 -> R.string.library
+                -2 -> R.string.recents
+                -3 -> R.string.browse
+                else -> R.string.last_used_library_recents
+            }
             entriesRes = arrayOf(
                 R.string.last_used_library_recents,
                 R.string.library,
@@ -29,6 +35,25 @@ class SettingsGeneralController : SettingsController() {
             )
             entryValues = (0 downTo -3).toList()
             defaultValue = 0
+            customSelectedValue = when (val value = preferences.startingTab().get()) {
+                in -3..-1 -> value
+                else -> 0
+            }
+
+            onChange { newValue ->
+                summaryRes = when (newValue) {
+                    0, 1 -> R.string.last_used_library_recents
+                    -1 -> R.string.library
+                    -2 -> R.string.recents
+                    -3 -> R.string.browse
+                    else -> R.string.last_used_library_recents
+                }
+                customSelectedValue = when (newValue) {
+                    in -3..-1 -> newValue as Int
+                    else -> 0
+                }
+                true
+            }
         }
 
         switchPreference {

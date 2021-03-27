@@ -24,6 +24,7 @@ class IntListMatPreference @JvmOverloads constructor(
         set(value) { entries = value.map { context.getString(it) } }
     private var defValue: Int = 0
     var entries: List<String> = emptyList()
+    var customSelectedValue: Int? = null
 
     override fun onSetInitialValue(defaultValue: Any?) {
         super.onSetInitialValue(defaultValue)
@@ -37,9 +38,19 @@ class IntListMatPreference @JvmOverloads constructor(
         else entries[index]
     }
 
+    override fun setSummary(summaryResId: Int) {
+        super.setSummary(summaryResId)
+        customSummary = summary.toString()
+    }
+
+    override fun setSummary(summary: CharSequence?) {
+        super.setSummary(summary)
+        customSummary = summary?.toString()
+    }
+
     override fun dialog(): MaterialDialog {
         return super.dialog().apply {
-            val default = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
+            val default = entryValues.indexOf(customSelectedValue ?: prefs.getInt(key, defValue).getOrDefault())
             listItemsSingleChoice(
                 items = entries,
                 waitForPositiveButton = false,
