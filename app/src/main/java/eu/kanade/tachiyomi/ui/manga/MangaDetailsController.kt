@@ -816,7 +816,12 @@ class MangaDetailsController :
                     }.negativeButton(android.R.string.cancel).show()
             }
             R.id.remove_all, R.id.remove_read, R.id.remove_non_bookmarked -> massDeleteChapters(item.itemId)
-            R.id.action_mark_all_as_unread -> markAsUnread(presenter.chapters)
+            R.id.action_mark_all_as_unread -> {
+                MaterialDialog(view!!.context).message(R.string.mark_all_chapters_as_unread)
+                    .positiveButton(R.string.mark_as_unread) {
+                        markAsUnread(presenter.chapters)
+                    }.negativeButton(android.R.string.cancel).show()
+            }
             R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
                 item.itemId
             )
