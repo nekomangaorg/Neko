@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:end="96dp" android:start="48dp" android:drawable="@drawable/square_ripple"/>
+    <item android:end="96dp" android:start="64dp" android:drawable="@drawable/square_ripple"/>
 </layer-list>
