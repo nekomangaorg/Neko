@@ -28,7 +28,7 @@
         android:layout_height="wrap_content"
         android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/dropdown_caret"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/start_barrier"
         app:layout_constraintTop_toTopOf="parent"
