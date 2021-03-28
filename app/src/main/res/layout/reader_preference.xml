@@ -35,15 +35,16 @@
         tools:text="Details" />
 
     <ImageView
+        android:id="@+id/dropdown_caret"
         android:layout_width="24dp"
         android:layout_height="24dp"
         android:layout_marginStart="1dp"
         app:tint="?android:attr/textColorSecondary"
         android:src="@drawable/ic_expand_more_24dp"
-        app:layout_constraintStart_toEndOf="@id/detail_view"
+        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="@id/detail_view"
         app:layout_constraintBottom_toBottomOf="@id/detail_view"
-        />
+        tools:ignore="ContentDescription" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/start_barrier"
