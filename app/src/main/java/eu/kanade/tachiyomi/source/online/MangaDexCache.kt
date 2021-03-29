@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSeria
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.Request
@@ -85,8 +84,7 @@ open class MangaDexCache() : MangaDex() {
         return withContext(Dispatchers.IO) {
             var response = client.newCall(apiRequest(manga)).execute()
             if (!response.isSuccessful) {
-                delay(1000L)
-                response = client.newCall(apiRequest(manga)).execute()
+                response = client.newCall(apiRequest(manga, true)).execute()
             }
             parseMangaCacheApi(response.body!!.string())
         }
@@ -154,9 +152,14 @@ open class MangaDexCache() : MangaDex() {
         return Logout(true, "Cache source does not have logout")
     }
 
-    private fun apiRequest(manga: SManga): Request {
+    private fun apiRequest(manga: SManga, useOtherUrl: Boolean = true): Request {
         val mangaId = MdUtil.getMangaId(manga.url).toLong()
-        return GET(MdUtil.apiUrlCache + mangaId.toString().padStart(5, '0') + ".json", headers, CacheControl.FORCE_NETWORK)
+        val url = when {
+            useOtherUrl -> MdUtil.apiUrlCache
+            else -> MdUtil.apiUrlCdnCache
+        }
+
+        return GET(url + mangaId.toString().padStart(5, '0') + ".json", headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun parseMangaCacheApi(jsonData: String): SManga {
