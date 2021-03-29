@@ -52,7 +52,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.databinding.LibraryListControllerBinding
+import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -109,7 +109,7 @@ import kotlin.random.nextInt
 class LibraryController(
     bundle: Bundle? = null,
     val preferences: PreferencesHelper = Injekt.get()
-) : BaseController<LibraryListControllerBinding>(bundle),
+) : BaseController<LibraryControllerBinding>(bundle),
     ActionMode.Callback,
     ChangeMangaCategoriesDialog.Listener,
     FlexibleAdapter.OnItemClickListener,
@@ -383,7 +383,7 @@ class LibraryController(
         }
     }
 
-    override fun createBinding(inflater: LayoutInflater) = LibraryListControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) = LibraryControllerBinding.inflate(inflater)
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
