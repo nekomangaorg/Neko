@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database
 
 import androidx.sqlite.db.SupportSQLiteDatabase
 import androidx.sqlite.db.SupportSQLiteOpenHelper
+import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
@@ -21,7 +22,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 23
+        const val DATABASE_VERSION = 25
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -32,6 +33,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         execSQL(MangaCategoryTable.createTableQuery)
         execSQL(HistoryTable.createTableQuery)
         execSQL(SimilarTable.createTableQuery)
+        execSQL(CachedMangaTable.createVirtualTableQuery)
 
         // DB indexes
         execSQL(MangaTable.createUrlIndexQuery)
@@ -95,6 +97,9 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         }
         if (oldVersion < 23) {
             db.execSQL(MangaTable.addMergeMangaImageCol)
+        }
+        if (oldVersion < 24) {
+            db.execSQL(CachedMangaTable.createVirtualTableQuery)
         }
     }
 

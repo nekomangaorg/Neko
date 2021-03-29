@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -54,7 +55,7 @@ class SettingsSiteController :
         preference {
             titleRes = R.string.show_languages
             onClick {
-                val ctrl = SettingsSiteController.ChooseLanguagesDialog(preferences)
+                val ctrl = ChooseLanguagesDialog(preferences)
                 ctrl.targetController = this@SettingsSiteController
                 ctrl.showDialog(router)
             }
@@ -64,6 +65,16 @@ class SettingsSiteController :
             key = PreferenceKeys.useCacheSource
             titleRes = R.string.use_cache_source
             defaultValue = false
+            onClick {
+                if (isChecked) {
+                    MaterialDialog(activity!!).show {
+                        message(R.string.use_cache_source_dialog)
+                        positiveButton(android.R.string.ok) {
+                            SimilarUpdateJob.doWorkNow(true)
+                        }
+                    }
+                }
+            }
         }
 
         listPreference(activity) {

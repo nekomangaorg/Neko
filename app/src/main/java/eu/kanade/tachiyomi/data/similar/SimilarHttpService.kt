@@ -45,4 +45,8 @@ interface SimilarHttpService {
     @Streaming
     @GET("/goldbattle/MangadexRecomendations/master/output/mangas_compressed.json.gz")
     fun getSimilarResults(): Call<ResponseBody>
+
+    @Streaming
+    @GET("/goldbattle/MangadexRecomendations/master/output/md2external.json.gz")
+    fun getCachedManga(): Call<ResponseBody>
 }

@@ -27,6 +27,7 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
+import com.elvishew.xlog.XLog
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.snackbar.Snackbar
@@ -77,7 +78,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -177,9 +177,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             val currentController = router.backstack.lastOrNull()?.controller()
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.bottom_nav.selectedItemId = id
-                }
+                        continueSwitchingTabs = true
+                        this@MainActivity.bottom_nav.selectedItemId = id
+                    }
                 ) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
@@ -189,7 +189,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     R.id.nav_library -> setRoot(LibraryController(), id)
                     R.id.nav_recents -> setRoot(RecentsController(), id)
                     else -> {
-                        if (!source.isLogged()) {
+                        if (!source.isLogged() && !preferences.useCacheSource()) {
                             val dialog = MangadexLoginDialog(source, this)
                             dialog.showDialog(router)
                         } else {
@@ -519,9 +519,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 // This way the snackbar will only be dismissed if
                 // the user clicks outside it.
                 if (canDismissSnackBar && !sRect.contains(
-                    ev.x.toInt(),
-                    ev.y.toInt()
-                ) && (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
+                        ev.x.toInt(),
+                        ev.y.toInt()
+                    ) && (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
                 ) {
                     snackBar?.dismiss()
                     snackBar = null
@@ -601,8 +601,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 val sheetRect = Rect()
                 bottom_nav.getGlobalVisibleRect(sheetRect)
                 if (sheetRect.contains(
-                    e1.x.toInt(), e1.y.toInt()
-                ) && abs(diffY) > Companion.SWIPE_THRESHOLD && abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD && diffY <= 0
+                        e1.x.toInt(), e1.y.toInt()
+                    ) && abs(diffY) > Companion.SWIPE_THRESHOLD && abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD && diffY <= 0
                 ) {
                     val bottomSheetController =
                         router.backstack.lastOrNull()?.controller() as? BottomSheetController

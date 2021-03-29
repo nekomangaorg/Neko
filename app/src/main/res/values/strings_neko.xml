@@ -86,7 +86,7 @@
     <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
     <string name="similar_loading_complete">Updating similar manga complete</string>
     <string name="similar_loading_complete_error">Error trying to load/process similar manga</string>
-    <string name="similar_loading_progress_start">Downloading similar manga data file…</string>
+    <string name="similar_loading_progress_start">Downloading data file…</string>
     <string name="similar_screen_summary_message">
         This is a feature where one can get manga recommendations.
         This is a recommendation system outside of MangaDex, and works by matching by genres,
@@ -138,6 +138,7 @@
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
     <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
     <string name="use_cache_source">Use cached manga api source</string>
+    <string name="use_cache_source_dialog">This will download  1.5MB file.  You only need to download it once.  If you already downloaded just dismiss this dialog.</string>
 
 
     <!-- Advanced Settings -->

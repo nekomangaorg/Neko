@@ -18,15 +18,16 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSeria
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.json.JSONObject
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import kotlin.random.Random
 
 open class MangaDexCache() : MangaDex() {
 
@@ -40,19 +41,32 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override fun fetchRandomMangaId(): Observable<String> {
-        throw Exception("Cache source cannot get random manga")
+        return Observable.just(Random(1060).nextInt().toString())
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        throw Exception("Cache source cannot get popular manga")
+        throw Exception("Cache source cannot get popular manga.  You can search though!")
     }
 
     override fun fetchSearchManga(
-            page: Int,
-            query: String,
-            filters: FilterList
+        page: Int,
+        query: String,
+        filters: FilterList
     ): Observable<MangasPage> {
-        throw Exception("Cache source cannot search")
+        val count = db.getCachedMangaCount().executeAsBlocking()
+        XLog.i("Number of Cached entries: $count")
+        if (count == 0) {
+            throw Exception("Cache manga db seems empty, try redownloading it")
+        }
+
+        return db.searchCachedManga(query).asRxObservable().flatMapIterable { it }
+            .map { cacheManga ->
+                SManga.create().apply {
+                    this.url = "/manga/${cacheManga.mangaId}"
+                    this.title = MdUtil.cleanString(cacheManga.title)
+                    this.thumbnail_url = "https://cdn.statically.io/og/theme=dark/This%20Is%20A%20%20Cached%20Manga.jpg"
+                }
+            }.toList().take(20).map { MangasPage(it, false) }
     }
 
     override fun fetchFollows(): Observable<MangasPage> {
@@ -61,15 +75,19 @@ open class MangaDexCache() : MangaDex() {
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
         return client.newCall(apiRequest(manga))
-                .asObservableSuccess()
-                .map { response ->
-                    parseMangaCacheApi(response.body!!.string())
-                }
+            .asObservableSuccess()
+            .map { response ->
+                parseMangaCacheApi(response.body!!.string())
+            }
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
-            val response = client.newCall(apiRequest(manga)).execute()
+            var response = client.newCall(apiRequest(manga)).execute()
+            if (!response.isSuccessful) {
+                delay(1000L)
+                response = client.newCall(apiRequest(manga)).execute()
+            }
             parseMangaCacheApi(response.body!!.string())
         }
     }
@@ -138,19 +156,18 @@ open class MangaDexCache() : MangaDex() {
 
     private fun apiRequest(manga: SManga): Request {
         val mangaId = MdUtil.getMangaId(manga.url).toLong()
-        return GET(MdUtil.apiUrlCache+mangaId.toString().padStart(5,'0')+".json", headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.apiUrlCache + mangaId.toString().padStart(5, '0') + ".json", headers, CacheControl.FORCE_NETWORK)
     }
 
-    private fun parseMangaCacheApi(jsonData : String) : SManga {
+    private fun parseMangaCacheApi(jsonData: String): SManga {
         try {
-
             // Serialize the api response
             val mangaReturn = SManga.create()
             val networkApiManga = MdUtil.jsonParser.decodeFromString(CacheApiMangaSerializer.serializer(), jsonData)
-
+            mangaReturn.url = "/manga/${networkApiManga.id}"
             // Convert from the api format
             mangaReturn.title = MdUtil.cleanString(networkApiManga.title)
-            mangaReturn.description = MdUtil.cleanDescription(networkApiManga.description)
+            mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.description)
             mangaReturn.rating = networkApiManga.rating.toString()
 
             // Get the external tracking ids for this manga
@@ -182,41 +199,7 @@ open class MangaDexCache() : MangaDex() {
             }
             mangaReturn.genre = genres.joinToString(", ")
 
-            // Query graph ql endpoint for our image
-            // https://stackoverflow.com/a/58923947
-            if(mangaReturn.anilist_id != null && mangaReturn.thumbnail_url == null) {
-                val query = "{\n" +
-                        "  Media(id: ${mangaReturn.anilist_id}, type: MANGA) {\n" +
-                        "    coverImage {\n" +
-                        "      extraLarge\n" +
-                        "      large\n" +
-                        "    }\n" +
-                        "  }\n" +
-                        "}\n"
-                val json = JSONObject()
-                json.put("query",query)
-                val requestBody = json.toString().toRequestBody(null)
-                val request = Request.Builder().url("https://graphql.anilist.co").post(requestBody)
-                        .addHeader("content-type", "application/json").build()
-                val response = clientAnilist.newCall(request).execute()
-                val data = JSONObject(response.body!!.string())
-                mangaReturn.thumbnail_url = data.getJSONObject("data")
-                        .getJSONObject("Media")
-                        .getJSONObject("coverImage")
-                        .getString("extraLarge")
-            }
-
-            // Query MAL api for an image
-            // https://jikan.docs.apiary.io/#reference/0/manga
-            if(mangaReturn.my_anime_list_id != null && mangaReturn.thumbnail_url == null) {
-                val request = GET("https://api.jikan.moe/v3/manga/${mangaReturn.my_anime_list_id}/pictures",headers, CacheControl.FORCE_NETWORK)
-                val response = clientMyAnimeList.newCall(request).execute()
-                val data = JSONObject(response.body!!.string())
-                val pictures = data.getJSONArray("pictures")
-                if(pictures.length() > 0) {
-                    mangaReturn.thumbnail_url = pictures.getJSONObject(pictures.length()-1).getString("large")
-                }
-            }
+            mangaReturn.thumbnail_url = getThumbnail(mangaReturn.anilist_id, mangaReturn.my_anime_list_id)
 
             return mangaReturn
         } catch (e: Exception) {
@@ -225,5 +208,42 @@ open class MangaDexCache() : MangaDex() {
         }
     }
 
+    fun getThumbnail(anilist_id: String?, my_anime_list_id: String?): String {
+        // Query graph ql endpoint for our image
+        // https://stackoverflow.com/a/58923947
+        if (anilist_id != null) {
+            val query = "{\n" +
+                "  Media(id: ${anilist_id}, type: MANGA) {\n" +
+                "    coverImage {\n" +
+                "      extraLarge\n" +
+                "      large\n" +
+                "    }\n" +
+                "  }\n" +
+                "}\n"
+            val json = JSONObject()
+            json.put("query", query)
+            val requestBody = json.toString().toRequestBody(null)
+            val request = Request.Builder().url("https://graphql.anilist.co").post(requestBody)
+                .addHeader("content-type", "application/json").build()
+            val response = clientAnilist.newCall(request).execute()
+            val data = JSONObject(response.body!!.string())
+            return data.getJSONObject("data")
+                .getJSONObject("Media")
+                .getJSONObject("coverImage")
+                .getString("extraLarge")
+        }
 
+        // Query MAL api for an image
+        // https://jikan.docs.apiary.io/#reference/0/manga
+        if (my_anime_list_id != null) {
+            val request = GET("https://api.jikan.moe/v3/manga/${my_anime_list_id}/pictures", headers, CacheControl.FORCE_NETWORK)
+            val response = clientMyAnimeList.newCall(request).execute()
+            val data = JSONObject(response.body!!.string())
+            val pictures = data.getJSONArray("pictures")
+            if (pictures.length() > 0) {
+                return pictures.getJSONObject(pictures.length() - 1).getString("large")
+            }
+        }
+        return "https://cdn.statically.io/og/theme=dark/This%20Is%20A%20%20Cached%20Manga.jpg"
+    }
 }

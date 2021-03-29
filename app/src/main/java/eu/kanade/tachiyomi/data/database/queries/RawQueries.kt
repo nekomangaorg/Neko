@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database.queries
 
+import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable as Category
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
@@ -236,3 +237,29 @@ fun getCategoriesForMangaQuery() =
     ${MangaCategory.TABLE}.${MangaCategory.COL_CATEGORY_ID}
     WHERE ${MangaCategory.COL_MANGA_ID} = ?
 """
+
+/*fun searchCachedMangaQuery(query: String) =
+    """
+        SELECT * FROM ${CachedMangaTable.TABLE} 
+        WHERE ${CachedMangaTable.COL_MANGA_ID} IN
+           (SELECT ${CachedMangaTable.COL_DOC_ID} FROM ${CachedMangaTable.TABLE_FTS} 
+            WHERE ${CachedMangaTable.TABLE_FTS} MATCH  '$query*')
+    """*/
+fun searchCachedMangaQuery(query: String) =
+    """
+      SELECT * FROM ${CachedMangaTable.TABLE_FTS}
+      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH  '$query'
+    """
+
+/*fun insertCachedMangaQuery() =
+    """
+    INSERT INTO ${CachedMangaTable.TABLE_FTS} (${CachedMangaTable.COL_DOC_ID}, ${CachedMangaTable.COL_MANGA_TITLE}) 
+    SELECT ${CachedMangaTable.COL_MANGA_ID}, ${CachedMangaTable.COL_MANGA_TITLE} FROM ${CachedMangaTable.TABLE}
+    """*/
+
+
+
+fun deleteCachedMangaFTSQuery() =
+    """
+    INSERT INTO ${CachedMangaTable.TABLE_FTS}(${CachedMangaTable.TABLE_FTS}) VALUES('delete-all')
+    """

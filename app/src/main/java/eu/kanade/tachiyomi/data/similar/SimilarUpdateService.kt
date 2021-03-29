@@ -13,6 +13,7 @@ import com.elvishew.xlog.XLog
 import com.squareup.moshi.JsonReader
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.CachedManga
 import eu.kanade.tachiyomi.data.database.models.MangaSimilarImpl
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -27,17 +28,15 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import okio.BufferedSource
 import okio.buffer
 import okio.sink
 import okio.source
-import okio.BufferedSource
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
 import java.io.InputStream
-import java.util.zip.GZIPInputStream
 import java.util.concurrent.TimeUnit
-import java.nio.charset.StandardCharsets.UTF_8
 
 class SimilarUpdateService(
     val db: DatabaseHelper = Injekt.get()
@@ -54,6 +53,8 @@ class SimilarUpdateService(
      * Subscription where the update is done.
      */
     private var job: Job? = null
+
+    private var cachedMangaJob: Job? = null
 
     /**
      * Pending intent of action that cancels the library update
@@ -97,6 +98,7 @@ class SimilarUpdateService(
      */
     override fun onDestroy() {
         job?.cancel()
+        cachedMangaJob?.cancel()
         similarServiceScope.cancel()
         if (wakeLock.isHeld) {
             wakeLock.release()
@@ -119,22 +121,114 @@ class SimilarUpdateService(
      */
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return Service.START_NOT_STICKY
-        val localFile = intent.getStringExtra("localFile")
 
-        // Unsubscribe from any previous subscription if needed.
-        job?.cancel()
-        val handler = CoroutineExceptionHandler { _, exception ->
-            XLog.e(exception)
-            stopSelf(startId)
-            showResultNotification(true, exception.message)
-            cancelProgressNotification()
+        val cachedManga = intent.getBooleanExtra("cachedManga", false)
+
+        if (cachedManga) {
+            cachedMangaJob?.cancel()
+            val handler = CoroutineExceptionHandler { _, exception ->
+                XLog.e(exception)
+                stopSelf(startId)
+                cancelProgressNotification()
+            }
+            cachedMangaJob = similarServiceScope.launch(handler) {
+                updateCachedManga()
+                cancelProgressNotification()
+            }
+            cachedMangaJob?.invokeOnCompletion { stopSelf(startId) }
+        } else {
+            val localFile = intent.getStringExtra("localFile")
+
+            // Unsubscribe from any previous subscription if needed.
+            job?.cancel()
+            val handler = CoroutineExceptionHandler { _, exception ->
+                XLog.e(exception)
+                stopSelf(startId)
+                showResultNotification(true, exception.message)
+                cancelProgressNotification()
+            }
+            job = similarServiceScope.launch(handler) {
+                updateSimilar(localFile)
+            }
+            job?.invokeOnCompletion { stopSelf(startId) }
         }
-        job = similarServiceScope.launch(handler) {
-            updateSimilar(localFile)
-        }
-        job?.invokeOnCompletion { stopSelf(startId) }
 
         return START_REDELIVER_INTENT
+    }
+
+    private suspend fun updateCachedManga() = withContext(Dispatchers.IO) {
+        val response = SimilarHttpService.create().getCachedManga().execute()
+        if (!response.isSuccessful) {
+            throw Exception("Error trying to download cached manga file")
+        }
+        val destinationFile = File(filesDir, "neko-cached.json")
+        val buffer = destinationFile.sink().buffer()
+        // write json to file
+        response.body()?.byteStream()?.source()?.use { input ->
+            buffer.use { output ->
+                output.writeAll(input)
+            }
+        }
+        val reader = JsonReader.of(destinationFile.source().buffer())
+
+        kotlin.runCatching {
+            db.deleteAllCachedFTS()
+        }
+
+        val cachedManga = getCachedManga(reader)
+        XLog.i("Beginning cache manga insert")
+        db.insertCachedManga2(cachedManga)
+        XLog.i("inserted cached manga: ${cachedManga.size}")
+        XLog.i("Done with cached manga")
+
+        destinationFile.delete()
+        reader.close()
+    }
+
+    fun getCachedManga(reader: JsonReader): MutableList<CachedManga> {
+        var processingManga = false
+        var processingTitle = false
+        var mangaId: String? = null
+        var mangaTitle: String? = null
+        val manga = mutableListOf<CachedManga>()
+
+        while (reader.peek() != JsonReader.Token.END_DOCUMENT) {
+            val nextToken = reader.peek()
+            if (JsonReader.Token.BEGIN_OBJECT == nextToken) {
+                reader.beginObject()
+            } else if (JsonReader.Token.NAME == nextToken) {
+                val name = reader.nextName()
+                if (!processingManga && name.isDigitsOnly()) {
+                    processingManga = true
+                    // similar add id
+                    mangaId = name
+                } else if (name == "title") {
+                    processingTitle = true
+                }
+            } else if (JsonReader.Token.STRING == nextToken) {
+                if (processingTitle) {
+                    mangaTitle = reader.nextString()
+                    processingTitle = false
+                } else {
+                    reader.nextString()
+                }
+            } else if (JsonReader.Token.END_OBJECT == nextToken) {
+                if (processingManga && mangaId != null && mangaTitle != null) {
+                    manga.add(
+                        CachedManga(
+                            mangaId.toLong(),
+                            mangaTitle,
+                        )
+                    )
+                    processingManga = false
+                    processingTitle = false
+                    mangaId = null
+                    mangaTitle = null
+                }
+                reader.endObject()
+            }
+        }
+        return manga
     }
 
     /**
@@ -165,7 +259,7 @@ class SimilarUpdateService(
             destinationFile.delete()
             reader.close()
         } else {
-            if(localFile.substring(localFile.lastIndexOf(".") + 1) != "json") {
+            if (localFile.substring(localFile.lastIndexOf(".") + 1) != "json") {
                 throw Exception("We can only load .json similar database files")
             }
             val localFileUri = Uri.parse(localFile)
@@ -326,10 +420,11 @@ class SimilarUpdateService(
          * @param context the application context.
          * @param localFile URI of the file we want to load locally, or null to get from the network
          */
-        fun start(context: Context, localFile: String? = null) {
+        fun start(context: Context, localFile: String? = null, cachedManga: Boolean = false) {
             if (!isRunning(context)) {
                 val intent = Intent(context, SimilarUpdateService::class.java)
                 intent.putExtra("localFile", localFile)
+                intent.putExtra("cachedManga", cachedManga)
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
