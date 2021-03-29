@@ -23,17 +23,6 @@ class RecentMangaHolder(
         binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
     }
 
-    fun bind(recentsType: Int) {
-        when (recentsType) {
-            RecentMangaHeaderItem.CONTINUE_READING -> {
-                binding.title.setText(R.string.view_history)
-            }
-            RecentMangaHeaderItem.NEW_CHAPTERS -> {
-                binding.title.setText(R.string.view_all_updates)
-            }
-        }
-    }
-
     fun bind(item: RecentMangaItem) {
         binding.downloadButton.downloadButton.visibleIf(item.mch.manga.source != LocalSource.ID)
 
