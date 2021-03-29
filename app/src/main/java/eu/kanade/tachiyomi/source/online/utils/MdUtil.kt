@@ -15,6 +15,7 @@ class MdUtil {
         const val apiUrl = "https://api.mangadex.org"
         const val apiUrlCdnCache = "https://cdn.statically.io/gh/goldbattle/MangadexRecomendations/master/output/api/"
         const val apiUrlCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
+        const val imageUrlCacheNotFound = "https://i.imgur.com/Qbo0zm3.png"
         const val apiManga = "/v2/manga/"
         const val includeChapters = "?include=chapters"
         const val oldApiChapter = "/api/chapter/"
