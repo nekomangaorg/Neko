@@ -8,10 +8,6 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
-import kotlinx.android.synthetic.main.reader_activity.*
-import kotlinx.android.synthetic.main.reader_color_filter.view.*
-import kotlinx.android.synthetic.main.recycler_with_scroller.view.*
-import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
 class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBottomSheetDialog(
     readerActivity
@@ -57,14 +53,14 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBott
         filterView.activity = readerActivity
         generalView.sheet = this
 
-        menu.gone()
+        binding.menu.gone()
         val attrs = window?.attributes
         val ogDim = attrs?.dimAmount ?: 0.25f
-        pager.adapter?.notifyDataSetChanged()
-        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        binding.pager.adapter?.notifyDataSetChanged()
+        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 window?.setDimAmount(if (tab?.position == 2) 0f else ogDim)
-                readerActivity.appbar.visInvisIf(tab?.position != 2)
+                readerActivity.binding.appBar.visInvisIf(tab?.position != 2)
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -77,12 +73,12 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBott
 
     override fun dismiss() {
         super.dismiss()
-        readerActivity.appbar.visible()
+        readerActivity.binding.appBar.visible()
     }
 
     fun updateTabs(isWebtoon: Boolean) {
         showWebview = isWebtoon
-        pager.adapter?.notifyDataSetChanged()
+        binding.pager.adapter?.notifyDataSetChanged()
         pagedView.updatePrefs()
     }
 }

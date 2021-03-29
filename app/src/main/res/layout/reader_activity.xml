@@ -47,7 +47,7 @@
         android:visibility="gone" >
 
         <FrameLayout
-            android:id="@+id/appbar"
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="?attr/colorSecondary">
@@ -61,7 +61,8 @@
         </FrameLayout>
     </FrameLayout>
 
-    <include layout="@layout/reader_chapters_sheet" />
+    <include layout="@layout/reader_chapters_sheet"
+        android:id="@+id/reader_chapters_sheet"/>
 
     <View
         android:id="@+id/brightness_overlay"

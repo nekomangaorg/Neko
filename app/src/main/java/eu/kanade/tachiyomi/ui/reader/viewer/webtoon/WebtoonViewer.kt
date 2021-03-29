@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.reader_activity.*
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import kotlin.math.max
@@ -126,9 +125,9 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
-            activity.navigation_overlay.setNavigation(config.navigator, showOnStart)
+            activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener = { activity.navigation_overlay.showNavigationAgain() }
+        config.navigationModeInvertedListener = { activity.binding.navigationOverlay.showNavigationAgain() }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)

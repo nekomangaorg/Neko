@@ -14,6 +14,7 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.ReaderChaptersSheetBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -24,7 +25,6 @@ import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.reader_chapters_sheet.view.*
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -39,13 +39,20 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     var shouldCollapse = true
     var selectedChapterId = -1L
 
+    lateinit var binding: ReaderChaptersSheetBinding
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding = ReaderChaptersSheetBinding.bind(this)
+    }
+
     fun setup(activity: ReaderActivity) {
         presenter = activity.presenter
         val fullPrimary = activity.getResourceColor(R.attr.colorSecondary)
         val primary = ColorUtils.setAlphaComponent(fullPrimary, 200)
 
         sheetBehavior = BottomSheetBehavior.from(this)
-        chapters_button.setOnClickListener {
+        binding.chaptersButton.setOnClickListener {
             if (sheetBehavior.isExpanded()) {
                 sheetBehavior?.collapse()
             } else {
@@ -53,28 +60,28 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
 
-        webview_button.setOnClickListener {
+        binding.webviewButton.setOnClickListener {
             activity.openMangaInBrowser()
         }
 
         post {
-            chapter_recycler?.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
-            chapter_recycler?.isClickable = sheetBehavior.isExpanded()
-            chapter_recycler?.isFocusable = sheetBehavior.isExpanded()
+            binding.chapterRecycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
+            binding.chapterRecycler.isClickable = sheetBehavior.isExpanded()
+            binding.chapterRecycler.isFocusable = sheetBehavior.isExpanded()
         }
 
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    pill.alpha = (1 - max(0f, progress)) * 0.25f
+                    binding.pill.alpha = (1 - max(0f, progress)) * 0.25f
                     val trueProgress = max(progress, 0f)
-                    chapters_button.alpha = 1 - trueProgress
-                    webview_button.alpha = trueProgress
-                    webview_button.visibleIf(webview_button.alpha > 0)
-                    chapters_button.visInvisIf(chapters_button.alpha > 0)
+                    binding.chaptersButton.alpha = 1 - trueProgress
+                    binding.webviewButton.alpha = trueProgress
+                    binding.webviewButton.visibleIf(binding.webviewButton.alpha > 0)
+                    binding.chaptersButton.visInvisIf(binding.chaptersButton.alpha > 0)
                     backgroundTintList =
                         ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
-                    chapter_recycler.alpha = trueProgress
+                    binding.chapterRecycler.alpha = trueProgress
                     if (activity.sheetManageNavColor && progress > 0f) {
                         activity.window.navigationBarColor =
                             lerpColor(ColorUtils.setAlphaComponent(primary, 0), primary, trueProgress)
@@ -85,29 +92,29 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         shouldCollapse = true
                         sheetBehavior?.isHideable = false
-                        (chapter_recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                        (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                             adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
-                            chapter_recycler.height / 2 - 30.dpToPx
+                            binding.chapterRecycler.height / 2 - 30.dpToPx
                         )
-                        chapters_button.alpha = 1f
-                        webview_button.alpha = 0f
+                        binding.chaptersButton.alpha = 1f
+                        binding.webviewButton.alpha = 0f
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        chapter_recycler.alpha = 1f
-                        chapters_button.alpha = 0f
-                        webview_button.alpha = 1f
+                        binding.chapterRecycler.alpha = 1f
+                        binding.chaptersButton.alpha = 0f
+                        binding.webviewButton.alpha = 1f
                         if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                     }
-                    chapter_recycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
-                    chapter_recycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
-                    webview_button.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
-                    chapters_button.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
+                    binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
+                    binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
+                    binding.webviewButton.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
+                    binding.chaptersButton.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
                 }
             }
         )
 
         adapter = FastAdapter.with(itemAdapter)
-        chapter_recycler.adapter = adapter
+        binding.chapterRecycler.adapter = adapter
         adapter?.onClickListener = { _, _, item, _ ->
             if (!sheetBehavior.isExpanded()) {
                 false
@@ -146,7 +153,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             else fullPrimary
         )
 
-        chapter_recycler.layoutManager = LinearLayoutManager(context)
+        binding.chapterRecycler.layoutManager = LinearLayoutManager(context)
         refreshList()
     }
 
@@ -158,9 +165,9 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             itemAdapter.clear()
             itemAdapter.add(chapters)
 
-            (chapter_recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+            (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                 adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
-                chapter_recycler.height / 2 - 30.dpToPx
+                binding.chapterRecycler.height / 2 - 30.dpToPx
             )
         }
     }

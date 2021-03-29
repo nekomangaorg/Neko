@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -71,8 +72,6 @@ import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
-import kotlinx.android.synthetic.main.reader_activity.*
-import kotlinx.android.synthetic.main.reader_chapters_sheet.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -100,6 +99,8 @@ import kotlin.math.abs
 class ReaderActivity :
     BaseRxActivity<ReaderPresenter>(),
     SystemUiHelper.OnVisibilityChangeListener {
+
+    lateinit var binding: ReaderActivityBinding
 
     /**
      * Preferences helper.
@@ -186,7 +187,8 @@ class ReaderActivity :
         AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
         setTheme(ThemeUtil.theme(preferences.theme()))
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.reader_activity)
+        binding = ReaderActivityBinding.inflate(layoutInflater)
+        setContentView(binding.root)
         val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
         lightStatusBar = a.getBoolean(0, false)
         a.recycle()
@@ -196,9 +198,9 @@ class ReaderActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             systemUiFlag = systemUiFlag.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
-        reader_layout.systemUiVisibility = when (lightStatusBar) {
-            true -> reader_layout.systemUiVisibility.or(systemUiFlag)
-            false -> reader_layout.systemUiVisibility.rem(systemUiFlag)
+        binding.readerLayout.systemUiVisibility = when (lightStatusBar) {
+            true -> binding.readerLayout.systemUiVisibility.or(systemUiFlag)
+            false -> binding.readerLayout.systemUiVisibility.rem(systemUiFlag)
         }
 
         if (presenter.needsInit()) {
@@ -212,7 +214,7 @@ class ReaderActivity :
                 }
                 presenter.init(manga, chapter)
             } else {
-                please_wait.visible()
+                binding.pleaseWait.visible()
             }
         }
 
@@ -220,9 +222,9 @@ class ReaderActivity :
             menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
         }
 
-        chapters_bottom_sheet.setup(this)
+        binding.readerChaptersSheet.chaptersBottomSheet.setup(this)
         if (ThemeUtil.isBlueTheme(preferences.theme())) {
-            chapter_recycler.setBackgroundColor(getResourceColor(android.R.attr.colorBackground))
+            binding.readerChaptersSheet.chapterRecycler.setBackgroundColor(getResourceColor(android.R.attr.colorBackground))
         }
         config = ReaderConfig()
         initializeMenu()
@@ -234,7 +236,7 @@ class ReaderActivity :
     override fun onDestroy() {
         super.onDestroy()
         viewer?.destroy()
-        chapters_bottom_sheet.adapter = null
+        binding.readerChaptersSheet.chaptersBottomSheet.adapter = null
         viewer = null
         config = null
         bottomSheet?.dismiss()
@@ -272,7 +274,7 @@ class ReaderActivity :
     }
 
     /**
-     * Called when the options menu of the toolbar is being created. It adds our custom menu.
+     * Called when the options menu of the binding.toolbar is being created. It adds our custom menu.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.reader, menu)
@@ -289,7 +291,7 @@ class ReaderActivity :
             R.id.action_display_settings -> TabbedReaderSettingsSheet(this).show()
             R.id.action_share_page, R.id.action_set_page_as_cover, R.id.action_save_page -> {
                 val currentChapter = presenter.getCurrentChapter() ?: return true
-                val page = currentChapter.pages?.getOrNull(page_seekbar.progress) ?: return true
+                val page = currentChapter.pages?.getOrNull(binding.readerChaptersSheet.pageSeekBar.progress) ?: return true
                 when (item.itemId) {
                     R.id.action_share_page -> shareImage(page)
                     R.id.action_set_page_as_cover -> showSetCoverPrompt(page)
@@ -319,12 +321,12 @@ class ReaderActivity :
     }
 
     /**
-     * Called when the user clicks the back key or the button on the toolbar. The call is
+     * Called when the user clicks the back key or the button on the binding.toolbar. The call is
      * delegated to the presenter.
      */
     override fun onBackPressed() {
-        if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
-            chapters_bottom_sheet.sheetBehavior?.collapse()
+        if (binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
+            binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
             return
         }
         presenter.onBackPressed()
@@ -363,20 +365,20 @@ class ReaderActivity :
      * Initializes the reader menu. It sets up click listeners and the initial visibility.
      */
     private fun initializeMenu() {
-        // Set toolbar
-        setSupportActionBar(toolbar)
+        // Set binding.toolbar
+        setSupportActionBar(binding.toolbar)
         val primaryColor = ColorUtils.setAlphaComponent(
             getResourceColor(R.attr.colorSecondary),
             200
         )
-        appbar.setBackgroundColor(primaryColor)
+        binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             popToMain()
         }
 
-        toolbar.setOnClickListener {
+        binding.toolbar.setOnClickListener {
             presenter.manga?.id?.let { id ->
                 val intent = SearchActivity.openMangaIntent(this, id)
                 startActivity(intent)
@@ -384,7 +386,7 @@ class ReaderActivity :
         }
 
         // Init listeners on bottom menu
-        page_seekbar.setOnSeekBarChangeListener(
+        binding.readerChaptersSheet.pageSeekBar.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
                     if (viewer != null && fromUser) {
@@ -396,10 +398,10 @@ class ReaderActivity :
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
-        chapters_bottom_sheet.sheetBehavior?.isHideable = !menuVisible
-        if (!menuVisible) chapters_bottom_sheet.sheetBehavior?.hide()
-        val peek = chapters_bottom_sheet.sheetBehavior?.peekHeight ?: 30.dpToPx
-        reader_layout.doOnApplyWindowInsets { v, insets, _ ->
+        binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = !menuVisible
+        if (!menuVisible) binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
+        val peek = binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.peekHeight ?: 30.dpToPx
+        binding.readerLayout.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = when {
                 insets.isBottomTappable() -> {
                     window.navigationBarColor = Color.TRANSPARENT
@@ -415,21 +417,21 @@ class ReaderActivity :
                 }
             }
 
-            appbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.systemWindowInsetLeft
                 rightMargin = insets.systemWindowInsetRight
             }
-            toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 topMargin = insets.systemWindowInsetTop
             }
-            chapters_bottom_sheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.readerChaptersSheet.chaptersBottomSheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = insets.systemWindowInsetLeft
                 rightMargin = insets.systemWindowInsetRight
                 height = 280.dpToPx + insets.systemWindowInsetBottom
             }
-            chapters_bottom_sheet.sheetBehavior?.peekHeight = peek + insets.getBottomGestureInsets()
-            chapter_recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-            viewer_container.requestLayout()
+            binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.peekHeight = peek + insets.getBottomGestureInsets()
+            binding.readerChaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+            binding.viewerContainer.requestLayout()
         }
     }
 
@@ -440,16 +442,16 @@ class ReaderActivity :
     private fun setMenuVisibility(visible: Boolean, animate: Boolean = true) {
         menuVisible = visible
         if (visible) coroutine?.cancel()
-        viewer_container.requestLayout()
+        binding.viewerContainer.requestLayout()
         if (visible) {
             snackbar?.dismiss()
             systemUi?.show()
-            reader_menu.visible()
+            binding.readerMenu.visible()
 
-            if (chapters_bottom_sheet.sheetBehavior.isExpanded()) {
-                chapters_bottom_sheet.sheetBehavior?.isHideable = false
+            if (binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
+                binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = false
             }
-            if (!chapters_bottom_sheet.sheetBehavior.isExpanded() && sheetManageNavColor) {
+            if (!binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded() && sheetManageNavColor) {
                 window.navigationBarColor = Color.TRANSPARENT
             }
             if (animate) {
@@ -462,9 +464,9 @@ class ReaderActivity :
                             }
                         }
                     )
-                    appbar.startAnimation(toolbarAnimation)
+                    binding.appBar.startAnimation(toolbarAnimation)
                 }
-                chapters_bottom_sheet.sheetBehavior?.collapse()
+                binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
             }
         } else {
             systemUi?.hide()
@@ -474,15 +476,15 @@ class ReaderActivity :
                 toolbarAnimation.setAnimationListener(
                     object : SimpleAnimationListener() {
                         override fun onAnimationEnd(animation: Animation) {
-                            reader_menu.gone()
+                            binding.readerMenu.gone()
                         }
                     }
                 )
-                appbar.startAnimation(toolbarAnimation)
-                BottomSheetBehavior.from(chapters_bottom_sheet).isHideable = true
-                chapters_bottom_sheet.sheetBehavior?.hide()
+                binding.appBar.startAnimation(toolbarAnimation)
+                BottomSheetBehavior.from(binding.readerChaptersSheet.chaptersBottomSheet).isHideable = true
+                binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else {
-                reader_menu.gone()
+                binding.readerMenu.gone()
             }
         }
         menuStickyVisible = false
@@ -490,7 +492,7 @@ class ReaderActivity :
 
     /**
      * Called from the presenter when a manga is ready. Used to instantiate the appropriate viewer
-     * and the toolbar title.
+     * and the binding.toolbar title.
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
@@ -506,7 +508,7 @@ class ReaderActivity :
         }
 
         if (noDefault && presenter.manga?.viewer!! > 0) {
-            snackbar = reader_layout.snack(
+            snackbar = binding.readerLayout.snack(
                 getString(
                     R.string.reading_,
                     getString(
@@ -529,13 +531,13 @@ class ReaderActivity :
         // Destroy previous viewer if there was one
         if (prevViewer != null) {
             prevViewer.destroy()
-            viewer_container.removeAllViews()
+            binding.viewerContainer.removeAllViews()
         }
         viewer = newViewer
-        viewer_container.addView(newViewer.getView())
+        binding.viewerContainer.addView(newViewer.getView())
 
-        navigation_overlay.isLTR = !(viewer is L2RPagerViewer)
-        viewer_container.setBackgroundColor(
+        binding.navigationOverlay.isLTR = !(viewer is L2RPagerViewer)
+        binding.viewerContainer.setBackgroundColor(
             if (viewer is WebtoonViewer) {
                 Color.BLACK
             } else {
@@ -543,12 +545,12 @@ class ReaderActivity :
             }
         )
 
-        toolbar.title = manga.title
+        binding.toolbar.title = manga.title
 
-        page_seekbar.isRTL = newViewer is R2LPagerViewer
+        binding.readerChaptersSheet.pageSeekBar.isRTL = newViewer is R2LPagerViewer
 
-        please_wait.visible()
-        please_wait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
+        binding.pleaseWait.visible()
+        binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
     }
 
     override fun onPause() {
@@ -558,14 +560,14 @@ class ReaderActivity :
 
     /**
      * Called from the presenter whenever a new [viewerChapters] have been set. It delegates the
-     * method to the current viewer, but also set the subtitle on the toolbar.
+     * method to the current viewer, but also set the subtitle on the binding.toolbar.
      */
     fun setChapters(viewerChapters: ViewerChapters) {
-        please_wait.gone()
+        binding.pleaseWait.gone()
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
-        toolbar.subtitle = viewerChapters.currChapter.chapter.name
+        binding.toolbar.subtitle = viewerChapters.currChapter.chapter.name
     }
 
     /**
@@ -581,7 +583,7 @@ class ReaderActivity :
     /**
      * Called from the presenter whenever it's loading the next or previous chapter. It shows or
      * dismisses a non-cancellable dialog to prevent user interaction according to the value of
-     * [show]. This is only used when the next/previous buttons on the toolbar are clicked; the
+     * [show]. This is only used when the next/previous buttons on the binding.toolbar are clicked; the
      * other cases are handled with chapter transitions on the viewers and chapter preloading.
      */
     @Suppress("DEPRECATION")
@@ -606,7 +608,7 @@ class ReaderActivity :
     }
 
     fun refreshChapters() {
-        chapters_bottom_sheet.refreshList()
+        binding.readerChaptersSheet.chaptersBottomSheet.refreshList()
     }
 
     /**
@@ -619,21 +621,21 @@ class ReaderActivity :
         val pages = page.chapter.pages ?: return
 
         // Set bottom page number
-        page_number.text = "${page.number}/${pages.size}"
+        binding.pageNumber.text = "${page.number}/${pages.size}"
         // Set seekbar page number
-        page_text.text = "${page.number} / ${pages.size}"
+        binding.readerChaptersSheet.pageText.text = "${page.number} / ${pages.size}"
 
-        if (!newChapter && chapters_bottom_sheet.shouldCollapse && chapters_bottom_sheet.sheetBehavior.isExpanded()) {
-            chapters_bottom_sheet.sheetBehavior?.collapse()
+        if (!newChapter && binding.readerChaptersSheet.chaptersBottomSheet.shouldCollapse && binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
+            binding.readerChaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
         }
-        if (chapters_bottom_sheet.selectedChapterId != page.chapter.chapter.id) {
-            chapters_bottom_sheet.refreshList()
+        if (binding.readerChaptersSheet.chaptersBottomSheet.selectedChapterId != page.chapter.chapter.id) {
+            binding.readerChaptersSheet.chaptersBottomSheet.refreshList()
         }
-        chapters_bottom_sheet.shouldCollapse = true
+        binding.readerChaptersSheet.chaptersBottomSheet.shouldCollapse = true
 
         // Set seekbar progress
-        page_seekbar.max = pages.lastIndex
-        page_seekbar.progress = page.index
+        binding.readerChaptersSheet.pageSeekBar.max = pages.lastIndex
+        binding.readerChaptersSheet.pageSeekBar.progress = page.index
     }
 
     /**
@@ -763,7 +765,7 @@ class ReaderActivity :
                 }
                 if (sheetManageNavColor) window.navigationBarColor =
                     getResourceColor(R.attr.colorSecondary)
-                reader_menu.visible()
+                binding.readerMenu.visible()
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(
                     object : SimpleAnimationListener() {
@@ -772,7 +774,7 @@ class ReaderActivity :
                         }
                     }
                 )
-                appbar.startAnimation(toolbarAnimation)
+                binding.appBar.startAnimation(toolbarAnimation)
             }
         } else {
             if (menuStickyVisible && !menuVisible) {
@@ -922,7 +924,7 @@ class ReaderActivity :
          * Sets the visibility of the bottom page indicator according to [visible].
          */
         private fun setPageNumberVisibility(visible: Boolean) {
-            page_number.visibility = if (visible) View.VISIBLE else View.INVISIBLE
+            binding.pageNumber.visibility = if (visible) View.VISIBLE else View.INVISIBLE
         }
 
         /**
@@ -985,7 +987,7 @@ class ReaderActivity :
                     .onEach { setColorFilterValue(it) }
                     .launchIn(scope)
             } else {
-                color_overlay.gone()
+                binding.colorOverlay.gone()
             }
         }
 
@@ -1011,11 +1013,11 @@ class ReaderActivity :
 
             // Set black overlay visibility.
             if (value < 0) {
-                brightness_overlay.visible()
+                binding.brightnessOverlay.visible()
                 val alpha = (abs(value) * 2.56).toInt()
-                brightness_overlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
+                binding.brightnessOverlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
             } else {
-                brightness_overlay.gone()
+                binding.brightnessOverlay.gone()
             }
         }
 
@@ -1023,8 +1025,8 @@ class ReaderActivity :
          * Sets the color filter [value].
          */
         private fun setColorFilterValue(value: Int) {
-            color_overlay.visible()
-            color_overlay.setFilterColor(value, preferences.colorFilterMode().get())
+            binding.colorOverlay.visible()
+            binding.colorOverlay.setFilterColor(value, preferences.colorFilterMode().get())
         }
     }
 }

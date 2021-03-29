@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.reader_activity.*
 import timber.log.Timber
 
 /**
@@ -107,9 +106,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
         config.navigationModeChangedListener = {
             val showOnStart = config.navigationOverlayForNewUser
-            activity.navigation_overlay.setNavigation(config.navigator, showOnStart)
+            activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener = { activity.navigation_overlay.showNavigationAgain() }
+        config.navigationModeInvertedListener = { activity.binding.navigationOverlay.showNavigationAgain() }
     }
 
     /**

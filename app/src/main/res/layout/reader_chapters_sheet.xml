@@ -26,7 +26,7 @@
             android:alpha="0.25"
             android:contentDescription="@string/drag_handle"
             android:src="@drawable/draggable_pill"
-            android:tint="?actionBarTintColor"
+            app:tint="?actionBarTintColor"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -38,7 +38,7 @@
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/next_title"
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-            android:tint="?actionBarTintColor"
+            app:tint="?actionBarTintColor"
             android:tooltipText="@string/view_chapters"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -52,7 +52,7 @@
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/open_in_webview"
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-            android:tint="?actionBarTintColor"
+            app:tint="?actionBarTintColor"
             android:tooltipText="@string/open_in_webview"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -61,7 +61,7 @@
             app:srcCompat="@drawable/ic_open_in_webview_24dp" />
 
         <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
-            android:id="@+id/page_seekbar"
+            android:id="@+id/page_seek_bar"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             app:layout_constraintBottom_toBottomOf="parent"
