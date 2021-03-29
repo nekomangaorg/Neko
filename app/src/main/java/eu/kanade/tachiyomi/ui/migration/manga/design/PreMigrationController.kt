@@ -15,6 +15,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.PreMigrationControllerBinding
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -31,7 +32,7 @@ import kotlinx.android.synthetic.main.pre_migration_controller.*
 import uy.kohesive.injekt.injectLazy
 
 class PreMigrationController(bundle: Bundle? = null) :
-    BaseController(bundle),
+    BaseController<PreMigrationControllerBinding>(bundle),
     FlexibleAdapter
     .OnItemClickListener,
     StartMigrationListener {

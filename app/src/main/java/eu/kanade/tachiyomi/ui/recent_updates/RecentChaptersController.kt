@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.databinding.RecentChaptersControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -38,7 +39,7 @@ import timber.log.Timber
  * UI related actions should be called from here.
  */
 class RecentChaptersController(bundle: Bundle? = null) :
-    BaseController(bundle),
+    BaseController<RecentChaptersControllerBinding>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnUpdateListener,
     FlexibleAdapter.OnItemMoveListener,

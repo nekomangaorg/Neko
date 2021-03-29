@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.SettingsSearchControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
@@ -21,7 +22,7 @@ import kotlinx.android.synthetic.main.settings_search_controller.*
  * [SettingsSearchAdapter.OnTitleClickListener] called when preference is clicked in settings search
  */
 class SettingsSearchController :
-    NucleusController<SettingsSearchPresenter>(),
+    NucleusController<SettingsSearchControllerBinding, SettingsSearchPresenter>(),
     SettingsSearchAdapter.OnTitleClickListener {
 
     /**

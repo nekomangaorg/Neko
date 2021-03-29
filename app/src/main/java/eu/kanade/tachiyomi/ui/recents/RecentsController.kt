@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -68,7 +69,7 @@ import kotlin.math.max
  * UI related actions should be called from here.
  */
 class RecentsController(bundle: Bundle? = null) :
-    BaseController(bundle),
+    BaseController<RecentsControllerBinding>(bundle),
     RecentMangaAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,

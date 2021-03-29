@@ -58,6 +58,10 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     flavorDimensions("default")
 
     productFlavors {

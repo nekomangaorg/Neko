@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.SharedPreferencesDataStore
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
+import eu.kanade.tachiyomi.databinding.ExtensionDetailControllerBinding
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getPreferenceKey
@@ -55,7 +56,7 @@ import uy.kohesive.injekt.api.get
 
 @SuppressLint("RestrictedApi")
 class ExtensionDetailsController(bundle: Bundle? = null) :
-    NucleusController<ExtensionDetailsPresenter>(bundle),
+    NucleusController<ExtensionDetailControllerBinding, ExtensionDetailsPresenter>(bundle),
     PreferenceManager.OnDisplayPreferenceDialogListener,
     DialogPreference.TargetFragment {
 

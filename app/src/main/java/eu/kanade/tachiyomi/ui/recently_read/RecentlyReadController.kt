@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.databinding.RecentlyReadControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -33,7 +34,7 @@ import kotlinx.android.synthetic.main.recently_read_controller.*
  * UI related actions should be called from here.
  */
 class RecentlyReadController(bundle: Bundle? = null) :
-    BaseController(bundle),
+    BaseController<RecentlyReadControllerBinding>(bundle),
     FlexibleAdapter.OnUpdateListener,
     FlexibleAdapter.EndlessScrollListener,
     RecentlyReadAdapter.OnRemoveClickListener,

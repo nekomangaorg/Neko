@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.BrowseSourceControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.Filter
@@ -57,7 +58,7 @@ import java.util.concurrent.TimeUnit
  * Controller to manage the catalogues available in the app.
  */
 open class BrowseSourceController(bundle: Bundle) :
-    NucleusController<BrowseSourcePresenter>(bundle),
+    NucleusController<BrowseSourceControllerBinding, BrowseSourcePresenter>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.EndlessScrollListener,

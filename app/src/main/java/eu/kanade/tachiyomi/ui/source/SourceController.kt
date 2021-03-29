@@ -24,6 +24,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.SourceControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
@@ -75,7 +76,7 @@ import kotlin.math.min
  * [SourceAdapter.OnLatestClickListener] call function data on latest item click
  */
 class SourceController :
-    NucleusController<SourcePresenter>(),
+    NucleusController<SourceControllerBinding, SourcePresenter>(),
     FlexibleAdapter.OnItemClickListener,
     SourceAdapter.SourceListener,
     RootSearchInterface,

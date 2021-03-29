@@ -11,6 +11,7 @@ import androidx.appcompat.widget.SearchView
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -28,7 +29,7 @@ import kotlinx.android.synthetic.main.source_global_search_controller.*
 open class GlobalSearchController(
     protected val initialQuery: String? = null,
     protected val extensionFilter: String? = null
-) : NucleusController<GlobalSearchPresenter>(),
+) : NucleusController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(),
     GlobalSearchCardAdapter.OnMangaClickListener {
 
     /**

@@ -297,7 +297,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener {
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
 
         toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
-        (router.backstack.lastOrNull()?.controller() as? BaseController)?.setTitle()
+        (router.backstack.lastOrNull()?.controller() as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
 
         if (savedInstanceState == null) {

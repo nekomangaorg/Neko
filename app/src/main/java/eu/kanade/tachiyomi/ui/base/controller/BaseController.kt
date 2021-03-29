@@ -6,6 +6,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -14,9 +15,11 @@ import kotlinx.android.extensions.LayoutContainer
 import kotlinx.android.synthetic.*
 import timber.log.Timber
 
-abstract class BaseController(bundle: Bundle? = null) :
+abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     RestoreViewOnCreateController(bundle),
     LayoutContainer {
+
+    lateinit var binding: VB
 
     init {
         addLifecycleListener(
@@ -78,7 +81,7 @@ abstract class BaseController(bundle: Bundle? = null) :
     fun setTitle() {
         var parentController = parentController
         while (parentController != null) {
-            if (parentController is BaseController && parentController.getTitle() != null) {
+            if (parentController is BaseController<*> && parentController.getTitle() != null) {
                 return
             }
             parentController = parentController.parentController

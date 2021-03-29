@@ -11,6 +11,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.CategoriesControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -23,7 +24,7 @@ import kotlinx.android.synthetic.main.categories_controller.*
  * Controller to manage the categories for the users' library.
  */
 class CategoryController(bundle: Bundle? = null) :
-    BaseController(bundle),
+    BaseController<CategoriesControllerBinding>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemMoveListener,
     CategoryAdapter.CategoryItemListener {

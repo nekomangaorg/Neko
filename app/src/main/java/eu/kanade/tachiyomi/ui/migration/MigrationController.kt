@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.MigrationControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.system.await
@@ -23,7 +24,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class MigrationController :
-    NucleusController<MigrationPresenter>(),
+    NucleusController<MigrationControllerBinding, MigrationPresenter>(),
     FlexibleAdapter.OnItemClickListener,
     SourceAdapter.OnAllClickListener,
     MigrationInterface {

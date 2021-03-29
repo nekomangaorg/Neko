@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.MigrationListControllerBinding
 import eu.kanade.tachiyomi.smartsearch.SmartSearchEngine
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
@@ -60,7 +61,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.coroutines.CoroutineContext
 
 class MigrationListController(bundle: Bundle? = null) :
-    BaseController(bundle),
+    BaseController<MigrationListControllerBinding>(bundle),
     MigrationProcessAdapter.MigrationProcessInterface,
     BottomNavBarInterface,
     CoroutineScope {
