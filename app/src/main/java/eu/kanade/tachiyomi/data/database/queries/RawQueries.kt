@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.database.queries
 
+import android.database.DatabaseUtils
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable as Category
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
@@ -245,11 +246,16 @@ fun getCategoriesForMangaQuery() =
            (SELECT ${CachedMangaTable.COL_DOC_ID} FROM ${CachedMangaTable.TABLE_FTS} 
             WHERE ${CachedMangaTable.TABLE_FTS} MATCH  '$query*')
     """*/
-fun searchCachedMangaQuery(query: String) =
-    """
+fun searchCachedMangaQuery(query: String, page: Int, limit: Int) : String {
+    val regex = Regex("[^A-Za-z0-9 ]")
+    val queryCleaned = regex.replace(query, "")
+    return """
       SELECT * FROM ${CachedMangaTable.TABLE_FTS}
-      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH  '$query'
+      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH "$queryCleaned"
+      LIMIT $limit OFFSET MAX(0,${page*limit-1})
     """
+}
+
 
 /*fun insertCachedMangaQuery() =
     """

@@ -29,11 +29,20 @@ interface CachedMangaQueries : DbProvider {
             .build()
     ).prepare()
 
-    fun searchCachedManga(query: String) = db.get()
+    fun getCachedMangaRange(page: Int, limit: Int = 20) = db.get()
         .listOfObjects(CachedManga::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(searchCachedMangaQuery(query))
+                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT $limit OFFSET MAX(0,${page*limit-1})")
+                .build()
+        )
+        .prepare()
+
+    fun searchCachedManga(query: String, page: Int, limit: Int = 20) = db.get()
+        .listOfObjects(CachedManga::class.java)
+        .withQuery(
+            RawQuery.builder()
+                .query(searchCachedMangaQuery(query, page, limit))
                 .build()
         )
         .prepare()

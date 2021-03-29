@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -44,7 +45,26 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        throw Exception("Cache source cannot get popular manga.  You can search though!")
+
+        // First check if we have manga to select
+        val count = db.getCachedMangaCount().executeAsBlocking()
+        if (count == 0) {
+            throw Exception("Cache manga db seems empty, try re-downloading it (enable and disable the cache)")
+        }
+
+        // Next lets query the next set of manga from the database
+        // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
+        val limit = 16
+        return db.getCachedMangaRange(page-1, limit).asRxObservable().flatMapIterable { it }
+                .map { cacheManga ->
+                    SManga.create().apply {
+                        initialized = false
+                        url = "/manga/${cacheManga.mangaId}"
+                        title = MdUtil.cleanString(cacheManga.title)
+                        thumbnail_url = null
+                    }
+                }.toList().map { MangasPage(it.take(limit-1), it.size == limit) }
+
     }
 
     override fun fetchSearchManga(
@@ -55,17 +75,21 @@ open class MangaDexCache() : MangaDex() {
         val count = db.getCachedMangaCount().executeAsBlocking()
         XLog.i("Number of Cached entries: $count")
         if (count == 0) {
-            throw Exception("Cache manga db seems empty, try redownloading it")
+            throw Exception("Cache manga db seems empty, try re-downloading it (enable and disable the cache)")
         }
 
-        return db.searchCachedManga(query).asRxObservable().flatMapIterable { it }
+        // Next lets query the next set of manga from the database
+        // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
+        val limit = 16
+        return db.searchCachedManga(query, page-1, limit).asRxObservable().flatMapIterable { it }
             .map { cacheManga ->
                 SManga.create().apply {
-                    this.url = "/manga/${cacheManga.mangaId}"
-                    this.title = MdUtil.cleanString(cacheManga.title)
-                    this.thumbnail_url = "https://cdn.statically.io/og/theme=dark/This%20Is%20A%20%20Cached%20Manga.jpg"
+                    initialized = false
+                    url = "/manga/${cacheManga.mangaId}"
+                    title = MdUtil.cleanString(cacheManga.title)
+                    thumbnail_url = null
                 }
-            }.toList().take(20).map { MangasPage(it, false) }
+            }.toList().map { MangasPage(it.take(limit-1), it.size == limit) }
     }
 
     override fun fetchFollows(): Observable<MangasPage> {
@@ -152,13 +176,16 @@ open class MangaDexCache() : MangaDex() {
         return Logout(true, "Cache source does not have logout")
     }
 
+    override fun getFilterList(): FilterList {
+        return FilterList(emptyList())
+    }
+
     private fun apiRequest(manga: SManga, useOtherUrl: Boolean = true): Request {
         val mangaId = MdUtil.getMangaId(manga.url).toLong()
         val url = when {
             useOtherUrl -> MdUtil.apiUrlCache
             else -> MdUtil.apiUrlCdnCache
         }
-
         return GET(url + mangaId.toString().padStart(5, '0') + ".json", headers, CacheControl.FORCE_NETWORK)
     }
 
@@ -229,11 +256,13 @@ open class MangaDexCache() : MangaDex() {
             val request = Request.Builder().url("https://graphql.anilist.co").post(requestBody)
                 .addHeader("content-type", "application/json").build()
             val response = clientAnilist.newCall(request).execute()
-            val data = JSONObject(response.body!!.string())
-            return data.getJSONObject("data")
-                .getJSONObject("Media")
-                .getJSONObject("coverImage")
-                .getString("extraLarge")
+            if(response.isSuccessful && response.code == 200) {
+                val data = JSONObject(response.body!!.string())
+                return data.getJSONObject("data")
+                        .getJSONObject("Media")
+                        .getJSONObject("coverImage")
+                        .getString("extraLarge")
+            }
         }
 
         // Query MAL api for an image
@@ -241,12 +270,14 @@ open class MangaDexCache() : MangaDex() {
         if (my_anime_list_id != null) {
             val request = GET("https://api.jikan.moe/v3/manga/${my_anime_list_id}/pictures", headers, CacheControl.FORCE_NETWORK)
             val response = clientMyAnimeList.newCall(request).execute()
-            val data = JSONObject(response.body!!.string())
-            val pictures = data.getJSONArray("pictures")
-            if (pictures.length() > 0) {
-                return pictures.getJSONObject(pictures.length() - 1).getString("large")
+            if(response.isSuccessful && response.code == 200) {
+                val data = JSONObject(response.body!!.string())
+                val pictures = data.getJSONArray("pictures")
+                if (pictures.length() > 0) {
+                    return pictures.getJSONObject(pictures.length() - 1).getString("large")
+                }
             }
         }
-        return "https://cdn.statically.io/og/theme=dark/This%20Is%20A%20%20Cached%20Manga.jpg"
+        return MdUtil.imageUrlCacheNotFound
     }
 }
