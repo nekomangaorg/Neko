@@ -383,6 +383,8 @@ class LibraryController(
         }
     }
 
+    override fun createBinding(inflater: LayoutInflater) = LibraryListControllerBinding.inflate(inflater)
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
@@ -724,11 +726,6 @@ class LibraryController(
             is LibraryItem -> return item.header
         }
         return adapter.headerItems.firstOrNull() as? LibraryHeaderItem
-    }
-
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        binding = LibraryListControllerBinding.inflate(inflater)
-        return binding.root
     }
 
     private fun anchorView(): View {

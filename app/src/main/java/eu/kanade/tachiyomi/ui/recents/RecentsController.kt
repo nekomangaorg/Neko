@@ -91,10 +91,7 @@ class RecentsController(bundle: Bundle? = null) :
         } else resources?.getString(R.string.recents)
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        binding = RecentsControllerBinding.inflate(inflater)
-        return binding.root
-    }
+    override fun createBinding(inflater: LayoutInflater) = RecentsControllerBinding.inflate(inflater)
 
     /**
      * Called when view is created

@@ -6,7 +6,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
@@ -46,16 +45,7 @@ open class GlobalSearchController(
         setHasOptionsMenu(true)
     }
 
-    /**
-     * Initiate the view with [R.layout.source_global_search_controller].
-     *
-     * @param inflater used to load the layout xml.
-     * @param container containing parent views.
-     * @return inflated view
-     */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): android.view.View {
-        return inflater.inflate(R.layout.source_global_search_controller, container, false)
-    }
+    override fun createBinding(inflater: LayoutInflater) = SourceGlobalSearchControllerBinding.inflate(inflater)
 
     /**
      * Set the title of controller.

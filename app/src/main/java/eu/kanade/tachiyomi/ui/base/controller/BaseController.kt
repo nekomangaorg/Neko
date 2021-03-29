@@ -50,10 +50,11 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         get() = view
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
-        return inflateView(inflater, container)
+        binding = createBinding(inflater)
+        return binding.root
     }
 
-    abstract fun inflateView(inflater: LayoutInflater, container: ViewGroup): View
+    abstract fun createBinding(inflater: LayoutInflater): VB
 
     open fun onViewCreated(view: View) { }
 

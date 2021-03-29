@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -66,9 +65,7 @@ class RecentlyReadController(bundle: Bundle? = null) :
         return resources?.getString(R.string.history)
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.recently_read_controller, container, false)
-    }
+    override fun createBinding(inflater: LayoutInflater) = RecentlyReadControllerBinding.inflate(inflater)
 
     /**
      * Called when view is created

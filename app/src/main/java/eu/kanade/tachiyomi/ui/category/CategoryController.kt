@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.category
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
@@ -51,15 +50,7 @@ class CategoryController(bundle: Bundle? = null) :
         return resources?.getString(R.string.edit_categories)
     }
 
-    /**
-     * Returns the view of this controller.
-     *
-     * @param inflater The layout inflater to create the view from XML.
-     * @param container The parent view for this one.
-     */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.categories_controller, container, false)
-    }
+    override fun createBinding(inflater: LayoutInflater) = CategoriesControllerBinding.inflate(inflater)
 
     /**
      * Called after view inflation. Used to initialize the view.

@@ -183,10 +183,7 @@ class MangaDetailsController :
         return null
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        binding = MangaDetailsControllerBinding.inflate(inflater)
-        return binding.root
-    }
+    override fun createBinding(inflater: LayoutInflater) = MangaDetailsControllerBinding.inflate(inflater)
 
     //region UI Methods
     override fun onViewCreated(view: View) {

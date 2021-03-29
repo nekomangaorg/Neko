@@ -113,17 +113,7 @@ class BrowseController :
         return SourcePresenter()
     }
 
-    /**
-     * Initiate the view with [R.layout.browse_controller].
-     *
-     * @param inflater used to load the layout xml.
-     * @param container containing parent views.
-     * @return inflated view.
-     */
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        binding = BrowseControllerBinding.inflate(inflater)
-        return binding.root
-    }
+    override fun createBinding(inflater: LayoutInflater) = BrowseControllerBinding.inflate(inflater)
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)

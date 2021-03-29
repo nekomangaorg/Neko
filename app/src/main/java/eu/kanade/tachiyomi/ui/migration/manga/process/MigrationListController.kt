@@ -8,7 +8,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import android.widget.Toast
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -88,10 +87,7 @@ class MigrationListController(bundle: Bundle? = null) :
     private var selectedPosition: Int? = null
     private var manaulMigrations = 0
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.migration_list_controller, container, false)
-    }
-
+    override fun createBinding(inflater: LayoutInflater) = MigrationListControllerBinding.inflate(inflater)
     override fun getTitle(): String? {
         return resources?.getString(R.string.migration) + " (${adapter?.items?.count {
             it.manga.migrationStatus != MigrationStatus.RUNNUNG

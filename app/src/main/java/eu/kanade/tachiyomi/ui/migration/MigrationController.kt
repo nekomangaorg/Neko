@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -41,10 +40,7 @@ class MigrationController :
         return MigrationPresenter()
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.migration_controller, container, false)
-    }
-
+    override fun createBinding(inflater: LayoutInflater) = MigrationControllerBinding.inflate(inflater)
     fun searchController(manga: Manga): SearchController {
         val controller = SearchController(manga)
         controller.targetController = this

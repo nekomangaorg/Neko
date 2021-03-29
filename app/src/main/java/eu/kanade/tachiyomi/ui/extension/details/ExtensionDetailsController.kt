@@ -13,7 +13,6 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
-import android.view.ViewGroup
 import androidx.preference.DialogPreference
 import androidx.preference.EditTextPreference
 import androidx.preference.EditTextPreferenceDialogController
@@ -77,11 +76,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         }
     )
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        val themedInflater = inflater.cloneInContext(getPreferenceThemeContext())
-
-        return themedInflater.inflate(R.layout.extension_detail_controller, container, false)
-    }
+    override fun createBinding(inflater: LayoutInflater) =
+        ExtensionDetailControllerBinding.inflate(inflater.cloneInContext(getPreferenceThemeContext()))
 
     override fun createPresenter(): ExtensionDetailsPresenter {
         return ExtensionDetailsPresenter(args.getString(PKGNAME_KEY)!!)

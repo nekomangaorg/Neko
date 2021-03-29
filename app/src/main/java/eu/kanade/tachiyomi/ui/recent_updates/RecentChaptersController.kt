@@ -4,7 +4,6 @@ import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -60,9 +59,7 @@ class RecentChaptersController(bundle: Bundle? = null) :
         return resources?.getString(R.string.recent_updates)
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.recent_chapters_controller, container, false)
-    }
+    override fun createBinding(inflater: LayoutInflater) = RecentChaptersControllerBinding.inflate(inflater)
 
     /**
      * Called when view is created

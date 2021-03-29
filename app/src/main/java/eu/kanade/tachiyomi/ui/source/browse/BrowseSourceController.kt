@@ -130,9 +130,7 @@ open class BrowseSourceController(bundle: Bundle) :
         return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY))
     }
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.browse_source_controller, container, false)
-    }
+    override fun createBinding(inflater: LayoutInflater) = BrowseSourceControllerBinding.inflate(inflater)
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)

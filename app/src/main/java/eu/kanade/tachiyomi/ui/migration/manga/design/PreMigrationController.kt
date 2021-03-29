@@ -49,10 +49,7 @@ class PreMigrationController(bundle: Bundle? = null) :
 
     override fun getTitle() = view?.context?.getString(R.string.select_sources)
 
-    override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.pre_migration_controller, container, false)
-    }
-
+    override fun createBinding(inflater: LayoutInflater) = PreMigrationControllerBinding.inflate(inflater)
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         liftAppbarWith(recycler)
