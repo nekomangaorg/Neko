@@ -51,10 +51,10 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         app:barrierDirection="right"
-        app:constraint_referenced_ids="bottom_line,title_view" />
+        app:constraint_referenced_ids="halfway_point,title_view" />
 
     <androidx.constraintlayout.widget.Guideline
-        android:id="@+id/bottom_line"
+        android:id="@+id/halfway_point"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"

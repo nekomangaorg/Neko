@@ -172,7 +172,7 @@
 
         <!-- Filter mode -->
 
-        <eu.kanade.tachiyomi.ui.reader.settings.ReaderSpinnerView
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
             android:id="@+id/color_filter_mode"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -227,13 +227,6 @@
             app:layout_constraintBottom_toBottomOf="@id/brightness_seekbar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/brightness_seekbar" />
-
-        <androidx.constraintlayout.widget.Guideline
-            android:id="@+id/bottom_line"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            app:layout_constraintGuide_percent="0.5" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView>

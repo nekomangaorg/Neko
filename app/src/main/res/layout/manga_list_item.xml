@@ -115,5 +115,5 @@
         android:layout_width="0dp"
         android:layout_height="6dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/bottom_line" />
+        app:layout_constraintTop_toBottomOf="@id/bottom_line" />
 </androidx.constraintlayout.widget.ConstraintLayout>

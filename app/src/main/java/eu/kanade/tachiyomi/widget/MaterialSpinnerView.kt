@@ -1,8 +1,9 @@
-package eu.kanade.tachiyomi.ui.reader.settings
+package eu.kanade.tachiyomi.widget
 
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
+import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.FrameLayout
 import androidx.annotation.ArrayRes
@@ -10,9 +11,9 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.view.get
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
-import kotlinx.android.synthetic.main.reader_preference.view.*
+import eu.kanade.tachiyomi.databinding.MaterialSpinnerViewBinding
 
-class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
+class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
 
     private var entries = emptyList<String>()
@@ -33,17 +34,19 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
             }
         }
 
+    private val binding = MaterialSpinnerViewBinding.inflate(LayoutInflater.from(context), this, false)
+
     init {
-        inflate(context, R.layout.reader_preference, this)
+        addView(binding.root)
         val a = context.obtainStyledAttributes(attrs, R.styleable.ReaderSpinnerView, 0, 0)
 
         val str = a.getString(R.styleable.ReaderSpinnerView_title) ?: ""
-        title_view.text = str
+        binding.titleView.text = str
 
         val entries = (a.getTextArray(R.styleable.ReaderSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
         this.entries = entries
 
-        detail_view.text = entries.firstOrNull().orEmpty()
+        binding.detailView.text = entries.firstOrNull().orEmpty()
 
         a.recycle()
     }
@@ -52,7 +55,7 @@ class ReaderSpinnerView @JvmOverloads constructor(context: Context, attrs: Attri
         popup?.menu?.get(selectedPosition)?.isCheckable = false
         popup?.menu?.get(selectedPosition)?.isChecked = false
         selectedPosition = selection
-        detail_view.text = entries.getOrNull(selection).orEmpty()
+        binding.detailView.text = entries.getOrNull(selection).orEmpty()
         popup?.menu?.get(selectedPosition)?.isCheckable = true
         popup?.menu?.get(selectedPosition)?.isChecked = true
     }
