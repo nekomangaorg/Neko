@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.data.track.anilist
 
 import android.content.Context
 import android.graphics.Color
+import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
-import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.database.models.Manga
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {
@@ -122,7 +122,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun update(track: Track): Track {
-        if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+        if (track.status == READING && track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
         }
         // If user was using API v1 fetch library_id
@@ -157,7 +157,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return api.remove(track)
     }
 
-    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked : Boolean) = api.search(query, manga, wasPreviouslyTracked)
+    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean) = api.search(query, manga, wasPreviouslyTracked)
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track, getUsername().toInt())
