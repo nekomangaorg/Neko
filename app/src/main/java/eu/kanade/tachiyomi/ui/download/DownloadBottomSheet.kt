@@ -10,6 +10,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
 import eu.kanade.tachiyomi.ui.extension.ExtensionDividerItemDecoration
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
@@ -21,7 +22,6 @@ import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import kotlinx.android.synthetic.main.download_bottom_sheet.view.*
 
 class DownloadBottomSheet @JvmOverloads constructor(
     context: Context,
@@ -45,20 +45,26 @@ class DownloadBottomSheet @JvmOverloads constructor(
     private var isRunning: Boolean = false
     private var activity: Activity? = null
 
+    lateinit var binding: DownloadBottomSheetBinding
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding = DownloadBottomSheetBinding.bind(this)
+    }
+
     fun onCreate(controller: RecentsController) {
         // Initialize adapter, scroll listener and recycler views
         adapter = DownloadAdapter(this)
         sheetBehavior = BottomSheetBehavior.from(this)
         activity = controller.activity
         // Create recycler and set adapter.
-        dl_recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        dl_recycler.adapter = adapter
+        binding.dlRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        binding.dlRecycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
         adapter?.isSwipeEnabled = true
-        adapter?.fastScroller = fast_scroller
-        dl_recycler.setHasFixedSize(true)
-        dl_recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
-        dl_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        adapter?.fastScroller = binding.fastScroller
+        binding.dlRecycler.setHasFixedSize(true)
+        binding.dlRecycler.addItemDecoration(ExtensionDividerItemDecoration(context))
+        binding.dlRecycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         this.controller = controller
         updateDLTitle()
 
@@ -66,12 +72,12 @@ class DownloadBottomSheet @JvmOverloads constructor(
         val array = context.obtainStyledAttributes(attrsArray)
         val headerHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        recycler_layout.doOnApplyWindowInsets { v, windowInsets, _ ->
+        binding.recyclerLayout.doOnApplyWindowInsets { v, windowInsets, _ ->
             v.updateLayoutParams<MarginLayoutParams> {
-                topMargin = windowInsets.systemWindowInsetTop + headerHeight - sheet_layout.height
+                topMargin = windowInsets.systemWindowInsetTop + headerHeight - binding.sheetLayout.height
             }
         }
-        sheet_layout.setOnClickListener {
+        binding.sheetLayout.setOnClickListener {
             if (!sheetBehavior.isExpanded()) {
                 sheetBehavior?.expand()
             } else {
@@ -93,7 +99,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
 
     private fun updateDLTitle() {
         val extCount = presenter.downloadQueue.firstOrNull()
-        title_text.text = if (extCount != null) resources.getString(
+        binding.titleText.text = if (extCount != null) resources.getString(
             R.string.downloading_,
             extCount.chapter.name
         )
@@ -153,7 +159,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
      * @return the holder of the download or null if it's not bound.
      */
     private fun getHolder(download: Download): DownloadHolder? {
-        return dl_recycler?.findViewHolderForItemId(download.chapter.id!!) as? DownloadHolder
+        return binding.dlRecycler?.findViewHolderForItemId(download.chapter.id!!) as? DownloadHolder
     }
 
     /**
@@ -163,12 +169,12 @@ class DownloadBottomSheet @JvmOverloads constructor(
         updateDLTitle()
         setBottomSheet()
         if (presenter.downloadQueue.isEmpty()) {
-            empty_view?.show(
+            binding.emptyView.show(
                 R.drawable.ic_download_off_24dp,
                 R.string.nothing_is_downloading
             )
         } else {
-            empty_view?.hide()
+            binding.emptyView.hide()
         }
     }
 

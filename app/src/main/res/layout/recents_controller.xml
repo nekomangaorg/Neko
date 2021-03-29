@@ -35,10 +35,11 @@
         android:alpha="0.5"
         android:background="@drawable/shape_gradient_top_shadow"
         android:paddingBottom="10dp"
-        app:layout_anchor="@id/dl_bottom_sheet"
+        app:layout_anchor="@id/download_bottom_sheet"
         app:layout_anchorGravity="top" />
     <!-- Adding bottom sheet after main content -->
-    <include layout="@layout/download_bottom_sheet" />
+    <include layout="@layout/download_bottom_sheet"
+        android:id="@+id/download_bottom_sheet"/>
 
     <View
         android:id="@+id/shadow2"

@@ -51,16 +51,6 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.download_bottom_sheet.*
-import kotlinx.android.synthetic.main.download_bottom_sheet.sheet_layout
-import kotlinx.android.synthetic.main.download_bottom_sheet.view.*
-import kotlinx.android.synthetic.main.extensions_bottom_sheet.*
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.recents_controller.*
-import kotlinx.android.synthetic.main.recents_controller.recycler
-import kotlinx.android.synthetic.main.recents_controller.shadow
-import kotlinx.android.synthetic.main.recents_controller.shadow2
-import kotlinx.android.synthetic.main.source_controller.*
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -102,7 +92,8 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.recents_controller, container, false)
+        binding = RecentsControllerBinding.inflate(inflater)
+        return binding.root
     }
 
     /**
@@ -114,11 +105,11 @@ class RecentsController(bundle: Bundle? = null) :
         super.onViewCreated(view)
         // Initialize adapter
         adapter = RecentMangaAdapter(this)
-        recycler.adapter = adapter
-        recycler.layoutManager = LinearLayoutManager(view.context)
-        recycler.setHasFixedSize(true)
-        recycler.recycledViewPool.setMaxRecycledViews(0, 0)
-        recycler.addItemDecoration(
+        binding.recycler.adapter = adapter
+        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.setHasFixedSize(true)
+        binding.recycler.recycledViewPool.setMaxRecycledViews(0, 0)
+        binding.recycler.addItemDecoration(
             RecentMangaDivider(view.context)
         )
         adapter.isSwipeEnabled = true
@@ -129,13 +120,13 @@ class RecentsController(bundle: Bundle? = null) :
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        swipe_refresh.setStyle()
+        binding.swipeRefresh.setStyle()
         scrollViewWith(
-            recycler,
-            swipeRefreshLayout = swipe_refresh,
+            binding.recycler,
+            swipeRefreshLayout = binding.swipeRefresh,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
-                recycler.updatePaddingRelative(bottom = activity!!.bottom_nav.height)
+                binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
             },
             onBottomNavUpdate = {
                 setBottomPadding()
@@ -150,25 +141,24 @@ class RecentsController(bundle: Bundle? = null) :
             }
         }
 
-        dl_bottom_sheet.onCreate(this)
+        binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
 
-        shadow2.alpha =
-            if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
-        shadow.alpha =
-            if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+        binding.shadow2.alpha =
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+        binding.shadow.alpha =
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
 
-        dl_bottom_sheet.sheetBehavior?.addBottomSheetCallback(
+        binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.addBottomSheetCallback(
             object :
                 BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    val shadow2 = shadow2 ?: return
-                    shadow2.alpha = (1 - abs(progress)) * 0.25f
-                    shadow.alpha = (1 - abs(progress)) * 0.5f
+                    binding.shadow2.alpha = (1 - abs(progress)) * 0.25f
+                    binding.shadow.alpha = (1 - abs(progress)) * 0.5f
                     if (progress >= 0) activityBinding?.appBar?.elevation = max(
                         progress * 15f,
-                        if (recycler.canScrollVertically(-1)) 15f else 0f
+                        if (binding.recycler.canScrollVertically(-1)) 15f else 0f
                     )
-                    sheet_layout.alpha = 1 - progress
+                    binding.downloadBottomSheet.sheetLayout.alpha = 1 - progress
                     activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
                     val oldShow = showingDownloads
                     showingDownloads = progress > 0.92f
@@ -182,7 +172,7 @@ class RecentsController(bundle: Bundle? = null) :
                     if (this@RecentsController.view == null) return
                     if (state == BottomSheetBehavior.STATE_EXPANDED) activityBinding?.appBar?.y = 0f
                     if (state == BottomSheetBehavior.STATE_EXPANDED || state == BottomSheetBehavior.STATE_COLLAPSED) {
-                        sheet_layout.alpha =
+                        binding.downloadBottomSheet.sheetLayout.alpha =
                             if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
                         showingDownloads = state == BottomSheetBehavior.STATE_EXPANDED
                         setTitle()
@@ -191,64 +181,63 @@ class RecentsController(bundle: Bundle? = null) :
 
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         if (hasQueue()) {
-                            dl_bottom_sheet.sheetBehavior?.isHideable = false
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable = false
                         } else {
-                            dl_bottom_sheet.sheetBehavior?.isHideable = true
-                            dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable = true
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
                         }
                     } else if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         if (!hasQueue()) {
-                            dl_bottom_sheet.sheetBehavior?.skipCollapsed = true
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.skipCollapsed = true
                         } else {
-                            dl_bottom_sheet.sheetBehavior?.skipCollapsed = false
-                            dl_bottom_sheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.skipCollapsed = false
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
                         }
                     }
 
                     if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
-                        shadow2.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
-                        shadow.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+                        binding.shadow2.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+                        binding.shadow.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
                     }
 
-                    sheet_layout?.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
-                    sheet_layout?.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
-                    setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
+                    binding.downloadBottomSheet.sheetLayout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                    binding.downloadBottomSheet.sheetLayout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                    setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
                 }
             }
         )
-        swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
-        swipe_refresh.setOnRefreshListener {
+        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(view.context)
             }
         }
 
         if (showingDownloads) {
-            dl_bottom_sheet.sheetBehavior?.expand()
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
-        setPadding(dl_bottom_sheet.sheetBehavior?.isHideable == true)
+        setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
     }
 
     fun setBottomPadding() {
-        val bottomBar = activity?.bottom_nav ?: return
-        dl_bottom_sheet ?: return
+        val bottomBar = activityBinding?.bottomNav ?: return
         val pad = bottomBar.translationY - bottomBar.height
         val padding = max(
             (-pad).toInt(),
-            if (dl_bottom_sheet.sheetBehavior.isExpanded()) 0 else {
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()) 0 else {
                 view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
             }
         )
-        shadow2.translationY = pad
-        dl_bottom_sheet.sheetBehavior?.peekHeight = 48.spToPx + padding
-        dl_bottom_sheet.fast_scroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.shadow2.translationY = pad
+        binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight = 48.spToPx + padding
+        binding.downloadBottomSheet.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
     }
 
     fun setRefreshing(refresh: Boolean) {
-        swipe_refresh?.isRefreshing = refresh
+        binding.swipeRefresh.isRefreshing = refresh
     }
 
     override fun onItemMove(fromPosition: Int, toPosition: Int) { }
@@ -256,21 +245,21 @@ class RecentsController(bundle: Bundle? = null) :
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
-        swipe_refresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE ||
-            swipe_refresh.isRefreshing
+        binding.swipeRefresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_SWIPE ||
+            binding.swipeRefresh.isRefreshing
     }
 
     override fun handleSheetBack(): Boolean {
-        if (dl_bottom_sheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
-            dl_bottom_sheet.dismiss()
+        if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+            binding.downloadBottomSheet.dlBottomSheet.dismiss()
             return true
         }
         return false
     }
 
     fun setPadding(sheetIsHidden: Boolean) {
-        recycler?.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
-        recycler?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.recycler.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
+        binding.recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = if (sheetIsHidden) 0 else 30.dpToPx
         }
     }
@@ -279,7 +268,7 @@ class RecentsController(bundle: Bundle? = null) :
         super.onActivityResumed(activity)
         if (view != null) {
             refresh()
-            dl_bottom_sheet?.update()
+            binding.downloadBottomSheet.dlBottomSheet.update()
         }
     }
 
@@ -294,7 +283,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     fun showLists(recents: List<RecentMangaItem>) {
         if (view == null) return
-        swipe_refresh.isRefreshing = LibraryUpdateService.isRunning()
+        binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.updateItems(recents)
         adapter.removeAllScrollableHeaders()
         if (presenter.viewType > 0) {
@@ -308,11 +297,11 @@ class RecentsController(bundle: Bundle? = null) :
 
     fun updateChapterDownload(download: Download) {
         if (view == null) return
-        dl_bottom_sheet.update()
-        dl_bottom_sheet.onUpdateProgress(download)
-        dl_bottom_sheet.onUpdateDownloadedPages(download)
+        binding.downloadBottomSheet.dlBottomSheet.update()
+        binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
+        binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
         val id = download.chapter.id ?: return
-        val holder = recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
+        val holder = binding.recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
         holder.notifyStatus(download.status, download.progress)
     }
 
@@ -399,7 +388,7 @@ class RecentsController(bundle: Bundle? = null) :
         lastChapterId = chapter.id
         presenter.markChapterRead(chapter, true)
         snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
-            anchorView = activity?.bottom_nav
+            anchorView = activityBinding?.bottomNav
             var undoing = false
             setAction(R.string.undo) {
                 presenter.markChapterRead(chapter, false, lastRead, pagesLeft)
@@ -457,14 +446,14 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
-        if (showingDownloads) dl_bottom_sheet.prepareMenu(menu)
+        if (showingDownloads) binding.downloadBottomSheet.dlBottomSheet.prepareMenu(menu)
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
-            dl_bottom_sheet.dismiss()
+            binding.downloadBottomSheet.dlBottomSheet.dismiss()
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
             snack?.dismiss()
@@ -480,29 +469,29 @@ class RecentsController(bundle: Bundle? = null) :
     fun hasQueue() = presenter.downloadManager.hasQueue()
 
     override fun showSheet() {
-        if (dl_bottom_sheet.sheetBehavior?.isHideable == false || hasQueue()) {
-            dl_bottom_sheet.sheetBehavior?.expand()
+        if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == false || hasQueue()) {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
     }
 
     override fun toggleSheet() {
-        if (showingDownloads) dl_bottom_sheet.dismiss()
-        else dl_bottom_sheet.sheetBehavior?.expand()
+        if (showingDownloads) binding.downloadBottomSheet.dlBottomSheet.dismiss()
+        else binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
     }
 
-    override fun sheetIsExpanded(): Boolean = dl_bottom_sheet.sheetBehavior.isExpanded()
+    override fun sheetIsExpanded(): Boolean = binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()
 
     override fun expandSearch() {
         if (showingDownloads) {
-            dl_bottom_sheet.dismiss()
+            binding.downloadBottomSheet.dlBottomSheet.dismiss()
         } else {
-            activity?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+            activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
         }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         if (showingDownloads) {
-            return dl_bottom_sheet.onOptionsItemSelected(item)
+            return binding.downloadBottomSheet.dlBottomSheet.onOptionsItemSelected(item)
         }
         when (item.itemId) {
             R.id.action_group_all, R.id.action_ungroup_all, R.id.action_only_history,
