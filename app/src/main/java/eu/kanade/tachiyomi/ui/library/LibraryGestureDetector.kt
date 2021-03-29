@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.library
 
+import android.annotation.SuppressLint
 import android.view.GestureDetector
 import android.view.Gravity
 import android.view.MotionEvent
@@ -34,6 +35,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         return super.onSingleTapUp(e)
     }
 
+    @SuppressLint("RtlHardcoded")
     override fun onFling(
         e1: MotionEvent,
         e2: MotionEvent,
@@ -55,7 +57,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             if (diffY <= 0) {
                 controller.showSheet()
             } else {
-                controller.filter_bottom_sheet.sheetBehavior?.hide()
+                controller.binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
             }
         } else if (abs(diffX) >= abs(diffY) &&
             abs(diffX) > SWIPE_THRESHOLD * 5 &&

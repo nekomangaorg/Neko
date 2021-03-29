@@ -42,7 +42,8 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <include layout="@layout/library_grid_recycler" />
+            <include layout="@layout/library_grid_recycler"
+                android:id="@+id/library_grid_recycler"/>
 
             <View
                 android:id="@+id/recycler_cover"
@@ -118,11 +119,13 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|center">
 
-        <include layout="@layout/rounded_category_hopper" />
+        <include layout="@layout/rounded_category_hopper"
+            android:id="@+id/rounded_category_hopper" />
 
     </FrameLayout>
     <!-- Adding bottom sheet after main content -->
-    <include layout="@layout/filter_bottom_sheet" />
+    <include layout="@layout/filter_bottom_sheet"
+        android:id="@+id/filter_bottom_sheet"/>
 
     <View
         android:id="@+id/shadow2"
