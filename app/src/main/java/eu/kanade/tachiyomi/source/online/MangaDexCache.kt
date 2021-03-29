@@ -72,7 +72,7 @@ open class MangaDexCache() : MangaDex() {
                 .map { cacheManga ->
                     SManga.create().apply {
                         initialized = false
-                        url = "/manga/${cacheManga.mangaId}"
+                        url = "/manga/${cacheManga.mangaId}/"
                         title = MdUtil.cleanString(cacheManga.title)
                         thumbnail_url = null
                     }
@@ -98,7 +98,7 @@ open class MangaDexCache() : MangaDex() {
             .map { cacheManga ->
                 SManga.create().apply {
                     initialized = false
-                    url = "/manga/${cacheManga.mangaId}"
+                    url = "/manga/${cacheManga.mangaId}/"
                     title = MdUtil.cleanString(cacheManga.title)
                     thumbnail_url = null
                 }
