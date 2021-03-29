@@ -16,14 +16,13 @@ import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.main_activity.*
 
 class SearchActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        toolbar?.navigationIcon = drawerArrow
-        toolbar?.setNavigationOnClickListener {
+        binding.toolbar?.navigationIcon = drawerArrow
+        binding.toolbar?.setNavigationOnClickListener {
             popToRoot()
         }
     }
@@ -56,10 +55,11 @@ class SearchActivity : MainActivity() {
         if (from is DialogController || to is DialogController) {
             return
         }
-        toolbar.navigationIcon = drawerArrow
+        binding.toolbar.navigationIcon = drawerArrow
         drawerArrow?.progress = 1f
 
-        bottom_nav.gone()
+        binding.bottomNav.gone()
+        binding.bottomView.gone()
     }
 
     override fun handleIntentAction(intent: Intent): Boolean {

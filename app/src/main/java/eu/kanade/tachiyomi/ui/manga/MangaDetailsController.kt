@@ -92,6 +92,7 @@ import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -199,7 +200,7 @@ class MangaDetailsController :
         setPaletteColor()
         adapter?.fastScroller = fast_scroller
         fast_scroller.addOnScrollStateChangeListener {
-            activity?.appbar?.y = 0f
+            activityBinding?.appBar?.y = 0f
         }
 
         presenter.onCreate()
@@ -234,7 +235,7 @@ class MangaDetailsController :
         val offset = 10.dpToPx
         swipe_refresh.setStyle()
         swipe_refresh.setDistanceToTriggerSync(70.dpToPx)
-        activity!!.appbar.elevation = 0f
+        activityBinding!!.appBar.elevation = 0f
 
         scrollViewWith(
             recycler,
@@ -365,13 +366,14 @@ class MangaDetailsController :
 
     /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
     private fun setActionBar(forThis: Boolean) {
-        val activity = activity ?: return
+        val activity = activity as? MainActivity ?: return
+        val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
         if (!activity.isInNightMode() && ThemeUtil.isBlueTheme(presenter.preferences.theme())) {
-            if (forThis) (activity as MainActivity).appbar.context.setTheme(
+            if (forThis) activityBinding.appBar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
             )
-            else (activity as MainActivity).appbar.context.setTheme(
+            else activityBinding.appBar.context.setTheme(
                 R.style.Theme_ActionBar_Dark_DayNight
             )
 
@@ -399,8 +401,8 @@ class MangaDetailsController :
             (activity as MainActivity).toolbar.setBackgroundColor(translucentColor)
             translucentColor
         } else Color.TRANSPARENT
-        (activity as MainActivity).appbar.setBackgroundColor(Color.TRANSPARENT)
-        (activity as MainActivity).toolbar.setBackgroundColor(
+        activityBinding?.appBar?.setBackgroundColor(Color.TRANSPARENT)
+        activityBinding?.toolbar?.setBackgroundColor(
             activity?.window?.statusBarColor
                 ?: Color.TRANSPARENT
         )
@@ -450,8 +452,8 @@ class MangaDetailsController :
             if (router.backstackSize > 0 &&
                 router.backstack.last().controller() !is MangaDetailsController
             ) {
-                (activity as? MainActivity)?.appbar?.setBackgroundColor(colorSecondary)
-                (activity as? MainActivity)?.toolbar?.setBackgroundColor(colorSecondary)
+                activityBinding?.appBar?.setBackgroundColor(colorSecondary)
+                activityBinding?.toolbar?.setBackgroundColor(colorSecondary)
 
                 activity?.window?.statusBarColor = activity?.getResourceColor(
                     android.R.attr.statusBarColor
@@ -975,7 +977,7 @@ class MangaDetailsController :
     override fun updateScroll() {
         if (recycler?.canScrollVertically(-1) == false) {
             getHeader()?.backdrop?.translationY = 0f
-            activity?.appbar?.y = 0f
+            activityBinding?.appBar?.y = 0f
             colorToolbar(isColor = false, animate = false)
         }
     }
@@ -1377,10 +1379,10 @@ class MangaDetailsController :
         expandedImageView.requestLayout()
 
         val activity = activity as? MainActivity ?: return
-        val currTheme = activity.appbar.context.theme
+        val currTheme = activityBinding!!.appBar.context.theme
         val currColor = activity.drawerArrow?.color
         if (!activity.isInNightMode()) {
-            activity.appbar.context.setTheme(R.style.ThemeOverlay_AppCompat_Dark_ActionBar)
+            activityBinding?.appBar?.context?.setTheme(R.style.ThemeOverlay_AppCompat_Dark_ActionBar)
 
             val iconPrimary = Color.WHITE
             activity.toolbar.setTitleTextColor(iconPrimary)
@@ -1474,7 +1476,7 @@ class MangaDetailsController :
                     interpolator = DecelerateInterpolator()
 
                     if (!activity.isInNightMode()) {
-                        activity.appbar.context.setTheme(
+                        activityBinding?.appBar?.context?.setTheme(
                             ThemeUtil.theme(presenter.preferences.theme())
                         )
 

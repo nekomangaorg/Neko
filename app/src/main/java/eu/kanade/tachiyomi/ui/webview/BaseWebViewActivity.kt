@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -26,7 +27,7 @@ import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.android.synthetic.main.webview_activity.*
 
-open class BaseWebViewActivity : BaseActivity() {
+open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
     private var bundle: Bundle? = null
 

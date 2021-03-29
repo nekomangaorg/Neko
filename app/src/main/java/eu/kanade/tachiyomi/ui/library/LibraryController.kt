@@ -77,6 +77,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.getItemView
@@ -96,7 +97,6 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -256,7 +256,7 @@ class LibraryController(
     }
 
     fun updateFilterSheetY() {
-        val bottomBar = activity?.bottom_nav
+        val bottomBar = activityBinding?.bottomNav
         if (bottomBar != null) {
             if (binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
                 val pad = bottomBar.translationY - bottomBar.height
@@ -292,8 +292,8 @@ class LibraryController(
         if (preferences.autohideHopper().get()) {
             // Flow same snap rules as bottom nav
             val closerToHopperBottom = hopperOffset > 25f.dpToPx
-            val halfWayBottom = activity!!.bottom_nav.height.toFloat() / 2
-            val closerToBottom = activity!!.bottom_nav.translationY > halfWayBottom
+            val halfWayBottom = activityBinding?.bottomNav?.height?.toFloat()?.div(2) ?: 0f
+            val closerToBottom = (activityBinding?.bottomNav?.translationY ?: 0f) > halfWayBottom
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
             val closerToEdge = if (preferences.hideBottomNavOnScroll().get()) (closerToBottom && !atTop) else closerToHopperBottom
             val end = if (closerToEdge) 55f.dpToPx else 0f
@@ -362,8 +362,9 @@ class LibraryController(
 
     private fun showFilterTip() {
         if (preferences.shownFilterTutorial().get() || !hasExpanded) return
+        val activityBinding = activityBinding ?: return
         val activity = activity ?: return
-        val icon = activity.bottom_nav.getItemView(R.id.nav_library) ?: return
+        val icon = activityBinding.bottomNav.getItemView(R.id.nav_library) ?: return
         filterTooltip =
             ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
                 .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
@@ -582,7 +583,7 @@ class LibraryController(
         }
 
         binding.roundedCategoryHopper.categoryButton.setOnLongClickListener {
-            activity?.toolbar?.menu?.performIdentifierAction(R.id.action_search, 0)
+            activityBinding?.toolbar?.menu?.performIdentifierAction(R.id.action_search, 0)
             true
         }
 
@@ -627,7 +628,7 @@ class LibraryController(
         val view = view ?: return
         val listOfYs = mutableListOf(
             binding.filterBottomSheet.filterBottomSheet.y,
-            activity?.bottom_nav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
+            activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
         )
         val insetBottom = view.rootWindowInsets?.systemWindowInsetBottom ?: 0
         if (!preferences.autohideHopper().get()) {
@@ -639,8 +640,8 @@ class LibraryController(
             binding.libraryGridRecycler.recycler.translationY
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
-                -(binding.categoryHopperFrame.y - (view.height - insetBottom))
-            +binding.libraryGridRecycler.recycler.translationY
+                -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
+                binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
@@ -730,7 +731,7 @@ class LibraryController(
         return binding.root
     }
 
-    private fun anchorView(): View? {
+    private fun anchorView(): View {
         return if (binding.categoryHopperFrame.isVisible()) {
             binding.categoryHopperFrame
         } else {
@@ -753,7 +754,7 @@ class LibraryController(
 
     private fun setRecyclerLayout() {
         binding.libraryGridRecycler.recycler.post {
-            binding.libraryGridRecycler.recycler.updatePaddingRelative(bottom = 50.dpToPx + (activity?.bottom_nav?.height ?: 0))
+            binding.libraryGridRecycler.recycler.updatePaddingRelative(bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0))
         }
         if (libraryLayout == 0) {
             binding.libraryGridRecycler.recycler.spanCount = 1
@@ -792,14 +793,14 @@ class LibraryController(
             if (binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
                 binding.filterBottomSheet.filterBottomSheet.invisible()
             }
-            activity?.toolbar?.hideDropdown()
+            activityBinding?.toolbar?.hideDropdown()
         }
     }
 
     override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeEnded(handler, type)
         if (!type.isEnter) {
-            activity?.toolbar?.hideDropdown()
+            activityBinding?.toolbar?.hideDropdown()
         }
     }
 
@@ -859,7 +860,7 @@ class LibraryController(
             scrollToHeader(activeCategory)
         }
         binding.libraryGridRecycler.recycler.post {
-            elevateAppBar(binding.libraryGridRecycler.recycler.canScrollVertically(-1) == true)
+            elevateAppBar(binding.libraryGridRecycler.recycler.canScrollVertically(-1))
             setActiveCategory()
         }
 
@@ -876,7 +877,7 @@ class LibraryController(
             shouldScrollToTop = false
         }
         if (onRoot) {
-            listOf(activity?.toolbar, binding.headerTitle).forEach {
+            listOf(activityBinding?.toolbar, binding.headerTitle).forEach {
                 it?.setOnClickListener {
                     val recycler = binding.libraryGridRecycler.recycler
                     if (singleCategory) {
@@ -896,9 +897,9 @@ class LibraryController(
     private fun showDropdown() {
         if (onRoot) {
             if (!singleCategory) {
-                activity?.toolbar?.showDropdown()
+                activityBinding?.toolbar?.showDropdown()
             } else {
-                activity?.toolbar?.hideDropdown()
+                activityBinding?.toolbar?.hideDropdown()
             }
         }
     }
@@ -939,7 +940,7 @@ class LibraryController(
         val translateY = if (show) full else 0f
         binding.libraryGridRecycler.recycler.animate().translationY(translateY).apply {
             setUpdateListener {
-                activity?.appbar?.y = 0f
+                activityBinding?.appBar?.y = 0f
                 updateHopperY()
             }
         }.start()
@@ -947,13 +948,13 @@ class LibraryController(
         binding.recyclerCover.animate().translationY(translateY).start()
         binding.recyclerCover.animate().alpha(if (show) 0.75f else 0f).start()
         binding.libraryGridRecycler.recycler.suppressLayout(show)
-        activity?.toolbar?.showDropdown(!show)
+        activityBinding?.toolbar?.showDropdown(!show)
         binding.swipeRefresh.isEnabled = !show
         setTitle()
         if (show) {
             binding.categoryRecycler.scrollToCategory(activeCategory)
             binding.fastScroller.hideScrollbar()
-            activity?.appbar?.y = 0f
+            activityBinding?.appBar?.y = 0f
             elevateAppBar(false)
             binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
         } else {
@@ -972,7 +973,7 @@ class LibraryController(
         }
         val headerPosition = adapter.indexOf(pos)
         if (headerPosition > -1) {
-            val appbar = activity?.appbar
+            val appbar = activityBinding?.appBar
             binding.libraryGridRecycler.recycler.suppressLayout(true)
             val appbarOffset = if (appbar?.y ?: 0f > -20) 0 else (
                 appbar?.y?.plus(

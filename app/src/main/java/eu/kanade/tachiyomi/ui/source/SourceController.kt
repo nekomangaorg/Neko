@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.spToPx
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -172,11 +173,11 @@ class SourceController :
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     val recycler = recycler ?: return
                     shadow2?.alpha = (1 - max(0f, progress)) * 0.25f
-                    activity?.appbar?.elevation = min(
+                    activityBinding?.appBar?.elevation = min(
                         (1f - progress) * 15f,
                         if (recycler.canScrollVertically(-1)) 15f else 0f
                     )
-                    activity?.appbar?.y = max(activity!!.appbar.y, -headerHeight * (1 - progress))
+                    activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
                     val oldShow = showingExtensions
                     showingExtensions = progress > 0.92f
                     if (oldShow != showingExtensions) {
@@ -189,7 +190,7 @@ class SourceController :
                 override fun onStateChanged(p0: View, state: Int) {
                     val extBottomSheet = ext_bottom_sheet ?: return
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        activity?.appbar?.y = 0f
+                        activityBinding?.appBar?.y = 0f
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED ||
                         state == BottomSheetBehavior.STATE_COLLAPSED
@@ -227,7 +228,7 @@ class SourceController :
     fun setBottomSheetTabs(progress: Float) {
         val bottomSheet = ext_bottom_sheet ?: return
         ext_bottom_sheet.tabs.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            topMargin = ((activity?.appbar?.height?.minus(9f.dpToPx) ?: 0f) * progress).toInt()
+            topMargin = ((activityBinding?.appBar?.height?.minus(9f.dpToPx) ?: 0f) * progress).toInt()
         }
         val selectedColor = ColorUtils.setAlphaComponent(
             ContextCompat.getColor(ext_bottom_sheet.tabs.context, R.color.colorAccent),
@@ -320,7 +321,7 @@ class SourceController :
         }
         if (!type.isEnter) {
             ext_bottom_sheet.canExpand = false
-            activity?.appbar?.elevation =
+            activityBinding?.appBar?.elevation =
                 when {
                     ext_bottom_sheet.sheetBehavior.isExpanded() -> 0f
                     recycler.canScrollVertically(-1) -> 15f

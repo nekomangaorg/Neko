@@ -25,13 +25,14 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.android.synthetic.main.main_activity.*
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
@@ -77,11 +78,11 @@ fun Controller.liftAppbarWith(recycler: RecyclerView) {
         elevate = el
         elevationAnim?.cancel()
         elevationAnim = ValueAnimator.ofFloat(
-            activity?.appbar?.elevation ?: 0f,
+            activityBinding?.appBar?.elevation ?: 0f,
             if (el) 15f else 0f
         )
         elevationAnim?.addUpdateListener { valueAnimator ->
-            activity?.appbar?.elevation = valueAnimator.animatedValue as Float
+            activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
         }
         elevationAnim?.start()
     }
@@ -112,7 +113,7 @@ fun Controller.scrollViewWith(
     onBottomNavUpdate: (() -> Unit)? = null
 ): ((Boolean) -> Unit) {
     var statusBarHeight = -1
-    activity?.appbar?.y = 0f
+    activityBinding?.appBar?.y = 0f
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = if (activity!!.toolbar.height > 0) activity!!.toolbar.height
@@ -166,11 +167,11 @@ fun Controller.scrollViewWith(
         } else {
             elevationAnim?.cancel()
             elevationAnim = ValueAnimator.ofFloat(
-                activity?.appbar?.elevation ?: 0f,
+                activityBinding?.appBar?.elevation ?: 0f,
                 if (el) 15f else 0f
             )
             elevationAnim?.addUpdateListener { valueAnimator ->
-                activity?.appbar?.elevation = valueAnimator.animatedValue as Float
+                activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
             }
             elevationAnim?.start()
         }
@@ -247,14 +248,14 @@ fun Controller.scrollViewWith(
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
                     ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
-                    activity != null && activity!!.appbar.height > 0 &&
+                    activity != null && activityBinding!!.appBar.height > 0 &&
                     recycler.translationY == 0f
                 ) {
                     if (!recycler.canScrollVertically(-1)) {
                         val shortAnimationDuration = resources?.getInteger(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
-                        activity!!.appbar.animate().y(0f)
+                        activityBinding!!.appBar.animate().y(0f)
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
                         if (router.backstackSize == 1 && isInView) {
@@ -270,15 +271,14 @@ fun Controller.scrollViewWith(
                         lastY = 0f
                         if (elevate) elevateFunc(false)
                     } else {
-                        activity!!.appbar.y -= dy
-                        activity!!.appbar.y = MathUtils.clamp(
-                            activity!!.appbar.y,
-                            -activity!!.appbar.height.toFloat(),
+                        activityBinding!!.appBar.y -= dy
+                        activityBinding!!.appBar.y = MathUtils.clamp(
+                            activityBinding!!.appBar.y,
+                            -activityBinding!!.appBar.height.toFloat(),
                             0f
                         )
                         val tabBar = activity!!.bottom_nav
                         if (tabBar != null && tabBar.isVisible() && isInView) {
-                            val preferences: PreferencesHelper = Injekt.get()
                             if (preferences.hideBottomNavOnScroll().get()) {
                                 tabBar.translationY += dy
                                 tabBar.translationY = MathUtils.clamp(
@@ -295,14 +295,14 @@ fun Controller.scrollViewWith(
                         if (!elevate && (
                             dy == 0 ||
                                 (
-                                    activity!!.appbar.y <= -activity!!.appbar.height.toFloat() ||
-                                        dy == 0 && activity!!.appbar.y == 0f
+                                    activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
+                                        dy == 0 && activityBinding!!.appBar.y == 0f
                                     )
                             )
                         ) {
                             elevateFunc(true)
                         }
-                        lastY = activity!!.appbar.y
+                        lastY = activityBinding!!.appBar.y
                     }
                 }
             }
@@ -312,14 +312,14 @@ fun Controller.scrollViewWith(
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (router?.backstack?.lastOrNull()
                         ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
-                        activity != null && activity!!.appbar.height > 0 &&
+                        activity != null && activityBinding!!.appBar.height > 0 &&
                         recycler.translationY == 0f
                     ) {
-                        val halfWay = activity!!.appbar.height.toFloat() / 2
+                        val halfWay = activityBinding!!.appBar.height.toFloat() / 2
                         val shortAnimationDuration = resources?.getInteger(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
-                        val closerToTop = abs(activity!!.appbar.y) > halfWay
+                        val closerToTop = abs(activityBinding!!.appBar.y) > halfWay
                         val halfWayBottom = activity!!.bottom_nav.height.toFloat() / 2
                         val closerToBottom = activity!!.bottom_nav.translationY > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
@@ -328,8 +328,8 @@ fun Controller.scrollViewWith(
                                 preferences.hideBottomNavOnScroll().get()
                             ) closerToBottom else closerToTop
                         lastY =
-                            if (closerToEdge && !atTop) (-activity!!.appbar.height.toFloat()) else 0f
-                        activity!!.appbar.animate().y(lastY)
+                            if (closerToEdge && !atTop) (-activityBinding!!.appBar.height.toFloat()) else 0f
+                        activityBinding!!.appBar.animate().y(lastY)
                             .setDuration(shortAnimationDuration.toLong()).start()
                         if (activity!!.bottom_nav.isVisible && isInView && preferences.hideBottomNavOnScroll().get()) {
                             activity!!.bottom_nav?.let {
@@ -376,3 +376,6 @@ fun Controller.openInBrowser(url: String) {
         activity?.toast(e.message)
     }
 }
+
+val Controller.activityBinding: MainActivityBinding?
+    get() = (activity as? MainActivity)?.binding
