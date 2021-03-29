@@ -2,21 +2,28 @@ package eu.kanade.tachiyomi.ui.base
 
 import android.content.Context
 import android.util.AttributeSet
+import android.widget.TextView
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.textview.MaterialTextView
 import eu.kanade.tachiyomi.R
-import kotlinx.android.synthetic.main.main_activity.view.*
 
 class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialToolbar(context, attrs) {
 
+    private lateinit var toolbarTitle:TextView
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        toolbarTitle = findViewById<MaterialTextView>(R.id.toolbar_title)
+    }
+
     override fun setTitle(resId: Int) {
         if (navigationIcon is DrawerArrowDrawable) {
             super.setTitle(resId)
-            toolbar_title.text = null
+            toolbarTitle.text = null
             hideDropdown()
         } else {
-            toolbar_title.text = context.getString(resId)
+            toolbarTitle.text = context.getString(resId)
             super.setTitle(null)
         }
     }
@@ -24,16 +31,16 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
     override fun setTitle(title: CharSequence?) {
         if (navigationIcon is DrawerArrowDrawable) {
             super.setTitle(title)
-            toolbar_title.text = ""
+            toolbarTitle.text = ""
             hideDropdown()
         } else {
-            toolbar_title.text = title
+            toolbarTitle.text = title
             super.setTitle(null)
         }
     }
 
     fun showDropdown(down: Boolean = true) {
-        toolbar_title.setCompoundDrawablesRelativeWithIntrinsicBounds(
+        toolbarTitle.setCompoundDrawablesRelativeWithIntrinsicBounds(
             R.drawable.ic_blank_24dp,
             0,
             if (down) {
@@ -46,6 +53,6 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
     }
 
     fun hideDropdown() {
-        toolbar_title.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
+        toolbarTitle.setCompoundDrawablesWithIntrinsicBounds(0, 0, 0, 0)
     }
 }
