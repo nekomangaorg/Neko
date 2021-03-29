@@ -140,14 +140,14 @@ class BrowseController :
             }
         )
 
-        binding.recycler?.post {
-            setBottomSheetTabs(if (binding.bottomSheet.extBottomSheet?.sheetBehavior.isCollapsed()) 0f else 1f)
+        binding.recycler.post {
+            setBottomSheetTabs(if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f)
         }
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
-        binding.bottomSheet.extBottomSheet.onCreate(this)
+        binding.bottomSheet.root.onCreate(this)
 
-        binding.bottomSheet.extBottomSheet.sheetBehavior?.addBottomSheetCallback(
+        binding.bottomSheet.root.sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior
             .BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
@@ -167,7 +167,10 @@ class BrowseController :
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
-                    val extBottomSheet = binding.bottomSheet.extBottomSheet ?: return
+                    if (state == BottomSheetBehavior.STATE_SETTLING) {
+                        binding.bottomSheet.root.updatedNestedRecyclers()
+                    }
+                    val extBottomSheet = binding.bottomSheet.root
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
                         activityBinding?.appBar?.y = 0f
                     }
@@ -195,7 +198,7 @@ class BrowseController :
         )
 
         if (showingExtensions) {
-            binding.bottomSheet.extBottomSheet.sheetBehavior?.expand()
+            binding.bottomSheet.root.sheetBehavior?.expand()
         }
     }
 
@@ -205,7 +208,7 @@ class BrowseController :
     }
 
     fun setBottomSheetTabs(progress: Float) {
-        val bottomSheet = binding.bottomSheet.extBottomSheet ?: return
+        val bottomSheet = binding.bottomSheet.root
         binding.bottomSheet.tabs.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = ((activityBinding?.appBar?.height?.minus(9f.dpToPx) ?: 0f) * progress).toInt()
         }
@@ -244,42 +247,41 @@ class BrowseController :
 
     private fun setBottomPadding() {
         val bottomBar = activityBinding?.bottomNav ?: return
-        binding.bottomSheet.extBottomSheet ?: return
         val pad = bottomBar.translationY - bottomBar.height
         val padding = max(
             (-pad).toInt(),
-            if (binding.bottomSheet.extBottomSheet.sheetBehavior.isExpanded()) 0 else {
+            if (binding.bottomSheet.root.sheetBehavior.isExpanded()) 0 else {
                 view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
             }
         )
         binding.shadow2.translationY = pad
-        binding.bottomSheet.extBottomSheet.sheetBehavior?.peekHeight = 58.spToPx + padding
-        binding.bottomSheet.extBottomSheet.extensionFrameLayout.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.bottomSheet.root.sheetBehavior?.peekHeight = 58.spToPx + padding
+        binding.bottomSheet.root.extensionFrameLayout.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
-        binding.bottomSheet.extBottomSheet.migrationFrameLayout.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.bottomSheet.root.migrationFrameLayout.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
     }
 
     override fun showSheet() {
-        binding.bottomSheet.extBottomSheet.sheetBehavior?.expand()
+        binding.bottomSheet.root.sheetBehavior?.expand()
     }
 
     override fun toggleSheet() {
-        if (!binding.bottomSheet.extBottomSheet.sheetBehavior.isCollapsed()) {
-            binding.bottomSheet.extBottomSheet.sheetBehavior?.collapse()
+        if (!binding.bottomSheet.root.sheetBehavior.isCollapsed()) {
+            binding.bottomSheet.root.sheetBehavior?.collapse()
         } else {
-            binding.bottomSheet.extBottomSheet.sheetBehavior?.expand()
+            binding.bottomSheet.root.sheetBehavior?.expand()
         }
     }
 
-    override fun sheetIsExpanded(): Boolean = binding.bottomSheet.extBottomSheet.sheetBehavior.isExpanded()
+    override fun sheetIsExpanded(): Boolean = binding.bottomSheet.root.sheetBehavior.isExpanded()
 
     override fun handleSheetBack(): Boolean {
-        if (!binding.bottomSheet.extBottomSheet.sheetBehavior.isCollapsed()) {
-            if (binding.bottomSheet.extBottomSheet.canGoBack()) {
-                binding.bottomSheet.extBottomSheet.sheetBehavior?.collapse()
+        if (!binding.bottomSheet.root.sheetBehavior.isCollapsed()) {
+            if (binding.bottomSheet.root.canGoBack()) {
+                binding.bottomSheet.root.sheetBehavior?.collapse()
             }
             return true
         }
@@ -294,20 +296,20 @@ class BrowseController :
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (!type.isPush) {
-            binding.bottomSheet.extBottomSheet.updateExtTitle()
-            binding.bottomSheet.extBottomSheet.presenter.refreshExtensions()
+            binding.bottomSheet.root.updateExtTitle()
+            binding.bottomSheet.root.presenter.refreshExtensions()
             presenter.updateSources()
         }
         if (!type.isEnter) {
-            binding.bottomSheet.extBottomSheet.canExpand = false
+            binding.bottomSheet.root.canExpand = false
             activityBinding?.appBar?.elevation =
                 when {
-                    binding.bottomSheet.extBottomSheet.sheetBehavior.isExpanded() -> 0f
+                    binding.bottomSheet.root.sheetBehavior.isExpanded() -> 0f
                     binding.recycler.canScrollVertically(-1) -> 15f
                     else -> 0f
                 }
         } else {
-            binding.bottomSheet.extBottomSheet.presenter.refreshMigrations()
+            binding.bottomSheet.root.presenter.refreshMigrations()
         }
         setBottomPadding()
     }
@@ -315,15 +317,15 @@ class BrowseController :
     override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeEnded(handler, type)
         if (type.isEnter) {
-            binding.bottomSheet.extBottomSheet.canExpand = true
+            binding.bottomSheet.root.canExpand = true
             setBottomPadding()
         }
     }
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        binding.bottomSheet.extBottomSheet?.presenter?.refreshExtensions()
-        binding.bottomSheet.extBottomSheet?.presenter?.refreshMigrations()
+        binding.bottomSheet.root.presenter.refreshExtensions()
+        binding.bottomSheet.root.presenter.refreshMigrations()
         setBottomPadding()
     }
 
@@ -343,7 +345,7 @@ class BrowseController :
         presenter.updateSources()
 
         snackbar = view?.snack(R.string.source_hidden, Snackbar.LENGTH_INDEFINITE) {
-            anchorView = binding.bottomSheet.extBottomSheet
+            anchorView = binding.bottomSheet.root
             setAction(R.string.undo) {
                 val newCurrent = preferences.hiddenSources().get()
                 preferences.hiddenSources().set(newCurrent - source.id.toString())
@@ -391,7 +393,7 @@ class BrowseController :
     }
 
     override fun expandSearch() {
-        if (showingExtensions) binding.bottomSheet.extBottomSheet.sheetBehavior?.collapse()
+        if (showingExtensions) binding.bottomSheet.root.sheetBehavior?.collapse()
         else activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
     }
 
@@ -418,7 +420,7 @@ class BrowseController :
                 // Create query listener which opens the global search view.
                 setOnQueryTextChangeListener(searchView) {
                     extQuery = it ?: ""
-                    binding.bottomSheet.extBottomSheet.drawExtensions()
+                    binding.bottomSheet.root.drawExtensions()
                     true
                 }
             } else {

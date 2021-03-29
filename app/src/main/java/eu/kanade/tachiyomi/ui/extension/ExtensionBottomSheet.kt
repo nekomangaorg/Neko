@@ -142,6 +142,12 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.getExtensionUpdateCount()
     }
 
+    fun updatedNestedRecyclers() {
+        listOf(extensionFrameLayout, migrationFrameLayout).forEachIndexed { index, recyclerWithScrollerBinding ->
+            recyclerWithScrollerBinding.recycler.isNestedScrollingEnabled = binding.pager.currentItem == index
+        }
+    }
+
     fun fetchOnlineExtensionsIfNeeded() {
         if (shouldCallApi) {
             presenter.findAvailableExtensions()
