@@ -20,9 +20,8 @@ import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import kotlinx.android.synthetic.main.manga_grid_item.view.*
-import kotlinx.android.synthetic.main.migration_process_item.*
-import kotlinx.android.synthetic.main.unread_download_badge.view.*
+import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
+import eu.kanade.tachiyomi.databinding.MigrationProcessItemBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -36,13 +35,14 @@ class MigrationProcessHolder(
     private val db: DatabaseHelper by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
     private var item: MigrationProcessItem? = null
+    private val binding = MigrationProcessItemBinding.bind(view)
 
     init {
         // We need to post a Runnable to show the popup to make sure that the PopupMenu is
         // correctly positioned. The reason being that the view may change position before the
         // PopupMenu is shown.
-        migration_menu.setOnClickListener { it.post { showPopupMenu(it) } }
-        skip_manga.setOnClickListener { it.post { adapter.removeManga(flexibleAdapterPosition) } }
+        binding.migrationMenu.setOnClickListener { it.post { showPopupMenu(it) } }
+        binding.skipManga.setOnClickListener { it.post { adapter.removeManga(flexibleAdapterPosition) } }
     }
 
     fun bind(item: MigrationProcessItem) {
@@ -51,23 +51,23 @@ class MigrationProcessHolder(
             val manga = item.manga.manga()
             val source = item.manga.mangaSource()
 
-            migration_menu.setVectorCompat(
+            binding.migrationMenu.setVectorCompat(
                 R.drawable.ic_more_vert_24dp,
                 view.context.getResourceColor(android.R.attr.textColorPrimary)
             )
-            skip_manga.setVectorCompat(
+            binding.skipManga.setVectorCompat(
                 R.drawable.ic_close_24dp,
                 view.context.getResourceColor(
                     android.R.attr.textColorPrimary
                 )
             )
-            migration_menu.invisible()
-            skip_manga.visible()
-            migration_manga_card_to.resetManga()
+            binding.migrationMenu.invisible()
+            binding.skipManga.visible()
+            binding.migrationMangaCardTo.resetManga()
             if (manga != null) {
                 withContext(Dispatchers.Main) {
-                    migration_manga_card_from.attachManga(manga, source, false)
-                    migration_manga_card_from.setOnClickListener {
+                    binding.migrationMangaCardFrom.attachManga(manga, source, false)
+                    binding.migrationMangaCardFrom.root.setOnClickListener {
                         adapter.controller.router.pushController(
                             MangaDetailsController(
                                 manga,
@@ -80,7 +80,7 @@ class MigrationProcessHolder(
                 /*launchUI {
                     item.manga.progress.asFlow().collect { (max, progress) ->
                         withContext(Dispatchers.Main) {
-                            migration_manga_card_to.search_progress.let { progressBar ->
+                            binding.migrationMangaCardTo.search_progress.let { progressBar ->
                                 progressBar.max = max
                                 progressBar.progress = progress
                             }
@@ -99,8 +99,8 @@ class MigrationProcessHolder(
                         return@withContext
                     }
                     if (searchResult != null && resultSource != null) {
-                        migration_manga_card_to.attachManga(searchResult, resultSource, true)
-                        migration_manga_card_to.setOnClickListener {
+                        binding.migrationMangaCardTo.attachManga(searchResult, resultSource, true)
+                        binding.migrationMangaCardTo.root.setOnClickListener {
                             adapter.controller.router.pushController(
                                 MangaDetailsController(
                                     searchResult,
@@ -109,41 +109,41 @@ class MigrationProcessHolder(
                             )
                         }
                     } else {
-                        migration_manga_card_to.progress.gone()
-                        migration_manga_card_to.title.text =
+                        binding.migrationMangaCardTo.progress.gone()
+                        binding.migrationMangaCardTo.title.text =
                             view.context.getString(R.string.no_alternatives_found)
                     }
-                    migration_menu.visible()
-                    skip_manga.gone()
+                    binding.migrationMenu.visible()
+                    binding.skipManga.gone()
                     adapter.sourceFinished()
                 }
             }
         }
     }
 
-    private fun View.resetManga() {
+    private fun MangaGridItemBinding.resetManga() {
         progress.visible()
-        cover_thumbnail.setImageDrawable(null)
-        compact_title.text = ""
+        coverThumbnail.setImageDrawable(null)
+        compactTitle.text = ""
         title.text = ""
         subtitle.text = ""
-        badge_view.setChapters(null)
-        (layoutParams as ConstraintLayout.LayoutParams).verticalBias = 0.5f
+        unreadDownloadBadge.badgeView.setChapters(null)
+        (root.layoutParams as ConstraintLayout.LayoutParams).verticalBias = 0.5f
         subtitle.text = ""
-        migration_manga_card_to.setOnClickListener(null)
+        root.setOnClickListener(null)
     }
 
-    private fun View.attachManga(manga: Manga, source: Source, isTo: Boolean) {
-        (layoutParams as ConstraintLayout.LayoutParams).verticalBias = 1f
+    private fun MangaGridItemBinding.attachManga(manga: Manga, source: Source, isTo: Boolean) {
+        (root.layoutParams as ConstraintLayout.LayoutParams).verticalBias = 1f
         progress.gone()
 
         val request = LoadRequest.Builder(view.context).data(manga)
-            .target(CoverViewTarget(cover_thumbnail, progress)).build()
+            .target(CoverViewTarget(coverThumbnail, progress)).build()
         Coil.imageLoader(view.context).execute(request)
 
-        compact_title.visible()
+        compactTitle.visible()
         gradient.visible()
-        compact_title.text = if (manga.title.isBlank()) {
+        compactTitle.text = if (manga.title.isBlank()) {
             view.context.getString(R.string.unknown)
         } else {
             manga.title
@@ -159,18 +159,18 @@ class MigrationProcessHolder(
         // }
 
         val mangaChapters = db.getChapters(manga).executeAsBlocking()
-        badge_view.setChapters(mangaChapters.size)
+        unreadDownloadBadge.badgeView.setChapters(mangaChapters.size)
         val latestChapter = mangaChapters.maxBy { it.chapter_number }?.chapter_number ?: -1f
 
         if (latestChapter > 0f) {
-            subtitle.text = context.getString(
+            subtitle.text = root.context.getString(
                 R.string.latest_,
                 DecimalFormat("#.#").format(latestChapter)
             )
         } else {
-            subtitle.text = context.getString(
+            subtitle.text = root.context.getString(
                 R.string.latest_,
-                context.getString(R.string.unknown)
+                root.context.getString(R.string.unknown)
             )
         }
     }
