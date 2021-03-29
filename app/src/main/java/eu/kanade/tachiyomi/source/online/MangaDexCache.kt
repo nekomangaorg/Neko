@@ -21,20 +21,33 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
+import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
+import org.isomorphism.util.TokenBuckets
 import org.json.JSONObject
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 open class MangaDexCache() : MangaDex() {
 
     private val preferences: PreferencesHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
-    private val clientAnilist = network.client.newBuilder().build()
-    private val clientMyAnimeList = network.client.newBuilder().build()
+
+    // Max request of 30 per second, per domain we query
+    private val bucket = TokenBuckets.builder().withCapacity(30)
+            .withFixedIntervalRefillStrategy(30, 1, TimeUnit.SECONDS).build()
+    private val rateLimitInterceptor = Interceptor {
+        bucket.consume()
+        it.proceed(it.request())
+    }
+    private val clientLessRateLimits = network.nonRateLimitedClient.newBuilder().addInterceptor(rateLimitInterceptor).build()
+    private val clientAnilist = clientLessRateLimits.newBuilder().build()
+    private val clientMyAnimeList = clientLessRateLimits.newBuilder().build()
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         throw Exception("Cache source cannot update follow status")
@@ -97,7 +110,7 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return client.newCall(apiRequest(manga))
+        return clientLessRateLimits.newCall(apiRequest(manga))
             .asObservableSuccess()
             .map { response ->
                 parseMangaCacheApi(response.body!!.string())
@@ -106,9 +119,9 @@ open class MangaDexCache() : MangaDex() {
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
-            var response = client.newCall(apiRequest(manga)).execute()
+            var response = clientLessRateLimits.newCall(apiRequest(manga)).execute()
             if (!response.isSuccessful) {
-                response = client.newCall(apiRequest(manga, true)).execute()
+                response = clientLessRateLimits.newCall(apiRequest(manga, true)).execute()
             }
             parseMangaCacheApi(response.body!!.string())
         }
