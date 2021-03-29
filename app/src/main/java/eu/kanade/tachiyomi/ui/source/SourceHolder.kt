@@ -3,22 +3,24 @@ package eu.kanade.tachiyomi.ui.source
 import android.content.res.ColorStateList
 import android.view.View
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.SourceItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.source_item.*
 
 class SourceHolder(view: View, val adapter: SourceAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
+    val binding = SourceItemBinding.bind(view)
+
     init {
-        source_pin.setOnClickListener {
+        binding.sourcePin.setOnClickListener {
             adapter.sourceListener.onPinClick(flexibleAdapterPosition)
         }
-        source_latest.setOnClickListener {
+        binding.sourceLatest.setOnClickListener {
             adapter.sourceListener.onLatestClick(flexibleAdapterPosition)
         }
     }
@@ -28,10 +30,10 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         // setCardEdges(item)
 
         // Set source name
-        title.text = source.name
+        binding.title.text = source.name
 
         val isPinned = item.isPinned ?: item.header?.code?.equals(SourcePresenter.PINNED_KEY) ?: false
-        source_pin.apply {
+        binding.sourcePin.apply {
             imageTintList = ColorStateList.valueOf(
                 context.getResourceColor(
                     if (isPinned) R.attr.colorAccent
@@ -48,27 +50,27 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         itemView.post {
             val icon = source.icon()
             when {
-                icon != null -> edit_button.setImageDrawable(icon)
-                item.source.id == LocalSource.ID -> edit_button.setImageResource(R.mipmap.ic_local_source)
+                icon != null -> binding.sourceImage.setImageDrawable(icon)
+                item.source.id == LocalSource.ID -> binding.sourceImage.setImageResource(R.mipmap.ic_local_source)
             }
         }
 
         if (source.supportsLatest) {
-            source_latest.visible()
+            binding.sourceLatest.visible()
         } else {
-            source_latest.gone()
+            binding.sourceLatest.gone()
         }
     }
 
     override fun getFrontView(): View {
-        return card
+        return binding.card
     }
 
     override fun getRearLeftView(): View {
-        return left_view
+        return binding.leftView
     }
 
     override fun getRearRightView(): View {
-        return right_view
+        return binding.rightView
     }
 }

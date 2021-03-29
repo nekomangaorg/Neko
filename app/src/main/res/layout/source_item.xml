@@ -51,7 +51,7 @@
         android:background="@drawable/list_item_selector">
 
         <ImageView
-            android:id="@+id/edit_button"
+            android:id="@+id/source_image"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginStart="6dp"
@@ -73,7 +73,7 @@
             android:textColor="?android:textColorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/source_latest"
-            app:layout_constraintStart_toEndOf="@+id/edit_button"
+            app:layout_constraintStart_toEndOf="@+id/source_image"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Source title" />
 
@@ -98,7 +98,7 @@
             android:layout_margin="10dp"
             android:layout_marginEnd="8dp"
             android:src="@drawable/ic_pin_24dp"
-            android:tint="?colorAccent"
+            app:tint="?colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintDimensionRatio="1:1"
             app:layout_constraintEnd_toEndOf="parent"

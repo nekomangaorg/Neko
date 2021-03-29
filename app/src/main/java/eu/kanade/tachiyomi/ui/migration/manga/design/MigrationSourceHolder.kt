@@ -3,16 +3,18 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 import android.graphics.Paint.STRIKE_THRU_TEXT_FLAG
 import android.view.View
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.MigrationSourceItemBinding
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import kotlinx.android.synthetic.main.migration_source_item.*
 import uy.kohesive.injekt.injectLazy
 
 class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
+
+    private val binding = MigrationSourceItemBinding.bind(view)
     init {
-        setDragHandleView(reorder)
+        setDragHandleView(binding.reorder)
     }
 
     fun bind(source: HttpSource, sourceEnabled: Boolean) {
@@ -20,21 +22,21 @@ class MigrationSourceHolder(view: View, val adapter: MigrationSourceAdapter) :
         val isMultiLanguage = preferences.enabledLanguages().get().size > 1
         // Set capitalized title.
         val sourceName = if (isMultiLanguage) source.toString() else source.name.capitalize()
-        title.text = sourceName
+        binding.title.text = sourceName
         // Update circle letter image.
         itemView.post {
             val icon = source.icon()
-            if (icon != null) edit_button?.setImageDrawable(icon)
+            if (icon != null) binding.sourceImage.setImageDrawable(icon)
         }
 
         if (sourceEnabled) {
-            title.alpha = 1.0f
-            edit_button.alpha = 1.0f
-            title.paintFlags = title.paintFlags and STRIKE_THRU_TEXT_FLAG.inv()
+            binding.title.alpha = 1.0f
+            binding.sourceImage.alpha = 1.0f
+            binding.title.paintFlags = binding.title.paintFlags and STRIKE_THRU_TEXT_FLAG.inv()
         } else {
-            title.alpha = DISABLED_ALPHA
-            edit_button.alpha = DISABLED_ALPHA
-            title.paintFlags = title.paintFlags or STRIKE_THRU_TEXT_FLAG
+            binding.title.alpha = DISABLED_ALPHA
+            binding.sourceImage.alpha = DISABLED_ALPHA
+            binding.title.paintFlags = binding.title.paintFlags or STRIKE_THRU_TEXT_FLAG
         }
     }
 

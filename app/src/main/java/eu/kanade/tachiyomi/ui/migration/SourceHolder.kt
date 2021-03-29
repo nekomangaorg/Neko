@@ -1,18 +1,17 @@
 package eu.kanade.tachiyomi.ui.migration
 
 import android.view.View
+import eu.kanade.tachiyomi.databinding.MigrationCardItemBinding
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import kotlinx.android.synthetic.main.migration_card_item.*
-import kotlinx.android.synthetic.main.source_item.edit_button
-import kotlinx.android.synthetic.main.source_item.title
 
 class SourceHolder(view: View, val adapter: SourceAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
+    private val binding = MigrationCardItemBinding.bind(view)
     init {
-        migration_all.setOnClickListener {
-            adapter.allClickListener?.onAllClick(flexibleAdapterPosition)
+        binding.migrationAll.setOnClickListener {
+            adapter.allClickListener.onAllClick(flexibleAdapterPosition)
         }
     }
 
@@ -20,11 +19,11 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         val source = item.source
 
         // Set source name
-        title.text = source.name
+        binding.title.text = source.name
 
         // Set circle letter image.
         itemView.post {
-            edit_button?.setImageDrawable(source.icon())
+            binding.sourceImage.setImageDrawable(source.icon())
         }
     }
 }

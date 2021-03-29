@@ -15,8 +15,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlinx.android.synthetic.main.extension_card_item.*
-import kotlinx.android.synthetic.main.source_global_search_controller_card_item.*
+import eu.kanade.tachiyomi.databinding.ExtensionCardItemBinding
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -24,8 +23,9 @@ import java.util.Locale
 class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
+    private val binding = ExtensionCardItemBinding.bind(view)
     init {
-        ext_button.setOnClickListener {
+        binding.extButton.setOnClickListener {
             adapter.buttonClickListener.onButtonClick(flexibleAdapterPosition)
         }
     }
@@ -38,10 +38,10 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
         val extension = item.extension
 
         // Set source name
-        ext_title.text = extension.name
-        version.text = extension.versionName
-        lang.text = LocaleHelper.getDisplayName(extension.lang)
-        warning.text = when {
+        binding.extTitle.text = extension.name
+        binding.version.text = extension.versionName
+        binding.lang.text = LocaleHelper.getDisplayName(extension.lang)
+        binding.warning.text = when {
             extension is Extension.Untrusted -> itemView.context.getString(R.string.untrusted)
             extension is Extension.Installed && extension.isObsolete -> itemView.context.getString(R.string.obsolete)
             extension is Extension.Installed && extension.isUnofficial -> itemView.context.getString(R.string.unofficial)
@@ -49,20 +49,20 @@ class ExtensionHolder(view: View, val adapter: ExtensionAdapter) :
             else -> ""
         }.toUpperCase(Locale.ROOT)
 
-        edit_button.clear()
+        binding.sourceImage.clear()
 
         if (extension is Extension.Available) {
-            edit_button.load(extension.iconUrl) {
-                target(CoverViewTarget(edit_button, progress))
+            binding.sourceImage.load(extension.iconUrl) {
+                target(CoverViewTarget(binding.sourceImage))
             }
         } else {
-            extension.getApplicationIcon(itemView.context)?.let { edit_button.setImageDrawable(it) }
+            extension.getApplicationIcon(itemView.context)?.let { binding.sourceImage.setImageDrawable(it) }
         }
         bindButton(item)
     }
 
     @Suppress("ResourceType")
-    fun bindButton(item: ExtensionItem) = with(ext_button) {
+    fun bindButton(item: ExtensionItem) = with(binding.extButton) {
         isEnabled = true
         isClickable = true
         isActivated = false

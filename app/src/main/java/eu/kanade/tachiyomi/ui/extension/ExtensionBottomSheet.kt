@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.ui.extension
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
 import android.widget.LinearLayout
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
@@ -13,15 +13,17 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.ExtensionsBottomSheetBinding
+import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.ui.extension.details.ExtensionDetailsController
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.migration.MangaAdapter
 import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SourceAdapter
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.source.BrowseController
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
@@ -29,11 +31,6 @@ import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.migration_controller.*
-import kotlinx.android.synthetic.main.recents_controller.*
-import kotlinx.android.synthetic.main.recycler_with_scroller.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -59,13 +56,17 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     private var extensions: List<ExtensionItem> = emptyList()
     var canExpand = false
+    private lateinit var binding: ExtensionsBottomSheetBinding
 
     lateinit var controller: BrowseController
 
-    val extensionFrameLayout =
-        inflate(context, R.layout.recycler_with_scroller, null) as FrameLayout
-    val migrationFrameLayout =
-        inflate(context, R.layout.recycler_with_scroller, null) as FrameLayout
+    val extensionFrameLayout = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(context))
+    val migrationFrameLayout = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(context))
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding = ExtensionsBottomSheetBinding.bind(this)
+    }
 
     fun onCreate(controller: BrowseController) {
         // Initialize adapter, scroll listener and recycler views
@@ -84,17 +85,16 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         migRecyler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
         migRecyler.setHasFixedSize(true)
 
-        adapter?.fastScroller = extensionFrameLayout.fast_scroller
+        adapter?.fastScroller = extensionFrameLayout.fastScroller
         this.controller = controller
-        pager.doOnApplyWindowInsets { _, _, _ ->
-            val bottomBar =
-                (this@ExtensionBottomSheet.controller.activity as? MainActivity)?.bottom_nav
+        binding.pager.doOnApplyWindowInsets { _, _, _ ->
+            val bottomBar = controller.activityBinding?.bottomNav
             extRecyler.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
             migRecyler.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
         }
-        pager.adapter = TabbedSheetAdapter()
-        tabs.setupWithViewPager(pager)
-        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        binding.pager.adapter = TabbedSheetAdapter()
+        binding.tabs.setupWithViewPager(binding.pager)
+        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 if (canExpand) {
                     this@ExtensionBottomSheet.sheetBehavior?.expand()
@@ -103,34 +103,35 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler?.isNestedScrollingEnabled = true
+                }.recycler.isNestedScrollingEnabled = true
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler?.requestLayout()
+                }.recycler.requestLayout()
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler?.isNestedScrollingEnabled = false
+                }.recycler.isNestedScrollingEnabled = false
                 if (tab?.position == 1) {
                     presenter.deselectSource()
                 }
             }
+
             override fun onTabReselected(tab: TabLayout.Tab?) {
                 this@ExtensionBottomSheet.sheetBehavior?.expand()
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler?.isNestedScrollingEnabled = true
+                }.recycler.isNestedScrollingEnabled = true
             }
         })
         presenter.onCreate()
         updateExtTitle()
 
-        sheet_layout.setOnClickListener {
+        binding.sheetLayout.setOnClickListener {
             if (!sheetBehavior.isExpanded()) {
                 sheetBehavior?.expand()
                 fetchOnlineExtensionsIfNeeded()
@@ -150,8 +151,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun updateExtTitle() {
         val extCount = presenter.getExtensionUpdateCount()
-        if (extCount > 0) tabs.getTabAt(0)?.orCreateBadge
-        else tabs.getTabAt(0)?.removeBadge()
+        if (extCount > 0) binding.tabs.getTabAt(0)?.orCreateBadge
+        else binding.tabs.getTabAt(0)?.removeBadge()
     }
 
     override fun onButtonClick(position: Int) {
@@ -174,7 +175,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onItemClick(view: View?, position: Int): Boolean {
-        when (tabs.selectedTabPosition) {
+        when (binding.tabs.selectedTabPosition) {
             0 -> {
                 val extension =
                     (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return false
@@ -202,7 +203,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onItemLongClick(position: Int) {
-        if (tabs.selectedTabPosition == 0) {
+        if (binding.tabs.selectedTabPosition == 0) {
             val extension = (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return
             if (extension is Extension.Installed || extension is Extension.Untrusted) {
                 uninstallExtension(extension.pkgName)
@@ -246,7 +247,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         if (migAdapter !is SourceAdapter) {
             migAdapter = SourceAdapter(this)
             migRecyler.adapter = migAdapter
-            migAdapter?.fastScroller = migrationFrameLayout.fast_scroller
+            migAdapter?.fastScroller = migrationFrameLayout.fastScroller
         }
         migAdapter?.updateDataSet(sources, true)
     }
@@ -256,7 +257,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         if (migAdapter !is MangaAdapter) {
             migAdapter = MangaAdapter(this)
             migRecyler.adapter = migAdapter
-            migAdapter?.fastScroller = migrationFrameLayout.fast_scroller
+            migAdapter?.fastScroller = migrationFrameLayout.fastScroller
         }
         migAdapter?.updateDataSet(manga, true)
     }
@@ -275,7 +276,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     fun canGoBack(): Boolean {
-        if (tabs.selectedTabPosition == 1 && migAdapter is MangaAdapter) {
+        if (binding.tabs.selectedTabPosition == 1 && migAdapter is MangaAdapter) {
             presenter.deselectSource()
             return false
         }
@@ -298,8 +299,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
         override fun createView(container: ViewGroup, position: Int): View {
             return when (position) {
-                0 -> extensionFrameLayout
-                else -> migrationFrameLayout
+                0 -> extensionFrameLayout.root
+                else -> migrationFrameLayout.root
             }
         }
 

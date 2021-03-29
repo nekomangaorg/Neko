@@ -6,21 +6,22 @@ import coil.api.clear
 import coil.api.loadAny
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import kotlinx.android.synthetic.main.manga_list_item.*
 
 class MangaHolder(
     view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
 ) : BaseFlexibleViewHolder(view, adapter) {
 
+    private val binding = MangaListItemBinding.bind(view)
     fun bind(item: MangaItem) {
         // Update the title of the manga.
-        title.text = item.manga.title
-        subtitle.text = ""
+        binding.title.text = item.manga.title
+        binding.subtitle.text = ""
 
         // Update the cover.
-        cover_thumbnail.clear()
-        cover_thumbnail.loadAny(item.manga)
+        binding.coverThumbnail.clear()
+        binding.coverThumbnail.loadAny(item.manga)
     }
 }
