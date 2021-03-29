@@ -2,17 +2,18 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.content.Context
 import android.util.AttributeSet
+import eu.kanade.tachiyomi.databinding.ReaderGeneralLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
-import kotlinx.android.synthetic.main.reader_general_layout.view.*
 
 class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    BaseReaderSettingsView(context, attrs) {
+    BaseReaderSettingsView<ReaderGeneralLayoutBinding>(context, attrs) {
 
     lateinit var sheet: TabbedReaderSettingsSheet
+    override fun inflateBinding() = ReaderGeneralLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
-        viewer_series.onItemSelectedListener = { position ->
+        binding.viewerSeries.onItemSelectedListener = { position ->
             activity.presenter.setMangaViewer(position)
 
             val mangaViewer = activity.presenter.getMangaViewer()
@@ -22,13 +23,13 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
                 initPagerPreferences()
             }
         }
-        viewer_series.setSelection((context as? ReaderActivity)?.presenter?.manga?.viewer ?: 0)
-        rotation_mode.bindToPreference(preferences.rotation(), 1)
-        background_color.bindToPreference(preferences.readerTheme(), 0)
-        show_page_number.bindToPreference(preferences.showPageNumber())
-        fullscreen.bindToPreference(preferences.fullscreen())
-        keepscreen.bindToPreference(preferences.keepScreenOn())
-        always_show_chapter_transition.bindToPreference(preferences.alwaysShowChapterTransition())
+        binding.viewerSeries.setSelection((context as? ReaderActivity)?.presenter?.manga?.viewer ?: 0)
+        binding.rotationMode.bindToPreference(preferences.rotation(), 1)
+        binding.backgroundColor.bindToPreference(preferences.readerTheme(), 0)
+        binding.showPageNumber.bindToPreference(preferences.showPageNumber())
+        binding.fullscreen.bindToPreference(preferences.fullscreen())
+        binding.keepscreen.bindToPreference(preferences.keepScreenOn())
+        binding.alwaysShowChapterTransition.bindToPreference(preferences.alwaysShowChapterTransition())
     }
 
     /**

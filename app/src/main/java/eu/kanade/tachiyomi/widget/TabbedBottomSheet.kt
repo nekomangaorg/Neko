@@ -11,10 +11,10 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.TabbedBottomSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 import kotlin.math.max
 
 abstract class TabbedBottomSheetDialog(private val activity: Activity) :
@@ -22,30 +22,29 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     (activity, R.style.BottomSheetDialogTheme) {
 
     private var sheetBehavior: BottomSheetBehavior<*>
+    protected val binding = TabbedBottomSheetBinding.inflate(activity.layoutInflater)
 
     open var offset = -1
     init {
         // Use activity theme for this layout
-        val view = activity.layoutInflater.inflate(R.layout.tabbed_bottom_sheet, null)
-
-        setContentView(view)
-        sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
-        setEdgeToEdge(activity, view)
+        setContentView(binding.root)
+        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
+        setEdgeToEdge(activity, binding.root)
 
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
-        pager.maxHeight = activity.window.decorView.height - height - 125.dpToPx
+        binding.pager.maxHeight = activity.window.decorView.height - height - 125.dpToPx
 
         val adapter = TabbedSheetAdapter()
-        pager.offscreenPageLimit = 2
-        pager.adapter = adapter
-        tabs.setupWithViewPager(pager)
+        binding.pager.offscreenPageLimit = 2
+        binding.pager.adapter = adapter
+        binding.tabs.setupWithViewPager(binding.pager)
     }
 
     override fun onStart() {
         super.onStart()
         sheetBehavior.skipCollapsed = true
         sheetBehavior.expand()
-        tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+        binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 val view = getTabViews()[tab?.position ?: 0] as? NestedScrollView
                 view?.isNestedScrollingEnabled = true
@@ -95,8 +94,8 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
         }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        var heightMeasureSpec = heightMeasureSpec
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        var heightSpec = heightMeasureSpec
+        super.onMeasure(widthMeasureSpec, heightSpec)
         var height = 0
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
             max(
@@ -113,11 +112,11 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
             if (h > height) height = h
         }
         if (height != 0) {
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
+            heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
         }
         if (maxHeight < height + (rootWindowInsets?.systemWindowInsetBottom ?: 0)) {
-            heightMeasureSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST)
+            heightSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST)
         }
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
+        super.onMeasure(widthMeasureSpec, heightSpec)
     }
 }

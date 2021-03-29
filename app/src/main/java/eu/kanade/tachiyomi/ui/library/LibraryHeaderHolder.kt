@@ -4,9 +4,6 @@ import android.app.Activity
 import android.graphics.Color
 import android.util.TypedValue
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import com.github.florent37.viewtooltip.ViewTooltip
@@ -15,6 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -25,39 +23,32 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.library_category_header_item.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAdapter) :
     BaseFlexibleViewHolder(view, adapter, true) {
 
-    private val sectionText: TextView = view.findViewById(R.id.category_title)
-    private val sortText: TextView = view.findViewById(R.id.category_sort)
-    private val updateButton: ImageView = view.findViewById(R.id.update_button)
-    private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
-    private val expandImage: ImageView = view.findViewById(R.id.collapse_arrow)
-    private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
-
+    private val binding = LibraryCategoryHeaderItemBinding.bind(view)
     init {
-        category_header_layout.setOnClickListener { toggleCategory() }
-        updateButton.setOnClickListener { addCategoryToUpdate() }
-        sectionText.setOnLongClickListener {
+        binding.categoryHeaderLayout.setOnClickListener { toggleCategory() }
+        binding.updateButton.setOnClickListener { addCategoryToUpdate() }
+        binding.categoryTitle.setOnLongClickListener {
             val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
             adapter.libraryListener.manageCategory(flexibleAdapterPosition)
             category?.isDynamic == false
         }
-        sectionText.setOnClickListener { toggleCategory() }
-        sortText.setOnClickListener { it.post { showCatSortOptions() } }
-        checkboxImage.setOnClickListener { selectAll() }
-        updateButton.drawable.mutate()
+        binding.categoryTitle.setOnClickListener { toggleCategory() }
+        binding.categorySort.setOnClickListener { it.post { showCatSortOptions() } }
+        binding.checkbox.setOnClickListener { selectAll() }
+        binding.updateButton.drawable.mutate()
     }
 
     private fun toggleCategory() {
         adapter.libraryListener.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
-            ViewTooltip.on(itemView.context as? Activity, sectionText).autoHide(true, 5000L)
+            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle).autoHide(true, 5000L)
                 .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
                 .text(R.string.long_press_category)
                 .color(itemView.context.getResourceColor(R.attr.colorAccent))
@@ -78,7 +69,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 false
             }
         val shorterMargin = adapter.headerItems.firstOrNull() == item
-        sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        binding.categoryTitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
             topMargin = (
                 when {
                     shorterMargin -> 2
@@ -90,21 +81,21 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val category = item.category
 
         if (category.isDynamic) {
-            category_header_layout.background = null
-            sectionText.background = null
+            binding.categoryHeaderLayout.background = null
+            binding.categoryTitle.background = null
         } else {
-            category_header_layout.setBackgroundResource(R.drawable.list_item_selector)
-            sectionText.setBackgroundResource(R.drawable.square_ripple)
+            binding.categoryHeaderLayout.setBackgroundResource(R.drawable.list_item_selector)
+            binding.categoryTitle.setBackgroundResource(R.drawable.square_ripple)
         }
 
-        if (category.isAlone && !category.isDynamic) sectionText.text = ""
-        else sectionText.text = category.name
+        if (category.isAlone && !category.isDynamic) binding.categoryTitle.text = ""
+        else binding.categoryTitle.text = category.name
         if (category.sourceId != null) {
             val icon = adapter.sourceManager.get(category.sourceId!!)?.icon()
             icon?.setBounds(0, 0, 32.dpToPx, 32.dpToPx)
-            sectionText.setCompoundDrawablesRelative(icon, null, null, null)
+            binding.categoryTitle.setCompoundDrawablesRelative(icon, null, null, null)
         } else {
-            sectionText.setCompoundDrawablesRelative(null, null, null, null)
+            binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
         }
 
         val isAscending = category.isAscending()
@@ -115,45 +106,45 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             else -> R.drawable.ic_arrow_upward_24dp
         }
 
-        sortText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
-        sortText.setText(category.sortRes())
-        expandImage.setImageResource(
+        binding.categorySort.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
+        binding.categorySort.setText(category.sortRes())
+        binding.collapseArrow.setImageResource(
             if (category.isHidden) R.drawable.ic_expand_more_24dp
             else R.drawable.ic_expand_less_24dp
         )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
-                checkboxImage.visibleIf(!category.isHidden)
-                expandImage.visibleIf(category.isHidden && !adapter.isSingleCategory && !category.isDynamic)
-                updateButton.gone()
-                catProgress.gone()
+                binding.checkbox.visibleIf(!category.isHidden)
+                binding.collapseArrow.visibleIf(category.isHidden && !adapter.isSingleCategory && !category.isDynamic)
+                binding.updateButton.gone()
+                binding.catProgress.gone()
                 setSelection()
             }
             category.id ?: -1 < 0 -> {
-                expandImage.gone()
-                checkboxImage.gone()
-                catProgress.gone()
-                updateButton.gone()
+                binding.collapseArrow.gone()
+                binding.checkbox.gone()
+                binding.catProgress.gone()
+                binding.updateButton.gone()
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
-                expandImage.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
-                checkboxImage.gone()
-                catProgress.visible()
-                updateButton.invisible()
+                binding.collapseArrow.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
+                binding.checkbox.gone()
+                binding.catProgress.visible()
+                binding.updateButton.invisible()
             }
             else -> {
-                expandImage.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
-                catProgress.gone()
-                checkboxImage.gone()
-                updateButton.visibleIf(!adapter.isSingleCategory)
+                binding.collapseArrow.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
+                binding.catProgress.gone()
+                binding.checkbox.gone()
+                binding.updateButton.visibleIf(!adapter.isSingleCategory)
             }
         }
     }
 
     private fun addCategoryToUpdate() {
         if (adapter.libraryListener.updateCategory(flexibleAdapterPosition)) {
-            catProgress.visible()
-            updateButton.invisible()
+            binding.catProgress.visible()
+            binding.updateButton.invisible()
         }
     }
 
@@ -278,7 +269,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 else R.color.gray_button
             )
         )
-        checkboxImage.setImageDrawable(tintedDrawable)
+        binding.checkbox.setImageDrawable(tintedDrawable)
     }
 
     override fun onLongClick(view: View?): Boolean {

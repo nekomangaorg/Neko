@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
-import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
 
 open class TabbedLibraryDisplaySheet(val controller: LibraryController) :
     TabbedBottomSheetDialog(controller.activity!!) {
@@ -22,17 +21,17 @@ open class TabbedLibraryDisplaySheet(val controller: LibraryController) :
         displayView.controller = controller
         badgesView.controller = controller
         categoryView.controller = controller
-        menu.visible()
+        binding.menu.visible()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            menu.tooltipText = context.getString(R.string.more_library_settings)
+            binding.menu.tooltipText = context.getString(R.string.more_library_settings)
         }
-        menu.setImageDrawable(
+        binding.menu.setImageDrawable(
             ContextCompat.getDrawable(
                 context,
                 R.drawable.ic_settings_24dp
             )
         )
-        menu.setOnClickListener {
+        binding.menu.setOnClickListener {
             controller.router.pushController(SettingsLibraryController().withFadeTransaction())
             dismiss()
         }

@@ -18,11 +18,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.databinding.FilterBottomSheetBinding
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
-import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
@@ -31,12 +32,6 @@ import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.filter_bottom_sheet.view.*
-import kotlinx.android.synthetic.main.library_grid_recycler.*
-import kotlinx.android.synthetic.main.library_list_controller.*
-import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.android.synthetic.main.tabbed_bottom_sheet.*
-import kotlinx.android.synthetic.main.track_item.*
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -57,6 +52,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
      * Preferences helper.
      */
     private val preferences: PreferencesHelper by injectLazy()
+
+    private lateinit var binding: FilterBottomSheetBinding
 
     private val trackManager: TrackManager by injectLazy()
 
@@ -100,23 +97,28 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var controller: LibraryController? = null
     var bottomBarHeight = 0
 
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding = FilterBottomSheetBinding.bind(this)
+    }
+
     fun onCreate(controller: LibraryController) {
-        clearButton = clear_button
-        filter_layout.removeView(clearButton)
+        clearButton = binding.clearButton
+        binding.filterLayout.removeView(clearButton)
         sheetBehavior = BottomSheetBehavior.from(this)
         sheetBehavior?.isHideable = true
         this.controller = controller
-        libraryRecyler = controller.recycler
+        libraryRecyler = controller.binding.libraryGridRecycler.recycler
         libraryRecyler?.post {
-            bottomBarHeight = (this@FilterBottomSheet.controller?.activity as? MainActivity)?.bottom_nav?.height ?: 0
+            bottomBarHeight = controller.activityBinding?.bottomNav?.height ?: 0
         }
-        val shadow2: View = controller.shadow2
-        val shadow: View = controller.shadow
+        val shadow2: View = controller.binding.shadow2
+        val shadow: View = controller.binding.shadow
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     this@FilterBottomSheet.controller?.updateFilterSheetY()
-                    pill.alpha = (1 - max(0f, progress)) * 0.25f
+                    binding.pill.alpha = (1 - max(0f, progress)) * 0.25f
                     shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                     shadow.alpha = 1 + min(0f, progress)
                     updateRootPadding(progress)
@@ -130,29 +132,26 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         )
 
         post {
-            second_layout ?: return@post
-            first_layout ?: return@post
-            view_options ?: return@post
-            if (second_layout.width + first_layout.width + 20.dpToPx < width) {
-                second_layout.removeView(view_options)
-                second_layout.removeView(reorder_filters)
-                first_layout.addView(reorder_filters)
-                first_layout.addView(view_options)
-                second_layout.gone()
+            if (binding.secondLayout.width + binding.firstLayout.width + 20.dpToPx < width) {
+                binding.secondLayout.removeView(binding.viewOptions)
+                binding.secondLayout.removeView(binding.reorderFilters)
+                binding.firstLayout.addView(binding.reorderFilters)
+                binding.firstLayout.addView(binding.viewOptions)
+                binding.secondLayout.gone()
             }
         }
 
         sheetBehavior?.hide()
-        expand_categories.setOnClickListener {
+        binding.expandCategories.setOnClickListener {
             onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
         }
-        group_by.setOnClickListener {
+        binding.groupBy.setOnClickListener {
             onGroupClicked(ACTION_GROUP_BY)
         }
-        view_options.setOnClickListener {
+        binding.viewOptions.setOnClickListener {
             onGroupClicked(ACTION_DISPLAY)
         }
-        reorder_filters.setOnClickListener {
+        binding.reorderFilters.setOnClickListener {
             manageFilterPopup()
         }
 
@@ -178,14 +177,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun setExpandText(expand: Boolean) {
-        expand_categories.setText(
+        binding.expandCategories.setText(
             if (expand) {
                 R.string.expand_all_categories
             } else {
                 R.string.collapse_all_categories
             }
         )
-        expand_categories.setIconResource(
+        binding.expandCategories.setIconResource(
             if (expand) {
                 R.drawable.ic_expand_less_24dp
             } else {
@@ -195,14 +194,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun stateChanged(state: Int) {
-        val shadow = controller?.shadow ?: return
+        val shadow = controller?.binding?.shadow ?: return
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = 1f
             libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
-            pill.alpha = 0f
+            binding.pill.alpha = 0f
         }
         if (state == BottomSheetBehavior.STATE_HIDDEN) {
             onGroupClicked(ACTION_HIDE_FILTER_TIP)
@@ -328,7 +327,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             serviceNames.getOrNull(2)
                         )
                         if (tracked?.isActivated == true) {
-                            filter_layout.addView(trackers)
+                            binding.filterLayout.addView(trackers)
                             filterItems.add(trackers!!)
                             trackers?.setState(FILTER_TRACKER)
                             reSortViews()
@@ -457,15 +456,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
         val hasFilters = hasActiveFilters()
         if (hasFilters && clearButton.parent == null) {
-            filter_layout.addView(clearButton, 0)
+            binding.filterLayout.addView(clearButton, 0)
         } else if (!hasFilters && clearButton.parent != null) {
-            filter_layout.removeView(clearButton)
+            binding.filterLayout.removeView(clearButton)
         }
         if (tracked?.isActivated == true && trackers != null && trackers?.parent == null) {
-            filter_layout.addView(trackers, filterItems.indexOf(tracked!!) + 2)
+            binding.filterLayout.addView(trackers, filterItems.indexOf(tracked!!) + 2)
             filterItems.add(filterItems.indexOf(tracked!!) + 1, trackers!!)
         } else if (tracked?.isActivated == false && trackers?.parent != null) {
-            filter_layout.removeView(trackers)
+            binding.filterLayout.removeView(trackers)
             trackers?.reset()
             FILTER_TRACKER = ""
             filterItems.remove(trackers!!)
@@ -473,8 +472,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     fun updateButtons(showExpand: Boolean, groupType: Int) {
-        expand_categories.visibleIf(showExpand && groupType == 0)
-        group_by.setIconResource(LibraryGroup.groupTypeDrawableRes(groupType))
+        binding.expandCategories.visibleIf(showExpand && groupType == 0)
+        binding.groupBy.setIconResource(LibraryGroup.groupTypeDrawableRes(groupType))
     }
 
     private fun clearFilters() {
@@ -487,7 +486,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
-        androidx.transition.TransitionManager.beginDelayedTransition(filter_layout, transition)
+        androidx.transition.TransitionManager.beginDelayedTransition(binding.filterLayout, transition)
         reorderFilters()
         filterItems.forEach {
             it.reset()
@@ -500,17 +499,17 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun reSortViews() {
-        filter_layout.removeAllViews()
+        binding.filterLayout.removeAllViews()
         if (filterItems.any { it.isActivated }) {
-            filter_layout.addView(clearButton)
+            binding.filterLayout.addView(clearButton)
         }
         filterItems.filter { it.isActivated }.forEach {
-            filter_layout.addView(it)
+            binding.filterLayout.addView(it)
         }
         filterItems.filterNot { it.isActivated }.forEach {
-            filter_layout.addView(it)
+            binding.filterLayout.addView(it)
         }
-        filter_scroll.scrollTo(0, 0)
+        binding.filterScroll.scrollTo(0, 0)
     }
 
     companion object {

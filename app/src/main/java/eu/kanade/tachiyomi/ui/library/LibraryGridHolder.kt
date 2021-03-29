@@ -9,10 +9,9 @@ import coil.size.Precision
 import coil.size.Scale
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.manga_grid_item.*
-import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -31,19 +30,20 @@ class LibraryGridHolder(
     private var fixedSize: Boolean
 ) : LibraryHolder(view, adapter) {
 
+    private val binding = MangaGridItemBinding.bind(view)
     init {
-        play_layout.setOnClickListener { playButtonClicked() }
+        binding.playLayout.setOnClickListener { playButtonClicked() }
         if (compact) {
-            text_layout.gone()
+            binding.textLayout.gone()
         } else {
-            compact_title.gone()
-            gradient.gone()
-            val playLayout = play_layout.layoutParams as FrameLayout.LayoutParams
-            val buttonLayout = play_button.layoutParams as FrameLayout.LayoutParams
+            binding.compactTitle.gone()
+            binding.gradient.gone()
+            val playLayout = binding.playLayout.layoutParams as FrameLayout.LayoutParams
+            val buttonLayout = binding.playButton.layoutParams as FrameLayout.LayoutParams
             playLayout.gravity = Gravity.BOTTOM or Gravity.END
             buttonLayout.gravity = Gravity.BOTTOM or Gravity.END
-            play_layout.layoutParams = playLayout
-            play_button.layoutParams = buttonLayout
+            binding.playLayout.layoutParams = playLayout
+            binding.playButton.layoutParams = buttonLayout
         }
     }
 
@@ -55,19 +55,19 @@ class LibraryGridHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
-        constraint_layout.visibleIf(!item.manga.isBlank())
-        title.text = item.manga.title
-        subtitle.text = item.manga.author?.trim()
+        binding.constraintLayout.visibleIf(!item.manga.isBlank())
+        binding.title.text = item.manga.title
+        binding.subtitle.text = item.manga.author?.trim()
 
-        compact_title.text = title.text
+        binding.compactTitle.text = binding.title.text
 
-        setUnreadBadge(badge_view, item)
+        setUnreadBadge(binding.unreadDownloadBadge.badgeView, item)
         setReadingButton(item)
 
         // Update the cover.
-        if (item.manga.thumbnail_url == null) cover_thumbnail.clear()
+        if (item.manga.thumbnail_url == null) binding.coverThumbnail.clear()
         else {
-            if (cover_thumbnail.height == 0) {
+            if (binding.coverThumbnail.height == 0) {
                 val oldPos = flexibleAdapterPosition
                 adapter.recyclerView.post {
                     if (oldPos == flexibleAdapterPosition) {
@@ -80,7 +80,7 @@ class LibraryGridHolder(
 
     private fun setCover(manga: Manga) {
         if ((adapter.recyclerView.context as? Activity)?.isDestroyed == true) return
-        cover_thumbnail.loadLibraryManga(manga) {
+        binding.coverThumbnail.loadLibraryManga(manga) {
             if (!fixedSize) {
                 precision(Precision.INEXACT)
                 scale(Scale.FIT)
@@ -95,14 +95,14 @@ class LibraryGridHolder(
     override fun onActionStateChanged(position: Int, actionState: Int) {
         super.onActionStateChanged(position, actionState)
         if (actionState == 2) {
-            card.isDragged = true
-            badge_view.isDragged = true
+            binding.card.isDragged = true
+            binding.unreadDownloadBadge.badgeView.isDragged = true
         }
     }
 
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
-        card.isDragged = false
-        badge_view.isDragged = false
+        binding.card.isDragged = false
+        binding.unreadDownloadBadge.badgeView.isDragged = false
     }
 }

@@ -4,21 +4,20 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.SeekBar
 import androidx.annotation.ColorInt
+import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
-import kotlinx.android.synthetic.main.reader_color_filter.*
-import kotlinx.android.synthetic.main.reader_color_filter.view.*
-import kotlinx.android.synthetic.main.reader_general_layout.view.*
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 
 class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
-    BaseReaderSettingsView(context, attrs) {
+    BaseReaderSettingsView<ReaderColorFilterBinding>(context, attrs) {
 
+    override fun inflateBinding() = ReaderColorFilterBinding.bind(this)
     override fun initGeneralPreferences() {
-        activity = context as ReaderActivity
+        activity = context as? ReaderActivity ?: return
         preferences.colorFilter().asFlow()
             .onEach { setColorFilter(it) }
             .launchIn(activity.scope)
@@ -38,33 +37,33 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
         val argb = setValues(color)
 
         // Set brightness value
-        txt_brightness_seekbar_value.text = brightness.toString()
-        brightness_seekbar.progress = brightness
+        binding.txtBrightnessSeekbarValue.text = brightness.toString()
+        binding.brightnessSeekbar.progress = brightness
 
         // Initialize seekBar progress
-        seekbar_color_filter_alpha.progress = argb[0]
-        seekbar_color_filter_red.progress = argb[1]
-        seekbar_color_filter_green.progress = argb[2]
-        seekbar_color_filter_blue.progress = argb[3]
+        binding.seekbarColorFilterAlpha.progress = argb[0]
+        binding.seekbarColorFilterRed.progress = argb[1]
+        binding.seekbarColorFilterGreen.progress = argb[2]
+        binding.seekbarColorFilterBlue.progress = argb[3]
 
         // Set listeners
-        switch_color_filter.isChecked = preferences.colorFilter().get()
-        switch_color_filter.setOnCheckedChangeListener { _, isChecked ->
+        binding.switchColorFilter.isChecked = preferences.colorFilter().get()
+        binding.switchColorFilter.setOnCheckedChangeListener { _, isChecked ->
             preferences.colorFilter().set(isChecked)
         }
 
-        custom_brightness.isChecked = preferences.customBrightness().get()
-        custom_brightness.setOnCheckedChangeListener { _, isChecked ->
+        binding.customBrightness.isChecked = preferences.customBrightness().get()
+        binding.customBrightness.setOnCheckedChangeListener { _, isChecked ->
             preferences.customBrightness().set(isChecked)
         }
 
-        color_filter_mode.bindToPreference(preferences.colorFilterMode())
-        seekbar_color_filter_alpha.setOnSeekBarChangeListener(
+        binding.colorFilterMode.bindToPreference(preferences.colorFilterMode())
+        binding.seekbarColorFilterAlpha.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                    seekbar_color_filter_red.isEnabled = value > 0 && seekbar_color_filter_alpha.isEnabled
-                    seekbar_color_filter_green.isEnabled = value > 0 && seekbar_color_filter_alpha.isEnabled
-                    seekbar_color_filter_blue.isEnabled = value > 0 && seekbar_color_filter_alpha.isEnabled
+                    binding.seekbarColorFilterRed.isEnabled = value > 0 && binding.seekbarColorFilterAlpha.isEnabled
+                    binding.seekbarColorFilterGreen.isEnabled = value > 0 && binding.seekbarColorFilterAlpha.isEnabled
+                    binding.seekbarColorFilterBlue.isEnabled = value > 0 && binding.seekbarColorFilterAlpha.isEnabled
                     if (fromUser) {
                         setColorValue(value, ALPHA_MASK, 24)
                     }
@@ -72,7 +71,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         )
 
-        seekbar_color_filter_red.setOnSeekBarChangeListener(
+        binding.seekbarColorFilterRed.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
                     if (fromUser) {
@@ -82,7 +81,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         )
 
-        seekbar_color_filter_green.setOnSeekBarChangeListener(
+        binding.seekbarColorFilterGreen.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
                     if (fromUser) {
@@ -92,7 +91,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         )
 
-        seekbar_color_filter_blue.setOnSeekBarChangeListener(
+        binding.seekbarColorFilterBlue.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
                     if (fromUser) {
@@ -102,7 +101,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         )
 
-        brightness_seekbar.setOnSeekBarChangeListener(
+        binding.brightnessSeekbar.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
                     if (fromUser) {
@@ -118,10 +117,10 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
      * @param enabled determines if seekBar gets enabled
      */
     private fun setColorFilterSeekBar(enabled: Boolean) {
-        seekbar_color_filter_red.isEnabled = seekbar_color_filter_alpha.progress > 0 && enabled
-        seekbar_color_filter_green.isEnabled = seekbar_color_filter_alpha.progress > 0 && enabled
-        seekbar_color_filter_blue.isEnabled = seekbar_color_filter_alpha.progress > 0 && enabled
-        seekbar_color_filter_alpha.isEnabled = enabled
+        binding.seekbarColorFilterRed.isEnabled = binding.seekbarColorFilterAlpha.progress > 0 && enabled
+        binding.seekbarColorFilterGreen.isEnabled = binding.seekbarColorFilterAlpha.progress > 0 && enabled
+        binding.seekbarColorFilterBlue.isEnabled = binding.seekbarColorFilterAlpha.progress > 0 && enabled
+        binding.seekbarColorFilterAlpha.isEnabled = enabled
     }
 
     /**
@@ -129,7 +128,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
      * @param enabled value which determines if seekBar gets enabled
      */
     private fun setCustomBrightnessSeekBar(enabled: Boolean) {
-        brightness_seekbar.isEnabled = enabled
+        binding.brightnessSeekbar.isEnabled = enabled
     }
 
     /**
@@ -143,10 +142,10 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
         val blue = getBlueFromColor(color)
 
         // Initialize values
-        txt_color_filter_alpha_value.text = alpha.toString()
-        txt_color_filter_red_value.text = red.toString()
-        txt_color_filter_green_value.text = green.toString()
-        txt_color_filter_blue_value.text = blue.toString()
+        binding.txtColorFilterAlphaValue.text = alpha.toString()
+        binding.txtColorFilterRedValue.text = red.toString()
+        binding.txtColorFilterGreenValue.text = green.toString()
+        binding.txtColorFilterBlueValue.text = blue.toString()
 
         return arrayOf(alpha, red, green, blue)
     }
@@ -176,7 +175,7 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
     private fun setCustomBrightnessValue(value: Int, isDisabled: Boolean = false) {
         // Set black overlay visibility.
         if (!isDisabled) {
-            txt_brightness_seekbar_value.text = value.toString()
+            binding.txtBrightnessSeekbarValue.text = value.toString()
         }
     }
 

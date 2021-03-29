@@ -91,6 +91,7 @@
         tools:text="Manga artist" />
 
     <include layout="@layout/unread_download_badge"
+        android:id="@+id/unread_download_badge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginStart="2dp"
