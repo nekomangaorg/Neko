@@ -17,11 +17,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import kotlinx.android.synthetic.main.manga_grid_item.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -62,40 +62,41 @@ class LibraryItem(
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             } else {
                 view.apply {
+                    val binding = MangaGridItemBinding.bind(this)
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
                     if (libraryLayout == 1) {
-                        gradient.layoutParams = FrameLayout.LayoutParams(
+                        binding.gradient.layoutParams = FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             (coverHeight * 0.66f).toInt(),
                             Gravity.BOTTOM
                         )
-                        card.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                        binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                             bottomMargin = 6.dpToPx
                         }
                     } else if (libraryLayout == 2) {
-                        constraint_layout.background = ContextCompat.getDrawable(
+                        binding.constraintLayout.background = ContextCompat.getDrawable(
                             context,
                             R.drawable.library_item_selector
                         )
                     }
                     if (isFixedSize) {
-                        constraint_layout.layoutParams = FrameLayout.LayoutParams(
+                        binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             ViewGroup.LayoutParams.WRAP_CONTENT
                         )
-                        cover_thumbnail.maxHeight = Int.MAX_VALUE
-                        cover_thumbnail.minimumHeight = 0
-                        constraint_layout.minHeight = 0
-                        cover_thumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
-                        cover_thumbnail.adjustViewBounds = false
-                        cover_thumbnail.layoutParams = FrameLayout.LayoutParams(
+                        binding.coverThumbnail.maxHeight = Int.MAX_VALUE
+                        binding.coverThumbnail.minimumHeight = 0
+                        binding.constraintLayout.minHeight = 0
+                        binding.coverThumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
+                        binding.coverThumbnail.adjustViewBounds = false
+                        binding.coverThumbnail.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             (parent.itemWidth / 3f * 3.7f).toInt()
                         )
                     } else {
-                        constraint_layout.minHeight = coverHeight
-                        cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
-                        cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
+                        binding.constraintLayout.minHeight = coverHeight
+                        binding.coverThumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
+                        binding.coverThumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
                     }
                 }
                 LibraryGridHolder(

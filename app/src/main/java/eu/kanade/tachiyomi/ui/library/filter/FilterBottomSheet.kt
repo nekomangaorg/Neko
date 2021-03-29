@@ -242,20 +242,20 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun createTags() {
-        downloaded = inflate(R.layout.filter_buttons) as FilterTagGroup
+        downloaded = inflate(R.layout.filter_tag_group) as FilterTagGroup
         downloaded.setup(this, R.string.downloaded, R.string.not_downloaded)
 
-        completed = inflate(R.layout.filter_buttons) as FilterTagGroup
+        completed = inflate(R.layout.filter_tag_group) as FilterTagGroup
         completed.setup(this, R.string.completed, R.string.ongoing)
 
-        unreadProgress = inflate(R.layout.filter_buttons) as FilterTagGroup
+        unreadProgress = inflate(R.layout.filter_tag_group) as FilterTagGroup
         unreadProgress.setup(this, R.string.not_started, R.string.in_progress)
 
-        unread = inflate(R.layout.filter_buttons) as FilterTagGroup
+        unread = inflate(R.layout.filter_tag_group) as FilterTagGroup
         unread.setup(this, R.string.unread, R.string.read)
 
         if (hasTracking) {
-            tracked = inflate(R.layout.filter_buttons) as FilterTagGroup
+            tracked = inflate(R.layout.filter_tag_group) as FilterTagGroup
             tracked?.setup(this, R.string.tracked, R.string.not_tracked)
         }
 
@@ -278,7 +278,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (libraryManga.any { it.mangaType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
             if (types.isNotEmpty()) {
                 launchUI {
-                    val mangaType = inflate(R.layout.filter_buttons) as FilterTagGroup
+                    val mangaType = inflate(R.layout.filter_tag_group) as FilterTagGroup
                     mangaType.setup(
                         this@FilterBottomSheet,
                         R.string.manga,
@@ -319,7 +319,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 if (loggedServices.size > 1) {
                     val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
                     withContext(Dispatchers.Main) {
-                        trackers = inflate(R.layout.filter_buttons) as FilterTagGroup
+                        trackers = inflate(R.layout.filter_tag_group) as FilterTagGroup
                         trackers?.setup(
                             this@FilterBottomSheet,
                             serviceNames.first(),

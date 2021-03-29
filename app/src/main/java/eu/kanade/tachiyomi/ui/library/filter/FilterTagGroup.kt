@@ -8,12 +8,12 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.filter_buttons.view.*
 
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
 (context, attrs) {
@@ -25,11 +25,32 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
 
     private var root: ViewGroup? = null
 
-    private val buttons by lazy { arrayOf(firstButton, secondButton, thirdButton, fourthButton) }
-    private val separators by lazy { arrayOf(separator1, separator2, separator3) }
+    private val buttons by lazy {
+        arrayOf(
+            binding.firstButton,
+            binding.secondButton,
+            binding.thirdButton,
+            binding.fourthButton
+        )
+    }
+
+    private val separators by lazy {
+        arrayOf(
+            binding.separator1,
+            binding.separator2,
+            binding.separator3
+        )
+    }
 
     override fun isActivated(): Boolean {
         return buttons.any { it.isActivated }
+    }
+
+    lateinit var binding: FilterTagGroupBinding
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding = FilterTagGroupBinding.bind(this)
     }
 
     fun nameOf(index: Int): String? = buttons.getOrNull(index)?.text as? String
@@ -37,14 +58,14 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     fun setup(root: ViewGroup, firstText: Int, vararg extra: Int?) {
         val text1 = context.getString(firstText)
         val strings = extra.mapNotNull { if (it != null) context.getString(it) else null }
-        setup(root, text1, extra = *strings.toTypedArray())
+        setup(root, text1, extra = strings.toTypedArray())
     }
 
     fun setup(root: ViewGroup, firstText: String, vararg extra: String?) {
         listener = root as? FilterTagGroupListener
         (layoutParams as? MarginLayoutParams)?.rightMargin = 5.dpToPx
         (layoutParams as? MarginLayoutParams)?.leftMargin = 5.dpToPx
-        firstButton.text = firstText
+        binding.firstButton.text = firstText
         val extras = (extra.toList() + listOf<String?>(null, null, null)).take(separators.size)
         extras.forEachIndexed { index, text ->
             buttons[index + 1].text = text
@@ -96,12 +117,12 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             )
         }
         if (itemCount == 1) {
-            firstButton.isActivated = !firstButton.isActivated
-            firstButton.setTextColor(
-                if (firstButton.isActivated) Color.WHITE else context
+            binding.firstButton.isActivated = !binding.firstButton.isActivated
+            binding.firstButton.setTextColor(
+                if (binding.firstButton.isActivated) Color.WHITE else context
                     .getResourceColor(android.R.attr.textColorPrimary)
             )
-            listener?.onFilterClicked(this, if (firstButton.isActivated) index else -1, callBack)
+            listener?.onFilterClicked(this, if (binding.firstButton.isActivated) index else -1, callBack)
             return
         }
         val mainButton = buttons[index]

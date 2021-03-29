@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import eu.kanade.tachiyomi.databinding.LibraryBadgesLayoutBinding
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
-import kotlinx.android.synthetic.main.library_badges_layout.view.*
 
 class LibraryBadgesView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseLibraryDisplayView<LibraryBadgesLayoutBinding>(context, attrs) {

@@ -8,9 +8,9 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.MaterialTextButtonBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import kotlinx.android.synthetic.main.material_text_button.*
 
 class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
 
@@ -62,18 +62,19 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
     class Holder(val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
         BaseFlexibleViewHolder(view, adapter, true) {
 
+        private val binding = MaterialTextButtonBinding.bind(view)
         init {
-            button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 width = MATCH_PARENT
             }
-            button.setOnClickListener {
+            binding.button.setOnClickListener {
                 val query = (adapter.getItem(flexibleAdapterPosition) as SearchGlobalItem).string
                 (adapter as? LibraryCategoryAdapter)?.libraryListener?.globalSearch(query)
             }
         }
 
         fun bind(string: String) {
-            button.text = view.context.getString(R.string.search_globally, string)
+            binding.button.text = view.context.getString(R.string.search_globally, string)
         }
 
         override fun onLongClick(view: View?): Boolean {
