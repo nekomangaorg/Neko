@@ -11,12 +11,12 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.databinding.TrackingBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import kotlinx.android.synthetic.main.tracking_bottom_sheet.*
 import timber.log.Timber
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
@@ -37,13 +37,14 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     private var adapter: TrackAdapter? = null
 
+    private val binding = TrackingBottomSheetBinding.inflate(activity.layoutInflater)
+
     init {
         // Use activity theme for this layout
-        val view = activity.layoutInflater.inflate(R.layout.tracking_bottom_sheet, null)
-        setContentView(view)
+        setContentView(binding.root)
 
-        sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
-        setEdgeToEdge(activity, view, 0)
+        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
+        setEdgeToEdge(activity, binding.root, 0)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 500.dpToPx + height
 
@@ -71,9 +72,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         adapter = TrackAdapter(this)
-        track_recycler.layoutManager = LinearLayoutManager(context)
-        track_recycler.adapter = adapter
-        track_recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        binding.trackRecycler.layoutManager = LinearLayoutManager(context)
+        binding.trackRecycler.adapter = adapter
+        binding.trackRecycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         adapter?.items = presenter.trackList
     }
@@ -100,13 +101,13 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     fun onRefreshDone() {
         for (i in adapter!!.items.indices) {
-            (track_recycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
         }
     }
 
     fun onRefreshError(error: Throwable) {
         for (i in adapter!!.items.indices) {
-            (track_recycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
         }
         activity.toast(error.message)
     }
@@ -223,13 +224,13 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     fun refreshItem(index: Int) {
-        (track_recycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(true)
+        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(true)
     }
 
     fun refreshTrack(item: TrackService?) {
         val index = adapter?.indexOf(item) ?: -1
         if (index > -1) {
-            (track_recycler.findViewHolderForAdapterPosition(index) as? TrackHolder)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)
                 ?.setProgress(true)
         }
     }

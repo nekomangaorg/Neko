@@ -7,6 +7,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.invisible
@@ -27,13 +28,13 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
 
     private val presenter = controller.presenter
 
+    private val binding = ChapterSortBottomSheetBinding.inflate(activity.layoutInflater)
     init {
         // Use activity theme for this layout
-        val view = activity.layoutInflater.inflate(R.layout.chapter_sort_bottom_sheet, null)
-        setContentView(view)
+        setContentView(binding.root)
 
-        sheetBehavior = BottomSheetBehavior.from(view.parent as ViewGroup)
-        setEdgeToEdge(activity, view)
+        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
+        setEdgeToEdge(activity, binding.root)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 415.dpToPx + height
 

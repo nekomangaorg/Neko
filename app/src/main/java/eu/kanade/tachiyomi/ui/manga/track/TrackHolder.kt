@@ -6,48 +6,49 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.TrackItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.track_item.*
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 
 class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
 
     private val preferences: PreferencesHelper by injectLazy()
+    private val binding = TrackItemBinding.bind(view)
     private val dateFormat: DateFormat by lazy {
         preferences.dateFormat()
     }
 
     init {
         val listener = adapter.rowClickListener
-        logo_container.setOnClickListener { listener.onLogoClick(bindingAdapterPosition) }
-        add_tracking.setOnClickListener { listener.onSetClick(bindingAdapterPosition) }
-        track_title.setOnClickListener { listener.onSetClick(bindingAdapterPosition) }
-        track_remove.setOnClickListener { listener.onRemoveClick(bindingAdapterPosition) }
-        track_status.setOnClickListener { listener.onStatusClick(bindingAdapterPosition) }
-        track_chapters.setOnClickListener { listener.onChaptersClick(bindingAdapterPosition) }
-        score_container.setOnClickListener { listener.onScoreClick(bindingAdapterPosition) }
-        track_start_date.setOnClickListener { listener.onStartDateClick(bindingAdapterPosition) }
-        track_finish_date.setOnClickListener { listener.onFinishDateClick(bindingAdapterPosition) }
+        binding.logoContainer.setOnClickListener { listener.onLogoClick(bindingAdapterPosition) }
+        binding.addTracking.setOnClickListener { listener.onSetClick(bindingAdapterPosition) }
+        binding.trackTitle.setOnClickListener { listener.onSetClick(bindingAdapterPosition) }
+        binding.trackRemove.setOnClickListener { listener.onRemoveClick(bindingAdapterPosition) }
+        binding.trackStatus.setOnClickListener { listener.onStatusClick(bindingAdapterPosition) }
+        binding.trackChapters.setOnClickListener { listener.onChaptersClick(bindingAdapterPosition) }
+        binding.scoreContainer.setOnClickListener { listener.onScoreClick(bindingAdapterPosition) }
+        binding.trackStartDate.setOnClickListener { listener.onStartDateClick(bindingAdapterPosition) }
+        binding.trackFinishDate.setOnClickListener { listener.onFinishDateClick(bindingAdapterPosition) }
     }
 
     @SuppressLint("SetTextI18n")
     fun bind(item: TrackItem) {
         val track = item.track
-        track_logo.setImageResource(item.service.getLogo())
-        logo_container.setBackgroundColor(item.service.getLogoColor())
-        logo_container.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            bottomToBottom = if (track != null) divider.id else track_details.id
+        binding.trackLogo.setImageResource(item.service.getLogo())
+        binding.logoContainer.setBackgroundColor(item.service.getLogoColor())
+        binding.logoContainer.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            bottomToBottom = if (track != null) binding.divider.id else binding.trackDetails.id
         }
-        val serviceName = track_logo.context.getString(item.service.nameRes())
-        track_logo.contentDescription = serviceName
-        track_group.visibleIf(track != null)
-        add_tracking.visibleIf(track == null)
+        val serviceName = binding.trackLogo.context.getString(item.service.nameRes())
+        binding.trackLogo.contentDescription = serviceName
+        binding.trackGroup.visibleIf(track != null)
+        binding.addTracking.visibleIf(track == null)
         if (track != null) {
-            track_title.text = track.title
-            with(track_chapters) {
+            binding.trackTitle.text = track.title
+            with(binding.trackChapters) {
                 text = when {
                     track.total_chapters > 0 && track.last_chapter_read == track.total_chapters -> context.getString(
                         R.string.all_chapters_read
@@ -65,15 +66,15 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
                 }
             }
             val status = item.service.getStatus(track.status)
-            if (status.isEmpty()) track_status.setText(R.string.unknown_status)
-            else track_status.text = item.service.getStatus(track.status)
-            track_score.text = if (track.score == 0f) "-" else item.service.displayScore(track)
-            track_score.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
-            date_group.visibleIf(item.service.supportsReadingDates)
+            if (status.isEmpty()) binding.trackStatus.setText(R.string.unknown_status)
+            else binding.trackStatus.text = item.service.getStatus(track.status)
+            binding.trackScore.text = if (track.score == 0f) "-" else item.service.displayScore(track)
+            binding.trackScore.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
+            binding.dateGroup.visibleIf(item.service.supportsReadingDates)
             if (item.service.supportsReadingDates) {
-                track_start_date.text =
+                binding.trackStartDate.text =
                     if (track.started_reading_date != 0L) dateFormat.format(track.started_reading_date) else "-"
-                track_finish_date.text =
+                binding.trackFinishDate.text =
                     if (track.finished_reading_date != 0L) dateFormat.format(track.finished_reading_date) else "-"
             } else {
             }
@@ -81,7 +82,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     }
 
     private fun starIcon(track: Track): Int {
-        return if (track.score == 0f || track_score.text.toString().toFloatOrNull() != null) {
+        return if (track.score == 0f || binding.trackScore.text.toString().toFloatOrNull() != null) {
             R.drawable.ic_star_12dp
         } else {
             0
@@ -89,7 +90,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     }
 
     fun setProgress(enabled: Boolean) {
-        progress.visibleIf(enabled)
-        track_logo.visibleIf(!enabled)
+        binding.progress.visibleIf(enabled)
+        binding.trackLogo.visibleIf(!enabled)
     }
 }
