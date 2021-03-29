@@ -32,8 +32,7 @@
         app:layout_anchorGravity="top"
         app:layout_anchor="@id/ext_bottom_sheet" />
     <!-- Adding bottom sheet after main content -->
-    <include layout="@layout/extensions_bottom_sheet"
-        android:id="@+id/bottom_sheet"/>
+    <include layout="@layout/extensions_bottom_sheet"/>
 
     <View
         android:id="@+id/shadow2"
