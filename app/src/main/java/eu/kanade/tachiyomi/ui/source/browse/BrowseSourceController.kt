@@ -258,6 +258,8 @@ open class BrowseSourceController(bundle: Bundle) :
             R.id.action_display_mode -> swapDisplayMode()
             R.id.action_toggle_have_already -> swapLibraryVisibility()
             R.id.action_open_in_web_view -> openInWebView()
+            R.id.action_open_merged_source_in_web_view -> openInWebView(false)
+
             else -> return super.onOptionsItemSelected(item)
         }
         return true
@@ -332,14 +334,23 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.show()
     }
 
-    private fun openInWebView() {
-        val source = presenter.source as? HttpSource ?: return
-        val activity = activity ?: return
-        val intent = WebViewActivity.newIntent(
-            activity, source.id, source.baseUrl,
-            presenter
-                .source.name
-        )
+    private fun openInWebView(dex: Boolean = true) {
+        val intent = if (dex) {
+            val source = presenter.source as? HttpSource ?: return
+            val activity = activity ?: return
+            WebViewActivity.newIntent(
+                activity, source.id, source.baseUrl,
+                presenter.source.name
+            )
+        } else {
+            val source = presenter.sourceManager.getMergeSource() as? HttpSource ?: return
+            val activity = activity ?: return
+            WebViewActivity.newIntent(
+                activity, source.id, source.baseUrl,
+                source.name
+            )
+        }
+
         startActivity(intent)
     }
 

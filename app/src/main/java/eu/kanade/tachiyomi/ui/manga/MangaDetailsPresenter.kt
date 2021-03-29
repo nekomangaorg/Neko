@@ -65,7 +65,7 @@ class MangaDetailsPresenter(
     val coverCache: CoverCache = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val sourceManager: SourceManager = Injekt.get(),
+    val sourceManager: SourceManager = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
@@ -452,7 +452,7 @@ class MangaDetailsPresenter(
                 }
 
                 // If we don't have an image we can try to use the merge source image fallback
-                if(networkManga.thumbnail_url == null && manga.merge_manga_image_url != null) {
+                if (networkManga.thumbnail_url == null && manga.merge_manga_image_url != null) {
                     manga.thumbnail_url = manga.merge_manga_image_url
                 }
                 db.insertManga(manga).executeOnIO()

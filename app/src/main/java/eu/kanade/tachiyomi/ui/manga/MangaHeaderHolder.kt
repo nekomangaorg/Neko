@@ -82,6 +82,7 @@ class MangaHeaderHolder(
             webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
             similar_button.setOnClickListener { adapter.delegate.openSimilar() }
 
+
             merge_button.setOnClickListener { adapter.delegate.openMerge() }
 
             share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }

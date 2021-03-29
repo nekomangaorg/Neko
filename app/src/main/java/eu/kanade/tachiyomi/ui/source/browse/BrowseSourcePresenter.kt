@@ -45,7 +45,7 @@ import java.util.Date
 open class BrowseSourcePresenter(
     var query: String = "",
     private var isDeepLink: Boolean = false,
-    sourceManager: SourceManager = Injekt.get(),
+    val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get()

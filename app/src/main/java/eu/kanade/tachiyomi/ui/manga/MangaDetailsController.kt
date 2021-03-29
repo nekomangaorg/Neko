@@ -47,6 +47,7 @@ import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
+import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.elvishew.xlog.XLog
@@ -824,11 +825,16 @@ class MangaDetailsController :
     override fun openMerge() {
         val context = view?.context ?: return
         if (presenter.manga.merge_manga_url != null) {
+            val items = listOf("Open merged source in WebView", "Remove merged Manga")
             MaterialDialog(context).show {
-                title(text = "Remove merged Manga?")
-                positiveButton(android.R.string.yes) {
-                    presenter.removeMerged()
+                listItemsSingleChoice(items = items) { _, index, _ ->
+                    if (index == 0) {
+                        openInWebView(presenter.sourceManager.getMergeSource().baseUrl + presenter.manga.merge_manga_url!!)
+                    } else {
+                        presenter.removeMerged()
+                    }
                 }
+                positiveButton(android.R.string.yes)
             }
         } else {
             mergeSearchDialog = MergeSearchDialog(this)
