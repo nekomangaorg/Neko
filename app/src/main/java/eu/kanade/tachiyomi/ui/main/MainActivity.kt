@@ -59,7 +59,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.ui.source.SourceController
+import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
@@ -194,7 +194,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     when (id) {
                         R.id.nav_library -> LibraryController()
                         R.id.nav_recents -> RecentsController()
-                        else -> SourceController()
+                        else -> BrowseController()
                     },
                     id
                 )
@@ -485,7 +485,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 router.popToRoot()
                 binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? SourceController
+                        router.backstack.firstOrNull()?.controller() as? BrowseController
                     controller?.showSheet()
                 }
             }

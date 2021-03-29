@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.R
 class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialToolbar(context, attrs) {
 
-    private lateinit var toolbarTitle:TextView
+    private lateinit var toolbarTitle: TextView
     override fun onFinishInflate() {
         super.onFinishInflate()
         toolbarTitle = findViewById<MaterialTextView>(R.id.toolbar_title)

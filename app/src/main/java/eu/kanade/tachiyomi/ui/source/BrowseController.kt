@@ -24,7 +24,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.databinding.SourceControllerBinding
+import eu.kanade.tachiyomi.databinding.BrowseControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
@@ -59,12 +59,10 @@ import kotlinx.android.synthetic.main.extensions_bottom_sheet.ext_bottom_sheet
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.sheet_layout
 import kotlinx.android.synthetic.main.extensions_bottom_sheet.view.*
 import kotlinx.android.synthetic.main.filter_bottom_sheet.*
-import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.recycler_with_scroller.view.*
 import kotlinx.android.synthetic.main.rounded_category_hopper.*
-import kotlinx.android.synthetic.main.source_controller.*
-import kotlinx.android.synthetic.main.source_controller.shadow2
+import kotlinx.android.synthetic.main.browse_controller.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.max
@@ -76,8 +74,8 @@ import kotlin.math.min
  * [SourceAdapter.SourceListener] call function data on browse item click.
  * [SourceAdapter.OnLatestClickListener] call function data on latest item click
  */
-class SourceController :
-    NucleusController<SourceControllerBinding, SourcePresenter>(),
+class BrowseController :
+    NucleusController<BrowseControllerBinding, SourcePresenter>(),
     FlexibleAdapter.OnItemClickListener,
     SourceAdapter.SourceListener,
     RootSearchInterface,
@@ -117,7 +115,7 @@ class SourceController :
                     else -> R.string.source_migration
                 }
             )
-        } else view?.context?.getString(R.string.sources)
+        } else view?.context?.getString(R.string.browse)
     }
 
     override fun createPresenter(): SourcePresenter {
@@ -125,14 +123,14 @@ class SourceController :
     }
 
     /**
-     * Initiate the view with [R.layout.source_controller].
+     * Initiate the view with [R.layout.browse_controller].
      *
      * @param inflater used to load the layout xml.
      * @param container containing parent views.
      * @return inflated view.
      */
     override fun inflateView(inflater: LayoutInflater, container: ViewGroup): View {
-        return inflater.inflate(R.layout.source_controller, container, false)
+        return inflater.inflate(R.layout.browse_controller, container, false)
     }
 
     override fun onViewCreated(view: View) {

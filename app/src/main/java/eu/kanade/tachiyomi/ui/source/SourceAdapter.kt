@@ -6,9 +6,9 @@ import eu.davidea.flexibleadapter.items.IFlexible
 /**
  * Adapter that holds the catalogue cards.
  *
- * @param controller instance of [SourceController].
+ * @param controller instance of [BrowseController].
  */
-class SourceAdapter(val controller: SourceController) :
+class SourceAdapter(val controller: BrowseController) :
     FlexibleAdapter<IFlexible<*>>(null, controller, true) {
 
     init {

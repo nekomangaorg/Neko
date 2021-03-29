@@ -16,7 +16,7 @@ import java.util.TreeMap
 import java.util.concurrent.TimeUnit
 
 /**
- * Presenter of [SourceController]
+ * Presenter of [BrowseController]
  * Function calls should be done from here. UI calls should be done from the controller.
  *
  * @param sourceManager manages the different sources.
@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit
 class SourcePresenter(
     val sourceManager: SourceManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
-) : BasePresenter<SourceController>() {
+) : BasePresenter<BrowseController>() {
 
     var sources = getEnabledSources()
 
@@ -78,7 +78,7 @@ class SourcePresenter(
         }
 
         sourceSubscription = Observable.just(sourceItems)
-            .subscribeLatestCache(SourceController::setSources)
+            .subscribeLatestCache(BrowseController::setSources)
     }
 
     private fun loadLastUsedSource() {
@@ -96,7 +96,7 @@ class SourcePresenter(
                 if (isPinned) null
                 else SourceItem(source, null, isPinned)
             }
-        }.subscribeLatestCache(SourceController::setLastUsedSource)
+        }.subscribeLatestCache(BrowseController::setLastUsedSource)
     }
 
     fun updateSources() {

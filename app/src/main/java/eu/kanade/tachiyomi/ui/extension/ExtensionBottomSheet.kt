@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SourceAdapter
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
-import eu.kanade.tachiyomi.ui.source.SourceController
+import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
@@ -60,14 +60,14 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     private var extensions: List<ExtensionItem> = emptyList()
     var canExpand = false
 
-    lateinit var controller: SourceController
+    lateinit var controller: BrowseController
 
     val extensionFrameLayout =
         inflate(context, R.layout.recycler_with_scroller, null) as FrameLayout
     val migrationFrameLayout =
         inflate(context, R.layout.recycler_with_scroller, null) as FrameLayout
 
-    fun onCreate(controller: SourceController) {
+    fun onCreate(controller: BrowseController) {
         // Initialize adapter, scroll listener and recycler views
         adapter = ExtensionAdapter(this)
         migAdapter = ExtensionAdapter(this)

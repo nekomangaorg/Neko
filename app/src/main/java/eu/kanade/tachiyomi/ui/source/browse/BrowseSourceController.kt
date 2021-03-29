@@ -31,7 +31,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.source.SourceController
+import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -67,7 +67,7 @@ open class BrowseSourceController(bundle: Bundle) :
     constructor(
         source: CatalogueSource,
         searchQuery: String? = null,
-        smartSearchConfig: SourceController.SmartSearchConfig? = null
+        smartSearchConfig: BrowseController.SmartSearchConfig? = null
     ) : this(
         Bundle().apply {
             putLong(SOURCE_ID_KEY, source.id)
