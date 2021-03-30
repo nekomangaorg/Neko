@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.snack
-import kotlinx.android.synthetic.main.categories_controller.*
 
 /**
  * Controller to manage the categories for the users' library.
@@ -59,12 +58,12 @@ class CategoryController(bundle: Bundle? = null) :
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(recycler)
+        liftAppbarWith(binding.recycler)
 
         adapter = CategoryAdapter(this@CategoryController)
-        recycler.layoutManager = LinearLayoutManager(view.context)
-        recycler.setHasFixedSize(true)
-        recycler.adapter = adapter
+        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.setHasFixedSize(true)
+        binding.recycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
         adapter?.isPermanentDelete = false
 
