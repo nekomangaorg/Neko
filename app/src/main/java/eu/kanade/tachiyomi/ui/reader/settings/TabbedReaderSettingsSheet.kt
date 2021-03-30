@@ -1,18 +1,21 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.view.View
+import android.view.ViewGroup
+import androidx.core.content.ContextCompat
+import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 
-class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBottomSheetDialog(
-    readerActivity
-) {
+class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
+    TabbedBottomSheetDialog(readerActivity) {
     private val generalView: ReaderGeneralView = View.inflate(
         readerActivity,
         R.layout.reader_general_layout,
@@ -48,10 +51,12 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBott
         R.string.filter
     )
 
+    var sheetBehavior: BottomSheetBehavior<*>
     init {
         generalView.activity = readerActivity
         pagedView.activity = readerActivity
         filterView.activity = readerActivity
+        filterView.window = window
         generalView.sheet = this
 
         sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
@@ -78,6 +83,15 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBott
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 window?.setDimAmount(if (tab?.position == 2) 0f else ogDim)
                 readerActivity.binding.appBar.visInvisIf(tab?.position != 2)
+                if (tab?.position == 2) {
+                    sheetBehavior.skipCollapsed = false
+                    sheetBehavior.peekHeight = 100.dpToPx
+                    filterView.setWindowBrightness()
+                } else {
+                    sheetBehavior.expand()
+                    sheetBehavior.skipCollapsed = true
+                    window?.attributes = window?.attributes?.apply { screenBrightness = 0.01f }
+                }
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {

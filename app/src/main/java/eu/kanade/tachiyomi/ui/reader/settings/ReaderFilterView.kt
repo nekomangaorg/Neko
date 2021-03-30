@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.Window
+import android.view.WindowManager
 import android.widget.SeekBar
 import androidx.annotation.ColorInt
 import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
@@ -11,9 +13,12 @@ import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
+import kotlin.math.max
 
 class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseReaderSettingsView<ReaderColorFilterBinding>(context, attrs) {
+
+    var window: Window? = null
 
     override fun inflateBinding() = ReaderColorFilterBinding.bind(this)
     override fun initGeneralPreferences() {
@@ -166,6 +171,10 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
         setCustomBrightnessSeekBar(enabled)
     }
 
+    fun setWindowBrightness() {
+        setCustomBrightnessValue(preferences.customBrightnessValue().get(), !preferences.customBrightness().get())
+    }
+
     /**
      * Sets the brightness of the screen. Range is [-75, 100].
      * From -75 to -1 a semi-transparent black view is shown at the top with the minimum brightness.
@@ -176,6 +185,9 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
         // Set black overlay visibility.
         if (!isDisabled) {
             binding.txtBrightnessSeekbarValue.text = value.toString()
+            window?.attributes = window?.attributes?.apply { screenBrightness = max(0.01f, value / 100f) }
+        } else {
+            window?.attributes = window?.attributes?.apply { screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE }
         }
     }
 
