@@ -4,6 +4,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
+import android.text.style.ForegroundColorSpan
 import androidx.annotation.ColorInt
 import kotlin.math.floor
 
@@ -60,6 +61,12 @@ fun String.capitalizeWords(): String {
  */
 fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
     return String.CASE_INSENSITIVE_ORDER.then(naturalOrder()).compare(this, other)
+}
+
+fun CharSequence.tintText(@ColorInt color: Int): Spanned {
+    val s = SpannableString(this)
+    s.setSpan(ForegroundColorSpan(color), 0, this.length, 0)
+    return s
 }
 
 fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {

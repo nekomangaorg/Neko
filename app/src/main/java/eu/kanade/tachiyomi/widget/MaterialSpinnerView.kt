@@ -1,17 +1,24 @@
 package eu.kanade.tachiyomi.widget
 
+import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.FrameLayout
 import androidx.annotation.ArrayRes
+import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
+import androidx.core.view.forEach
 import androidx.core.view.get
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.MaterialSpinnerViewBinding
+import eu.kanade.tachiyomi.util.lang.tintText
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.max
 
 class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
@@ -53,12 +60,16 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     fun setSelection(selection: Int) {
-        popup?.menu?.get(selectedPosition)?.isCheckable = false
-        popup?.menu?.get(selectedPosition)?.isChecked = false
+        popup?.menu?.get(selectedPosition)?.let {
+            it.icon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
+            it.title = entries[selectedPosition]
+        }
         selectedPosition = selection
+        popup?.menu?.get(selectedPosition)?.let {
+            it.icon = tintedCheck()
+            it.title = it.title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
+        }
         binding.detailView.text = entries.getOrNull(selection).orEmpty()
-        popup?.menu?.get(selectedPosition)?.isCheckable = true
-        popup?.menu?.get(selectedPosition)?.isChecked = true
     }
 
     fun bindToPreference(pref: Preference<Int>, offset: Int = 0, block: ((Int) -> Unit)? = null) {
@@ -99,14 +110,14 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            val pos = popup.menuClicked(menuItem)
+            val pos = menuClicked(menuItem)
             onItemSelectedListener?.invoke(pos)
             true
         }
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
             val enumConstants = T::class.java.enumConstants
-            val pos = popup.menuClicked(menuItem)
+            val pos = menuClicked(menuItem)
             enumConstants?.get(pos)?.let { preference.set(it) }
             true
         }
@@ -117,7 +128,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            val pos = popup.menuClicked(menuItem)
+            val pos = menuClicked(menuItem)
             preference.set(intValues[pos] ?: 0)
             block?.invoke(pos)
             true
@@ -129,7 +140,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            val pos = popup.menuClicked(menuItem)
+            val pos = menuClicked(menuItem)
             preference.set(pos + offset)
             block?.invoke(pos)
             true
@@ -142,30 +153,42 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            val pos = popup.menuClicked(menuItem)
+            val pos = menuClicked(menuItem)
             onItemSelectedListener?.invoke(pos)
             true
         }
         return popup
     }
 
-    fun PopupMenu.menuClicked(menuItem: MenuItem): Int {
+    fun menuClicked(menuItem: MenuItem): Int {
         val pos = menuItem.itemId
-        menu[selectedPosition].isCheckable = false
-        menu[selectedPosition].isChecked = false
         setSelection(pos)
-        menu[pos].isCheckable = true
-        menu[pos].isChecked = true
         return pos
     }
 
+    @SuppressLint("RestrictedApi")
     fun popup(): PopupMenu {
         val popup = PopupMenu(context, this, Gravity.END)
         entries.forEachIndexed { index, entry ->
             popup.menu.add(0, index, 0, entry)
         }
-        popup.menu[selectedPosition].isCheckable = true
-        popup.menu[selectedPosition].isChecked = true
+        if (popup.menu is MenuBuilder) {
+            val m = popup.menu as MenuBuilder
+            m.setOptionalIconsVisible(true)
+        }
+        popup.menu.forEach {
+            it.icon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
+        }
+        popup.menu[selectedPosition].icon = tintedCheck()
+        popup.menu[selectedPosition].title =
+            popup.menu[selectedPosition].title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
+
         return popup
+    }
+
+    private fun tintedCheck(): Drawable? {
+        return ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)?.mutate()?.apply {
+            setTint(context.getResourceColor(android.R.attr.colorAccent))
+        }
     }
 }
