@@ -16,6 +16,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textview.MaterialTextView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
@@ -29,7 +30,6 @@ import eu.kanade.tachiyomi.util.view.setTextColorRes
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.bottom_menu_sheet.*
 
 open class MaterialMenuSheet(
     activity: Activity,
@@ -44,20 +44,20 @@ open class MaterialMenuSheet(
     (activity, R.style.BottomSheetDialogTheme) {
 
     private val primaryColor = activity.getResourceColor(android.R.attr.textColorPrimary)
-    private val view = activity.layoutInflater.inflate(R.layout.bottom_menu_sheet, null)
+    private val binding = BottomMenuSheetBinding.inflate(activity.layoutInflater)
 
     init {
-        setContentView(view)
-        setEdgeToEdge(activity, view)
+        setContentView(binding.root)
+        setEdgeToEdge(activity, binding.root)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.isInNightMode() && !activity.window.decorView.rootWindowInsets.hasSideNavBar()) {
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
         maxHeight?.let {
-            menu_scroll_view.maxHeight = it + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-            menu_scroll_view.requestLayout()
+            binding.menuScrollView.maxHeight = it + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+            binding.menuScrollView.requestLayout()
         }
 
-        divider.visibleIf(showDivider)
+        binding.divider.visibleIf(showDivider)
         var currentIndex: Int? = null
         items.forEachIndexed { index, item ->
             val view =
@@ -68,7 +68,7 @@ open class MaterialMenuSheet(
             }
             with(view) {
                 id = item.id
-                menu_layout.addView(this)
+                binding.menuLayout.addView(this)
                 setOnClickListener {
                     val shouldDismiss = onMenuItemClicked(this@MaterialMenuSheet, id)
                     if (shouldDismiss) {
@@ -99,17 +99,17 @@ open class MaterialMenuSheet(
             }
         }
 
-        BottomSheetBehavior.from(view.parent as ViewGroup).expand()
-        BottomSheetBehavior.from(view.parent as ViewGroup).skipCollapsed = true
+        BottomSheetBehavior.from(binding.root.parent as ViewGroup).expand()
+        BottomSheetBehavior.from(binding.root.parent as ViewGroup).skipCollapsed = true
 
-        setBottomEdge(menu_layout, activity)
+        setBottomEdge(binding.menuLayout, activity)
 
-        title_layout.visibleIf(title != null)
-        toolbar_title.text = title
+        binding.titleLayout.visibleIf(title != null)
+        binding.toolbarTitle.text = title
 
         currentIndex?.let {
-            view.post {
-                menu_scroll_view?.scrollTo(0, it * 48.dpToPx - menu_scroll_view.height / 2)
+            binding.root.post {
+                binding.menuScrollView?.scrollTo(0, it * 48.dpToPx - binding.menuScrollView.height / 2)
             }
         }
 
@@ -121,17 +121,17 @@ open class MaterialMenuSheet(
             isElevated = elevate
             elevationAnimator?.cancel()
             elevationAnimator = ObjectAnimator.ofFloat(
-                title_layout,
+                binding.titleLayout,
                 "elevation",
-                title_layout.elevation,
+                binding.titleLayout.elevation,
                 if (elevate) 10f else 0f
             )
             elevationAnimator?.start()
         }
-        elevate(menu_scroll_view.canScrollVertically(-1))
-        if (title_layout.isVisible()) {
-            menu_scroll_view.setOnScrollChangeListener { _: View?, _: Int, _: Int, _: Int, _: Int ->
-                val notAtTop = menu_scroll_view.canScrollVertically(-1)
+        elevate(binding.menuScrollView.canScrollVertically(-1))
+        if (binding.titleLayout.isVisible()) {
+            binding.menuScrollView.setOnScrollChangeListener { _: View?, _: Int, _: Int, _: Int, _: Int ->
+                val notAtTop = binding.menuScrollView.canScrollVertically(-1)
                 if (notAtTop != isElevated) {
                     elevate(notAtTop)
                 }
@@ -140,9 +140,9 @@ open class MaterialMenuSheet(
     }
 
     private fun clearEndDrawables() {
-        (0 until menu_layout.childCount).forEach {
-            val textView = (menu_layout.getChildAt(it) as ViewGroup).getChildAt(0) as TextView
-            val imageView = (menu_layout.getChildAt(it) as ViewGroup).getChildAt(1) as ImageView
+        (0 until binding.menuLayout.childCount).forEach {
+            val textView = (binding.menuLayout.getChildAt(it) as ViewGroup).getChildAt(0) as TextView
+            val imageView = (binding.menuLayout.getChildAt(it) as ViewGroup).getChildAt(1) as ImageView
             textView.setTextColor(primaryColor)
             textView.compoundDrawableTintList = ColorStateList.valueOf(primaryColor)
             imageView.invisible()
@@ -153,7 +153,7 @@ open class MaterialMenuSheet(
         if (clearAll) {
             clearEndDrawables()
         }
-        val layout = menu_layout.findViewById<ViewGroup>(id) ?: return
+        val layout = binding.menuLayout.findViewById<ViewGroup>(id) ?: return
         val textView = layout.getChildAt(0) as? TextView
         val imageView = layout.getChildAt(1) as? ImageView
         textView?.setTextColorRes(R.color.colorAccent)

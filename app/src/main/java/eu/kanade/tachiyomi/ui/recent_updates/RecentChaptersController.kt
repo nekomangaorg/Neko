@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.empty_view
 import timber.log.Timber
@@ -114,7 +113,6 @@ class RecentChaptersController(bundle: Bundle? = null) :
         super.onActivityResumed(activity)
         if (view != null) {
             refresh()
-            dl_bottom_sheet?.update()
         }
     }
 
