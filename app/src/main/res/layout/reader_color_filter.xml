@@ -23,16 +23,27 @@
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="parent" />
 
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/swipe_down"
+            style="@style/Theme.Widget.Button.TextButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/preview"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
         <!-- Color filter -->
 
         <androidx.appcompat.widget.SwitchCompat
             android:id="@+id/switch_color_filter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
             android:text="@string/use_custom_color_filter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toBottomOf="@id/swipe_down"/>
 
         <!-- Red filter -->
 
@@ -188,7 +199,7 @@
             android:id="@+id/custom_brightness"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:text="@string/use_custom_brightness"
             app:layout_constraintTop_toBottomOf="@id/color_filter_mode" />
 

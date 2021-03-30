@@ -7,10 +7,13 @@ import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
@@ -61,6 +64,15 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
         generalView.sheet = this
 
         sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
+
+        ReaderColorFilterBinding.bind(filterView).swipeDown.setOnClickListener {
+            if (sheetBehavior.isCollapsed()) {
+                sheetBehavior.expand()
+            } else {
+                sheetBehavior.collapse()
+            }
+        }
+
         binding.menu.visible()
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             binding.menu.tooltipText = context.getString(R.string.reader_settings)
@@ -86,7 +98,7 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
                 readerActivity.binding.appBar.visInvisIf(tab?.position != 2)
                 if (tab?.position == 2) {
                     sheetBehavior.skipCollapsed = false
-                    sheetBehavior.peekHeight = 100.dpToPx
+                    sheetBehavior.peekHeight = 110.dpToPx
                     filterView.setWindowBrightness()
                 } else {
                     sheetBehavior.expand()

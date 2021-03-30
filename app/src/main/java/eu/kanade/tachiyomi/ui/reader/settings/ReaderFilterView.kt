@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.content.Context
+import android.graphics.Rect
+import android.os.Build
 import android.util.AttributeSet
 import android.view.Window
 import android.view.WindowManager
@@ -19,6 +21,8 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
     BaseReaderSettingsView<ReaderColorFilterBinding>(context, attrs) {
 
     var window: Window? = null
+    private val boundingBox: Rect = Rect()
+    private val exclusions = listOf(boundingBox)
 
     override fun inflateBinding() = ReaderColorFilterBinding.bind(this)
     override fun initGeneralPreferences() {
@@ -265,6 +269,16 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
 
         /** Integer mask of blue value **/
         const val BLUE_MASK: Long = 0x000000FF
+    }
+
+    override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
+        super.onLayout(changed, left, top, right, bottom)
+        if (Build.VERSION.SDK_INT >= 29 && changed) {
+            with(binding.brightnessSeekbar) {
+                boundingBox.set(this.left, this.top, this.right, this.bottom)
+                this.systemGestureExclusionRects = exclusions
+            }
+        }
     }
 }
 
