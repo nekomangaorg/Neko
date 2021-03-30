@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter
 plugins {
     id(Plugins.androidApplication)
     kotlin(Plugins.kotlinAndroid)
-    kotlin(Plugins.kotlinExtensions)
     kotlin(Plugins.kapt)
+    id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
     id(Plugins.aboutLibraries)
     id(Plugins.firebaseCrashlytics)
@@ -86,9 +86,6 @@ android {
     kotlinOptions {
         jvmTarget = "1.8"
     }
-}
-androidExtensions {
-    isExperimental = true
 }
 
 dependencies {
