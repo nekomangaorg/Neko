@@ -390,8 +390,17 @@ class LibraryUpdateService(
 
             notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
             val source = sourceManager.getMangadex()
-            val details = source.fetchMangaAndChapterDetails(manga)
+
+            //This prevents manga info from changing when updating from cached source
+            val details = if (preferences.useCacheSource().not() || (preferences.useCacheSource() && manga.description.isNullOrBlank())) {
+                source.fetchMangaAndChapterDetails(manga)
+            } else {
+                Pair(db.getManga(manga.id!!).executeAsBlocking()!!, db.getChaptersByMangaId(manga.id!!).executeAsBlocking())
+            }
+
             val fetchedChapters = details.second.toMutableList()
+
+
             manga.merge_manga_url?.let {
                 try {
                     val chapters = sourceManager.getMergeSource().fetchChapters(it)
@@ -407,7 +416,8 @@ class LibraryUpdateService(
             val thumbnailUrl = manga.thumbnail_url
             manga.copyFrom(details.first)
             manga.initialized = true
-            if (manga.thumbnail_url != null && preferences.refreshCoversToo().getOrDefault()) {
+            //dont refresh covers while using cached source
+            if (manga.thumbnail_url != null && preferences.refreshCoversToo().getOrDefault() && preferences.useCacheSource().not()) {
                 coverCache.deleteFromCache(thumbnailUrl)
                 // load new covers in background
                 val request =
@@ -475,7 +485,8 @@ class LibraryUpdateService(
             } else {
                 updateMissingChapterCount(manga)
             }
-            if (preferences.markChaptersReadFromMDList()) {
+            //no reason to do this when using cache
+            if (preferences.markChaptersReadFromMDList() && preferences.useCacheSource().not()) {
                 tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
                     if (FollowStatus.fromInt(it.status) == FollowStatus.READING && it.last_chapter_read > 0) {
                         val chapters = db.getChapters(manga).executeAsBlocking()
