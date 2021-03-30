@@ -12,6 +12,7 @@ import androidx.core.view.get
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.MaterialSpinnerViewBinding
+import kotlin.math.max
 
 class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
@@ -82,10 +83,10 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     fun bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int, block: ((Int) -> Unit)? = null) {
-        setSelection(pref.get())
         this.pref = pref
         prefOffset = 0
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
+        setSelection(max(0,intValues.indexOf(pref.get())))
         popup = makeSettingsPopup(pref, intValues, block)
         setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {
