@@ -17,11 +17,11 @@ import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.binding.webview.BaseWebViewActivity
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.webview_activity.*
 import uy.kohesive.injekt.injectLazy
 
 open class WebViewActivity : BaseWebViewActivity() {
@@ -52,14 +52,14 @@ open class WebViewActivity : BaseWebViewActivity() {
         container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
-        swipe_refresh.isEnabled = false
+        binding.swipeRefresh.isEnabled = false
 
         if (bundle == null) {
             val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
             val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
 
-            webview.webViewClient = object : WebViewClientCompat() {
+            binding.webview.webViewClient = object : WebViewClientCompat() {
                 override fun shouldOverrideUrlCompat(view: WebView, url: String): Boolean {
                     view.loadUrl(url)
                     return true
@@ -69,10 +69,10 @@ open class WebViewActivity : BaseWebViewActivity() {
                     super.onPageFinished(view, url)
                     invalidateOptionsMenu()
                     title = view?.title
-                    swipe_refresh.isEnabled = true
-                    swipe_refresh?.isRefreshing = false
-                    val thing = view?.evaluateJavascript("getComputedStyle(document.querySelector('body')).backgroundColor") {
-                        nested_view.setBackgroundColor(parseHTMLColor(it))
+                    binding.swipeRefresh.isEnabled = true
+                    binding.swipeRefresh?.isRefreshing = false
+                    view?.evaluateJavascript("getComputedStyle(document.querySelector('body')).backgroundColor") {
+                        binding.nestedView.setBackgroundColor(parseHTMLColor(it))
                     }
                 }
 
@@ -83,12 +83,12 @@ open class WebViewActivity : BaseWebViewActivity() {
 
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
-                    nested_view.scrollTo(0, 0)
+                    binding.nestedView.scrollTo(0, 0)
                 }
             }
 
-            webview.settings.userAgentString = source.headers["User-Agent"]
-            webview.loadUrl(url, headers)
+            binding.webview.settings.userAgentString = source.headers["User-Agent"]
+            binding.webview.loadUrl(url, headers)
         }
     }
 
@@ -116,22 +116,22 @@ open class WebViewActivity : BaseWebViewActivity() {
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val backItem = toolbar.menu.findItem(R.id.action_web_back)
-        val forwardItem = toolbar.menu.findItem(R.id.action_web_forward)
-        backItem?.isEnabled = webview.canGoBack()
-        forwardItem?.isEnabled = webview.canGoForward()
-        val hasHistory = webview.canGoBack() || webview.canGoForward()
+        val backItem = binding.toolbar.menu.findItem(R.id.action_web_back)
+        val forwardItem = binding.toolbar.menu.findItem(R.id.action_web_forward)
+        backItem?.isEnabled = binding.webview.canGoBack()
+        forwardItem?.isEnabled = binding.webview.canGoForward()
+        val hasHistory = binding.webview.canGoBack() || binding.webview.canGoForward()
         backItem?.isVisible = hasHistory
         forwardItem?.isVisible = hasHistory
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
         val translucentWhite = ColorUtils.setAlphaComponent(tintColor, 127)
-        backItem.icon?.setTint(if (webview.canGoBack()) tintColor else translucentWhite)
-        forwardItem?.icon?.setTint(if (webview.canGoForward()) tintColor else translucentWhite)
+        backItem.icon?.setTint(if (binding.webview.canGoBack()) tintColor else translucentWhite)
+        forwardItem?.icon?.setTint(if (binding.webview.canGoForward()) tintColor else translucentWhite)
         return super.onPrepareOptionsMenu(menu)
     }
 
     override fun onBackPressed() {
-        if (webview.canGoBack()) webview.goBack()
+        if (binding.webview.canGoBack()) binding.webview.goBack()
         else super.onBackPressed()
     }
 
@@ -141,8 +141,8 @@ open class WebViewActivity : BaseWebViewActivity() {
      */
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_web_back -> webview.goBack()
-            R.id.action_web_forward -> webview.goForward()
+            R.id.action_web_back -> binding.webview.goBack()
+            R.id.action_web_forward -> binding.webview.goForward()
             R.id.action_web_share -> shareWebpage()
             R.id.action_web_browser -> openInBrowser()
         }
@@ -153,7 +153,7 @@ open class WebViewActivity : BaseWebViewActivity() {
         try {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, webview.url)
+                putExtra(Intent.EXTRA_TEXT, binding.webview.url)
             }
             startActivity(Intent.createChooser(intent, getString(R.string.share)))
         } catch (e: Exception) {
@@ -162,6 +162,6 @@ open class WebViewActivity : BaseWebViewActivity() {
     }
 
     private fun openInBrowser() {
-        openInBrowser(webview.url)
+        openInBrowser(binding.webview.url)
     }
 }

@@ -7,7 +7,7 @@ import android.util.AttributeSet
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
 import eu.kanade.tachiyomi.R
-import kotlinx.android.synthetic.main.pref_widget_imageview.view.*
+import eu.kanade.tachiyomi.databinding.PrefWidgetImageviewBinding
 
 class LoginPreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     Preference(context, attrs) {
@@ -18,12 +18,13 @@ class LoginPreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun onBindViewHolder(holder: PreferenceViewHolder) {
         super.onBindViewHolder(holder)
+        val binding = PrefWidgetImageviewBinding.bind(holder.itemView)
 
-        holder.itemView.image_view.setImageResource(
+        binding.imageView.setImageResource(
             if (getPersistedString("").isNullOrEmpty()) android.R.color.transparent
             else R.drawable.ic_done_24dp
         )
-        holder.itemView.image_view.imageTintList =
+        binding.imageView.imageTintList =
             ColorStateList.valueOf(Color.parseColor("#FF4CAF50"))
     }
 

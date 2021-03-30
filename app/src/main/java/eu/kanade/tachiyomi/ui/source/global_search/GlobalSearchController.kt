@@ -14,10 +14,10 @@ import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.android.synthetic.main.source_global_search_controller.*
 
 /**
@@ -133,7 +133,7 @@ open class GlobalSearchController(
         adapter = GlobalSearchAdapter(this)
 
         recycler.updatePaddingRelative(
-            top = (activity?.toolbar?.height ?: 0) +
+            top = (activityBinding?.toolbar?.height ?: 0) +
                 (activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0)
         )
 
