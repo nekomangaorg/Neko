@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.pref_account_login.view.*
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -25,18 +24,18 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
 
     override fun setCredentialsOnView(view: View) = with(view) {
         val serviceName = context.getString(service.nameRes())
-        dialog_title.text = context.getString(R.string.log_in_to_, serviceName)
-        username.setText(service.getUsername())
-        password.setText(service.getPassword())
+        binding.dialogTitle.text = context.getString(R.string.log_in_to_, serviceName)
+        binding.username.setText(service.getUsername())
+        binding.password.setText(service.getPassword())
     }
 
     override fun checkLogin() {
         v?.apply {
-            login.apply {
+            binding.login.apply {
                 progressType = ProgressType.INDETERMINATE
                 startAnimation()
             }
-            if (username.text.isNullOrBlank() || password.text.isNullOrBlank()) {
+            if (binding.username.text.isNullOrBlank() || binding.password.text.isNullOrBlank()) {
                 errorResult()
                 context.toast(R.string.username_must_not_be_blank)
                 return
@@ -44,8 +43,8 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
 
             dialog?.setCancelable(false)
             dialog?.setCanceledOnTouchOutside(false)
-            val user = username.text.toString()
-            val pass = password.text.toString()
+            val user = binding.username.text.toString()
+            val pass = binding.password.text.toString()
             scope.launch {
                 try {
                     val result = service.login(user, pass)
@@ -67,8 +66,8 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
         v?.apply {
             dialog?.setCancelable(true)
             dialog?.setCanceledOnTouchOutside(true)
-            login.revertAnimation {
-                login.text = activity!!.getText(R.string.unknown_error)
+            binding.login.revertAnimation {
+                binding.login.text = activity!!.getText(R.string.unknown_error)
             }
         }
     }

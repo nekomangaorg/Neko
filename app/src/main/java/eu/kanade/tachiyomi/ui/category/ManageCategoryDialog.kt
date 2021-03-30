@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.ui.category
 
 import android.app.Dialog
 import android.os.Bundle
-import android.view.View
 import android.widget.CompoundButton
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -36,22 +36,21 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
 
     private val preferences by injectLazy<PreferencesHelper>()
     private val db by injectLazy<DatabaseHelper>()
-    var binding: MangaCategoryDialogBinding? = null
+    lateinit var binding: MangaCategoryDialogBinding
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        binding = MangaCategoryDialogBinding.inflate(activity!!.layoutInflater)
         val dialog = MaterialDialog(activity!!).apply {
             title(R.string.manage_category)
-            customView(view = binding!!.root)
+            customView(viewRes = R.layout.manga_category_dialog)
             negativeButton(android.R.string.cancel)
             positiveButton(R.string.save) { onPositiveButtonClick() }
         }
-        onViewCreated(dialog.view)
+        binding = MangaCategoryDialogBinding.bind(dialog.getCustomView())
+        onViewCreated()
         return dialog
     }
 
     private fun onPositiveButtonClick() {
-        val binding = binding ?: return
         val category = category ?: return
         if (category.id ?: 0 <= 0) return
         val text = binding.title.text.toString()
@@ -85,8 +84,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
     }
 
-    fun onViewCreated(view: View) {
-        val binding = binding ?: return
+    fun onViewCreated() {
         val category = category ?: return
         if (category.id ?: 0 <= 0) {
             binding.title.gone()
@@ -131,11 +129,6 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         categories.set(updateCategories)
         return updateCategories.isNotEmpty()
-    }
-
-    override fun onDestroyView(view: View) {
-        super.onDestroyView(view)
-        binding = null
     }
 
     private fun setCheckbox(
