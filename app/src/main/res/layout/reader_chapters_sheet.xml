@@ -6,9 +6,9 @@
     android:layout_width="match_parent"
     android:layout_height="300dp"
     android:background="@drawable/bottom_sheet_rounded_background"
-    android:backgroundTint="?colorSecondary"
+    android:backgroundTint="@color/secondary_alpha"
     android:orientation="vertical"
-    app:behavior_peekHeight="?attr/actionBarSize"
+    app:behavior_peekHeight="60dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -40,7 +40,9 @@
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
             app:tint="?actionBarTintColor"
             android:tooltipText="@string/view_chapters"
+            app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/webview_button"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_format_list_numbered_24dp" />
@@ -54,32 +56,45 @@
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
             app:tint="?actionBarTintColor"
             android:tooltipText="@string/open_in_webview"
+            app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintStart_toEndOf="@id/chapters_button"
+            app:layout_constraintEnd_toStartOf="@id/display_options"
             app:layout_constraintTop_toTopOf="parent"
-            android:alpha="0.0"
             app:srcCompat="@drawable/ic_open_in_webview_24dp" />
 
-        <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
-            android:id="@+id/page_seek_bar"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
+        <ImageButton
+            android:id="@+id/display_options"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next_title"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            app:tint="?actionBarTintColor"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            android:tooltipText="@string/display_options"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/page_text"
-            app:layout_constraintStart_toEndOf="@id/chapters_button"
-            app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/page_text"
-            android:layout_width="100dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textColor="?actionBarTintColor"
-            android:textSize="15sp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/full_settings"
+            app:layout_constraintStart_toEndOf="@id/webview_button"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="100 / 105" />
+            app:srcCompat="@drawable/ic_tune_24dp" />
+
+        <ImageButton
+            android:id="@+id/full_settings"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next_title"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            app:tint="?actionBarTintColor"
+            android:visibility="gone"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:tooltipText="@string/reader_settings"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/display_options"
+            app:layout_constraintTop_toTopOf="parent"
+            app:srcCompat="@drawable/ic_settings_24dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView

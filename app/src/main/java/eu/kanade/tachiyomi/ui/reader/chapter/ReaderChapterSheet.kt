@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -15,16 +16,20 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderChaptersSheetBinding
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
+import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.visInvisIf
-import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.util.view.visible
+import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import kotlin.math.roundToInt
@@ -64,10 +69,20 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             activity.openMangaInBrowser()
         }
 
+        binding.displayOptions.setOnClickListener {
+            TabbedReaderSettingsSheet(activity).show()
+        }
+
+        binding.fullSettings.setOnClickListener {
+            val intent = SearchActivity.openReaderSettings(activity)
+            activity.startActivity(intent)
+        }
+
         post {
             binding.chapterRecycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
             binding.chapterRecycler.isClickable = sheetBehavior.isExpanded()
             binding.chapterRecycler.isFocusable = sheetBehavior.isExpanded()
+            activity.binding.readerNav.root.isVisible = sheetBehavior.isCollapsed()
         }
 
         sheetBehavior?.addBottomSheetCallback(
@@ -75,10 +90,11 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     binding.pill.alpha = (1 - max(0f, progress)) * 0.25f
                     val trueProgress = max(progress, 0f)
-                    binding.chaptersButton.alpha = 1 - trueProgress
-                    binding.webviewButton.alpha = trueProgress
-                    binding.webviewButton.visibleIf(binding.webviewButton.alpha > 0)
-                    binding.chaptersButton.visInvisIf(binding.chaptersButton.alpha > 0)
+                    activity.binding.readerNav.root.alpha = (1 - abs(progress)).coerceIn(0f, 1f)
+//                    binding.chaptersButton.alpha = 1 - trueProgress
+//                    binding.webviewButton.alpha = trueProgress
+//                    binding.webviewButton.visibleIf(binding.webviewButton.alpha > 0)
+//                    binding.chaptersButton.visInvisIf(binding.chaptersButton.alpha > 0)
                     backgroundTintList =
                         ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
                     binding.chapterRecycler.alpha = trueProgress
@@ -96,19 +112,32 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                             adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
                             binding.chapterRecycler.height / 2 - 30.dpToPx
                         )
-                        binding.chaptersButton.alpha = 1f
-                        binding.webviewButton.alpha = 0f
+                        activity.binding.readerNav.root.visible()
+                        activity.binding.readerNav.root.alpha = 1f
+//                        binding.chaptersButton.alpha = 1f
+//                        binding.webviewButton.alpha = 0f
+                    }
+                    if (state == BottomSheetBehavior.STATE_DRAGGING || state == BottomSheetBehavior.STATE_SETTLING) {
+                        activity.binding.readerNav.root.visible()
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
+                        activity.binding.readerNav.root.gone()
+                        activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
-                        binding.chaptersButton.alpha = 0f
-                        binding.webviewButton.alpha = 1f
+//                        binding.chaptersButton.alpha = 0f
+//                        binding.webviewButton.alpha = 1f
                         if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
+                    }
+                    if (state == BottomSheetBehavior.STATE_HIDDEN) {
+                        activity.binding.readerNav.root.alpha = 0f
+                        activity.binding.readerNav.root.gone()
                     }
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
-                    binding.webviewButton.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
-                    binding.chaptersButton.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
+                    binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
+                    binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+//                    binding.webviewButton.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
+//                    binding.chaptersButton.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
                 }
             }
         )
