@@ -5,9 +5,9 @@ import coil.api.clear
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.databinding.RecentlyReadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.lang.toTimestampString
-import kotlinx.android.synthetic.main.recently_read_item.*
 import java.util.Date
 
 /**
@@ -24,16 +24,17 @@ class RecentlyReadHolder(
     val adapter: RecentlyReadAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
 
+    private val binding = RecentlyReadItemBinding.bind(view)
     init {
-        remove.setOnClickListener {
+        binding.remove.setOnClickListener {
             adapter.removeClickListener.onRemoveClick(flexibleAdapterPosition)
         }
 
-        resume.setOnClickListener {
+        binding.resume.setOnClickListener {
             adapter.resumeClickListener.onResumeClick(flexibleAdapterPosition)
         }
 
-        cover.setOnClickListener {
+        binding.cover.setOnClickListener {
             adapter.coverClickListener.onCoverClick(flexibleAdapterPosition)
         }
     }
@@ -48,18 +49,18 @@ class RecentlyReadHolder(
         val (manga, chapter, history) = item
 
         // Set manga title
-        title.text = manga.title
+        binding.title.text = manga.title
 
         // Set source + chapter title
         val formattedNumber = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-        manga_source.text = itemView.context.getString(R.string.source_dash_chapter_)
+        binding.mangaSource.text = itemView.context.getString(R.string.source_dash_chapter_)
             .format(adapter.sourceManager.getOrStub(manga.source).toString(), formattedNumber)
 
         // Set last read timestamp title
-        last_read.text = Date(history.last_read).toTimestampString(adapter.dateFormat)
+        binding.lastRead.text = Date(history.last_read).toTimestampString(adapter.dateFormat)
 
-        // Set cover
-        cover.clear()
-        cover.loadLibraryManga(manga)
+        // Set binding.cover
+        binding.cover.clear()
+        binding.cover.loadLibraryManga(manga)
     }
 }

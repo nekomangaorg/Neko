@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import kotlinx.android.synthetic.main.manga_list_item.*
+import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 
 /**
  * Class used to hold the displayed data of a manga in the catalogue, like the cover or the title.
@@ -24,6 +24,8 @@ import kotlinx.android.synthetic.main.manga_list_item.*
 class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
     BrowseSourceHolder(view, adapter) {
 
+    private val binding = MangaListItemBinding.bind(view)
+
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.
@@ -31,8 +33,8 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
      * @param manga the manga to bind.
      */
     override fun onSetValues(manga: Manga) {
-        title.text = manga.title
-        with(subtitle) {
+        binding.title.text = manga.title
+        with(binding.subtitle) {
             visibility = if (manga.favorite) View.VISIBLE else View.GONE
             text = view.resources.getString(R.string.in_library)
             setTextColor(view.context.getResourceColor(android.R.attr.colorAccent))
@@ -44,11 +46,11 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
     override fun setImage(manga: Manga) {
         // Update the cover.
         if (manga.thumbnail_url == null) {
-            cover_thumbnail.clear()
+            binding.coverThumbnail.clear()
         } else {
-            val id = manga.id ?: return
+            manga.id ?: return
             val request = LoadRequest.Builder(view.context).data(manga)
-                .target(CoverViewTarget(cover_thumbnail)).build()
+                .target(CoverViewTarget(binding.coverThumbnail)).build()
             Coil.imageLoader(view.context).execute(request)
         }
     }

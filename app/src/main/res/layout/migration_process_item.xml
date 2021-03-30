@@ -12,7 +12,7 @@
         app:layout_constraintVertical_bias="1.0"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/imageView"
+        app:layout_constraintEnd_toStartOf="@id/imageView"
         app:layout_constraintHorizontal_bias="0.5"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -26,9 +26,9 @@
         android:scaleType="center"
         android:layout_marginBottom="45dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/migration_manga_card_to"
+        app:layout_constraintEnd_toStartOf="@id/migration_manga_card_to"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/migration_manga_card_from"
+        app:layout_constraintStart_toEndOf="@id/migration_manga_card_from"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_chevron_right_24dp" />
 
@@ -39,9 +39,9 @@
         android:layout_width="150dp"
         android:layout_height="wrap_content"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+        app:layout_constraintEnd_toStartOf="@id/migration_menu"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/imageView"
+        app:layout_constraintStart_toEndOf="@id/imageView"
         app:layout_constraintTop_toTopOf="parent" />
 
     <ImageView
@@ -55,7 +55,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.5"
-        app:layout_constraintStart_toEndOf="@+id/migration_manga_card_to"
+        app:layout_constraintStart_toEndOf="@id/migration_manga_card_to"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_more_vert_24dp"
         android:visibility="invisible"/>
@@ -65,9 +65,9 @@
         android:id="@+id/skip_manga"
         android:layout_width="48dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toBottomOf="@+id/migration_menu"
-        app:layout_constraintEnd_toEndOf="@+id/migration_menu"
-        app:layout_constraintStart_toStartOf="@+id/migration_menu"
-        app:layout_constraintTop_toTopOf="@+id/migration_menu"
+        app:layout_constraintBottom_toBottomOf="@id/migration_menu"
+        app:layout_constraintEnd_toEndOf="@id/migration_menu"
+        app:layout_constraintStart_toStartOf="@id/migration_menu"
+        app:layout_constraintTop_toTopOf="@id/migration_menu"
         app:srcCompat="@drawable/ic_close_24dp" />
 </androidx.constraintlayout.widget.ConstraintLayout>

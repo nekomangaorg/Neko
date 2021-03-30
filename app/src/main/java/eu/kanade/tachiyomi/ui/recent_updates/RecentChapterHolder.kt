@@ -7,11 +7,10 @@ import coil.api.clear
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.databinding.RecentChaptersItemBinding
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import kotlinx.android.synthetic.main.download_button.*
-import kotlinx.android.synthetic.main.recent_chapters_item.*
 
 /**
  * Holder that contains chapter item
@@ -41,8 +40,9 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
      */
     private var item: RecentChapterItem? = null
 
+    private val binding = RecentChaptersItemBinding.bind(view)
     init {
-        manga_cover.setOnClickListener {
+        binding.mangaCover.setOnClickListener {
             adapter.coverClickListener.onCoverClick(flexibleAdapterPosition)
         }
     }
@@ -55,16 +55,16 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
     fun bind(item: RecentChapterItem) {
         this.item = item
 
-        // Set chapter title
-        chapter_title.text = item.chapter.name
+        // Set chapter binding.title
+        binding.chapterTitle.text = item.chapter.name
 
-        // Set manga title
-        title.text = item.manga.title
+        // Set manga binding.title
+        binding.title.text = item.manga.title
 
-        if (front_view.translationX == 0f) {
-            read.setImageDrawable(
+        if (binding.frontView.translationX == 0f) {
+            binding.read.setImageDrawable(
                 ContextCompat.getDrawable(
-                    read.context,
+                    binding.root.context,
                     if (item.read) R.drawable.ic_eye_off_24dp
                     else R.drawable.ic_eye_24dp
                 )
@@ -73,15 +73,15 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
 
         // Set cover
         if ((view.context as? Activity)?.isDestroyed != true) {
-            manga_cover.clear()
-            manga_cover.loadLibraryManga(item.manga) {
+            binding.mangaCover.clear()
+            binding.mangaCover.loadLibraryManga(item.manga) {
                 transformations(CircleCropTransformation())
             }
         }
 
         val chapterColor = ChapterUtil.chapterColor(itemView.context, item)
-        chapter_title.setTextColor(chapterColor)
-        title.setTextColor(chapterColor)
+        binding.chapterTitle.setTextColor(chapterColor)
+        binding.title.setTextColor(chapterColor)
 
         // Set chapter status
         notifyStatus(item.status, item.progress)
@@ -89,15 +89,15 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
     }
 
     private fun resetFrontView() {
-        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
+        if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
     override fun getFrontView(): View {
-        return front_view
+        return binding.frontView
     }
 
     override fun getRearRightView(): View {
-        return right_view
+        return binding.rightView
     }
 
     /**
@@ -106,5 +106,5 @@ class RecentChapterHolder(private val view: View, private val adapter: RecentCha
      * @param status download status
      */
     fun notifyStatus(status: Int, progress: Int) =
-        download_button.setDownloadStatus(status, progress)
+        binding.downloadButton.root.setDownloadStatus(status, progress)
 }

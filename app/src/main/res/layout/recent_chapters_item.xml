@@ -51,9 +51,9 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Regular.Body1"
-            app:layout_constraintBottom_toTopOf="@+id/chapter_title"
-            app:layout_constraintEnd_toStartOf="@+id/download_button"
-            app:layout_constraintStart_toEndOf="@+id/manga_cover"
+            app:layout_constraintBottom_toTopOf="@id/chapter_title"
+            app:layout_constraintEnd_toStartOf="@id/download_button"
+            app:layout_constraintStart_toEndOf="@id/manga_cover"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintVertical_chainStyle="packed"
             tools:text="Manga title" />
@@ -68,13 +68,14 @@
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Regular.Caption"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/download_button"
-            app:layout_constraintStart_toEndOf="@+id/manga_cover"
-            app:layout_constraintTop_toBottomOf="@+id/title"
+            app:layout_constraintEnd_toStartOf="@id/download_button"
+            app:layout_constraintStart_toEndOf="@id/manga_cover"
+            app:layout_constraintTop_toBottomOf="@id/title"
             tools:text="Chapter title" />
 
         <include
             layout="@layout/download_button"
+            android:id="@+id/download_button"
             android:layout_width="50dp"
             android:layout_height="0dp"
             android:layout_marginEnd="8dp"

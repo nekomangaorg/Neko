@@ -12,8 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import kotlinx.android.synthetic.main.manga_grid_item.*
-import kotlinx.android.synthetic.main.unread_download_badge.*
+import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -30,12 +29,13 @@ class BrowseSourceGridHolder(
     compact: Boolean
 ) : BrowseSourceHolder(view, adapter) {
 
+    private val binding = MangaGridItemBinding.bind(view)
     init {
         if (compact) {
-            text_layout.gone()
+            binding.textLayout.gone()
         } else {
-            compact_title.gone()
-            gradient.gone()
+            binding.compactTitle.gone()
+            binding.gradient.gone()
         }
     }
 
@@ -47,9 +47,9 @@ class BrowseSourceGridHolder(
      */
     override fun onSetValues(manga: Manga) {
         // Update the title of the manga.
-        title.text = manga.title
-        compact_title.text = title.text
-        badge_view.setInLibrary(manga.favorite)
+        binding.title.text = manga.title
+        binding.compactTitle.text = binding.title.text
+        binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
 
         // Update the cover.
         setImage(manga)
@@ -58,11 +58,11 @@ class BrowseSourceGridHolder(
     override fun setImage(manga: Manga) {
         if ((view.context as? Activity)?.isDestroyed == true) return
         if (manga.thumbnail_url == null) {
-            cover_thumbnail.clear()
+            binding.coverThumbnail.clear()
         } else {
             val id = manga.id ?: return
             val request = LoadRequest.Builder(view.context).data(manga)
-                .target(CoverViewTarget(cover_thumbnail, progress)).build()
+                .target(CoverViewTarget(binding.coverThumbnail, binding.progress)).build()
             Coil.imageLoader(view.context).execute(request)
         }
     }

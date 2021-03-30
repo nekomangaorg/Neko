@@ -8,10 +8,11 @@ import coil.api.clear
 import coil.api.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.databinding.TrackSearchItemBinding
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
-import kotlinx.android.synthetic.main.track_search_item.view.*
 import java.util.ArrayList
+import java.util.Locale
 
 class TrackSearchAdapter(context: Context) :
     ArrayAdapter<TrackSearch>(context, R.layout.track_search_item, ArrayList<TrackSearch>()) {
@@ -43,32 +44,33 @@ class TrackSearchAdapter(context: Context) :
     class TrackSearchHolder(private val view: View) {
 
         fun onSetValues(track: TrackSearch) {
-            view.track_search_title.text = track.title
-            view.track_search_summary.text = track.summary
-            view.track_search_cover.clear()
-            if (!track.cover_url.isNullOrEmpty()) {
-                view.track_search_cover.load(track.cover_url)
+            val binding = TrackSearchItemBinding.bind(view)
+            binding.trackSearchTitle.text = track.title
+            binding.trackSearchSummary.text = track.summary
+            binding.trackSearchCover.clear()
+            if (track.cover_url.isNotEmpty()) {
+                binding.trackSearchCover.load(track.cover_url)
             }
 
-            if (track.publishing_status.isNullOrBlank()) {
-                view.track_search_status.gone()
-                view.track_search_status_result.gone()
+            if (track.publishing_status.isBlank()) {
+                binding.trackSearchStatus.gone()
+                binding.trackSearchStatusResult.gone()
             } else {
-                view.track_search_status_result.text = track.publishing_status.capitalize()
+                binding.trackSearchStatusResult.text = track.publishing_status.capitalize(Locale.ROOT)
             }
 
-            if (track.publishing_type.isNullOrBlank()) {
-                view.track_search_type.gone()
-                view.track_search_type_result.gone()
+            if (track.publishing_type.isBlank()) {
+                binding.trackSearchType.gone()
+                binding.trackSearchTypeResult.gone()
             } else {
-                view.track_search_type_result.text = track.publishing_type.capitalize()
+                binding.trackSearchTypeResult.text = track.publishing_type.capitalize(Locale.ROOT)
             }
 
-            if (track.start_date.isNullOrBlank()) {
-                view.track_search_start.gone()
-                view.track_search_start_result.gone()
+            if (track.start_date.isBlank()) {
+                binding.trackSearchStart.gone()
+                binding.trackSearchStartResult.gone()
             } else {
-                view.track_search_start_result.text = track.start_date
+                binding.trackSearchStartResult.text = track.start_date
             }
         }
     }

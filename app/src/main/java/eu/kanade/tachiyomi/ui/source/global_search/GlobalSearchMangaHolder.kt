@@ -9,11 +9,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import kotlinx.android.synthetic.main.source_global_search_controller_card_item.*
+import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerCardItemBinding
 
 class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
+    private val binding = SourceGlobalSearchControllerCardItemBinding.bind(view)
     init {
         // Call onMangaClickListener when item is pressed.
         itemView.setOnClickListener {
@@ -32,18 +33,18 @@ class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
     }
 
     fun bind(manga: Manga) {
-        title.text = manga.title
-        favorite_button.visibleIf(manga.favorite)
+        binding.title.text = manga.title
+        binding.favoriteButton.visibleIf(manga.favorite)
         setImage(manga)
     }
 
     fun setImage(manga: Manga) {
-        itemImage.clear()
+        binding.itemImage.clear()
         if (!manga.thumbnail_url.isNullOrEmpty()) {
             val request = LoadRequest.Builder(itemView.context).data(manga)
                 .placeholder(android.R.color.transparent)
                 .memoryCachePolicy(CachePolicy.DISABLED)
-                .target(CoverViewTarget(itemImage, progress)).build()
+                .target(CoverViewTarget(binding.itemImage, binding.progress)).build()
             Coil.imageLoader(itemView.context).execute(request)
         }
     }

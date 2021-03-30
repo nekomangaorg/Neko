@@ -5,10 +5,10 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.ExtensionDetailHeaderBinding
 import eu.kanade.tachiyomi.ui.extension.getApplicationIcon
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.view.inflate
-import kotlinx.android.synthetic.main.extension_detail_header.view.*
 
 class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPresenter) :
     RecyclerView.Adapter<ExtensionDetailsHeaderAdapter.HeaderViewHolder>() {
@@ -34,28 +34,29 @@ class ExtensionDetailsHeaderAdapter(private val presenter: ExtensionDetailsPrese
 
     inner class HeaderViewHolder(private val view: View) : RecyclerView.ViewHolder(view) {
         fun bind() {
+            val binding = ExtensionDetailHeaderBinding.bind(view)
             val extension = presenter.extension ?: return
             val context = view.context
 
-            extension.getApplicationIcon(context)?.let { view.extension_icon.setImageDrawable(it) }
-            view.extension_title.text = extension.name
-            view.extension_version.text = context.getString(R.string.version_, extension.versionName)
-            view.extension_lang.text = context.getString(R.string.language_, LocaleHelper.getSourceDisplayName(extension.lang, context))
-            view.extension_nsfw.isVisible = extension.isNsfw
-            view.extension_pkg.text = extension.pkgName
+            extension.getApplicationIcon(context)?.let { binding.extensionIcon.setImageDrawable(it) }
+            binding.extensionTitle.text = extension.name
+            binding.extensionVersion.text = context.getString(R.string.version_, extension.versionName)
+            binding.extensionLang.text = context.getString(R.string.language_, LocaleHelper.getSourceDisplayName(extension.lang, context))
+            binding.extensionNsfw.isVisible = extension.isNsfw
+            binding.extensionPkg.text = extension.pkgName
 
-            view.extension_uninstall_button.setOnClickListener {
+            binding.extensionUninstallButton.setOnClickListener {
                 presenter.uninstallExtension()
             }
 
             if (extension.isObsolete) {
-                view.extension_warning_banner.isVisible = true
-                view.extension_warning_banner.setText(R.string.obsolete_extension_message)
+                binding.extensionWarningBanner.isVisible = true
+                binding.extensionWarningBanner.setText(R.string.obsolete_extension_message)
             }
 
             if (extension.isUnofficial) {
-                view.extension_warning_banner.isVisible = true
-                view.extension_warning_banner.setText(R.string.unofficial_extension_message)
+                binding.extensionWarningBanner.isVisible = true
+                binding.extensionWarningBanner.setText(R.string.unofficial_extension_message)
             }
         }
     }

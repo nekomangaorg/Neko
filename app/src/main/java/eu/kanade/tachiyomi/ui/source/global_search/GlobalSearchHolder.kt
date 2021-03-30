@@ -2,10 +2,10 @@ package eu.kanade.tachiyomi.ui.source.global_search
 
 import android.view.View
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerCardBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.source_global_search_controller_card.*
 
 /**
  * Holder that binds the [GlobalSearchItem] containing catalogue cards.
@@ -23,11 +23,13 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
 
     private var lastBoundResults: List<GlobalSearchMangaItem>? = null
 
+    private val binding = SourceGlobalSearchControllerCardBinding.bind(view)
+
     init {
         // Set layout horizontal.
-        recycler.layoutManager =
+        binding.recycler.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(view.context, androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
-        recycler.adapter = mangaAdapter
+        binding.recycler.adapter = mangaAdapter
     }
 
     /**
@@ -43,20 +45,20 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
         val langSuffix = if (source.lang.isNotEmpty()) " (${source.lang})" else ""
 
         // Set Title with country code if available.
-        title.text = titlePrefix + source.name + langSuffix
+        binding.title.text = titlePrefix + source.name + langSuffix
 
         when {
             results == null -> {
-                progress.visible()
+                binding.progress.visible()
                 showHolder()
             }
             results.isEmpty() -> {
-                progress.gone()
-                no_results.visible()
-                source_card.gone()
+                binding.progress.gone()
+                binding.noResults.visible()
+                binding.sourceCard.gone()
             }
             else -> {
-                progress.gone()
+                binding.progress.gone()
                 showHolder()
             }
         }
@@ -93,7 +95,7 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
     }
 
     private fun showHolder() {
-        source_card.visible()
-        no_results.gone()
+        binding.sourceCard.visible()
+        binding.noResults.gone()
     }
 }

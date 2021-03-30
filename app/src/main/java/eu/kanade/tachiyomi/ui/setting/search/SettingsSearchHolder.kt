@@ -5,8 +5,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.SettingsSearchControllerCardBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
-import kotlinx.android.synthetic.main.settings_search_controller_card.view.*
 import kotlin.reflect.full.createInstance
 
 /**
@@ -18,8 +18,9 @@ import kotlin.reflect.full.createInstance
 class SettingsSearchHolder(view: View, val adapter: SettingsSearchAdapter) :
     FlexibleViewHolder(view, adapter) {
 
+    private val binding = SettingsSearchControllerCardBinding.bind(view)
     init {
-        view.title_wrapper.setOnClickListener {
+        binding.titleWrapper.setOnClickListener {
             adapter.getItem(bindingAdapterPosition)?.let {
                 val ctrl = it.settingsSearchResult.searchController::class.createInstance()
                 ctrl.preferenceKey = it.settingsSearchResult.key
@@ -37,8 +38,8 @@ class SettingsSearchHolder(view: View, val adapter: SettingsSearchAdapter) :
      */
     fun bind(item: SettingsSearchItem) {
         val color = ColorUtils.setAlphaComponent(ContextCompat.getColor(itemView.context, R.color.colorAccent), 75)
-        itemView.search_result_pref_title.text = item.settingsSearchResult.title.highlightText(item.searchResult, color)
-        itemView.search_result_pref_summary.text = item.settingsSearchResult.summary.highlightText(item.searchResult, color)
-        itemView.search_result_pref_breadcrumb.text = item.settingsSearchResult.breadcrumb.highlightText(item.searchResult, color)
+        binding.searchResultPrefTitle.text = item.settingsSearchResult.title.highlightText(item.searchResult, color)
+        binding.searchResultPrefSummary.text = item.settingsSearchResult.summary.highlightText(item.searchResult, color)
+        binding.searchResultPrefBreadcrumb.text = item.settingsSearchResult.breadcrumb.highlightText(item.searchResult, color)
     }
 }
