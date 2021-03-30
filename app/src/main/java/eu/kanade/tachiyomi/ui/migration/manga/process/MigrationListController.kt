@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.ui.migration.MigrationMangaDialog
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.system.await
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -43,7 +42,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.migration_list_controller.*
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -96,7 +94,7 @@ class MigrationListController(bundle: Bundle? = null) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(recycler)
+        liftAppbarWith(binding.recycler)
         setTitle()
         val config = this.config ?: return
 
@@ -110,10 +108,10 @@ class MigrationListController(bundle: Bundle? = null) :
 
         adapter = MigrationProcessAdapter(this)
 
-        recycler.adapter = adapter
-        recycler.layoutManager = LinearLayoutManager(view.context)
-        recycler.setHasFixedSize(true)
-        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+        binding.recycler.adapter = adapter
+        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.setHasFixedSize(true)
+        binding.recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
 
         adapter?.updateDataSet(newMigratingManga.map { it.toModal() })
 

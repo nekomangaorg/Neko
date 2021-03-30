@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.pre_migration_controller.*
 import uy.kohesive.injekt.injectLazy
 
 class PreMigrationController(bundle: Bundle? = null) :
@@ -52,37 +51,35 @@ class PreMigrationController(bundle: Bundle? = null) :
     override fun createBinding(inflater: LayoutInflater) = PreMigrationControllerBinding.inflate(inflater)
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(recycler)
+        liftAppbarWith(binding.recycler)
 
         val ourAdapter = adapter ?: MigrationSourceAdapter(
             getEnabledSources().map { MigrationSourceItem(it, isEnabled(it.id.toString())) },
             this
         )
         adapter = ourAdapter
-        recycler.layoutManager = LinearLayoutManager(view.context)
-        recycler.setHasFixedSize(true)
-        recycler.adapter = ourAdapter
+        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.setHasFixedSize(true)
+        binding.recycler.adapter = ourAdapter
         ourAdapter.itemTouchHelperCallback = null // Reset adapter touch adapter to fix drag after rotation
         ourAdapter.isHandleDragEnabled = true
         dialog = null
-        val fabBaseMarginBottom = fab?.marginBottom ?: 0
-        recycler.doOnApplyWindowInsets { v, insets, padding ->
+        val fabBaseMarginBottom = binding.fab.marginBottom
+        binding.recycler.doOnApplyWindowInsets { v, insets, padding ->
 
-            fab?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = fabBaseMarginBottom + insets.systemWindowInsetBottom
             }
             v.post {
-                // offset the recycler by the fab's inset + some inset on top
+                // offset the binding.recycler by the binding.fab's inset + some inset on top
                 v.updatePaddingRelative(
-                    bottom = insets.systemWindowInsetBottom + (
-                        fab?.marginBottom
-                            ?: 0
-                        ) + (fab?.height ?: 0)
+                    bottom = insets.systemWindowInsetBottom + binding.fab.marginBottom +
+                        (binding.fab.height)
                 )
             }
         }
 
-        fab.setOnClickListener {
+        binding.fab.setOnClickListener {
             if (dialog?.isShowing != true) {
                 dialog = MigrationBottomSheetDialog(activity!!, this)
                 dialog?.show()
