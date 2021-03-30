@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import kotlinx.android.synthetic.main.pref_account_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -53,10 +52,10 @@ abstract class LoginDialogPreference(
     fun onViewCreated(view: View) {
         v = view.apply {
             if (usernameLabelRes != null) {
-                username_input.hint = view.context.getString(usernameLabelRes)
+                binding.usernameInput.hint = view.context.getString(usernameLabelRes)
             }
 
-            login.setOnClickListener {
+            binding.login.setOnClickListener {
                 checkLogin()
             }
 
