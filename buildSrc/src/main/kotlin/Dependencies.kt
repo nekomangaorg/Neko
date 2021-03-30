@@ -53,7 +53,7 @@ object Versions {
     const val injekt = "65b0440"
     const val jsoup = "1.13.1"
     const val junit = "4.13"
-    const val kotlin = "1.4.10"
+    const val kotlin = "1.4.20"
     const val kotlinCoroutines = "1.3.9"
     const val kotlinSerialization = "1.0.1"
     const val kotson = "2.5.0"
@@ -98,7 +98,6 @@ object LegacyPluginClassPath {
     const val aboutLibraries = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${Versions.aboutLibraries}"
     const val androidGradlePlugin = "com.android.tools.build:gradle:${Versions.androidGradlePlugin}"
     const val googleServices = "com.google.gms:google-services:${Versions.googleServices}"
-    const val kotlinExtensions = "org.jetbrains.kotlin:kotlin-android-extensions:${Versions.kotlin}"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
     const val kotlinSerializations = "org.jetbrains.kotlin:kotlin-serialization:${Versions.kotlin}"
     const val fireBaseCrashlytics = "com.google.firebase:firebase-crashlytics-gradle:2.3.0"
@@ -120,8 +119,10 @@ object Plugins {
     const val firebaseCrashlytics = "com.google.firebase.crashlytics"
     const val googleServices = "com.google.gms.google-services"
     const val kapt = "kapt"
+    const val kotlinParcelize = "kotlin-parcelize"
     const val kotlinAndroid = "android"
     const val kotlinExtensions = "android.extensions"
+    const val jetbrainsKotlin = "org.jetbrains.kotlin.android"
     const val kotlinSerialization = "org.jetbrains.kotlin.plugin.serialization"
     val gradleVersions = PluginClass("com.github.ben-manes.versions", Versions.gradleVersions)
     val ktLint = PluginClass("org.jlleitschuh.gradle.ktlint", Versions.ktlint)
@@ -144,7 +145,6 @@ object Configs {
 object BuildPluginsVersion {
     const val AGP = "com.android.tools.build:gradle:4.1.3"
     const val KOTLIN = "1.4.10"
-    const val ANDROID_EXTENSIONS = "org.jetbrains.kotlin:kotlin-android-extensions:$KOTLIN"
     const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
     const val KOTLINTER = "3.3.0"
     const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"

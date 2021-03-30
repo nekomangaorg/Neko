@@ -1,6 +1,7 @@
 plugins {
     id(Plugins.kotlinter.name) version Plugins.kotlinter.version
     id(Plugins.gradleVersions.name) version Plugins.gradleVersions.version
+    id(Plugins.jetbrainsKotlin) version Versions.kotlin apply false
 }
 allprojects {
     repositories {
@@ -25,7 +26,6 @@ buildscript {
         classpath(LegacyPluginClassPath.fireBaseCrashlytics)
         classpath(LegacyPluginClassPath.androidGradlePlugin)
         classpath(LegacyPluginClassPath.googleServices)
-        classpath(LegacyPluginClassPath.kotlinExtensions)
         classpath(LegacyPluginClassPath.kotlinPlugin)
         classpath(LegacyPluginClassPath.aboutLibraries)
         classpath(LegacyPluginClassPath.kotlinSerializations)
