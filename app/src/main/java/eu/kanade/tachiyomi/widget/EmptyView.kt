@@ -2,23 +2,23 @@ package eu.kanade.tachiyomi.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.common_view_empty.view.*
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     RelativeLayout(context, attrs) {
 
-    init {
-        inflate(context, R.layout.common_view_empty, this)
-    }
+    private val binding: CommonViewEmptyBinding =
+        CommonViewEmptyBinding.inflate(LayoutInflater.from(context), this, true)
 
     /**
      * Hide the information view
@@ -41,10 +41,10 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param textResource text of information view
      */
     fun show(@DrawableRes drawable: Int, message: String, actions: List<Action>? = null) {
-        image_view.setVectorCompat(drawable, context.getResourceColor(android.R.attr.textColorHint))
-        text_label.text = message
+        binding.imageView.setVectorCompat(drawable, context.getResourceColor(android.R.attr.textColorHint))
+        binding.textLabel.text = message
 
-        actions_container.removeAllViews()
+        binding.actionsContainer.removeAllViews()
         if (!actions.isNullOrEmpty()) {
             actions.forEach {
                 val button = (
@@ -58,7 +58,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                     setOnClickListener(it.listener)
                 }
 
-                actions_container.addView(button)
+                binding.actionsContainer.addView(button)
             }
         }
 
