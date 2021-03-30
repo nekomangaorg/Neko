@@ -74,27 +74,10 @@
             app:layout_constraintHorizontal_chainStyle="spread"
             android:tooltipText="@string/display_options"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/full_settings"
             app:layout_constraintStart_toEndOf="@id/webview_button"
             app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_tune_24dp" />
-
-        <ImageButton
-            android:id="@+id/full_settings"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:background="?selectableItemBackgroundBorderless"
-            android:contentDescription="@string/next_title"
-            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-            app:tint="?actionBarTintColor"
-            android:visibility="gone"
-            app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintEnd_toEndOf="parent"
-            android:tooltipText="@string/reader_settings"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/display_options"
-            app:layout_constraintTop_toTopOf="parent"
-            app:srcCompat="@drawable/ic_settings_24dp" />
+            app:srcCompat="@drawable/ic_tune_24dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.recyclerview.widget.RecyclerView

@@ -16,7 +16,6 @@ import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.fastadapter.listeners.ClickEventHook
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderChaptersSheetBinding
-import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
@@ -71,11 +70,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         binding.displayOptions.setOnClickListener {
             TabbedReaderSettingsSheet(activity).show()
-        }
-
-        binding.fullSettings.setOnClickListener {
-            val intent = SearchActivity.openReaderSettings(activity)
-            activity.startActivity(intent)
         }
 
         post {

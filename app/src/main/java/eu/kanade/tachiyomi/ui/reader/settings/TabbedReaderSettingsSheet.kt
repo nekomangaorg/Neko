@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.settings
 import android.view.View
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visInvisIf
@@ -53,7 +54,23 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) : TabbedBott
         filterView.activity = readerActivity
         generalView.sheet = this
 
-        binding.menu.gone()
+        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
+        binding.menu.visible()
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            binding.menu.tooltipText = context.getString(R.string.reader_settings)
+        }
+        binding.menu.setImageDrawable(
+            ContextCompat.getDrawable(
+                context,
+                R.drawable.ic_settings_24dp
+            )
+        )
+        binding.menu.setOnClickListener {
+            val intent = SearchActivity.openReaderSettings(readerActivity)
+            readerActivity.startActivity(intent)
+            dismiss()
+        }
+
         val attrs = window?.attributes
         val ogDim = attrs?.dimAmount ?: 0.25f
         binding.pager.adapter?.notifyDataSetChanged()
