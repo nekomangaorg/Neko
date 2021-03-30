@@ -2,21 +2,4 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item
-        android:id="@+id/action_share_page"
-        android:icon="@drawable/ic_share_24dp"
-        android:title="@string/share_page"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_save_page"
-        android:icon="@drawable/ic_save_24dp"
-        android:title="@string/save_page"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_set_page_as_cover"
-        android:icon="@drawable/ic_photo_24dp"
-        android:title="@string/set_page_as_cover"
-        app:showAsAction="never" />
 </menu>

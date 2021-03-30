@@ -13,7 +13,6 @@ import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
-import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -34,6 +33,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseRxActivity
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
@@ -43,7 +43,6 @@ import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
@@ -277,27 +276,6 @@ class ReaderActivity :
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.reader, menu)
-        return true
-    }
-
-    /**
-     * Called when an item of the options menu was clicked. Used to handle clicks on our menu
-     * entries.
-     */
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        coroutine?.cancel()
-        when (item.itemId) {
-            R.id.action_share_page, R.id.action_set_page_as_cover, R.id.action_save_page -> {
-                val currentChapter = presenter.getCurrentChapter() ?: return true
-                val page = currentChapter.pages?.getOrNull(binding.readerNav.pageSeekbar.progress) ?: return true
-                when (item.itemId) {
-                    R.id.action_share_page -> shareImage(page)
-                    R.id.action_set_page_as_cover -> showSetCoverPrompt(page)
-                    R.id.action_save_page -> saveImage(page)
-                }
-            }
-            else -> return super.onOptionsItemSelected(item)
-        }
         return true
     }
 
@@ -641,6 +619,41 @@ class ReaderActivity :
         // Set seekbar progress
         binding.readerNav.pageSeekbar.max = pages.lastIndex
         binding.readerNav.pageSeekbar.progress = page.index
+    }
+
+    /**
+     * Called from the viewer whenever a [page] is long clicked. A bottom sheet with a list of
+     * actions to perform is shown.
+     */
+    fun onPageLongTap(page: ReaderPage) {
+        val items = listOf(
+            MaterialMenuSheet.MenuSheetItem(
+                0,
+                R.drawable.ic_share_24dp,
+                R.string.share
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                1,
+                R.drawable.ic_save_24dp,
+                R.string.save
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                2,
+                R.drawable.ic_photo_24dp,
+                R.string.set_as_cover
+            )
+        )
+        MaterialMenuSheet(this, items) { _, item ->
+            when (item) {
+                0 -> shareImage(page)
+                1 -> saveImage(page)
+                2 -> showSetCoverPrompt(page)
+            }
+            true
+        }.show()
+        if (binding.chaptersSheet.root.sheetBehavior.isExpanded()) {
+            binding.chaptersSheet.root.sheetBehavior?.collapse()
+        }
     }
 
     /**
