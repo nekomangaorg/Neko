@@ -86,7 +86,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         this.pref = pref
         prefOffset = 0
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
-        setSelection(max(0,intValues.indexOf(pref.get())))
+        setSelection(max(0, intValues.indexOf(pref.get())))
         popup = makeSettingsPopup(pref, intValues, block)
         setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {

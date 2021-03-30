@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
@@ -90,7 +91,7 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
                 } else {
                     sheetBehavior.expand()
                     sheetBehavior.skipCollapsed = true
-                    window?.attributes = window?.attributes?.apply { screenBrightness = 0.01f }
+                    window?.attributes = window?.attributes?.apply { screenBrightness = WindowManager.LayoutParams.BRIGHTNESS_OVERRIDE_NONE }
                 }
             }
 
