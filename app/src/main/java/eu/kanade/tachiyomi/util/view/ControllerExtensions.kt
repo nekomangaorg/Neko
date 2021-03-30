@@ -32,7 +32,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.android.synthetic.main.main_activity.*
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
@@ -116,19 +115,19 @@ fun Controller.scrollViewWith(
     activityBinding?.appBar?.y = 0f
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
-    var appBarHeight = if (activity!!.toolbar.height > 0) activity!!.toolbar.height
+    var appBarHeight = if (activityBinding!!.toolbar.height > 0) activityBinding!!.toolbar.height
     else array.getDimensionPixelSize(0, 0)
     array.recycle()
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
-    activity!!.toolbar.post {
-        if (activity!!.toolbar.height > 0) {
-            appBarHeight = activity!!.toolbar.height
+    activityBinding!!.toolbar.post {
+        if (activityBinding!!.toolbar.height > 0) {
+            appBarHeight = activityBinding!!.toolbar.height
             recycler.requestApplyInsets()
         }
     }
     val updateViewsNearBottom = {
         onBottomNavUpdate?.invoke()
-        activity?.bottom_view?.translationY = activity?.bottom_nav?.translationY ?: 0f
+        activityBinding?.bottomView?.translationY = activityBinding?.bottomNav?.translationY ?: 0f
     }
     recycler.post {
         updateViewsNearBottom()
@@ -139,7 +138,7 @@ fun Controller.scrollViewWith(
     var fakeBottomNavView: View? = null
     if (!customPadding) {
         recycler.updatePaddingRelative(
-            top = activity!!.toolbar.y.toInt() + appBarHeight
+            top = activityBinding!!.toolbar.y.toInt() + appBarHeight
         )
     }
     recycler.doOnApplyWindowInsets { view, insets, _ ->
@@ -198,8 +197,8 @@ fun Controller.scrollViewWith(
                         fakeBottomNavView = null
                     }
                     lastY = 0f
-                    activity!!.toolbar.tag = randomTag
-                    activity!!.toolbar.setOnClickListener {
+                    activityBinding!!.toolbar.tag = randomTag
+                    activityBinding!!.toolbar.setOnClickListener {
                         if ((this@scrollViewWith as? BottomSheetController)?.sheetIsExpanded() != true) {
                             recycler.scrollToPosition(0)
                         } else {
@@ -223,7 +222,7 @@ fun Controller.scrollViewWith(
                     }
                     if (!customPadding && router.backstackSize == 2) {
                         val parent = recycler.parent as? ViewGroup ?: return
-                        val bottomNav = activity!!.bottom_nav ?: return
+                        val bottomNav = activityBinding?.bottomNav ?: return
                         val v = View(activity)
                         fakeBottomNavView = v
                         parent.addView(v, parent.indexOfChild(recycler) + 1)
@@ -236,7 +235,7 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                     }
                     elevationAnim?.cancel()
-                    if (activity!!.toolbar.tag == randomTag) activity!!.toolbar.setOnClickListener(null)
+                    if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(null)
                 }
             }
         }
@@ -259,7 +258,7 @@ fun Controller.scrollViewWith(
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
                         if (router.backstackSize == 1 && isInView) {
-                            activity!!.bottom_nav?.let {
+                            activityBinding!!.bottomNav.let {
                                 val animator = it.animate()?.translationY(0f)
                                     ?.setDuration(shortAnimationDuration.toLong())
                                 animator?.setUpdateListener {
@@ -277,8 +276,8 @@ fun Controller.scrollViewWith(
                             -activityBinding!!.appBar.height.toFloat(),
                             0f
                         )
-                        val tabBar = activity!!.bottom_nav
-                        if (tabBar != null && tabBar.isVisible() && isInView) {
+                        val tabBar = activityBinding!!.bottomNav
+                        if (tabBar.isVisible() && isInView) {
                             if (preferences.hideBottomNavOnScroll().get()) {
                                 tabBar.translationY += dy
                                 tabBar.translationY = MathUtils.clamp(
@@ -289,7 +288,7 @@ fun Controller.scrollViewWith(
                                 updateViewsNearBottom()
                             } else if (tabBar.translationY != 0f) {
                                 tabBar.translationY = 0f
-                                activity!!.bottom_view?.translationY = 0f
+                                activityBinding!!.bottomView?.translationY = 0f
                             }
                         }
                         if (!elevate && (
@@ -320,19 +319,19 @@ fun Controller.scrollViewWith(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
                         val closerToTop = abs(activityBinding!!.appBar.y) > halfWay
-                        val halfWayBottom = activity!!.bottom_nav.height.toFloat() / 2
-                        val closerToBottom = activity!!.bottom_nav.translationY > halfWayBottom
+                        val halfWayBottom = activityBinding!!.bottomNav.height.toFloat() / 2
+                        val closerToBottom = activityBinding!!.bottomNav.translationY > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
                         val closerToEdge =
-                            if (activity!!.bottom_nav.isVisible &&
+                            if (activityBinding!!.bottomNav.isVisible &&
                                 preferences.hideBottomNavOnScroll().get()
                             ) closerToBottom else closerToTop
                         lastY =
                             if (closerToEdge && !atTop) (-activityBinding!!.appBar.height.toFloat()) else 0f
                         activityBinding!!.appBar.animate().y(lastY)
                             .setDuration(shortAnimationDuration.toLong()).start()
-                        if (activity!!.bottom_nav.isVisible && isInView && preferences.hideBottomNavOnScroll().get()) {
-                            activity!!.bottom_nav?.let {
+                        if (activityBinding!!.bottomNav.isVisible && isInView && preferences.hideBottomNavOnScroll().get()) {
+                            activityBinding!!.bottomNav?.let {
                                 val lastBottomY =
                                     if (closerToEdge && !atTop) it.height.toFloat() else 0f
                                 val animator = it.animate()?.translationY(lastBottomY)
