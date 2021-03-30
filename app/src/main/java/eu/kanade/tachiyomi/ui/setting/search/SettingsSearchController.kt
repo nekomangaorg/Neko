@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.settings_search_controller.*
 
 /**
  * This controller shows and manages the different search result in settings search.
@@ -109,10 +108,10 @@ class SettingsSearchController :
 
         adapter = SettingsSearchAdapter(this)
 
-        liftAppbarWith(recycler)
+        liftAppbarWith(binding.recycler)
         // Create recycler and set adapter.
-        recycler.layoutManager = LinearLayoutManager(view.context)
-        recycler.adapter = adapter
+        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.adapter = adapter
 
         // load all search results
         SettingsSearchHelper.initPreferenceSearchResultCollection(presenter.preferences.context)

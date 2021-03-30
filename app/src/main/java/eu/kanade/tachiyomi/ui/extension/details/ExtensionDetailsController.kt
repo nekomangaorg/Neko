@@ -46,7 +46,6 @@ import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
-import kotlinx.android.synthetic.main.extension_detail_controller.*
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -90,7 +89,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     @SuppressLint("PrivateResource")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        scrollViewWith(extension_prefs_recycler, padBottom = true)
+        scrollViewWith(binding.extensionPrefsRecycler, padBottom = true)
 
         val extension = presenter.extension ?: return
         val context = view.context
@@ -114,7 +113,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         manager.setPreferences(screen)
 
-        extension_prefs_recycler.layoutManager =
+        binding.extensionPrefsRecycler.layoutManager =
             androidx.recyclerview.widget.LinearLayoutManager(context)
         val concatAdapterConfig = ConcatAdapter.Config.Builder()
             .setStableIdMode(ConcatAdapter.Config.StableIdMode.ISOLATED_STABLE_IDS)
@@ -122,12 +121,12 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         screen.setShouldUseGeneratedIds(true)
         val extHeaderAdapter = ExtensionDetailsHeaderAdapter(presenter)
         extHeaderAdapter.setHasStableIds(true)
-        extension_prefs_recycler.adapter = ConcatAdapter(
+        binding.extensionPrefsRecycler.adapter = ConcatAdapter(
             concatAdapterConfig,
             extHeaderAdapter,
             PreferenceGroupAdapter(screen)
         )
-        extension_prefs_recycler.addItemDecoration(ExtensionSettingsDividerItemDecoration(context))
+        binding.extensionPrefsRecycler.addItemDecoration(ExtensionSettingsDividerItemDecoration(context))
     }
 
     override fun onDestroyView(view: View) {
@@ -206,7 +205,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                         prefs.forEach { it.isVisible = checked }
                         true
                     } else {
-                        coordinator.snack(context.getString(R.string._must_be_enabled_first, title), Snackbar.LENGTH_LONG) {
+                        binding.coordinator.snack(context.getString(R.string._must_be_enabled_first, title), Snackbar.LENGTH_LONG) {
                             setAction(R.string.enable) {
                                 preferences.enabledLanguages() += source.lang
                                 isChecked = true

@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.android.synthetic.main.source_global_search_controller.*
 
 /**
  * This controller shows and manages the different search result in global search.
@@ -132,15 +131,15 @@ open class GlobalSearchController(
         super.onViewCreated(view)
         adapter = GlobalSearchAdapter(this)
 
-        recycler.updatePaddingRelative(
+        binding.recycler.updatePaddingRelative(
             top = (activityBinding?.toolbar?.height ?: 0) +
                 (activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0)
         )
 
         // Create recycler and set adapter.
-        recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        recycler.adapter = adapter
-        scrollViewWith(recycler, padBottom = true)
+        binding.recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
+        binding.recycler.adapter = adapter
+        scrollViewWith(binding.recycler, padBottom = true)
         if (extensionFilter != null) {
             customTitle = view.context?.getString(R.string.loading)
             setTitle()
