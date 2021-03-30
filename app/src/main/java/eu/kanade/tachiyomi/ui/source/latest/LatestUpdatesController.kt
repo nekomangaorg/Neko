@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
 import eu.kanade.tachiyomi.util.view.gone
-import kotlinx.android.synthetic.main.browse_source_controller.*
 
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseSourceController].
@@ -23,7 +22,7 @@ class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        fab.gone()
+        binding.fab.gone()
     }
 
     override fun createPresenter(): BrowseSourcePresenter {

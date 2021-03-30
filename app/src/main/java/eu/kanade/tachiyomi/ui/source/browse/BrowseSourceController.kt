@@ -46,7 +46,6 @@ import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
-import kotlinx.android.synthetic.main.browse_source_controller.*
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -139,9 +138,9 @@ open class BrowseSourceController(bundle: Bundle) :
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
 
-        fab.visibleIf(presenter.sourceFilters.isNotEmpty())
-        fab.setOnClickListener { showFilters() }
-        progress?.visible()
+        binding.fab.visibleIf(presenter.sourceFilters.isNotEmpty())
+        binding.fab.setOnClickListener { showFilters() }
+        binding.progress.visible()
     }
 
     override fun onDestroyView(view: View) {
@@ -155,12 +154,12 @@ open class BrowseSourceController(bundle: Bundle) :
 
     private fun setupRecycler(view: View) {
         var oldPosition = RecyclerView.NO_POSITION
-        val oldRecycler = catalogue_view?.getChildAt(1)
+        val oldRecycler = binding.catalogueView.getChildAt(1)
         if (oldRecycler is RecyclerView) {
-            oldPosition = (oldRecycler.layoutManager as androidx.recyclerview.widget.LinearLayoutManager).findFirstVisibleItemPosition()
+            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
-            catalogue_view?.removeView(oldRecycler)
+            binding.catalogueView.removeView(oldRecycler)
         }
 
         val recycler = if (presenter.isListMode) {
@@ -171,7 +170,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
-            (catalogue_view.inflate(R.layout.manga_recycler_autofit) as AutofitRecyclerView).apply {
+            (binding.catalogueView.inflate(R.layout.manga_recycler_autofit) as AutofitRecyclerView).apply {
                 columnWidth = when (preferences.gridSize().getOrDefault()) {
                     1 -> 1f
                     2 -> 1.25f
@@ -198,7 +197,7 @@ open class BrowseSourceController(bundle: Bundle) :
             recycler,
             true,
             afterInsets = { insets ->
-                fab?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
                 }
             }
@@ -208,15 +207,15 @@ open class BrowseSourceController(bundle: Bundle) :
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     if (dy <= 0) {
-                        fab.extend()
+                        binding.fab.extend()
                     } else {
-                        fab.shrink()
+                        binding.fab.shrink()
                     }
                 }
             }
         )
 
-        catalogue_view.addView(recycler, 1)
+        binding.catalogueView.addView(recycler, 1)
         if (oldPosition != RecyclerView.NO_POSITION) {
             recycler.layoutManager?.scrollToPosition(oldPosition)
         }
@@ -411,7 +410,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         val message = getErrorMessage(error)
         val retryAction = View.OnClickListener {
-            // If not the first page, show bottom progress bar.
+            // If not the first page, show bottom binding.progress bar.
             if (adapter.mainItemCount > 0 && progressItem != null) {
                 adapter.addScrollableFooterWithDelay(progressItem!!, 0, true)
             } else {
@@ -425,28 +424,26 @@ open class BrowseSourceController(bundle: Bundle) :
 
             actions += if (presenter.source is LocalSource) {
                 EmptyView.Action(
-                    R.string.local_source_help_guide,
-                    View.OnClickListener { openLocalSourceHelpGuide() }
-                )
+                    R.string.local_source_help_guide
+                ) { openLocalSourceHelpGuide() }
             } else {
                 EmptyView.Action(R.string.retry, retryAction)
             }
 
             if (presenter.source is HttpSource) {
                 actions += EmptyView.Action(
-                    R.string.open_in_webview,
-                    View.OnClickListener { openInWebView() }
-                )
+                    R.string.open_in_webview
+                ) { openInWebView() }
             }
 
-            empty_view.show(
+            binding.emptyView.show(
                 if (presenter.source is HttpSource) R.drawable.ic_browse_off_24dp
                 else R.drawable.ic_local_library_24dp,
                 message,
                 actions
             )
         } else {
-            snack = source_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
+            snack = binding.sourceLayout.snack(message, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.retry, retryAction)
             }
         }
@@ -465,7 +462,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     /**
-     * Sets a new progress item and reenables the scroll listener.
+     * Sets a new binding.progress item and reenables the scroll listener.
      */
     private fun resetProgressItem() {
         progressItem = ProgressItem()
@@ -537,21 +534,21 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     /**
-     * Shows the progress bar.
+     * Shows the binding.progress bar.
      */
     private fun showProgressBar() {
-        empty_view.gone()
-        progress?.visible()
+        binding.emptyView.gone()
+        binding.progress.visible()
         snack?.dismiss()
         snack = null
     }
 
     /**
-     * Hides active progress bars.
+     * Hides active binding.progress bars.
      */
     private fun hideProgressBar() {
-        empty_view.gone()
-        progress?.gone()
+        binding.emptyView.gone()
+        binding.progress.gone()
     }
 
     /**
@@ -582,7 +579,7 @@ open class BrowseSourceController(bundle: Bundle) :
         if (manga.favorite) {
             presenter.changeMangaFavorite(manga)
             adapter?.notifyItemChanged(position)
-            snack = source_layout?.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
+            snack = binding.sourceLayout.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.undo) {
                     if (!manga.favorite) addManga(manga, position)
                 }
@@ -598,7 +595,7 @@ open class BrowseSourceController(bundle: Bundle) :
             (activity as? MainActivity)?.setUndoSnackBar(snack)
         } else {
             addManga(manga, position)
-            snack = source_layout?.snack(R.string.added_to_library)
+            snack = binding.sourceLayout.snack(R.string.added_to_library)
         }
     }
 
@@ -631,7 +628,7 @@ open class BrowseSourceController(bundle: Bundle) :
     /**
      * Update manga to use selected categories.
      *
-     * @param mangas The list of manga to move to categories.
+     * @param manga The manga to move to categories.
      * @param categories The list of categories where manga will be placed.
      */
     override fun updateCategoriesForManga(manga: Manga?, categories: List<Category>) {
