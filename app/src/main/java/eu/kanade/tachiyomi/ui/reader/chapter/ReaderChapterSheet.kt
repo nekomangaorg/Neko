@@ -85,10 +85,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     binding.pill.alpha = (1 - max(0f, progress)) * 0.25f
                     val trueProgress = max(progress, 0f)
                     activity.binding.readerNav.root.alpha = (1 - abs(progress)).coerceIn(0f, 1f)
-//                    binding.chaptersButton.alpha = 1 - trueProgress
-//                    binding.webviewButton.alpha = trueProgress
-//                    binding.webviewButton.visibleIf(binding.webviewButton.alpha > 0)
-//                    binding.chaptersButton.visInvisIf(binding.chaptersButton.alpha > 0)
                     backgroundTintList =
                         ColorStateList.valueOf(lerpColor(primary, fullPrimary, trueProgress))
                     binding.chapterRecycler.alpha = trueProgress
@@ -108,8 +104,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         )
                         activity.binding.readerNav.root.visible()
                         activity.binding.readerNav.root.alpha = 1f
-//                        binding.chaptersButton.alpha = 1f
-//                        binding.webviewButton.alpha = 0f
                     }
                     if (state == BottomSheetBehavior.STATE_DRAGGING || state == BottomSheetBehavior.STATE_SETTLING) {
                         activity.binding.readerNav.root.visible()
@@ -118,8 +112,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         activity.binding.readerNav.root.gone()
                         activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
-//                        binding.chaptersButton.alpha = 0f
-//                        binding.webviewButton.alpha = 1f
                         if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
@@ -128,8 +120,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     }
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
-//                    binding.webviewButton.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
-//                    binding.chaptersButton.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
                 }
             }
         )
