@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -26,6 +27,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -77,7 +79,7 @@ class MangaDetailsPresenter(
 
     val source = sourceManager.getMangadex()
 
-    private var hasMergeChaptersInitially = manga.merge_manga_url != null
+    private var hasMergeChaptersInitially = manga.isMerged()
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -146,7 +148,7 @@ class MangaDetailsPresenter(
     }
 
     private suspend fun getChapters() {
-        val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
+        val chapters = db.getChapters(manga).executeOnIO().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource()).map { it.toModel() }
 
         // update all scanlators
         updateScanlators(chapters)
@@ -188,7 +190,7 @@ class MangaDetailsPresenter(
 
     private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
         val chapters =
-            (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
+            (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).filterIfUsingCache(downloadManager, manga, preferences.useCacheSource()).map { it.toModel() }
 
         // update all scanlators
         updateScanlators(chapters)
@@ -370,9 +372,9 @@ class MangaDetailsPresenter(
                 manga.merge_manga_url = null
                 hasMergeChaptersInitially = false
                 db.insertManga(manga)
-                val dbChapters = db.getChapters(manga).executeAsBlocking()
-                val mergedChapters = dbChapters.filter { it.isMergedChapter() }
-                val nonMergedChapters = dbChapters.filter { !it.isMergedChapter() }
+                val dbChapters = db.getChapters(manga).executeAsBlocking().partition { it.isMergedChapter() }
+                val mergedChapters = dbChapters.first
+                val nonMergedChapters = dbChapters.second
                 downloadManager.deleteChapters(mergedChapters, manga, sourceManager.getMangadex())
                 db.deleteChapters(mergedChapters).executeAsBlocking()
                 allChapterScanlators = nonMergedChapters.flatMap { it -> it.scanlatorList() }.toSet()
@@ -400,7 +402,6 @@ class MangaDetailsPresenter(
     fun refreshAll() {
         if (controller.isNotOnline()) return
 
-        val isMerged = manga.merge_manga_url.isNullOrBlank().not()
         val usingCache = preferences.useCacheSource()
 
         scope.launch {
@@ -416,7 +417,7 @@ class MangaDetailsPresenter(
             val nPair = async(Dispatchers.IO) {
                 try {
                     val result = source.fetchMangaAndChapterDetails(manga)
-                    if (isMerged) {
+                    if (manga.isMerged()) {
                         try {
                             val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
                             val list = result.second.toMutableList()
@@ -467,12 +468,12 @@ class MangaDetailsPresenter(
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
-            if (!error && (usingCache.not() || (usingCache && isMerged))) {
+            if (!error && (usingCache.not() || (usingCache && manga.isMerged()))) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     val downloadNew = preferences.downloadNew().getOrDefault()
                     if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                        if (!hasMergeChaptersInitially && isMerged) {
+                        if (!hasMergeChaptersInitially && manga.isMerged()) {
                             hasMergeChaptersInitially = true
                         } else {
                             val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
@@ -502,7 +503,7 @@ class MangaDetailsPresenter(
             }
 
             withContext(Dispatchers.IO) {
-                val allChaps = db.getChapters(manga).executeAsBlocking()
+                val allChaps = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
                 updateScanlators(allChaps.map { it.toModel() })
                 manga.scanlator_filter?.let {
                     filteredScanlators = MdUtil.getScanlators(it).toSet()

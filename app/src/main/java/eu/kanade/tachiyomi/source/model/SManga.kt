@@ -135,3 +135,7 @@ interface SManga : Serializable {
         }
     }
 }
+
+fun SManga.isMerged(): Boolean {
+    return merge_manga_url.isNullOrEmpty().not()
+}

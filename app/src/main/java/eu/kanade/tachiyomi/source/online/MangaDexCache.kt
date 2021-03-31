@@ -4,6 +4,7 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
@@ -13,6 +14,8 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMerged
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -35,6 +38,7 @@ open class MangaDexCache() : MangaDex() {
 
     private val preferences: PreferencesHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
+    private val downloadManager: DownloadManager by injectLazy()
 
     // Max request of 30 per second, per domain we query
     private val bucket = TokenBuckets.builder().withCapacity(30)
@@ -126,8 +130,19 @@ open class MangaDexCache() : MangaDex() {
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         val dbManga = db.getMangadexManga(manga.url).executeAsBlocking()!!
-        val dbChapters = db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking()
-        return Pair(fetchMangaDetails(manga), dbChapters)
+        val dbChapters = if (manga.isMerged()) {
+            db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking().filter { downloadManager.isChapterDownloaded(it, dbManga) || it.isMergedChapter() }
+        } else {
+            db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking()
+        }
+        //don't replace manga info if it already exists waste of network, and loses the original non cached info
+        val mangaToReturn = if (manga.description.isNullOrBlank()) {
+            fetchMangaDetails(manga)
+        } else {
+            dbManga
+        }
+
+        return Pair(mangaToReturn, dbChapters)
     }
 
     override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {

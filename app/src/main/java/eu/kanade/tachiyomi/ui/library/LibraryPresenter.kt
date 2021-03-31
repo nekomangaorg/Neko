@@ -8,12 +8,14 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -275,8 +277,8 @@ class LibraryPresenter(
         if (filterCompleted == STATE_INCLUDE && item.manga.status != SManga.COMPLETED) return false
         if (filterCompleted == STATE_EXCLUDE && item.manga.status == SManga.COMPLETED) return false
 
-        if (filterMerged == STATE_INCLUDE && item.manga.merge_manga_url == null) return false
-        if (filterMerged == STATE_EXCLUDE && item.manga.merge_manga_url != null) return false
+        if (filterMerged == STATE_INCLUDE && item.manga.isMerged().not()) return false
+        if (filterMerged == STATE_EXCLUDE && item.manga.isMerged()) return false
 
         if (filterMissingChapters == STATE_INCLUDE && item.manga.missing_chapters == null) return false
         if (filterMissingChapters == STATE_EXCLUDE && item.manga.missing_chapters != null) return false
@@ -801,7 +803,7 @@ class LibraryPresenter(
 
     /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
-        val chapters = db.getChapters(manga).executeAsBlocking()
+        val chapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
 
@@ -908,7 +910,7 @@ class LibraryPresenter(
         scope.launch {
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
-                    val chapters = db.getChapters(it).executeAsBlocking().filter { !it.read }
+                    val chapters = db.getChapters(it).executeAsBlocking().filter { !it.read }.filterIfUsingCache(downloadManager, it, preferences.useCacheSource())
                     downloadManager.downloadChapters(it, chapters)
                 }
             }
@@ -923,7 +925,7 @@ class LibraryPresenter(
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
                     withContext(Dispatchers.IO) {
-                        val chapters = db.getChapters(it).executeAsBlocking()
+                        val chapters = db.getChapters(it).executeAsBlocking().filterIfUsingCache(downloadManager, it, preferences.useCacheSource())
                         chapters.forEach {
                             it.read = markRead
                             it.last_page_read = 0

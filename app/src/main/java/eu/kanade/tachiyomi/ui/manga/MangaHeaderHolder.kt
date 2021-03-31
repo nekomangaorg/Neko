@@ -20,6 +20,7 @@ import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.contextCompatColor
@@ -196,7 +197,7 @@ class MangaHeaderHolder(
         with(merge_button) {
             visibleIf(manga.status != SManga.COMPLETED)
             val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
-            if (presenter.manga.merge_manga_url == null) {
+            if (presenter.manga.isMerged().not()) {
                 iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
                 iconics.contourColorInt = context.getResourceColor(R.attr.colorAccent)
                 iconics.contourWidthPx = 6

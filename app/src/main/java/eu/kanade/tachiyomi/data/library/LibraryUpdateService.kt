@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -29,6 +30,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
@@ -391,19 +393,13 @@ class LibraryUpdateService(
             notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
             val source = sourceManager.getMangadex()
 
-            //This prevents manga info from changing when updating from cached source
-            val details = if (preferences.useCacheSource().not() || (preferences.useCacheSource() && manga.description.isNullOrBlank())) {
-                source.fetchMangaAndChapterDetails(manga)
-            } else {
-                Pair(db.getManga(manga.id!!).executeAsBlocking()!!, db.getChaptersByMangaId(manga.id!!).executeAsBlocking())
-            }
+            val details = source.fetchMangaAndChapterDetails(manga)
 
             val fetchedChapters = details.second.toMutableList()
 
-
-            manga.merge_manga_url?.let {
+            if (manga.isMerged()) {
                 try {
-                    val chapters = sourceManager.getMergeSource().fetchChapters(it)
+                    val chapters = sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
                     fetchedChapters.addAll(chapters)
                 } catch (e: Exception) {
                     XLog.e("Error with mergedsource", e)
@@ -440,7 +436,7 @@ class LibraryUpdateService(
             }
 
             if (fetchedChapters.isNotEmpty()) {
-                val originalChapters = db.getChapters(manga).executeAsBlocking()
+                val originalChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
                 val newChapters = syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
 
                 manga.missing_chapters = updateMissingChapterCount(manga).missing_chapters
@@ -515,7 +511,7 @@ class LibraryUpdateService(
     }
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
-        val allChaps = db.getChapters(manga).executeAsBlocking()
+        val allChaps = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters

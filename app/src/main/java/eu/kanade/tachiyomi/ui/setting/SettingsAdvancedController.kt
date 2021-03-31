@@ -219,6 +219,10 @@ class SettingsAdvancedController : SettingsController() {
 
     private fun cleanupDownloads(removeRead: Boolean, removeNonFavorite: Boolean) {
         if (job?.isActive == true) return
+        if (preferences.useCacheSource()) {
+            activity?.toast("Skipping since using cached source.")
+            return
+        }
         activity?.toast(R.string.starting_cleanup)
         job = GlobalScope.launch(Dispatchers.IO) {
             val sourceManager: SourceManager = Injekt.get()

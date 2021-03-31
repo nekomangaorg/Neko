@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import kotlin.math.floor
 
@@ -11,8 +11,8 @@ import kotlin.math.floor
  * MangaDex manga that has chapter number reset every volume
  * Manhua/Manhwa that have multiple seasons on MangaDex but no seasons on MergedSource
  */
-fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapter>, manga: Manga, downloadManager: DownloadManager, useCacheSource: Boolean): List<SChapter> {
-    if (manga.merge_manga_url == null) {
+fun deduplicateChapters(sourceChapters: List<SChapter>, manga: Manga): List<SChapter> {
+    if (manga.isMerged().not()) {
         return sourceChapters
     }
 

@@ -67,6 +67,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -824,7 +825,7 @@ class MangaDetailsController :
 
     override fun openMerge() {
         val context = view?.context ?: return
-        if (presenter.manga.merge_manga_url != null) {
+        if (presenter.manga.isMerged()) {
             val items = listOf("Open merged source in WebView", "Remove merged Manga")
             MaterialDialog(context).show {
                 listItemsSingleChoice(items = items) { _, index, _ ->

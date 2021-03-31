@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.data.database.models
 
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.Serializable
 
@@ -37,3 +39,15 @@ fun Chapter.scanlatorList(): List<String> {
     this.scanlator ?: return emptyList()
     return MdUtil.getScanlators(this.scanlator!!)
 }
+
+fun List<Chapter>.filterIfUsingCache(downloadManager: DownloadManager, manga: Manga, usingCachedManga: Boolean): List<Chapter> {
+    return this.filter {
+        when {
+            usingCachedManga.not() -> true
+            downloadManager.isChapterDownloaded(it, manga) -> true
+            it.isMergedChapter() -> true
+            else -> false
+        }
+    }
+}
+

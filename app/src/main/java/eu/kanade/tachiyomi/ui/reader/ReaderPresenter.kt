@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.isWebtoon
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -99,7 +100,7 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
+        val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
@@ -195,7 +196,7 @@ class ReaderPresenter(
     suspend fun getChapters(): List<ReaderChapterItem> {
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
-            val dbChapters = db.getChapters(manga).executeAsBlocking()
+            val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
             val list =
                 chapterFilter.filterChaptersForReader(dbChapters, manga, getCurrentChapter()?.chapter)
                     .sortedBy {
