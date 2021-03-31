@@ -6,9 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
-import androidx.core.view.get
 import androidx.recyclerview.widget.RecyclerView
-import androidx.viewpager.widget.PagerAdapter.POSITION_NONE
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -51,11 +49,11 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     /**
      * Adapter containing the list of extensions
      */
-    private var adapter: ExtensionAdapter? = null
+    private var extAdapter: ExtensionAdapter? = null
     private var migAdapter: FlexibleAdapter<IFlexible<*>>? = null
 
     val adapters
-        get() = listOf(adapter, migAdapter)
+        get() = listOf(extAdapter, migAdapter)
 
     val presenter = ExtensionBottomPresenter(this)
 
@@ -78,8 +76,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun onCreate(controller: BrowseController) {
         // Initialize adapter, scroll listener and recycler views
-        adapter = ExtensionAdapter(this)
-        adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        extAdapter = ExtensionAdapter(this)
+        extAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         if (migAdapter == null) {
             migAdapter = SourceAdapter(this)
         }
@@ -163,7 +161,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onButtonClick(position: Int) {
-        val extension = (migAdapter?.getItem(position) as? ExtensionItem)?.extension ?: return
+        val extension = (extAdapter?.getItem(position) as? ExtensionItem)?.extension ?: return
         when (extension) {
             is Extension.Installed -> {
                 if (!extension.hasUpdate) {
@@ -185,7 +183,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         when (binding.tabs.selectedTabPosition) {
             0 -> {
                 val extension =
-                    (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return false
+                    (extAdapter?.getItem(position) as? ExtensionItem)?.extension ?: return false
                 if (extension is Extension.Installed) {
                     openDetails(extension)
                 } else if (extension is Extension.Untrusted) {
@@ -211,7 +209,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     override fun onItemLongClick(position: Int) {
         if (binding.tabs.selectedTabPosition == 0) {
-            val extension = (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return
+            val extension = (extAdapter?.getItem(position) as? ExtensionItem)?.extension ?: return
             if (extension is Extension.Installed || extension is Extension.Untrusted) {
                 uninstallExtension(extension.pkgName)
             }
@@ -269,13 +267,13 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun drawExtensions() {
         if (controller.extQuery.isNotBlank()) {
-            adapter?.updateDataSet(
+            extAdapter?.updateDataSet(
                 extensions.filter {
                     it.extension.name.contains(controller.extQuery, ignoreCase = true)
                 }
             )
         } else {
-            adapter?.updateDataSet(extensions)
+            extAdapter?.updateDataSet(extensions)
         }
         updateExtTitle()
     }
@@ -289,7 +287,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     fun downloadUpdate(item: ExtensionItem) {
-        adapter?.updateItem(item, item.installStep)
+        extAdapter?.updateItem(item, item.installStep)
     }
 
     override fun trustSignature(signatureHash: String) {
