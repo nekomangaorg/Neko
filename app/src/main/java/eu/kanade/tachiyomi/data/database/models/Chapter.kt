@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import java.io.Serializable
@@ -46,6 +47,7 @@ fun List<Chapter>.filterIfUsingCache(downloadManager: DownloadManager, manga: Ma
             usingCachedManga.not() -> true
             downloadManager.isChapterDownloaded(it, manga) -> true
             it.isMergedChapter() -> true
+            manga.isMerged().not() -> true
             else -> false
         }
     }
