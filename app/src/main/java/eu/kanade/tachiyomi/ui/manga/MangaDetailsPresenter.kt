@@ -77,7 +77,7 @@ class MangaDetailsPresenter(
 
     val source = sourceManager.getMangadex()
 
-    private var hasMergeChapters = manga.merge_manga_url != null
+    private var hasMergeChaptersInitially = manga.merge_manga_url != null
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -368,7 +368,7 @@ class MangaDetailsPresenter(
         scope.launch {
             withContext(Dispatchers.IO) {
                 manga.merge_manga_url = null
-                hasMergeChapters = false
+                hasMergeChaptersInitially = false
                 db.insertManga(manga)
                 val dbChapters = db.getChapters(manga).executeAsBlocking()
                 val mergedChapters = dbChapters.filter { it.isMergedChapter() }
@@ -400,6 +400,9 @@ class MangaDetailsPresenter(
     fun refreshAll() {
         if (controller.isNotOnline()) return
 
+        val isMerged = manga.merge_manga_url.isNullOrBlank().not()
+        val usingCache = preferences.useCacheSource()
+
         scope.launch {
             withContext(Dispatchers.Main) {
                 controller.setRefresh(true)
@@ -409,17 +412,11 @@ class MangaDetailsPresenter(
             var errorFromMerged: java.lang.Exception? = null
             var error = false
             val thumbnailUrl = manga.thumbnail_url
-            if (preferences.useCacheSource() && manga.merge_manga_url == null) {
-                withContext(Dispatchers.Main) {
-                    controller.showError("Using cached source, and manga is not merged.  No reason to update")
-                }
-                return@launch
-            }
 
             val nPair = async(Dispatchers.IO) {
                 try {
                     val result = source.fetchMangaAndChapterDetails(manga)
-                    if (manga.merge_manga_url != null) {
+                    if (isMerged) {
                         try {
                             val otherChapters = sourceManager.getMergeSource().fetchChapters(manga.merge_manga_url!!)
                             val list = result.second.toMutableList()
@@ -446,14 +443,19 @@ class MangaDetailsPresenter(
             val networkManga = networkPair.first
             val mangaWasInitalized = manga.initialized
             if (networkManga != null) {
-                manga.copyFrom(networkManga)
+                //only copy if it had no data
+                if (usingCache && manga.description.isNullOrEmpty()) {
+                    manga.copyFrom(networkManga)
+                }
                 manga.initialized = true
 
                 // force new cover if it exists
-                if (networkManga.thumbnail_url != null || preferences.refreshCoversToo().getOrDefault()) {
-                    coverCache.deleteFromCache(thumbnailUrl)
-                    withContext(Dispatchers.Main) {
-                        controller.clearCoverCache()
+                if (usingCache.not()) {
+                    if (networkManga.thumbnail_url != null || preferences.refreshCoversToo().getOrDefault()) {
+                        coverCache.deleteFromCache(thumbnailUrl)
+                        withContext(Dispatchers.Main) {
+                            controller.clearCoverCache()
+                        }
                     }
                 }
 
@@ -465,13 +467,13 @@ class MangaDetailsPresenter(
             }
             fetchExternalLinks()
             val finChapters = networkPair.second
-            if (!error) {
+            if (!error && (usingCache.not() || (usingCache && isMerged))) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     val downloadNew = preferences.downloadNew().getOrDefault()
                     if (downloadNew && !controller.fromCatalogue && mangaWasInitalized) {
-                        if (!hasMergeChapters && manga.merge_manga_url != null) {
-                            hasMergeChapters = true
+                        if (!hasMergeChaptersInitially && isMerged) {
+                            hasMergeChaptersInitially = true
                         } else {
                             val categoriesToDownload = preferences.downloadNewCategories().getOrDefault().map(String::toInt)
                             val shouldDownload = categoriesToDownload.isEmpty() || getMangaCategoryIds().any { it in categoriesToDownload }

@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -29,9 +30,10 @@ fun syncChaptersWithSource(
 ): Pair<List<Chapter>, List<Chapter>> {
 
     val downloadManager: DownloadManager = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
-    val dedupedChapters = deduplicateChapters(dbChapters, rawSourceChapters, manga)
+    val dedupedChapters = deduplicateChapters(dbChapters, rawSourceChapters, manga, downloadManager, preferences.useCacheSource())
 
     val sourceChapters = dedupedChapters.mapIndexed { i, sChapter ->
         Chapter.create().apply {
@@ -121,10 +123,10 @@ fun syncChaptersWithSource(
         // Recalculate update rate if unset and enough chapters are present
         if (manga.next_update == 0L && topChapters.size > 1) {
             var delta = 0L;
-            for (i in 0 until topChapters.size-1) {
-                delta += (topChapters[i].date_upload - topChapters[i+1].date_upload)
+            for (i in 0 until topChapters.size - 1) {
+                delta += (topChapters[i].date_upload - topChapters[i + 1].date_upload)
             }
-            delta /= topChapters.size-1
+            delta /= topChapters.size - 1
             manga.next_update = newestDate + delta
             db.updateNextUpdated(manga).executeAsBlocking()
         }
@@ -180,10 +182,10 @@ fun syncChaptersWithSource(
         // Recalculate next update since chapters were changed
         if (topChapters.size > 1) {
             var delta = 0L;
-            for (i in 0 until topChapters.size-1) {
-                delta += (topChapters[i].date_upload - topChapters[i+1].date_upload)
+            for (i in 0 until topChapters.size - 1) {
+                delta += (topChapters[i].date_upload - topChapters[i + 1].date_upload)
             }
-            delta /= topChapters.size-1
+            delta /= topChapters.size - 1
             manga.next_update = topChapters[0].date_upload + delta
             db.updateNextUpdated(manga).executeAsBlocking()
         }

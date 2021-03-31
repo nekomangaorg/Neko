@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -22,7 +21,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.Interceptor
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
@@ -40,7 +38,7 @@ open class MangaDexCache() : MangaDex() {
 
     // Max request of 30 per second, per domain we query
     private val bucket = TokenBuckets.builder().withCapacity(30)
-            .withFixedIntervalRefillStrategy(30, 1, TimeUnit.SECONDS).build()
+        .withFixedIntervalRefillStrategy(30, 1, TimeUnit.SECONDS).build()
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
         it.proceed(it.request())
@@ -68,16 +66,15 @@ open class MangaDexCache() : MangaDex() {
         // Next lets query the next set of manga from the database
         // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
         val limit = 16
-        return db.getCachedMangaRange(page-1, limit).asRxObservable().flatMapIterable { it }
-                .map { cacheManga ->
-                    SManga.create().apply {
-                        initialized = false
-                        url = "/manga/${cacheManga.mangaId}/"
-                        title = MdUtil.cleanString(cacheManga.title)
-                        thumbnail_url = null
-                    }
-                }.toList().map { MangasPage(it.take(limit-1), it.size == limit) }
-
+        return db.getCachedMangaRange(page - 1, limit).asRxObservable().flatMapIterable { it }
+            .map { cacheManga ->
+                SManga.create().apply {
+                    initialized = false
+                    url = "/manga/${cacheManga.mangaId}/"
+                    title = MdUtil.cleanString(cacheManga.title)
+                    thumbnail_url = null
+                }
+            }.toList().map { MangasPage(it.take(limit - 1), it.size == limit) }
     }
 
     override fun fetchSearchManga(
@@ -94,7 +91,7 @@ open class MangaDexCache() : MangaDex() {
         // Next lets query the next set of manga from the database
         // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
         val limit = 16
-        return db.searchCachedManga(query, page-1, limit).asRxObservable().flatMapIterable { it }
+        return db.searchCachedManga(query, page - 1, limit).asRxObservable().flatMapIterable { it }
             .map { cacheManga ->
                 SManga.create().apply {
                     initialized = false
@@ -102,7 +99,7 @@ open class MangaDexCache() : MangaDex() {
                     title = MdUtil.cleanString(cacheManga.title)
                     thumbnail_url = null
                 }
-            }.toList().map { MangasPage(it.take(limit-1), it.size == limit) }
+            }.toList().map { MangasPage(it.take(limit - 1), it.size == limit) }
     }
 
     override fun fetchFollows(): Observable<MangasPage> {
@@ -128,8 +125,8 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        val id = MdUtil.getMangaId(manga.url).toLong()
-        val dbChapters = db.getChaptersByMangaId(id).executeAsBlocking()
+        val dbManga = db.getMangadexManga(manga.url).executeAsBlocking()!!
+        val dbChapters = db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking()
         return Pair(fetchMangaDetails(manga), dbChapters)
     }
 
@@ -269,12 +266,12 @@ open class MangaDexCache() : MangaDex() {
             val request = Request.Builder().url("https://graphql.anilist.co").post(requestBody)
                 .addHeader("content-type", "application/json").build()
             val response = clientAnilist.newCall(request).execute()
-            if(response.isSuccessful && response.code == 200) {
+            if (response.isSuccessful && response.code == 200) {
                 val data = JSONObject(response.body!!.string())
                 return data.getJSONObject("data")
-                        .getJSONObject("Media")
-                        .getJSONObject("coverImage")
-                        .getString("extraLarge")
+                    .getJSONObject("Media")
+                    .getJSONObject("coverImage")
+                    .getString("extraLarge")
             }
         }
 
@@ -283,7 +280,7 @@ open class MangaDexCache() : MangaDex() {
         if (my_anime_list_id != null) {
             val request = GET("https://api.jikan.moe/v3/manga/${my_anime_list_id}/pictures", headers, CacheControl.FORCE_NETWORK)
             val response = clientMyAnimeList.newCall(request).execute()
-            if(response.isSuccessful && response.code == 200) {
+            if (response.isSuccessful && response.code == 200) {
                 val data = JSONObject(response.body!!.string())
                 val pictures = data.getJSONArray("pictures")
                 if (pictures.length() > 0) {

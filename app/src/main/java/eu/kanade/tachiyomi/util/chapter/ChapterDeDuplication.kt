@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import kotlin.math.floor
@@ -10,10 +11,11 @@ import kotlin.math.floor
  * MangaDex manga that has chapter number reset every volume
  * Manhua/Manhwa that have multiple seasons on MangaDex but no seasons on MergedSource
  */
-fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapter>, manga: Manga): List<SChapter> {
+fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapter>, manga: Manga, downloadManager: DownloadManager, useCacheSource: Boolean): List<SChapter> {
     if (manga.merge_manga_url == null) {
         return sourceChapters
     }
+
     val partition = sourceChapters.partition { !it.isMergedChapter() }
     val dexChapters = partition.first.toMutableList()
     val mergedChapters = partition.second
@@ -21,14 +23,14 @@ fun deduplicateChapters(dbChapters: List<SChapter>, sourceChapters: List<SChapte
     val isManga = "jp" == manga.lang_flag
 
     var dexMap: Map<Int?, List<Float?>>? = null
-    var only1VolNoVol: Boolean = false
+    var only1VolNoVol = false
 
     if (isManga.not()) {
         dexMap = dexChapters.groupBy(keySelector = { getVolumeNum(it) }, valueTransform = { getChapterNum(it) })
         only1VolNoVol = dexChapters.all { getVolumeNum(it) == 1 } && mergedChapters.all { getVolumeNum(it) == null }
     }
 
-    var dexSet: HashSet<Float?>? = null
+    var dexSet: MutableSet<Float?>? = null
     if (isManga || only1VolNoVol) {
         dexSet = dexChapters.map { getChapterNum(it) }.toHashSet()
     }
