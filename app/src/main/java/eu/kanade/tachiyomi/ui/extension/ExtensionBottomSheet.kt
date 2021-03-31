@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -91,8 +92,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         this.controller = controller
         binding.pager.doOnApplyWindowInsets { _, _, _ ->
             val bottomBar = controller.activityBinding?.bottomNav
-            // extRecyler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
-            // migRecyler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
+            extensionFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
+            migrationFrameLayout?.binding?.recycler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
         }
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
@@ -322,7 +323,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         override fun createView(container: ViewGroup): View {
             val binding = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(container.context), container, false)
             val view: RecyclerWithScrollerView = binding.root
-            view.setUp(this@ExtensionBottomSheet, binding)
+            view.setUp(this@ExtensionBottomSheet, binding, this@ExtensionBottomSheet.controller.activityBinding?.bottomNav?.height ?: 0)
+
             return view
         }
 
