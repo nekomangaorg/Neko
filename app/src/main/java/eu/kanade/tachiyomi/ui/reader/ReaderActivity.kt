@@ -376,7 +376,8 @@ class ReaderActivity :
             }
         }
 
-        val gestureDetector = GestureDetectorCompat(this, ReaderNavGestureDetector(this))
+        val readerNavGestureDetector = ReaderNavGestureDetector(this)
+        val gestureDetector = GestureDetectorCompat(this, readerNavGestureDetector)
         with(binding.readerNav) {
             listOf(root, leftChapter, rightChapter, pageSeekbar).forEach {
                 it.setOnTouchListener { _, event ->
@@ -384,16 +385,24 @@ class ReaderActivity :
                     if (event?.action == MotionEvent.ACTION_UP) {
                         if (!result) {
                             val sheetBehavior = binding.chaptersSheet.root.sheetBehavior
+                            binding.chaptersSheet.root.dispatchTouchEvent(event)
                             if (sheetBehavior?.state != BottomSheetBehavior.STATE_SETTLING && !sheetBehavior.isCollapsed()) {
-                                binding.chaptersSheet.root.dispatchTouchEvent(event)
                                 sheetBehavior?.collapse()
                             }
+                        }
+                        if (readerNavGestureDetector.lockVertical) {
+                            // event.action = MotionEvent.ACTION_CANCEL
+                            return@setOnTouchListener true
                         }
                     } else if ((event?.action != MotionEvent.ACTION_UP || event.action != MotionEvent.ACTION_DOWN) && result) {
                         event.action = MotionEvent.ACTION_CANCEL
                         return@setOnTouchListener false
                     }
-                    result
+                    if (it == pageSeekbar) {
+                        readerNavGestureDetector.lockVertical
+                    } else {
+                        result
+                    }
                 }
             }
         }
@@ -443,8 +452,8 @@ class ReaderActivity :
                 height = 280.dpToPx + insets.systemWindowInsetBottom
             }
             binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = 6.dpToPx + insets.systemWindowInsetLeft
-                rightMargin = 6.dpToPx + insets.systemWindowInsetRight
+                leftMargin = 12.dpToPx + insets.systemWindowInsetLeft
+                rightMargin = 12.dpToPx + insets.systemWindowInsetRight
             }
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             binding.viewerContainer.requestLayout()

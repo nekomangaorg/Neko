@@ -12,8 +12,10 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
 
     private val lastPixel = 0f
     private var buttonY: Float = 20f.dpToPx
-    private var hasScrollHorizontal = false
-    private var lockVertical = false
+    var hasScrollHorizontal = false
+        private set
+    var lockVertical = false
+        private set
 
     override fun onDown(e: MotionEvent): Boolean {
         lockVertical = false
@@ -51,7 +53,7 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
         if (hasScrollHorizontal) {
             activity.binding.chaptersSheet.root.sheetBehavior?.collapse()
         }
-        return lockVertical
+        return !hasScrollHorizontal && lockVertical
     }
 
     override fun onFling(
@@ -61,13 +63,14 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
         velocityY: Float
     ): Boolean {
         var result = false
-        val diffY = e2.rawY - e1.rawY
-        val diffX = e2.rawX - e1.rawX
+        val diffY = e2.y - e1.y
+        val diffX = e2.x - e1.x
         val sheetBehavior = activity.binding.chaptersSheet.root.sheetBehavior
-        if (!hasScrollHorizontal && abs(diffX) < abs(diffY)
-            && (abs(diffY) > SWIPE_THRESHOLD || abs(velocityY) > SWIPE_VELOCITY_THRESHOLD)
-            && diffY <= 0
+        if (!hasScrollHorizontal && abs(diffX) < abs(diffY) &&
+            (abs(diffY) > SWIPE_THRESHOLD || abs(velocityY) > SWIPE_VELOCITY_THRESHOLD) &&
+            diffY <= 0
         ) {
+            lockVertical = true
             sheetBehavior?.expand()
             result = true
         }
@@ -84,7 +87,7 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
     }
 
     private companion object {
-        const val SWIPE_THRESHOLD = 500
-        const val SWIPE_VELOCITY_THRESHOLD = 600
+        const val SWIPE_THRESHOLD = 50
+        const val SWIPE_VELOCITY_THRESHOLD = 200
     }
 }
