@@ -139,6 +139,9 @@ open class BrowseSourceController(bundle: Bundle) :
         if (presenter.source.isLogged().not()) {
             view.snack("You must be logged it.  please login")
         }
+        if(preferences.useCacheSource()){
+            view.snack("Browsing Cached Source")
+        }
         if (bundle?.getBoolean(APPLY_INSET) == true) {
             view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         }
@@ -147,7 +150,7 @@ open class BrowseSourceController(bundle: Bundle) :
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
 
-        fab.visibleIf(presenter.sourceFilters.isNotEmpty())
+        fab.visibleIf(presenter.sourceFilters.isNotEmpty() && preferences.useCacheSource().not())
         fab.setOnClickListener { showFilters() }
         progress?.visible()
     }
