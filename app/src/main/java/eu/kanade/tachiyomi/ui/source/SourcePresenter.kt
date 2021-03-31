@@ -1,19 +1,20 @@
 package eu.kanade.tachiyomi.ui.source
 
-import android.os.Bundle
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
-import rx.Observable
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
+import eu.kanade.tachiyomi.util.system.withUIContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.TreeMap
-import java.util.concurrent.TimeUnit
 
 /**
  * Presenter of [BrowseController]
@@ -23,86 +24,102 @@ import java.util.concurrent.TimeUnit
  * @param preferences application preferences.
  */
 class SourcePresenter(
+    val controller: BrowseController,
     val sourceManager: SourceManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
-) : BasePresenter<BrowseController>() {
+) {
 
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
     var sources = getEnabledSources()
 
-    /**
-     * Subscription for retrieving enabled sources.
-     */
-    private var sourceSubscription: Subscription? = null
-    private var lastUsedSubscription: Subscription? = null
+    var sourceItems = emptyList<SourceItem>()
+    var lastUsedItem: SourceItem? = null
 
-    override fun onCreate(savedState: Bundle?) {
-        super.onCreate(savedState)
+    var lastUsedJob: Job? = null
+
+    fun onCreate() {
+        if (lastSources != null) {
+            if (sourceItems.isEmpty()) {
+                sourceItems = lastSources ?: emptyList()
+            }
+            lastUsedItem = lastUsedItemRem
+            lastSources = null
+            lastUsedItemRem = null
+        }
 
         // Load enabled and last used sources
         loadSources()
-        loadLastUsedSource()
     }
 
     /**
      * Unsubscribe and create a new subscription to fetch enabled sources.
      */
     private fun loadSources() {
-        sourceSubscription?.unsubscribe()
+        scope.launch {
+            val pinnedSources = mutableListOf<SourceItem>()
+            val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
 
-        val pinnedSources = mutableListOf<SourceItem>()
-        val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
-
-        val map = TreeMap<String, MutableList<CatalogueSource>> { d1, d2 ->
-            // Catalogues without a lang defined will be placed at the end
-            when {
-                d1 == "" && d2 != "" -> 1
-                d2 == "" && d1 != "" -> -1
-                else -> d1.compareTo(d2)
-            }
-        }
-        val byLang = sources.groupByTo(map, { it.lang })
-        var sourceItems = byLang.flatMap {
-            val langItem = LangItem(it.key)
-            it.value.map { source ->
-                val isPinned = source.id.toString() in pinnedCatalogues
-                if (source.id.toString() in pinnedCatalogues) {
-                    pinnedSources.add(SourceItem(source, LangItem(PINNED_KEY)))
+            val map = TreeMap<String, MutableList<CatalogueSource>> { d1, d2 ->
+                // Catalogues without a lang defined will be placed at the end
+                when {
+                    d1 == "" && d2 != "" -> 1
+                    d2 == "" && d1 != "" -> -1
+                    else -> d1.compareTo(d2)
                 }
+            }
+            val byLang = sources.groupByTo(map, { it.lang })
+            sourceItems = byLang.flatMap {
+                val langItem = LangItem(it.key)
+                it.value.map { source ->
+                    val isPinned = source.id.toString() in pinnedCatalogues
+                    if (source.id.toString() in pinnedCatalogues) {
+                        pinnedSources.add(SourceItem(source, LangItem(PINNED_KEY)))
+                    }
 
-                SourceItem(source, langItem, isPinned)
+                    SourceItem(source, langItem, isPinned)
+                }
+            }
+
+            if (pinnedSources.isNotEmpty()) {
+                sourceItems = pinnedSources + sourceItems
+            }
+
+            lastUsedItem = getLastUsedSource(preferences.lastUsedCatalogueSource().get())
+            withUIContext {
+                controller.setSources(sourceItems, lastUsedItem)
+                loadLastUsedSource()
             }
         }
-
-        if (pinnedSources.isNotEmpty()) {
-            sourceItems = pinnedSources + sourceItems
-        }
-
-        sourceSubscription = Observable.just(sourceItems)
-            .subscribeLatestCache(BrowseController::setSources)
     }
 
     private fun loadLastUsedSource() {
-        lastUsedSubscription?.unsubscribe()
-        val sharedObs = preferences.lastUsedCatalogueSource().asObservable().share()
+        lastUsedJob?.cancel()
+        lastUsedJob = preferences.lastUsedCatalogueSource().asFlow()
+            .onEach {
+                lastUsedItem = getLastUsedSource(it)
+                withUIContext {
+                    controller.setLastUsedSource(lastUsedItem)
+                }
+            }.launchIn(scope)
+    }
 
-        // Emit the first item immediately but delay subsequent emissions by 500ms.
-        lastUsedSubscription = Observable.merge(
-            sharedObs.take(1),
-            sharedObs.skip(1).delay(500, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-        ).distinctUntilChanged().map {
-            (sourceManager.get(it) as? CatalogueSource)?.let { source ->
-                val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
-                val isPinned = source.id.toString() in pinnedCatalogues
-                if (isPinned) null
-                else SourceItem(source, null, isPinned)
-            }
-        }.subscribeLatestCache(BrowseController::setLastUsedSource)
+    private fun getLastUsedSource(value: Long): SourceItem? {
+        return (sourceManager.get(value) as? CatalogueSource)?.let { source ->
+            val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
+            val isPinned = source.id.toString() in pinnedCatalogues
+            if (isPinned) null
+            else SourceItem(source, null, isPinned)
+        }
     }
 
     fun updateSources() {
         sources = getEnabledSources()
         loadSources()
-        loadLastUsedSource()
+    }
+
+    fun onDestroy() {
+        lastSources = sourceItems
+        lastUsedItemRem = lastUsedItem
     }
 
     /**
@@ -124,5 +141,8 @@ class SourcePresenter(
     companion object {
         const val PINNED_KEY = "pinned"
         const val LAST_USED_KEY = "last_used"
+
+        private var lastSources: List<SourceItem>? = null
+        private var lastUsedItemRem: SourceItem? = null
     }
 }

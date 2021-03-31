@@ -13,6 +13,7 @@ import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
@@ -27,7 +28,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.BrowseControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -66,7 +67,7 @@ import kotlin.math.min
  * [SourceAdapter.OnLatestClickListener] call function data on latest item click
  */
 class BrowseController :
-    NucleusController<BrowseControllerBinding, SourcePresenter>(),
+    BaseController<BrowseControllerBinding>(),
     FlexibleAdapter.OnItemClickListener,
     SourceAdapter.SourceListener,
     RootSearchInterface,
@@ -109,9 +110,7 @@ class BrowseController :
         } else view?.context?.getString(R.string.browse)
     }
 
-    override fun createPresenter(): SourcePresenter {
-        return SourcePresenter()
-    }
+    val presenter = SourcePresenter(this)
 
     override fun createBinding(inflater: LayoutInflater) = BrowseControllerBinding.inflate(inflater)
 
@@ -119,29 +118,34 @@ class BrowseController :
         super.onViewCreated(view)
 
         adapter = SourceAdapter(this)
+        // Create binding.sourceRecycler and set adapter.
+        binding.sourceRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
 
-        // Create binding.recycler and set adapter.
-        binding.recycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(view.context)
-        binding.recycler.adapter = adapter
+        binding.sourceRecycler.adapter = adapter
         adapter?.isSwipeEnabled = true
-        // binding.recycler.addItemDecoration(SourceDividerItemDecoration(view.context))
+        adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        // binding.sourceRecycler.addItemDecoration(SourceDividerItemDecoration(view.context))
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         scrollViewWith(
-            binding.recycler,
+            binding.sourceRecycler,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
-                binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+                binding.sourceRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
             },
             onBottomNavUpdate = {
                 setBottomPadding()
             }
         )
 
-        binding.recycler.post {
+        binding.sourceRecycler.post {
             setBottomSheetTabs(if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f)
+            activityBinding?.appBar?.elevation = min(
+                if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f * 15f,
+                if (binding.sourceRecycler.canScrollVertically(-1)) 15f else 0f
+            )
         }
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
@@ -154,7 +158,7 @@ class BrowseController :
                     binding.shadow2.alpha = (1 - max(0f, progress)) * 0.25f
                     activityBinding?.appBar?.elevation = min(
                         (1f - progress) * 15f,
-                        if (binding.recycler.canScrollVertically(-1)) 15f else 0f
+                        if (binding.sourceRecycler.canScrollVertically(-1)) 15f else 0f
                     )
                     activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
                     val oldShow = showingExtensions
@@ -199,6 +203,10 @@ class BrowseController :
 
         if (showingExtensions) {
             binding.bottomSheet.root.sheetBehavior?.expand()
+        }
+        presenter.onCreate()
+        if (presenter.sourceItems.isNotEmpty()) {
+            setSources(presenter.sourceItems, presenter.lastUsedItem)
         }
     }
 
@@ -256,10 +264,10 @@ class BrowseController :
         )
         binding.shadow2.translationY = pad
         binding.bottomSheet.root.sheetBehavior?.peekHeight = 58.spToPx + padding
-        binding.bottomSheet.root.extensionFrameLayout.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.bottomSheet.root.extensionFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
-        binding.bottomSheet.root.migrationFrameLayout.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.bottomSheet.root.migrationFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
     }
@@ -293,6 +301,11 @@ class BrowseController :
         super.onDestroyView(view)
     }
 
+    override fun onDestroy() {
+        super.onDestroy()
+        presenter.onDestroy()
+    }
+
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (!type.isPush) {
@@ -305,7 +318,7 @@ class BrowseController :
             activityBinding?.appBar?.elevation =
                 when {
                     binding.bottomSheet.root.sheetBehavior.isExpanded() -> 0f
-                    binding.recycler.canScrollVertically(-1) -> 15f
+                    binding.sourceRecycler.canScrollVertically(-1) -> 15f
                     else -> 0f
                 }
         } else {
@@ -483,8 +496,9 @@ class BrowseController :
     /**
      * Called to update adapter containing sources.
      */
-    fun setSources(sources: List<IFlexible<*>>) {
-        adapter?.updateDataSet(sources)
+    fun setSources(sources: List<IFlexible<*>>, lastUsed: SourceItem?) {
+        adapter?.updateDataSet(sources, false)
+        setLastUsedSource(lastUsed)
     }
 
     /**

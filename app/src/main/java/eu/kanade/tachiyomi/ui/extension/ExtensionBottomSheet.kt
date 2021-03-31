@@ -6,6 +6,9 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.get
+import androidx.recyclerview.widget.RecyclerView
+import androidx.viewpager.widget.PagerAdapter.POSITION_NONE
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -28,9 +31,7 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -49,8 +50,11 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     /**
      * Adapter containing the list of extensions
      */
-    private var adapter: FlexibleAdapter<IFlexible<*>>? = null
+    private var adapter: ExtensionAdapter? = null
     private var migAdapter: FlexibleAdapter<IFlexible<*>>? = null
+
+    val adapters
+        get() = listOf(adapter, migAdapter)
 
     val presenter = ExtensionBottomPresenter(this)
 
@@ -59,9 +63,12 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     private lateinit var binding: ExtensionsBottomSheetBinding
 
     lateinit var controller: BrowseController
+    var boundViews = arrayListOf<RecyclerWithScrollerView>()
 
-    val extensionFrameLayout = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(context))
-    val migrationFrameLayout = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(context))
+    val extensionFrameLayout: RecyclerWithScrollerView? 
+        get() = binding.pager.findViewWithTag("TabbedRecycler0") as? RecyclerWithScrollerView
+    val migrationFrameLayout: RecyclerWithScrollerView?
+        get() = binding.pager.findViewWithTag("TabbedRecycler1") as? RecyclerWithScrollerView
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -71,29 +78,22 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     fun onCreate(controller: BrowseController) {
         // Initialize adapter, scroll listener and recycler views
         adapter = ExtensionAdapter(this)
-        migAdapter = ExtensionAdapter(this)
+        adapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        if (migAdapter == null) {
+            migAdapter = SourceAdapter(this)
+        }
+        migAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         sheetBehavior = BottomSheetBehavior.from(this)
         // Create recycler and set adapter.
-        val extRecyler = extensionFrameLayout.recycler
-        val migRecyler = migrationFrameLayout.recycler
 
-        extRecyler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        extRecyler.adapter = adapter
-        extRecyler.setHasFixedSize(true)
-        extRecyler.addItemDecoration(ExtensionDividerItemDecoration(context))
-
-        migRecyler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
-        migRecyler.setHasFixedSize(true)
-
-        adapter?.fastScroller = extensionFrameLayout.fastScroller
+        binding.pager.adapter = TabbedSheetAdapter()
+        binding.tabs.setupWithViewPager(binding.pager)
         this.controller = controller
         binding.pager.doOnApplyWindowInsets { _, _, _ ->
             val bottomBar = controller.activityBinding?.bottomNav
-            extRecyler.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
-            migRecyler.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
+            // extRecyler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
+            // migRecyler?.updatePaddingRelative(bottom = bottomBar?.height ?: 0)
         }
-        binding.pager.adapter = TabbedSheetAdapter()
-        binding.tabs.setupWithViewPager(binding.pager)
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 if (canExpand) {
@@ -103,18 +103,18 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler.isNestedScrollingEnabled = true
+                }?.binding?.recycler?.isNestedScrollingEnabled = true
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler.requestLayout()
+                }?.binding?.recycler?.requestLayout()
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler.isNestedScrollingEnabled = false
+                }?.binding?.recycler?.isNestedScrollingEnabled = false
                 if (tab?.position == 1) {
                     presenter.deselectSource()
                 }
@@ -125,7 +125,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
-                }.recycler.isNestedScrollingEnabled = true
+                }?.binding?.recycler?.isNestedScrollingEnabled = true
             }
         })
         presenter.onCreate()
@@ -144,7 +144,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
 
     fun updatedNestedRecyclers() {
         listOf(extensionFrameLayout, migrationFrameLayout).forEachIndexed { index, recyclerWithScrollerBinding ->
-            recyclerWithScrollerBinding.recycler.isNestedScrollingEnabled = binding.pager.currentItem == index
+            recyclerWithScrollerBinding?.binding?.recycler?.isNestedScrollingEnabled = binding.pager.currentItem == index
         }
     }
 
@@ -162,7 +162,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     override fun onButtonClick(position: Int) {
-        val extension = (adapter?.getItem(position) as? ExtensionItem)?.extension ?: return
+        val extension = (migAdapter?.getItem(position) as? ExtensionItem)?.extension ?: return
         when (extension) {
             is Extension.Installed -> {
                 if (!extension.hasUpdate) {
@@ -249,21 +249,19 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     }
 
     fun setMigrationSources(sources: List<SourceItem>) {
-        val migRecyler = migrationFrameLayout.recycler
         if (migAdapter !is SourceAdapter) {
             migAdapter = SourceAdapter(this)
-            migRecyler.adapter = migAdapter
-            migAdapter?.fastScroller = migrationFrameLayout.fastScroller
+            migrationFrameLayout?.onBind(migAdapter!!)
+            migAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
         migAdapter?.updateDataSet(sources, true)
     }
 
     fun setMigrationManga(manga: List<MangaItem>?) {
-        val migRecyler = migrationFrameLayout.recycler
         if (migAdapter !is MangaAdapter) {
             migAdapter = MangaAdapter(this)
-            migRecyler.adapter = migAdapter
-            migAdapter?.fastScroller = migrationFrameLayout.fastScroller
+            migrationFrameLayout?.onBind(migAdapter!!)
+            migAdapter?.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         }
         migAdapter?.updateDataSet(manga, true)
     }
@@ -301,14 +299,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         presenter.uninstallExtension(pkgName)
     }
 
-    private inner class TabbedSheetAdapter : ViewPagerAdapter() {
-
-        override fun createView(container: ViewGroup, position: Int): View {
-            return when (position) {
-                0 -> extensionFrameLayout.root
-                else -> migrationFrameLayout.root
-            }
-        }
+    private inner class TabbedSheetAdapter : RecyclerViewPagerAdapter() {
 
         override fun getCount(): Int {
             return 2
@@ -321,6 +312,61 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                     else -> R.string.migration
                 }
             )
+        }
+
+        /**
+         * Creates a new view for this adapter.
+         *
+         * @return a new view.
+         */
+        override fun createView(container: ViewGroup): View {
+            val binding = RecyclerWithScrollerBinding.inflate(LayoutInflater.from(container.context), container, false)
+            val view: RecyclerWithScrollerView = binding.root
+            view.setUp(this@ExtensionBottomSheet, binding)
+            return view
+        }
+
+        /**
+         * Binds a view with a position.
+         *
+         * @param view the view to bind.
+         * @param position the position in the adapter.
+         */
+        override fun bindView(view: View, position: Int) {
+            (view as RecyclerWithScrollerView).onBind(adapters[position]!!)
+            view.setTag("TabbedRecycler$position")
+            boundViews.add(view)
+        }
+
+        /**
+         * Recycles a view.
+         *
+         * @param view the view to recycle.
+         * @param position the position in the adapter.
+         */
+        override fun recycleView(view: View, position: Int) {
+            // (view as RecyclerWithScrollerView).onRecycle()
+            boundViews.remove(view)
+        }
+
+        /**
+         * Returns the position of the view.
+         */
+        override fun getItemPosition(obj: Any): Int {
+            val view = (obj as? RecyclerWithScrollerView) ?: return POSITION_NONE
+            val index = adapters.indexOfFirst { it == view.binding?.recycler?.adapter }
+            return if (index == -1) POSITION_NONE else index
+        }
+
+        /**
+         * Called when the view of this adapter is being destroyed.
+         */
+        fun onDestroy() {
+            /*for (view in boundViews) {
+                if (view is LibraryCategoryView) {
+                    view.onDestroy()
+                }
+            }*/
         }
     }
 }

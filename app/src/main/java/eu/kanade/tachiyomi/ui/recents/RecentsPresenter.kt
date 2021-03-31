@@ -367,7 +367,7 @@ class RecentsPresenter(
         getRecents()
     }
 
-    companion object {
+    private companion object {
         var lastRecents: List<RecentMangaItem>? = null
     }
 }
