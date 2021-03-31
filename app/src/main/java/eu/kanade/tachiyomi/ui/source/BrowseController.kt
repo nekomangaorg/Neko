@@ -131,9 +131,13 @@ class BrowseController :
         array.recycle()
         scrollViewWith(
             binding.sourceRecycler,
+            customPadding = true,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
-                binding.sourceRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+                binding.sourceRecycler.updatePaddingRelative(
+                    top = activityBinding?.appBar?.height ?: 0,
+                    bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
+                )
             },
             onBottomNavUpdate = {
                 setBottomPadding()
@@ -145,6 +149,9 @@ class BrowseController :
             activityBinding?.appBar?.elevation = min(
                 if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f * 15f,
                 if (binding.sourceRecycler.canScrollVertically(-1)) 15f else 0f
+            )
+            binding.sourceRecycler.updatePaddingRelative(
+                bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
             )
         }
 
@@ -270,6 +277,9 @@ class BrowseController :
         binding.bottomSheet.root.migrationFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }
+        binding.sourceRecycler.updatePaddingRelative(
+            bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
+        )
     }
 
     override fun showSheet() {
