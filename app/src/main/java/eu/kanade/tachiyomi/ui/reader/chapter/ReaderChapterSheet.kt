@@ -128,8 +128,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     }
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
-                    binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
-                    binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
 //                    binding.webviewButton.visibleIf(state != BottomSheetBehavior.STATE_COLLAPSED)
 //                    binding.chaptersButton.visInvisIf(state != BottomSheetBehavior.STATE_EXPANDED)
                 }

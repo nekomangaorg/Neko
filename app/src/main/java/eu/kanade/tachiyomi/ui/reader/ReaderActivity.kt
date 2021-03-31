@@ -22,6 +22,7 @@ import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.GestureDetectorCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -63,6 +64,7 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -336,6 +338,7 @@ class ReaderActivity :
     /**
      * Initializes the reader menu. It sets up click listeners and the initial visibility.
      */
+    @SuppressLint("ClickableViewAccessibility")
     private fun initializeMenu() {
         // Set binding.toolbar
         setSupportActionBar(binding.toolbar)
@@ -370,6 +373,28 @@ class ReaderActivity :
                 presenter.loadNextChapter()
             } else {
                 presenter.loadPreviousChapter()
+            }
+        }
+
+        val gestureDetector = GestureDetectorCompat(this, ReaderNavGestureDetector(this))
+        with(binding.readerNav) {
+            listOf(root, leftChapter, rightChapter, pageSeekbar).forEach {
+                it.setOnTouchListener { _, event ->
+                    val result = gestureDetector.onTouchEvent(event)
+                    if (event?.action == MotionEvent.ACTION_UP) {
+                        if (!result) {
+                            val sheetBehavior = binding.chaptersSheet.root.sheetBehavior
+                            if (sheetBehavior?.state != BottomSheetBehavior.STATE_SETTLING && !sheetBehavior.isCollapsed()) {
+                                binding.chaptersSheet.root.dispatchTouchEvent(event)
+                                sheetBehavior?.collapse()
+                            }
+                        }
+                    } else if ((event?.action != MotionEvent.ACTION_UP || event.action != MotionEvent.ACTION_DOWN) && result) {
+                        event.action = MotionEvent.ACTION_CANCEL
+                        return@setOnTouchListener false
+                    }
+                    result
+                }
             }
         }
 
