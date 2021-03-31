@@ -403,7 +403,7 @@ class ReaderActivity :
                         return@setOnTouchListener false
                     }
                     if (it == pageSeekbar) {
-                        readerNavGestureDetector.lockVertical || !readerNavGestureDetector.hasScrollHorizontal
+                        readerNavGestureDetector.lockVertical || (!readerNavGestureDetector.hasScrollHorizontal && event?.action != MotionEvent.ACTION_UP)
                     } else {
                         result
                     }
