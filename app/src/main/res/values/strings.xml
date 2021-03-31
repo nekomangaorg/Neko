@@ -303,8 +303,8 @@
     <string name="webtoon_style">webtoon style</string>
     <string name="next_page">Next page</string>
     <string name="previous_page">Previous page</string>
-    <string name="next_chapter">Next page</string>
-    <string name="previous_chapter">Previous page</string>
+    <string name="next_chapter">Next chapter</string>
+    <string name="previous_chapter">Previous chapter</string>
 
     <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>

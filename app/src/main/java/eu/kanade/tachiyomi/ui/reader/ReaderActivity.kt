@@ -357,6 +357,22 @@ class ReaderActivity :
             }
         }
 
+        binding.readerNav.leftChapter.setOnClickListener {
+            if (viewer is R2LPagerViewer) {
+                presenter.loadNextChapter()
+            } else {
+                presenter.loadPreviousChapter()
+            }
+        }
+
+        binding.readerNav.rightChapter.setOnClickListener {
+            if (viewer !is R2LPagerViewer) {
+                presenter.loadNextChapter()
+            } else {
+                presenter.loadPreviousChapter()
+            }
+        }
+
         // Init listeners on bottom menu
         binding.readerNav.pageSeekbar.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
@@ -510,6 +526,16 @@ class ReaderActivity :
         }
         viewer = newViewer
         binding.viewerContainer.addView(newViewer.getView())
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if (newViewer is R2LPagerViewer) {
+                binding.readerNav.leftChapter.tooltipText = getString(R.string.next_chapter)
+                binding.readerNav.rightChapter.tooltipText = getString(R.string.previous_chapter)
+            } else {
+                binding.readerNav.leftChapter.tooltipText = getString(R.string.previous_chapter)
+                binding.readerNav.rightChapter.tooltipText = getString(R.string.next_chapter)
+            }
+        }
 
         binding.navigationOverlay.isLTR = !(viewer is L2RPagerViewer)
         binding.viewerContainer.setBackgroundColor(
