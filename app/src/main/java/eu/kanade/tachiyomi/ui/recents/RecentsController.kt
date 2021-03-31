@@ -124,11 +124,17 @@ class RecentsController(bundle: Bundle? = null) :
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
                 binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+                binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
             },
             onBottomNavUpdate = {
                 setBottomPadding()
             }
         )
+
+        activityBinding?.bottomNav?.post {
+            binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+            binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+        }
 
         presenter.onCreate()
         if (presenter.recentItems.isNotEmpty()) {

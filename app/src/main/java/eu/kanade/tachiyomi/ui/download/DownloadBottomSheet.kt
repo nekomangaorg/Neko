@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
 import eu.kanade.tachiyomi.ui.extension.ExtensionDividerItemDecoration
 import eu.kanade.tachiyomi.ui.recents.RecentsController
-import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
@@ -64,7 +63,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
         adapter?.fastScroller = binding.fastScroller
         binding.dlRecycler.setHasFixedSize(true)
         binding.dlRecycler.addItemDecoration(ExtensionDividerItemDecoration(context))
-        binding.dlRecycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
         this.controller = controller
         updateDLTitle()
 
