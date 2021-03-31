@@ -65,7 +65,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     lateinit var controller: BrowseController
     var boundViews = arrayListOf<RecyclerWithScrollerView>()
 
-    val extensionFrameLayout: RecyclerWithScrollerView? 
+    val extensionFrameLayout: RecyclerWithScrollerView?
         get() = binding.pager.findViewWithTag("TabbedRecycler0") as? RecyclerWithScrollerView
     val migrationFrameLayout: RecyclerWithScrollerView?
         get() = binding.pager.findViewWithTag("TabbedRecycler1") as? RecyclerWithScrollerView

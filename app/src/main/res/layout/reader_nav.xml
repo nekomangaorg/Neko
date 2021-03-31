@@ -16,12 +16,22 @@
     android:gravity="center"
     android:orientation="horizontal">
 
+    <ProgressBar
+        android:id="@+id/left_progress"
+        style="?android:attr/progressBarStyleSmall"
+        android:visibility="gone"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="8dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="56dp" />
+
     <ImageButton
         android:id="@+id/left_chapter"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginStart="60dp"
+        android:layout_marginStart="56dp"
         android:background="?selectableItemBackgroundBorderless"
         android:layout_marginEnd="8dp"
         android:contentDescription="@string/previous_chapter"
@@ -32,9 +42,7 @@
     <LinearLayout
         android:id="@+id/reader_seekbar"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingStart="10dp"
-        android:paddingEnd="10dp">
+        android:layout_height="match_parent">
 
         <TextView
             android:id="@+id/left_page_text"
@@ -70,11 +78,21 @@
         android:layout_height="40dp"
         android:layout_gravity="center"
         android:layout_marginStart="8dp"
-        android:layout_marginEnd="60dp"
+        android:layout_marginEnd="56dp"
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/next_chapter"
         android:padding="@dimen/material_layout_keylines_screen_edge_margin"
         app:tint="@color/textColorPrimary"
         app:srcCompat="@drawable/ic_skip_next_24" />
+
+    <ProgressBar
+        android:id="@+id/right_progress"
+        style="?android:attr/progressBarStyleSmall"
+        android:visibility="gone"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:layout_marginStart="8dp"
+        android:layout_marginEnd="56dp" />
 
 </LinearLayout>

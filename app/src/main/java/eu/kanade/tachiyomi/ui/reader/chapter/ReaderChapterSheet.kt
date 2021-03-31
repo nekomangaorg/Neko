@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.visible
@@ -43,6 +44,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     var shouldCollapse = true
     var selectedChapterId = -1L
 
+    var loadingPos = 0
     lateinit var binding: ReaderChaptersSheetBinding
 
     override fun onFinishInflate() {
@@ -126,13 +128,20 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         adapter = FastAdapter.with(itemAdapter)
         binding.chapterRecycler.adapter = adapter
-        adapter?.onClickListener = { _, _, item, _ ->
-            if (!sheetBehavior.isExpanded()) {
+        adapter?.onClickListener = { _, _, item, position ->
+            if (!sheetBehavior.isExpanded() || activity.isLoading) {
                 false
             } else {
                 if (item.chapter.id != presenter.getCurrentChapter()?.chapter?.id) {
+                    activity.binding.readerNav.leftChapter.invisible()
+                    activity.binding.readerNav.rightChapter.invisible()
+
                     shouldCollapse = false
                     presenter.loadChapter(item.chapter)
+                    loadingPos = position
+                    val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(position) as? ReaderChapterItem.ViewHolder)?.binding
+                    itemView?.bookmarkImage?.gone()
+                    itemView?.progress?.visible()
                 }
                 true
             }
@@ -141,7 +150,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             object : ClickEventHook<ReaderChapterItem>() {
                 override fun onBind(viewHolder: RecyclerView.ViewHolder): View? {
                     return if (viewHolder is ReaderChapterItem.ViewHolder) {
-                        viewHolder.bookmarkButton
+                        viewHolder.binding.bookmarkButton
                     } else {
                         null
                     }
@@ -153,8 +162,10 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     fastAdapter: FastAdapter<ReaderChapterItem>,
                     item: ReaderChapterItem
                 ) {
-                    presenter.toggleBookmark(item.chapter)
-                    refreshList()
+                    if (!activity.isLoading) {
+                        presenter.toggleBookmark(item.chapter)
+                        refreshList()
+                    }
                 }
             }
         )
@@ -166,6 +177,12 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         binding.chapterRecycler.layoutManager = LinearLayoutManager(context)
         refreshList()
+    }
+
+    fun resetChapter() {
+        val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(loadingPos) as? ReaderChapterItem.ViewHolder)?.binding
+        itemView?.bookmarkImage?.visible()
+        itemView?.progress?.gone()
     }
 
     fun refreshList() {

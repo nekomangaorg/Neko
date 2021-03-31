@@ -2,15 +2,13 @@ package eu.kanade.tachiyomi.ui.reader.chapter
 
 import android.graphics.Typeface
 import android.view.View
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.core.graphics.drawable.DrawableCompat
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.databinding.ReaderChapterItemBinding
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
@@ -35,17 +33,14 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
     }
 
     class ViewHolder(view: View) : FastAdapter.ViewHolder<ReaderChapterItem>(view) {
-        private var chapterTitle: TextView = view.findViewById(R.id.chapter_title)
-        private var chapterSubtitle: TextView = view.findViewById(R.id.chapter_scanlator)
-        var bookmarkButton: FrameLayout = view.findViewById(R.id.bookmark_layout)
-        private var bookmarkImage: ImageView = view.findViewById(R.id.bookmark_image)
+        val binding = ReaderChapterItemBinding.bind(view)
 
         override fun bindView(item: ReaderChapterItem, payloads: List<Any>) {
             val manga = item.manga
 
             val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
 
-            chapterTitle.text = when (manga.displayMode) {
+            binding.chapterTitle.text = when (manga.displayMode) {
                 Manga.DISPLAY_NUMBER -> {
                     val number = item.decimalFormat.format(item.chapter_number.toDouble())
                     itemView.context.getString(R.string.chapter_, number)
@@ -55,35 +50,35 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val statuses = mutableListOf<String>()
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
-            item.scanlator?.isNotBlank()?.let { statuses.add(item.scanlator!!) }
+            item.scanlator?.isNotBlank()?.let { statuses.add(item.scanlator ?: "") }
 
             if (item.isCurrent) {
-                chapterTitle.setTypeface(null, Typeface.BOLD_ITALIC)
-                chapterSubtitle.setTypeface(null, Typeface.BOLD_ITALIC)
+                binding.chapterTitle.setTypeface(null, Typeface.BOLD_ITALIC)
+                binding.chapterSubtitle.setTypeface(null, Typeface.BOLD_ITALIC)
             } else {
-                chapterTitle.setTypeface(null, Typeface.NORMAL)
-                chapterSubtitle.setTypeface(null, Typeface.NORMAL)
+                binding.chapterTitle.setTypeface(null, Typeface.NORMAL)
+                binding.chapterSubtitle.setTypeface(null, Typeface.NORMAL)
             }
 
             // match color of the chapter title
-            chapterTitle.setTextColor(chapterColor)
-            chapterSubtitle.setTextColor(chapterColor)
+            binding.chapterTitle.setTextColor(chapterColor)
+            binding.chapterSubtitle.setTextColor(chapterColor)
 
-            bookmarkImage.setImageResource(
+            binding.bookmarkImage.setImageResource(
                 if (item.bookmark) R.drawable.ic_bookmark_24dp
                 else R.drawable.ic_bookmark_border_24dp
             )
 
             val drawableColor = ChapterUtil.bookmarkColor(itemView.context, item)
 
-            DrawableCompat.setTint(bookmarkImage.drawable, drawableColor)
+            DrawableCompat.setTint(binding.bookmarkImage.drawable, drawableColor)
 
-            chapterSubtitle.text = statuses.joinToString(" • ")
+            binding.chapterSubtitle.text = statuses.joinToString(" • ")
         }
 
         override fun unbindView(item: ReaderChapterItem) {
-            chapterTitle.text = null
-            chapterSubtitle.text = null
+            binding.chapterTitle.text = null
+            binding.chapterSubtitle.text = null
         }
     }
 }
