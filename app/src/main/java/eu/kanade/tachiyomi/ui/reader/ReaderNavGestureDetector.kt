@@ -36,7 +36,7 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
         val newDistanceX = (e1?.rawX ?: 0f) - (e2?.rawX ?: 0f)
         val newDistanceY = (e1?.rawY ?: 0f) - (e2?.rawY ?: 0f)
         if ((!hasScrollHorizontal || lockVertical) && e2 != null) {
-            hasScrollHorizontal = abs(newDistanceX) > abs(newDistanceY) && abs(newDistanceX) > 60
+            hasScrollHorizontal = abs(newDistanceX) > abs(newDistanceY) && abs(newDistanceX) > 40
 
             val modE = MotionEvent.obtain(e2)
             modE.setLocation(
@@ -88,6 +88,6 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
 
     private companion object {
         const val SWIPE_THRESHOLD = 50
-        const val SWIPE_VELOCITY_THRESHOLD = 200
+        const val SWIPE_VELOCITY_THRESHOLD = 100
     }
 }
