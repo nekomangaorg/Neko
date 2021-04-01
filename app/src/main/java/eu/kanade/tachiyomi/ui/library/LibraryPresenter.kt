@@ -507,7 +507,7 @@ class LibraryPresenter(
                 if(preferences.useCacheSource()){
                     it.unread = db.getChaptersByMangaId(it.id!!).executeAsBlocking().asSequence()
                             .filter { chp-> chp.read.not() }
-                            .filter { chp-> downloadManager.isChapterDownloaded(chp, it) }.count()
+                            .filter { chp-> chp.isMergedChapter() || downloadManager.isChapterDownloaded(chp, it) }.count()
                 }
                 LibraryItem(it, headerItem)
             }.toMutableList()
