@@ -505,10 +505,10 @@ class LibraryPresenter(
                     else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
-                if(preferences.useCacheSource()){
+                if (preferences.useCacheSource()) {
                     it.unread = db.getChaptersByMangaId(it.id!!).executeAsBlocking().asSequence()
-                            .filter { chp-> chp.read.not() }
-                            .filter { chp-> chp.isMergedChapter() || downloadManager.isChapterDownloaded(chp, it) }.count()
+                        .filter { chp -> chp.read.not() }
+                        .filter { chp -> it.isMerged().not() || chp.isMergedChapter() || downloadManager.isChapterDownloaded(chp, it) }.count()
                 }
                 LibraryItem(it, headerItem)
             }.toMutableList()
