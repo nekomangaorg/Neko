@@ -476,6 +476,7 @@ class LibraryPresenter(
         removeArticles = preferences.removeArticles().getOrDefault()
         val categories = db.getCategories().executeAsBlocking().toMutableList()
         var libraryManga = db.getLibraryMangas().executeAsBlocking()
+
         val showAll = showAllCategories
         if (groupType > BY_DEFAULT) {
             libraryManga = libraryManga.distinctBy { it.id }
@@ -503,6 +504,11 @@ class LibraryPresenter(
                     else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
+                if(preferences.useCacheSource()){
+                    it.unread = db.getChaptersByMangaId(it.id!!).executeAsBlocking().asSequence()
+                            .filter { chp-> chp.read.not() }
+                            .filter { chp-> downloadManager.isChapterDownloaded(chp, it) }.count()
+                }
                 LibraryItem(it, headerItem)
             }.toMutableList()
 
