@@ -172,7 +172,7 @@ class SimilarUpdateService(
         val reader = JsonReader.of(destinationFile.source().buffer())
 
         kotlin.runCatching {
-            db.deleteAllCachedFTS()
+            db.deleteAllCached().executeAsBlocking()
         }
 
         val cachedManga = getCachedManga(reader)

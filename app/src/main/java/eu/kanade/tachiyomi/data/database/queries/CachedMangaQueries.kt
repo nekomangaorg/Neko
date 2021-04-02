@@ -33,7 +33,7 @@ interface CachedMangaQueries : DbProvider {
         .listOfObjects(CachedManga::class.java)
         .withQuery(
             RawQuery.builder()
-                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT $limit OFFSET MAX(0,${page*limit-1})")
+                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT $limit OFFSET MAX(0,${page * limit - 1})")
                 .build()
         )
         .prepare()
@@ -54,17 +54,4 @@ interface CachedMangaQueries : DbProvider {
                 .build()
         )
         .prepare()
-
-    fun deleteAllCachedFTS() = db.lowLevel()
-        .rawQuery(
-            RawQuery.builder()
-                .query(deleteCachedMangaFTSQuery())
-                .build()
-        )
-
-    /*   fun copyCachedToFTS() = db.lowLevel().rawQuery(
-           RawQuery.builder()
-               .query(insertCachedMangaQuery())
-               .build()
-       )*/
 }
