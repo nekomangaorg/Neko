@@ -33,7 +33,7 @@ interface CachedMangaQueries : DbProvider {
         .listOfObjects(CachedManga::class.java)
         .withQuery(
             RawQuery.builder()
-                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT $limit OFFSET MAX(0,${page * limit - 1})")
+                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT ${limit+1} OFFSET ${page*limit}")
                 .build()
         )
         .prepare()

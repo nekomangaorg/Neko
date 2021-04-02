@@ -69,7 +69,7 @@ open class MangaDexCache() : MangaDex() {
 
         // Next lets query the next set of manga from the database
         // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
-        val limit = 16
+        val limit = 10
         return db.getCachedMangaRange(page - 1, limit).asRxObservable().flatMapIterable { it }
             .map { cacheManga ->
                 SManga.create().apply {
@@ -78,7 +78,7 @@ open class MangaDexCache() : MangaDex() {
                     title = MdUtil.cleanString(cacheManga.title)
                     thumbnail_url = null
                 }
-            }.toList().map { MangasPage(it.take(limit - 1), it.size == limit) }
+            }.toList().map { MangasPage(it.take(limit), it.size > limit) }
     }
 
     override fun fetchSearchManga(
@@ -86,6 +86,8 @@ open class MangaDexCache() : MangaDex() {
         query: String,
         filters: FilterList
     ): Observable<MangasPage> {
+
+        // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
         XLog.i("Number of Cached entries: $count")
         if (count == 0) {
@@ -94,7 +96,7 @@ open class MangaDexCache() : MangaDex() {
 
         // Next lets query the next set of manga from the database
         // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
-        val limit = 16
+        val limit = 10
         return db.searchCachedManga(query, page - 1, limit).asRxObservable().flatMapIterable { it }
             .map { cacheManga ->
                 SManga.create().apply {
@@ -103,7 +105,7 @@ open class MangaDexCache() : MangaDex() {
                     title = MdUtil.cleanString(cacheManga.title)
                     thumbnail_url = null
                 }
-            }.toList().map { MangasPage(it.take(limit - 1), it.size == limit) }
+            }.toList().map { MangasPage(it.take(limit), it.size > limit) }
     }
 
     override fun fetchFollows(): Observable<MangasPage> {

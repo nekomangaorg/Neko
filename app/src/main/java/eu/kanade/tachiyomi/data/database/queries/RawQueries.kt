@@ -244,6 +244,6 @@ fun searchCachedMangaQuery(query: String, page: Int, limit: Int): String {
     return """
       SELECT * FROM ${CachedMangaTable.TABLE_FTS}
       WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH "$queryCleaned"
-      LIMIT $limit OFFSET MAX(0,${page * limit - 1})
+      LIMIT ${limit+1} OFFSET ${page*limit}
     """
 }
