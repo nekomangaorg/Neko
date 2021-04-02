@@ -2,6 +2,13 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.2.3">
+        <changelogtext>Added ability to use a cache for when MangaDex is down</changelogtext>
+        <changelogtext>Please see github release for more info</changelogtext>
+        <changelogtext>Fix: Error message shows correctly when browsing dex while its down</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.2.2.3">
         <changelogtext>Don't update library when Dex is down</changelogtext>
         <changelogtext>Don't try to sync follows when Dex is down</changelogtext>
