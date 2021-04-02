@@ -458,8 +458,8 @@ class ReaderPresenter(
      * read, update tracking services, enqueue downloaded chapter deletion, and updating the active chapter if this
      * [page]'s chapter is different from the currently active.
      */
-    fun onPageSelected(page: ReaderPage): Boolean {
-        val currentChapters = viewerChaptersRelay.value ?: return false
+    fun onPageSelected(page: ReaderPage) {
+        val currentChapters = viewerChaptersRelay.value ?: return
 
         val selectedChapter = page.chapter
 
@@ -477,9 +477,7 @@ class ReaderPresenter(
             Timber.d("Setting ${selectedChapter.chapter.url} as active")
             onChapterChanged(currentChapters.currChapter)
             loadNewChapter(selectedChapter)
-            return true
         }
-        return false
     }
 
     /**

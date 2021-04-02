@@ -41,7 +41,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     lateinit var presenter: ReaderPresenter
     var adapter: FastAdapter<ReaderChapterItem>? = null
     private val itemAdapter = ItemAdapter<ReaderChapterItem>()
-    var shouldCollapse = true
     var selectedChapterId = -1L
 
     var loadingPos = 0
@@ -98,7 +97,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
                 override fun onStateChanged(p0: View, state: Int) {
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-                        shouldCollapse = true
                         sheetBehavior?.isHideable = false
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                             adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
@@ -136,7 +134,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     activity.binding.readerNav.leftChapter.invisible()
                     activity.binding.readerNav.rightChapter.invisible()
 
-                    shouldCollapse = false
                     presenter.loadChapter(item.chapter)
                     loadingPos = position
                     val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(position) as? ReaderChapterItem.ViewHolder)?.binding
