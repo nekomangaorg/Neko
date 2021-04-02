@@ -162,7 +162,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     fastAdapter: FastAdapter<ReaderChapterItem>,
                     item: ReaderChapterItem
                 ) {
-                    if (!activity.isLoading) {
+                    if (!activity.isLoading && sheetBehavior.isExpanded()) {
                         presenter.toggleBookmark(item.chapter)
                         refreshList()
                     }
