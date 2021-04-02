@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -41,11 +42,11 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
     // filter chapters for the reader
     fun filterChaptersForReader(chapters: List<Chapter>, manga: Manga, selectedChapter: Chapter? = null): List<Chapter> {
         // if neither preference is enabled don't even filter
+        var filteredChapters = chapters.filterIfUsingCache(downloadManager, manga, preferences.useCacheSource(), true)
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
-            return chapters
+            return filteredChapters
         }
 
-        var filteredChapters = chapters
         if (preferences.skipRead()) {
             filteredChapters = filteredChapters.filter { !it.read }
         }

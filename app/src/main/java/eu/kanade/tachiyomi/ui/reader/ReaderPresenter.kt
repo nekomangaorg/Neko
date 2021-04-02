@@ -106,7 +106,7 @@ class ReaderPresenter(
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
+            chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter).filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         XLog.d("--chapter list--")
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
@@ -196,7 +196,7 @@ class ReaderPresenter(
     suspend fun getChapters(): List<ReaderChapterItem> {
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
-            val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
+            val dbChapters = db.getChapters(manga).executeAsBlocking()
             val list =
                 chapterFilter.filterChaptersForReader(dbChapters, manga, getCurrentChapter()?.chapter)
                     .sortedBy {

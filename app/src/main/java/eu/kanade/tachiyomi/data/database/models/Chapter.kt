@@ -41,13 +41,13 @@ fun Chapter.scanlatorList(): List<String> {
     return MdUtil.getScanlators(this.scanlator!!)
 }
 
-fun List<Chapter>.filterIfUsingCache(downloadManager: DownloadManager, manga: Manga, usingCachedManga: Boolean): List<Chapter> {
+fun List<Chapter>.filterIfUsingCache(downloadManager: DownloadManager, manga: Manga, usingCachedManga: Boolean, ignoreMangaIsMerged: Boolean = false): List<Chapter> {
     return this.filter {
         when {
             usingCachedManga.not() -> true
             downloadManager.isChapterDownloaded(it, manga) -> true
             it.isMergedChapter() -> true
-            manga.isMerged().not() -> true
+            manga.isMerged().not() -> !ignoreMangaIsMerged
             else -> false
         }
     }
