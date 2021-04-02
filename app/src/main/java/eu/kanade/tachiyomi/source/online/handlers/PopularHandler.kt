@@ -40,6 +40,9 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
 
     private fun popularMangaParse(response: Response): MangasPage {
         val document = response.asJsoup()
+        if (document.toString().contains("Due to a recent hacking incident")) {
+            throw Exception("MangaDex appears to be down, or under heavy load")
+        }
 
         val mangas = document.select(popularMangaSelector).map { element ->
             popularMangaFromElement(element)

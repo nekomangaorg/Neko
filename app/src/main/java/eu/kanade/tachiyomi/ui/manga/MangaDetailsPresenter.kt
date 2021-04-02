@@ -413,6 +413,12 @@ class MangaDetailsPresenter(
             var errorFromMerged: java.lang.Exception? = null
             var error = false
             val thumbnailUrl = manga.thumbnail_url
+            if (usingCache && manga.isMerged().not()) {
+                withContext(Dispatchers.Main) {
+                    controller.showError("Using cached source, and manga is not merged.  No reason to update")
+                }
+                return@launch
+            }
 
             val nPair = async(Dispatchers.IO) {
                 try {

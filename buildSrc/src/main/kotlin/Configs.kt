@@ -6,7 +6,7 @@ object Configs {
     const val targetSdkVersion = 29
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     const val versionCode = 112
-    const val versionName = "2.2.3"
+    const val versionName = "2.3"
 }
 
 object LegacyPluginClassPath {
