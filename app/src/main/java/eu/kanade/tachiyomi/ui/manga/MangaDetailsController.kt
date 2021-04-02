@@ -679,6 +679,10 @@ class MangaDetailsController :
 
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
+        if (presenter.preferences.useCacheSource() && presenter.manga.isMerged().not() && presenter.downloadManager.isChapterDownloaded(chapter, presenter.manga).not()) {
+            view?.snack(R.string.using_cached_source_cant_open)
+            return
+        }
         if (XLogLevel.shouldLog(XLogLevel.EXTRA))
             XLog.d("-- Chapter List Before Reader --")
         for (chapter in presenter.chapters) {

@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -25,6 +26,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.recently_read_controller.*
 
@@ -162,8 +164,14 @@ class RecentlyReadController(bundle: Bundle? = null) :
 
     override fun onResumeClick(position: Int) {
         val activity = activity ?: return
+
         observeLater = true
         val (manga, chapter, _) = (adapter?.getItem(position) as? RecentlyReadItem)?.mch ?: return
+
+        if (presenter.preferences.useCacheSource() && manga.isMerged().not() && presenter.downloadManager.isChapterDownloaded(chapter, manga).not()) {
+            view?.snack(R.string.using_cached_source_cant_open)
+            return
+        }
 
         val nextChapter = presenter.getNextChapter(chapter, manga)
         if (nextChapter != null) {

@@ -29,7 +29,7 @@ class RecentChaptersPresenter(
     private val controller: RecentChaptersController,
     val preferences: PreferencesHelper = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-    private val downloadManager: DownloadManager = Injekt.get(),
+    val downloadManager: DownloadManager = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 

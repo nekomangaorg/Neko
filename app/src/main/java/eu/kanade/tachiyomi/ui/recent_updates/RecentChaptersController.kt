@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.elvishew.xlog.XLog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -18,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -31,7 +33,6 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.synthetic.main.download_bottom_sheet.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.*
 import kotlinx.android.synthetic.main.recent_chapters_controller.empty_view
-import com.elvishew.xlog.XLog
 
 /**
  * Fragment that shows recent chapters.
@@ -142,6 +143,10 @@ class RecentChaptersController(bundle: Bundle? = null) :
      */
     private fun openChapter(item: RecentChapterItem) {
         val activity = activity ?: return
+        if (presenter.preferences.useCacheSource() && item.manga.isMerged().not() && presenter.downloadManager.isChapterDownloaded(item.chapter, item.manga).not()) {
+            view?.snack(R.string.using_cached_source_cant_open)
+            return
+        }
         val intent = ReaderActivity.newIntent(activity, item.manga, item.chapter)
         startActivity(intent)
     }

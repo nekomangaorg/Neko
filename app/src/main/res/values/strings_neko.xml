@@ -50,6 +50,8 @@
 
     <string name="missing_chapters">%1$s missing chapters</string>
 
+    <string name="using_cached_source_cant_open">Using cached source, can\'t open this chapter</string>
+
     <!-- Reader -->
     <string name="try_similar">Don\'t forget to try looking for \nSimilar Manga. Click the </string>
     <string name="try_similar_after_click">icon on the manga info screen</string>

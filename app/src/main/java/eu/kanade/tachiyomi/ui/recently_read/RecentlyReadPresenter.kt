@@ -4,6 +4,8 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.Dispatchers
@@ -24,6 +26,9 @@ class RecentlyReadPresenter(private val view: RecentlyReadController) {
      * Used to connect to database
      */
     val db: DatabaseHelper by injectLazy()
+    val preferences: PreferencesHelper by injectLazy()
+    val downloadManager: DownloadManager by injectLazy()
+
     var lastCount = 25
     var lastSearch = ""
 
