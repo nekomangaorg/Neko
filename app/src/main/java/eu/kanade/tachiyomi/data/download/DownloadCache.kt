@@ -126,7 +126,7 @@ class DownloadCache(
 
         val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
             .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->
-                onlineSources.find { provider.getSourceDirName(it).toLowerCase() == entry.key?.toLowerCase() }?.id
+                onlineSources.find { provider.getSourceDirName(it).equals(entry.key, ignoreCase = true) }?.id
             }
 
         val db: DatabaseHelper by injectLazy()
@@ -159,7 +159,7 @@ class DownloadCache(
      */
     private fun findManga(mangaList: List<Manga>, mangaKey: String, sourceKey: Long): Manga? {
         return mangaList.find {
-            DiskUtil.buildValidFilename(it.originalTitle).toLowerCase() == mangaKey.toLowerCase() && it.source == sourceKey
+            DiskUtil.buildValidFilename(it.originalTitle).equals(mangaKey, ignoreCase = true) && it.source == sourceKey
         }
     }
 
