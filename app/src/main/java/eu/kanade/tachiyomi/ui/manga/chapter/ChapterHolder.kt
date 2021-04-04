@@ -72,7 +72,9 @@ class ChapterHolder(
             )
         }
 
-        chapter.scanlator?.isNotBlank()?.let { statuses.add(chapter.scanlator!!) }
+        if (chapter.scanlator?.isNotBlank() == true) {
+            statuses.add(chapter.scanlator!!)
+        }
 
         if (binding.frontView.translationX == 0f) {
             binding.read.setImageResource(
