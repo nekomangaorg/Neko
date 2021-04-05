@@ -1,11 +1,19 @@
 package eu.kanade.tachiyomi.util.lang
 
+import android.content.Context
+import android.graphics.Typeface
 import android.text.Spannable
 import android.text.SpannableString
+import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.BackgroundColorSpan
 import android.text.style.ForegroundColorSpan
+import android.text.style.RelativeSizeSpan
+import android.text.style.StyleSpan
+import android.text.style.SuperscriptSpan
 import androidx.annotation.ColorInt
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.floor
 
 /**
@@ -89,4 +97,14 @@ fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
             else -> list.add(i)
         }
     }
+}
+
+fun String.addBetaTag(context: Context): Spanned {
+    val betaText = context.getString(R.string.beta)
+    val betaSpan = SpannableStringBuilder(this + betaText)
+    betaSpan.setSpan(SuperscriptSpan(), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(RelativeSizeSpan(0.75f), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(StyleSpan(Typeface.BOLD), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorAccent)), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    return betaSpan
 }

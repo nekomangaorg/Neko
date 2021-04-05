@@ -16,6 +16,7 @@ abstract class ViewerConfig(preferences: PreferencesHelper) {
     protected val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     var imagePropertyChangedListener: (() -> Unit)? = null
+    var reloadChapterListener: ((Boolean) -> Unit)? = null
 
     var navigationModeChangedListener: (() -> Unit)? = null
     var navigationModeInvertedListener: (() -> Unit)? = null

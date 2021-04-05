@@ -29,6 +29,13 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     private var pref: Preference<Int>? = null
     private var prefOffset = 0
     private var popup: PopupMenu? = null
+    var title: CharSequence
+        get() {
+            return binding.titleView.text
+        }
+        set(value) {
+            binding.titleView.text = value
+        }
 
     var onItemSelectedListener: ((Int) -> Unit)? = null
         set(value) {
@@ -49,7 +56,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         val a = context.obtainStyledAttributes(attrs, R.styleable.ReaderSpinnerView, 0, 0)
 
         val str = a.getString(R.styleable.ReaderSpinnerView_title) ?: ""
-        binding.titleView.text = str
+        title = str
 
         val entries = (a.getTextArray(R.styleable.ReaderSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
         this.entries = entries

@@ -8,10 +8,12 @@ import android.content.pm.ActivityInfo
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
 import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
@@ -20,9 +22,10 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
+import androidx.core.view.GestureDetectorCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -46,6 +49,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
@@ -57,6 +62,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
+import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -160,6 +166,10 @@ class ReaderActivity :
 
     var isLoading = false
 
+    var lastShiftDoubleState: Boolean? = null
+    var indexPageToShift: Int? = null
+    var indexChapterToShift: Long? = null
+
     companion object {
         @Suppress("unused")
         const val LEFT_TO_RIGHT = 1
@@ -167,6 +177,10 @@ class ReaderActivity :
         const val VERTICAL = 3
         const val WEBTOON = 4
         const val VERTICAL_PLUS = 5
+
+        const val SHIFT_DOUBLE_PAGES = "shiftingDoublePages"
+        const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
+        const val SHIFTED_CHAP_INDEX = "shiftedChapterIndex"
 
         fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
@@ -217,6 +231,9 @@ class ReaderActivity :
 
         if (savedInstanceState != null) {
             menuVisible = savedInstanceState.getBoolean(::menuVisible.name)
+            lastShiftDoubleState = savedInstanceState.get(SHIFT_DOUBLE_PAGES) as? Boolean
+            indexPageToShift = savedInstanceState.get(SHIFTED_PAGE_INDEX) as? Int
+            indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
             binding.readerNav.root.isVisible = menuVisible
         } else {
             binding.readerNav.root.gone()
@@ -251,6 +268,16 @@ class ReaderActivity :
      */
     override fun onSaveInstanceState(outState: Bundle) {
         outState.putBoolean(::menuVisible.name, menuVisible)
+        (viewer as? PagerViewer)?.let { pViewer ->
+            val config = pViewer.config
+            outState.putBoolean(SHIFT_DOUBLE_PAGES, config.shiftDoublePage)
+            if (config.shiftDoublePage) {
+                pViewer.getShiftedPage()?.let {
+                    outState.putInt(SHIFTED_PAGE_INDEX, it.index)
+                    outState.putLong(SHIFTED_CHAP_INDEX, it.chapter.chapter.id ?: 0L)
+                }
+            }
+        }
         if (!isChangingConfigurations) {
             presenter.onSaveInstanceStateNonConfigurationChange()
         }
@@ -276,6 +303,65 @@ class ReaderActivity :
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.reader, menu)
+        return true
+    }
+
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val splitItem = menu?.findItem(R.id.action_shift_double_page)
+        splitItem?.isVisible = (viewer as? PagerViewer)?.config?.doublePages ?: false
+        (viewer as? PagerViewer)?.config?.let { config ->
+            splitItem?.icon = ContextCompat.getDrawable(
+                this,
+                if ((!config.shiftDoublePage).xor(viewer is R2LPagerViewer)) R.drawable.ic_page_previous_outline_24dp else R.drawable.ic_page_next_outline_24dp
+            )
+        }
+        setBottomNavButtons(preferences.pageLayout().get())
+        (binding.toolbar.background as? LayerDrawable)?.let { layerDrawable ->
+            val isDoublePage = splitItem?.isVisible ?: false
+            // Shout out to Google for not fixing setVisible https://issuetracker.google.com/issues/127538945
+            layerDrawable.findDrawableByLayerId(R.id.layer_full_width).alpha = if (!isDoublePage) 255 else 0
+            layerDrawable.findDrawableByLayerId(R.id.layer_one_item).alpha = if (isDoublePage) 255 else 0
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
+    fun setBottomNavButtons(pageLayout: Int) {
+        val isDoublePage = pageLayout == PageLayout.DOUBLE_PAGES ||
+            (pageLayout == PageLayout.AUTOMATIC && (viewer as? PagerViewer)?.config?.doublePages ?: false)
+        binding.chaptersSheet.doublePage.setImageDrawable(
+            ContextCompat.getDrawable(
+                this,
+                if (!isDoublePage) R.drawable.ic_single_page_24dp
+                else R.drawable.ic_book_open_variant_24dp
+            )
+        )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            binding.chaptersSheet.doublePage.tooltipText =
+                getString(
+                    if (isDoublePage) R.string.switch_to_single
+                    else R.string.switch_to_double
+                )
+        }
+    }
+
+    /**
+     * Called when an item of the options menu was clicked. Used to handle clicks on our menu
+     * entries.
+     */
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            R.id.action_shift_double_page -> {
+                (viewer as? PagerViewer)?.config?.let { config ->
+                    config.shiftDoublePage = !config.shiftDoublePage
+                    presenter.viewerChapters?.let {
+                        (viewer as? PagerViewer)?.updateShifting()
+                        (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
+                        invalidateOptionsMenu()
+                    }
+                }
+            }
+            else -> return super.onOptionsItemSelected(item)
+        }
         return true
     }
 
@@ -358,6 +444,16 @@ class ReaderActivity :
             }
         }
 
+        binding.chaptersSheet.doublePage.setOnClickListener {
+            if (preferences.pageLayout().get() == PageLayout.AUTOMATIC) {
+                (viewer as? PagerViewer)?.config?.let { config ->
+                    config.doublePages = !config.doublePages
+                    reloadChapters(config.doublePages, true)
+                }
+            } else {
+                preferences.pageLayout().set(1 - preferences.pageLayout().get())
+            }
+        }
         binding.readerNav.leftChapter.setOnClickListener {
             if (isLoading) {
                 return@setOnClickListener
@@ -579,6 +675,7 @@ class ReaderActivity :
             binding.viewerContainer.removeAllViews()
         }
         viewer = newViewer
+        binding.chaptersSheet.doublePage.isVisible = viewer is PagerViewer
         binding.viewerContainer.addView(newViewer.getView())
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -589,6 +686,14 @@ class ReaderActivity :
                 binding.readerNav.leftChapter.tooltipText = getString(R.string.previous_chapter)
                 binding.readerNav.rightChapter.tooltipText = getString(R.string.next_chapter)
             }
+        }
+
+        if (newViewer is PagerViewer) {
+            if (preferences.pageLayout().get() == PageLayout.AUTOMATIC) {
+                setDoublePageMode(newViewer)
+            }
+            lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
+            lastShiftDoubleState = null
         }
 
         binding.navigationOverlay.isLTR = !(viewer is L2RPagerViewer)
@@ -606,11 +711,37 @@ class ReaderActivity :
 
         binding.pleaseWait.visible()
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
+        invalidateOptionsMenu()
     }
 
     override fun onPause() {
         presenter.saveProgress()
         super.onPause()
+    }
+
+    fun reloadChapters(doublePages: Boolean, force: Boolean = false) {
+        val pViewer = viewer as? PagerViewer ?: return
+        pViewer.updateShifting()
+        if (!force && pViewer.config.autoDoublePages) {
+            setDoublePageMode(pViewer)
+        } else {
+            pViewer.config.doublePages = doublePages
+        }
+        val currentChapter = presenter.getCurrentChapter()
+        if (doublePages) {
+            // If we're moving from singe to double, we want the current page to be the first page
+            pViewer.config.shiftDoublePage = (
+                binding.readerNav.pageSeekbar.progress +
+                    (
+                        currentChapter?.pages?.subList(0, binding.readerNav.pageSeekbar.progress)
+                            ?.count { it.fullPage || it.isolatedPage } ?: 0
+                        )
+                ) % 2 != 0
+        }
+        presenter.viewerChapters?.let {
+            pViewer.setChaptersDoubleShift(it)
+        }
+        invalidateOptionsMenu()
     }
 
     /**
@@ -619,6 +750,13 @@ class ReaderActivity :
      */
     fun setChapters(viewerChapters: ViewerChapters) {
         binding.pleaseWait.gone()
+        if (indexChapterToShift != null && indexPageToShift != null) {
+            viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }?.let {
+                (viewer as? PagerViewer)?.updateShifting(it)
+            }
+            indexChapterToShift = null
+            indexPageToShift = null
+        }
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
@@ -687,58 +825,100 @@ class ReaderActivity :
      * bottom menu and delegates the change to the presenter.
      */
     @SuppressLint("SetTextI18n")
-    fun onPageSelected(page: ReaderPage) {
-        presenter.onPageSelected(page)
+    fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
+        presenter.onPageSelected(page, hasExtraPage)
         val pages = page.chapter.pages ?: return
 
-        val currentPage = page.number
-        val totalPages = pages.size
-
-        // Set bottom page number
-        binding.pageNumber.text = "$currentPage/$totalPages"
-
-        if (viewer is R2LPagerViewer) {
-            binding.readerNav.rightPageText.text = currentPage.toString()
-            binding.readerNav.leftPageText.text = totalPages.toString()
+        val currentPage = if (hasExtraPage) {
+            if (resources.isLTR) "${page.number}-${page.number + 1}" else "${page.number + 1}-${page.number}"
         } else {
-            binding.readerNav.leftPageText.text = currentPage.toString()
-            binding.readerNav.rightPageText.text = totalPages.toString()
+            "${page.number}"
+        }
+
+        val totalPages = pages.size.toString()
+        binding.pageNumber.text = if (resources.isLTR) "$currentPage/$totalPages" else "$totalPages/$currentPage"
+        if (viewer is R2LPagerViewer) {
+            binding.readerNav.rightPageText.text = currentPage
+            binding.readerNav.leftPageText.text = totalPages
+        } else {
+            binding.readerNav.leftPageText.text = currentPage
+            binding.readerNav.rightPageText.text = totalPages
         }
         if (binding.chaptersSheet.chaptersBottomSheet.selectedChapterId != page.chapter.chapter.id) {
             binding.chaptersSheet.chaptersBottomSheet.refreshList()
         }
         // Set seekbar progress
         binding.readerNav.pageSeekbar.max = pages.lastIndex
-        binding.readerNav.pageSeekbar.progress = page.index
+        val progress = page.index + if (hasExtraPage) 1 else 0
+        // For a double page, show the last 2 pages as if it was the final part of the seekbar
+        binding.readerNav.pageSeekbar.progress = if (progress == pages.lastIndex) progress else page.index
     }
 
     /**
      * Called from the viewer whenever a [page] is long clicked. A bottom sheet with a list of
      * actions to perform is shown.
      */
-    fun onPageLongTap(page: ReaderPage) {
-        val items = listOf(
-            MaterialMenuSheet.MenuSheetItem(
-                0,
-                R.drawable.ic_share_24dp,
-                R.string.share
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                1,
-                R.drawable.ic_save_24dp,
-                R.string.save
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                2,
-                R.drawable.ic_photo_24dp,
-                R.string.set_as_cover
+    fun onPageLongTap(page: ReaderPage, extraPage: ReaderPage? = null) {
+        val items = if (extraPage != null) {
+            listOf(
+                MaterialMenuSheet.MenuSheetItem(
+                    3,
+                    R.drawable.ic_outline_share_24dp,
+                    R.string.share_second_page
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    4,
+                    R.drawable.ic_outline_save_24dp,
+                    R.string.save_second_page
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    5,
+                    R.drawable.ic_outline_photo_24dp,
+                    R.string.set_second_page_as_cover
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    0,
+                    R.drawable.ic_share_24dp,
+                    R.string.share_first_page
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    1,
+                    R.drawable.ic_save_24dp,
+                    R.string.save_first_page
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    2,
+                    R.drawable.ic_photo_24dp,
+                    R.string.set_first_page_as_cover
+                )
             )
-        )
+        } else {
+            listOf(
+                MaterialMenuSheet.MenuSheetItem(
+                    0,
+                    R.drawable.ic_share_24dp,
+                    R.string.share
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    1,
+                    R.drawable.ic_save_24dp,
+                    R.string.save
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    2,
+                    R.drawable.ic_photo_24dp,
+                    R.string.set_as_cover
+                )
+            )
+        }
         MaterialMenuSheet(this, items) { _, item ->
             when (item) {
                 0 -> shareImage(page)
                 1 -> saveImage(page)
                 2 -> showSetCoverPrompt(page)
+                3 -> extraPage?.let { shareImage(it) }
+                4 -> extraPage?.let { saveImage(it) }
+                5 -> extraPage?.let { showSetCoverPrompt(it) }
             }
             true
         }.show()
@@ -911,6 +1091,11 @@ class ReaderActivity :
         }
     }
 
+    private fun setDoublePageMode(viewer: PagerViewer) {
+        val currentOrientation = resources.configuration.orientation
+        viewer.config.doublePages = (currentOrientation == Configuration.ORIENTATION_LANDSCAPE)
+    }
+
     private fun handleIntentAction(intent: Intent): Boolean {
         val uri = intent.data ?: return false
         if (!presenter.canLoadUrl(uri)) {
@@ -999,6 +1184,12 @@ class ReaderActivity :
 
             preferences.alwaysShowChapterTransition().asFlow()
                 .onEach { showNewChapter = it }
+                .launchIn(scope)
+
+            preferences.pageLayout().asFlow()
+                .onEach {
+                    setBottomNavButtons(it)
+                }
                 .launchIn(scope)
         }
 

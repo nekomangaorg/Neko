@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.widget.preference
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import androidx.annotation.StringRes
 import androidx.preference.Preference
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.callbacks.onDismiss
@@ -23,6 +24,8 @@ open class MatPreference @JvmOverloads constructor(
     private var isShowing = false
     var customSummary: String? = null
 
+    @StringRes var dialogTitleRes: Int? = null
+
     override fun onClick() {
         if (!isShowing) {
             dialog().apply {
@@ -38,7 +41,9 @@ open class MatPreference @JvmOverloads constructor(
 
     open fun dialog(): MaterialDialog {
         return MaterialDialog(activity ?: context).apply {
-            if (title != null) {
+            if (dialogTitleRes != null) {
+                title(res = dialogTitleRes)
+            } else if (title != null) {
                 title(text = title.toString())
             }
             negativeButton(android.R.string.cancel)

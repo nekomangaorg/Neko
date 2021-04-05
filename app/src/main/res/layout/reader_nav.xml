@@ -46,12 +46,12 @@
 
         <TextView
             android:id="@+id/left_page_text"
-            android:layout_width="32dp"
+            android:layout_width="48dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:textColor="@color/textColorPrimary"
             android:textSize="15sp"
-            tools:text="1" />
+            tools:text="12-14" />
 
         <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
             android:id="@+id/page_seekbar"
@@ -63,7 +63,7 @@
 
         <TextView
             android:id="@+id/right_page_text"
-            android:layout_width="32dp"
+            android:layout_width="48dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:textColor="@color/textColorPrimary"

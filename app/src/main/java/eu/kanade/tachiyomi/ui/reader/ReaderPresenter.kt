@@ -86,6 +86,9 @@ class ReaderPresenter(
      */
     private val viewerChaptersRelay = BehaviorRelay.create<ViewerChapters>()
 
+    val viewerChapters: ViewerChapters?
+        get() = viewerChaptersRelay.value
+
     /**
      * Relay used when loading prev/next chapter needed to lock the UI (with a dialog).
      */
@@ -398,8 +401,7 @@ class ReaderPresenter(
             .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
             .subscribeFirst(
                 { view, _ ->
-                    val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
-                    view.moveToPageIndex(lastPage)
+                    view.moveToPageIndex(0)
                     view.refreshChapters()
                 },
                 { _, _ ->
@@ -458,7 +460,7 @@ class ReaderPresenter(
      * read, update tracking services, enqueue downloaded chapter deletion, and updating the active chapter if this
      * [page]'s chapter is different from the currently active.
      */
-    fun onPageSelected(page: ReaderPage) {
+    fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
         val currentChapters = viewerChaptersRelay.value ?: return
 
         val selectedChapter = page.chapter
@@ -467,7 +469,10 @@ class ReaderPresenter(
         selectedChapter.chapter.last_page_read = page.index
         selectedChapter.chapter.pages_left =
             (selectedChapter.pages?.size ?: page.index) - page.index
-        if (selectedChapter.pages?.lastIndex == page.index) {
+        // For double pages, check if the second to last page is doubled up
+        if (selectedChapter.pages?.lastIndex == page.index ||
+            (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
+        ) {
             selectedChapter.chapter.read = true
             updateTrackChapterRead(selectedChapter)
             deleteChapterIfNeeded(selectedChapter)

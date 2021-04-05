@@ -165,6 +165,7 @@
     <string name="hide_category_hopper">Hide category hopper</string>
     <string name="hide_hopper_on_scroll">Hide category hopper on scroll</string>
     <string name="more_library_settings">More library settings</string>
+    <string name="shift_one_page_over">Shift one page over</string>
 
     <!-- Library update service notifications -->
     <string name="new_chapters_found">New chapters found</string>
@@ -279,9 +280,6 @@
     <!-- Reader -->
     <string name="custom_filter">Custom filter</string>
     <string name="set_as_cover">Set as cover</string>
-    <string name="set_page_as_cover">Set page as cover</string>
-    <string name="share_page">Share page</string>
-    <string name="save_page">Save page</string>
     <string name="_details">%1$s details</string>
     <string name="reader_settings">Reader settings</string>
     <string name="set_as_default_for_all">Set as default for all</string>
@@ -305,6 +303,14 @@
     <string name="previous_page">Previous page</string>
     <string name="next_chapter">Next chapter</string>
     <string name="previous_chapter">Previous chapter</string>
+
+    <string name="set_first_page_as_cover">Set first page as cover</string>
+    <string name="share_first_page">Share first page</string>
+    <string name="save_first_page">Save first page</string>
+
+    <string name="set_second_page_as_cover">Set second page as cover</string>
+    <string name="share_second_page">Share second page</string>
+    <string name="save_second_page">Save second page</string>
 
     <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>
@@ -352,6 +358,10 @@
     <string name="original_size">Original size</string>
     <string name="smart_fit">Smart fit</string>
     <string name="zoom_start_position">Zoom start position</string>
+    <string name="double_pages">Double pages</string>
+    <string name="single_page">Single page</string>
+    <string name="switch_to_double">Switch to double pages</string>
+    <string name="switch_to_single">Switch to single page</string>
     <string name="force_portrait">Force portrait</string>
     <string name="force_landscape">Force landscape</string>
     <string name="red_initial">R</string>
@@ -382,6 +392,9 @@
     <string name="pad_cutout_areas">Pad cutout areas</string>
     <string name="start_past_cutout">Start past cutout</string>
     <string name="ignore_cutout_areas">Ignore cutout areas</string>
+    <string name="page_layout">Page layout</string>
+    <string name="automatic_can_still_switch">While using automatic page layout, you can still switch between layouts while reading without overriding this setting</string>
+    <string name="automatic_orientation">Automatic (based on orientation)</string>
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>
@@ -783,6 +796,7 @@
     <string name="auto">Auto</string>
     <string name="automatic">Automatic</string>
     <string name="back">Back</string>
+    <string name="beta">BETA</string>
     <string name="bottom">Bottom</string>
     <string name="bug_report">Report a Bug</string>
     <string name="cancel">Cancel</string>

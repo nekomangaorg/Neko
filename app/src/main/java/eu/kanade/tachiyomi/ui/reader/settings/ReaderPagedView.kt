@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderPagedLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.bindToPreference
+import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 
@@ -27,12 +28,18 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         binding.pagerNav.bindToPreference(preferences.navigationModePager())
         binding.pagerInvert.bindToPreference(preferences.pagerNavInverted())
         binding.extendPastCutout.bindToPreference(preferences.pagerCutoutBehavior())
+        binding.pageLayout.bindToPreference(preferences.pageLayout())
+
+        binding.pageLayout.title = binding.pageLayout.title.toString().addBetaTag(context)
 
         val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaViewer() ?: 0
         val isWebtoonView = mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
         val hasMargins = mangaViewer == ReaderActivity.VERTICAL_PLUS
         binding.cropBordersWebtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
-        binding.webtoonSidePadding.bindToIntPreference(preferences.webtoonSidePadding(), R.array.webtoon_side_padding_values)
+        binding.webtoonSidePadding.bindToIntPreference(
+            preferences.webtoonSidePadding(),
+            R.array.webtoon_side_padding_values
+        )
         binding.webtoonEnableZoomOut.bindToPreference(preferences.webtoonEnableZoomOut())
         binding.webtoonNav.bindToPreference(preferences.navigationModeWebtoon())
         binding.webtoonInvert.bindToPreference(preferences.webtoonNavInverted())
@@ -49,8 +56,22 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
     }
 
     private fun updatePagedGroup(show: Boolean) {
-        listOf(binding.scaleType, binding.zoomStart, binding.cropBorders, binding.pageTransitions, binding.pagerNav, binding.pagerInvert).forEach { it.visibleIf(show) }
-        listOf(binding.cropBordersWebtoon, binding.webtoonSidePadding, binding.webtoonEnableZoomOut, binding.webtoonNav, binding.webtoonInvert).forEach { it.visibleIf(!show) }
+        listOf(
+            binding.scaleType,
+            binding.zoomStart,
+            binding.cropBorders,
+            binding.pageTransitions,
+            binding.pagerNav,
+            binding.pagerInvert,
+            binding.pageLayout
+        ).forEach { it.visibleIf(show) }
+        listOf(
+            binding.cropBordersWebtoon,
+            binding.webtoonSidePadding,
+            binding.webtoonEnableZoomOut,
+            binding.webtoonNav,
+            binding.webtoonInvert
+        ).forEach { it.visibleIf(!show) }
         val isFullFit = when (preferences.imageScaleType().get()) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,

@@ -59,9 +59,25 @@
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toEndOf="@id/chapters_button"
-            app:layout_constraintEnd_toStartOf="@id/display_options"
+            app:layout_constraintEnd_toStartOf="@id/double_page"
             app:layout_constraintTop_toTopOf="parent"
             app:srcCompat="@drawable/ic_open_in_webview_24dp" />
+
+        <ImageButton
+            android:id="@+id/double_page"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/next_title"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            app:tint="?actionBarTintColor"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            android:tooltipText="@string/double_pages"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toEndOf="@id/webview_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/display_options"
+            app:srcCompat="@drawable/ic_book_open_variant_24dp" />
 
         <ImageButton
             android:id="@+id/display_options"
@@ -74,7 +90,7 @@
             app:layout_constraintHorizontal_chainStyle="spread"
             android:tooltipText="@string/display_options"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toEndOf="@id/webview_button"
+            app:layout_constraintStart_toEndOf="@id/double_page"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:srcCompat="@drawable/ic_tune_24dp" />

@@ -5,6 +5,8 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
+import eu.kanade.tachiyomi.util.lang.addBetaTag
 import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -185,6 +187,21 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.cropBorders
                 titleRes = R.string.crop_borders
                 defaultValue = false
+            }
+            intListPreference(activity) {
+                key = Keys.pageLayout
+                title = context.getString(R.string.page_layout).addBetaTag(context)
+                dialogTitleRes = R.string.page_layout
+                entriesRes = arrayOf(
+                    R.string.single_page,
+                    R.string.double_pages,
+                    R.string.automatic_orientation
+                )
+                entryRange = 0..2
+                defaultValue = 2
+            }
+            infoPreference(R.string.automatic_can_still_switch).apply {
+                preferences.pageLayout().asImmediateFlow { isVisible = it == PageLayout.AUTOMATIC }.launchIn(viewScope)
             }
         }
         preferenceCategory {

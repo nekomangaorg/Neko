@@ -70,6 +70,12 @@
         <item>@string/right_and_left_nav</item>
     </string-array>
 
+    <string-array name="page_layouts">
+        <item>@string/single_page</item>
+        <item>@string/double_pages</item>
+        <item>@string/automatic</item>
+    </string-array>
+
     <string-array name="invert_tapping_mode">
         <item>@string/none</item>
         <item>@string/horizontally</item>
