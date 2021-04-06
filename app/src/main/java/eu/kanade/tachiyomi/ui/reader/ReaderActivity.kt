@@ -71,11 +71,13 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
+import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
@@ -234,9 +236,9 @@ class ReaderActivity :
             lastShiftDoubleState = savedInstanceState.get(SHIFT_DOUBLE_PAGES) as? Boolean
             indexPageToShift = savedInstanceState.get(SHIFTED_PAGE_INDEX) as? Int
             indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
-            binding.readerNav.root.isVisible = menuVisible
+            binding.readerNav.root.visInvisIf(menuVisible)
         } else {
-            binding.readerNav.root.gone()
+            binding.readerNav.root.invisible()
         }
 
         binding.chaptersSheet.chaptersBottomSheet.setup(this)

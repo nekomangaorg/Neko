@@ -109,14 +109,14 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         activity.binding.readerNav.root.visible()
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        activity.binding.readerNav.root.gone()
+                        activity.binding.readerNav.root.invisible()
                         activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
                         if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         activity.binding.readerNav.root.alpha = 0f
-                        activity.binding.readerNav.root.gone()
+                        activity.binding.readerNav.root.invisible()
                     }
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
