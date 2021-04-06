@@ -14,7 +14,7 @@ object Versions {
     const val RX_BINDING = "1.0.1"
     const val TIMBER = "4.7.1"
     const val WORKMANAGER = "2.5.0"
-    const val aboutLibraries = "8.3.0"
+    const val aboutLibraries = "0.10.3"
     const val androidAnnotations = "1.1.0"
     const val androidAppCompat = "1.1.0"
     const val androidBiometrics = "1.0.1"
@@ -95,7 +95,7 @@ object Versions {
 }
 
 object LegacyPluginClassPath {
-    const val aboutLibraries = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${Versions.aboutLibraries}"
+    const val aboutLibraries = "com.google.android.gms:oss-licenses-plugin:${Versions.aboutLibraries}"
     const val androidGradlePlugin = "com.android.tools.build:gradle:${Versions.androidGradlePlugin}"
     const val googleServices = "com.google.gms:google-services:${Versions.googleServices}"
     const val kotlinPlugin = "org.jetbrains.kotlin:kotlin-gradle-plugin:${Versions.kotlin}"
@@ -114,7 +114,7 @@ object AndroidVersions {
 }
 
 object Plugins {
-    const val aboutLibraries = "com.mikepenz.aboutlibraries.plugin"
+    const val aboutLibraries = "com.google.android.gms.oss-licenses-plugin"
     const val androidApplication = "com.android.application"
     const val firebaseCrashlytics = "com.google.firebase.crashlytics"
     const val googleServices = "com.google.gms.google-services"
@@ -148,7 +148,7 @@ object BuildPluginsVersion {
     const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
     const val KOTLINTER = "3.3.0"
     const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
-    const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.2"
+    const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.3"
     const val VERSIONS_PLUGIN = "0.28.0"
 }
 

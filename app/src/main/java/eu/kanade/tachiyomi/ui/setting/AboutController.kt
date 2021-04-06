@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.openInBrowser
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -54,68 +55,92 @@ class AboutController : SettingsController() {
         titleRes = R.string.about
 
         preference {
-            titleRes = R.string.website
-            val url = "https://tachiyomi.org"
-            summary = url
+            key = "pref_whats_new"
+            titleRes = R.string.whats_new_this_release
             onClick {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    if (BuildConfig.DEBUG) {
+                        "https://github.com/Jays2Kings/tachiyomiJ2K/commits/master"
+                    } else {
+                        "https://github.com/Jays2Kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}"
+                    }.toUri()
+                )
                 startActivity(intent)
             }
         }
-
-        preference {
-            title = "Discord"
-            val url = "https://discord.gg/tachiyomi"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                startActivity(intent)
-            }
-        }
-        preference {
-            title = "Github"
-            val url = "https://github.com/Jays2Kings/tachiyomiJ2K"
-            summary = url
-            onClick {
-                val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                startActivity(intent)
-            }
-        }
-        preferenceCategory {
+        if (isUpdaterEnabled) {
             preference {
-                titleRes = R.string.whats_new_this_release
+                key = "pref_check_for_updates"
+                titleRes = R.string.check_for_updates
                 onClick {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        if (BuildConfig.DEBUG) {
-                            "https://github.com/Jays2Kings/tachiyomiJ2K/commits/master"
-                        } else {
-                            "https://github.com/Jays2Kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}"
-                        }.toUri()
-                    )
-                    startActivity(intent)
-                }
-            }
-            preference {
-                titleRes = R.string.version
-                summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
-                else BuildConfig.VERSION_NAME
-
-                if (isUpdaterEnabled) {
-                    onClick {
-                        if (activity!!.isOnline()) {
-                            checkVersion()
-                        } else {
-                            activity!!.toast(R.string.no_network_connection)
-                        }
+                    if (activity!!.isOnline()) {
+                        checkVersion()
+                    } else {
+                        activity!!.toast(R.string.no_network_connection)
                     }
                 }
             }
+        }
+        preference {
+            key = "pref_version"
+            titleRes = R.string.version
+            summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
+            else BuildConfig.VERSION_NAME
+        }
+        preference {
+            key = "pref_build_time"
+            titleRes = R.string.build_time
+            summary = getFormattedBuildTime()
+        }
+
+        preferenceCategory {
             preference {
-                titleRes = R.string.build_time
-                summary = getFormattedBuildTime()
+                key = "pref_about_website"
+                titleRes = R.string.website
+                "https://tachiyomi.org".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
+                }
+            }
+
+            preference {
+                key = "pref_about_discord"
+                title = "Discord"
+                "https://discord.gg/tachiyomi".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
+                }
             }
             preference {
+                key = "pref_about_github"
+                title = "Github"
+                "https://github.com/Jays2Kings/tachiyomiJ2K".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
+                }
+            }
+
+            preference {
+                key = "pref_about_twitter"
+                title = "Twitter"
+                "https://twitter.com/tachiyomiorg".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
+                }
+            }
+
+            preference {
+                key = "pref_about_label_extensions"
+                titleRes = R.string.extensions
+                "https://github.com/tachiyomiorg/tachiyomi-extensions".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
+                }
+            }
+
+            preference {
+                key = "pref_oss"
                 titleRes = R.string.open_source_licenses
 
                 onClick {
