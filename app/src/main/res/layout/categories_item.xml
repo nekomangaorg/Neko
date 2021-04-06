@@ -50,7 +50,7 @@
         android:layout_height="match_parent"
         android:background="@null"
         android:imeOptions="actionDone"
-        android:inputType="none"
+        android:inputType="textCapSentences"
         android:maxLines="1"
         android:singleLine="true"
         android:textColor="@color/textColorPrimary"

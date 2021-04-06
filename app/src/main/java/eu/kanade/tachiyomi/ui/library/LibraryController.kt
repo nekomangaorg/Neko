@@ -1332,7 +1332,9 @@ class LibraryController(
     override fun manageCategory(position: Int) {
         val category = (adapter.getItem(position) as? LibraryHeaderItem)?.category ?: return
         if (!category.isDynamic) {
-            ManageCategoryDialog(this, category).showDialog(router)
+            ManageCategoryDialog(category) {
+                presenter.getLibrary()
+            }.showDialog(router)
         }
     }
 

@@ -21,6 +21,8 @@
     <string name="author">Author</string>
     <string name="artist">Artist</string>
     <string name="description">Description</string>
+    <string name="move_x_to">Move %1$s to…</string>
+    <string name="add_x_to">Add %1$s to…</string>
 
     <!-- Status -->
     <string name="ongoing">Ongoing</string>
@@ -69,6 +71,7 @@
     <string name="adding_category_to_queue">Adding %1$s to update queue</string>
     <string name="_already_in_queue">%1$s is already in queue</string>
     <string name="create_new_category">Create new category</string>
+    <string name="new_category">New category</string>
     <string name="category_is_empty">Category is empty</string>
     <string name="category_is_hidden">Category is hidden</string>
     <string name="top_category">Top category (%1$s)</string>
@@ -86,12 +89,12 @@
     <string name="manage_category">Manage category</string>
     <string name="rename_category">Rename category</string>
     <string name="move_to_categories">Move to categories</string>
-    <string name="add_to_categories">Choose which categories to add this to.  If none are selected, this will be added to the "default" category</string>
     <plurals name="category_plural">
         <item quantity="one">%d category</item>
         <item quantity="other">%d categories</item>
     </plurals>
     <string name="category_with_name_exists">A category with that name already exists!</string>
+    <string name="category_cannot_be_blank">Category name cannot be blank</string>
     <string name="category_deleted">Category deleted</string>
     <string name="long_press_category">Press and hold to edit a category</string>
     <string name="jump_to_category">Jump to category</string>
@@ -788,6 +791,8 @@
 
     <!-- Miscellaneous -->
     <string name="add">Add</string>
+    <string name="add_to_">Add to %1$s</string>
+    <string name="added_to_">Added to %1$s</string>
     <string name="all">All</string>
     <string name="alphabetically">Alphabetically</string>
     <string name="always">Always</string>
@@ -801,6 +806,7 @@
     <string name="bug_report">Report a Bug</string>
     <string name="cancel">Cancel</string>
     <string name="center">Center</string>
+    <string name="change">Change</string>
     <string name="charging">Charging</string>
     <string name="clear">Clear</string>
     <string name="close">Close</string>
@@ -839,6 +845,7 @@
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>
     <string name="move_to_top">Move to top</string>
+    <string name="move_to_">Move to %1$s</string>
     <string name="moved_to_">Moved to %1$s</string>
     <string name="never">Never</string>
     <string name="newest">Newest</string>

@@ -68,8 +68,6 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
-import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
@@ -84,6 +82,8 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
+import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -116,9 +116,7 @@ class MangaDetailsController :
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
     MangaDetailsAdapter.MangaDetailsInterface,
-    FlexibleAdapter.OnItemMoveListener,
-    ChangeMangaCategoriesDialog.Listener,
-    AddToLibraryCategoriesDialog.Listener {
+    FlexibleAdapter.OnItemMoveListener {
 
     constructor(
         manga: Manga?,
@@ -1092,7 +1090,7 @@ class MangaDetailsController :
         popupView.setOnTouchListener(popup.dragToOpenListener)
     }
 
-    fun makeFavPopup(popupView: View, manga: Manga, categories: List<Category>): PopupMenu {
+    private fun makeFavPopup(popupView: View, manga: Manga, categories: List<Category>): PopupMenu {
         val popup = PopupMenu(view!!.context, popupView)
         popup.menu.add(0, 1, 0, R.string.remove_from_library)
         if (categories.isNotEmpty()) {
@@ -1102,18 +1100,9 @@ class MangaDetailsController :
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
             if (menuItem.itemId == 0) {
-                val ids = presenter.getMangaCategoryIds()
-                val preselected = ids.mapNotNull { id ->
-                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                }.toTypedArray()
-                ChangeMangaCategoriesDialog(
-                    this,
-                    listOf(manga),
-                    categories,
-                    preselected
-                ).showDialog(
-                    router
-                )
+                presenter.manga.moveCategories(presenter.db, activity!!) {
+                    updateHeader()
+                }
             } else {
                 toggleMangaFavorite()
             }
@@ -1123,31 +1112,24 @@ class MangaDetailsController :
     }
 
     private fun toggleMangaFavorite() {
-        if (presenter.toggleFavorite()) {
-            val categories = presenter.getCategories()
-            val defaultCategoryId = presenter.preferences.defaultCategory()
-            val defaultCategory = categories.find { it.id == defaultCategoryId }
-            when {
-                defaultCategory != null -> presenter.moveMangaToCategory(defaultCategory)
-                defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
-                    presenter.moveMangaToCategory(null)
-                else -> {
-                    val ids = presenter.getMangaCategoryIds()
-                    val preselected = ids.mapNotNull { id ->
-                        categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                    }.toTypedArray()
-
-                    AddToLibraryCategoriesDialog(
-                        this,
-                        presenter.manga,
-                        categories,
-                        preselected
-                    ).showDialog(router)
-                }
-            }
-            showAddedSnack()
-        } else {
-            showRemovedSnack()
+        val view = view ?: return
+        val activity = activity ?: return
+        snack?.dismiss()
+        snack = presenter.manga.addOrRemoveToFavorites(
+            presenter.db,
+            presenter.preferences,
+            view,
+            activity,
+            onMangaAdded = {
+                updateHeader()
+                showAddedSnack()
+            },
+            onMangaMoved = { updateHeader() },
+            onMangaDeleted = { presenter.confirmDeletion() }
+        )
+        if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
+            val favButton = getHeader()?.binding?.favoriteButton
+            (activity as? MainActivity)?.setUndoSnackBar(snack, favButton)
         }
     }
 
@@ -1157,42 +1139,7 @@ class MangaDetailsController :
         snack = view.snack(view.context.getString(R.string.added_to_library))
     }
 
-    private fun showRemovedSnack() {
-        val view = view ?: return
-        snack?.dismiss()
-        snack = view.snack(
-            view.context.getString(R.string.removed_from_library),
-            Snackbar.LENGTH_INDEFINITE
-        ) {
-            setAction(R.string.undo) {
-                presenter.setFavorite(true)
-            }
-            addCallback(
-                object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                    override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                        super.onDismissed(transientBottomBar, event)
-                        if (!presenter.manga.favorite) presenter.confirmDeletion()
-                    }
-                }
-            )
-        }
-        val favButton = getHeader()?.binding?.favoriteButton
-        (activity as? MainActivity)?.setUndoSnackBar(snack, favButton)
-    }
-
     override fun mangaPresenter(): MangaDetailsPresenter = presenter
-
-    override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
-        presenter.moveMangaToCategories(categories)
-    }
-
-    override fun updateCategoriesForManga(manga: Manga?, categories: List<Category>) {
-        manga?.let { presenter.moveMangaToCategories(categories) }
-    }
-
-    override fun addToLibraryCancelled(manga: Manga?, position: Int) {
-        manga?.let { presenter.toggleFavorite() }
-    }
 
     /**
      * Copies a string to clipboard

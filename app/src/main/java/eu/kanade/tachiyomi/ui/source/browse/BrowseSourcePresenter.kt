@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.CatalogueSource
@@ -37,7 +36,6 @@ import rx.subjects.PublishSubject
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
 
 /**
  * Presenter of [BrowseSourceController].
@@ -45,7 +43,7 @@ import java.util.Date
 open class BrowseSourcePresenter(
     sourceId: Long,
     sourceManager: SourceManager = Injekt.get(),
-    private val db: DatabaseHelper = Injekt.get(),
+    val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<BrowseSourceController>() {
@@ -278,22 +276,6 @@ open class BrowseSourcePresenter(
             .onErrorResumeNext { Observable.just(manga) }
     }
 
-    /**
-     * Adds or removes a manga from the library.
-     *
-     * @param manga the manga to update.
-     */
-    fun changeMangaFavorite(manga: Manga) {
-        manga.favorite = !manga.favorite
-
-        when (manga.favorite) {
-            true -> manga.date_added = Date().time
-            false -> manga.date_added = 0
-        }
-
-        db.insertManga(manga).executeAsBlocking()
-    }
-
     fun confirmDeletion(manga: Manga) {
         coverCache.deleteFromCache(manga)
         val downloadManager: DownloadManager = Injekt.get()
@@ -364,57 +346,5 @@ open class BrowseSourcePresenter(
      */
     fun getCategories(): List<Category> {
         return db.getCategories().executeAsBlocking()
-    }
-
-    /**
-     * Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
-     *
-     * @param manga the manga to get categories from.
-     * @return Array of category ids the manga is in, if none returns default id
-     */
-    fun getMangaCategoryIds(manga: Manga): Array<Int?> {
-        val categories = db.getCategoriesForManga(manga).executeAsBlocking()
-        return categories.mapNotNull { it.id }.toTypedArray()
-    }
-
-    /**
-     * Move the given manga to categories.
-     *
-     * @param categories the selected categories.
-     * @param manga the manga to move.
-     */
-    private fun moveMangaToCategories(manga: Manga, categories: List<Category>) {
-        val mc = categories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
-        db.setMangaCategories(mc, listOf(manga))
-    }
-
-    /**
-     * Move the given manga to the category.
-     *
-     * @param category the selected category.
-     * @param manga the manga to move.
-     */
-    fun moveMangaToCategory(manga: Manga, category: Category?) {
-        moveMangaToCategories(manga, listOfNotNull(category))
-    }
-
-    /**
-     * Update manga to use selected categories.
-     *
-     * @param manga needed to change
-     * @param selectedCategories selected categories
-     */
-    fun updateMangaCategories(manga: Manga, selectedCategories: List<Category>) {
-        if (selectedCategories.isNotEmpty()) {
-            if (!manga.favorite) {
-                changeMangaFavorite(manga)
-            }
-
-            moveMangaToCategories(manga, selectedCategories.filter { it.id != 0 })
-        } else {
-            if (!manga.favorite) {
-                changeMangaFavorite(manga)
-            }
-        }
     }
 }

@@ -78,19 +78,19 @@ interface Category : Serializable {
     }
 
     companion object {
-        private const val DRAG_AND_DROP = 'D'
-        private const val ALPHA_ASC = 'a'
-        private const val ALPHA_DSC = 'b'
-        private const val UPDATED_ASC = 'c'
-        private const val UPDATED_DSC = 'd'
-        private const val UNREAD_ASC = 'e'
-        private const val UNREAD_DSC = 'f'
-        private const val LAST_READ_ASC = 'g'
-        private const val LAST_READ_DSC = 'h'
-        private const val TOTAL_ASC = 'i'
-        private const val TOTAL_DSC = 'j'
-        private const val DATE_ADDED_ASC = 'k'
-        private const val DATE_ADDED_DSC = 'l'
+        const val DRAG_AND_DROP = 'D'
+        const val ALPHA_ASC = 'a'
+        const val ALPHA_DSC = 'b'
+        const val UPDATED_ASC = 'c'
+        const val UPDATED_DSC = 'd'
+        const val UNREAD_ASC = 'e'
+        const val UNREAD_DSC = 'f'
+        const val LAST_READ_ASC = 'g'
+        const val LAST_READ_DSC = 'h'
+        const val TOTAL_ASC = 'i'
+        const val TOTAL_DSC = 'j'
+        const val DATE_ADDED_ASC = 'k'
+        const val DATE_ADDED_DSC = 'l'
 
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name

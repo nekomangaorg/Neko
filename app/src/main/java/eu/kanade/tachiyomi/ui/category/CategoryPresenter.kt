@@ -72,10 +72,10 @@ class CategoryPresenter(
         val cat = Category.create(name)
 
         // Set the new item in the last position.
-        cat.order = categories.map { it.order + 1 }.max() ?: 0
+        cat.order = categories.maxOf { it.order } + 1
 
         // Insert into database.
-        cat.mangaSort = 'a'
+        cat.mangaSort = Category.ALPHA_ASC
         db.insertCategory(cat).executeAsBlocking()
         val cats = db.getCategories().executeAsBlocking()
         val newCat = cats.find { it.name == name } ?: return false

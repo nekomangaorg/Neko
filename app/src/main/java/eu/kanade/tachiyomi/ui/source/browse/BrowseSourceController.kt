@@ -11,13 +11,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -28,11 +26,11 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -60,8 +58,7 @@ open class BrowseSourceController(bundle: Bundle) :
     NucleusController<BrowseSourceControllerBinding, BrowseSourcePresenter>(bundle),
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
-    FlexibleAdapter.EndlessScrollListener,
-    AddToLibraryCategoriesDialog.Listener {
+    FlexibleAdapter.EndlessScrollListener {
 
     constructor(
         source: CatalogueSource,
@@ -575,73 +572,23 @@ open class BrowseSourceController(bundle: Bundle) :
      */
     override fun onItemLongClick(position: Int) {
         val manga = (adapter?.getItem(position) as? BrowseSourceItem?)?.manga ?: return
+        val view = view ?: return
+        val activity = activity ?: return
         snack?.dismiss()
-        if (manga.favorite) {
-            presenter.changeMangaFavorite(manga)
-            adapter?.notifyItemChanged(position)
-            snack = binding.sourceLayout.snack(R.string.removed_from_library, Snackbar.LENGTH_INDEFINITE) {
-                setAction(R.string.undo) {
-                    if (!manga.favorite) addManga(manga, position)
-                }
-                addCallback(
-                    object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
-                        override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
-                            super.onDismissed(transientBottomBar, event)
-                            if (!manga.favorite) presenter.confirmDeletion(manga)
-                        }
-                    }
-                )
-            }
+        snack = manga.addOrRemoveToFavorites(
+            presenter.db,
+            preferences,
+            view,
+            activity,
+            onMangaAdded = {
+                adapter?.notifyItemChanged(position)
+                snack = view.snack(R.string.added_to_library)
+            },
+            onMangaMoved = { adapter?.notifyItemChanged(position) },
+            onMangaDeleted = { presenter.confirmDeletion(manga) }
+        )
+        if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             (activity as? MainActivity)?.setUndoSnackBar(snack)
-        } else {
-            addManga(manga, position)
-            snack = binding.sourceLayout.snack(R.string.added_to_library)
-        }
-    }
-
-    private fun addManga(manga: Manga, position: Int) {
-        presenter.changeMangaFavorite(manga)
-        adapter?.notifyItemChanged(position)
-
-        val categories = presenter.getCategories()
-        val defaultCategoryId = preferences.defaultCategory()
-        val defaultCategory = categories.find { it.id == defaultCategoryId }
-        when {
-            defaultCategory != null -> presenter.moveMangaToCategory(manga, defaultCategory)
-            defaultCategoryId == 0 || categories.isEmpty() -> // 'Default' or no category
-                presenter.moveMangaToCategory(manga, null)
-            else -> {
-                val ids = presenter.getMangaCategoryIds(manga)
-                if (ids.isNullOrEmpty()) {
-                    presenter.moveMangaToCategory(manga, null)
-                }
-                val preselected = ids.mapNotNull { id ->
-                    categories.indexOfFirst { it.id == id }.takeIf { it != -1 }
-                }.toTypedArray()
-
-                AddToLibraryCategoriesDialog(this, manga, categories, preselected, position)
-                    .showDialog(router)
-            }
-        }
-    }
-
-    /**
-     * Update manga to use selected categories.
-     *
-     * @param manga The manga to move to categories.
-     * @param categories The list of categories where manga will be placed.
-     */
-    override fun updateCategoriesForManga(manga: Manga?, categories: List<Category>) {
-        manga?.let { presenter.updateMangaCategories(manga, categories) }
-    }
-
-    /**
-     * Update manga to remove from favorites
-     */
-    override fun addToLibraryCancelled(manga: Manga?, position: Int) {
-        manga?.let {
-            presenter.changeMangaFavorite(manga)
-            adapter?.notifyItemChanged(position)
         }
     }
 

@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.ui.category
 
+import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
 import android.widget.CompoundButton
+import androidx.core.view.isVisible
+import androidx.core.widget.addTextChangedListener
 import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.callbacks.onShow
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
 import com.tfcporciuncula.flow.Preference
@@ -15,8 +19,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.library.LibraryController
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -26,12 +28,12 @@ import uy.kohesive.injekt.injectLazy
 class ManageCategoryDialog(bundle: Bundle? = null) :
     DialogController(bundle) {
 
-    constructor(libraryController: LibraryController, category: Category) : this() {
-        this.libraryController = libraryController
+    constructor(category: Category?, updateLibrary: ((Int?) -> Unit)) : this() {
+        this.updateLibrary = updateLibrary
         this.category = category
     }
 
-    private var libraryController: LibraryController? = null
+    private var updateLibrary: ((Int?) -> Unit)? = null
     private var category: Category? = null
 
     private val preferences by injectLazy<PreferencesHelper>()
@@ -39,28 +41,59 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     lateinit var binding: MangaCategoryDialogBinding
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!).apply {
-            title(R.string.manage_category)
-            customView(viewRes = R.layout.manga_category_dialog)
-            negativeButton(android.R.string.cancel)
-            positiveButton(R.string.save) { onPositiveButtonClick() }
-        }
+        val dialog = dialog(activity!!)
         binding = MangaCategoryDialogBinding.bind(dialog.getCustomView())
         onViewCreated()
         return dialog
     }
 
-    private fun onPositiveButtonClick() {
-        val category = category ?: return
-        if (category.id ?: 0 <= 0) return
+    fun dialog(activity: Activity): MaterialDialog {
+        return MaterialDialog(activity).apply {
+            title(if (category == null) R.string.new_category else R.string.manage_category)
+            customView(viewRes = R.layout.manga_category_dialog)
+            negativeButton(android.R.string.cancel) { dismiss() }
+            positiveButton(R.string.save) {
+                if (onPositiveButtonClick()) {
+                    dismiss()
+                }
+            }
+            noAutoDismiss()
+        }
+    }
+
+    fun show(activity: Activity) {
+        val dialog = dialog(activity)
+        binding = MangaCategoryDialogBinding.bind(dialog.getCustomView())
+        onViewCreated()
+        dialog.onShow {
+            binding.title.requestFocus()
+        }
+        dialog.show()
+    }
+
+    private fun onPositiveButtonClick(): Boolean {
+        if (category?.id ?: 0 <= 0 && category != null) return false
         val text = binding.title.text.toString()
         val categoryExists = categoryExists(text)
-        if (text.isNotBlank() && !categoryExists && !text.equals(category.name, true)) {
+        val category = this.category ?: Category.create(text)
+        if (text.isNotBlank() && !categoryExists && !text.equals(this.category?.name ?: "", true)) {
             category.name = text
-            db.insertCategory(category).executeAsBlocking()
-            libraryController?.presenter?.getLibrary()
+            if (this.category == null) {
+                val categories = db.getCategories().executeAsBlocking()
+                category.order = categories.maxOf { it.order } + 1
+                category.mangaSort = Category.ALPHA_ASC
+                val dbCategory = db.insertCategory(category).executeAsBlocking()
+                category.id = dbCategory.insertedId()?.toInt()
+                this.category = category
+            } else {
+                db.insertCategory(category).executeAsBlocking()
+            }
         } else if (categoryExists) {
-            activity?.toast(R.string.category_with_name_exists)
+            binding.categoryTextLayout.error = binding.categoryTextLayout.context.getString(R.string.category_with_name_exists)
+            return false
+        } else {
+            binding.categoryTextLayout.error = binding.categoryTextLayout.context.getString(R.string.category_cannot_be_blank)
+            return false
         }
         if (!updatePref(preferences.downloadNewCategories(), binding.downloadNew)) {
             preferences.downloadNew().set(false)
@@ -73,6 +106,8 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             preferences.libraryUpdateInterval().set(0)
             LibraryUpdateJob.setupTask(0)
         }
+        updateLibrary?.invoke(category.id)
+        return true
     }
 
     /**
@@ -85,19 +120,22 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     fun onViewCreated() {
-        val category = category ?: return
-        if (category.id ?: 0 <= 0) {
+        if (category?.id ?: 0 <= 0 && category != null) {
             binding.title.gone()
             binding.downloadNew.gone()
             binding.includeGlobal.gone()
             return
         }
+        binding.editCategories.isVisible = category != null
         binding.editCategories.setOnClickListener {
             router.popCurrentController()
             router.pushController(CategoryController().withFadeTransaction())
         }
-        binding.title.hint = category.name
-        binding.title.append(category.name)
+        binding.title.addTextChangedListener {
+            binding.categoryTextLayout.error = null
+        }
+        binding.title.hint = category?.name ?: binding.editCategories.context.getString(R.string.category)
+        binding.title.append(category?.name ?: "")
         val downloadNew = preferences.downloadNew().get()
         setCheckbox(
             binding.downloadNew,

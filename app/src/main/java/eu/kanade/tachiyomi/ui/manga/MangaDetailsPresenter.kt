@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -61,7 +60,7 @@ class MangaDetailsPresenter(
     val source: Source,
     val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
-    private val db: DatabaseHelper = Injekt.get(),
+    val db: DatabaseHelper = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
@@ -334,7 +333,6 @@ class MangaDetailsPresenter(
             }
 
             val networkManga = nManga.await()
-            val mangaWasInitalized = manga.initialized
             if (networkManga != null) {
                 manga.copyFrom(networkManga)
                 manga.initialized = true
@@ -405,7 +403,7 @@ class MangaDetailsPresenter(
             } catch (e: Exception) {
                 withContext(Dispatchers.Main) { controller.showError(trimException(e)) }
                 return@launch
-            } ?: listOf()
+            }
             isLoading = false
             try {
                 syncChaptersWithSource(db, chapters, manga, source)
@@ -549,38 +547,6 @@ class MangaDetailsPresenter(
      */
     fun getCategories(): List<Category> {
         return db.getCategories().executeAsBlocking()
-    }
-
-    /**
-     * Move the given manga to the category.
-     *
-     * @param manga the manga to move.
-     * @param category the selected category, or null for default category.
-     */
-    fun moveMangaToCategory(category: Category?) {
-        moveMangaToCategories(listOfNotNull(category))
-    }
-
-    /**
-     * Move the given manga to categories.
-     *
-     * @param manga the manga to move.
-     * @param categories the selected categories.
-     */
-    fun moveMangaToCategories(categories: List<Category>) {
-        val mc = categories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
-        db.setMangaCategories(mc, listOf(manga))
-    }
-
-    /**
-     * Gets the category id's the manga is in, if the manga is not in a category, returns the default id.
-     *
-     * @param manga the manga to get categories from.
-     * @return Array of category ids the manga is in, if none returns default id
-     */
-    fun getMangaCategoryIds(): Array<Int> {
-        val categories = db.getCategoriesForManga(manga).executeAsBlocking()
-        return categories.mapNotNull { it.id }.toTypedArray()
     }
 
     fun confirmDeletion() {
