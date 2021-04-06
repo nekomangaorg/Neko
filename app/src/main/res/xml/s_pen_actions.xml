@@ -8,7 +8,7 @@
         priority="1"
         repeatable="true"
         repeatable_interval="short"
-        trigger_key="CTRL_LEFT+DPAD_RIGHT">
+        trigger_key="E">
         <preference
             name="gesture"
             value="click" />
@@ -19,7 +19,7 @@
         priority="2"
         repeatable="true"
         repeatable_interval="short"
-        trigger_key="CTRL_LEFT+DPAD_LEFT">
+        trigger_key="Q">
         <preference
             name="gesture"
             value="double_click" />
@@ -41,7 +41,7 @@
         priority="4"
         repeatable="true"
         repeatable_interval="short"
-        trigger_key="N">
+        trigger_key="R">
         <preference
             name="gesture"
             value="swipe_right" />
@@ -52,7 +52,7 @@
         priority="5"
         repeatable="true"
         repeatable_interval="short"
-        trigger_key="P">
+        trigger_key="L">
         <preference
             name="gesture"
             value="swipe_left" />

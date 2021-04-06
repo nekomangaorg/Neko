@@ -32,6 +32,16 @@ interface BaseViewer {
     fun moveToPage(page: ReaderPage)
 
     /**
+     * Moves to the next page.
+     */
+    fun moveToNext()
+
+    /**
+     * Moves to the previous page.
+     */
+    fun moveToPrevious()
+
+    /**
      * Called from the containing activity when a key [event] is received. It should return true
      * if the event was handled, false otherwise.
      */

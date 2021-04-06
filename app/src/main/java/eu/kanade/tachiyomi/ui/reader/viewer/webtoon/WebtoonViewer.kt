@@ -109,8 +109,8 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 val navigator = config.navigator
                 when (navigator.getAction(pos)) {
                     ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
-                    ViewerNavigation.NavigationRegion.NEXT, ViewerNavigation.NavigationRegion.RIGHT -> scrollDown()
-                    ViewerNavigation.NavigationRegion.PREV, ViewerNavigation.NavigationRegion.LEFT -> scrollUp()
+                    ViewerNavigation.NavigationRegion.NEXT, ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
+                    ViewerNavigation.NavigationRegion.PREV, ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
                 }
             }
         }
@@ -252,14 +252,14 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     /**
      * Scrolls up by [scrollDistance].
      */
-    private fun scrollUp() {
+    override fun moveToNext() {
         recycler.smoothScrollBy(0, -scrollDistance)
     }
 
     /**
      * Scrolls down by [scrollDistance].
      */
-    private fun scrollDown() {
+    override fun moveToPrevious() {
         recycler.smoothScrollBy(0, scrollDistance)
     }
 
@@ -275,25 +275,25 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                 if (!config.volumeKeysEnabled || activity.menuVisible) {
                     return false
                 } else if (isUp) {
-                    if (!config.volumeKeysInverted) scrollDown() else scrollUp()
+                    if (!config.volumeKeysInverted) moveToNext() else moveToPrevious()
                 }
             }
             KeyEvent.KEYCODE_VOLUME_UP -> {
                 if (!config.volumeKeysEnabled || activity.menuVisible) {
                     return false
                 } else if (isUp) {
-                    if (!config.volumeKeysInverted) scrollUp() else scrollDown()
+                    if (!config.volumeKeysInverted) moveToPrevious() else moveToNext()
                 }
             }
             KeyEvent.KEYCODE_MENU -> if (isUp) activity.toggleMenu()
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) scrollUp()
+            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) moveToPrevious()
 
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) scrollDown()
+            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveToNext()
             else -> return false
         }
         return true

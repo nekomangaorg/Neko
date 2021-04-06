@@ -402,14 +402,41 @@ class ReaderActivity :
     }
 
     override fun onKeyUp(keyCode: Int, event: KeyEvent?): Boolean {
-        if (keyCode == KeyEvent.KEYCODE_N) {
-            presenter.loadNextChapter()
-            return true
-        } else if (keyCode == KeyEvent.KEYCODE_P) {
-            presenter.loadPreviousChapter()
-            return true
+        when (keyCode) {
+            KeyEvent.KEYCODE_N -> {
+                if (viewer is R2LPagerViewer) {
+                    binding.readerNav.leftChapter.performClick()
+                } else {
+                    binding.readerNav.rightChapter.performClick()
+                }
+                return true
+            }
+            KeyEvent.KEYCODE_P -> {
+                if (viewer !is R2LPagerViewer) {
+                    binding.readerNav.leftChapter.performClick()
+                } else {
+                    binding.readerNav.rightChapter.performClick()
+                }
+                return true
+            }
+            KeyEvent.KEYCODE_L -> {
+                binding.readerNav.leftChapter.performClick()
+                return true
+            }
+            KeyEvent.KEYCODE_R -> {
+                binding.readerNav.rightChapter.performClick()
+                return true
+            }
+            KeyEvent.KEYCODE_E -> {
+                viewer?.moveToNext()
+                return true
+            }
+            KeyEvent.KEYCODE_Q -> {
+                viewer?.moveToPrevious()
+                return true
+            }
+            else -> return super.onKeyUp(keyCode, event)
         }
-        return super.onKeyUp(keyCode, event)
     }
 
     /**
