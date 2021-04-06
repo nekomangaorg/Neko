@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.extension
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
@@ -17,6 +18,22 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
         binding.recycler.setHasFixedSize(true)
         binding.recycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         binding.recycler.updatePaddingRelative(bottom = height)
+        binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (sheet.isOnView(this@RecyclerWithScrollerView) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    sheet.sheetBehavior?.isDraggable = true
+                }
+            }
+
+            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                super.onScrolled(recyclerView, dx, dy)
+                if (sheet.isOnView(this@RecyclerWithScrollerView) && recyclerView.canScrollVertically(-1)) {
+                    sheet.sheetBehavior?.isDraggable = false
+                }
+            }
+        })
+
         this.binding = binding
     }
 

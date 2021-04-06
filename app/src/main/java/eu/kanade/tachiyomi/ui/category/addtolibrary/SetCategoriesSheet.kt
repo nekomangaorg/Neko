@@ -86,7 +86,7 @@ class SetCategoriesSheet(
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    sheetBehavior.isDraggable = !recyclerView.canScrollVertically(-1)
+                    sheetBehavior.isDraggable = true
                 }
             }
 

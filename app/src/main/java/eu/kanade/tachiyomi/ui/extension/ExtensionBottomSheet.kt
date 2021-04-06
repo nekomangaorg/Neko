@@ -69,6 +69,8 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
     val migrationFrameLayout: RecyclerWithScrollerView?
         get() = binding.pager.findViewWithTag("TabbedRecycler1") as? RecyclerWithScrollerView
 
+    var isExpanding = false
+
     override fun onFinishInflate() {
         super.onFinishInflate()
         binding = ExtensionsBottomSheetBinding.bind(this)
@@ -95,6 +97,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
         }
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
+                isExpanding = !sheetBehavior.isExpanded()
                 if (canExpand) {
                     this@ExtensionBottomSheet.sheetBehavior?.expand()
                 }
@@ -107,6 +110,7 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
                 }?.binding?.recycler?.requestLayout()
+                sheetBehavior?.isDraggable = true
             }
 
             override fun onTabUnselected(tab: TabLayout.Tab?) {
@@ -120,11 +124,13 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             }
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
+                isExpanding = !sheetBehavior.isExpanded()
                 this@ExtensionBottomSheet.sheetBehavior?.expand()
                 when (tab?.position) {
                     0 -> extensionFrameLayout
                     else -> migrationFrameLayout
                 }?.binding?.recycler?.isNestedScrollingEnabled = true
+                sheetBehavior?.isDraggable = true
             }
         })
         presenter.onCreate()
@@ -139,6 +145,10 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
             }
         }
         presenter.getExtensionUpdateCount()
+    }
+
+    fun isOnView(view: View): Boolean {
+        return "TabbedRecycler${binding.pager.currentItem}" == view.tag
     }
 
     fun updatedNestedRecyclers() {

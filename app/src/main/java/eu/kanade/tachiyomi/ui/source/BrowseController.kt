@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.source
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.os.Parcelable
@@ -129,6 +130,7 @@ class BrowseController :
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
+        var elevationAnim: ValueAnimator? = null
         scrollViewWith(
             binding.sourceRecycler,
             customPadding = true,
@@ -138,6 +140,19 @@ class BrowseController :
                     top = activityBinding?.appBar?.height ?: 0,
                     bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
                 )
+            },
+            liftOnScroll = { el ->
+                if (!binding.bottomSheet.root.sheetBehavior.isExpanded()) {
+                    elevationAnim?.cancel()
+                    elevationAnim = ValueAnimator.ofFloat(
+                        activityBinding?.appBar?.elevation ?: 0f,
+                        if (el) 15f else 0f
+                    )
+                    elevationAnim?.addUpdateListener { valueAnimator ->
+                        activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
+                    }
+                    elevationAnim?.start()
+                }
             },
             onBottomNavUpdate = {
                 setBottomPadding()
@@ -180,6 +195,9 @@ class BrowseController :
                 override fun onStateChanged(p0: View, state: Int) {
                     if (state == BottomSheetBehavior.STATE_SETTLING) {
                         binding.bottomSheet.root.updatedNestedRecyclers()
+                    } else if (state == BottomSheetBehavior.STATE_EXPANDED && binding.bottomSheet.root.isExpanding) {
+                        binding.bottomSheet.root.updatedNestedRecyclers()
+                        binding.bottomSheet.root.isExpanding = false
                     }
                     val extBottomSheet = binding.bottomSheet.root
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -188,6 +206,7 @@ class BrowseController :
                     if (state == BottomSheetBehavior.STATE_EXPANDED ||
                         state == BottomSheetBehavior.STATE_COLLAPSED
                     ) {
+                        binding.bottomSheet.root.sheetBehavior?.isDraggable = true
                         showingExtensions = state == BottomSheetBehavior.STATE_EXPANDED
                         setTitle()
                         if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -224,9 +243,11 @@ class BrowseController :
 
     fun setBottomSheetTabs(progress: Float) {
         val bottomSheet = binding.bottomSheet.root
+        val halfStepProgress = (max(0.5f, progress) - 0.5f) * 2
         binding.bottomSheet.tabs.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            topMargin = ((activityBinding?.appBar?.height?.minus(9f.dpToPx) ?: 0f) * progress).toInt()
+            topMargin = ((activityBinding?.appBar?.height?.minus(9f.dpToPx) ?: 0f) * halfStepProgress).toInt()
         }
+        binding.bottomSheet.pill.alpha = (1 - progress) * 0.25f
         val selectedColor = ColorUtils.setAlphaComponent(
             ContextCompat.getColor(binding.bottomSheet.tabs.context, R.color.colorAccent),
             (progress * 255).toInt()
@@ -333,6 +354,12 @@ class BrowseController :
                 }
         } else {
             binding.bottomSheet.root.presenter.refreshMigrations()
+            activityBinding?.appBar?.elevation =
+                when {
+                    binding.bottomSheet.root.sheetBehavior.isExpanded() -> 0f
+                    binding.sourceRecycler.canScrollVertically(-1) -> 15f
+                    else -> 0f
+                }
         }
         setBottomPadding()
     }
