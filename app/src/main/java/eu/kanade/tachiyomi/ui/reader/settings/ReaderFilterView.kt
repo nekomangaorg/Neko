@@ -80,6 +80,8 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
             }
         )
 
+        setColorFilterSeekBar(binding.switchColorFilter.isChecked)
+
         binding.seekbarColorFilterRed.setOnSeekBarChangeListener(
             object : SimpleSeekBarListener() {
                 override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
