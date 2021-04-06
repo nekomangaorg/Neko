@@ -11,8 +11,8 @@ abstract class ViewerNavigation {
         object MENU : NavigationRegion(R.string.menu, R.color.navigation_menu)
         object PREV : NavigationRegion(R.string.previous, R.color.navigation_prev)
         object NEXT : NavigationRegion(R.string.next, R.color.navigation_next)
-        object LEFT : NavigationRegion(R.string.left, R.color.navigation_left)
-        object RIGHT : NavigationRegion(R.string.right, R.color.navigation_right)
+        object LEFT : NavigationRegion(R.string.left, R.color.navigation_next)
+        object RIGHT : NavigationRegion(R.string.right, R.color.navigation_prev)
 
         fun directionalRegion(LTR: Boolean): NavigationRegion {
             return if (this === LEFT || this === RIGHT) {
