@@ -52,9 +52,8 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
-import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.recents.RecentsController
+import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
@@ -473,11 +472,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             SHORTCUT_LIBRARY -> binding.bottomNav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
                 binding.bottomNav.selectedItemId = R.id.nav_recents
-                val controller: Controller = when (intent.action) {
-                    SHORTCUT_RECENTLY_UPDATED -> RecentChaptersController()
-                    else -> RecentlyReadController()
+                val viewType = when (intent.action) {
+                    SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+                    else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
                 }
-                router.pushController(controller.withFadeTransaction())
+                router.pushController(RecentsController(viewType).withFadeTransaction())
             }
             SHORTCUT_BROWSE -> binding.bottomNav.selectedItemId = R.id.nav_browse
             SHORTCUT_EXTENSIONS -> {

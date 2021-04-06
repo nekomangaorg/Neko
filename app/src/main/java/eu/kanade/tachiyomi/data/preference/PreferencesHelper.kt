@@ -283,7 +283,7 @@ class PreferencesHelper(val context: Context) {
 
     fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
 
-    fun recentsViewType() = rxPrefs.getInteger("recents_view_type", 0)
+    fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 

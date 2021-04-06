@@ -224,6 +224,7 @@
     <string name="no_recent_chapters">No recent chapters</string>
     <string name="no_recently_read_manga">No recently read manga</string>
     <string name="group_all">Group all</string>
+    <string name="grouped">Grouped</string>
     <string name="ungroup_all">Ungroup all</string>
     <string name="only_history">Only history</string>
     <string name="only_updates">Only updates</string>

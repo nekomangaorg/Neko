@@ -214,11 +214,20 @@
         <item name="tabTextColor">@color/tabs_selector</item>
         <item name="tabRippleColor">@color/rippleColor</item>
         <item name="tabIndicatorFullWidth">false</item>
-        <item name="tabIndicatorHeight">3dp</item>
         <item name="tabInlineLabel">true</item>
         <item name="tabMinWidth">75dp</item>
         <item name="tabMode">scrollable</item>
         <item name="tabTextAppearance">@style/TextAppearance.Widget.Tab</item>
+    </style>
+
+    <style name="Theme.Widget.Tabs.Highlight" parent="Theme.Widget.Tabs">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="tabIndicatorGravity">center</item>
+        <item name="tabTextColor">@color/tabs_selector_alt</item>
+        <item name="tabIndicator">@drawable/tab_highlight_indicator</item>
+        <item name="tabMaxWidth">0dp</item>
+        <item name="tabMode">fixed</item>
+        <item name="tabIndicatorFullWidth">true</item>
     </style>
 
     <!--==============-->

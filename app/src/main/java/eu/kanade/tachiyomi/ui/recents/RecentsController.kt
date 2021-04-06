@@ -14,7 +14,6 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -22,6 +21,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -34,9 +34,8 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
-import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.recently_read.RemoveHistoryDialog
+import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
@@ -65,6 +64,7 @@ class RecentsController(bundle: Bundle? = null) :
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener,
+    FlexibleAdapter.EndlessScrollListener,
     RootSearchInterface,
     BottomSheetController,
     RemoveHistoryDialog.Listener {
@@ -74,11 +74,16 @@ class RecentsController(bundle: Bundle? = null) :
         retainViewMode = RetainViewMode.RETAIN_DETACH
     }
 
+    constructor(viewType: Int) : this() {
+        presenter.toggleGroupRecents(viewType, false)
+    }
+
     /**
      * Adapter containing the recent manga.
      */
     private var adapter = RecentMangaAdapter(this)
 
+    private var progressItem: ProgressItem? = null
     private var presenter = RecentsPresenter(this)
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
@@ -113,6 +118,7 @@ class RecentsController(bundle: Bundle? = null) :
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
         )
+        resetProgressItem()
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
@@ -257,6 +263,10 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
             return true
         }
+        if (presenter.preferences.recentsViewType().get() != presenter.viewType) {
+            presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_GROUP_ALL, false)
+            return true
+        }
         return false
     }
 
@@ -284,13 +294,28 @@ class RecentsController(bundle: Bundle? = null) :
 
     fun refresh() = presenter.getRecents()
 
-    fun showLists(recents: List<RecentMangaItem>) {
+    fun showLists(recents: List<RecentMangaItem>, hasNewItems: Boolean, shouldMoveToTop: Boolean = false) {
         if (view == null) return
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.updateItems(recents)
-        adapter.removeAllScrollableHeaders()
-        if (presenter.viewType > 0) {
+        adapter.headerItems.forEach {
+            if (it != presenter.generalHeader) {
+                adapter.removeScrollableHeader(it)
+            }
+        }
+        if (!adapter.headerItems.any { it === presenter.generalHeader }) {
             adapter.addScrollableHeader(presenter.generalHeader)
+        }
+        adapter.onLoadMoreComplete(null)
+        if (!hasNewItems || presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL || presenter.query.isNotEmpty() ||
+            recents.isEmpty()
+        ) {
+            onAddPageError()
+        } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL && presenter.query.isEmpty()) {
+            resetProgressItem()
+        }
+        if (shouldMoveToTop) {
+            binding.recycler.scrollToPosition(0)
         }
         if (lastChapterId != null) {
             refreshItem(lastChapterId ?: 0L)
@@ -339,20 +364,32 @@ class RecentsController(bundle: Bundle? = null) :
         router.pushController(MangaDetailsController(manga).withFadeTransaction())
     }
 
-    override fun showHistory() = router.pushController(RecentlyReadController().withFadeTransaction())
-    override fun showUpdates() = router.pushController(RecentChaptersController().withFadeTransaction())
+    fun showHistory() {
+        presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_ONLY_HISTORY, false)
+    }
+
+    fun showUpdates() {
+        presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_ONLY_UPDATES, false)
+    }
+
+    override fun setViewType(viewType: Int) {
+        if (viewType != presenter.viewType) {
+            presenter.toggleGroupRecents(viewType)
+        }
+    }
+
+    override fun getViewType() = presenter.viewType
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter.getItem(position) ?: return false
         if (item is RecentMangaItem) {
             if (item.mch.manga.id == null) {
                 val headerItem = adapter.getHeaderOf(item) as? RecentMangaHeaderItem
-                val controller: Controller = when (headerItem?.recentsType) {
-                    RecentMangaHeaderItem.NEW_CHAPTERS -> RecentChaptersController()
-                    RecentMangaHeaderItem.CONTINUE_READING -> RecentlyReadController()
+                when (headerItem?.recentsType) {
+                    RecentMangaHeaderItem.NEW_CHAPTERS -> showUpdates()
+                    RecentMangaHeaderItem.CONTINUE_READING -> showHistory()
                     else -> return false
                 }
-                router.pushController(controller.withFadeTransaction())
             } else {
                 val activity = activity ?: return false
                 val intent = ReaderActivity.newIntent(activity, item.mch.manga, item.chapter)
@@ -440,6 +477,7 @@ class RecentsController(bundle: Bundle? = null) :
             setOnQueryTextChangeListener(searchView) {
                 if (presenter.query != it) {
                     presenter.query = it ?: return@setOnQueryTextChangeListener false
+                    resetProgressItem()
                     refresh()
                 }
                 true
@@ -514,5 +552,32 @@ class RecentsController(bundle: Bundle? = null) :
             }
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    override fun noMoreLoad(newItemsSize: Int) {}
+
+    override fun onLoadMore(lastPosition: Int, currentPage: Int) {
+        val view = view ?: return
+        if (presenter.finished || BackupRestoreService.isRunning(view.context.applicationContext)) {
+            onAddPageError()
+            return
+        }
+        presenter.requestNext()
+    }
+
+    private fun onAddPageError() {
+        adapter.onLoadMoreComplete(null)
+        adapter.endlessTargetCount = 0
+        adapter.setEndlessScrollListener(null, progressItem!!)
+        adapter.setEndlessProgressItem(null)
+    }
+
+    /**
+     * Sets a new progress item and reenables the scroll listener.
+     */
+    private fun resetProgressItem() {
+        progressItem = ProgressItem()
+        adapter.endlessTargetCount = 0
+        adapter.setEndlessScrollListener(this, progressItem!!)
     }
 }

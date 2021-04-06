@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -62,8 +63,19 @@ class RecentMangaHeaderItem(val recentsType: Int) :
 
         private val binding = RecentsHeaderItemBinding.bind(view)
         init {
-            binding.actionHistory.setOnClickListener { adapter.delegate.showHistory() }
-            binding.actionUpdate.setOnClickListener { adapter.delegate.showUpdates() }
+            listOf(R.string.grouped, R.string.all, R.string.history, R.string.updates).forEach { resId ->
+                binding.recentsTabs.addTab(binding.recentsTabs.newTab().setText(resId))
+            }
+            val selectedTab = (this@Holder.bindingAdapter as? RecentMangaAdapter)?.delegate?.getViewType() ?: 0
+            binding.recentsTabs.selectTab(binding.recentsTabs.getTabAt(selectedTab))
+            binding.recentsTabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                override fun onTabSelected(tab: TabLayout.Tab?) {
+                    (this@Holder.bindingAdapter as? RecentMangaAdapter)?.delegate?.setViewType(tab?.position ?: 0)
+                }
+
+                override fun onTabUnselected(tab: TabLayout.Tab?) { }
+                override fun onTabReselected(tab: TabLayout.Tab?) { }
+            })
         }
 
         fun bind(recentsType: Int) {
@@ -75,8 +87,9 @@ class RecentMangaHeaderItem(val recentsType: Int) :
                     else -> R.string.continue_reading
                 }
             )
-            binding.actionHistory.visibleIf(recentsType == -1)
-            binding.actionUpdate.visibleIf(recentsType == -1)
+            binding.recentsTabs.visibleIf(recentsType == -1)
+            val selectedTab = (this@Holder.bindingAdapter as? RecentMangaAdapter)?.delegate?.getViewType() ?: 0
+            binding.recentsTabs.selectTab(binding.recentsTabs.getTabAt(selectedTab))
             binding.title.visibleIf(recentsType != -1)
         }
     }
