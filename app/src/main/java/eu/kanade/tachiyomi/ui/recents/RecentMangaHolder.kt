@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.app.Activity
 import android.view.View
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -21,11 +22,13 @@ class RecentMangaHolder(
 
     init {
         binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
+        binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
     }
 
     fun bind(item: RecentMangaItem) {
         binding.downloadButton.downloadButton.visibleIf(item.mch.manga.source != LocalSource.ID)
 
+        binding.removeHistory.isVisible = item.mch.history.id != null
         binding.title.apply {
             text = item.chapter.name
             ChapterUtil.setTextViewForChapter(this, item)

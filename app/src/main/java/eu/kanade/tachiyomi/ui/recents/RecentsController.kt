@@ -364,6 +364,10 @@ class RecentsController(bundle: Bundle? = null) :
         router.pushController(MangaDetailsController(manga).withFadeTransaction())
     }
 
+    override fun onRemoveHistoryClicked(position: Int) {
+        onItemLongClick(position)
+    }
+
     fun showHistory() {
         presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_ONLY_HISTORY, false)
     }

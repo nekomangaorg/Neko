@@ -125,7 +125,7 @@
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="14sp"
             app:layout_constrainedWidth="true"
-            app:layout_constraintEnd_toStartOf="@+id/download_button"
+            app:layout_constraintEnd_toStartOf="@id/button_layout"
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="@+id/title"
             app:layout_constraintTop_toBottomOf="@+id/subtitle"
@@ -145,19 +145,37 @@
             android:progress="10"
             android:progressTint="?colorAccent"
             android:visibility="gone"
-            app:layout_constraintEnd_toStartOf="@id/download_button"
+            app:layout_constraintEnd_toStartOf="@id/button_layout"
             app:layout_constraintStart_toStartOf="@id/title"
             app:layout_constraintTop_toBottomOf="@id/subtitle" />
 
+        
+        <LinearLayout
+            android:id="@+id/button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/subtitle" >
+        
+            <ImageButton
+                android:id="@+id/remove_history"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:background="?selectableItemBackgroundBorderless"
+                android:contentDescription="@string/next_title"
+                android:padding="8dp"
+                app:tint="@color/holo_red"
+                app:layout_constraintHorizontal_chainStyle="spread"
+                android:tooltipText="@string/reset_chapter_history"
+                app:srcCompat="@drawable/ic_eye_remove_outline_24dp" />
         <include
             layout="@layout/download_button"
             android:id="@+id/download_button"
-            android:layout_width="50dp"
-            android:layout_height="0dp"
-            android:layout_marginEnd="8dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/subtitle" />
+            android:layout_width="45dp"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="8dp" />
+        </LinearLayout>
 
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/bottom_line"

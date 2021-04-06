@@ -207,6 +207,7 @@
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>
+    <string name="reset_chapter_history">Reset chapter history</string>
     <string name="recent_updates">Recent updates</string>
     <string name="this_will_remove_the_read_date_for_x_question">This will remove the read date of
         \"%1$s\". Are you sure?</string>

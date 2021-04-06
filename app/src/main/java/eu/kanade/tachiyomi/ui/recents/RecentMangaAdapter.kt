@@ -27,6 +27,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     interface RecentMangaInterface {
         fun onCoverClick(position: Int)
+        fun onRemoveHistoryClicked(position: Int)
         fun markAsRead(position: Int)
         fun isSearching(): Boolean
         fun setViewType(viewType: Int)
