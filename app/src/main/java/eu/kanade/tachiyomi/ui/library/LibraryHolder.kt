@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -44,9 +45,8 @@ abstract class LibraryHolder(
     }
 
     fun setReadingButton(item: LibraryItem) {
-        itemView.findViewById<View>(R.id.play_layout)?.visibility = if (item.manga.unread > 0 && item.unreadType > 0 && !item.hideReadingButton) {
-            View.VISIBLE
-        } else View.GONE
+        itemView.findViewById<View>(R.id.play_layout)?.isVisible =
+            item.manga.unread > 0 && !item.hideReadingButton
     }
 
     /**
