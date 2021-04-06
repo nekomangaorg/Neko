@@ -468,6 +468,14 @@ class ReaderActivity :
             if (result) {
                 binding.readerNav.leftChapter.gone()
                 binding.readerNav.leftProgress.visible()
+            } else {
+                toast(
+                    if (viewer is R2LPagerViewer) {
+                        R.string.theres_no_next_chapter
+                    } else {
+                        R.string.theres_no_previous_chapter
+                    }
+                )
             }
         }
 
@@ -483,6 +491,14 @@ class ReaderActivity :
             if (result) {
                 binding.readerNav.rightChapter.gone()
                 binding.readerNav.rightProgress.visible()
+            } else {
+                toast(
+                    if (viewer !is R2LPagerViewer) {
+                        R.string.theres_no_next_chapter
+                    } else {
+                        R.string.theres_no_previous_chapter
+                    }
+                )
             }
         }
 
