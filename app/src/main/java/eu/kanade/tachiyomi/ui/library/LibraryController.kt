@@ -73,6 +73,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
+import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -111,7 +112,6 @@ class LibraryController(
     val preferences: PreferencesHelper = Injekt.get()
 ) : BaseController<LibraryControllerBinding>(bundle),
     ActionMode.Callback,
-    ChangeMangaCategoriesDialog.Listener,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener,
@@ -1477,7 +1477,7 @@ class LibraryController(
 
     override fun onActionItemClicked(mode: ActionMode, item: MenuItem): Boolean {
         when (item.itemId) {
-            R.id.action_move_to_category -> showChangeMangaCategoriesDialog()
+            R.id.action_move_to_category -> showChangeMangaCategoriesSheet()
             R.id.action_share -> shareManga()
             R.id.action_delete -> {
                 MaterialDialog(activity!!).message(R.string.remove_from_library_question)
@@ -1551,27 +1551,14 @@ class LibraryController(
         (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
-    override fun updateCategoriesForMangas(mangas: List<Manga>, categories: List<Category>) {
-        presenter.moveMangasToCategories(categories, mangas)
-        destroyActionModeIfNeeded()
-    }
-
     /**
      * Move the selected manga to a list of categories.
      */
-    private fun showChangeMangaCategoriesDialog() {
-        // Create a copy of selected manga
-        val mangas = selectedMangas.toList()
-
-        // Hide the default category because it has a different behavior than the ones from db.
-        val categories = presenter.allCategories.filter { it.id != 0 }
-
-        // Get indexes of the common categories to preselect.
-        val commonCategoriesIndexes =
-            presenter.getCommonCategories(mangas).map { categories.indexOf(it) }.toTypedArray()
-
-        ChangeMangaCategoriesDialog(this, mangas, categories, commonCategoriesIndexes).showDialog(
-            router
-        )
+    private fun showChangeMangaCategoriesSheet() {
+        val activity = activity ?: return
+        selectedMangas.toList().moveCategories(presenter.db, activity) {
+            presenter.getLibrary()
+            destroyActionModeIfNeeded()
+        }
     }
 }

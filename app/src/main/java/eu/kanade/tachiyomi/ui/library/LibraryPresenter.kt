@@ -44,7 +44,7 @@ import java.util.Locale
  */
 class LibraryPresenter(
     private val view: LibraryController,
-    private val db: DatabaseHelper = Injekt.get(),
+    val db: DatabaseHelper = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),

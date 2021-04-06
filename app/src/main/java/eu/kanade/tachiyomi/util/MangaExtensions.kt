@@ -6,6 +6,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -48,6 +49,29 @@ fun Manga.moveCategories(
         this,
         categories.toMutableList(),
         ids,
+        false
+    ) {
+        onMangaMoved()
+    }.show()
+}
+
+fun List<Manga>.moveCategories(
+    db: DatabaseHelper,
+    activity: Activity,
+    onMangaMoved: () -> Unit
+) {
+    if (this.isEmpty()) return
+    val commonCategories = this
+        .map { db.getCategoriesForManga(it).executeAsBlocking() }
+        .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+        .mapNotNull { it.id }
+        .toTypedArray()
+    val categories = db.getCategories().executeAsBlocking()
+    SetCategoriesSheet(
+        activity,
+        this,
+        categories.toMutableList(),
+        commonCategories,
         false
     ) {
         onMangaMoved()

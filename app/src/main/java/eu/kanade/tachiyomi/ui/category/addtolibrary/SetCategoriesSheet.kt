@@ -28,19 +28,23 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.ArrayList
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
 
 class SetCategoriesSheet(
     private val activity: Activity,
-    private val manga: Manga,
+    private val listManga: List<Manga>,
     var categories: MutableList<Category>,
     var preselected: Array<Int>,
-    val addingToLibrary: Boolean,
+    private val addingToLibrary: Boolean,
     val onMangaAdded: (() -> Unit) = { }
 ) : BottomSheetDialog
 (activity, R.style.BottomSheetDialogTheme) {
+
+    constructor(activity: Activity, manga: Manga, categories: MutableList<Category>, preselected: Array<Int>, addingToLibrary: Boolean, onMangaAdded: () -> Unit) :
+        this(activity, listOf(manga), categories, preselected, addingToLibrary, onMangaAdded)
 
     private var sheetBehavior: BottomSheetBehavior<*>
 
@@ -63,7 +67,11 @@ class SetCategoriesSheet(
             } else {
                 R.string.move_x_to
             },
-            manga.mangaType(context)
+            if (listManga.size == 1) {
+                listManga.first().mangaType(context)
+            } else {
+                context.getString(R.string.selection).lowercase(Locale.ROOT)
+            }
         )
 
         setOnShowListener {
@@ -199,7 +207,8 @@ class SetCategoriesSheet(
     }
 
     private fun addMangaToCategories() {
-        if (!manga.favorite) {
+        if (listManga.size == 1 && !listManga.first().favorite) {
+            val manga = listManga.first()
             manga.favorite = !manga.favorite
 
             manga.date_added = Date().time
@@ -207,9 +216,15 @@ class SetCategoriesSheet(
             db.insertManga(manga).executeAsBlocking()
         }
 
+        val mc = ArrayList<MangaCategory>()
+
         val selectedCategories = selectExtension.selectedItems.map(AddCategoryItem::category)
-        val mc = selectedCategories.filter { it.id != 0 }.map { MangaCategory.create(manga, it) }
-        db.setMangaCategories(mc, listOf(manga))
+        for (manga in listManga) {
+            for (cat in selectedCategories) {
+                mc.add(MangaCategory.create(manga, cat))
+            }
+        }
+        db.setMangaCategories(mc, listManga)
         onMangaAdded()
     }
 }
