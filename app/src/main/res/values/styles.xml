@@ -224,6 +224,7 @@
         <item name="android:background">@android:color/transparent</item>
         <item name="tabIndicatorGravity">center</item>
         <item name="tabTextColor">@color/tabs_selector_alt</item>
+        <item name="tabRippleColor">@android:color/transparent</item>
         <item name="tabIndicator">@drawable/tab_highlight_indicator</item>
         <item name="tabMaxWidth">0dp</item>
         <item name="tabMode">fixed</item>
