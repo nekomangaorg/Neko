@@ -27,7 +27,7 @@ class RecentMangaHolder(
     fun bind(item: RecentMangaItem, showDLs: RecentMangaAdapter.ShowRecentsDLs, showRemoveHistory: Boolean, showTitleFirst: Boolean) {
         binding.downloadButton.downloadButton.isVisible = item.mch.manga.source != LocalSource.ID && when (showDLs) {
             RecentMangaAdapter.ShowRecentsDLs.None -> false
-            RecentMangaAdapter.ShowRecentsDLs.OnlyUnread -> !item.mch.chapter.read
+            RecentMangaAdapter.ShowRecentsDLs.OnlyUnread -> !item.chapter.read
             RecentMangaAdapter.ShowRecentsDLs.All -> true
         }
 
