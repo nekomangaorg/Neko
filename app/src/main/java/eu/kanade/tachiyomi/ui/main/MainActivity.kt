@@ -23,6 +23,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
@@ -643,6 +644,35 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         alphaAnimation.startDelay = 50
         animationSet?.playTogether(alphaAnimation)
         animationSet?.start()
+    }
+
+    fun showTabBar(show: Boolean, animate: Boolean = true) {
+        if (animate) {
+            if (show) {
+                binding.tabsFrameLayout.alpha = 0f
+                binding.tabsFrameLayout.isVisible = true
+            }
+            val alphaAnimation = ValueAnimator.ofFloat(
+                binding.tabsFrameLayout.alpha,
+                if (show) 1f else 0f
+            )
+            alphaAnimation.addUpdateListener { valueAnimator ->
+                binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
+            }
+            alphaAnimation.addListener(
+                EndAnimatorListener {
+                    binding.tabsFrameLayout.isVisible = show
+                    if (!show) {
+                        binding.mainTabs.clearOnTabSelectedListeners()
+                        binding.mainTabs.removeAllTabs()
+                    }
+                }
+            )
+            alphaAnimation.duration = 200
+            alphaAnimation.start()
+        } else {
+            binding.tabsFrameLayout.isVisible = show
+        }
     }
 
     override fun downloadStatusChanged(downloading: Boolean) {

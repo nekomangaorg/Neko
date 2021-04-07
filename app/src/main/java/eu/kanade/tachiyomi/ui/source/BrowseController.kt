@@ -137,7 +137,7 @@ class BrowseController :
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight
                 binding.sourceRecycler.updatePaddingRelative(
-                    top = activityBinding?.appBar?.height ?: 0,
+                    top = headerHeight,
                     bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
                 )
             },

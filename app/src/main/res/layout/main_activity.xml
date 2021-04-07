@@ -60,6 +60,28 @@
                     tools:text="Title Text" />
             </LinearLayout>
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
+
+        <FrameLayout
+            android:id="@+id/tabs_frame_layout"
+            android:clickable="true"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="KeyboardInaccessibleWidget">
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/main_tabs"
+                style="@style/Theme.Widget.Tabs.Highlight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tabIndicatorColor="?attr/colorAccent"
+                app:tabGravity="fill"/>
+        </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
 
     <View

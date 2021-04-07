@@ -54,8 +54,6 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         fun onRemoveHistoryClicked(position: Int)
         fun markAsRead(position: Int)
         fun isSearching(): Boolean
-        fun setViewType(viewType: Int)
-        fun getViewType(): Int
         fun scope(): CoroutineScope
     }
 

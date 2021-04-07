@@ -10,6 +10,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -18,6 +19,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
@@ -53,6 +55,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Fragment that shows recently read manga.
@@ -129,8 +132,9 @@ class RecentsController(bundle: Bundle? = null) :
         scrollViewWith(
             binding.recycler,
             swipeRefreshLayout = binding.swipeRefresh,
+            includeTabView = true,
             afterInsets = {
-                headerHeight = it.systemWindowInsetTop + appBarHeight
+                headerHeight = it.systemWindowInsetTop + appBarHeight + 48.dpToPx
                 binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
                 binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
             },
@@ -142,12 +146,12 @@ class RecentsController(bundle: Bundle? = null) :
         activityBinding?.bottomNav?.post {
             binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+            activityBinding?.tabsFrameLayout?.isVisible = !binding.downloadBottomSheet.root.sheetBehavior.isExpanded()
         }
 
         presenter.onCreate()
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
-            adapter.addScrollableHeader(presenter.generalHeader)
         }
 
         binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
@@ -163,12 +167,24 @@ class RecentsController(bundle: Bundle? = null) :
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     binding.shadow2.alpha = (1 - abs(progress)) * 0.25f
                     binding.shadow.alpha = (1 - abs(progress)) * 0.5f
-                    if (progress >= 0) activityBinding?.appBar?.elevation = max(
-                        progress * 15f,
+                    val height = binding.root.height - binding.downloadBottomSheet.dlRecycler.paddingTop
+                    // Doing some fun math to hide the tab bar just as the title text of the
+                    // dl sheet is under the toolbar
+                    val cap = height * (1 / 12600f) + 479f / 700
+                    activityBinding?.appBar?.elevation = min(
+                        (1f - progress / cap) * 15f,
                         if (binding.recycler.canScrollVertically(-1)) 15f else 0f
-                    )
-                    binding.downloadBottomSheet.sheetLayout.alpha = 1 - progress
+                    ).coerceIn(0f, 15f)
+                    binding.downloadBottomSheet.sheetLayout.alpha = 1 - max(0f, progress / cap)
                     activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
+                    activityBinding?.tabsFrameLayout?.let { tabs ->
+                        tabs.alpha = 1 - max(0f, progress / cap)
+                        if (tabs.alpha <= 0 && tabs.isVisible) {
+                            tabs.isVisible = false
+                        } else if (tabs.alpha > 0 && !tabs.isVisible) {
+                            tabs.isVisible = true
+                        }
+                    }
                     val oldShow = showingDownloads
                     showingDownloads = progress > 0.92f
                     if (oldShow != showingDownloads) {
@@ -188,6 +204,7 @@ class RecentsController(bundle: Bundle? = null) :
                         activity?.invalidateOptionsMenu()
                     }
 
+                    activityBinding?.tabsFrameLayout?.isVisible = state != BottomSheetBehavior.STATE_EXPANDED
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         if (hasQueue()) {
                             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable = false
@@ -229,7 +246,7 @@ class RecentsController(bundle: Bundle? = null) :
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
     }
 
-    fun setBottomPadding() {
+    private fun setBottomPadding() {
         val bottomBar = activityBinding?.bottomNav ?: return
         val pad = bottomBar.translationY - bottomBar.height
         val padding = max(
@@ -264,7 +281,7 @@ class RecentsController(bundle: Bundle? = null) :
             return true
         }
         if (presenter.preferences.recentsViewType().get() != presenter.viewType) {
-            presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_GROUP_ALL, false)
+            tempJumpTo(RecentsPresenter.VIEW_TYPE_GROUP_ALL)
             return true
         }
         return false
@@ -299,15 +316,8 @@ class RecentsController(bundle: Bundle? = null) :
     fun showLists(recents: List<RecentMangaItem>, hasNewItems: Boolean, shouldMoveToTop: Boolean = false) {
         if (view == null) return
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+        adapter.removeAllScrollableHeaders()
         adapter.updateItems(recents)
-        adapter.headerItems.forEach {
-            if (it != presenter.generalHeader || presenter.query.isNotEmpty()) {
-                adapter.removeScrollableHeader(it)
-            }
-        }
-        if (presenter.query.isEmpty() && !adapter.headerItems.any { it === presenter.generalHeader }) {
-            adapter.addScrollableHeader(presenter.generalHeader)
-        }
         adapter.onLoadMoreComplete(null)
         if (!hasNewItems || presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL || presenter.query.isNotEmpty() ||
             recents.isEmpty()
@@ -370,21 +380,16 @@ class RecentsController(bundle: Bundle? = null) :
         onItemLongClick(position)
     }
 
-    fun showHistory() {
-        presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_ONLY_HISTORY, false)
+    private fun tempJumpTo(viewType: Int) {
+        presenter.toggleGroupRecents(viewType, false)
+        activityBinding?.mainTabs?.selectTab(activityBinding?.mainTabs?.getTabAt(viewType))
     }
 
-    fun showUpdates() {
-        presenter.toggleGroupRecents(RecentsPresenter.VIEW_TYPE_ONLY_UPDATES, false)
-    }
-
-    override fun setViewType(viewType: Int) {
+    private fun setViewType(viewType: Int) {
         if (viewType != presenter.viewType) {
             presenter.toggleGroupRecents(viewType)
         }
     }
-
-    override fun getViewType() = presenter.viewType
 
     override fun scope() = adapterScope
 
@@ -393,11 +398,13 @@ class RecentsController(bundle: Bundle? = null) :
         if (item is RecentMangaItem) {
             if (item.mch.manga.id == null) {
                 val headerItem = adapter.getHeaderOf(item) as? RecentMangaHeaderItem
-                when (headerItem?.recentsType) {
-                    RecentMangaHeaderItem.NEW_CHAPTERS -> showUpdates()
-                    RecentMangaHeaderItem.CONTINUE_READING -> showHistory()
-                    else -> return false
-                }
+                tempJumpTo(
+                    when (headerItem?.recentsType) {
+                        RecentMangaHeaderItem.NEW_CHAPTERS -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+                        RecentMangaHeaderItem.CONTINUE_READING -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
+                        else -> return false
+                    }
+                )
             } else {
                 val activity = activity ?: return false
                 val intent = ReaderActivity.newIntent(activity, item.mch.manga, item.chapter)
@@ -495,8 +502,38 @@ class RecentsController(bundle: Bundle? = null) :
         if (type.isEnter) {
             if (type == ControllerChangeType.POP_ENTER) presenter.onCreate()
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
+            activityBinding?.mainTabs?.let { tabs ->
+                tabs.removeAllTabs()
+                tabs.clearOnTabSelectedListeners()
+                val selectedTab = presenter.preferences.recentsViewType().get()
+                listOf(
+                    R.string.grouped,
+                    R.string.all,
+                    R.string.history,
+                    R.string.updates
+                ).forEachIndexed { index, resId ->
+                    tabs.addTab(
+                        tabs.newTab().setText(resId).also { tab ->
+                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                tab.view.tooltipText = null
+                            }
+                        },
+                        index == selectedTab
+                    )
+                }
+                tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+                    override fun onTabSelected(tab: TabLayout.Tab?) {
+                        setViewType(tab?.position ?: 0)
+                    }
+
+                    override fun onTabUnselected(tab: TabLayout.Tab?) {}
+                    override fun onTabReselected(tab: TabLayout.Tab?) {}
+                })
+                (activity as? MainActivity)?.showTabBar(true)
+            }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
+            (activity as? MainActivity)?.showTabBar(false)
             snack?.dismiss()
         }
         setBottomPadding()

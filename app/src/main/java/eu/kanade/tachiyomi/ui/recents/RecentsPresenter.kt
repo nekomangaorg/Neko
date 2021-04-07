@@ -49,7 +49,6 @@ class RecentsPresenter(
         }
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
-    val generalHeader = RecentMangaHeaderItem(-1)
     private val continueReadingHeader = RecentMangaHeaderItem(
         RecentMangaHeaderItem
             .CONTINUE_READING

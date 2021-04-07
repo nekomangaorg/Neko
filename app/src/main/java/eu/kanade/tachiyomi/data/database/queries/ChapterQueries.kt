@@ -34,11 +34,11 @@ interface ChapterQueries : DbProvider {
 
     fun getRecentChapters(date: Date) = getRecentChapters(Date(), date)
 
-    fun getRecentChapters(startDate: Date, date: Date) = db.get()
+    fun getRecentChapters(startDate: Date, date: Date, search: String = "") = db.get()
         .listOfObjects(MangaChapter::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentsQuery())
+                .query(getRecentsQuery(search.sqLite))
                 .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()

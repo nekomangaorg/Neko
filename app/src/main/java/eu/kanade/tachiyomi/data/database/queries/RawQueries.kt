@@ -41,7 +41,7 @@ val libraryQuery =
 /**
  * Query to get the recent chapters of manga from the library up to a date.
  */
-fun getRecentsQuery() =
+fun getRecentsQuery(search: String) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE} JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
@@ -49,6 +49,7 @@ fun getRecentsQuery() =
     AND ${Chapter.COL_DATE_UPLOAD} > ?
     AND ${Chapter.COL_DATE_UPLOAD} < ?
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
+    AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${Chapter.COL_DATE_UPLOAD} DESC
 """
 

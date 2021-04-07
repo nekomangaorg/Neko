@@ -109,19 +109,23 @@ fun Controller.scrollViewWith(
     afterInsets: ((WindowInsets) -> Unit)? = null,
     liftOnScroll: ((Boolean) -> Unit)? = null,
     onLeavingController: (() -> Unit)? = null,
-    onBottomNavUpdate: (() -> Unit)? = null
+    onBottomNavUpdate: (() -> Unit)? = null,
+    includeTabView: Boolean = false
 ): ((Boolean) -> Unit) {
     var statusBarHeight = -1
+    val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
-    var appBarHeight = if (activityBinding!!.toolbar.height > 0) activityBinding!!.toolbar.height
-    else array.getDimensionPixelSize(0, 0)
+    var appBarHeight = (
+        if (activityBinding!!.toolbar.height > 0) activityBinding!!.toolbar.height
+        else array.getDimensionPixelSize(0, 0)
+        ) + if (includeTabView) tabBarHeight else 0
     array.recycle()
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     activityBinding!!.toolbar.post {
         if (activityBinding!!.toolbar.height > 0) {
-            appBarHeight = activityBinding!!.toolbar.height
+            appBarHeight = activityBinding!!.toolbar.height + if (includeTabView) tabBarHeight else 0
             recycler.requestApplyInsets()
         }
     }
@@ -206,8 +210,10 @@ fun Controller.scrollViewWith(
                         }
                     }
                 } else {
-                    if (!customPadding && lastY == 0f && router.backstack.lastOrNull()
-                        ?.controller() is MangaDetailsController
+                    if (!customPadding && lastY == 0f && (
+                        router.backstack.lastOrNull()
+                            ?.controller() is MangaDetailsController || includeTabView
+                        )
                     ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val v = View(activity)
