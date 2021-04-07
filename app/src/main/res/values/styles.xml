@@ -228,6 +228,7 @@
         <item name="tabIndicator">@drawable/tab_highlight_indicator</item>
         <item name="tabMaxWidth">0dp</item>
         <item name="tabMode">fixed</item>
+        <item name="tabIndicatorAnimationMode">elastic</item>
         <item name="tabIndicatorFullWidth">true</item>
     </style>
 
