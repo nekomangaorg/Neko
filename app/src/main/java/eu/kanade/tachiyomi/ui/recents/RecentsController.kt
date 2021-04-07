@@ -9,7 +9,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -38,7 +37,6 @@ import eu.kanade.tachiyomi.ui.recently_read.RemoveHistoryDialog
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -50,6 +48,10 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -77,6 +79,8 @@ class RecentsController(bundle: Bundle? = null) :
     constructor(viewType: Int) : this() {
         presenter.toggleGroupRecents(viewType, false)
     }
+
+    private val adapterScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
 
     /**
      * Adapter containing the recent manga.
@@ -290,6 +294,8 @@ class RecentsController(bundle: Bundle? = null) :
         snack?.dismiss()
         presenter.onDestroy()
         snack = null
+        adapterScope.cancel()
+        presenter.cancelScope()
     }
 
     fun refresh() = presenter.getRecents()
@@ -384,6 +390,8 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun getViewType() = presenter.viewType
 
+    override fun scope() = adapterScope
+
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter.getItem(position) ?: return false
         if (item is RecentMangaItem) {
@@ -462,14 +470,6 @@ class RecentsController(bundle: Bundle? = null) :
         } else {
             inflater.inflate(R.menu.recents, menu)
 
-            when (presenter.viewType) {
-                0 -> menu.findItem(R.id.action_group_all)
-                1 -> menu.findItem(R.id.action_ungroup_all)
-                2 -> menu.findItem(R.id.action_only_history)
-                3 -> menu.findItem(R.id.action_only_updates)
-                else -> null
-            }?.isChecked = true
-
             val searchItem = menu.findItem(R.id.action_search)
             val searchView = searchItem.actionView as SearchView
             searchView.queryHint = view?.context?.getString(R.string.search_recents)
@@ -539,21 +539,7 @@ class RecentsController(bundle: Bundle? = null) :
             return binding.downloadBottomSheet.dlBottomSheet.onOptionsItemSelected(item)
         }
         when (item.itemId) {
-            R.id.action_group_all, R.id.action_ungroup_all, R.id.action_only_history,
-            R.id.action_only_updates -> {
-                presenter.toggleGroupRecents(
-                    when (item.itemId) {
-                        R.id.action_ungroup_all -> 1
-                        R.id.action_only_history -> 2
-                        R.id.action_only_updates -> 3
-                        else -> 0
-                    }
-                )
-                if (item.itemId == R.id.action_only_history) {
-                    activity?.toast(R.string.press_and_hold_to_reset_history, Toast.LENGTH_LONG)
-                }
-                activity?.invalidateOptionsMenu()
-            }
+            R.id.display_options -> RecentsOptionsSheet(activity!!).show()
         }
         return super.onOptionsItemSelected(item)
     }

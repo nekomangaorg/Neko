@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
+import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import java.io.File
@@ -284,6 +285,14 @@ class PreferencesHelper(val context: Context) {
     fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
 
     fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
+
+    fun showRecentsDownloads() = flowPrefs.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
+
+    fun showRecentsRemHistory() = flowPrefs.getBoolean(Keys.showRemHistoryInRecents, true)
+
+    fun showReadInAllRecents() = flowPrefs.getBoolean(Keys.showReadInAllRecents, false)
+
+    fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
 

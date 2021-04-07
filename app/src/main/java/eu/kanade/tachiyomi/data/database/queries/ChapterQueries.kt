@@ -32,24 +32,34 @@ interface ChapterQueries : DbProvider {
         )
         .prepare()
 
-    fun getRecentChapters(date: Date) = db.get()
+    fun getRecentChapters(date: Date) = getRecentChapters(Date(), date)
+
+    fun getRecentChapters(startDate: Date, date: Date) = db.get()
         .listOfObjects(MangaChapter::class.java)
         .withQuery(
             RawQuery.builder()
                 .query(getRecentsQuery())
-                .args(date.time)
+                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()
         )
         .withGetResolver(MangaChapterGetResolver.INSTANCE)
         .prepare()
 
-    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) = db.get()
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
+    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) =
+        getUpdatedManga(Date(), date, search, endless)
+
+    fun getUpdatedManga(startDate: Date, date: Date, search: String = "", endless: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
                 .query(getRecentsQueryDistinct(search.sqLite, endless))
-                .args(date.time)
+                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()
         )

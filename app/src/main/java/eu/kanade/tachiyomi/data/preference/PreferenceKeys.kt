@@ -170,6 +170,11 @@ object PreferenceKeys {
 
     const val updateOnRefresh = "update_on_refresh"
 
+    const val showDLsInRecents = "show_dls_in_recents"
+    const val showRemHistoryInRecents = "show_rem_history_in_recents"
+    const val showReadInAllRecents = "show_read_in_all_recents"
+    const val showTitleFirstInRecents = "show_title_first_in_recents"
+
     const val showLibraryUpdateErrors = "show_library_update_errors"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"

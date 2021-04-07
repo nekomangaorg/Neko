@@ -231,6 +231,12 @@
     <string name="only_updates">Only updates</string>
     <string name="reset_chapter_question">Reset chapter?</string>
     <string name="press_and_hold_to_reset_history">Press and hold to reset chapter history</string>
+    <string name="press_and_hold_to_also_reset">Press and hold can also reset chapter history</string>
+    <string name="show_download_button">Show download button</string>
+    <string name="only_unread">Only unread</string>
+    <string name="show_reset_history_button">Show reset history button</string>
+    <string name="show_read_in_all">Show read in all</string>
+    <string name="show_title_first">Show title first</string>
 
     <!-- Browse -->
     <string name="search_filters">Search filters</string>

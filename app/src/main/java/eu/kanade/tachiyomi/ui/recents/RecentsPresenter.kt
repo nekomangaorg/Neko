@@ -19,6 +19,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -74,6 +77,13 @@ class RecentsPresenter(
             lastRecents = null
         }
         getRecents()
+        preferences.showReadInAllRecents()
+            .asFlow()
+            .drop(1)
+            .onEach {
+                getRecents()
+            }
+            .launchIn(scope)
     }
 
     fun getRecents(updatePageCount: Boolean = false, retryCount: Int = 0, itemCount: Int = 0) {
@@ -85,6 +95,7 @@ class RecentsPresenter(
                 withContext(Dispatchers.Main) { controller.showLists(recentItems, false) }
             }
 
+            val showRead = preferences.showReadInAllRecents().get()
             if (updatePageCount) {
                 page++
             }
@@ -129,8 +140,13 @@ class RecentsPresenter(
 
             val cReading = if (viewType != VIEW_TYPE_ONLY_UPDATES) {
                 if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) {
-                    db.getRecentsWithUnread(startCal.time, cal.time, query, isUngrouped)
-                        .executeOnIO()
+                    if (showRead) {
+                        db.getAllRecents(startCal.time, cal.time, query, isUngrouped)
+                            .executeOnIO()
+                    } else {
+                        db.getRecentsWithUnread(startCal.time, cal.time, query, isUngrouped)
+                            .executeOnIO()
+                    }
                 } else db.getRecentMangaLimit(
                     startCal.time,
                     cal.time,
@@ -164,7 +180,9 @@ class RecentsPresenter(
                 val chapter = when {
                     viewType == VIEW_TYPE_ONLY_HISTORY -> it.chapter
                     it.chapter.read || it.chapter.id == null -> getNextChapter(it.manga)
+                        ?: if (showRead && it.chapter.id != null) it.chapter else null
                     it.history.id == null -> getFirstUpdatedChapter(it.manga, it.chapter)
+                        ?: if (showRead && it.chapter.id != null) it.chapter else null
                     else -> it.chapter
                 }
                 if (chapter == null) if ((query.isNotEmpty() || viewType > VIEW_TYPE_UNGROUP_ALL) &&

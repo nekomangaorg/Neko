@@ -4,14 +4,13 @@ import android.app.Activity
 import android.view.View
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
-import eu.kanade.tachiyomi.util.view.visibleIf
 
 class RecentMangaHolder(
     view: View,
@@ -25,16 +24,28 @@ class RecentMangaHolder(
         binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
     }
 
-    fun bind(item: RecentMangaItem) {
-        binding.downloadButton.downloadButton.visibleIf(item.mch.manga.source != LocalSource.ID)
+    fun bind(item: RecentMangaItem, showDLs: RecentMangaAdapter.ShowRecentsDLs, showRemoveHistory: Boolean, showTitleFirst: Boolean) {
+        binding.downloadButton.downloadButton.isVisible = item.mch.manga.source != LocalSource.ID && when (showDLs) {
+            RecentMangaAdapter.ShowRecentsDLs.None -> false
+            RecentMangaAdapter.ShowRecentsDLs.OnlyUnread -> !item.mch.chapter.read
+            RecentMangaAdapter.ShowRecentsDLs.All -> true
+        }
 
-        binding.removeHistory.isVisible = item.mch.history.id != null
+        binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
         binding.title.apply {
-            text = item.chapter.name
+            text = if (!showTitleFirst) {
+                item.chapter.name
+            } else {
+                item.mch.manga.title
+            }
             ChapterUtil.setTextViewForChapter(this, item)
         }
         binding.subtitle.apply {
-            text = item.mch.manga.title
+            text = if (!showTitleFirst) {
+                item.mch.manga.title
+            } else {
+                item.chapter.name
+            }
             setTextColor(ChapterUtil.readColor(context, item))
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0

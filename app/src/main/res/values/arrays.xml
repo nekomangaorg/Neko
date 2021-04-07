@@ -62,6 +62,12 @@
         <item>@string/screen</item>
     </string-array>
 
+    <string-array name="show_recent_download">
+        <item>@string/never</item>
+        <item>@string/only_unread</item>
+        <item>@string/always</item>
+    </string-array>
+
     <string-array name="reader_nav">
         <item>@string/default_value</item>
         <item>@string/l_nav</item>

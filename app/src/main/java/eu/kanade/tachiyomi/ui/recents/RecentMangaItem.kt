@@ -57,7 +57,10 @@ class RecentMangaItem(
         position: Int,
         payloads: MutableList<Any?>?
     ) {
+        val showDLs = (adapter as? RecentMangaAdapter)?.showDownloads ?: RecentMangaAdapter.ShowRecentsDLs.All
+        val showRemoveHistory = (adapter as? RecentMangaAdapter)?.showRemoveHistory ?: true
+        val showTitleFirst = (adapter as? RecentMangaAdapter)?.showTitleFirst ?: false
         if (mch.manga.id == null) (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
-        else (holder as? RecentMangaHolder)?.bind(this)
+        else (holder as? RecentMangaHolder)?.bind(this, showDLs, showRemoveHistory, showTitleFirst)
     }
 }
