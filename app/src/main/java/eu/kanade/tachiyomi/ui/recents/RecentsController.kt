@@ -312,7 +312,7 @@ class RecentsController(bundle: Bundle? = null) :
         if (!hasNewItems || presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL || presenter.query.isNotEmpty() ||
             recents.isEmpty()
         ) {
-            onAddPageError()
+            loadNoMore()
         } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL && presenter.query.isEmpty()) {
             resetProgressItem()
         }
@@ -477,7 +477,7 @@ class RecentsController(bundle: Bundle? = null) :
             setOnQueryTextChangeListener(searchView) {
                 if (presenter.query != it) {
                     presenter.query = it ?: return@setOnQueryTextChangeListener false
-                    onAddPageError()
+                    loadNoMore()
                     refresh()
                 }
                 true
@@ -544,14 +544,18 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onLoadMore(lastPosition: Int, currentPage: Int) {
         val view = view ?: return
-        if (presenter.finished || BackupRestoreService.isRunning(view.context.applicationContext)) {
-            onAddPageError()
+        if (presenter.finished ||
+            BackupRestoreService.isRunning(view.context.applicationContext) ||
+            presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL ||
+            presenter.query.isNotEmpty()
+        ) {
+            loadNoMore()
             return
         }
         presenter.requestNext()
     }
 
-    private fun onAddPageError() {
+    private fun loadNoMore() {
         adapter.onLoadMoreComplete(null)
     }
 
