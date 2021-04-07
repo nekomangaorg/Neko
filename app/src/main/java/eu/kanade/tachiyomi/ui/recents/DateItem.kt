@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.recent_updates
+package eu.kanade.tachiyomi.ui.recents
 
 import android.text.format.DateUtils
 import android.view.View
@@ -11,8 +11,7 @@ import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import java.util.Date
 
-class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeaderItem<DateItem
-    .Holder>() {
+class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeaderItem<DateItem.Holder>() {
 
     override fun getLayoutRes(): Int {
         return R.layout.recent_chapters_section_item
