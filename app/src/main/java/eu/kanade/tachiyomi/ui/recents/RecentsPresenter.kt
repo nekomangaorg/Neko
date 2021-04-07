@@ -182,7 +182,7 @@ class RecentsPresenter(
         }
         val pairs = mangaList.mapNotNull {
             val chapter = when {
-                viewType == VIEW_TYPE_ONLY_HISTORY -> it.chapter
+                viewType == VIEW_TYPE_ONLY_UPDATES -> it.chapter
                 it.chapter.read || it.chapter.id == null -> getNextChapter(it.manga)
                     ?: if (showRead && it.chapter.id != null) it.chapter else null
                 it.history.id == null -> getFirstUpdatedChapter(it.manga, it.chapter)
