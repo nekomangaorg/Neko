@@ -5,7 +5,7 @@
   Ensures visibility on top of the background color.
 -->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:color="@color/md_white_1000" android:state_selected="true"/>
-    <item android:color="@color/md_white_1000" android:state_pressed="true"/>
+    <item android:color="@color/colorAccentText" android:state_selected="true"/>
+    <item android:color="@color/colorAccent" android:state_pressed="true"/>
     <item android:alpha="0.60" android:color="?attr/colorOnBackground"/>
 </selector>
