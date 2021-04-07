@@ -70,6 +70,8 @@ object PreferenceKeys {
     const val showNavigationOverlayNewUser = "reader_navigation_overlay_new_user"
     const val showNavigationOverlayNewUserWebtoon = "reader_navigation_overlay_new_user_webtoon"
 
+    const val preloadSize = "preload_size"
+
     const val webtoonSidePadding = "webtoon_side_padding"
 
     const val webtoonEnableZoomOut = "webtoon_enable_zoom_out"

@@ -151,6 +151,8 @@ class PreferencesHelper(val context: Context) {
 
     fun showNavigationOverlayNewUserWebtoon() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
 
+    fun preloadSize() = flowPrefs.getInt(Keys.preloadSize, 6)
+
     fun updateOnlyNonCompleted() = prefs.getBoolean(Keys.updateOnlyNonCompleted, false)
 
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)

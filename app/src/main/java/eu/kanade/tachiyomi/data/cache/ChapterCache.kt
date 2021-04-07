@@ -6,9 +6,15 @@ import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.Gson
 import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.saveTo
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import okhttp3.Response
 import okio.buffer
 import okio.sink
@@ -16,6 +22,8 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.IOException
+import kotlin.math.pow
+import kotlin.math.roundToLong
 
 /**
  * Class used to create chapter cache
@@ -39,19 +47,18 @@ class ChapterCache(private val context: Context) {
         const val PARAMETER_VALUE_COUNT = 1
 
         /** The maximum number of bytes this cache should use to store.  */
-        const val PARAMETER_CACHE_SIZE = 75L * 1024 * 1024
+        const val PARAMETER_CACHE_SIZE = 50L * 1024 * 1024
     }
 
     /** Google Json class used for parsing JSON files.  */
     private val gson: Gson by injectLazy()
 
+    private val preferences: PreferencesHelper by injectLazy()
+
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
     /** Cache class used for cache management.  */
-    private val diskCache = DiskLruCache.open(
-        File(context.cacheDir, PARAMETER_CACHE_DIRECTORY),
-        PARAMETER_APP_VERSION,
-        PARAMETER_VALUE_COUNT,
-        PARAMETER_CACHE_SIZE
-    )
+    private var diskCache = setupDiskCache(preferences.preloadSize().get())
 
     /**
      * Returns directory of cache.
@@ -70,6 +77,27 @@ class ChapterCache(private val context: Context) {
      */
     val readableSize: String
         get() = Formatter.formatFileSize(context, realSize)
+
+    init {
+        preferences.preloadSize().asFlow()
+            .onEach {
+                // Save old cache for destruction later
+                val oldCache = diskCache
+                diskCache = setupDiskCache(it)
+                oldCache.close()
+            }
+            .launchIn(scope)
+    }
+
+    private fun setupDiskCache(cacheSize: Int): DiskLruCache {
+        return DiskLruCache.open(
+            File(context.cacheDir, PARAMETER_CACHE_DIRECTORY),
+            PARAMETER_APP_VERSION,
+            PARAMETER_VALUE_COUNT,
+            // 4 pages = 115MB, 6 = ~150MB, 10 = ~200MB, 20 = ~300MB
+            (PARAMETER_CACHE_SIZE * cacheSize.toFloat().pow(0.6f)).roundToLong()
+        )
+    }
 
     /**
      * Remove file from cache.

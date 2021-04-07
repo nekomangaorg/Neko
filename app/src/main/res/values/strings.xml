@@ -330,6 +330,8 @@
     <string name="double_tap_anim_speed">Double tap animation speed</string>
     <string name="show_page_number">Show page number</string>
     <string name="true_32bit_color">32-bit color</string>
+    <string name="page_preload_amount">Page preload amount</string>
+    <string name="amount_of_pages_to_preload">The amount of pages to preload when reading. Higher values will result in a smoother reading experience, at the cost of higher cache and network usage.</string>
     <string name="reduces_banding_impacts_performance">Reduces banding, but impacts
         performance</string>
     <string name="crop_borders">Crop borders</string>
@@ -406,6 +408,11 @@
     <string name="page_layout">Page layout</string>
     <string name="automatic_can_still_switch">While using automatic page layout, you can still switch between layouts while reading without overriding this setting</string>
     <string name="automatic_orientation">Automatic (based on orientation)</string>
+    <plurals name="pages_plural">
+        <item quantity="one">%1$d page</item>
+        <item quantity="other">%1$d pages</item>
+    </plurals>
+
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>

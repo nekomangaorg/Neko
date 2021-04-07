@@ -10,6 +10,12 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPageHolder
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -41,9 +47,16 @@ class HttpPageLoader(
     private val subscriptions = CompositeSubscription()
 
     private val preferences by injectLazy<PreferencesHelper>()
-    private val preloadSize = 4
+    private var preloadSize = preferences.preloadSize().get()
 
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
     init {
+        // Adding flow since we can reach reader settings after this is created
+        preferences.preloadSize().asFlow()
+            .onEach {
+                preloadSize = it
+            }
+            .launchIn(scope)
         subscriptions += Observable.defer { Observable.just(queue.take().page) }
             .filter { it.status == Page.QUEUE }
             .concatMap { source.fetchImageFromCacheThenNet(it) }
@@ -65,6 +78,7 @@ class HttpPageLoader(
      */
     override fun recycle() {
         super.recycle()
+        scope.cancel()
         subscriptions.unsubscribe()
         queue.clear()
 

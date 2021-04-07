@@ -57,6 +57,14 @@ class SettingsReaderController : SettingsController() {
                     defaultValue = false
                 }
             }
+            intListPreference(activity) {
+                key = Keys.preloadSize
+                titleRes = R.string.page_preload_amount
+                entryValues = listOf(4, 6, 8, 10, 12, 14, 16, 20)
+                entries = entryValues.map { context.resources.getQuantityString(R.plurals.pages_plural, it, it) }
+                defaultValue = 6
+                summaryRes = R.string.amount_of_pages_to_preload
+            }
         }
 
         preferenceCategory {
