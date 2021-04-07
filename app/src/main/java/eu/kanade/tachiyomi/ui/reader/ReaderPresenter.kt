@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -57,7 +58,8 @@ class ReaderPresenter(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get()
+    private val chapterFilter: ChapterFilter = Injekt.get(),
+    private val mangaShortcutManager: MangaShortcutManager = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
 
     /**
@@ -153,6 +155,7 @@ class ReaderPresenter(
             saveChapterProgress(currentChapters.currChapter)
             saveChapterHistory(currentChapters.currChapter)
         }
+        mangaShortcutManager.updateShortcuts()
     }
 
     /**

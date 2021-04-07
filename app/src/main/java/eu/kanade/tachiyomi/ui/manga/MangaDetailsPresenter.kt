@@ -37,6 +37,7 @@ import eu.kanade.tachiyomi.util.lang.trimOrNull
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -68,6 +69,7 @@ class MangaDetailsPresenter(
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     private val customMangaManager: CustomMangaManager by injectLazy()
+    private val mangaShortcutManager: MangaShortcutManager by injectLazy()
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -357,6 +359,7 @@ class MangaDetailsPresenter(
                                 .map { it.toModel() }
                         )
                     }
+                    mangaShortcutManager.updateShortcuts()
                 }
                 if (newChapters.second.isNotEmpty()) {
                     val removedChaptersId = newChapters.second.map { it.id }

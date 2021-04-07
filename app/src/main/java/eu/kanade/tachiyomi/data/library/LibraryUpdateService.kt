@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -64,7 +65,8 @@ class LibraryUpdateService(
     val sourceManager: SourceManager = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    val trackManager: TrackManager = Injekt.get()
+    val trackManager: TrackManager = Injekt.get(),
+    private val mangaShortcutManager: MangaShortcutManager = Injekt.get()
 ) : Service() {
 
     /**
@@ -346,6 +348,7 @@ class LibraryUpdateService(
                 errorFile.getUriCompat(this)
             )
         }
+        mangaShortcutManager.updateShortcuts()
         failedUpdates.clear()
         notifier.cancelProgressNotification()
     }

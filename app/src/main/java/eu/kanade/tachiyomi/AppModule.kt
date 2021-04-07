@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -52,6 +53,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 
         addSingletonFactory { ChapterFilter() }
+
+        addSingletonFactory { MangaShortcutManager() }
 
         // Asynchronously init expensive components for a faster cold start
 
