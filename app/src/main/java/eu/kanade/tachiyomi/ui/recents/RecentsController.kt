@@ -121,7 +121,6 @@ class RecentsController(bundle: Bundle? = null) :
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
         )
-        resetProgressItem()
         val attrsArray = intArrayOf(android.R.attr.actionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
@@ -478,7 +477,7 @@ class RecentsController(bundle: Bundle? = null) :
             setOnQueryTextChangeListener(searchView) {
                 if (presenter.query != it) {
                     presenter.query = it ?: return@setOnQueryTextChangeListener false
-                    resetProgressItem()
+                    onAddPageError()
                     refresh()
                 }
                 true
@@ -554,17 +553,14 @@ class RecentsController(bundle: Bundle? = null) :
 
     private fun onAddPageError() {
         adapter.onLoadMoreComplete(null)
-        adapter.endlessTargetCount = 0
-        adapter.setEndlessScrollListener(null, progressItem!!)
-        adapter.setEndlessProgressItem(null)
     }
 
     /**
      * Sets a new progress item and reenables the scroll listener.
      */
     private fun resetProgressItem() {
+        adapter.onLoadMoreComplete(null)
         progressItem = ProgressItem()
-        adapter.endlessTargetCount = 0
         adapter.setEndlessScrollListener(this, progressItem!!)
     }
 }

@@ -66,6 +66,17 @@ class RecentsPresenter(
             }
         }
 
+    init {
+        preferences.showReadInAllRecents()
+            .asFlow()
+            .drop(1)
+            .onEach {
+                page = 0
+                getRecents()
+            }
+            .launchIn(scope)
+    }
+
     fun onCreate() {
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
@@ -76,13 +87,6 @@ class RecentsPresenter(
             lastRecents = null
         }
         getRecents()
-        preferences.showReadInAllRecents()
-            .asFlow()
-            .drop(1)
-            .onEach {
-                getRecents()
-            }
-            .launchIn(scope)
     }
 
     fun getRecents(updatePageCount: Boolean = false, retryCount: Int = 0, itemCount: Int = 0) {
@@ -137,7 +141,7 @@ class RecentsPresenter(
             time = Date()
             when {
                 query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                isUngrouped -> add(Calendar.MONTH, -1)
+                isUngrouped -> add(Calendar.MONTH, -(page + 1))
                 else -> add(Calendar.DAY_OF_YEAR, -1)
             }
         }
@@ -179,6 +183,14 @@ class RecentsPresenter(
             it.history.last_read
         }.distinctBy {
             if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) it.manga.id else it.chapter.id
+        }.filter { mch ->
+            if (page > 0) {
+                if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) {
+                    recentItems.none { mch.manga.id == it.mch.manga.id }
+                } else {
+                    recentItems.none { mch.chapter.id == it.mch.chapter.id }
+                }
+            } else true
         }
         val pairs = mangaList.mapNotNull {
             val chapter = when {
@@ -252,9 +264,9 @@ class RecentsPresenter(
         }
         val newCount = itemCount + newItems.size
         val hasNewItems = newItems.isNotEmpty()
-        if (newCount < 25 && viewType != VIEW_TYPE_GROUP_ALL && query.isEmpty() && !limit) {
+        if (updatePageCount && newCount < 25 && viewType != VIEW_TYPE_GROUP_ALL && query.isEmpty() && !limit) {
             page++
-            getRecents(true, retryCount + (if (hasNewItems) 0 else 1), newCount)
+            runRecents(oldQuery, true, retryCount + (if (hasNewItems) 0 else 1), newCount)
             return
         }
         if (!limit) {
