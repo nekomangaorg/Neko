@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
+import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
@@ -203,31 +204,36 @@ object ImageUtil {
         if (topIsBlackStreak && bottomIsBlackStreak) {
             darkBG = true
         }
+        val isLandscape = context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (darkBG) {
-            return if (isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(
+            return if (!isLandscape && isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
             )
-            else if (isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top))) GradientDrawable(
+            else if (!isLandscape && isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top))) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
             )
             else ColorDrawable(blackPixel)
         }
-        if (topIsBlackStreak || (
-            topLeftIsDark && topRightIsDark &&
-                isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top)) &&
-                (topMidIsDark || overallBlackPixels > 9)
+        if (!isLandscape && (
+            topIsBlackStreak || (
+                topLeftIsDark && topRightIsDark &&
+                    isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top)) &&
+                    (topMidIsDark || overallBlackPixels > 9)
+                )
             )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
             )
-        } else if (bottomIsBlackStreak || (
-            botLeftIsDark && botRightIsDark &&
-                isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot)) &&
-                (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
+        } else if (!isLandscape && (
+            bottomIsBlackStreak || (
+                botLeftIsDark && botRightIsDark &&
+                    isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot)) &&
+                    (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
+                )
             )
         ) {
             return GradientDrawable(

@@ -724,7 +724,7 @@ class PagerPageHolder(
         fun getBGType(readerTheme: Int, context: Context): Int {
             return if (readerTheme == 3) {
                 if (context.isInNightMode()) 2 else 1
-            } else 0
+            } else 0 + (context.resources.configuration?.orientation ?: 0) * 10
         }
     }
 }
