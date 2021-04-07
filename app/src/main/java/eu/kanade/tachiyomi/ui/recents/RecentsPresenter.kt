@@ -163,7 +163,7 @@ class RecentsPresenter(
             ).executeOnIO()
         } else emptyList()
         val rUpdates = when {
-            viewType == VIEW_TYPE_ONLY_UPDATES -> db.getRecentChapters(startCal.time, calWeek.time).executeOnIO().map {
+            viewType == VIEW_TYPE_ONLY_UPDATES -> db.getRecentChapters(startCal.time, calWeek.time, query).executeOnIO().map {
                 MangaChapterHistory(it.manga, it.chapter, HistoryImpl())
             }
             viewType != VIEW_TYPE_ONLY_HISTORY -> db.getUpdatedManga(startCal.time, calWeek.time, query, isUngrouped && !limit).executeOnIO()
@@ -184,8 +184,8 @@ class RecentsPresenter(
         }.distinctBy {
             if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) it.manga.id else it.chapter.id
         }.filter { mch ->
-            if (page > 0) {
-                if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) {
+            if (page > 0 && query.isEmpty()) {
+                if (viewType != VIEW_TYPE_ONLY_HISTORY) {
                     recentItems.none { mch.manga.id == it.mch.manga.id }
                 } else {
                     recentItems.none { mch.chapter.id == it.mch.chapter.id }
