@@ -534,6 +534,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun setStartingTab() {
+        if (this is SearchActivity) return
         if (binding.bottomNav.selectedItemId != R.id.nav_browse &&
             preferences.startingTab().get() >= 0
         ) {
