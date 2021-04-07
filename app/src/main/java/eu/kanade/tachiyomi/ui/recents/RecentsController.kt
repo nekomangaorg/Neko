@@ -149,9 +149,7 @@ class RecentsController(bundle: Bundle? = null) :
         presenter.onCreate()
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
-            if (presenter.viewType > 0) {
-                adapter.addScrollableHeader(presenter.generalHeader)
-            }
+            adapter.addScrollableHeader(presenter.generalHeader)
         }
 
         binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
@@ -305,11 +303,11 @@ class RecentsController(bundle: Bundle? = null) :
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.updateItems(recents)
         adapter.headerItems.forEach {
-            if (it != presenter.generalHeader) {
+            if (it != presenter.generalHeader || presenter.query.isNotEmpty()) {
                 adapter.removeScrollableHeader(it)
             }
         }
-        if (!adapter.headerItems.any { it === presenter.generalHeader }) {
+        if (presenter.query.isEmpty() && !adapter.headerItems.any { it === presenter.generalHeader }) {
             adapter.addScrollableHeader(presenter.generalHeader)
         }
         adapter.onLoadMoreComplete(null)

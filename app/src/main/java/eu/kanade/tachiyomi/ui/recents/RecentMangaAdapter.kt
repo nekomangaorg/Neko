@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.recents
 
 import androidx.recyclerview.widget.ItemTouchHelper
+import com.tfcporciuncula.flow.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
@@ -32,24 +33,15 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     init {
         setDisplayHeadersAtStartUp(true)
-        preferences.showRecentsDownloads()
-            .asFlow()
+        preferences.showRecentsDownloads().register { showDownloads = it }
+        preferences.showRecentsRemHistory().register { showRemoveHistory = it }
+        preferences.showTitleFirstInRecents().register { showTitleFirst = it }
+    }
+
+    private fun <T> Preference<T>.register(onChanged: (T) -> Unit) {
+        asFlow()
             .onEach {
-                showDownloads = it
-                notifyDataSetChanged()
-            }
-            .launchIn(delegate.scope())
-        preferences.showRecentsRemHistory()
-            .asFlow()
-            .onEach {
-                showRemoveHistory = it
-                notifyDataSetChanged()
-            }
-            .launchIn(delegate.scope())
-        preferences.showTitleFirstInRecents()
-            .asFlow()
-            .onEach {
-                showTitleFirst = it
+                onChanged(it)
                 notifyDataSetChanged()
             }
             .launchIn(delegate.scope())
