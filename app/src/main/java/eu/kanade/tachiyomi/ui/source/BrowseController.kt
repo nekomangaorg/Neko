@@ -318,7 +318,7 @@ class BrowseController :
     override fun sheetIsExpanded(): Boolean = binding.bottomSheet.root.sheetBehavior.isExpanded()
 
     override fun handleSheetBack(): Boolean {
-        if (!binding.bottomSheet.root.sheetBehavior.isCollapsed()) {
+        if (showingExtensions) {
             if (binding.bottomSheet.root.canGoBack()) {
                 binding.bottomSheet.root.sheetBehavior?.collapse()
             }

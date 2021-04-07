@@ -276,7 +276,7 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     override fun handleSheetBack(): Boolean {
-        if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_EXPANDED) {
+        if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
             return true
         }
