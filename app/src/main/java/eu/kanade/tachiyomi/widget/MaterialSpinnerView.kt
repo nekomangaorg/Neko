@@ -190,6 +190,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         popup.menu[selectedPosition].title =
             popup.menu[selectedPosition].title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
 
+        this.popup = popup
         return popup
     }
 
