@@ -548,7 +548,7 @@ class RecentsController(bundle: Bundle? = null) :
             activityBinding?.mainTabs?.let { tabs ->
                 tabs.removeAllTabs()
                 tabs.clearOnTabSelectedListeners()
-                val selectedTab = presenter.preferences.recentsViewType().get()
+                val selectedTab = presenter.viewType
                 listOf(
                     R.string.grouped,
                     R.string.all,
