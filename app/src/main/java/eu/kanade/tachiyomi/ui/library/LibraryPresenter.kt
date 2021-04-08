@@ -100,6 +100,9 @@ class LibraryPresenter(
 
     /** Get favorited manga for library and sort and filter it */
     fun getLibrary() {
+        if (categories.isEmpty()) {
+            categories = lastCategories ?: db.getCategories().executeAsBlocking().toMutableList()
+        }
         scope.launch {
             val library = withContext(Dispatchers.IO) { getLibraryFromDB() }
             library.apply {

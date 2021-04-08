@@ -783,6 +783,7 @@ class LibraryController(
             LibraryUpdateService.setListener(this)
             binding.recyclerCover.isClickable = false
             binding.recyclerCover.isFocusable = false
+            singleCategory = presenter.categories.size <= 1
             showDropdown()
         } else {
             updateFilterSheetY()
