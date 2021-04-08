@@ -9,6 +9,7 @@ import android.os.PowerManager
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.LoadRequest
+import coil.request.Parameters
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -475,7 +477,12 @@ class LibraryUpdateService(
                                         .memoryCachePolicy(CachePolicy.DISABLED).build()
                                 Coil.imageLoader(this@LibraryUpdateService).execute(request)
                             } else {
-                                coverCache.deleteFromCache(manga, false)
+                                val request =
+                                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                                        .memoryCachePolicy(CachePolicy.DISABLED)
+                                        .parameters(Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true).build())
+                                        .build()
+                                Coil.imageLoader(this@LibraryUpdateService).execute(request)
                             }
                             db.insertManga(manga).executeAsBlocking()
                         }

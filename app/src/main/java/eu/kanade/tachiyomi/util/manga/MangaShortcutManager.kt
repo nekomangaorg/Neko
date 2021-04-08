@@ -5,9 +5,10 @@ import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
+import coil.Coil
+import coil.request.GetRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -26,7 +27,6 @@ import kotlinx.coroutines.GlobalScope
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
 import kotlin.math.min
 
 class MangaShortcutManager(
@@ -71,25 +71,8 @@ class MangaShortcutManager(
                 val shortcuts = recents.mapNotNull { item ->
                     when (item) {
                         is Manga -> {
-                            val customCoverFile = coverCache.getCustomCoverFile(item)
-                            val coverFile = if (customCoverFile.exists()) {
-                                customCoverFile
-                            } else {
-                                val coverFile = coverCache.getCoverFile(item)
-                                if (coverFile.exists()) {
-                                    if (!item.favorite) {
-                                        coverFile.setLastModified(Date().time)
-                                    }
-                                    coverFile
-                                } else {
-                                    null
-                                }
-                            }
-                            val bitmap = if (coverFile != null) {
-                                BitmapFactory.decodeFile(coverFile.path)
-                            } else {
-                                null
-                            }
+                            val request = GetRequest.Builder(context).data(item).build()
+                            val bitmap = (Coil.imageLoader(context).execute(request).drawable as? BitmapDrawable)?.bitmap
 
                             ShortcutInfo.Builder(
                                 context,
