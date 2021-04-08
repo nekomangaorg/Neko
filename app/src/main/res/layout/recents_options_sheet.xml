@@ -31,14 +31,14 @@
                 android:id="@+id/show_recents_download"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="2dp"
+                android:layout_marginTop="8dp"
                 android:entries="@array/show_recent_download"
                 app:title="@string/show_download_button" />
 
             <com.google.android.material.switchmaterial.SwitchMaterial
                 android:id="@+id/show_remove_history"
                 android:layout_width="match_parent"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="8dp"
                 android:layout_height="wrap_content"
                 android:text="@string/show_reset_history_button"
                 android:textColor="?android:attr/textColorPrimary"
@@ -48,7 +48,7 @@
                 android:id="@+id/show_read_in_all"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="4dp"
+                android:layout_marginTop="8dp"
                 android:text="@string/show_read_in_all"
                 android:textColor="?android:attr/textColorPrimary" />
 
@@ -58,7 +58,7 @@
                 android:layout_height="wrap_content"
                 android:text="@string/show_title_first"
                 android:textColor="?android:attr/textColorPrimary"
-                android:layout_marginTop="4dp" />
+                android:layout_marginTop="8dp" />
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 </androidx.constraintlayout.widget.ConstraintLayout>
