@@ -273,7 +273,7 @@ class ReaderActivity :
         (viewer as? PagerViewer)?.let { pViewer ->
             val config = pViewer.config
             outState.putBoolean(SHIFT_DOUBLE_PAGES, config.shiftDoublePage)
-            if (config.shiftDoublePage) {
+            if (config.shiftDoublePage && config.doublePages) {
                 pViewer.getShiftedPage()?.let {
                     outState.putInt(SHIFTED_PAGE_INDEX, it.index)
                     outState.putLong(SHIFTED_CHAP_INDEX, it.chapter.chapter.id ?: 0L)
@@ -738,7 +738,6 @@ class ReaderActivity :
                 setDoublePageMode(newViewer)
             }
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
-            lastShiftDoubleState = null
         }
 
         binding.navigationOverlay.isLTR = !(viewer is L2RPagerViewer)
@@ -801,7 +800,17 @@ class ReaderActivity :
             }
             indexChapterToShift = null
             indexPageToShift = null
+        } else if (lastShiftDoubleState != null) {
+            val currentChapter = viewerChapters.currChapter
+            (viewer as? PagerViewer)?.config?.shiftDoublePage = (
+                currentChapter.requestedPage +
+                    (
+                        currentChapter.pages?.subList(0, currentChapter.requestedPage)
+                            ?.count { it.fullPage || it.isolatedPage } ?: 0
+                        )
+                ) % 2 != 0
         }
+        lastShiftDoubleState = null
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
