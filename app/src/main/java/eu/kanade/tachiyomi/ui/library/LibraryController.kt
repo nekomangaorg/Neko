@@ -91,6 +91,7 @@ import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
+import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -565,7 +566,7 @@ class LibraryController(
             true
         }
         binding.roundedCategoryHopper.upCategory.setOnLongClickListener {
-            binding.libraryGridRecycler.recycler.scrollToPosition(0)
+            binding.libraryGridRecycler.recycler.smoothScrollToTop()
             true
         }
         binding.roundedCategoryHopper.categoryButton.setOnClickListener {

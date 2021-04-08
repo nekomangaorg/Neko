@@ -20,6 +20,10 @@ import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.graphics.ColorUtils
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearSmoothScroller
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
@@ -309,4 +313,27 @@ fun TextView.setTextColorRes(@ColorRes id: Int) {
 fun BottomNavigationView.getItemView(@IdRes id: Int): BottomNavigationItemView? {
     val order = (menu as MenuBuilder).findItemIndex(id)
     return (getChildAt(0) as BottomNavigationMenuView).getChildAt(order) as? BottomNavigationItemView
+}
+
+fun RecyclerView.smoothScrollToTop() {
+    val linearLayoutManager = layoutManager as? LinearLayoutManager
+    if (linearLayoutManager != null) {
+        val smoothScroller: SmoothScroller = object : LinearSmoothScroller(context) {
+            override fun getVerticalSnapPreference(): Int {
+                return SNAP_TO_START
+            }
+        }
+        smoothScroller.targetPosition = 0
+        val firstItemPos = linearLayoutManager.findFirstVisibleItemPosition()
+        if (firstItemPos > 15) {
+            scrollToPosition(15)
+            post {
+                linearLayoutManager.startSmoothScroll(smoothScroller)
+            }
+        } else {
+            linearLayoutManager.startSmoothScroll(smoothScroller)
+        }
+    } else {
+        scrollToPosition(0)
+    }
 }

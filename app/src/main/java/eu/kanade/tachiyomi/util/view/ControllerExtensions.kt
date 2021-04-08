@@ -204,7 +204,7 @@ fun Controller.scrollViewWith(
                     activityBinding!!.toolbar.tag = randomTag
                     activityBinding!!.toolbar.setOnClickListener {
                         if ((this@scrollViewWith as? BottomSheetController)?.sheetIsExpanded() != true) {
-                            recycler.scrollToPosition(0)
+                            recycler.smoothScrollToTop()
                         } else {
                             (this@scrollViewWith as? BottomSheetController)?.toggleSheet()
                         }
