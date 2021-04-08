@@ -186,10 +186,11 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         popup.menu.forEach {
             it.icon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
         }
-        popup.menu[selectedPosition].icon = tintedCheck()
-        popup.menu[selectedPosition].title =
-            popup.menu[selectedPosition].title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
-
+        popup.menu.getItem(selectedPosition)?.let { menuItem ->
+            menuItem.icon = tintedCheck()
+            menuItem.title =
+                menuItem.title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
+        }
         this.popup = popup
         return popup
     }
