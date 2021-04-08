@@ -9,10 +9,13 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -21,10 +24,12 @@ class SearchActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.toolbar?.navigationIcon = drawerArrow
-        binding.toolbar?.setNavigationOnClickListener {
+        binding.toolbar.navigationIcon = drawerArrow
+        binding.toolbar.setNavigationOnClickListener {
             popToRoot()
         }
+        (router.backstack.lastOrNull()?.controller() as? BaseController<*>)?.setTitle()
+        (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
     }
 
     override fun onBackPressed() {
@@ -35,7 +40,7 @@ class SearchActivity : MainActivity() {
     }
 
     private fun popToRoot() {
-        if (intent.action == SHORTCUT_MANGA || intent.action == SHORTCUT_READER_SETTINGS) {
+        if (intentShouldGoBack()) {
             onBackPressed()
         } else if (!router.handleBack()) {
             val intent = Intent(this, MainActivity::class.java).apply {
@@ -45,6 +50,9 @@ class SearchActivity : MainActivity() {
             finishAfterTransition()
         }
     }
+
+    private fun intentShouldGoBack() =
+        intent.action in listOf(SHORTCUT_MANGA, SHORTCUT_READER_SETTINGS, SHORTCUT_BROWSE)
 
     override fun syncActivityViewWithController(
         to: Controller?,
@@ -94,6 +102,14 @@ class SearchActivity : MainActivity() {
                 val extras = intent.extras ?: return false
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailsController(extras))
+                        .pushChangeHandler(SimpleSwapChangeHandler())
+                        .popChangeHandler(FadeChangeHandler())
+                )
+            }
+            SHORTCUT_SOURCE -> {
+                val extras = intent.extras ?: return false
+                router.replaceTopController(
+                    RouterTransaction.with(BrowseSourceController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
                         .popChangeHandler(FadeChangeHandler())
                 )

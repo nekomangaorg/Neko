@@ -60,6 +60,8 @@ import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.source.BrowseController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
@@ -101,6 +103,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     private var animationSet: AnimatorSet? = null
     private val downloadManager: DownloadManager by injectLazy()
+    private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val hideBottomNav
         get() = router.backstackSize > 1 && router.backstack[1].controller() !is DialogController
 
@@ -417,6 +420,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         super.onPause()
         snackBar?.dismiss()
         setStartingTab()
+        mangaShortcutManager.updateShortcuts()
     }
 
     private fun getAppUpdates() {
@@ -494,6 +498,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
+            SHORTCUT_SOURCE -> {
+                val extras = intent.extras ?: return false
+                if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
+                router.pushController(BrowseSourceController(extras).withFadeTransaction())
+            }
             SHORTCUT_DOWNLOADS -> {
                 binding.bottomNav.selectedItemId = R.id.nav_recents
                 router.popToRoot()
@@ -528,6 +537,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     setStartingTab()
                 }
                 SecureActivityDelegate.locked = this !is SearchActivity
+                mangaShortcutManager.updateShortcuts()
                 super.onBackPressed()
             }
         }
@@ -732,6 +742,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
+        const val SHORTCUT_SOURCE = "eu.kanade.tachiyomi.SHOW_SOURCE"
         const val SHORTCUT_READER_SETTINGS = "eu.kanade.tachiyomi.READER_SETTINGS"
         const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
 

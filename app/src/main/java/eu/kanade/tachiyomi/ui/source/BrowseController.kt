@@ -58,6 +58,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.android.parcel.Parcelize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 import kotlin.math.max
 import kotlin.math.min
 
@@ -439,6 +440,11 @@ class BrowseController :
      */
     private fun openCatalogue(source: CatalogueSource, controller: BrowseSourceController) {
         preferences.lastUsedCatalogueSource().set(source.id)
+        val list = preferences.lastUsedSources().get().toMutableSet()
+        list.removeAll { it.startsWith("${source.id}:") }
+        list.add("${source.id}:${Date().time}")
+        val sortedList = list.filter { it.split(":").size == 2 }.sortedByDescending { it.split(":").last().toLong() }
+        preferences.lastUsedSources().set(sortedList.subList(0, min(sortedList.size, 2)).toSet())
         router.pushController(controller.withFadeTransaction())
     }
 

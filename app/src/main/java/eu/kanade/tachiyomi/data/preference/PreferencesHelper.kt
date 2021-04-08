@@ -161,6 +161,8 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
 
+    fun lastUsedSources() = flowPrefs.getStringSet("last_used_sources", emptySet())
+
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
     fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)

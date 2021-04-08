@@ -455,11 +455,11 @@ class RecentsPresenter(
         const val VIEW_TYPE_ONLY_HISTORY = 2
         const val VIEW_TYPE_ONLY_UPDATES = 3
 
-        suspend fun getRecentManga(): List<Manga> {
+        suspend fun getRecentManga(): List<Pair<Manga, Long>> {
             val presenter = RecentsPresenter(null)
             presenter.viewType = 1
             presenter.runRecents(limit = true)
-            return presenter.recentItems.filter { it.mch.manga.id != null }.map { it.mch.manga }
+            return presenter.recentItems.filter { it.mch.manga.id != null }.map { it.mch.manga to it.mch.history.last_read }
         }
     }
 }
