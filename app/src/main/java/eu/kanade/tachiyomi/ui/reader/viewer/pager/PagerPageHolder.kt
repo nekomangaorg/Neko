@@ -44,7 +44,10 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.withContext
 import rx.Observable
 import rx.Subscription
@@ -56,6 +59,7 @@ import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 /**
  * View of the ViewPager that contains a page of a chapter.
@@ -130,8 +134,11 @@ class PagerPageHolder(
     var extraProgress: Int = 0
     private var skipExtra = false
 
+    var scope: CoroutineScope? = null
+
     init {
         addView(progressBar)
+        scope = CoroutineScope(Job() + Default)
         observeStatus()
         setBackgroundColor(
             when (val theme = viewer.config.readerTheme) {
@@ -152,6 +159,8 @@ class PagerPageHolder(
         unsubscribeProgress(2)
         unsubscribeStatus(2)
         unsubscribeReadImageHeader()
+        scope?.cancel()
+        scope = null
         subsamplingImageView?.setOnImageEventListener(null)
     }
 
@@ -196,7 +205,7 @@ class PagerPageHolder(
                 if (extraPage == null) {
                     progressBar.setProgress(progress)
                 } else {
-                    progressBar.setProgress((progress + extraProgress) / 2)
+                    progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
                 }
             }
     }
@@ -211,7 +220,7 @@ class PagerPageHolder(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe { value ->
                 extraProgress = value
-                progressBar.setProgress((progress + extraProgress) / 2)
+                progressBar.setProgress(((progress + extraProgress) / 2 * 0.95f).roundToInt())
             }
     }
 
@@ -325,7 +334,11 @@ class PagerPageHolder(
      */
     private fun setImage() {
         progressBar.visible()
-        progressBar.completeAndFadeOut()
+        if (extraPage == null) {
+            progressBar.completeAndFadeOut()
+        } else {
+            progressBar.setProgress(95)
+        }
         retryButton?.gone()
         decodeErrorLayout?.gone()
 
@@ -643,8 +656,8 @@ class PagerPageHolder(
             return imageStream
         }
         val imageBytes = imageStream.readBytes()
-
         val imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        scope?.launchUI { progressBar.setProgress(96) }
         val height = imageBitmap.height
         val width = imageBitmap.width
 
@@ -658,6 +671,7 @@ class PagerPageHolder(
 
         val imageBytes2 = imageStream2.readBytes()
         val imageBitmap2 = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
+        scope?.launchUI { progressBar.setProgress(97) }
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
 
@@ -683,6 +697,7 @@ class PagerPageHolder(
             imageBitmap.height + (maxHeight - imageBitmap.height) / 2
         )
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
+        scope?.launchUI { progressBar.setProgress(98) }
         val bottomPart = Rect(
             if (!isLTR) 0 else width,
             (maxHeight - imageBitmap2.height) / 2,
@@ -690,11 +705,13 @@ class PagerPageHolder(
             imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2
         )
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
+        scope?.launchUI { progressBar.setProgress(99) }
 
         val output = ByteArrayOutputStream()
         result.compress(Bitmap.CompressFormat.JPEG, 100, output)
         imageStream.close()
         imageStream2.close()
+        scope?.launchUI { progressBar.completeAndFadeOut() }
         return ByteArrayInputStream(output.toByteArray())
     }
 
