@@ -91,7 +91,10 @@ class MangaShortcutManager(
                                 null
                             }
 
-                            ShortcutInfo.Builder(context, "Manga-${item.id?.toString() ?: item.title}")
+                            ShortcutInfo.Builder(
+                                context,
+                                "Manga-${item.id?.toString() ?: item.title}"
+                            )
                                 .setShortLabel(item.title)
                                 .setLongLabel(item.title)
                                 .setIcon(
@@ -124,7 +127,12 @@ class MangaShortcutManager(
                                     } else {
                                         Icon.createWithBitmap(bitmap)
                                     }
-                                    else Icon.createWithResource(context, R.drawable.ic_extension_update_24dp)
+                                    else {
+                                        Icon.createWithResource(
+                                            context,
+                                            R.drawable.sc_extensions_48dp
+                                        )
+                                    }
                                 )
                                 .setIntent(
                                     Intent(
