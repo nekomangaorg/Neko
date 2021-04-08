@@ -6,7 +6,7 @@
         <shape>
             <corners android:radius="4dp" />
             <solid android:color="@color/accent_alpha" />
-            <size android:height="32sp"/>
+            <size android:height="28sp"/>
         </shape>
     </item>
 </layer-list>
