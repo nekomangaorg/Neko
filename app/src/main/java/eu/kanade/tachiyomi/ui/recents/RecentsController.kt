@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
+import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -570,7 +571,9 @@ class RecentsController(bundle: Bundle? = null) :
                     }
 
                     override fun onTabUnselected(tab: TabLayout.Tab?) {}
-                    override fun onTabReselected(tab: TabLayout.Tab?) {}
+                    override fun onTabReselected(tab: TabLayout.Tab?) {
+                        binding.recycler.smoothScrollToTop()
+                    }
                 })
                 (activity as? MainActivity)?.showTabBar(true)
             }
