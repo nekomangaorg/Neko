@@ -224,8 +224,7 @@ class RecentsPresenter(
                             it.second,
                             newChaptersHeader
                         )
-                    } +
-                    RecentMangaItem(header = newChaptersHeader)
+                    }.toMutableList()
             val cReadingItems =
                 pairs.filter { it.first.history.id != null }.take(9 - nChaptersItems.size).map {
                     RecentMangaItem(
@@ -233,7 +232,13 @@ class RecentsPresenter(
                         it.second,
                         continueReadingHeader
                     )
-                } + RecentMangaItem(header = continueReadingHeader)
+                }.toMutableList()
+            if (nChaptersItems.isNotEmpty()) {
+                nChaptersItems.add(RecentMangaItem(header = newChaptersHeader))
+            }
+            if (cReadingItems.isNotEmpty()) {
+                cReadingItems.add(RecentMangaItem(header = continueReadingHeader))
+            }
             val nAdditionsItems = pairs.filter { it.first.chapter.id == null }.take(4)
                 .map { RecentMangaItem(it.first, it.second, newAdditionsHeader) }
             listOf(nChaptersItems, cReadingItems, nAdditionsItems).sortedByDescending {

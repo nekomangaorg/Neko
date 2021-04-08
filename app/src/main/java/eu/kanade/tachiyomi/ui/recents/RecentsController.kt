@@ -135,8 +135,16 @@ class RecentsController(bundle: Bundle? = null) :
             includeTabView = true,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight + 48.dpToPx
-                binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
-                binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+                binding.recycler.updatePaddingRelative(
+                    bottom = activityBinding?.bottomNav?.height ?: 0
+                )
+                binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
+                    bottom = activityBinding?.bottomNav?.height ?: 0
+                )
+                binding.recentsEmptyView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = headerHeight
+                    bottomMargin = activityBinding?.bottomNav?.height ?: 0
+                }
             },
             onBottomNavUpdate = {
                 setBottomPadding()
@@ -145,7 +153,9 @@ class RecentsController(bundle: Bundle? = null) :
 
         activityBinding?.bottomNav?.post {
             binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
-            binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+            binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
+                bottom = activityBinding?.bottomNav?.height ?: 0
+            )
             activityBinding?.tabsFrameLayout?.isVisible = !binding.downloadBottomSheet.root.sheetBehavior.isExpanded()
         }
 
@@ -167,7 +177,8 @@ class RecentsController(bundle: Bundle? = null) :
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     binding.shadow2.alpha = (1 - abs(progress)) * 0.25f
                     binding.shadow.alpha = (1 - abs(progress)) * 0.5f
-                    val height = binding.root.height - binding.downloadBottomSheet.dlRecycler.paddingTop
+                    val height =
+                        binding.root.height - binding.downloadBottomSheet.dlRecycler.paddingTop
                     // Doing some fun math to hide the tab bar just as the title text of the
                     // dl sheet is under the toolbar
                     val cap = height * (1 / 12600f) + 479f / 700
@@ -176,7 +187,10 @@ class RecentsController(bundle: Bundle? = null) :
                         if (binding.recycler.canScrollVertically(-1)) 15f else 0f
                     ).coerceIn(0f, 15f)
                     binding.downloadBottomSheet.sheetLayout.alpha = 1 - max(0f, progress / cap)
-                    activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
+                    activityBinding?.appBar?.y = max(
+                        activityBinding!!.appBar.y,
+                        -headerHeight * (1 - progress)
+                    )
                     activityBinding?.tabsFrameLayout?.let { tabs ->
                         tabs.alpha = 1 - max(0f, progress / cap)
                         if (tabs.alpha <= 0 && tabs.isVisible) {
@@ -204,30 +218,41 @@ class RecentsController(bundle: Bundle? = null) :
                         activity?.invalidateOptionsMenu()
                     }
 
-                    activityBinding?.tabsFrameLayout?.isVisible = state != BottomSheetBehavior.STATE_EXPANDED
+                    activityBinding?.tabsFrameLayout?.isVisible =
+                        state != BottomSheetBehavior.STATE_EXPANDED
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         if (hasQueue()) {
-                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable = false
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable =
+                                false
                         } else {
-                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable = true
-                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state = BottomSheetBehavior.STATE_HIDDEN
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable =
+                                true
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state =
+                                BottomSheetBehavior.STATE_HIDDEN
                         }
                     } else if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         if (!hasQueue()) {
-                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.skipCollapsed = true
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.skipCollapsed =
+                                true
                         } else {
-                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.skipCollapsed = false
-                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state = BottomSheetBehavior.STATE_COLLAPSED
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.skipCollapsed =
+                                false
+                            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state =
+                                BottomSheetBehavior.STATE_COLLAPSED
                         }
                     }
 
                     if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
-                        binding.shadow2.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
-                        binding.shadow.alpha = if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+                        binding.shadow2.alpha =
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+                        binding.shadow.alpha =
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
                     }
 
-                    binding.downloadBottomSheet.sheetLayout.isClickable = state == BottomSheetBehavior.STATE_COLLAPSED
-                    binding.downloadBottomSheet.sheetLayout.isFocusable = state == BottomSheetBehavior.STATE_COLLAPSED
+                    binding.downloadBottomSheet.sheetLayout.isClickable =
+                        state == BottomSheetBehavior.STATE_COLLAPSED
+                    binding.downloadBottomSheet.sheetLayout.isFocusable =
+                        state == BottomSheetBehavior.STATE_COLLAPSED
                     setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
                 }
             }
@@ -313,7 +338,11 @@ class RecentsController(bundle: Bundle? = null) :
 
     fun refresh() = presenter.getRecents()
 
-    fun showLists(recents: List<RecentMangaItem>, hasNewItems: Boolean, shouldMoveToTop: Boolean = false) {
+    fun showLists(
+        recents: List<RecentMangaItem>,
+        hasNewItems: Boolean,
+        shouldMoveToTop: Boolean = false
+    ) {
         if (view == null) return
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         adapter.removeAllScrollableHeaders()
@@ -325,6 +354,20 @@ class RecentsController(bundle: Bundle? = null) :
             loadNoMore()
         } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL && presenter.query.isEmpty()) {
             resetProgressItem()
+        }
+        if (recents.isEmpty()) {
+            binding.recentsEmptyView.show(
+                if (presenter.query.isEmpty()) R.drawable.ic_history_off_24dp
+                else R.drawable.ic_search_off_24dp,
+                if (presenter.query.isNotEmpty()) R.string.no_results_found
+                else when (presenter.viewType) {
+                    RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.no_recent_chapters
+                    RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.no_recently_read_manga
+                    else -> R.string.no_recent_read_updated_manga
+                }
+            )
+        } else {
+            binding.recentsEmptyView.hide()
         }
         if (shouldMoveToTop) {
             binding.recycler.scrollToPosition(0)

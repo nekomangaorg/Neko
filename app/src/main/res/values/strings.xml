@@ -222,6 +222,7 @@
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
     <string name="search_recents">Search recents…</string>
+    <string name="no_recent_read_updated_manga">No recently read or updated manga</string>
     <string name="no_recent_chapters">No recent chapters</string>
     <string name="no_recently_read_manga">No recently read manga</string>
     <string name="group_all">Group all</string>

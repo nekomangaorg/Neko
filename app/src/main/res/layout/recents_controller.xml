@@ -28,6 +28,13 @@
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <eu.kanade.tachiyomi.widget.EmptyView
+        android:id="@+id/recents_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
     <View
         android:id="@+id/shadow"
         android:layout_width="match_parent"
