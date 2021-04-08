@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 
 class RecentMangaHolder(
@@ -25,11 +25,12 @@ class RecentMangaHolder(
     }
 
     fun bind(item: RecentMangaItem, showDLs: RecentMangaAdapter.ShowRecentsDLs, showRemoveHistory: Boolean, showTitleFirst: Boolean) {
-        binding.downloadButton.downloadButton.isVisible = item.mch.manga.source != LocalSource.ID && when (showDLs) {
+        binding.downloadButton.downloadButton.isVisible = when (showDLs) {
             RecentMangaAdapter.ShowRecentsDLs.None -> false
-            RecentMangaAdapter.ShowRecentsDLs.OnlyUnread -> !item.chapter.read
+            RecentMangaAdapter.ShowRecentsDLs.OnlyUnread, RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded -> !item.chapter.read
+            RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded -> true
             RecentMangaAdapter.ShowRecentsDLs.All -> true
-        }
+        } && !item.mch.manga.isLocal()
 
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
         binding.title.apply {
@@ -83,10 +84,13 @@ class RecentMangaHolder(
         if ((itemView.context as? Activity)?.isDestroyed != true) {
             binding.coverThumbnail.loadLibraryManga(item.mch.manga)
         }
-        notifyStatus(
-            if (adapter.isSelected(flexibleAdapterPosition)) Download.CHECKED else item.status,
-            item.progress
-        )
+        if (!item.mch.manga.isLocal()) {
+            notifyStatus(
+                if (adapter.isSelected(flexibleAdapterPosition)) Download.CHECKED else item.status,
+                item.progress,
+                item.chapter.read
+            )
+        }
         resetFrontView()
     }
 
@@ -100,8 +104,18 @@ class RecentMangaHolder(
         return item.mch.history.id != null
     }
 
-    fun notifyStatus(status: Int, progress: Int) =
+    fun notifyStatus(status: Int, progress: Int, isRead: Boolean) {
         binding.downloadButton.downloadButton.setDownloadStatus(status, progress)
+        val isChapterRead =
+            if (adapter.showDownloads == RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded) isRead else false
+        binding.downloadButton.downloadButton.isVisible =
+            when (adapter.showDownloads) {
+                RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
+                RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded ->
+                    status !in Download.CHECKED..Download.NOT_DOWNLOADED && !isChapterRead
+                else -> binding.downloadButton.downloadButton.isVisible
+            }
+    }
 
     override fun getFrontView(): View {
         return binding.frontView

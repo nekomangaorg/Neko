@@ -67,6 +67,8 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     enum class ShowRecentsDLs {
         None,
         OnlyUnread,
+        OnlyDownloaded,
+        UnreadOrDownloaded,
         All,
     }
 }

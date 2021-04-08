@@ -65,6 +65,8 @@
     <string-array name="show_recent_download">
         <item>@string/never</item>
         <item>@string/only_unread</item>
+        <item>@string/only_downloaded</item>
+        <item>@string/unread_or_downloaded</item>
         <item>@string/always</item>
     </string-array>
 
