@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
+import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 
 class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -28,7 +29,10 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (sheet.isOnView(this@RecyclerWithScrollerView) && recyclerView.canScrollVertically(-1)) {
+                if (sheet.isOnView(this@RecyclerWithScrollerView) &&
+                    sheet.sheetBehavior.isExpanded() &&
+                    recyclerView.canScrollVertically(-1)
+                ) {
                     sheet.sheetBehavior?.isDraggable = false
                 }
             }
