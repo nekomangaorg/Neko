@@ -53,7 +53,7 @@ object Versions {
     const val injekt = "65b0440"
     const val jsoup = "1.13.1"
     const val junit = "4.13"
-    const val kotlin = "1.4.20"
+    const val kotlin = "1.4.32"
     const val kotlinCoroutines = "1.3.9"
     const val kotlinSerialization = "1.0.1"
     const val kotson = "2.5.0"
