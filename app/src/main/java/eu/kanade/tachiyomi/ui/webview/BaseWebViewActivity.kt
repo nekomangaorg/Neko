@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.binding.webview
+package eu.kanade.tachiyomi.ui.webview
 
 import android.content.res.Configuration
 import android.graphics.Color

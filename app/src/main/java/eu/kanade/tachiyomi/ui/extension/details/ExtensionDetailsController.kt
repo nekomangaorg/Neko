@@ -206,7 +206,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
                         context.getString(
                             R.string._must_be_enabled_first,
                             title
-                        ), Snackbar.LENGTH_LONG
+                        ),
+                        Snackbar.LENGTH_LONG
                     ) {
                         setAction(R.string.enable) {
                             preferences.enabledLanguages() += source.lang
