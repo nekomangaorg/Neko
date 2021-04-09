@@ -12,8 +12,12 @@ abstract class BaseThemedActivity : AppCompatActivity() {
     val preferences: PreferencesHelper by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        setTheme(ThemeUtil.theme(preferences.theme()))
+        if (preferences.theme().isNotSet()) {
+            ThemeUtil.convertTheme(preferences, preferences.oldTheme())
+        }
+        val theme = preferences.theme().get()
+        AppCompatDelegate.setDefaultNightMode(theme.nightMode)
+        setTheme(theme.styleRes)
 
         super.onCreate(savedInstanceState)
     }

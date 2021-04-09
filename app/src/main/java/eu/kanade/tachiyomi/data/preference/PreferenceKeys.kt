@@ -7,6 +7,8 @@ object PreferenceKeys {
 
     const val theme = "pref_theme_key"
 
+    const val themeStyle = "theme_style"
+
     const val startingTab = "starting_tab"
 
     const val backToStart = "back_to_start"

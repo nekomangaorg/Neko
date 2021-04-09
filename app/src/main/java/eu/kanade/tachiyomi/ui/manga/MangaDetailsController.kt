@@ -361,7 +361,7 @@ class MangaDetailsController :
         val activity = activity as? MainActivity ?: return
         val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
-        if (!activity.isInNightMode() && ThemeUtil.isBlueTheme(presenter.preferences.theme())) {
+        if (ThemeUtil.hasDarkActionBarInLight(activity, presenter.preferences.theme().get())) {
             if (forThis) activityBinding.appBar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
             )
@@ -1414,7 +1414,7 @@ class MangaDetailsController :
 
                     if (!activity.isInNightMode()) {
                         activityBinding?.appBar?.context?.setTheme(
-                            ThemeUtil.theme(presenter.preferences.theme())
+                            presenter.preferences.theme().get().styleRes
                         )
 
                         val iconPrimary = currColor ?: Color.WHITE

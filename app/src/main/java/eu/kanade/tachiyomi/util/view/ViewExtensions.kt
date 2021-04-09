@@ -36,7 +36,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isInNightMode
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -64,8 +63,8 @@ fun View.snack(
     if (f != null) {
         snack.f()
     }
-    val theme = Injekt.get<PreferencesHelper>().theme()
-    if (ThemeUtil.isAMOLEDTheme(theme) && context.isInNightMode()) {
+    val theme = Injekt.get<PreferencesHelper>().theme().get()
+    if (ThemeUtil.isPitchBlack(context, theme)) {
         val textView: TextView =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
         val button: Button? =

@@ -23,8 +23,18 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        setTheme(ThemeUtil.theme(preferences.theme()))
+        if (preferences.theme().isNotSet()) {
+            ThemeUtil.convertTheme(preferences, preferences.oldTheme())
+        }
+        // Using a try catch in case I start to remove themes
+        val theme = try {
+            preferences.theme().get()
+        } catch (e: Exception) {
+            preferences.theme().set(ThemeUtil.Themes.DEFAULT)
+            ThemeUtil.Themes.DEFAULT
+        }
+        AppCompatDelegate.setDefaultNightMode(theme.nightMode)
+        setTheme(theme.styleRes)
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
     }

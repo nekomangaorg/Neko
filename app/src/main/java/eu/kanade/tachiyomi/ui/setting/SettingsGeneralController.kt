@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -87,22 +88,13 @@ class SettingsGeneralController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.display
 
-            intListPreference(activity) {
-                key = Keys.theme
+            listPreference(activity) {
+                key = Keys.themeStyle
                 titleRes = R.string.app_theme
-                entriesRes = arrayOf(
-                    R.string.white_theme,
-                    R.string.light_blue,
-                    R.string.dark,
-                    R.string.amoled_black,
-                    R.string.dark_blue,
-                    R.string.system_default,
-                    R.string
-                        .system_default_amoled,
-                    R.string.system_default_all_blue
-                )
-                entryValues = listOf(1, 8, 2, 3, 4, 5, 6, 7)
-                defaultValue = 5
+                val enumConstants = ThemeUtil.Themes::class.java.enumConstants
+                entriesRes = enumConstants?.map { it.nameRes }.orEmpty().toTypedArray()
+                entryValues = enumConstants?.map { it.name }.orEmpty()
+                defaultValue = ThemeUtil.Themes.DEFAULT
 
                 onChange {
                     activity?.recreate()

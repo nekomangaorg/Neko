@@ -198,8 +198,9 @@ class ReaderActivity :
      * Called when the activity is created. Initializes the presenter and configuration.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        setTheme(ThemeUtil.theme(preferences.theme()))
+        val theme = preferences.theme().get()
+        AppCompatDelegate.setDefaultNightMode(theme.nightMode)
+        setTheme(theme.styleRes)
         super.onCreate(savedInstanceState)
         binding = ReaderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -243,7 +244,7 @@ class ReaderActivity :
         }
 
         binding.chaptersSheet.chaptersBottomSheet.setup(this)
-        if (ThemeUtil.isBlueTheme(preferences.theme())) {
+        if (ThemeUtil.isColoredTheme(preferences.theme().get())) {
             binding.chaptersSheet.chapterRecycler.setBackgroundColor(getResourceColor(android.R.attr.colorBackground))
         }
         config = ReaderConfig()

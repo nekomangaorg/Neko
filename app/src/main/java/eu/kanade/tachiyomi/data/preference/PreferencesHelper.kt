@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.onEach
 import java.io.File
@@ -85,7 +86,9 @@ class PreferencesHelper(val context: Context) {
 
     fun clear() = prefs.edit().clear().apply()
 
-    fun theme() = prefs.getInt(Keys.theme, 5)
+    fun oldTheme() = prefs.getInt(Keys.theme, 5)
+
+    fun theme() = flowPrefs.getEnum(Keys.themeStyle, ThemeUtil.Themes.DEFAULT)
 
     fun rotation() = flowPrefs.getInt(Keys.rotation, 1)
 
