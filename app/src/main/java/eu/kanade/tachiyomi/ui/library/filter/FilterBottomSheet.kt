@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
@@ -138,6 +139,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 binding.firstLayout.addView(binding.reorderFilters)
                 binding.firstLayout.addView(binding.viewOptions)
                 binding.secondLayout.gone()
+            } else if (binding.reorderFilters.parent == binding.firstLayout) {
+                binding.firstLayout.removeView(binding.viewOptions)
+                binding.firstLayout.removeView(binding.reorderFilters)
+                binding.secondLayout.addView(binding.reorderFilters)
+                binding.secondLayout.addView(binding.viewOptions)
+                binding.secondLayout.visible()
             }
         }
 
