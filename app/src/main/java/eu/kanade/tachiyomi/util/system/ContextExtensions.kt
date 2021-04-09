@@ -148,6 +148,8 @@ val Float.dpToPxEnd: Float
 val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
+fun Context.isTablet() = resources.getBoolean(R.bool.isTablet)
+
 /**
  * Helper method to create a notification builder.
  *
@@ -155,7 +157,10 @@ val Resources.isLTR
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null): NotificationCompat.Builder {
+fun Context.notificationBuilder(
+    channelId: String,
+    block: (NotificationCompat.Builder.() -> Unit)? = null
+): NotificationCompat.Builder {
     val builder = NotificationCompat.Builder(this, channelId)
         .setColor(ContextCompat.getColor(this, R.color.colorAccent))
     if (block != null) {
@@ -197,7 +202,9 @@ val Context.powerManager: PowerManager
  * @param intent intent that contains broadcast information
  */
 fun Context.sendLocalBroadcast(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
+        intent
+    )
 }
 
 /**
@@ -206,7 +213,9 @@ fun Context.sendLocalBroadcast(intent: Intent) {
  * @param intent intent that contains broadcast information
  */
 fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(
+        intent
+    )
 }
 
 /**
@@ -215,7 +224,10 @@ fun Context.sendLocalBroadcastSync(intent: Intent) {
  * @param receiver receiver that gets registered.
  */
 fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
+        receiver,
+        filter
+    )
 }
 
 /**
@@ -224,7 +236,9 @@ fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFil
  * @param receiver receiver that gets unregistered.
  */
 fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(
+        receiver
+    )
 }
 
 /**

@@ -21,4 +21,6 @@
         <attr name="android:entries"/>
         <attr name="summary" format="reference|string" />
     </declare-styleable>
+
+    <bool name="isTablet">false</bool>
 </resources>

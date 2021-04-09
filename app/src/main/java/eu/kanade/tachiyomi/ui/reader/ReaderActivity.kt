@@ -63,6 +63,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -310,12 +311,15 @@ class ReaderActivity :
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val splitItem = menu?.findItem(R.id.action_shift_double_page)
-        splitItem?.isVisible = (viewer as? PagerViewer)?.config?.doublePages ?: false
+        splitItem?.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !isTablet()
+        binding.chaptersSheet.shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && isTablet()
         (viewer as? PagerViewer)?.config?.let { config ->
-            splitItem?.icon = ContextCompat.getDrawable(
+            val icon = ContextCompat.getDrawable(
                 this,
                 if ((!config.shiftDoublePage).xor(viewer is R2LPagerViewer)) R.drawable.ic_page_previous_outline_24dp else R.drawable.ic_page_next_outline_24dp
             )
+            splitItem?.icon = icon
+            binding.chaptersSheet.shiftPageButton.setImageDrawable(icon)
         }
         setBottomNavButtons(preferences.pageLayout().get())
         (binding.toolbar.background as? LayerDrawable)?.let { layerDrawable ->
@@ -353,18 +357,22 @@ class ReaderActivity :
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             R.id.action_shift_double_page -> {
-                (viewer as? PagerViewer)?.config?.let { config ->
-                    config.shiftDoublePage = !config.shiftDoublePage
-                    presenter.viewerChapters?.let {
-                        (viewer as? PagerViewer)?.updateShifting()
-                        (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
-                        invalidateOptionsMenu()
-                    }
-                }
+                shiftDoublePages()
             }
             else -> return super.onOptionsItemSelected(item)
         }
         return true
+    }
+
+    fun shiftDoublePages() {
+        (viewer as? PagerViewer)?.config?.let { config ->
+            config.shiftDoublePage = !config.shiftDoublePage
+            presenter.viewerChapters?.let {
+                (viewer as? PagerViewer)?.updateShifting()
+                (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
+                invalidateOptionsMenu()
+            }
+        }
     }
 
     private fun popToMain() {
@@ -482,6 +490,9 @@ class ReaderActivity :
             } else {
                 preferences.pageLayout().set(1 - preferences.pageLayout().get())
             }
+        }
+        binding.chaptersSheet.shiftPageButton.setOnClickListener {
+            shiftDoublePages()
         }
         binding.readerNav.leftChapter.setOnClickListener {
             if (isLoading) {
