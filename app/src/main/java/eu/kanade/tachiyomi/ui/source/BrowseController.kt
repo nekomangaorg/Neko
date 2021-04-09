@@ -448,7 +448,7 @@ class BrowseController :
             val sortedList = list.filter { it.split(":").size == 2 }
                 .sortedByDescending { it.split(":").last().toLong() }
             preferences.lastUsedSources()
-                .set(sortedList.subList(0, min(sortedList.size, 2)).toSet())
+                .set(sortedList.take(2).toSet())
         }
         router.pushController(controller.withFadeTransaction())
     }

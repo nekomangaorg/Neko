@@ -208,8 +208,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                             0,
                             (
                                 if (index > -1) (
-                                    items.subList(0, index)
-                                        .indexOfLast { it?.fullPage == true }
+                                    items.take(index).indexOfLast { it?.fullPage == true }
                                     ) else -1
                                 )
                         )

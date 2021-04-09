@@ -788,7 +788,7 @@ class ReaderActivity :
             pViewer.config.shiftDoublePage = (
                 binding.readerNav.pageSeekbar.progress +
                     (
-                        currentChapter?.pages?.subList(0, binding.readerNav.pageSeekbar.progress)
+                        currentChapter?.pages?.take(binding.readerNav.pageSeekbar.progress)
                             ?.count { it.fullPage || it.isolatedPage } ?: 0
                         )
                 ) % 2 != 0
@@ -816,7 +816,7 @@ class ReaderActivity :
             (viewer as? PagerViewer)?.config?.shiftDoublePage = (
                 currentChapter.requestedPage +
                     (
-                        currentChapter.pages?.subList(0, currentChapter.requestedPage)
+                        currentChapter.pages?.take(currentChapter.requestedPage)
                             ?.count { it.fullPage || it.isolatedPage } ?: 0
                         )
                 ) % 2 != 0

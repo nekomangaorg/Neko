@@ -49,30 +49,20 @@ class MangaShortcutManager(
                         sourceManager.getOrStub(id) to splitS[1].toLong()
                     }
                 }
-                var recents = (
-                    recentManga.subList(
-                        0,
-                        min(
-                            recentManga.size,
-                            shortcutManager.maxShortcutCountPerActivity
-                        )
-                    ) + recentSources
-                    )
-                    .sortedByDescending { it.second }.map { it.first }
-
-                recents = recents.subList(
-                    0,
-                    min(
-                        recentManga.size,
-                        shortcutManager.maxShortcutCountPerActivity
-                    )
-                )
+                val recents =
+                    (recentManga.take(shortcutManager.maxShortcutCountPerActivity) + recentSources)
+                        .sortedByDescending { it.second }
+                        .map { it.first }
+                        .take(shortcutManager.maxShortcutCountPerActivity)
 
                 val shortcuts = recents.mapNotNull { item ->
                     when (item) {
                         is Manga -> {
                             val request = GetRequest.Builder(context).data(item).build()
-                            val bitmap = (Coil.imageLoader(context).execute(request).drawable as? BitmapDrawable)?.bitmap
+                            val bitmap = (
+                                Coil.imageLoader(context)
+                                    .execute(request).drawable as? BitmapDrawable
+                                )?.bitmap
 
                             ShortcutInfo.Builder(
                                 context,
