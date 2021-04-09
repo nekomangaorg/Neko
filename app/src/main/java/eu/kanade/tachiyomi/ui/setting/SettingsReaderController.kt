@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.lang.addBetaTag
+import eu.kanade.tachiyomi.util.view.activityBinding
 import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -179,6 +180,38 @@ class SettingsReaderController : SettingsController() {
                 entryRange = 1..6
                 defaultValue = 1
             }
+
+            intListPreference(activity) {
+                key = Keys.pagerCutoutBehavior
+                titleRes = R.string.cutout_area_behavior
+                entriesRes = arrayOf(
+                    R.string.pad_cutout_areas,
+                    R.string.start_past_cutout,
+                    R.string.ignore_cutout_areas,
+                )
+                summaryRes = R.string.cutout_behavior_only_applies
+                entryRange = 0..2
+                defaultValue = 0
+                // Calling this once to show only on cutout
+                isVisible = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    activityBinding?.root?.rootWindowInsets?.displayCutout?.safeInsetTop != null ||
+                        activityBinding?.root?.rootWindowInsets?.displayCutout?.safeInsetBottom != null
+                } else {
+                    false
+                }
+                // Calling this a second time in case activity is recreated while on this page
+                // Keep the first so it shouldn't animate hiding the preference for phones without
+                // cutouts
+                activityBinding?.root?.post {
+                    isVisible = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                        activityBinding?.root?.rootWindowInsets?.displayCutout?.safeInsetTop != null ||
+                            activityBinding?.root?.rootWindowInsets?.displayCutout?.safeInsetBottom != null
+                    } else {
+                        false
+                    }
+                }
+            }
+
             intListPreference(activity) {
                 key = Keys.zoomStart
                 titleRes = R.string.zoom_start_position

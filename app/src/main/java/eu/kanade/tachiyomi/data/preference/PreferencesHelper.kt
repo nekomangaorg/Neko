@@ -91,7 +91,7 @@ class PreferencesHelper(val context: Context) {
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
-    fun pagerCutoutBehavior() = flowPrefs.getInt(Keys.pagerCutoutBehavior, 1)
+    fun pagerCutoutBehavior() = flowPrefs.getInt(Keys.pagerCutoutBehavior, 0)
 
     fun doubleTapAnimSpeed() = flowPrefs.getInt(Keys.doubleTapAnimationSpeed, 500)
 
