@@ -4,7 +4,6 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -14,6 +13,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.coroutineScope
 import java.util.concurrent.TimeUnit
@@ -38,7 +38,7 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
                 setContentTitle(context.getString(R.string.app_name))
                 setContentText(context.getString(R.string.update_available))
                 setSmallIcon(android.R.drawable.stat_sys_download_done)
-                color = ContextCompat.getColor(context, R.color.colorAccent)
+                color = context.getResourceColor(R.attr.colorAccent)
                 // Download action
                 addAction(
                     android.R.drawable.stat_sys_download_done,

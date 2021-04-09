@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import eu.kanade.tachiyomi.util.view.setTextColorRes
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -88,9 +87,9 @@ open class MaterialMenuSheet(
                 }
                 if (item.id == selectedId) {
                     currentIndex = index
-                    setTextColorRes(R.color.colorAccent)
+                    setTextColor(context.getResourceColor(R.attr.colorAccent))
                     compoundDrawableTintList =
-                        ColorStateList.valueOf(context.getColor(R.color.colorAccent))
+                        ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
                 }
                 updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     height = 48.dpToPx
@@ -156,9 +155,9 @@ open class MaterialMenuSheet(
         val layout = binding.menuLayout.findViewById<ViewGroup>(id) ?: return
         val textView = layout.getChildAt(0) as? TextView
         val imageView = layout.getChildAt(1) as? ImageView
-        textView?.setTextColorRes(R.color.colorAccent)
+        textView?.setTextColor(context.getResourceColor(R.attr.colorAccent))
         textView?.compoundDrawableTintList =
-            ColorStateList.valueOf(context.getColor(R.color.colorAccent))
+            ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
         imageView?.visible()
         imageView?.setImageResource(drawableRes)
     }

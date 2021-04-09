@@ -14,8 +14,9 @@
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
         <item name="colorPrimaryDark">@color/app_color_primary</item>
-        <item name="colorControlActivated">@color/colorAccent</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccentText">@color/colorAccentText</item>
+        <item name="colorControlActivated">?colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
@@ -46,7 +47,7 @@
         <!-- Material Dialog colors -->
         <item name="md_color_title">@color/textColorPrimary</item>
         <item name="md_color_content">@color/text_color_secondary</item>
-        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_color_button_text">?colorAccent</item>
         <item name="md_background_color">@color/dialog</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>

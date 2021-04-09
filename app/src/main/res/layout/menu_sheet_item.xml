@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="42dp"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/selectableItemBackground"
     android:clickable="true"
     android:focusable="true"
@@ -28,7 +29,7 @@
         android:layout_height="42dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        android:tint="@color/colorAccent"
+        app:tint="?colorAccent"
         android:visibility="invisible"
         tools:visibility="visible"
         android:src="@drawable/ic_arrow_upward_24dp" />

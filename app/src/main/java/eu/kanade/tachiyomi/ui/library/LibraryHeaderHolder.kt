@@ -263,11 +263,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
-            ContextCompat.getColor(
-                contentView.context,
-                if (allSelected) R.color.colorAccent
-                else R.color.gray_button
-            )
+            if (allSelected) contentView.context.getResourceColor(R.attr.colorAccent)
+            else ContextCompat.getColor(contentView.context, R.color.gray_button)
         )
         binding.checkbox.setImageDrawable(tintedDrawable)
     }

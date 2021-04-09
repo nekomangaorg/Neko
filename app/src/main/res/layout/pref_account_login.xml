@@ -38,9 +38,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:hint="@string/password"
-        app:boxStrokeColor="@color/colorAccent"
+        app:boxStrokeColor="?colorAccent"
         app:endIconMode="password_toggle"
-        app:hintTextColor="@color/colorAccent">
+        app:hintTextColor="?colorAccent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"

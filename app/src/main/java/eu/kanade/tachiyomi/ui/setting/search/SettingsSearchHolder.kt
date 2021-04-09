@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.setting.search
 
 import android.view.View
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SettingsSearchControllerCardBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.reflect.full.createInstance
 
 /**
@@ -37,7 +37,7 @@ class SettingsSearchHolder(view: View, val adapter: SettingsSearchAdapter) :
      * @param item item of card.
      */
     fun bind(item: SettingsSearchItem) {
-        val color = ColorUtils.setAlphaComponent(ContextCompat.getColor(itemView.context, R.color.colorAccent), 75)
+        val color = ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorAccent), 75)
         binding.searchResultPrefTitle.text = item.settingsSearchResult.title.highlightText(item.searchResult, color)
         binding.searchResultPrefSummary.text = item.settingsSearchResult.summary.highlightText(item.searchResult, color)
         binding.searchResultPrefBreadcrumb.text = item.settingsSearchResult.breadcrumb.highlightText(item.searchResult, color)
