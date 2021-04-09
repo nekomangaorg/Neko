@@ -104,13 +104,13 @@ object LegacyPluginClassPath {
 }
 
 object AndroidVersions {
-    const val BUILD_TOOL = "29.0.3"
-    const val COMPILE_SDK = 29
-    const val MIN_SDK = 23
-    const val TARGET_SDK = 29
-    const val VERSION_CODE = 68
-    const val VERSION_NAME = "1.0.11"
-    const val NDK = "22.0.7026061"
+    const val buildTools = "29.0.3"
+    const val compileSdk = 29
+    const val minSdk = 23
+    const val targetSdk = 29
+    const val versionCode = 68
+    const val versionName = "1.0.11"
+    const val ndk = "22.0.7026061"
 }
 
 object Plugins {
@@ -128,20 +128,6 @@ object Plugins {
 }
 
 data class PluginClass(val name: String, val version: String)
-
-object Configs {
-    const val applicationId = "tachiyomi.mangadex"
-    const val buildToolsVersion = "29.0.3"
-    const val compileSdkVersion = 29
-    const val minSdkVersion = 24
-    const val targetSdkVersion = 29
-    const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 110
-    const val versionName = "2.2.2.2"
-}
-
-object BuildPluginsVersion {
-}
 
 fun isNonStable(version: String): Boolean {
     val stableKeyword = listOf("RELEASE", "FINAL", "GA").any { version.toUpperCase().contains(it) }
