@@ -121,11 +121,9 @@ object Plugins {
     const val kapt = "kapt"
     const val kotlinParcelize = "kotlin-parcelize"
     const val kotlinAndroid = "android"
-    const val kotlinExtensions = "android.extensions"
     const val jetbrainsKotlin = "org.jetbrains.kotlin.android"
     const val kotlinSerialization = "org.jetbrains.kotlin.plugin.serialization"
     val gradleVersions = PluginClass("com.github.ben-manes.versions", Versions.gradleVersions)
-    val ktLint = PluginClass("org.jlleitschuh.gradle.ktlint", Versions.ktlint)
     val kotlinter = PluginClass("org.jmailen.kotlinter", Versions.kotlinter)
 }
 
@@ -143,13 +141,6 @@ object Configs {
 }
 
 object BuildPluginsVersion {
-    const val AGP = "com.android.tools.build:gradle:4.1.3"
-    const val KOTLIN = "1.4.10"
-    const val KOTLIN_GRADLE = "org.jetbrains.kotlin:kotlin-gradle-plugin:$KOTLIN"
-    const val KOTLINTER = "3.3.0"
-    const val GOOGLE_SERVICES = "com.google.gms:google-services:4.3.3"
-    const val OSS_LICENSE = "com.google.android.gms:oss-licenses-plugin:0.10.3"
-    const val VERSIONS_PLUGIN = "0.28.0"
 }
 
 fun isNonStable(version: String): Boolean {
