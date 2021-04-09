@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
@@ -579,7 +580,9 @@ class RecentsController(bundle: Bundle? = null) :
             }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
-            (activity as? MainActivity)?.showTabBar(false)
+            if (router.backstack.lastOrNull()?.controller() !is DialogController) {
+                (activity as? MainActivity)?.showTabBar(false)
+            }
             snack?.dismiss()
         }
         setBottomPadding()

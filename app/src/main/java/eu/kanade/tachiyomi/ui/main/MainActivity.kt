@@ -659,7 +659,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     fun showTabBar(show: Boolean, animate: Boolean = true) {
         if (animate) {
-            if (show) {
+            if (show && !binding.tabsFrameLayout.isVisible) {
                 binding.tabsFrameLayout.alpha = 0f
                 binding.tabsFrameLayout.isVisible = true
             }
