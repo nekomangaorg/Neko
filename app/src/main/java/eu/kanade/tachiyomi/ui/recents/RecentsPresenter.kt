@@ -96,10 +96,11 @@ class RecentsPresenter(
     }
 
     private suspend fun runRecents(oldQuery: String = "", updatePageCount: Boolean = false, retryCount: Int = 0, itemCount: Int = 0, limit: Boolean = false) {
-        if (retryCount > 20) {
+        if (retryCount > 15) {
             finished = true
             setDownloadedChapters(recentItems)
             withContext(Dispatchers.Main) { controller?.showLists(recentItems, false) }
+            return
         }
 
         val showRead = preferences.showReadInAllRecents().get() && !limit
@@ -208,7 +209,7 @@ class RecentsPresenter(
         }
         val newItems = if (query.isEmpty() && !isUngrouped) {
             val nChaptersItems =
-                pairs.filter { it.first.history.id == null && it.first.chapter.id != null }
+                pairs.asSequence().filter { it.first.history.id == null && it.first.chapter.id != null }
                     .sortedWith { f1, f2 ->
                         if (abs(f1.second.date_fetch - f2.second.date_fetch) <=
                             TimeUnit.HOURS.toMillis(12)
