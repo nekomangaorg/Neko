@@ -46,8 +46,8 @@ fun getRecentsQuery(search: String) =
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, * FROM ${Manga.TABLE} JOIN ${Chapter.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
     WHERE ${Manga.COL_FAVORITE} = 1 
-    AND ${Chapter.COL_DATE_UPLOAD} > ?
-    AND ${Chapter.COL_DATE_UPLOAD} < ?
+    AND ${Chapter.COL_DATE_FETCH} > ?
+    AND ${Chapter.COL_DATE_FETCH} < ?
     AND ${Chapter.COL_DATE_FETCH} > ${Manga.COL_DATE_ADDED}
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY ${Chapter.COL_DATE_UPLOAD} DESC
@@ -80,8 +80,8 @@ fun getRecentsQueryDistinct(search: String, endless: Boolean) =
     SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID},${Chapter.TABLE}.${Chapter.COL_ID} as ${History.COL_CHAPTER_ID},MAX(${Chapter.TABLE}.${Chapter.COL_DATE_UPLOAD}) 
     FROM ${Chapter.TABLE} JOIN ${Manga.TABLE}
     ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
-    WHERE ${Chapter.COL_DATE_UPLOAD} > ?
-    AND ${Chapter.COL_DATE_UPLOAD} < ?
+    WHERE ${Chapter.COL_DATE_FETCH} > ?
+    AND ${Chapter.COL_DATE_FETCH} < ?
     AND ${Chapter.COL_READ} = 0
     GROUP BY ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}) AS newest_chapter
     ON ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} = newest_chapter.${Chapter.COL_MANGA_ID}

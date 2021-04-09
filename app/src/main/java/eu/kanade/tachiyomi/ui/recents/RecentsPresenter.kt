@@ -170,7 +170,7 @@ class RecentsPresenter(
             else -> emptyList()
         }
         rUpdates.forEach {
-            it.history.last_read = it.chapter.date_upload
+            it.history.last_read = it.chapter.date_fetch
         }
         val nAdditions = if (viewType < VIEW_TYPE_ONLY_HISTORY) {
             db.getRecentlyAdded(startCal.time, calDay.time, query, isUngrouped && !limit).executeOnIO()
