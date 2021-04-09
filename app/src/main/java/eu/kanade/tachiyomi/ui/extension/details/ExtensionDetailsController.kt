@@ -106,9 +106,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
         val langauges = preferences.enabledLanguages().get()
 
         for (source in extension.sources.sortedByDescending { it.isLangEnabled(langauges) }) {
-            if (source is ConfigurableSource) {
-                addPreferencesForSource(screen, source, multiSource, isMultiLangSingleSource)
-            }
+            addPreferencesForSource(screen, source, multiSource, isMultiLangSingleSource)
         }
 
         manager.setPreferences(screen)
@@ -187,47 +185,52 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             context.getSharedPreferences("source_${source.id}", Context.MODE_PRIVATE)
         )
 
-        if (source is ConfigurableSource) {
-            val prefs = mutableListOf<Preference>()
-            val block: (@DSL SwitchPreferenceCompat).() -> Unit = {
-                key = source.getPreferenceKey()
-                title = when {
-                    isMultiSource && !isMultiLangSingleSource -> source.toString()
-                    else -> LocaleHelper.getSourceDisplayName(source.lang, context)
-                }
-                isPersistent = false
-                isChecked = source.isEnabled()
+        val prefs = mutableListOf<Preference>()
+        val block: (@DSL SwitchPreferenceCompat).() -> Unit = {
+            key = source.getPreferenceKey()
+            title = when {
+                isMultiSource && !isMultiLangSingleSource -> source.toString()
+                else -> LocaleHelper.getSourceDisplayName(source.lang, context)
+            }
+            isPersistent = false
+            isChecked = source.isEnabled()
 
-                onChange { newValue ->
-                    if (source.isLangEnabled()) {
-                        val checked = newValue as Boolean
-                        toggleSource(source, checked)
-                        prefs.forEach { it.isVisible = checked }
-                        true
-                    } else {
-                        binding.coordinator.snack(context.getString(R.string._must_be_enabled_first, title), Snackbar.LENGTH_LONG) {
-                            setAction(R.string.enable) {
-                                preferences.enabledLanguages() += source.lang
-                                isChecked = true
-                                toggleSource(source, true)
-                                prefs.forEach { it.isVisible = true }
-                            }
+            onChange { newValue ->
+                if (source.isLangEnabled()) {
+                    val checked = newValue as Boolean
+                    toggleSource(source, checked)
+                    prefs.forEach { it.isVisible = checked }
+                    true
+                } else {
+                    binding.coordinator.snack(
+                        context.getString(
+                            R.string._must_be_enabled_first,
+                            title
+                        ), Snackbar.LENGTH_LONG
+                    ) {
+                        setAction(R.string.enable) {
+                            preferences.enabledLanguages() += source.lang
+                            isChecked = true
+                            toggleSource(source, true)
+                            prefs.forEach { it.isVisible = true }
                         }
-                        false
                     }
+                    false
                 }
-
-                // React to enable/disable all changes
-                preferences.hiddenSources().asFlow()
-                    .onEach {
-                        val enabled = source.isEnabled()
-                        isChecked = enabled
-                    }
-                    .launchIn(viewScope)
             }
 
+            // React to enable/disable all changes
+            preferences.hiddenSources().asFlow()
+                .onEach {
+                    val enabled = source.isEnabled()
+                    isChecked = enabled
+                }
+                .launchIn(viewScope)
+        }
+
+        screen.switchPreference(block)
+        if (source is ConfigurableSource) {
             val newScreen = screen.preferenceManager.createPreferenceScreen(context)
-            screen.switchPreference(block)
             source.setupPreferenceScreen(newScreen)
 
             // Reparent the preferences
