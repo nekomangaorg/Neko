@@ -226,6 +226,7 @@
         <item name="tabTextColor">@color/tabs_selector_alt</item>
         <item name="tabRippleColor">@android:color/transparent</item>
         <item name="tabIndicator">@drawable/tab_highlight_indicator</item>
+        <item name="tabIndicatorColor">?tabHighlightBackground</item>
         <item name="tabMaxWidth">0dp</item>
         <item name="tabMode">fixed</item>
         <item name="tabIndicatorAnimationMode">elastic</item>

@@ -12,7 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -251,11 +250,11 @@ class BrowseController :
         }
         binding.bottomSheet.pill.alpha = (1 - progress) * 0.25f
         val selectedColor = ColorUtils.setAlphaComponent(
-            ContextCompat.getColor(binding.bottomSheet.tabs.context, R.color.colorAccent),
+            bottomSheet.context.getResourceColor(R.attr.tabBarIconColor),
             (progress * 255).toInt()
         )
         val unselectedColor = ColorUtils.setAlphaComponent(
-            bottomSheet.context.getResourceColor(R.attr.colorOnBackground),
+            bottomSheet.context.getResourceColor(R.attr.actionBarTintColor),
             153
         )
         binding.bottomSheet.sheetLayout.elevation = progress * 5
@@ -293,7 +292,7 @@ class BrowseController :
             }
         )
         binding.shadow2.translationY = pad
-        binding.bottomSheet.root.sheetBehavior?.peekHeight = 58.spToPx + padding
+        binding.bottomSheet.root.sheetBehavior?.peekHeight = 56.spToPx + padding
         binding.bottomSheet.root.extensionFrameLayout?.binding?.fastScroller?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
         }

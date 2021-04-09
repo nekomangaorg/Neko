@@ -15,6 +15,7 @@
     <attr name="readerBackground" format="color"/>
     <attr name="tabBarIconColor" format="reference|integer"/>
     <attr name="tabBarIconInactive" format="reference|integer"/>
+    <attr name="tabHighlightBackground" format="reference|integer"/>
 
     <declare-styleable name="ReaderSpinnerView">
         <attr name="title" format="reference|string"/>
