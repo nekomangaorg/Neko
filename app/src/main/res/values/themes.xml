@@ -41,7 +41,7 @@
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/status_bar</item>
         <item name="android:navigationBarColor">#B3000000</item>
-        <item name="android:colorEdgeEffect">@color/colorAccent</item>
+        <item name="android:colorEdgeEffect">?colorAccent</item>
         <item name="tabHighlightBackground">@color/accent_alpha</item>
 
         <!-- Material Dialog colors -->
