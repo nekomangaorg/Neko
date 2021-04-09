@@ -169,7 +169,7 @@ class RecentsPresenter(
             else -> emptyList()
         }
         rUpdates.forEach {
-            it.history.last_read = it.chapter.date_fetch
+            it.history.last_read = it.chapter.date_upload
         }
         val nAdditions = if (viewType < VIEW_TYPE_ONLY_HISTORY) {
             db.getRecentlyAdded(startCal.time, calDay.time, query, isUngrouped && !limit).executeOnIO()
@@ -183,7 +183,7 @@ class RecentsPresenter(
         }.distinctBy {
             if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) it.manga.id else it.chapter.id
         }.filter { mch ->
-            if (page > 0 && query.isEmpty()) {
+            if (updatePageCount && page > 0 && query.isEmpty()) {
                 if (viewType != VIEW_TYPE_ONLY_HISTORY) {
                     recentItems.none { mch.manga.id == it.mch.manga.id }
                 } else {
@@ -261,7 +261,7 @@ class RecentsPresenter(
                 }
             } else pairs.map { RecentMangaItem(it.first, it.second, null) }
         }
-        recentItems = if (page == 0) {
+        recentItems = if (page == 0 || !updatePageCount) {
             newItems
         } else {
             recentItems + newItems
