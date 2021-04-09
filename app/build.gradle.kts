@@ -28,15 +28,15 @@ fun runCommand(command: String): String {
 }
 
 android {
-    compileSdkVersion(AndroidVersions.COMPILE_SDK)
-    buildToolsVersion(AndroidVersions.BUILD_TOOL)
+    compileSdkVersion(AndroidVersions.compileSdk)
+    buildToolsVersion(AndroidVersions.buildTools)
 
     defaultConfig {
-        minSdkVersion(AndroidVersions.MIN_SDK)
-        targetSdkVersion(AndroidVersions.TARGET_SDK)
+        minSdkVersion(AndroidVersions.minSdk)
+        targetSdkVersion(AndroidVersions.targetSdk)
         applicationId = "eu.kanade.tachiyomi"
-        versionCode = AndroidVersions.VERSION_CODE
-        versionName = AndroidVersions.VERSION_NAME
+        versionCode = AndroidVersions.versionCode
+        versionName = AndroidVersions.versionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         multiDexEnabled = true
 
