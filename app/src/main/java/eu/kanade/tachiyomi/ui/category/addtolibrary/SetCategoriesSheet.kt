@@ -155,9 +155,6 @@ class SetCategoriesSheet(
                 )
             }
         )
-        binding.categoryRecyclerView.scrollToPosition(
-            max(0, itemAdapter.adapterItems.indexOf(selectExtension.selectedItems.firstOrNull()))
-        )
     }
 
     override fun onStart() {
@@ -165,6 +162,11 @@ class SetCategoriesSheet(
         sheetBehavior.expand()
         sheetBehavior.skipCollapsed = true
         updateBottomButtons()
+        binding.root.post {
+            binding.categoryRecyclerView.scrollToPosition(
+                max(0, itemAdapter.adapterItems.indexOf(selectExtension.selectedItems.firstOrNull()))
+            )
+        }
     }
 
     fun updateBottomButtons() {
