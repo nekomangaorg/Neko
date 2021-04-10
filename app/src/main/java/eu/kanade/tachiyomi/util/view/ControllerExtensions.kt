@@ -118,7 +118,7 @@ fun Controller.scrollViewWith(
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
-        if (activityBinding!!.toolbar.height > 0) activityBinding!!.toolbar.height
+        if (activityBinding?.toolbar?.height ?: 0 > 0) activityBinding!!.toolbar.height
         else array.getDimensionPixelSize(0, 0)
         ) + if (includeTabView) tabBarHeight else 0
     array.recycle()
