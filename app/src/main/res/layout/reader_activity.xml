@@ -58,6 +58,8 @@
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
+                app:titleTextColor="?actionBarTintColor"
+                app:subtitleTextColor="@color/tint_color_secondary"
                 android:background="@drawable/reader_toolbar_ripple" />
 
         </FrameLayout>
