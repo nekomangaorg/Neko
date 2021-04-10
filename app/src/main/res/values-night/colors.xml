@@ -23,4 +23,12 @@
     <color name="background">#1C1C1D</color>
     <color name="dialog">#212121</color>
     <color name="gray_button">#BFBFBF</color>
+
+    <!-- Midnight Dusk Theme -->
+    <color name="colorAccentDuskDawn">#F02475</color>
+    <color name="colorAccentDuskDawnText">#f091b7</color>
+    <color name="backgroundDuskDawn">#16151D</color>
+    <color name="dialogDuskDawn">#201F27</color>
+    <color name="textPrimaryDuskDawn">@color/md_white_1000</color>
+    <color name="appBarTextDuskDawn">@color/md_white_1000</color>
 </resources>

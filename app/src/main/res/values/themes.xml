@@ -69,6 +69,18 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
+    <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi">
+        <item name="colorPrimary">@color/dialogDuskDawn</item>
+        <item name="colorPrimaryDark">@color/dialogDuskDawn</item>
+        <item name="colorAccent">@color/colorAccentDuskDawn</item>
+        <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
+        <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
+        <item name="colorSecondary">@color/backgroundDuskDawn</item>
+        <item name="background">@color/backgroundDuskDawn</item>
+        <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
+        <item name="android:colorBackground">@color/backgroundDuskDawn</item>
+        <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
+    </style>
 
     <!--===============-->
     <!-- Launch Screen -->
