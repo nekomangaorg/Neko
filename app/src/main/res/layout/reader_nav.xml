@@ -58,7 +58,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:progressBackgroundTint="?actionBarTintColor"
+            android:progressBackgroundTint="@color/tint_color_secondary"
             android:maxHeight="?attr/actionBarSize"
             android:minHeight="?attr/actionBarSize" />
 

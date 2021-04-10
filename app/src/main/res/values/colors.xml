@@ -15,7 +15,6 @@
 
     <color name="read_chapter">@color/text_color_hint</color>
 
-    <color name="unread_badge">@color/colorAccent</color>
     <color name="unread_badge_text">@color/md_white_1000</color>
     <color name="download_badge">@color/pale_green</color>
     <color name="download_badge_text">@color/md_black_1000</color>

@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.core.widget.TextViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.textview.MaterialTextView
@@ -88,8 +89,10 @@ open class MaterialMenuSheet(
                 if (item.id == selectedId) {
                     currentIndex = index
                     setTextColor(context.getResourceColor(R.attr.colorAccent))
-                    compoundDrawableTintList =
+                    TextViewCompat.setCompoundDrawableTintList(
+                        this,
                         ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
+                    )
                 }
                 updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     height = 48.dpToPx
@@ -143,7 +146,10 @@ open class MaterialMenuSheet(
             val textView = (binding.menuLayout.getChildAt(it) as ViewGroup).getChildAt(0) as TextView
             val imageView = (binding.menuLayout.getChildAt(it) as ViewGroup).getChildAt(1) as ImageView
             textView.setTextColor(primaryColor)
-            textView.compoundDrawableTintList = ColorStateList.valueOf(primaryColor)
+            TextViewCompat.setCompoundDrawableTintList(
+                textView,
+                ColorStateList.valueOf(primaryColor)
+            )
             imageView.invisible()
         }
     }
@@ -155,9 +161,13 @@ open class MaterialMenuSheet(
         val layout = binding.menuLayout.findViewById<ViewGroup>(id) ?: return
         val textView = layout.getChildAt(0) as? TextView
         val imageView = layout.getChildAt(1) as? ImageView
-        textView?.setTextColor(context.getResourceColor(R.attr.colorAccent))
-        textView?.compoundDrawableTintList =
-            ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
+        textView?.setTextColor(textView.context.getResourceColor(R.attr.colorAccent))
+        textView?.let {
+            TextViewCompat.setCompoundDrawableTintList(
+                it,
+                ColorStateList.valueOf(it.context.getResourceColor(R.attr.colorAccent))
+            )
+        }
         imageView?.visible()
         imageView?.setImageResource(drawableRes)
     }
