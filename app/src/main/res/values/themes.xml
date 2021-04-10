@@ -69,6 +69,7 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
+    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled"/>
     <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi">
         <item name="colorPrimary">@color/dialogDuskDawn</item>
         <item name="colorPrimaryDark">@color/dialogDuskDawn</item>

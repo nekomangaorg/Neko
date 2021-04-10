@@ -21,4 +21,10 @@
         <!-- Material Dialog colors -->
         <item name="md_background_color">@color/colorAmoledPrimary</item>
     </style>
+
+    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled">
+        <item name="colorAccent">@color/holo_red</item>
+        <item name="colorAccentText">@color/md_red_500</item>
+    </style>
+
 </resources>

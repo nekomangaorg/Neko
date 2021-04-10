@@ -76,6 +76,11 @@ object ThemeUtil {
             AppCompatDelegate.MODE_NIGHT_YES,
             R.string.amoled_black
         ),
+        BLACK_N_RED(
+            R.style.Theme_Tachiyomi_BlackAndRed,
+            AppCompatDelegate.MODE_NIGHT_YES,
+            R.string.black_and_red
+        ),
         LIGHT_BLUE(
             R.style.Theme_Tachiyomi_AllBlue,
             AppCompatDelegate.MODE_NIGHT_NO,
@@ -155,7 +160,7 @@ object ThemeUtil {
         @ColorInt
         val darkBackground: Int = Color.parseColor(
             when (styleRes) {
-                R.style.Theme_Tachiyomi_Amoled -> "#000000"
+                R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed -> "#000000"
                 R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
                 else -> "#1C1C1D"
             }
@@ -173,6 +178,7 @@ object ThemeUtil {
         val darkAccent: Int = Color.parseColor(
             when (styleRes) {
                 R.style.Theme_Tachiyomi_MidnightDusk -> "#F02475"
+                R.style.Theme_Tachiyomi_BlackAndRed -> "#AA2200"
                 else -> "#3399FF"
             }
         )
@@ -215,7 +221,7 @@ object ThemeUtil {
         val darkBottomBar: Int = Color.parseColor(
             when (styleRes) {
                 R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
-                R.style.Theme_Tachiyomi_Amoled -> "#000000"
+                R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed -> "#000000"
                 R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
                 else -> "#212121"
             }
