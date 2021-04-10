@@ -11,8 +11,6 @@ import eu.kanade.tachiyomi.source.model.toPageUrl
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.util.system.awaitSingle
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import rx.Observable
 import tachiyomi.source.model.ChapterInfo
 import tachiyomi.source.model.MangaInfo
