@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.os.Bundle
+import android.view.View
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
@@ -8,7 +10,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -16,6 +17,8 @@ class SettingsGeneralController : SettingsController() {
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
+    var lastThemeX: Int? = null
+    var themePreference: ThemePreference? = null
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.general
 
@@ -88,18 +91,12 @@ class SettingsGeneralController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.display
 
-            listPreference(activity) {
+            themePreference = themePreference {
                 key = Keys.themeStyle
                 titleRes = R.string.app_theme
-                val enumConstants = ThemeUtil.Themes::class.java.enumConstants
-                entriesRes = enumConstants?.map { it.nameRes }.orEmpty().toTypedArray()
-                entryValues = enumConstants?.map { it.name }.orEmpty()
-                defaultValue = ThemeUtil.Themes.DEFAULT
-
-                onChange {
-                    activity?.recreate()
-                    true
-                }
+                lastScrollPostion = lastThemeX
+                summaryRes = preferences.theme().get().nameRes
+                activity = this@SettingsGeneralController.activity
             }
 
             switchPreference {
@@ -203,5 +200,21 @@ class SettingsGeneralController : SettingsController() {
                 defaultValue = ""
             }
         }
+    }
+
+    override fun onDestroyView(view: View) {
+        super.onDestroyView(view)
+        themePreference = null
+    }
+
+    override fun onSaveViewState(view: View, outState: Bundle) {
+        outState.putInt(::lastThemeX.name, themePreference?.lastScrollPostion ?: 0)
+        super.onSaveInstanceState(outState)
+    }
+
+    override fun onRestoreViewState(view: View, savedViewState: Bundle) {
+        super.onRestoreViewState(view, savedViewState)
+        lastThemeX = savedViewState.getInt(::lastThemeX.name)
+        themePreference?.lastScrollPostion = lastThemeX
     }
 }

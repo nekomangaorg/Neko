@@ -32,6 +32,10 @@ inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Pref
     return initThenAdd(Preference(context), block)
 }
 
+inline fun PreferenceGroup.themePreference(block: (@DSL ThemePreference).() -> Unit): ThemePreference {
+    return initThenAdd(ThemePreference(context), block)
+}
+
 inline fun PreferenceGroup.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
     return initThenAdd(SwitchPreferenceCompat(context), block)
 }
