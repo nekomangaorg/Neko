@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.model.toMangaInfo
 import eu.kanade.tachiyomi.source.model.toPageUrl
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
+import eu.kanade.tachiyomi.util.system.awaitSingle
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import rx.Observable
@@ -65,12 +66,10 @@ interface Source : tachiyomi.source.Source {
      */
     @Suppress("DEPRECATION")
     override suspend fun getMangaDetails(manga: MangaInfo): MangaInfo {
-        return withContext(Dispatchers.IO) {
-            val sManga = manga.toSManga()
-            val networkManga = fetchMangaDetails(sManga).toBlocking().single()
-            sManga.copyFrom(networkManga)
-            sManga.toMangaInfo()
-        }
+        val sManga = manga.toSManga()
+        val networkManga = fetchMangaDetails(sManga).awaitSingle()
+        sManga.copyFrom(networkManga)
+        return sManga.toMangaInfo()
     }
 
     /**
@@ -78,9 +77,7 @@ interface Source : tachiyomi.source.Source {
      */
     @Suppress("DEPRECATION")
     override suspend fun getChapterList(manga: MangaInfo): List<ChapterInfo> {
-        return withContext(Dispatchers.IO) {
-            fetchChapterList(manga.toSManga()).toBlocking().single().map { it.toChapterInfo() }
-        }
+        return fetchChapterList(manga.toSManga()).awaitSingle().map { it.toChapterInfo() }
     }
 
     /**
@@ -88,10 +85,7 @@ interface Source : tachiyomi.source.Source {
      */
     @Suppress("DEPRECATION")
     override suspend fun getPageList(chapter: ChapterInfo): List<tachiyomi.source.model.Page> {
-        return withContext(Dispatchers.IO) {
-            fetchPageList(chapter.toSChapter()).toBlocking().single()
-                .map { it.toPageUrl() }
-        }
+        return fetchPageList(chapter.toSChapter()).awaitSingle().map { it.toPageUrl() }
     }
 }
 

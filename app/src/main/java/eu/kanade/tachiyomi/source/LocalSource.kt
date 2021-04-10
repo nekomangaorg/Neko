@@ -5,12 +5,15 @@ import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.model.toMangaInfo
+import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.util.chapter.ChapterRecognition
 import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -18,6 +21,7 @@ import eu.kanade.tachiyomi.util.storage.EpubFile
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import junrar.Archive
 import junrar.rarfile.FileHeader
+import kotlinx.coroutines.runBlocking
 import rx.Observable
 import timber.log.Timber
 import java.io.File
@@ -124,7 +128,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
 
                 // Copy the cover from the first chapter found.
                 if (thumbnail_url == null) {
-                    val chapters = fetchChapterList(this).toBlocking().first()
+                    val chapters = runBlocking { getChapterList(toMangaInfo()).map { it.toSChapter() } }
                     if (chapters.isNotEmpty()) {
                         try {
                             val dest = updateCover(chapters.last(), this)
@@ -172,7 +176,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
 
         // Copy the cover from the first chapter found.
         if (manga.thumbnail_url == null) {
-            val chapters = fetchChapterList(manga).toBlocking().first()
+            val chapters = runBlocking { getChapterList(manga.toMangaInfo()).map { it.toSChapter() } }
             if (chapters.isNotEmpty()) {
                 try {
                     val dest = updateCover(chapters.last(), manga)
@@ -186,7 +190,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
     }
 
     fun updateMangaInfo(manga: SManga) {
-        val directory = getBaseDirectories(context).mapNotNull { File(it, manga.url) }.find {
+        val directory = getBaseDirectories(context).map { File(it, manga.url) }.find {
             it.exists()
         } ?: return
         val gson = GsonBuilder().setPrettyPrinting().create()
