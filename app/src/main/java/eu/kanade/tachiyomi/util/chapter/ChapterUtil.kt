@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 
 class ChapterUtil {
@@ -85,9 +86,9 @@ class ChapterUtil {
 
         private fun readColor(context: Context): Int = context.contextCompatColor(R.color.read_chapter)
 
-        private fun unreadColor(context: Context): Int = context.contextCompatColor(R.color.unread_chapter)
+        private fun unreadColor(context: Context): Int = context.getResourceColor(android.R.attr.textColorPrimary)
 
-        private fun bookmarkedColor(context: Context): Int = context.contextCompatColor(R.color.bookmarked_chapter)
+        private fun bookmarkedColor(context: Context): Int = context.getResourceColor(android.R.attr.colorAccent)
 
         private val volumeRegex = Regex("""(vol|volume)\.? *([0-9]+)?""", RegexOption.IGNORE_CASE)
         private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")

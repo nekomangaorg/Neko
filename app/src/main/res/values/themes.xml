@@ -36,7 +36,7 @@
         <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
 
         <!-- Custom Attributes-->
-        <item name="actionBarTintColor">@color/textColorPrimary</item>
+        <item name="actionBarTintColor">?android:textColorPrimary</item>
         <item name="tabBarIconColor">?colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/status_bar</item>
@@ -45,7 +45,7 @@
         <item name="tabHighlightBackground">@color/accent_alpha</item>
 
         <!-- Material Dialog colors -->
-        <item name="md_color_title">@color/textColorPrimary</item>
+        <item name="md_color_title">?android:attr/textColorPrimary</item>
         <item name="md_color_content">@color/text_color_secondary</item>
         <item name="md_color_button_text">?colorAccent</item>
         <item name="md_background_color">@color/dialog</item>

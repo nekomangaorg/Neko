@@ -63,7 +63,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             binding.editText.setText("")
             binding.editText.hint = binding.title.text
         } else {
-            binding.title.setTextColor(ContextCompat.getColor(itemView.context, R.color.textColorPrimary))
+            binding.title.setTextColor(itemView.context.getResourceColor(android.R.attr.textColorPrimary))
             regularDrawable = ContextCompat.getDrawable(
                 itemView.context,
                 R.drawable
