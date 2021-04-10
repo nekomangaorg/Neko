@@ -59,6 +59,7 @@ abstract class SettingsController : PreferenceController() {
                     listView.findViewHolderForAdapterPosition(pos)?.let {
                         animatePreferenceHighlight(it.itemView)
                     }
+                    preferenceKey = null
                 }
             }
         }
