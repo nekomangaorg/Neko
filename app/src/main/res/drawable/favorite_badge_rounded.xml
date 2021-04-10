@@ -3,5 +3,5 @@
     android:shape="rectangle">
     <corners
         android:bottomRightRadius="10dp" />
-    <solid android:color="@color/unread_badge" />
+    <solid android:color="?colorAccent" />
 </shape>

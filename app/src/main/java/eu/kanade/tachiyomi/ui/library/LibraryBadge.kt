@@ -7,9 +7,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.UnreadDownloadBadgeBinding
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.isVisible
-import eu.kanade.tachiyomi.util.view.setTextColorRes
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visibleIf
 
@@ -26,9 +26,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
     fun setUnreadDownload(unread: Int, downloads: Int, showTotalChapters: Boolean) {
         // Update the unread count and its visibility.
 
-        val unreadBadgeBackground = context.contextCompatColor(
-            if (showTotalChapters) R.color.total_badge else R.color.unread_badge
-        )
+        val unreadBadgeBackground = if (showTotalChapters) {
+            context.contextCompatColor(R.color.total_badge)
+        } else context.getResourceColor(R.attr.colorAccent)
 
         with(binding.unreadText) {
             visibleIf(unread > 0 || unread == -1 || showTotalChapters)
@@ -36,12 +36,12 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 return@with
             }
             text = if (unread == -1) "0" else unread.toString()
-            setTextColorRes(
+            setTextColor(
                 // hide the badge text when preference is only show badge
                 when {
-                    unread == -1 && !showTotalChapters -> R.color.unread_badge
-                    showTotalChapters -> R.color.total_badge_text
-                    else -> R.color.unread_badge_text
+                    unread == -1 && !showTotalChapters -> context.getResourceColor(R.attr.colorAccent)
+                    showTotalChapters -> context.contextCompatColor(R.color.total_badge_text)
+                    else -> context.contextCompatColor(R.color.unread_badge_text)
                 }
             )
             setBackgroundColor(unreadBadgeBackground)
