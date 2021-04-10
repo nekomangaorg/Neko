@@ -61,7 +61,7 @@
                         android:layout_gravity="start|center"
                         android:layout_marginStart="10dp"
                         android:layout_marginEnd="@dimen/theme_app_bar_margin_end"
-                        android:src="@drawable/oval"
+                        android:src="@drawable/rounded_preview_rect"
                         app:tint="?actionBarTintColor"
                         tools:ignore="ContentDescription" />
 
@@ -69,7 +69,7 @@
 
                 <ImageView
                     android:id="@+id/theme_hero_image"
-                    android:src="@drawable/oval"
+                    android:src="@drawable/rounded_preview_rect"
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/theme_hero_preview"
                     app:tint="?android:attr/textColorPrimary"
@@ -89,7 +89,7 @@
                     android:layout_marginStart="@dimen/theme_padding_preview"
                     android:layout_marginEnd="@dimen/theme_primary_margin_end"
                     android:layout_marginTop="@dimen/theme_text_padding_preview"
-                    android:src="@drawable/oval"
+                    android:src="@drawable/rounded_preview_rect"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/theme_hero_image"
                     app:tint="?android:attr/textColorPrimary"
@@ -114,7 +114,7 @@
                     android:layout_marginStart="@dimen/theme_padding_preview"
                     android:layout_marginTop="@dimen/theme_text_padding_preview"
                     android:layout_marginEnd="@dimen/theme_secondary_margin_end"
-                    android:src="@drawable/oval"
+                    android:src="@drawable/rounded_preview_rect"
                     app:layout_constraintEnd_toStartOf="@id/theme_secondary_text_2"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@id/theme_primary_text"
@@ -125,8 +125,8 @@
                     android:id="@+id/theme_secondary_text_2"
                     android:layout_width="27dp"
                     android:layout_height="@dimen/theme_text_preview"
-                    android:layout_marginStart="6dp"
-                    android:src="@drawable/oval"
+                    android:layout_marginStart="3dp"
+                    android:src="@drawable/rounded_preview_rect"
                     app:layout_constraintBottom_toBottomOf="@id/theme_secondary_text"
                     app:layout_constraintStart_toEndOf="@id/theme_secondary_text"
                     app:layout_constraintTop_toTopOf="@id/theme_secondary_text"
