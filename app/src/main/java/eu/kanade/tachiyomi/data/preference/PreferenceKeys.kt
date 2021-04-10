@@ -7,7 +7,9 @@ object PreferenceKeys {
 
     const val theme = "pref_theme_key"
 
-    const val themeStyle = "theme_style"
+    const val nightMode = "night_mode"
+    const val lightTheme = "light_theme"
+    const val darkTheme = "dark_theme"
 
     const val startingTab = "starting_tab"
 

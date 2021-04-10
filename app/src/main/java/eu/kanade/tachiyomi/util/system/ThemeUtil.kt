@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.ColorInt
@@ -15,17 +16,24 @@ object ThemeUtil {
 
     /** Migration method */
     fun convertTheme(preferences: PreferencesHelper, theme: Int) {
-        preferences.theme().set(
+        preferences.nightMode().set(
             when (theme) {
-                0 -> Themes.PURE_WHITE
+                0, 1 -> AppCompatDelegate.MODE_NIGHT_NO
+                2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
+        preferences.lightTheme().set(
+            when (theme) {
                 1 -> Themes.LIGHT_BLUE
-                2 -> Themes.DARK
+                else -> Themes.PURE_WHITE
+            }
+        )
+        preferences.darkTheme().set(
+            when (theme) {
                 3 -> Themes.AMOLED
                 4 -> Themes.DARK_BLUE
-                5 -> Themes.DEFAULT
-                6 -> Themes.DEFAULT_AMOLED
-                7 -> Themes.ALL_BLUE
-                else -> Themes.DEFAULT
+                else -> Themes.DARK
             }
         )
     }
@@ -51,36 +59,21 @@ object ThemeUtil {
 
     enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
         PURE_WHITE(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_NO, R.string.white_theme),
-        LIGHT_BLUE(
-            R.style.Theme_Tachiyomi_AllBlue,
-            AppCompatDelegate.MODE_NIGHT_NO,
-            R.string.light_blue
-        ),
         DARK(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_YES, R.string.dark),
         AMOLED(
             R.style.Theme_Tachiyomi_Amoled,
             AppCompatDelegate.MODE_NIGHT_YES,
             R.string.amoled_black
         ),
+        LIGHT_BLUE(
+            R.style.Theme_Tachiyomi_AllBlue,
+            AppCompatDelegate.MODE_NIGHT_NO,
+            R.string.light_blue
+        ),
         DARK_BLUE(
             R.style.Theme_Tachiyomi_AllBlue,
             AppCompatDelegate.MODE_NIGHT_YES,
             R.string.dark_blue
-        ),
-        DEFAULT(
-            R.style.Theme_Tachiyomi,
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            R.string.system_default
-        ),
-        DEFAULT_AMOLED(
-            R.style.Theme_Tachiyomi_Amoled,
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            R.string.system_default_amoled
-        ),
-        ALL_BLUE(
-            R.style.Theme_Tachiyomi_AllBlue,
-            AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-            R.string.system_default_all_blue
         );
 
         fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
@@ -140,11 +133,11 @@ object ThemeUtil {
 
         @ColorInt
         val darkBackground: Int = Color.parseColor(
-                when (styleRes) {
-                    R.style.Theme_Tachiyomi_Amoled -> "#000000"
-                    else -> "#1C1C1D"
-                }
-            )
+            when (styleRes) {
+                R.style.Theme_Tachiyomi_Amoled -> "#000000"
+                else -> "#1C1C1D"
+            }
+        )
 
         @ColorInt
         val lightAccent: Int = Color.parseColor("#2979FF")
@@ -177,16 +170,21 @@ object ThemeUtil {
         }
 
         @ColorInt
-        val lightBottomBar: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
-            else -> Color.parseColor("#FFFFFF")
-        }
+        val lightBottomBar: Int = Color.parseColor(
+            when (styleRes) {
+                R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
+                else -> "#FFFFFF"
+            }
+        )
 
         @ColorInt
-        val darkBottomBar: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
-            else -> Color.parseColor("#212121")
-        }
+        val darkBottomBar: Int = Color.parseColor(
+            when (styleRes) {
+                R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
+                R.style.Theme_Tachiyomi_Amoled -> "#000000"
+                else -> "#212121"
+            }
+        )
 
         @ColorInt
         val lightInactiveTab: Int = when (styleRes) {
@@ -224,4 +222,24 @@ object ThemeUtil {
         @ColorInt val inactiveTab: Int,
         @ColorInt val activeTab: Int,
     )
+}
+
+fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
+    if (preferences.nightMode().isNotSet()) {
+        ThemeUtil.convertTheme(preferences, preferences.oldTheme())
+    }
+    AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
+    val theme = getPrefTheme(preferences)
+    setTheme(theme.styleRes)
+}
+
+fun Context.getPrefTheme(preferences: PreferencesHelper): ThemeUtil.Themes {
+    // Using a try catch in case I start to remove themes
+    return try {
+        (if (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) preferences.darkTheme() else preferences.lightTheme()).get()
+    } catch (e: Exception) {
+        preferences.lightTheme().set(ThemeUtil.Themes.PURE_WHITE)
+        preferences.darkTheme().set(ThemeUtil.Themes.DARK)
+        ThemeUtil.Themes.PURE_WHITE
+    }
 }

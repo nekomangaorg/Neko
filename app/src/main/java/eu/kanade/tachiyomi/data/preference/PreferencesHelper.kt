@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Environment
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
@@ -88,7 +89,10 @@ class PreferencesHelper(val context: Context) {
 
     fun oldTheme() = prefs.getInt(Keys.theme, 5)
 
-    fun theme() = flowPrefs.getEnum(Keys.themeStyle, ThemeUtil.Themes.DEFAULT)
+    fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+
+    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, ThemeUtil.Themes.PURE_WHITE)
+    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, ThemeUtil.Themes.DARK)
 
     fun rotation() = flowPrefs.getInt(Keys.rotation, 1)
 

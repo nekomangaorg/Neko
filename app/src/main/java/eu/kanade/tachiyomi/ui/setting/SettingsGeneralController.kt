@@ -2,15 +2,20 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.os.Bundle
 import android.view.View
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
+import eu.kanade.tachiyomi.util.system.appDelegateNightMode
+import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
+import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -68,6 +73,13 @@ class SettingsGeneralController : SettingsController() {
         }
 
         switchPreference {
+            key = Keys.hideBottomNavOnScroll
+            titleRes = R.string.hide_bottom_nav
+            summaryRes = R.string.hides_on_scroll
+            defaultValue = true
+        }
+
+        switchPreference {
             key = Keys.automaticUpdates
             titleRes = R.string.check_for_updates
             summaryRes = R.string.auto_check_for_app_versions
@@ -92,18 +104,33 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.display
 
             themePreference = themePreference {
-                key = Keys.themeStyle
+                key = "theme_preference"
                 titleRes = R.string.app_theme
                 lastScrollPostion = lastThemeX
-                summaryRes = preferences.theme().get().nameRes
+                summaryRes = context.getPrefTheme(preferences).nameRes
                 activity = this@SettingsGeneralController.activity
             }
 
             switchPreference {
-                key = Keys.hideBottomNavOnScroll
-                titleRes = R.string.hide_bottom_nav
-                summaryRes = R.string.hides_on_scroll
-                defaultValue = true
+                key = "night_mode_switch"
+                isPersistent = false
+                titleRes = R.string.follow_system_theme
+                isChecked =
+                    preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+
+                onChange {
+                    if (it == true) {
+                        preferences.nightMode().set(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+                        activity?.recreate()
+                    } else {
+                        preferences.nightMode().set(context.appDelegateNightMode())
+                        themePreference?.fastAdapter?.notifyDataSetChanged()
+                    }
+                    true
+                }
+                preferences.nightMode().asImmediateFlow { mode ->
+                    isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                }.launchIn(viewScope)
             }
         }
 

@@ -32,7 +32,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = WebviewActivityBinding.inflate(layoutInflater)
-        delegate.localNightMode = preferences.theme().get().nightMode
+        delegate.localNightMode = preferences.nightMode().get()
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)

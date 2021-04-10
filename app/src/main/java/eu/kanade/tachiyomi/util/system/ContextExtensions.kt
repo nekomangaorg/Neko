@@ -24,6 +24,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
@@ -322,6 +323,11 @@ fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
 fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
+}
+
+fun Context.appDelegateNightMode(): Int {
+    return if (isInNightMode()) AppCompatDelegate.MODE_NIGHT_YES
+    else AppCompatDelegate.MODE_NIGHT_NO
 }
 
 fun Context.isOnline(): Boolean {

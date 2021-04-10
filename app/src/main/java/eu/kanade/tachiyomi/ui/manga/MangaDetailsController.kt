@@ -87,6 +87,7 @@ import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isOnline
@@ -361,7 +362,7 @@ class MangaDetailsController :
         val activity = activity as? MainActivity ?: return
         val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
-        if (ThemeUtil.hasDarkActionBarInLight(activity, presenter.preferences.theme().get())) {
+        if (ThemeUtil.hasDarkActionBarInLight(activity, activity.getPrefTheme(presenter.preferences))) {
             if (forThis) activityBinding.appBar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
             )
@@ -1414,7 +1415,7 @@ class MangaDetailsController :
 
                     if (!activity.isInNightMode()) {
                         activityBinding?.appBar?.context?.setTheme(
-                            presenter.preferences.theme().get().styleRes
+                            activity.getPrefTheme(presenter.preferences).styleRes
                         )
 
                         val iconPrimary = currColor ?: Color.WHITE

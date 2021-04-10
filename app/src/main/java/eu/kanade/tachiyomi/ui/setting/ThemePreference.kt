@@ -22,16 +22,18 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ThemeItemBinding
 import eu.kanade.tachiyomi.databinding.ThemesPreferenceBinding
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.visInvisIf
 import uy.kohesive.injekt.injectLazy
 
 class ThemePreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     Preference(context, attrs) {
 
-    private lateinit var fastAdapter: FastAdapter<ThemeItem>
+    var fastAdapter: FastAdapter<ThemeItem>
     private val itemAdapter = ItemAdapter<ThemeItem>()
-    private lateinit var selectExtension: SelectExtension<ThemeItem>
+    private var selectExtension: SelectExtension<ThemeItem>
     private val preferences: PreferencesHelper by injectLazy()
     var activity: Activity? = null
     var lastScrollPostion: Int? = null
@@ -42,22 +44,41 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         fastAdapter = FastAdapter.with(itemAdapter)
         fastAdapter.setHasStableIds(true)
         val enumConstants = ThemeUtil.Themes::class.java.enumConstants
-        val currentTheme = preferences.theme().get()
+        val currentLightTheme = preferences.lightTheme().get()
+        val currentDarkTheme = preferences.darkTheme().get()
+        val nightMode = preferences.nightMode().get()
         selectExtension = fastAdapter.getSelectExtension().apply {
             isSelectable = true
-            multiSelect = false
+            multiSelect = true
             selectionListener = object : ISelectionListener<ThemeItem> {
                 override fun onSelectionChanged(item: ThemeItem, selected: Boolean) {
-                    preferences.theme().set(item.theme)
-                    activity?.recreate()
+                    if (item.theme.nightMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                        preferences.darkTheme().set(item.theme)
+                    } else {
+                        preferences.lightTheme().set(item.theme)
+                    }
+                    if (!selected) {
+                        preferences.nightMode().set(item.theme.nightMode)
+                    } else if (preferences.nightMode()
+                        .get() != AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    ) {
+                        preferences.nightMode().set(item.theme.nightMode)
+                    }
+                    if ((
+                        preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM &&
+                            item.theme.nightMode != context.appDelegateNightMode()
+                        ) ||
+                        (!selected && item.theme.nightMode == context.appDelegateNightMode())
+                    ) {
+                        fastAdapter.notifyDataSetChanged()
+                    } else {
+                        activity?.recreate()
+                    }
                 }
             }
         }
 
         itemAdapter.set(enumConstants?.map(::ThemeItem).orEmpty())
-        itemAdapter.adapterItems.forEach { item ->
-            item.isSelected = currentTheme == item.theme
-        }
         isSelectable = false
     }
 
@@ -75,24 +96,22 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 lastScrollPostion =
-                    recyclerView.computeHorizontalScrollOffset() // (lastScrollPostion ?: 0) + dx
+                    recyclerView.computeHorizontalScrollOffset()
             }
         })
 
-        val enumConstants = ThemeUtil.Themes::class.java.enumConstants
-        val currentTheme = preferences.theme().get()
         if (lastScrollPostion != null) {
             val lX = lastScrollPostion!!
             (binding.themeRecycler.layoutManager as LinearLayoutManager).apply {
                 scrollToPositionWithOffset(
                     lX / 110.dpToPx,
-                    -lX % 110.dpToPx + binding.themeRecycler.paddingStart
+                    -lX % 110.dpToPx
                 )
             }
             lastScrollPostion = binding.themeRecycler.computeHorizontalScrollOffset()
         } else {
             binding.themeRecycler.scrollToPosition(
-                enumConstants?.indexOf(currentTheme) ?: 0
+                selectExtension.selections.firstOrNull() ?: 0
             )
         }
     }
@@ -112,11 +131,15 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         }
 
         val colors = theme.getColors()
-        val darkColors = if (theme.nightMode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM) {
-            theme.getColors(AppCompatDelegate.MODE_NIGHT_YES)
-        } else {
-            null
-        }
+
+        override var isSelected: Boolean
+            get() = when (preferences.nightMode().get()) {
+                AppCompatDelegate.MODE_NIGHT_YES -> preferences.darkTheme().get() == theme
+                AppCompatDelegate.MODE_NIGHT_NO -> preferences.lightTheme().get() == theme
+                else -> preferences.darkTheme().get() == theme ||
+                    preferences.lightTheme().get() == theme
+            }
+            set(value) {}
 
         inner class ViewHolder(view: View) : FastAdapter.ViewHolder<ThemeItem>(view) {
 
@@ -126,6 +149,16 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
                 binding.checkbox.isVisible = item.isSelected
                 binding.themeSelected.visInvisIf(item.isSelected)
+
+                if (binding.checkbox.isVisible) {
+                    val themeMatchesApp = if (context.isInNightMode()) {
+                        item.theme.nightMode == AppCompatDelegate.MODE_NIGHT_YES
+                    } else {
+                        item.theme.nightMode == AppCompatDelegate.MODE_NIGHT_NO
+                    }
+                    binding.themeSelected.alpha = if (themeMatchesApp) 1f else 0.5f
+                    binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
+                }
                 binding.themeToolbar.setBackgroundColor(item.colors.appBar)
                 binding.themeAppBarText.imageTintList = ColorStateList.valueOf(item.colors.appBarText)
                 binding.themeHeroImage.imageTintList = ColorStateList.valueOf(item.colors.primaryText)
@@ -138,23 +171,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.themeItem1.imageTintList = ColorStateList.valueOf(item.colors.inactiveTab)
                 binding.themeItem2.imageTintList = ColorStateList.valueOf(item.colors.activeTab)
                 binding.themeItem3.imageTintList = ColorStateList.valueOf(item.colors.inactiveTab)
-
                 binding.themeLayout.setBackgroundColor(item.colors.colorBackground)
-                binding.darkThemeLayout.isVisible = item.darkColors != null
-
-                if (binding.darkThemeLayout.isVisible && item.darkColors != null) {
-                    binding.darkThemeToolbar.setBackgroundColor(item.darkColors.appBar)
-                    binding.darkThemeAppBarText.imageTintList = ColorStateList.valueOf(item.darkColors.appBarText)
-                    binding.darkThemeLayout.setBackgroundColor(item.darkColors.colorBackground)
-                    binding.darkThemePrimaryText.imageTintList = ColorStateList.valueOf(item.darkColors.primaryText)
-                    binding.darkThemeHeroImage.imageTintList = ColorStateList.valueOf(item.darkColors.primaryText)
-                    binding.darkThemeAccentedButton.imageTintList = ColorStateList.valueOf(item.darkColors.colorAccent)
-                    binding.darkThemeSecondaryText.imageTintList = ColorStateList.valueOf(item.darkColors.secondaryText)
-
-                    binding.darkThemeBottomBar.setBackgroundColor(item.darkColors.bottomBar)
-                    binding.darkThemeItem2.imageTintList = ColorStateList.valueOf(item.darkColors.activeTab)
-                    binding.darkThemeItem3.imageTintList = ColorStateList.valueOf(item.darkColors.inactiveTab)
-                }
             }
 
             override fun unbindView(item: ThemeItem) {
