@@ -40,7 +40,7 @@
         android:layout_marginStart="8dp"
         android:contentDescription="@string/select_all"
         android:src="@drawable/ic_expand_less_24dp"
-        android:tint="?android:textColorPrimary"
+        app:tint="?android:textColorPrimary"
         app:layout_constraintBottom_toBottomOf="@+id/category_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/category_title" />
@@ -127,7 +127,7 @@
         android:focusable="true"
         android:padding="4dp"
         android:src="@drawable/ic_refresh_24dp"
-        android:tint="?android:textColorPrimary"
+        app:tint="?android:textColorPrimary"
         android:tooltipText="@string/update"
         app:layout_constraintBottom_toBottomOf="@id/category_title"
         app:layout_constraintEnd_toEndOf="parent"
