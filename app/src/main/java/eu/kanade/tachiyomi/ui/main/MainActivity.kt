@@ -95,7 +95,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         private set
     private var searchDrawable: Drawable? = null
     private var dismissDrawable: Drawable? = null
-    private lateinit var gestureDetector: GestureDetectorCompat
+    private var gestureDetector: GestureDetectorCompat? = null
 
     private var snackBar: Snackbar? = null
     private var extraViewForUndo: View? = null
@@ -591,7 +591,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        gestureDetector.onTouchEvent(ev)
+        gestureDetector?.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
