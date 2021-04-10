@@ -236,7 +236,11 @@ fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
 fun Context.getPrefTheme(preferences: PreferencesHelper): ThemeUtil.Themes {
     // Using a try catch in case I start to remove themes
     return try {
-        (if (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) preferences.darkTheme() else preferences.lightTheme()).get()
+        (
+            if ((applicationContext.isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+                preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
+            ) preferences.darkTheme() else preferences.lightTheme()
+            ).get()
     } catch (e: Exception) {
         preferences.lightTheme().set(ThemeUtil.Themes.PURE_WHITE)
         preferences.darkTheme().set(ThemeUtil.Themes.DARK)
