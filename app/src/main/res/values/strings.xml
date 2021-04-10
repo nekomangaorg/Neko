@@ -581,7 +581,7 @@
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
-    <string name="hide_tachi_from_recents">Hide Tachiyomi from the recents screen</string>
+    <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
     <string name="security">Security</string>
     <string name="starting_screen">Starting screen</string>
     <string name="back_to_start">Back to start</string>
