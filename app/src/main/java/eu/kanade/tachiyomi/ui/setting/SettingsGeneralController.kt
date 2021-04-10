@@ -3,19 +3,16 @@ package eu.kanade.tachiyomi.ui.setting
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
-import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import kotlinx.coroutines.flow.launchIn
+import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -135,57 +132,6 @@ class SettingsGeneralController : SettingsController() {
         }
 
         preferenceCategory {
-            titleRes = R.string.security
-
-            val biometricManager = BiometricManager.from(context)
-            if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-                var preference: IntListMatPreference? = null
-                switchPreference {
-                    key = Keys.useBiometrics
-                    titleRes = R.string.lock_with_biometrics
-                    defaultValue = false
-
-                    onChange {
-                        preference?.isVisible = it as Boolean
-                        true
-                    }
-                }
-                preference = intListPreference(activity) {
-                    key = Keys.lockAfter
-                    titleRes = R.string.lock_when_idle
-                    isVisible = preferences.useBiometrics().getOrDefault()
-                    val values = listOf(0, 2, 5, 10, 20, 30, 60, 90, 120, -1)
-                    entries = values.mapNotNull {
-                        when (it) {
-                            0 -> context.getString(R.string.always)
-                            -1 -> context.getString(R.string.never)
-                            else -> resources?.getQuantityString(
-                                R.plurals.after_minutes,
-                                it.toInt(),
-                                it
-                            )
-                        }
-                    }
-                    entryValues = values
-                    defaultValue = 0
-                }
-            }
-
-            switchPreference {
-                key = Keys.secureScreen
-                titleRes = R.string.secure_screen
-                summaryRes = R.string.hide_tachi_from_recents
-                defaultValue = false
-
-                onChange {
-                    it as Boolean
-                    SecureActivityDelegate.setSecure(activity, it)
-                    true
-                }
-            }
-        }
-
-        preferenceCategory {
             titleRes = R.string.locale
 
             listPreference(activity) {
@@ -197,8 +143,8 @@ class SettingsGeneralController : SettingsController() {
                     "pt-BR", "ro", "ru", "sc", "sr", "sv", "th", "tl", "tr", "uk", "vi", "zh-rCN"
                 )
                 entries = entryValues.map { value ->
-                    val locale = LocaleHelper.getLocaleFromString(value.toString())
-                    locale?.getDisplayName(locale)?.capitalize()
+                    val locale = LocaleHelper.getLocaleFromString(value)
+                    locale?.getDisplayName(locale)?.capitalize(Locale.ROOT)
                         ?: context.getString(R.string.system_default)
                 }
                 defaultValue = ""

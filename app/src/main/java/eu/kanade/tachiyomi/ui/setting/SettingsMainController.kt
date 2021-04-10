@@ -67,6 +67,12 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
+            iconRes = R.drawable.ic_security_24dp
+            iconTint = tintColor
+            titleRes = R.string.security
+            onClick { navigateTo(SettingsSecurityController()) }
+        }
+        preference {
             iconRes = R.drawable.ic_code_24dp
             iconTint = tintColor
             titleRes = R.string.advanced
