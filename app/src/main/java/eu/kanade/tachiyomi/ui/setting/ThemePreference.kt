@@ -43,10 +43,6 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         layoutResource = R.layout.themes_preference
         fastAdapter = FastAdapter.with(itemAdapter)
         fastAdapter.setHasStableIds(true)
-        val enumConstants = ThemeUtil.Themes::class.java.enumConstants
-        val currentLightTheme = preferences.lightTheme().get()
-        val currentDarkTheme = preferences.darkTheme().get()
-        val nightMode = preferences.nightMode().get()
         selectExtension = fastAdapter.getSelectExtension().apply {
             isSelectable = true
             multiSelect = true
@@ -78,6 +74,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             }
         }
 
+        val enumConstants = ThemeUtil.Themes::class.java.enumConstants
         itemAdapter.set(enumConstants?.map(::ThemeItem).orEmpty())
         isSelectable = false
     }

@@ -20,6 +20,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.ViewCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -336,3 +337,13 @@ fun RecyclerView.smoothScrollToTop() {
         scrollToPosition(0)
     }
 }
+
+var View.compatToolTipText: CharSequence?
+    get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        tooltipText
+    } else {
+        ""
+    }
+    set(value) {
+        ViewCompat.setTooltipText(this, value)
+    }

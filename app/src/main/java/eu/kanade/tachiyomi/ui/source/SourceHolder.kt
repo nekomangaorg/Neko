@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 
@@ -40,6 +41,7 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
                     else android.R.attr.textColorSecondary
                 )
             )
+            compatToolTipText = context.getString(if (isPinned) R.string.unpin else R.string.pin)
             setImageResource(
                 if (isPinned) R.drawable.ic_pin_24dp
                 else R.drawable.ic_pin_outline_24dp

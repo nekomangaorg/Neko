@@ -112,6 +112,13 @@ class EditMangaDialog : DialogController {
             infoController.changeCover()
         }
         binding.resetTags.setOnClickListener { resetTags() }
+        binding.resetTags.text = resources?.getString(
+            if (manga.genre.isNullOrBlank() || manga.source == LocalSource.ID) {
+                R.string.clear_tags
+            } else {
+                R.string.reset_tags
+            }
+        )
         binding.resetCover.visibleIf(!isLocal)
         binding.resetCover.setOnClickListener {
             binding.mangaCover.loadAny(
