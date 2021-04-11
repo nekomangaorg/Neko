@@ -31,7 +31,6 @@
     <string name="edit">編輯</string>
     <string name="add">新增</string>
     <string name="edit_categories">管理分類</string>
-    <string name="rename_category">重新命名分類</string>
     <string name="move_to_categories">移至分類</string>
     <string name="start">開始</string>
     <string name="stop">停止</string>
@@ -127,7 +126,6 @@
     <string name="create_backup">建立備份</string>
     <string name="restore_backup">還原備份</string>
     <string name="backup_location">備份位置</string>
-    <string name="service">服務</string>
     <string name="backup_frequency">備份頻率</string>
     <string name="backup_created">已建立備份</string>
     <string name="restore_completed">還原成功</string>
@@ -141,10 +139,8 @@
     <string name="auto_check_for_app_versions">自動檢查應用程式更新</string>
     <string name="send_crash_report">傳送錯誤報告</string>
     <string name="password">密碼</string>
-    <string name="show_password">顯示密碼</string>
     <string name="login">登入</string>
     <string name="successfully_logged_in">登入成功</string>
-    <string name="could_not_log_in">登入失敗</string>
     <string name="added_to_library">已收藏至書櫃</string>
     <string name="removed_from_library">已從書櫃中移除</string>
     <string name="_copied_to_clipboard">「%1$s」已複製至剪貼簿</string>
@@ -164,8 +160,6 @@
     <string name="no_network_connection">尚未連接至網路</string>
     <string name="download_paused">下載已暫停</string>
     <string name="select_order_to_update">選擇 Tachiyomi 檢查書櫃更新的順序</string>
-    <string name="details">詳情</string>
-    <string name="empty_preferences_for_extension">該套件未提供可用的偏好設定</string>
     <string name="crop_borders">邊緣裁剪</string>
     <string name="color_filter_blend_mode">濾鏡融合機制</string>
     <string name="overlay">覆蓋</string>
@@ -211,9 +205,6 @@
     <string name="no_recently_read_manga">沒有近期閱讀</string>
     <string name="common">一般</string>
     <string name="can_be_used_to_restore">可用來保存目前書櫃內容</string>
-    <string name="restore_message">還原時需連線至來源以取得資料，可能要支付數據傳輸費用。
-\n
-\n在進行還原前，請確認你已安裝所需的擴充套件，並已登入至歷程平台及要求身分認證的來源。</string>
     <string name="clear_database_summary">將未收藏於書櫃中的漫畫的記錄刪除</string>
     <string name="clear_database_completed">已刪除項目</string>
     <string name="unknown_error">不明的錯誤</string>
@@ -238,7 +229,6 @@
     <string name="title">標題</string>
     <string name="options">選項</string>
     <string name="decode_image_error">無法解碼該圖片</string>
-    <string name="select">選擇</string>
     <string name="must_be_in_library_to_edit">請先將漫畫收藏至書櫃再進行更新</string>
     <string name="select_backup_file">選擇備份檔案</string>
     <string name="cover_of_image">漫畫封面</string>
@@ -251,7 +241,6 @@
     <string name="loading_pages">正在載入頁面…</string>
     <string name="library_is_empty_add_from_browse">尚未收藏任何作品，探索來源以挖掘你的愛書。</string>
     <string name="updates_covers_genres_desc">更新書封、類型、描述和連載狀態等漫畫簡介</string>
-    <string name="custom_filter">濾鏡</string>
     <string name="migrate">遷移</string>
     <string name="failed_to_update_cover">書封更新失敗</string>
     <string name="library_update_restriction_summary">僅在符合條件時更新</string>
@@ -267,7 +256,6 @@
     <string name="theres_no_previous_chapter">已達盡頭</string>
     <string name="failed_to_load_pages_">第 %1$s 頁載入失敗</string>
     <string name="no_recent_chapters">沒有新章節</string>
-    <string name="name">名稱</string>
     <string name="tracking">歷程</string>
     <string name="sync_chapters_after_reading">閱讀完後同步章節</string>
     <string name="trust">信任</string>
@@ -293,7 +281,6 @@
     <string name="this_will_remove_the_read_date_question">這將會清除此章節的閱讀日期，確定嗎？</string>
     <string name="current_chapter">當前章節:</string>
     <string name="previous_title">上一章：</string>
-    <string name="source_dash_chapter_">%1$s - 第%2$s章</string>
     <string name="could_not_download_chapter_can_try_again">該章節無法下載，請再試一次</string>
     <string name="could_not_download_unexpected_error">下載時發生不可預期的錯誤</string>
     <string name="lock_with_biometrics">生物特徵辨識鎖定</string>
@@ -314,7 +301,6 @@
     <string name="updating_library">正在更新書櫃</string>
     <string name="date_added">收藏日期</string>
     <string name="latest_chapter">最新章節</string>
-    <string name="unread_badges">未讀章數</string>
     <plurals name="notification_update_failed">
         <item quantity="other">有 %1$d 項更新失敗</item>
     </plurals>
@@ -356,7 +342,6 @@
     <string name="failed_to_bypass_cloudflare">無法繞過 Cloudflare</string>
     <string name="please_update_webview">請更新 WebView 以獲得更佳的相容性</string>
     <string name="always">立即</string>
-    <string name="app_not_available">應用程式無法使用</string>
     <string name="back">上一頁</string>
     <string name="forward">下一頁</string>
     <string name="less">較少</string>
@@ -369,7 +354,6 @@
     <string name="oldest">由舊到新</string>
     <string name="pin">釘選</string>
     <string name="pinned">已釘選</string>
-    <string name="refresh">重新整理</string>
     <string name="reorder">重新排序</string>
     <string name="unpin">取消釘選</string>
     <string name="view_chapters">檢視章節</string>

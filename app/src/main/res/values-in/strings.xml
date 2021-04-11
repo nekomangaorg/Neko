@@ -28,7 +28,6 @@
     <string name="edit">Ubah</string>
     <string name="add">Tambah</string>
     <string name="edit_categories">Ubah urutan kategori</string>
-    <string name="rename_category">Ubah nama kategori</string>
     <string name="move_to_categories">Masukkan ke kategori</string>
     <string name="start">Mulai</string>
     <string name="stop">Berhenti</string>
@@ -49,7 +48,6 @@
     <string name="reset">Atur ulang</string>
     <string name="undo">Kembalikan</string>
     <string name="create">Buat</string>
-    <string name="name">Nama</string>
     <string name="compact_grid">Jaring</string>
     <string name="restore">Pulihkan</string>
     <string name="loading">Memuat…</string>
@@ -144,14 +142,10 @@
     <string name="restore_backup">Pulihkan cadangan</string>
     <string name="restore_from_backup_file">Pulihkan isi perpustakaan dari file cadangan</string>
     <string name="backup_location">Tempat cadangan</string>
-    <string name="service">Layanan</string>
     <string name="backup_frequency">Frekuensi cadangan dibuat</string>
     <string name="max_auto_backups">Jumlah maksimum cadangan otomatis</string>
     <string name="backup_created">Cadangan dibuat</string>
     <string name="restore_completed">Pemulihan telah selesai</string>
-    <string name="restore_message">Proses pemulihan data akan menggunakan koneksi internet untuk mengunduh data, biaya operator mungkin berlaku.
-\n
-\nPastikan juga Anda telah memasang ekstensi yang dibutuhkan dan telah login ke sumber dan layanan pelacakan sebelum pemulihan.</string>
     <string name="what_should_backup">Apa saja yang ingin anda simpan\?</string>
     <string name="restoring_backup">Memulihkan cadangan</string>
     <string name="clear_chapter_cache">Hapus cache bab</string>
@@ -176,10 +170,8 @@
     <string name="log_in_to_">Masuk ke %1$s</string>
     <string name="username">Nama pengguna</string>
     <string name="password">Kata sandi</string>
-    <string name="show_password">Perlihatkan kata sandi</string>
     <string name="login">Masuk</string>
     <string name="successfully_logged_in">Login berhasil</string>
-    <string name="could_not_log_in">Login gagal</string>
     <string name="unknown_error">Terdapat suatu kesalahan</string>
     <string name="no_more_results">Tidak ada hasil lainnya</string>
     <string name="local_source">Sumber lokal</string>
@@ -208,7 +200,6 @@
     <string name="this_will_remove_the_read_date_question">Ini akan menghapus tanggal baca bab ini. Apakah kamu yakin?</string>
     <string name="picture_saved">Gambar disimpan</string>
     <string name="options">Pilihan</string>
-    <string name="custom_filter">Filter khusus</string>
     <string name="set_as_cover">Tetapkan sebagai sampul</string>
     <string name="cover_updated">Sampul telah diperbarui</string>
     <string name="page_">Halaman: %1$d</string>
@@ -216,7 +207,6 @@
     <string name="decode_image_error">Gambar tidak bisa diterjemahkan</string>
     <string name="use_image_as_cover">Apakah anda ingin menggunakan gambar ini sebagai sampul\?</string>
     <string name="viewer_for_this_series">Jumlah pembaca untuk seri ini</string>
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <string name="could_not_download_chapter_can_try_again">Terjadi kesalahan saat mengunduh bab. Anda bisa mencoba lagi di halaman sedang diunduh</string>
     <string name="new_chapters_found">Bab baru ditemukan</string>
     <string name="failed_to_update_cover">Gagal memperbarui sampul</string>
@@ -248,7 +238,6 @@
     <string name="source_migration">Pindah sumber</string>
     <string name="extensions">Ekstensi</string>
     <string name="extension_info">Info ekstensi</string>
-    <string name="details">Detail</string>
     <string name="pending">Tertunda</string>
     <string name="installing">Memasang</string>
     <string name="installed">Terpasang</string>
@@ -263,7 +252,6 @@
 \nDengan mempercayai sertifikat ini anda menyetujui resiko tersebut.</string>
     <string name="version_">Versi: %1$s</string>
     <string name="language_">Bahasa: %1$s</string>
-    <string name="empty_preferences_for_extension">Tidak ada pengaturan yang tersedia untuk ekstensi ini</string>
     <string name="double_tap_anim_speed">Kecepatan animasi dua ketukan</string>
     <string name="no_animation">Tanpa animasi</string>
     <string name="normal">Normal</string>
@@ -273,7 +261,6 @@
     <string name="removed_from_library">Dihapus dari perpustakaan</string>
     <string name="_copied_to_clipboard">%1$s tersalin ke clipboard</string>
     <string name="custom_range">Unduh tertentu</string>
-    <string name="select">Pilih</string>
     <string name="migrate">Pindah</string>
     <string name="source_not_installed_">Sumber tidak terpasang: %1$s</string>
     <string name="rereading">Baca ulang</string>
@@ -302,8 +289,6 @@
     <string name="help">Bantuan</string>
     <string name="library_update_order">Urutan perbarui perpustakaan</string>
     <string name="select_order_to_update">Pilih urutan perpustakaan yang akan Tachiyomi perbarui terlebih dahulu</string>
-    <string name="system_default_all_blue">Bawaan sistem (Biru gelap)</string>
-    <string name="system_default_amoled">Bawaan sistem (AMOLED)</string>
     <string name="no_results_found">Hasil tidak ditemukan</string>
     <string name="lock_with_biometrics">Kunci dengan biometrik</string>
     <string name="lock_when_idle">Kunci saat diam</string>
@@ -314,7 +299,6 @@
     <string name="updating_library">Memperbarui koleksi perpustakaan</string>
     <string name="date_added">Tanggal ditambahkan</string>
     <string name="latest_chapter">Bab terbaru</string>
-    <string name="unread_badges">Belum Dibaca</string>
     <plurals name="notification_update_failed">
         <item quantity="other">%1$d pembaruan gagal</item>
     </plurals>
@@ -360,7 +344,6 @@
     <string name="failed_to_bypass_cloudflare">Gagal untuk menembus Cloudflare</string>
     <string name="please_update_webview">Harap perbarui aplikasi WebView untuk kompatibilitas yang lebih baik</string>
     <string name="always">Selalu</string>
-    <string name="app_not_available">App tidak tersedia</string>
     <string name="back">Kembali</string>
     <string name="forward">Teruskan</string>
     <string name="less">Lebih sedikit</string>
@@ -373,7 +356,6 @@
     <string name="oldest">Terlama</string>
     <string name="pin">Tandai</string>
     <string name="pinned">Tersemat</string>
-    <string name="refresh">Muat ulang</string>
     <string name="reorder">Susun ulang</string>
     <string name="marked_as_unread">Tandai sebagai belum dibaca</string>
     <string name="marked_as_read">Tandai sebagai telah dibaca</string>
@@ -404,12 +386,7 @@
     <string name="all_sources">Semua sumber</string>
     <string name="search_extensions">Cari ekstensi…</string>
     <string name="in_library">Dalam perpustakaan</string>
-    <string name="press_and_hold_to_reset_history">Tekan dan tahan untuk mengatur ulang riwayat bab</string>
     <string name="reset_chapter_question">Atur ulang bab\?</string>
-    <string name="only_updates">Hanya pembaruan</string>
-    <string name="only_history">Riwayat saja</string>
-    <string name="ungroup_all">Pisahkan semua</string>
-    <string name="group_all">Kelompokkan semua</string>
     <string name="search_recents">Cari yang terbaru…</string>
     <string name="view_all_updates">Lihat semua pembaharuan</string>
     <string name="view_history">Lihat riwayat</string>
@@ -445,7 +422,6 @@
     <string name="x_small">XS</string>
     <string name="uniform_covers">Sampul halaman</string>
     <string name="hide_start_reading_button">Sembunyikan tombol mulai membaca</string>
-    <string name="start_with_filters_hidden">Mulai dari filter yang disembunyikan</string>
     <string name="comfortable_grid">Grid nyaman</string>
     <string name="display_options">Opsi penampilan</string>
     <string name="drag_and_drop">Geser &amp; Jatuhkan</string>
@@ -479,7 +455,6 @@
     <string name="categories_on_manual">Kategori yang akan diperhabaruio ketika direfresh secara manual</string>
     <string name="first_category">Kategori pertama</string>
     <string name="top_category">Kategori teratas (%1$s)</string>
-    <string name="category_is_hidden">Kategori tersembunyi</string>
     <string name="category_is_empty">Kategori kosong</string>
     <string name="create_new_category">Buat kategori baru</string>
     <string name="manhua">Manhua</string>

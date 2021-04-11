@@ -30,7 +30,6 @@
     <string name="read">Legi</string>
     <string name="comic">Komikso</string>
     <string name="manga">Mangao</string>
-    <string name="name">Nomo</string>
     <string name="categories">Kategorioj</string>
     <string name="download_queue">Elŝutos</string>
     <string name="more">Plu</string>
@@ -45,7 +44,6 @@
     <string name="backup">Savkopio</string>
     <string name="website">Retejo</string>
     <string name="username">Uzantnomo</string>
-    <string name="show_password">Montri pasvorton</string>
     <string name="password">Pasvorto</string>
     <string name="email">Retpoŝta adreso</string>
     <string name="chapters">Ĉapitroj</string>
@@ -54,7 +52,6 @@
     <string name="invalid_backup_file">Nevalida savkopia dosiero</string>
     <string name="backup_created">Savkopio kreita</string>
     <string name="edit_categories">Redakti kategoriojn</string>
-    <string name="rename_category">Alinomi kategorion</string>
     <string name="update">Ĝisdatigi</string>
     <string name="list">Listo</string>
     <plurals name="category_plural">

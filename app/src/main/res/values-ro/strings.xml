@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Titlu</string>
     <string name="categories">Categorii</string>
     <string name="manga">Manga</string>
     <string name="chapters">Capitole</string>
@@ -32,7 +31,6 @@
     <string name="edit">Modifică</string>
     <string name="add">Adaugă</string>
     <string name="edit_categories">Modifică categoriile</string>
-    <string name="rename_category">Redenumește categoria</string>
     <string name="move_to_categories">Mută în categorii</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
@@ -90,7 +88,6 @@
     <string name="system_default">Prestabilită de sistem</string>
     <string name="default_category">Categorie implicită</string>
     <string name="always_ask">Întreabă mereu</string>
-    <string name="details">Detalii</string>
     <string name="pending">În așteptare</string>
     <string name="installing">În curs de instalare</string>
     <string name="installed">Instalată</string>
@@ -105,7 +102,6 @@
 \nPrin acordarea încrederii acestui certificat acceptați riscurile menționate.</string>
     <string name="version_">Versiune: %1$s</string>
     <string name="language_">Limbă: %1$s</string>
-    <string name="empty_preferences_for_extension">Nu există preferințe pentru această extensie</string>
     <string name="fullscreen">Ecran complet</string>
     <string name="download_badge">Insigne descărcate</string>
     <string name="dark_blue">Albastru închis</string>
@@ -169,12 +165,10 @@
     <string name="restore_backup">Restaurează copia de rezervă</string>
     <string name="restore_from_backup_file">Restaurează biblioteca din fișierul copiei de rezervă</string>
     <string name="backup_location">Registrul copiei de rezervă</string>
-    <string name="service">Serviciu</string>
     <string name="backup_frequency">Frecventă a copiilor de rezervă</string>
     <string name="max_auto_backups">Maximum copii de rezervă automate</string>
     <string name="backup_created">Copie de rezervă creată</string>
     <string name="restore_completed">Restaurare completă</string>
-    <string name="restore_message">Restaurare folosește sursa pentru a aduce datele, cost suplimentar aplicabil. De asemenea verificați dacă sunteți autentificați în sursele ce au nevoie înainte de a incepe restaurarea.</string>
     <string name="what_should_backup">Doriți să creați copie de rezervă\?</string>
     <string name="restoring_backup">Restaurând copia de rezervă</string>
     <string name="clear_chapter_cache">Curățare capitole depozitate</string>
@@ -199,10 +193,8 @@
     <string name="log_in_to_">Autentificare pentru %1$s</string>
     <string name="username">Nume de utilizator</string>
     <string name="password">Parolă</string>
-    <string name="show_password">Arată parola</string>
     <string name="login">Autentificare</string>
     <string name="successfully_logged_in">Autentificare reușită</string>
-    <string name="could_not_log_in">Eroare de conectare</string>
     <string name="unknown_error">Eroare necunoscută</string>
     <string name="local">Local</string>
     <string name="search_filters">Filtre de căutare</string>
@@ -246,7 +238,6 @@
     <string name="this_will_remove_the_read_date_question">Aceasta va șterge data citirii acestui capitol. Ești sigur\?</string>
     <string name="picture_saved">Imagine salvată</string>
     <string name="options">Opțiuni</string>
-    <string name="custom_filter">Filtru personalizat</string>
     <string name="set_as_cover">Stabilește o copertă</string>
     <string name="cover_updated">Copertă actualizată</string>
     <string name="page_">Pagina: %1$d</string>
@@ -262,8 +253,6 @@
     <string name="theres_no_previous_chapter">Nu există capitolul precedent</string>
     <string name="loading_pages">Încărcând paginile…</string>
     <string name="failed_to_load_pages_">Încărcarea paginilor eșuată: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Cap.%2$s</string>
-    <string name="select">Selectează</string>
     <string name="migrate">Migrează</string>
     <string name="could_not_download_chapter_can_try_again">Am întâmpinat o eroare dascarcând capitolele. Puteți încerca din noi în sectiunea de descărcări</string>
     <string name="new_chapters_found">Capitol nou găsit</string>
@@ -298,8 +287,6 @@
     <string name="skip_read_chapters">Treci peste capitolele marcate citit</string>
     <string name="long_tap_dialog">Dialog prin apasare lunga</string>
     <string name="help">Ajutor</string>
-    <string name="system_default_all_blue">Prestabilită de sistem (Albastru închis)</string>
-    <string name="system_default_amoled">Prestabilită de sistem (AMOLED)</string>
     <string name="library_update_order">Ordinea actualizării bibliotecii</string>
     <string name="select_order_to_update">Selectați ordinea în care Tachiyomi verifică actualizarea</string>
     <string name="lock_with_biometrics">Blocare cu amprentă</string>
@@ -308,7 +295,6 @@
     <string name="updating_library">Se actualizează biblioteca</string>
     <string name="date_added">Data adăugării</string>
     <string name="latest_chapter">Ultimul capitol</string>
-    <string name="unread_badges">Insigne pentru necitite</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 actualizare a eșuat%1$d actualizări au eșuat%1$d actualizări au eșuat</item>
         <item quantity="few"/>
@@ -339,7 +325,6 @@
     <string name="oldest">Cele mai vechi</string>
     <string name="pin">Fixează</string>
     <string name="pinned">Fixate</string>
-    <string name="refresh">Actualizați</string>
     <string name="reorder">Reordonează</string>
     <string name="unpin">Anulați fixarea</string>
     <string name="view_chapters">Vezi capitolele</string>
@@ -375,7 +360,6 @@
     <string name="failed_to_bypass_cloudflare">A eșuat evitarea Cloudflare</string>
     <string name="please_update_webview">Actualizați aplicația WebView pentru o compatibilitate mai bună</string>
     <string name="always">Întotdeauna</string>
-    <string name="app_not_available">Aplicația nu este accesibilă</string>
     <string name="back">Înapoi</string>
     <string name="badges">Insigne</string>
     <string name="no_chapters_error">Nu a fost găsit niciun capitol</string>

@@ -3,7 +3,6 @@
     <string name="app_name" translatable="false">TachiyomiJ2K</string>
     <string name="app_short_name" translatable="false">TachiJ2K</string>
     <!--Models-->
-    <string name="name">Nazwa</string>
     <!-- Manga Type -->
     <string name="manga">Manga</string>
     <string name="manhwa">Manhwa</string>
@@ -68,7 +67,6 @@
     <string name="_already_in_queue">%1$s jest już w kolejce</string>
     <string name="create_new_category">Stwórz nową kategorię</string>
     <string name="category_is_empty">Kategoria jest pusta</string>
-    <string name="category_is_hidden">Kategoria jest ukryta</string>
     <string name="top_category">Top kategoria (%1$s)</string>
     <string name="default_category">Domyślna kategoria</string>
     <string name="first_category">Pierwsza kategoria</string>
@@ -80,7 +78,6 @@
     <string name="add_categories">Dodaj kategorie</string>
     <string name="edit_categories">Edytuj kategorie</string>
     <string name="manage_category">Zarządzaj kategorią</string>
-    <string name="rename_category">Zmień nazwę kategorii</string>
     <string name="move_to_categories">Przenieś do kategorii</string>
     <plurals name="category_plural">
         <item quantity="one">%d kategoria</item>
@@ -135,10 +132,8 @@
     <string name="list">Lista</string>
     <string name="comfortable_grid">Wygodna siatka</string>
     <string name="compact_grid">Zwarta siatka</string>
-    <string name="start_with_filters_hidden">Zacznij z ukrytymi filtrami</string>
     <string name="download_badge">Odznaka pobrania</string>
     <string name="hide_start_reading_button">Ukryj przycisk szybkiego przejścia do czytnika</string>
-    <string name="unread_badges">Odznaka nieprzeczytanych</string>
     <string name="uniform_covers">Jednolite okładki</string>
     <string name="x_small">XS</string>
     <string name="small">S</string>
@@ -195,7 +190,6 @@
     <string name="this_will_remove_the_read_date_question">Ta czynność usunie datę przeczytania z tego
         rozdziału. Kontynuować?</string>
     <string name="reset_all_chapters_for_this_">Resetuj rozdziały dla %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Rozdz. %2$s</string>
     <string name="last_read_">Ostatnio czytany %1$s</string>
     <string name="read_">Czytany %1$s</string>
     <string name="updated_">Zaktualizowany %1$s</string>
@@ -205,12 +199,7 @@
     <string name="search_recents">Szukaj ostatnich…</string>
     <string name="no_recent_chapters">Brak nowych rozdziałów</string>
     <string name="no_recently_read_manga">Brak ostatnio czytanych mang</string>
-    <string name="group_all">Grupuj wszystko</string>
-    <string name="ungroup_all">Rozgrupuj wszystko</string>
-    <string name="only_history">Tylko historia</string>
-    <string name="only_updates">Tylko aktualizacje</string>
     <string name="reset_chapter_question">Zrestartować rozdział?</string>
-    <string name="press_and_hold_to_reset_history">Dotknij i przytrzymaj aby zresetować historię rozdziałów</string>
     <!-- Browse -->
     <string name="search_filters">Filtry wyszukiwania</string>
     <string name="no_more_results">Nie znaleziono więcej wyników</string>
@@ -233,7 +222,6 @@
     <string name="extensions">Rozszerzenia</string>
     <string name="extension_updates">Aktualizacje rozszerzeń</string>
     <string name="extension_info">Szczegóły rozszerzenia</string>
-    <string name="details">Szczegóły</string>
     <string name="obsolete">Przestarzałe</string>
     <string name="pending">Oczekujące</string>
     <string name="installing">Pobieranie</string>
@@ -250,7 +238,6 @@
     <string name="obsolete_extension_message">To rozszerzenie nie jest już dostępne.</string>
     <string name="version_">Wersja: %1$s</string>
     <string name="language_">Język: %1$s</string>
-    <string name="empty_preferences_for_extension">To rozszerzenie nie ma żadnych preferencji do edycji</string>
     <plurals name="extension_updates_available">
         <item quantity="one">Aktualizacja rozszerzenia dostępna</item>
         <item quantity="few">%d aktualizacji rozszerzeń dostępnych</item>
@@ -258,7 +245,6 @@
         <item quantity="other">%d aktualizacje rozszerzeń dostępne</item>
     </plurals>
     <!-- Reader -->
-    <string name="custom_filter">Filtr niestandardowy</string>
     <string name="set_as_cover">Ustaw jako okładkę</string>
     <string name="set_as_default_for_all">Ustaw jako domyślne dla wszystkich</string>
     <string name="cover_updated">Okładka zaktualizowana</string>
@@ -440,7 +426,6 @@
     <string name="search_manually">Szukaj ręcznie</string>
     <string name="migrate_now">Migruj teraz</string>
     <string name="copy_now">Skopiuj teraz</string>
-    <string name="select">Wybierz</string>
     <string name="migrate">Migruj</string>
     <string name="migrate_">Migruj %1$s</string>
     <string name="copy_value">Kopiuj</string>
@@ -480,8 +465,6 @@
     <string name="amoled_black">Ciemny AMOLED</string>
     <string name="dark_blue">Ciemnoniebieski</string>
     <string name="white_theme">Jasny</string>
-    <string name="system_default_amoled">Domyślny w systemie (Ciemny AMOLED)</string>
-    <string name="system_default_all_blue">Domyślny w systemie (Ciemnoniebieski)</string>
     <string name="language">Język</string>
     <string name="system_default">Domyślny w systemie</string>
     <string name="date_format">Format daty</string>
@@ -496,33 +479,15 @@
     <string name="restore_backup">Przywróć kopię zapasową</string>
     <string name="restore_from_backup_file">Przywraca bibliotekę z pliku kopii zapasowej</string>
     <string name="backup_location">Folder kopii zapasowych</string>
-    <string name="service">Cykliczna kopia zapasowa</string>
     <string name="backup_frequency">Częstotliwość tworzenia kopii</string>
     <string name="max_auto_backups">Maks. ilosć kopii automatycznych</string>
     <string name="backup_failed">Tworzenie kopii nie powiodło się</string>
     <string name="backup_created">Kopia zapasowa utworzona</string>
     <string name="restore_completed">Przywracanie ukończone</string>
     <string name="restore_error">Nieudane przywrócenie kopii zapasowej</string>
-    <string name="restore_content_skipped">%1$d pominięte</string>
-    <string name="restore_message">Przywracanie używa źródeł do pobierania danych, operator może naliczać dodatkowe opłaty.
-\n
-\nPrzed przywróceniem upewnij się też, że jesteś poprawnie zalogowany do źródeł.</string>
     <string name="creating_backup">Tworzenie kopii zapasowej</string>
     <string name="what_should_backup">Co zawrzeć w kopii zapasowej?</string>
     <string name="restoring_backup">Przywracanie kopii zapasowej</string>
-    <string name="restoring_progress">Przywracanie (%1$d/%2$d)</string>
-    <plurals name="sources_missing">
-        <item quantity="one">%d brakujące źródło</item>
-        <item quantity="few">%d brakujące źródła</item>
-        <item quantity="many">%d brakujących źródeł</item>
-        <item quantity="other">%d sources missing</item>
-    </plurals>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d manga posiada teraz licencję i nie może zostać przywrócona</item>
-        <item quantity="few">%d mangi posiadają teraz licencję i nie mogą zostać przywrócone</item>
-        <item quantity="many">%d mang posiada teraz licencję i nie mogą zostać przywrócone</item>
-        <item quantity="other">%d mangi posiadają teraz licencję i nie mogą zostać przywrócone</item>
-    </plurals>
     <string name="not_logged_into_">Niezalogowany do %1$s</string>
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Wyczyść cache rozdziałów</string>
@@ -593,14 +558,12 @@
     <string name="username">Nazwa użytkownika</string>
     <string name="email">Adres e-mail</string>
     <string name="password">Hasło</string>
-    <string name="show_password">Pokaż hasło</string>
     <string name="login">Zaloguj się</string>
     <string name="logout">Wyloguj</string>
     <string name="logout_from_">Wyloguj z %1$s?</string>
     <string name="successfully_logged_in">Logowanie udane</string>
     <string name="username_must_not_be_blank">Nazwa użytkownika i hasło nie mogą być puste</string>
     <string name="successfully_logged_out">Wylogowanie udane</string>
-    <string name="could_not_log_in">Nie udało się zalogować</string>
     <!-- Downloads -->
     <string name="downloads">Pobrane</string>
     <string name="download_queue">Kolejka pobierania</string>
@@ -672,18 +635,14 @@
     <string name="alphabetically">Alfabetycznie</string>
     <string name="always">Zawsze</string>
     <string name="always_ask">Zawsze pytaj</string>
-    <string name="app_not_available">Aplikacja niedostępna</string>
-    <string name="auto">Auto</string>
     <string name="automatic">Automatycznie</string>
     <string name="back">Wróć</string>
     <string name="bottom">Dół</string>
-    <string name="bug_report">Zgłoś błąd</string>
     <string name="cancel">Anuluj</string>
     <string name="center">Od środka</string>
     <string name="charging">Ładowanie</string>
     <string name="clear">Wyczyść</string>
     <string name="close">Wyjdź</string>
-    <string name="collasped">Schowane</string>
     <string name="common">Zwykły</string>
     <string name="cover_of_image">Okładka mangi</string>
     <string name="create">Stwórz</string>
@@ -726,8 +685,6 @@
     <string name="picture_saved">Obraz zapisany</string>
     <string name="pin">Przypnij</string>
     <string name="pinned">Przypięte</string>
-    <string name="refresh">Odśwież</string>
-    <string name="refreshing">Odświeżanie</string>
     <string name="remove">Usuń</string>
     <string name="reorder">Zmień kolejność</string>
     <string name="reset">Resetuj</string>
@@ -749,7 +706,6 @@
     <string name="top">Top</string>
     <string name="undo">Cofnij</string>
     <string name="unknown_error">Nieznany błąd</string>
-    <string name="un_select_all">Odznacz wszystko</string>
     <string name="unpin">Odepnij</string>
     <string name="use_default">Użyj domyślnych</string>
     <string name="view_all_errors">Wyświetl wszystkie błędy</string>
@@ -849,7 +805,6 @@
     <string name="vertically">Pionowo</string>
     <string name="horizontally">Poziomo</string>
     <string name="reader_settings">Ustawienia Czytnika</string>
-    <string name="_details">%1$s - szczegóły</string>
     <string name="_must_be_enabled_first">%1$s musi najpierw zostać włączone</string>
     <string name="app_info">Informacje o aplikacji</string>
     <string name="filter_languages">Filtruj Języki</string>

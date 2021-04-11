@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Navn</string>
     <string name="categories">Kategorier</string>
     <string name="manga">Manga</string>
     <string name="chapters">Kapittel</string>
@@ -31,7 +30,6 @@
     <string name="edit">Rediger</string>
     <string name="add">Legg til</string>
     <string name="edit_categories">Rediger kategorier</string>
-    <string name="rename_category">Gi kategori nytt navn</string>
     <string name="move_to_categories">Flytt til kategorier</string>
     <string name="start">Start</string>
     <string name="stop">Stopp</string>
@@ -83,7 +81,6 @@
     <string name="system_default">Systemforvalg</string>
     <string name="default_category">Forvalgt kategori</string>
     <string name="always_ask">Alltid spør</string>
-    <string name="details">Detaljer</string>
     <string name="pending">Ventende</string>
     <string name="installing">Installerer</string>
     <string name="installed">Installert</string>
@@ -165,7 +162,6 @@
     <string name="restore_backup">Gjenopprett sikkerhetskopi</string>
     <string name="restore_from_backup_file">Gjenopprett bibliotek fra sikkerhetskopifil</string>
     <string name="backup_location">Sikkerhetskopi-mappe</string>
-    <string name="service">Tjeneste</string>
     <string name="backup_frequency">Sikkerhetskopieringsfrekvens</string>
     <string name="max_auto_backups">Maks antall automatiske sikkerhetskopier</string>
     <string name="backup_created">Sikkerhetskopi opprettet</string>
@@ -194,10 +190,8 @@
     <string name="log_in_to_">Innlogging for %1$s</string>
     <string name="username">Brukernavn</string>
     <string name="password">Passord</string>
-    <string name="show_password">Vis passord</string>
     <string name="login">Logg inn</string>
     <string name="successfully_logged_in">Innlogget</string>
-    <string name="could_not_log_in">Innloggingsfeil</string>
     <string name="unknown_error">Ukjent feil</string>
     <string name="local">Lokal</string>
     <string name="search_filters">Søkefilter</string>
@@ -241,7 +235,6 @@
     <string name="this_will_remove_the_read_date_question">Lesningsdato for dette kapittelet vil bli fjernet. Er du sikker\?</string>
     <string name="picture_saved">Bilde lagret</string>
     <string name="options">Valg</string>
-    <string name="custom_filter">Egendefinert filter</string>
     <string name="set_as_cover">Sett som omslag</string>
     <string name="cover_updated">Omslag oppdatert</string>
     <string name="page_">Side: %1$d</string>
@@ -255,8 +248,6 @@
     <string name="theres_no_previous_chapter">Det er ikke noe tidligere kapittel</string>
     <string name="loading_pages">Laster inn sider…</string>
     <string name="failed_to_load_pages_">Klarte ikke å laste inn sider: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Kap.%2$s</string>
-    <string name="select">Velg</string>
     <string name="migrate">Migrer</string>
     <string name="new_chapters_found">Nye kapitler funnet</string>
     <string name="failed_to_update_cover">Klarte ikke å oppdatere omslag</string>
@@ -270,10 +261,7 @@
 \nEn skadelig utvidelse kan lese innloggingsdetaljer lagret i Tachiyomi, eller kjøre ukjent kode.
 \n
 \nVed å godta dette sertifikatet aksepterer du overstående risikoer.</string>
-    <string name="empty_preferences_for_extension">Det er ingen preferanser å redigere for denne utvidelsen</string>
     <string name="double_tap_anim_speed">Animasjonshastighet ved dobbelklikk</string>
-    <string name="restore_message">Gjenoppretting bruker kilde for å hente data, mobilkostnader kan forekomme
-\nHusk å logge inn på kilder som krever dette før gjennoppretting.</string>
     <string name="use_image_as_cover">Vil du bruke dette bildet som omslag\?</string>
     <string name="viewer_for_this_series">Leser for denne serien</string>
     <string name="could_not_download_chapter_can_try_again">En feil oppstod under nedlasting av kapitler. Du kan prøve igjen i nedlastingsdelen.</string>
@@ -301,8 +289,6 @@
     <string name="burn_darken">Brenn / mørkere</string>
     <string name="library_update_order">Rekkefølge for biblioteksoppdatering</string>
     <string name="select_order_to_update">Velg rekkefølgen Tachiyomi ser etter oppdateringer</string>
-    <string name="system_default_all_blue">Systemforvalg (Mørkeblå)</string>
-    <string name="system_default_amoled">Systemforvalg (AMOLED)</string>
     <string name="no_results_found">Resultatløst</string>
     <string name="lock_with_biometrics">Lås med biometri</string>
     <string name="lock_when_idle">Lås ved lediggang</string>
@@ -312,7 +298,6 @@
     <string name="updating_library">Oppdaterer bibliotek</string>
     <string name="date_added">Dato lagt til</string>
     <string name="latest_chapter">Siste kapittel</string>
-    <string name="unread_badges">ulest merke</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 oppdatering mislyktes%1$d oppdateringer mislyktes</item>
         <item quantity="other"/>
@@ -350,7 +335,6 @@
     <string name="successfully_logged_out">Du er utlogget</string>
     <string name="please_update_webview">Oppdater WebView-programmet for bedre kompabilitet</string>
     <string name="always">Alltid</string>
-    <string name="app_not_available">Program ikke tilgjengelig</string>
     <string name="back">Tilbake</string>
     <string name="forward">Fram</string>
     <string name="mark_as_unread">Marker som ulest</string>
@@ -362,7 +346,6 @@
     <string name="oldest">Eldste</string>
     <string name="pin">Fest</string>
     <string name="pinned">Festet</string>
-    <string name="refresh">Gjenoppfrisk</string>
     <string name="reorder">Sorter etter</string>
     <string name="unpin">Opphev festin</string>
     <string name="view_chapters">Vis kapitler</string>

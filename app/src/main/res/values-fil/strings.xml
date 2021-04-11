@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Pangalan</string>
     <string name="manga">Mga Manga</string>
     <string name="webtoon">Pa-webtoon</string>
     <string name="title">Pamagat</string>
@@ -71,10 +70,8 @@
     <string name="username">Sagisag (username)</string>
     <string name="email">Email address</string>
     <string name="password">Hudyat (password)</string>
-    <string name="show_password">Ipakita ang password</string>
     <string name="login">Mag-login</string>
     <string name="successfully_logged_out">Naka-logout ka na</string>
-    <string name="could_not_log_in">Di makapag-login</string>
     <string name="downloads">Pag-download</string>
     <string name="download_queue">Mga Dina-download</string>
     <string name="cancel_all">Ikansela lahat</string>
@@ -117,7 +114,6 @@
     <string name="alphabetically">Pa-alpabeto</string>
     <string name="always">Palagi</string>
     <string name="always_ask">Palaging tanungin</string>
-    <string name="app_not_available">Hindi available ang app</string>
     <string name="automatic">Ipagpaubaya</string>
     <string name="back">Bumalik</string>
     <string name="cancel">Ikansela</string>
@@ -131,7 +127,6 @@
     <string name="delete">Burahin</string>
     <string name="default_category">Panimulang lagayan</string>
     <string name="edit_categories">Ayusin</string>
-    <string name="rename_category">Baguhin ang pangalan</string>
     <string name="update">Isapanahon</string>
     <string name="new_version_available">May bagong bersyon!</string>
     <string name="no_new_updates_available">Walang bagong update</string>
@@ -145,7 +140,6 @@
     <string name="latest_chapter">Pinakabagong kabanata</string>
     <string name="list">Listahan</string>
     <string name="download_badge">Bilang ng na-download</string>
-    <string name="unread_badges">Bilang ng babasáhin</string>
     <string name="new_chapters_found">May mga bagong kabanata</string>
     <plurals name="notification_update_failed">
         <item quantity="one">Pumalya ang isang pag-updatePumalya ang %1$d (na) mga pag-update</item>
@@ -192,7 +186,6 @@
         <item quantity="one">May update sa dugtongMay update sa $d (na) dugtong</item>
         <item quantity="other"/>
     </plurals>
-    <string name="custom_filter">Aking pagsalâ</string>
     <string name="set_as_cover">Gawing pabalat</string>
     <string name="cover_updated">Na-update na pabalat</string>
     <string name="next_chapter_not_found">Di makita ang susunod na kabanata</string>
@@ -302,7 +295,6 @@
     <string name="picture_saved">Na-save na ang larawan</string>
     <string name="pin">I-pin</string>
     <string name="pinned">Naka-pin</string>
-    <string name="refresh">Sariwain</string>
     <string name="remove">Tanggalin</string>
     <string name="reorder">Isaayos</string>
     <string name="reset">I-reset</string>

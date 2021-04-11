@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">이름</string>
     <string name="categories">카테고리</string>
     <string name="manga">만화</string>
     <string name="chapters">챕터</string>
@@ -23,7 +22,6 @@
     <string name="edit">편집</string>
     <string name="add">추가</string>
     <string name="edit_categories">카테고리 편집</string>
-    <string name="rename_category">카테고리 이름 바꾸기</string>
     <string name="move_to_categories">카테고리로 이동</string>
     <string name="stop">정지</string>
     <string name="remove">제거</string>
@@ -101,7 +99,6 @@
 \n이 인증서를 신뢰함으로써 이런 위험들을 감수합니다.</string>
     <string name="version_">버전: %1$s</string>
     <string name="language_">언어: %1$s</string>
-    <string name="empty_preferences_for_extension">이 확장기능에 대한 설정이 없습니다</string>
     <string name="fullscreen">전체화면</string>
     <string name="double_tap_anim_speed">더블 탭 애니메이션 속도</string>
     <string name="show_page_number">페이지 번호 표시</string>
@@ -143,7 +140,6 @@
     <string name="restore_backup">백업 복원</string>
     <string name="restore_from_backup_file">백업 파일에서 서재 복원</string>
     <string name="backup_location">백업 폴더</string>
-    <string name="service">서비스</string>
     <string name="backup_frequency">백업 주기</string>
     <string name="max_auto_backups">최대 자동 백업</string>
     <string name="backup_created">백업 생성됨</string>
@@ -170,10 +166,8 @@
     <string name="log_in_to_">%1$s 으로 로그인</string>
     <string name="username">유저네임</string>
     <string name="password">비밀번호</string>
-    <string name="show_password">비밀번호 표시</string>
     <string name="login">로그인</string>
     <string name="successfully_logged_in">로그인 성공</string>
-    <string name="could_not_log_in">로그인 오류</string>
     <string name="unknown_error">알 수 없는 오류</string>
     <string name="search_filters">검색 필터</string>
     <string name="no_more_results">더이상 결과 없음</string>
@@ -200,7 +194,6 @@
     <string name="this_will_remove_the_read_date_question">이 챕터의 읽은 날짜를 삭제합니다. 확실합니까\?</string>
     <string name="picture_saved">사진 저장됨</string>
     <string name="options">설정</string>
-    <string name="custom_filter">사용자 정의 필터</string>
     <string name="set_as_cover">표지로 설정</string>
     <string name="cover_updated">표지 업데이트됨</string>
     <string name="page_">페이지: %1$d</string>
@@ -216,8 +209,6 @@
     <string name="theres_no_previous_chapter">이전 챕터가 없습니다</string>
     <string name="loading_pages">페이지 로딩중…</string>
     <string name="failed_to_load_pages_">페이지 로딩 실패: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - %2$s화</string>
-    <string name="select">선택</string>
     <string name="new_chapters_found">새로운 챕터 발견</string>
     <string name="failed_to_update_cover">표지 업데이트 실패</string>
     <string name="select_cover_image">표지 이미지 선택</string>
@@ -239,7 +230,6 @@
     <string name="only_update_ongoing">연재 중인 만화만 업데이트</string>
     <string name="sync_chapters_after_reading">읽은 뒤 챕터 동기화</string>
     <string name="always_ask">항상 물어보기</string>
-    <string name="details">세부정보</string>
     <string name="can_be_used_to_restore">현재 서재를 나중에 복구하는 데 사용 가능</string>
     <string name="navigation">네비게이션</string>
     <string name="tapping">탭핑</string>
@@ -260,8 +250,6 @@
     <string name="fourth_to_last">네번째 챕터에서 끝까지</string>
     <string name="fifth_to_last">다섯번째 챕터에서 끝까지</string>
     <string name="categories_to_include_in_download">다운로드에 포함할 카테고리</string>
-    <string name="restore_message">복원시 소스에서 데이터를 가져오며, 통신 비용이 청구 될 수 있습니다.
-\n또한 복원 전에 필요한 소스에 제대로 로그인이 되어있는지 확인하십시오.</string>
     <string name="what_should_backup">어떤 항목들을 백업하겠습니까\?</string>
     <string name="clear_database_completed">항목 삭제됨</string>
     <string name="local">로컬</string>
@@ -299,8 +287,6 @@
     <string name="dodge_lighten">닷지 / 밝게하기</string>
     <string name="burn_darken">번 / 어둡게하기</string>
     <string name="help">도움</string>
-    <string name="system_default_all_blue">시스템 기본값 (다크 블루)</string>
-    <string name="system_default_amoled">시스템 기본값 (AMOLED)</string>
     <string name="update">업데이트</string>
     <string name="remove_from_library">서재에서 제거</string>
     <string name="copy_value">복사</string>

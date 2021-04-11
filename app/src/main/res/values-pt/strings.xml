@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Nome</string>
     <!-- Activities and fragments labels (toolbar title) -->
     <string name="settings">Definições</string>
     <string name="download_queue">Fila de Transferências</string>
@@ -20,7 +19,6 @@
     <string name="delete">Eliminar</string>
     <string name="edit">Editar</string>
     <string name="edit_categories">Editar categorias</string>
-    <string name="rename_category">Renomear categoria</string>
     <string name="move_to_categories">Mover para categorias</string>
     <string name="start">Começar</string>
     <string name="stop">Parar</string>
@@ -132,10 +130,8 @@
     <string name="log_in_to_">Iniciar sessão para %1$s</string>
     <string name="username">Nome de utilizador</string>
     <string name="password">Palavra-passe</string>
-    <string name="show_password">Mostrar palavra-passe</string>
     <string name="login">Iniciar sessão</string>
     <string name="successfully_logged_in">Início de sessão bem sucedido</string>
-    <string name="could_not_log_in">Início de sessão falhado</string>
     <string name="unknown_error">Erro desconhecido</string>
     <!-- Library fragment -->
     <!-- Catalogue fragment -->
@@ -173,7 +169,6 @@
     <!-- Backup fragment -->
     <string name="backup">Cópia de segurança</string>
     <!-- Recent manga fragment -->
-    <string name="source_dash_chapter_">%1$s - Cap.%2$s</string>
     <!-- Downloads activity and service -->
     <string name="could_not_download_chapter_can_try_again">Ocorreu um erro ao transferir capítulos. Poderá tentar novamente na secção das transferências</string>
     <!-- Library update service notifications -->
@@ -228,7 +223,6 @@
     <string name="restore">Restaurar</string>
     <string name="default_category">Categoria padrão</string>
     <string name="always_ask">Sempre perguntar</string>
-    <string name="details">Detalhes</string>
     <string name="pending">Pendente</string>
     <string name="installing">Instalando</string>
     <string name="installed">Instalado</string>
@@ -241,7 +235,6 @@
 \nAo confiar neste certificado serão aceites estes riscos.</string>
     <string name="version_">Versão: %1$s</string>
     <string name="language_">Linguagem: %1$s</string>
-    <string name="empty_preferences_for_extension">Não há preferências editáveis para esta extensão</string>
     <string name="crop_borders">Cortar bordas</string>
     <string name="use_custom_color_filter">Usar filtro de cor personalizado</string>
     <string name="invert_volume_keys">Inverter botões de volume</string>
@@ -256,7 +249,6 @@
     <string name="can_be_used_to_restore">Pode ser usado para restaurar a biblioteca atual</string>
     <string name="restore_backup">Restaurar backup</string>
     <string name="restore_from_backup_file">Restaurar biblioteca a partir de um ficheiro de backup</string>
-    <string name="service">Serviço</string>
     <string name="backup_frequency">Frequência de backup</string>
     <string name="restoring_backup">Restaurando cópia de segurança</string>
     <string name="source_migration">Migração de fonte</string>
@@ -280,9 +272,6 @@
     <string name="open_in_webview">Abra em webview</string>
     <string name="true_32bit_color">32-bit color</string>
     <string name="skip_read_chapters">Pular capítulos lidos</string>
-    <string name="restore_message">A restauração usa a rede para obter dados, cobranças adicionais podem ser efetuadas pelo operador.
-\n
-\nVerifique se instalou todas as extensões necessárias e tem sessão iniciada nas fontes e serviços de monitorização antes de restaurar.</string>
     <string name="refresh_tracking_metadata">Atualizar metadados do monitoramento</string>
     <string name="updates_tracking_details">Atualiza informações como situação, avaliações e últimos capítulos lidos dos serviços de monitoramento</string>
     <string name="local">Local</string>
@@ -305,7 +294,6 @@
     <string name="category_with_name_exists">Já existe uma categoria com este nome!</string>
     <string name="picture_saved">Imagem guardada</string>
     <string name="options">Opções</string>
-    <string name="custom_filter">Filtro personalizado</string>
     <string name="set_as_cover">Usar como capa</string>
     <string name="cover_updated">Capa atualizada</string>
     <string name="use_image_as_cover">Deseja usar esta imagem como capa\?</string>
@@ -317,7 +305,6 @@
     <string name="theres_no_previous_chapter">Não há capítulo anterior</string>
     <string name="loading_pages">Carregando páginas…</string>
     <string name="failed_to_load_pages_">Falha ao carregar páginas: %1$s</string>
-    <string name="select">Selecionar</string>
     <string name="migrate">Migrar</string>
     <string name="failed_to_update_cover">Erro ao atualizar a capa</string>
     <string name="no_network_connection">Conexão à rede indisponível</string>
@@ -332,8 +319,6 @@
     <string name="help">Ajuda</string>
     <string name="library_update_order">Ordem de atualização da biblioteca</string>
     <string name="select_order_to_update">Selecione a ordem em que Tachiyomi verifica a atualização</string>
-    <string name="system_default_all_blue">Predefinição do sistema (Preto/Azul)</string>
-    <string name="system_default_amoled">Predefinição do sistema (AMOLED)</string>
     <string name="lock_with_biometrics">Bloqueio com biometria</string>
     <string name="lock_when_idle">Bloquear automaticamente</string>
     <string name="copy_value">Copiar</string>
@@ -348,7 +333,6 @@
     <string name="updating_library">Atualizando biblioteca</string>
     <string name="date_added">Data de adição</string>
     <string name="latest_chapter">Último capítulo</string>
-    <string name="unread_badges">Distintivos de não lido</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 atualização falhou</item>
         <item quantity="other">%1$d atualizações falharam</item>
@@ -390,7 +374,6 @@
     <string name="failed_to_bypass_cloudflare">Falha ao contornar o Cloudflare</string>
     <string name="please_update_webview">Por favor, atualize a app de WebView para melhor compatibilidade</string>
     <string name="always">Sempre</string>
-    <string name="app_not_available">App não disponível</string>
     <string name="back">Voltar</string>
     <string name="forward">Avançar</string>
     <string name="less">Menos</string>
@@ -403,7 +386,6 @@
     <string name="oldest">Mais antigos</string>
     <string name="pin">Fixar</string>
     <string name="pinned">Fixado</string>
-    <string name="refresh">Recarregar</string>
     <string name="reorder">Reordenar</string>
     <string name="unpin">Desafixar</string>
     <string name="view_chapters">Ver capítulos</string>
@@ -423,7 +405,6 @@
     <string name="categories_on_manual">Categorias para atualizar ao atualizar manualmente</string>
     <string name="first_category">Primeira categoria</string>
     <string name="top_category">Categoria principal (%1$s)</string>
-    <string name="category_is_hidden">Categoria está escondida</string>
     <string name="category_is_empty">Categoria está vazia</string>
     <string name="create_new_category">Criar nova categoria</string>
     <string name="_already_in_queue">%1$s já está na fila</string>
@@ -468,7 +449,6 @@
     <string name="x_small">XS</string>
     <string name="uniform_covers">Capas uniformes</string>
     <string name="hide_start_reading_button">Esconder butão de iniciar leitura</string>
-    <string name="start_with_filters_hidden">Começar com filtros escondidos</string>
     <string name="comfortable_grid">Grelha confortável</string>
     <string name="display_options">Opções de visualização</string>
     <string name="drag_and_drop">Arrastar e Largar</string>

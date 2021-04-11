@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">नाम</string>
     <string name="categories">श्रेणियाँ</string>
     <string name="manga">मांगा</string>
     <string name="chapters">अध्याय</string>
@@ -29,7 +28,6 @@
     <string name="edit">संपादित करें</string>
     <string name="add">जोड़े</string>
     <string name="edit_categories">श्रेणियाँ संपादित करें</string>
-    <string name="rename_category">श्रेणियाँ का पुन:नामकरण</string>
     <string name="move_to_categories">श्रेणियाँ का स्थान-परिवर्तन</string>
     <string name="start">प्रारंभ</string>
     <string name="stop">रोके</string>
@@ -145,13 +143,10 @@
     <string name="restore_backup">बैकअप पुनर्स्थापित करे</string>
     <string name="restore_from_backup_file">बैकअप फ़ाइल से लाइब्रेरी पुनर्स्थापित करें</string>
     <string name="backup_location">बैकअप निर्देशिका</string>
-    <string name="service">सेवा</string>
     <string name="backup_frequency">बैकअप फ़्रीक्वेंसी</string>
     <string name="max_auto_backups">अधिकतम स्वचालित बैकअप</string>
     <string name="backup_created">बैकअप बनाया</string>
     <string name="restore_completed">पुनर्स्थापना पूर्ण हुआ</string>
-    <string name="restore_message">पुनर्स्थापना डेटा प्राप्त करने के लिए स्रोत का उपयोग करता है, वाहक की लागत लागू हो सकती है
-\nयह भी सुनिश्चित करें कि आप संसाधनों में ठीक से लॉग इन कर रहे हैं जो बहाल करने से पहले की आवश्यकता होती है।</string>
     <string name="what_should_backup">आप बैकअप के लिए क्या चाहते हैं?</string>
     <string name="restoring_backup">बैकअप को पुनर्स्थापित करना</string>
     <string name="clear_chapter_cache">अध्याय कैश साफ़ करें</string>
@@ -176,10 +171,8 @@
     <string name="log_in_to_">%1$s के लिए लॉगिन</string>
     <string name="username">उपयोगकर्ता नाम</string>
     <string name="password">पासवर्ड</string>
-    <string name="show_password">पासवर्ड दिखाए</string>
     <string name="login">लॉग इन करें</string>
     <string name="successfully_logged_in">सफलतापूर्ण लॉग इन</string>
-    <string name="could_not_log_in">लॉग इन त्रुटि</string>
     <string name="unknown_error">अज्ञात त्रुटि</string>
     <string name="local">लोकल</string>
     <string name="no_more_results">कोई और परिणाम नहीं है</string>
@@ -213,7 +206,6 @@
     <string name="this_will_remove_the_read_date_question">यह इस अध्याय की पठन तिथि को निकाल देगा क्या आप निश्चित है?</string>
     <string name="picture_saved">चित्र सहेजा गया</string>
     <string name="options">विकल्प</string>
-    <string name="custom_filter">इच्छा अनुसार फिल्टर</string>
     <string name="set_as_cover">कवर के रूप में सेट करें</string>
     <string name="cover_updated">कवर अपडेट किया गया</string>
     <string name="page_">पृष्ठ: %1$d</string>
@@ -221,7 +213,6 @@
     <string name="decode_image_error">छवि को डीकोड नहीं किया जा सका</string>
     <string name="use_image_as_cover">क्या आप इस छवि को कवर के रूप में सेट करना चाहते हैं?</string>
     <string name="viewer_for_this_series">इस श्रृंखला के लिए दर्शक</string>
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <string name="could_not_download_chapter_can_try_again">अध्याय डाउनलोड करते समय एक त्रुटि हुई आप डाउनलोड अनुभाग में पुनः प्रयास कर सकते हैं</string>
     <string name="new_chapters_found">नए अध्याय पाए गए</string>
     <string name="failed_to_update_cover">कवर को अपडेट करने में विफल</string>
@@ -247,7 +238,6 @@
     <string name="source_migration">स्रोत प्रवास</string>
     <string name="extensions">विस्तार</string>
     <string name="extension_info">विस्तार की जानकारी</string>
-    <string name="details">विवरण</string>
     <string name="pending">अपूर्ण</string>
     <string name="installing">स्थापना</string>
     <string name="installed">स्थापित</string>
@@ -262,7 +252,6 @@
 \nइस प्रमाणपत्र पर विश्वास करके आप इन जोखिमों को स्वीकार करते हैं।</string>
     <string name="version_">संस्करण: %1$s</string>
     <string name="language_">भाषा: %1$s</string>
-    <string name="empty_preferences_for_extension">इस एक्सटेंशन के लिए कोई प्राथमिकताएं संपादित नहीं हैं</string>
     <string name="double_tap_anim_speed">डबल टैप एनीमेशन गति</string>
     <string name="no_animation">कोई एनीमेशन नहीं</string>
     <string name="normal">साधारण</string>
@@ -272,7 +261,6 @@
     <string name="removed_from_library">लाइब्रेरी से निकाला गया</string>
     <string name="_copied_to_clipboard">%1$s क्लिपबोर्ड पर नकल</string>
     <string name="custom_range">कस्टम डाउनलोड करें</string>
-    <string name="select">चयन</string>
     <string name="migrate">प्रवास</string>
     <string name="source_not_installed_">स्रोत स्थापित नहीं है : %1$s</string>
     <string name="rereading">फिर से पढाना</string>
@@ -301,8 +289,6 @@
     <string name="help">मदद</string>
     <string name="library_update_order">लाइब्रेरी अद्यतन क्रम</string>
     <string name="select_order_to_update">उस क्रम का चयन करें जिसमें टचियोमी अद्यतन की जांच करे</string>
-    <string name="system_default_all_blue">डिफ़ॉल्ट प्रणाली (गहरा नीला)</string>
-    <string name="system_default_amoled">डिफ़ॉल्ट प्रणाली (अलौकिक)</string>
     <string name="no_results_found">कोई परिणाम नहीं मिला</string>
     <string name="lock_with_biometrics">बायोमेट्रिक्स के साथ लॉक करें</string>
     <string name="lock_when_idle">निष्क्रिय होने पर लॉक करें</string>
@@ -318,7 +304,6 @@
     <string name="updating_library">अद्यतन पुस्तकालय</string>
     <string name="date_added">तारीख को जोड़ा गया</string>
     <string name="latest_chapter">नवीनतम अध्याय</string>
-    <string name="unread_badges">अपठित बैज</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 अद्यतन विफल हुआ%1$d अपडेट विफल रहे</item>
         <item quantity="other"/>
@@ -359,7 +344,6 @@
     <string name="failed_to_bypass_cloudflare">Cloudflare को बायपास करने में विफल</string>
     <string name="please_update_webview">बेहतर संगतता के लिए कृपया WebView ऐप को अपडेट करें</string>
     <string name="always">हमेशा</string>
-    <string name="app_not_available">ऐप उपलब्ध नहीं</string>
     <string name="back">पिछली तरफ</string>
     <string name="forward">आगे की ओर</string>
     <string name="less">कम</string>
@@ -372,7 +356,6 @@
     <string name="oldest">सबसे पुराना</string>
     <string name="pin">पिन</string>
     <string name="pinned">पिन की गई</string>
-    <string name="refresh">रीफ़्रेश करें</string>
     <string name="reorder">पुनःक्रमित</string>
     <string name="unpin">अनपिन</string>
     <string name="view_chapters">अध्याय देखें</string>

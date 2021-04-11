@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Models -->
-    <string name="name">Name</string>
     <!-- Manga Type -->
     <string name="manga">Manga</string>
     <string name="manhwa">Manhwa</string>
@@ -60,7 +59,6 @@
     <string name="_already_in_queue">%1$s ist schon in der Warteschlange</string>
     <string name="create_new_category">Neue Kategorie erstellen</string>
     <string name="category_is_empty">Kategorie ist leer</string>
-    <string name="category_is_hidden">Kategorie ist versteckt</string>
     <string name="top_category">Beste Kategorie (%1$s)</string>
     <string name="default_category">Standardkategorie</string>
     <string name="first_category">Erste Kategorie</string>
@@ -72,7 +70,6 @@
     <string name="add_categories">Kategorien hinzufügen</string>
     <string name="edit_categories">Kategorien bearbeiten</string>
     <string name="manage_category">Kategorie verwalten</string>
-    <string name="rename_category">Kategorie umbenennen</string>
     <string name="move_to_categories">Zu Kategorien hinzufügen</string>
     <plurals name="category_plural">
         <item quantity="one">%d Kategorie</item>
@@ -125,10 +122,8 @@
     <string name="list">Liste</string>
     <string name="comfortable_grid">Entspanntes Raster</string>
     <string name="compact_grid">Kompaktes Raster</string>
-    <string name="start_with_filters_hidden">Filtermenu verstecken</string>
     <string name="download_badge">Downloadzähler</string>
     <string name="hide_start_reading_button">„Jetzt lesen“-Symbol verstecken</string>
-    <string name="unread_badges">Kennzeichnungen für ungelesen</string>
     <string name="uniform_covers">Einheitliche Vorschaubilder</string>
     <string name="x_small">XS</string>
     <string name="small">S</string>
@@ -177,7 +172,6 @@
     <string name="this_will_remove_the_read_date_for_x_question">Das Lesedatum von „%1$s“ wird gelöscht. Bist du sicher\?</string>
     <string name="this_will_remove_the_read_date_question">Das Lesedatum dieses Kapitels wird gelöscht. Bist du sicher\?</string>
     <string name="reset_all_chapters_for_this_">Alle Kapitel für %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Kap.%2$s</string>
     <string name="last_read_">Zuletzt gelesen %1$s</string>
     <string name="read_">%1$s gelesen</string>
     <string name="updated_">%1$s aktualisiert</string>
@@ -187,12 +181,7 @@
     <string name="search_recents">Neues durchsuchen …</string>
     <string name="no_recent_chapters">Keine neuen Kapitel</string>
     <string name="no_recently_read_manga">Keine kürzlich gelesene Manga</string>
-    <string name="group_all">Gruppiert</string>
-    <string name="ungroup_all">Unrruppiert</string>
-    <string name="only_history">Nur Verlauf</string>
-    <string name="only_updates">Nur Aktualisierungen</string>
     <string name="reset_chapter_question">Kapitel zurücksetzen?</string>
-    <string name="press_and_hold_to_reset_history">Drücken und halten um Kapitelhistorie zurückzusetzen</string>
     <!-- Browse -->
     <string name="search_filters">Suchfilter</string>
     <string name="no_more_results">Keine weiteren Ergebnisse</string>
@@ -215,7 +204,6 @@
     <string name="extensions">Erweiterungen</string>
     <string name="extension_updates">Erweiterungsaktualisierungen</string>
     <string name="extension_info">Erweiterungsinfo</string>
-    <string name="details">Details</string>
     <string name="obsolete">Veraltet</string>
     <string name="pending">Anstehend</string>
     <string name="installing">Installiere</string>
@@ -232,13 +220,11 @@
     <string name="obsolete_extension_message">Diese Erweiterung ist nicht länger verfügbar.</string>
     <string name="version_">Version: %1$s</string>
     <string name="language_">Sprache: %1$s</string>
-    <string name="empty_preferences_for_extension">Keine änderbaren Einstellungen für diese Erweiterung</string>
     <plurals name="extension_updates_available">
         <item quantity="one">Erweiterungsaktualisierung verfügbar</item>
         <item quantity="other">%d Erweiterungsaktualisierungen verfügbar</item>
     </plurals>
     <!-- Reader -->
-    <string name="custom_filter">Eigener Filter</string>
     <string name="set_as_cover">Als Vorschaubild festlegen</string>
     <string name="set_as_default_for_all">Als Standard für alle setzen</string>
     <string name="cover_updated">Vorschaubild geändert</string>
@@ -410,7 +396,6 @@
     <string name="search_manually">Manuell suchen</string>
     <string name="migrate_now">Jetzt migrieren</string>
     <string name="copy_now">Jetzt kopieren</string>
-    <string name="select">Auswählen</string>
     <string name="migrate">Migrieren</string>
     <string name="migrate_">Migriere %1$s</string>
     <string name="copy_value">Kopieren</string>
@@ -444,8 +429,6 @@
     <string name="amoled_black">AMOLED Schwarz</string>
     <string name="dark_blue">Dunkelblau</string>
     <string name="white_theme">Reines Weiß</string>
-    <string name="system_default_amoled">Systemstandard (AMOLED)</string>
-    <string name="system_default_all_blue">Systemstandard (Dunkelblau)</string>
     <string name="language">Sprache</string>
     <string name="system_default">Systemstandard</string>
     <string name="date_format">Datumsformat</string>
@@ -460,27 +443,15 @@
     <string name="restore_backup">Datensicherung wiederherstellen</string>
     <string name="restore_from_backup_file">Bibliothek mit Hilfe einer Datensicherung wiederherstellen</string>
     <string name="backup_location">Sicherungsordner</string>
-    <string name="service">Service</string>
     <string name="backup_frequency">Sicherungshäufigkeit</string>
     <string name="max_auto_backups">Maximale Anzahl automatischer Sicherungen</string>
     <string name="backup_failed">Datensicherung fehlgeschlagen</string>
     <string name="backup_created">Datensicherung erstellt</string>
     <string name="restore_completed">Wiederherstellen abgeschlossen</string>
     <string name="restore_error">Fehler beim Wiederherstellen der Sicherung</string>
-    <string name="restore_content_skipped">%1$d übersprungen</string>
-    <string name="restore_message">Beim Wiederherstellen werden Daten von den Quellen abgerufen, wodurch möglicherweise Mobilfunkkosten entstehen können.\n\nVergewissern Sie sich zudem, dass Sie alle benötigen Seitenlogins bereitgestellt haben, bevor Sie mit dem Wiederherstellen beginnen.</string>
     <string name="creating_backup">Datensicherung wird erstellt</string>
     <string name="what_should_backup">Was willst du sichern\?</string>
     <string name="restoring_backup">Datensicherung wird wiederhergestellt</string>
-    <string name="restoring_progress">Wiederhergestellt (%1$d / %2$d)</string>
-    <plurals name="sources_missing">
-        <item quantity="one">%d Quelle fehlt</item>
-        <item quantity="other">%d Quellen fehlen</item>
-    </plurals>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d Manga ist nun lizenziert und konnte nicht wiederhergestellt werden</item>
-        <item quantity="other">%d Manga sind nun lizenziert und konnten nicht wiederhergestellt werden</item>
-    </plurals>
     <string name="not_logged_into_">Nicht angemeldet in %1$s</string>
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Kapitel-Zwischenspeicher leeren</string>
@@ -546,14 +517,12 @@
     <string name="username">Benutzername</string>
     <string name="email">E-Mail-Adresse</string>
     <string name="password">Passwort</string>
-    <string name="show_password">Passwort anzeigen</string>
     <string name="login">Anmelden</string>
     <string name="logout">Abmelden</string>
     <string name="logout_from_">Von %1$s abmelden?</string>
     <string name="successfully_logged_in">Anmeldung erfolgreich</string>
     <string name="username_must_not_be_blank">Benutzername und Passwort dürfen nicht leer sein</string>
     <string name="successfully_logged_out">Du bist jetzt abgemeldet</string>
-    <string name="could_not_log_in">Anmeldungsfehler</string>
     <!-- Downloads -->
     <string name="downloads">Heruntergeladene</string>
     <string name="download_queue">Herunterladen-Warteschlange</string>
@@ -623,18 +592,14 @@
     <string name="alphabetically">Alphabetisch</string>
     <string name="always">Immer</string>
     <string name="always_ask">Immer Fragen</string>
-    <string name="app_not_available">App nicht verfügbar</string>
-    <string name="auto">Automatisch</string>
     <string name="automatic">Automatisch</string>
     <string name="back">Zurück</string>
     <string name="bottom">Unten</string>
-    <string name="bug_report">Einen Programmfehler melden</string>
     <string name="cancel">Abbrechen</string>
     <string name="center">Mitte</string>
     <string name="charging">Am Laden</string>
     <string name="clear">Löschen</string>
     <string name="close">Schließen</string>
-    <string name="collasped">Einklappen</string>
     <string name="common">Allgemein</string>
     <string name="cover_of_image">Vorschaubild des Manga</string>
     <string name="create">Erstellen</string>
@@ -677,8 +642,6 @@
     <string name="picture_saved">Bild gespeichert</string>
     <string name="pin">Anpinnen</string>
     <string name="pinned">Angepinnt</string>
-    <string name="refresh">Aktualisieren</string>
-    <string name="refreshing">Aktualisiere</string>
     <string name="remove">Entfernen</string>
     <string name="reorder">Neuordnen</string>
     <string name="reset">Zurücksetzen</string>
@@ -700,7 +663,6 @@
     <string name="top">Oben</string>
     <string name="undo">Rückgängig machen</string>
     <string name="unknown_error">Unbekannter Fehler</string>
-    <string name="un_select_all">Selektierung aufheben</string>
     <string name="unpin">Loslösen</string>
     <string name="use_default">Standard nutzen</string>
     <string name="view_all_errors">Alle Fehler zeigen</string>
@@ -804,7 +766,6 @@
     <string name="vertically">Vertikal</string>
     <string name="horizontally">Horizontal</string>
     <string name="reader_settings">Lese-Einstellungen</string>
-    <string name="_details">%1$s Details</string>
     <string name="hide_hopper_on_scroll">Kategorienhopper beim Scrollen verstecken</string>
     <string name="show_unread_badges">Ungelesenzähler anzeigen</string>
     <string name="hide_unread_badges">Ungelesenzähler verstecken</string>

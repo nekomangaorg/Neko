@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Όνομα</string>
     <string name="categories">Κατηγορίες</string>
     <string name="manga">Manga</string>
     <string name="chapters">Κεφάλαια</string>
@@ -32,7 +31,6 @@
     <string name="edit">Επεξεργασία</string>
     <string name="add">Προσθήκη</string>
     <string name="edit_categories">Επεξεργασία βιβλιοθήκης</string>
-    <string name="rename_category">Μετονομασία βιβλιοθήκης</string>
     <string name="move_to_categories">Μετακίνηση σε κατηγορίες</string>
     <string name="start">Εκκίνηση</string>
     <string name="stop">Σταμάτημα</string>
@@ -92,7 +90,6 @@
     <string name="system_default">Προεπιλογή συστήματος</string>
     <string name="default_category">Προεπιλεγμένη κατηγορία</string>
     <string name="always_ask">Ερώτηση πάντα</string>
-    <string name="details">Λεπτομέρειες</string>
     <string name="pending">Αναμονή</string>
     <string name="installing">Εγκατάσταση</string>
     <string name="installed">Εγκαταστημένο</string>
@@ -107,7 +104,6 @@
 \nΕμπιστεύοντας αυτό το πιστοποιητικό αποδέχεστε αυτούς τους κινδύνους.</string>
     <string name="version_">Έκδοση: %1$s</string>
     <string name="language_">Γλώσσα: %1$s</string>
-    <string name="empty_preferences_for_extension">Δεν υπάρχουν προτιμήσεις επεξεργασίας για αυτή την επέκταση</string>
     <string name="fullscreen">Πλήρης οθόνη</string>
     <string name="double_tap_anim_speed">Διπλή βρύση κινούμενα σχέδια ταχύτητα</string>
     <string name="show_page_number">Εμφάνιση αριθμού σελίδας</string>
@@ -169,14 +165,10 @@
     <string name="restore_backup">Επαναφορά αντίγραφου ασφάλειας</string>
     <string name="restore_from_backup_file">Επαναφορά βιβλιοθήκης από αρχείο αντίγραφου ασφάλειας</string>
     <string name="backup_location">Φάκελος αντίγραφου ασφάλειας</string>
-    <string name="service">Υπηρεσία</string>
     <string name="backup_frequency">Συχνότητα αντίγραφου ασφάλειας</string>
     <string name="max_auto_backups">Μέγιστος αριθμός αυτόματων αντιγραφών ασφάλειας</string>
     <string name="backup_created">Δημιουργήθηκε αντίγραφο ασφαλείας</string>
     <string name="restore_completed">Η επαναφορά ολοκληρώθηκε</string>
-    <string name="restore_message">Η επαναφορά χρησιμοποιεί την πηγή για την μεταφορά δεδομένων, ενδέχεται να ισχύουν έξοδα φορέα.
-\n
-\nΒεβαιωθείτε ότι έχετε εγκαταστήσει όλες τις απαραίτητες επεκτάσεις και είστε συνδεδεμένοι σε πηγές και σε υπηρεσίες παρακολούθησης πριν κάνετε επαναφορά.</string>
     <string name="what_should_backup">Τι θέλετε να κάνετε backup;</string>
     <string name="restoring_backup">Επαναφορά αντιγράφων ασφαλείας</string>
     <string name="clear_chapter_cache">Καθάρισμα προσωρινής μνήμης κεφαλαίου</string>
@@ -201,10 +193,8 @@
     <string name="log_in_to_">Σύνδεση για %1$s</string>
     <string name="username">Όνομα χρήστη</string>
     <string name="password">Κωδικός πρόσβασης</string>
-    <string name="show_password">Εμφάνιση κωδικού</string>
     <string name="login">Σύνδεση</string>
     <string name="successfully_logged_in">Επιτυχής σύνδεση</string>
-    <string name="could_not_log_in">Σφάλμα σύνδεσης</string>
     <string name="unknown_error">Άγνωστο σφάλμα</string>
     <string name="local">Τοπικό</string>
     <string name="search_filters">Φίλτρα αναζήτησης</string>
@@ -248,7 +238,6 @@
     <string name="this_will_remove_the_read_date_question">Αυτό θα αφαιρέσει την ημερομηνία ανάγνωσης αυτού του κεφαλαίου. Είσαι σίγουρος;</string>
     <string name="picture_saved">Η εικόνα αποθηκεύτηκε</string>
     <string name="options">Επιλογές</string>
-    <string name="custom_filter">Προσαρμοσμένο φίλτρο</string>
     <string name="set_as_cover">Ορισμός ως εξώφυλλο</string>
     <string name="cover_updated">Το εξώφυλλο ενημερώθηκε</string>
     <string name="page_">Σελίδα: %1$d</string>
@@ -264,8 +253,6 @@
     <string name="theres_no_previous_chapter">Δεν υπάρχει προηγούμενο κεφάλαιο</string>
     <string name="loading_pages">Φόρτωση σελίδων…</string>
     <string name="failed_to_load_pages_">Η φόρτωση σελίδων απέτυχε: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Κεφ.%2$s</string>
-    <string name="select">Επιλογή</string>
     <string name="migrate">Μεταφορά</string>
     <string name="could_not_download_chapter_can_try_again">Παρουσιάστηκε σφάλμα κατά τη λήψη κεφαλαίων. Μπορείτε να δοκιμάσετε ξανά στην ενότητα λήψεων</string>
     <string name="new_chapters_found">Βρέθηκαν νέα κεφάλαια</string>
@@ -299,15 +286,12 @@
     <string name="help">Βοήθεια</string>
     <string name="library_update_order">Συχνότητα ανανέωσης της Βιβλιοθήκης</string>
     <string name="select_order_to_update">Διαλέξτε την σύχνοτητα που το Tachiyomi ελένχει για διαθέσιμη ενημέρωση</string>
-    <string name="system_default_all_blue">Προεπιλογή συστήματος (Σκούρο μπλε)</string>
-    <string name="system_default_amoled">Προεπιλογή συστήματος (AMOLED)</string>
     <string name="lock_with_biometrics">Κλείδωμα με βιομετρικά στοιχεία</string>
     <string name="lock_when_idle">Κλείδωμα όταν είναι αδρανής</string>
     <string name="update">Ενημέρωση</string>
     <string name="updating_library">Ενημέρωση βιβλιοθήκης</string>
     <string name="date_added">Ημερομηνία προσθήκης</string>
     <string name="latest_chapter">Νεότερο κεφάλαιο</string>
-    <string name="unread_badges">Μη αναγνωσμένα σήματα</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 ενημέρωση απέτυχε</item>
         <item quantity="other">%1$d ενημερώσεις απέτυχαν</item>
@@ -330,7 +314,6 @@
     <string name="paged">Σελιδοποίηση</string>
     <string name="please_update_webview">Παρακαλώ ενημερώστε την εφαρμογή WebView για καλύτερη συμβατότητα</string>
     <string name="always">Πάντα</string>
-    <string name="app_not_available">Μη διαθέσιμη εφαρμογή</string>
     <string name="back">Πίσω</string>
     <string name="always_show_chapter_transition">Να εμφανίζεται πάντα η μετάβαση κεφαλαίου</string>
     <string name="pref_webtoon_side_padding">Πλευρικό γέμισμα</string>
@@ -373,7 +356,6 @@
     <string name="oldest">Παλαιότερο</string>
     <string name="pin">Καρφίτσωμα</string>
     <string name="pinned">Καρφιτσωμένα</string>
-    <string name="refresh">Ανανέωση</string>
     <string name="reorder">Αναδιάταξη</string>
     <string name="unpin">Ξεκαρφίτσωμα</string>
     <string name="view_chapters">Προβολή κεφαλαίων</string>
@@ -388,17 +370,11 @@
     <string name="manhua">Manhua</string>
     <string name="white_theme">Λευκό</string>
     <string name="tracked">Παρακολουθούνται</string>
-    <string name="refreshing">Ανανεώνει</string>
     <string name="last_used">Χρησιμοποιήθηκε τελευταία</string>
     <string name="source_hidden">Κρυφή πηγή</string>
     <string name="all_sources">Όλες οι πηγές</string>
     <string name="search_extensions">Αναζήτηση επεκτάσεων…</string>
-    <string name="press_and_hold_to_reset_history">Πατήστε παρατεταμένα για επαναφορά του ιστορικού κεφαλαίου</string>
     <string name="reset_chapter_question">Επαναφορά κεφαλαίου;</string>
-    <string name="only_updates">Μόνο ενημερώσεις</string>
-    <string name="only_history">Μόνο ιστορικό</string>
-    <string name="ungroup_all">Κατάργηση ομαδοποίησης όλων</string>
-    <string name="group_all">Ομαδοποίηση όλων</string>
     <string name="search_recents">Αναζήτηση πρόσφατων…</string>
     <string name="view_all_updates">Προβολή όλων των ενημερώσεων</string>
     <string name="view_history">Προβολή ιστορικού</string>
@@ -435,7 +411,6 @@
     <string name="x_small">XS</string>
     <string name="uniform_covers">Ομοιόμορφα καλύμματα</string>
     <string name="hide_start_reading_button">Απόκρυψη κουμπιού έναρξης ανάγνωσης</string>
-    <string name="start_with_filters_hidden">Έναρξη με κρυμμένα φίλτρα</string>
     <string name="comfortable_grid">Άνετο πλέγμα</string>
     <string name="display_options">Επιλογές εμφάνισης</string>
     <string name="drag_and_drop">Μεταφορά &amp; απόθεση</string>
@@ -468,7 +443,6 @@
     <string name="categories_on_manual">Κατηγορίες προς ενημέρωση κατά τη χειροκίνητη ανανέωση</string>
     <string name="first_category">Πρώτη κατηγορία</string>
     <string name="top_category">Κορυφαία κατηγορία (%1$s)</string>
-    <string name="category_is_hidden">Η κατηγορία είναι κρυμμένη</string>
     <string name="category_is_empty">Η κατηγορία είναι κενή</string>
     <string name="create_new_category">Δημιουργία νέας κατηγορίας</string>
     <string name="_already_in_queue">%1$s είναι ήδη στην ουρά</string>
@@ -563,14 +537,6 @@
     <string name="restore_in_progress">Η επαναφορά βρίσκεται ήδη σε εξέλιξη</string>
     <string name="backup_in_progress">Η δημιουργία αντιγράφων ασφαλείας βρίσκεται ήδη σε εξέλιξη</string>
     <string name="not_logged_into_">Δεν έχετε συνδεθεί στο %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d το manga έχει πλέον αδειοδοτηθεί και δεν μπορεί να αποκατασταθεί</item>
-        <item quantity="other">%d τα manga έχουν πλέον αδειοδοτηθεί και δεν μπορούν να αποκατασταθούν</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d πηγή λείπει</item>
-        <item quantity="other">%d πηγές λείπουν</item>
-    </plurals>
     <string name="backup_and_restore">Δημιουργία αντιγράφων ασφαλείας και επαναφορά</string>
     <string name="progress">Η λήψη ολοκληρώθηκε</string>
     <string name="complete">Ολοκληρωμένο</string>

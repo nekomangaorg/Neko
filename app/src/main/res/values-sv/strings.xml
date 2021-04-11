@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Namn</string>
     <string name="categories">Kategorier</string>
     <string name="manga">Manga</string>
     <string name="chapters">Kapitel</string>
@@ -32,7 +31,6 @@
     <string name="edit">Redigera</string>
     <string name="add">Lägg till</string>
     <string name="edit_categories">Redigera kategorier</string>
-    <string name="rename_category">Byt namn på kategori</string>
     <string name="move_to_categories">Flytta till kategorier</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
@@ -92,7 +90,6 @@
     <string name="system_default">Systemstandard</string>
     <string name="default_category">Standardkategori</string>
     <string name="always_ask">Fråga alltid</string>
-    <string name="details">Detaljer</string>
     <string name="pending">Väntade</string>
     <string name="installing">Installerar</string>
     <string name="installed">Installerad</string>
@@ -107,7 +104,6 @@
 \nGenom att lita på detta certifikat accepterar du dessa risker.</string>
     <string name="version_">Version: %1$s</string>
     <string name="language_">Språk: %1$s</string>
-    <string name="empty_preferences_for_extension">Det finns inga inställningar för detta tillägg</string>
     <string name="fullscreen">Fullskärm</string>
     <string name="double_tap_anim_speed">Dubbelklicka animationshastighet</string>
     <string name="show_page_number">Visa sidnummer</string>
@@ -169,14 +165,10 @@
     <string name="restore_backup">Återställ backup</string>
     <string name="restore_from_backup_file">Återställ bibliotek från backup fil</string>
     <string name="backup_location">Backup katalog</string>
-    <string name="service">Service</string>
     <string name="backup_frequency">Backup frekvens</string>
     <string name="max_auto_backups">Max automatiska backups</string>
     <string name="backup_created">Säkerhetskopia skapad</string>
     <string name="restore_completed">Återställning slutförd</string>
-    <string name="restore_message">Återställning använder källa för att hämta data, kostnader kan tillkomma.
-\n
-\nSe till att du är inloggad på källor som kräver detta innan du återställer.</string>
     <string name="what_should_backup">Vad vill du skapa backup på\?</string>
     <string name="restoring_backup">Återställer säkerhetskopia</string>
     <string name="clear_chapter_cache">Rensa kapitelcache</string>
@@ -201,10 +193,8 @@
     <string name="log_in_to_">Login för %1$s</string>
     <string name="username">Användarnamn</string>
     <string name="password">Lösenord</string>
-    <string name="show_password">Visa lösenord</string>
     <string name="login">Logga in</string>
     <string name="successfully_logged_in">Inloggningen lyckades</string>
-    <string name="could_not_log_in">Inloggningsfel</string>
     <string name="unknown_error">Okänt fel</string>
     <string name="local">Lokal</string>
     <string name="search_filters">Sök filter</string>
@@ -248,7 +238,6 @@
     <string name="this_will_remove_the_read_date_question">Detta kommer att ta bort läs datumet för detta kapitel. Är du säker\?</string>
     <string name="picture_saved">Bild sparad</string>
     <string name="options">Alternativ</string>
-    <string name="custom_filter">Anpassat filter</string>
     <string name="set_as_cover">Ställ in som omslag</string>
     <string name="cover_updated">Omslag uppdaterad</string>
     <string name="page_">Sida: %1$d</string>
@@ -264,8 +253,6 @@
     <string name="theres_no_previous_chapter">Det finns inget tidigare kapitel</string>
     <string name="loading_pages">Laddar sidor…</string>
     <string name="failed_to_load_pages_">Misslyckades att ladda sidor: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Kap.%2$s</string>
-    <string name="select">Välj</string>
     <string name="migrate">Migrera</string>
     <string name="could_not_download_chapter_can_try_again">Ett fel inträffade vid nedladdning av kapitlen. Du kan försöka igen i nedladdningssektionen</string>
     <string name="new_chapters_found">Nya kapitel hittades</string>
@@ -302,8 +289,6 @@
     <string name="help">Hjälp</string>
     <string name="library_update_order">Bibliotekets uppdateringsordning</string>
     <string name="select_order_to_update">Välj i vilken ordning Tachiyomi söker efter uppdateringar</string>
-    <string name="system_default_all_blue">System standard (Mörkblå)</string>
-    <string name="system_default_amoled">System standard (AMOLED)</string>
     <string name="lock_with_biometrics">Lås med biometri</string>
     <string name="lock_when_idle">Lås vid inaktivitet</string>
     <string name="security">Säkerhet</string>
@@ -325,7 +310,6 @@
     <string name="updating_library">Uppdaterar biblioteket</string>
     <string name="date_added">Datum tillagd</string>
     <string name="latest_chapter">Senaste kapitel</string>
-    <string name="unread_badges">Olästa märken</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 uppdatering misslyckades</item>
         <item quantity="other">%1$d uppdateringar misslyckades</item>
@@ -360,7 +344,6 @@
     <string name="failed_to_bypass_cloudflare">Det gick inte att kringgå Cloudflare</string>
     <string name="please_update_webview">Uppdatera WebView-appen för bättre kompatibilitet</string>
     <string name="always">Alltid</string>
-    <string name="app_not_available">Applikationen är inte tillgänglig</string>
     <string name="back">Bakåt</string>
     <string name="forward">Framåt</string>
     <string name="less">Mindre</string>
@@ -373,7 +356,6 @@
     <string name="oldest">Äldsta</string>
     <string name="pin">Nåla</string>
     <string name="pinned">Nålad</string>
-    <string name="refresh">Uppdatera</string>
     <string name="reorder">Ändra ordning</string>
     <string name="unpin">Lossa</string>
     <string name="view_chapters">Visa kapitel</string>
@@ -479,7 +461,6 @@
     <string name="categories_on_manual">Kategorier som ska uppdateras när du uppdaterar manuellt</string>
     <string name="first_category">Första kategorin</string>
     <string name="top_category">Toppkategori (%1$s)</string>
-    <string name="category_is_hidden">Kategorin är dold</string>
     <string name="category_is_empty">Kategorin är tom</string>
     <string name="create_new_category">Skapa ny kategori</string>
     <string name="_already_in_queue">%1$s är redan i kö</string>
@@ -543,7 +524,6 @@
     <string name="x_small">XS</string>
     <string name="uniform_covers">Enhetliga omslag</string>
     <string name="hide_start_reading_button">Dölj knappen för \"Börja läsa\"</string>
-    <string name="start_with_filters_hidden">Börja med dolda filter</string>
     <string name="comfortable_grid">Bekvämt rutnät</string>
     <string name="display_options">Visnisalternativ</string>
     <string name="drag_and_drop">Dra och släpp</string>
@@ -563,7 +543,6 @@
     <string name="reading_">Läser %1$s</string>
     <string name="set_as_default_for_all">Ange som standard för alla</string>
     <string name="reader_settings">Läsinställningar</string>
-    <string name="_details">%1$s detaljer</string>
     <string name="_must_be_enabled_first">%1$s måste vara aktiverad först</string>
     <string name="app_info">Appinformation</string>
     <string name="filter_languages">Filtrera språk</string>
@@ -571,12 +550,7 @@
     <string name="source_hidden">Källa dold</string>
     <string name="all_sources">Alla källor</string>
     <string name="search_extensions">Sök tillägg…</string>
-    <string name="press_and_hold_to_reset_history">Håll intryckt för att återställa kapitelhistoriken</string>
     <string name="reset_chapter_question">Återställ kapitel\?</string>
-    <string name="only_updates">Bara uppdateringar</string>
-    <string name="only_history">Bara historik</string>
-    <string name="ungroup_all">Separera alla</string>
-    <string name="group_all">Gruppera alla</string>
     <string name="search_recents">Sök senaste…</string>
     <string name="view_all_updates">Visa alla uppdateringar</string>
     <string name="view_history">Visa historik</string>
@@ -724,16 +698,6 @@
     </plurals>
     <string name="data_management">Datahanteing</string>
     <string name="not_logged_into_">Inte inloggad mot %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d manga är nu licensierad och kan inte återställas</item>
-        <item quantity="other">%d mangas är nu licensierade och kan inte återställas</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d källa saknas</item>
-        <item quantity="other">%d källor saknas</item>
-    </plurals>
-    <string name="restoring_progress">Återställer (%1$d/%2$d)</string>
-    <string name="restore_content_skipped">%1$d hoppades över</string>
     <string name="restore_error">Det gick inte att återställa säkerhetskopian</string>
     <string name="pressing_back_to_start">Tryck tillbaka till startskärmen</string>
     <string name="back_to_start">Tillbaka till början</string>

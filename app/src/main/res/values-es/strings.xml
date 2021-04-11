@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Nombre</string>
     <!-- Activities and fragments labels (toolbar title) -->
     <string name="settings">Configuraciones</string>
     <string name="download_queue">Cola de descargas</string>
@@ -19,7 +18,6 @@
     <string name="delete">Eliminar</string>
     <string name="edit">Editar</string>
     <string name="edit_categories">Editar categorías</string>
-    <string name="rename_category">Renombrar</string>
     <string name="move_to_categories">Mover a categorías</string>
     <string name="start">Comenzar</string>
     <string name="stop">Detener</string>
@@ -125,10 +123,8 @@
     <string name="log_in_to_">Iniciar sesión en %1$s</string>
     <string name="username">Nombre de usuario</string>
     <string name="password">Contraseña</string>
-    <string name="show_password">Mostrar contraseña</string>
     <string name="login">Iniciar sesión</string>
     <string name="successfully_logged_in">Inicio de sesión exitoso</string>
-    <string name="could_not_log_in">Inicio de sesión inválido</string>
     <string name="unknown_error">Error desconocido</string>
     <!-- Library fragment -->
     <!-- Catalogue fragment -->
@@ -166,7 +162,6 @@
     <!-- Backup fragment -->
     <string name="backup">Copia de seguridad</string>
     <!-- Recent manga fragment -->
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <!-- Downloads activity and service -->
     <string name="could_not_download_chapter_can_try_again">Se ha producido un error al descargar capítulos. Puede intentarlo de nuevo en la sección de descargas</string>
     <!-- Library update service notifications -->
@@ -245,13 +240,10 @@
     <string name="restore_backup">Restaurar copia de seguridad</string>
     <string name="restore_from_backup_file">Restaurar la biblioteca del archivo de copia de seguridad</string>
     <string name="backup_location">Directorio de copia de seguridad</string>
-    <string name="service">Servicio</string>
     <string name="backup_frequency">Frecuencia de respaldo</string>
     <string name="max_auto_backups">Máximos respaldos automáticos</string>
     <string name="backup_created">Copia de seguridad creada</string>
     <string name="restore_completed">Restauración completada</string>
-    <string name="restore_message">Restaurar utiliza la fuente para obtener datos, es posible que se apliquen los costos de la operadora.
-También asegúrese de haber iniciado sesión en las fuentes que lo requieren antes de la restauración.</string>
     <string name="what_should_backup">¿Qué deseas respaldar\?</string>
     <string name="restoring_backup">Restaurando copia de seguridad</string>
     <string name="refresh_library_metadata">Actualizar metadatos de la biblioteca</string>
@@ -264,7 +256,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="category_with_name_exists">¡Ya existe una categoría con este nombre!</string>
     <string name="picture_saved">Imagen guardada</string>
     <string name="options">Opciones</string>
-    <string name="custom_filter">Filtro personalizado</string>
     <string name="set_as_cover">Establecer como cubierta</string>
     <string name="cover_updated">Cubierta actualizada</string>
     <string name="failed_to_update_cover">Error al actualizar la portada</string>
@@ -278,7 +269,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="source_migration">Migración de fuente</string>
     <string name="extensions">Extensiones</string>
     <string name="extension_info">Información de extensión</string>
-    <string name="details">Detalles</string>
     <string name="pending">Pendiente</string>
     <string name="installing">Instalando</string>
     <string name="installed">Instalado</string>
@@ -298,7 +288,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="untrusted_extension_message">Esta extensión fue firmada por una fuente no certificada y no fue activada.
 \nUna extencion maliciosa puede leer cualquier credencial de inicio guardada en Tachiyomi o ejecutar código arbitrario.
 \nConfiando en este certificado aceptas estos riesgos.</string>
-    <string name="empty_preferences_for_extension">No hay preferencias para editar en esta extensión</string>
     <string name="no_animation">Sin animación</string>
     <string name="search_filters">Filtros de búsqueda</string>
     <string name="added_to_library">Añadido a la biblioteca</string>
@@ -314,7 +303,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="current_chapter">Actual:</string>
     <string name="loading_pages">Cargando páginas…</string>
     <string name="failed_to_load_pages_">Error al cargar páginas: %1$s</string>
-    <string name="select">Seleccionar</string>
     <string name="double_tap_anim_speed">Velocidad de animación de doble toque</string>
     <string name="dark_blue">Azul oscuro</string>
     <string name="long_tap_dialog">Diálogo de toque largo</string>
@@ -330,8 +318,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="help">Ayuda</string>
     <string name="library_update_order">Orden de actualización de la biblioteca</string>
     <string name="select_order_to_update">Selecciona el orden en el que Tachiyomi buscará actualizaciones</string>
-    <string name="system_default_all_blue">Predefinido del sistema (Azul oscuro)</string>
-    <string name="system_default_amoled">Predefinido del sistema (AMOLED)</string>
     <string name="no_results_found">No se han encontrado resultados</string>
     <string name="lock_with_biometrics">Bloquear con huella</string>
     <string name="lock_when_idle">Bloquear cuando está inactivo</string>
@@ -352,12 +338,10 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="failed_to_bypass_cloudflare">Fallo al evitar Cloudflare</string>
     <string name="please_update_webview">Actualice la aplicación WebView para mejor compatibilidad</string>
     <string name="always">Siempre</string>
-    <string name="app_not_available">Aplicación no disponible</string>
     <string name="update">Actualizar</string>
     <string name="updating_library">Actualizando biblioteca</string>
     <string name="date_added">Fecha agregada</string>
     <string name="latest_chapter">Capítulo más reciente</string>
-    <string name="unread_badges">Iconos de no leídas</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 actualización fallida</item>
         <item quantity="other">%1$d actualizaciónes fallidas</item>
@@ -401,7 +385,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="oldest">Lo más antiguo</string>
     <string name="pin">Fijar</string>
     <string name="pinned">Fijado</string>
-    <string name="refresh">Actualizar</string>
     <string name="reorder">Reordenar</string>
     <string name="unpin">Desfijar</string>
     <string name="view_chapters">Ver capítulos</string>
@@ -478,12 +461,7 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="all_sources">Todas las fuentes</string>
     <string name="search_extensions">Buscar extensiones…</string>
     <string name="in_library">En Biblioteca</string>
-    <string name="press_and_hold_to_reset_history">Mantenga pulsado para restablecer el historial de capítulos</string>
     <string name="reset_chapter_question">¿Restablecer capítulo\?</string>
-    <string name="only_updates">Solo actualizaciones</string>
-    <string name="only_history">Solo historia</string>
-    <string name="ungroup_all">Desagrupar todo</string>
-    <string name="group_all">Agrupar todo</string>
     <string name="search_recents">Buscar recientes…</string>
     <string name="view_all_updates">Ver todas las actualizaciones</string>
     <string name="view_history">Ver historial</string>
@@ -521,7 +499,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="x_small">XS</string>
     <string name="uniform_covers">Cubiertas uniformes</string>
     <string name="hide_start_reading_button">Ocultar el botón de inicio de lectura</string>
-    <string name="start_with_filters_hidden">Iniciar con filtros ocultos</string>
     <string name="comfortable_grid">Cuadrícula agradable</string>
     <string name="display_options">Opciones de visualización</string>
     <string name="drag_and_drop">Arrastra y suelta</string>
@@ -555,7 +532,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="categories_on_manual">Categorías para actualizar al refrescar manualmente</string>
     <string name="first_category">Primera categoría</string>
     <string name="top_category">Categoría superior (%1$s)</string>
-    <string name="category_is_hidden">Esta categoría está oculta</string>
     <string name="category_is_empty">Esta categoría está vacía</string>
     <string name="create_new_category">Crear nueva categoría</string>
     <string name="_already_in_queue">%1$s ya está en la cola</string>
@@ -577,10 +553,8 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="reset_cover">Recolocar portada</string>
     <string name="view_all_errors">Mostrar todos los errores</string>
     <string name="use_default">Usar predefinida</string>
-    <string name="un_select_all">Deseleccionar todo</string>
     <string name="tag">Etiqueta</string>
     <string name="sort_and_filter">Ordenar y filtrar</string>
-    <string name="refreshing">Actualizando</string>
     <string name="mark_previous_as_unread">Marcar anteriores como no leídos</string>
     <string name="mark_all_as_unread">Marcar todos como no leídos</string>
     <string name="mark_all_as_read">Marcar todos como leídos</string>
@@ -588,8 +562,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="hide">Ocultar</string>
     <string name="download_unread">Descargar no leídos</string>
     <string name="deleted_">Removido: %1$s</string>
-    <string name="bug_report">Reporta un Bug</string>
-    <string name="auto">Automático</string>
     <plurals name="after_minutes">
         <item quantity="one">Después de %1$s minuto</item>
         <item quantity="other">Después de %1$s minutos</item>
@@ -618,10 +590,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="disable_if_issues_with_updating">Borrar esto si estás experimentando problemas al actualizar o restaurar tu librería</string>
     <string name="no_folders_to_cleanup">No hay carpetas para borrar</string>
     <string name="clean_read_downloads">Borrar leídos</string>
-    <plurals name="sources_missing">
-        <item quantity="one">%d fuente no encontrada</item>
-        <item quantity="other">%d fuentes no encontradas</item>
-    </plurals>
     <string name="restore_error">Error en la restauración</string>
     <string name="stop_migrating">Cancelar migración\?</string>
     <string name="no_chapters_found_for_migration">No se han encontrado capítulos, este manga no se puede migrar</string>
@@ -740,7 +708,6 @@ También asegúrese de haber iniciado sesión en las fuentes que lo requieren an
     <string name="horizontally">Horizontalmente</string>
     <string name="right_and_left_nav">Derecha e Izquierda</string>
     <string name="reader_settings">Configuración del lector</string>
-    <string name="_details">%1$s detalles</string>
     <string name="_must_be_enabled_first">%1$s debe estar habilitado primero</string>
     <string name="app_info">Información de la aplicación</string>
     <string name="filter_languages">Filtrar idiomas</string>

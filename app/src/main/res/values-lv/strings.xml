@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Nosaukums</string>
     <string name="categories">Kategorijas</string>
     <string name="manga">Manga</string>
     <string name="chapters">Nodaļas</string>
@@ -29,7 +28,6 @@
     <string name="edit">Rediģēt</string>
     <string name="add">Pievienot</string>
     <string name="edit_categories">Rediģēt kategorijas</string>
-    <string name="rename_category">Pārdēvēt kategoriju</string>
     <string name="move_to_categories">Pārvietot uz kategorijam</string>
     <string name="start">Sākt</string>
     <string name="stop">Beigt</string>
@@ -77,7 +75,6 @@
     <string name="no_network_connection">Tīkla savienojums nav pieejams</string>
     <string name="please_update_webview">Lai uzlabotu saderību, lūdzu, atjauniniet WebView lietotni</string>
     <string name="always">Vienmēr</string>
-    <string name="app_not_available">Programma nav pieejama</string>
     <string name="back">Atpakaļ</string>
     <string name="update">Atjaunināt</string>
     <string name="no_new_updates_available">Nav pieejamas jaunas nodaļas</string>
@@ -106,12 +103,10 @@
     <string name="oldest">Vecākais</string>
     <string name="open_in_webview">Atvērt WebView</string>
     <string name="pin">Piespraust</string>
-    <string name="refresh">Atjaunot</string>
     <string name="reorder">Pārkārtot</string>
     <string name="unpin">Atspraust</string>
     <string name="view_chapters">Skatīt nodaļas</string>
     <string name="hide_start_reading_button">Paslēpt sākt lasīšanas pogu</string>
-    <string name="start_with_filters_hidden">Sākt ar paslēptiem filtriem</string>
     <string name="comfortable_grid">Ērts Režģis</string>
     <string name="display_options">Parādīšanas iespējas</string>
     <string name="drag_and_drop">Vilkt un nomest</string>
@@ -151,7 +146,6 @@
     <string name="confirm_category_deletion">Dzēst kategoriju\?</string>
     <string name="first_category">Pirmā kategorija</string>
     <string name="default_category">Noklusētā kategorija</string>
-    <string name="category_is_hidden">Paslēpta kategorija</string>
     <string name="category_is_empty">Kategorija ir tukša</string>
     <string name="create_new_category">Izveido jaunu kategoriju</string>
     <string name="_already_in_queue">%1$s jau ir rindā</string>
@@ -185,7 +179,6 @@
     <string name="comic">Komikss</string>
     <string name="manhua">Manhua</string>
     <string name="manhwa">Manhva</string>
-    <string name="unread_badges">Nelasītas nozīmes</string>
     <string name="invert_tapping">Invertēt spiešanu</string>
     <string name="none">Nav</string>
     <string name="tracked">Izsekots</string>

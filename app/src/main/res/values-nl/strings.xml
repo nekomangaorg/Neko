@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Naam</string>
     <string name="categories">Categorieën</string>
     <string name="manga">Manga</string>
     <string name="chapters">Hoofdstukken</string>
@@ -25,7 +24,6 @@
     <string name="edit">Bewerken</string>
     <string name="add">Toevoegen</string>
     <string name="edit_categories">Categorieën bewerken</string>
-    <string name="rename_category">Categorie hernoemen</string>
     <string name="move_to_categories">Verplaatsen naar categorieën</string>
     <string name="start">Start</string>
     <string name="stop">Stop</string>
@@ -116,7 +114,6 @@
     <string name="restore_backup">Back-up terugzetten</string>
     <string name="restore_from_backup_file">Back-up terugzetten van bestand</string>
     <string name="backup_location">Back-up map</string>
-    <string name="service">Service</string>
     <string name="backup_frequency">Back-up frequentie</string>
     <string name="max_auto_backups">Max aantal automatische back-ups</string>
     <string name="backup_created">Back-up gemaakt</string>
@@ -133,7 +130,6 @@
     <string name="log_in_to_">Login voor %1$s</string>
     <string name="username">Gebruikersnaam</string>
     <string name="password">Wachtwoord</string>
-    <string name="show_password">Toon wachtwoord</string>
     <string name="login">Log in</string>
     <string name="unknown_error">Onbekende fout</string>
     <string name="no_more_results">Geen verdere resultaten</string>
@@ -156,14 +152,12 @@
     <string name="category_with_name_exists">Er bestaat al een categorie met deze naam!</string>
     <string name="picture_saved">Afbeelding opgeslagen</string>
     <string name="options">Opties</string>
-    <string name="custom_filter">Aangepast filter</string>
     <string name="set_as_cover">Instellen als omslagfoto</string>
     <string name="cover_updated">Omslagfoto bijgewerkt</string>
     <string name="page_">Pagina: %1$d</string>
     <string name="next_chapter_not_found">Volgend hoofdstuk niet gevonden</string>
     <string name="use_image_as_cover">Wil je deze afbeelding als omslagfoto gebruiken?</string>
     <string name="viewer_for_this_series">Lezer voor deze serie</string>
-    <string name="source_dash_chapter_">%1$s - Hfdst.%2$s</string>
     <string name="new_chapters_found">Nieuwe hoofdstukken gevonden</string>
     <string name="must_be_in_library_to_edit">Gelieve eerst de manga aan je bibliotheek toe te voegen</string>
     <string name="select_cover_image">Selecteer omslagfoto</string>
@@ -231,11 +225,7 @@
     <string name="searching_for_updates">Zoeken naar updates…</string>
     <string name="download_error">Fout bij het downloaden</string>
     <string name="bookmarked">Met bladwijzer</string>
-    <string name="restore_message">Herstellen gebruikt het netwerk om data op te halen, mogelijk zijn extra kosten van toepassing.
-\n
-\nZorg ook dat je alle nodige extensies hebt geinstalleerd en dat je bent ingelogd in bronnen en trackingdiensten voordat je het herstellen begint.</string>
     <string name="successfully_logged_in">Login geslaagd</string>
-    <string name="could_not_log_in">Login error</string>
     <string name="licensed">Gelicenseerd</string>
     <string name="plan_to_read">Van plan te lezen</string>
     <string name="download_badge">Downloadbadges</string>
@@ -249,7 +239,6 @@
     <string name="extensions">Extensies</string>
     <string name="extension_info">Informatie over extensie</string>
     <string name="dark_blue">Donkerblauw</string>
-    <string name="details">Details</string>
     <string name="pending">Aan het afwachten</string>
     <string name="installing">Aan het installeren</string>
     <string name="installed">Geïnstalleerd</string>
@@ -264,7 +253,6 @@
 \nDoor dit certificaat te vertrouwen accepteer je deze risico\'s.</string>
     <string name="version_">Versie: %1$s</string>
     <string name="language_">Taal: %1$s</string>
-    <string name="empty_preferences_for_extension">Er zijn geen aan te passen voorkeuren voor deze extensie</string>
     <string name="double_tap_anim_speed">Dubbel tik animatiesnelheid</string>
     <string name="long_tap_dialog">Lange tik dialoog</string>
     <string name="no_animation">Geen animatie</string>
@@ -288,10 +276,7 @@
     <string name="theres_no_previous_chapter">Er is geen vorig hoofdstuk</string>
     <string name="loading_pages">Pagina\'s aan het laden…</string>
     <string name="failed_to_load_pages_">Fout bij het laden van pagina\'s : %1$s</string>
-    <string name="select">Selecteer</string>
     <string name="migrate">Migreren</string>
-    <string name="system_default_all_blue">Systeemstandaard (Tumman sininen)</string>
-    <string name="system_default_amoled">Systeemstandaard (AMOLED)</string>
     <string name="open_in_webview">Openen in webview</string>
     <string name="true_32bit_color">32-bit kleuren</string>
     <string name="skip_read_chapters">Hoofdstukken die gemarkeerd zijn als gelezen overslaan</string>
@@ -312,7 +297,6 @@
     <string name="updating_library">Bibliotheek bijwerken</string>
     <string name="date_added">Datum toegevoegd</string>
     <string name="latest_chapter">Laatste hoofdstuk</string>
-    <string name="unread_badges">Ongelezen badges</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 update mislukt</item>
         <item quantity="other">%1$d updates mislukt</item>
@@ -360,7 +344,6 @@
     <string name="failed_to_bypass_cloudflare">Kon Cloudflare niet omzeilen</string>
     <string name="please_update_webview">Gelieve de WebView-app bij te werken voor betere compatibiliteit</string>
     <string name="always">Altijd</string>
-    <string name="app_not_available">App niet beschikbaar</string>
     <string name="back">Terugkeren</string>
     <string name="forward">Vooruit</string>
     <string name="less">Minder</string>
@@ -373,18 +356,15 @@
     <string name="oldest">Oudste</string>
     <string name="pin">Vastpinnen</string>
     <string name="pinned">Vastgepind</string>
-    <string name="refresh">Vernieuwen</string>
     <string name="reorder">Opnieuw organiseren</string>
     <string name="unpin">Lospinnen</string>
     <string name="view_chapters">Hoofdstukken bekijken</string>
-    <string name="un_select_all">Alles deselecteren</string>
     <string name="view_all_errors">Bekijk alle fouten</string>
     <string name="use_default">Standaard gebruiken</string>
     <string name="top">Bovenkant</string>
     <string name="tag">Label</string>
     <string name="sort_and_filter">Sorteren &amp; filteren</string>
     <string name="select_none">Niks selecteren</string>
-    <string name="refreshing">Verversen</string>
     <string name="moved_to_">Verplaatst naar %1$s</string>
     <string name="mark_previous_as_unread">Markeer vorige als ongelezen</string>
     <string name="mark_all_as_unread">Alles als ongelezen markeren</string>
@@ -395,10 +375,7 @@
     <string name="drag_handle">Sleephandvat</string>
     <string name="download_unread">Download ongelezen</string>
     <string name="deleted_">Verwijderd: %1$s</string>
-    <string name="collasped">Ingeklapt</string>
-    <string name="bug_report">Rapporteer een bug</string>
     <string name="bottom">Onderkant</string>
-    <string name="auto">Automatisch</string>
     <plurals name="after_minutes">
         <item quantity="one">Na %1$s minuut</item>
         <item quantity="other">Na %1$s minuten</item>
@@ -437,7 +414,6 @@
     <string name="x_small">XS</string>
     <string name="uniform_covers">Eenduidige omslagen</string>
     <string name="hide_start_reading_button">\"Begin met lezen\"-knop verbergen</string>
-    <string name="start_with_filters_hidden">Starten met filters verborgen</string>
     <string name="comfortable_grid">Comfortabel raster</string>
     <string name="display_options">Weergaveopties</string>
     <string name="drag_and_drop">Slepen &amp; neerzetten</string>
@@ -471,7 +447,6 @@
     <string name="categories_on_manual">Categorieën om bij te werken bij het handmatig verversen</string>
     <string name="top_category">Beste categorie (%1$s)</string>
     <string name="first_category">Eerste categorie</string>
-    <string name="category_is_hidden">Categorie is verborgen</string>
     <string name="category_is_empty">Categorie is leeg</string>
     <string name="create_new_category">Maak nieuwe categorie aan</string>
     <string name="_already_in_queue">%1$s staat al in de wachtrij</string>
@@ -551,16 +526,6 @@
     </plurals>
     <string name="data_management">Gegevensbeheer</string>
     <string name="not_logged_into_">Niet ingelogd bij %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d manga is nu gelicenseerd en kan niet worden teruggezet</item>
-        <item quantity="other">%d mangas zijn nu gelicenseerd en kunnen niet worden teruggezet</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d bron mist</item>
-        <item quantity="other">%d bronnen missen</item>
-    </plurals>
-    <string name="restoring_progress">Herstellen (%1$d/%2$d)</string>
-    <string name="restore_content_skipped">%1$d overgeslagen</string>
     <string name="restore_error">Fout bij het herstellen van de back-up</string>
     <string name="white_theme">Puur wit</string>
     <plurals name="manga_migrated">
@@ -662,12 +627,7 @@
     <string name="all_sources">Alle bronnen</string>
     <string name="search_extensions">Extensies zoeken…</string>
     <string name="in_library">In Bibliotheek</string>
-    <string name="press_and_hold_to_reset_history">Ingedrukt houden om hoofdstukgeschiedenis opnieuw in te stellen</string>
     <string name="reset_chapter_question">Hoofdstuk terugzetten\?</string>
-    <string name="only_updates">Alleen updates</string>
-    <string name="only_history">Alleen geschiedenis</string>
-    <string name="ungroup_all">Niks groeperen</string>
-    <string name="group_all">Alles groeperen</string>
     <string name="search_recents">Zoek nieuwste…</string>
     <string name="view_all_updates">Bekijk alle updates</string>
     <string name="view_history">Bekijk geschiedenis</string>
@@ -761,7 +721,6 @@
     <string name="vertically">Verticaal</string>
     <string name="horizontally">Horizontaal</string>
     <string name="reader_settings">Lezer instellingen</string>
-    <string name="_details">%1$s details</string>
     <string name="_must_be_enabled_first">%1$s moet eerst ingeschakeld worden</string>
     <string name="app_info">App-informatie</string>
     <string name="filter_languages">Filter talen</string>

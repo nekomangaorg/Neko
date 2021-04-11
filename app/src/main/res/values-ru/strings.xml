@@ -31,7 +31,6 @@
     <string name="open_in_webview">Открыть в Web View</string>
     <string name="pause">Пауза</string>
     <string name="remove">Убрать</string>
-    <string name="rename_category">Переименовать категорию</string>
     <string name="reorder">Переупорядочить</string>
     <string name="reset">Сбросить</string>
     <string name="restore">Восстановить</string>
@@ -61,10 +60,6 @@
     <string name="backup">Резервная копия</string>
     <string name="what_should_backup">Что вы хотите резервировать\?</string>
     <string name="backup_created">Резевная копия создана</string>
-    <string name="restore_message">При восстановлении используются данные из каталогов, что может вызвать большой расход трафика.
-\n
-\nТакже убедитесь, что вы установили все нужные расширения, и авторизовались в источниках и сервисах отлеживания перед восстановлением.</string>
-    <string name="restoring_progress">Восстанавливаем (%1$d/%2$d)</string>
     <string name="black">Чёрный</string>
     <string name="browse">Поисковик</string>
     <string name="build_time">Дата сборки</string>
@@ -114,7 +109,6 @@
     <string name="cover_updated">Обложка обновлена</string>
     <string name="currently_reading">Читаю</string>
     <string name="custom_location">Пользовательская директория</string>
-    <string name="custom_filter">Пользовательский фильтр</string>
     <string name="dark">Тёмная</string>
     <string name="dark_blue">Тёмно-синяя</string>
     <string name="data_to_include_in_migration">Данные, которые нужно мигрировать</string>
@@ -137,8 +131,6 @@
     <string name="dropped">Заброшено</string>
     <string name="category_with_name_exists">Категория с таким именем уже существует!</string>
     <string name="no_chapters_found_for_migration">Главы не найдены, эта манга не может быть использована для миграции</string>
-    <string name="details">Детали</string>
-    <string name="empty_preferences_for_extension">Нет настроек для этого расширения</string>
     <string name="installed">Установлено</string>
     <string name="installing">Устанавливается</string>
     <string name="language_">Язык: %1$s</string>
@@ -163,7 +155,6 @@
     <string name="no_recent_chapters">Нет новых глав</string>
     <string name="no_recently_read_manga">Нет недавно прочитанной манги</string>
     <string name="invalid_download_location">Недопустомая директория для скачивания</string>
-    <string name="could_not_log_in">Ошибка входа</string>
     <string name="download_queue">Очередь загрузки</string>
     <string name="extension_info">Информация о дополнении</string>
     <string name="extensions">Дополнения</string>
@@ -177,12 +168,6 @@
     <string name="latest_">Последний: %1$s</string>
     <string name="left_to_right_viewer">Слева направо</string>
     <string name="licensed">Лицензировано</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d манга теперь лицензирована и не может быть восстановлена</item>
-        <item quantity="few">%d манги теперь лицензированы и не могут быть восстановлены</item>
-        <item quantity="many">%d манг теперь лицензированы и не могут быть восстановлены</item>
-        <item quantity="other">%d манг теперь лицензированы и не могут быть восстановлены</item>
-    </plurals>
     <string name="light_blue">Бело-синяя</string>
     <string name="loading">Загрузка…</string>
     <string name="local_source">Локальная манга</string>
@@ -215,7 +200,6 @@
     <string name="removed_from_library">Удалено из библиотеки</string>
     <string name="migrating_to">Мигрировать в</string>
     <string name="migration">Миграция</string>
-    <string name="name">Название</string>
     <string name="no_alternatives_found">Альтернатив не найдено</string>
     <string name="no_folders_to_cleanup">Нет папок для очистки</string>
     <string name="no_more_results">Больше нет результатов</string>
@@ -250,7 +234,6 @@
     <string name="sync_chapters_after_reading">Синхронизировать главы после прочтения</string>
     <string name="backup_location">Расположение резевной копии</string>
     <string name="backup_frequency">Частота резервной копии</string>
-    <string name="service">Служба</string>
     <string name="max_auto_backups">Максимальное количество автоматических резерных копии</string>
     <string name="about">О приложении</string>
     <string name="advanced">Дополнительно</string>
@@ -319,10 +302,8 @@
     <string name="smart_based_on_page">Умный (по странице)</string>
     <string name="smart_based_on_page_and_theme">Умный (по странице и теме)</string>
     <string name="reading">В процессе чтения</string>
-    <string name="source_dash_chapter_">%1$s - Гл.%2$s</string>
     <string name="rereading">Перечитываю</string>
     <string name="restore_completed">Восстановление завершено</string>
-    <string name="restore_content_skipped">%1$d пропущено</string>
     <string name="restore_error">Не удалось восстановить резервную копию</string>
     <string name="restoring_backup">Восстановление из резервной копии</string>
     <string name="right_to_left_viewer">Справа налево</string>
@@ -340,27 +321,17 @@
     <string name="library_search_hint">Название, теги, источник</string>
     <string name="search_parameter_eg">Параметр поиска (например - язык:английский)</string>
     <string name="second_to_last">Предпоследняя</string>
-    <string name="select">Выбрать</string>
     <string name="services">Сервисы</string>
     <string name="set_as_cover">Установить как обложку</string>
     <string name="updates">Обновления</string>
-    <string name="show_password">Показывать пароль</string>
     <string name="skip_this_step_next_time">Пропустить этот шаг в следующий раз</string>
     <string name="skipping_">(Пропуская %1$d)</string>
     <string name="smart_by_page">Умный (по странице)</string>
     <string name="smart_by_theme">Умный (по теме)</string>
     <string name="source_not_installed_">Источник не установлен: %1$s</string>
     <string name="search_filters">Поисковые фильтры</string>
-    <plurals name="sources_missing">
-        <item quantity="one">%d источник отсутствует</item>
-        <item quantity="few">%d источника отсутствуют</item>
-        <item quantity="many">%d источников отсутствуют</item>
-        <item quantity="other">%d источников отсутствуют</item>
-    </plurals>
     <string name="starting_cleanup">Начало очистки</string>
     <string name="stop_migrating">Остановить миграцию\?</string>
-    <string name="system_default_amoled">Системная (Белый + Чёрный)</string>
-    <string name="system_default_all_blue">Системная (Полно-синее)</string>
     <string name="system_default">Системный</string>
     <string name="third_to_last">Третья от прочитанной главы</string>
     <string name="title">Название</string>
@@ -464,7 +435,6 @@
     <string name="_already_in_queue">%1$s уже в очереди</string>
     <string name="create_new_category">Создать новую категорию</string>
     <string name="category_is_empty">Категория пуста</string>
-    <string name="category_is_hidden">Категория скрыта</string>
     <string name="top_category">Высшая категория (%1$s)</string>
     <string name="first_category">Первая категория</string>
     <string name="categories_on_manual">Категории для обновления при обновлении вручную</string>
@@ -509,9 +479,7 @@
     <!-- Library Display -->
     <string name="display_options">Показать опции</string>
     <string name="comfortable_grid">Удобная Сетка</string>
-    <string name="start_with_filters_hidden">Скрывать фильтры при запуске</string>
     <string name="hide_start_reading_button">Скрыть кнопку начала чтения</string>
-    <string name="unread_badges">Значки непрочитанных глав</string>
     <string name="uniform_covers">Одинаковые обложки</string>
     <string name="x_small">XS</string>
     <string name="small">S</string>
@@ -545,12 +513,7 @@
     <string name="view_history">Посмотреть историю</string>
     <string name="view_all_updates">Посмотреть все обновления</string>
     <string name="search_recents">Искать недавние…</string>
-    <string name="group_all">Сгруппировать все</string>
-    <string name="ungroup_all">Разгруппировать все</string>
-    <string name="only_history">Только история</string>
-    <string name="only_updates">Только обновления</string>
     <string name="reset_chapter_question">Сбросить главу\?</string>
-    <string name="press_and_hold_to_reset_history">Нажмите и удерживайте, чтобы сбросить историю глав</string>
     <!-- Browse -->
     <string name="in_library">В библиотеке</string>
     <string name="search_extensions">Поиск расширений…</string>
@@ -712,11 +675,7 @@
     <string name="failed_to_bypass_cloudflare">Не удалось обойти Cloudflare</string>
     <string name="please_update_webview">Пожалуйста, обновите приложение WebView для лучшей совместимости</string>
     <!-- Miscellaneous -->
-    <string name="app_not_available">Приложение недоступно</string>
-    <string name="auto">Автоматически</string>
     <string name="bottom">По низу</string>
-    <string name="bug_report">Сообщить об ошибке</string>
-    <string name="collasped">Рухнул</string>
     <string name="deleted_">Удалено: %1$s</string>
     <string name="drag_handle">Перетащить маркер</string>
     <string name="hide">Скрыть</string>
@@ -728,13 +687,10 @@
     <string name="moved_to_">Перемещено в %1$s</string>
     <string name="pin">Закрепить</string>
     <string name="pinned">Закреплено</string>
-    <string name="refresh">Обновить</string>
-    <string name="refreshing">Обновляется</string>
     <string name="select_none">Ничего не выбрано</string>
     <string name="sort_and_filter">Сортировка и Фильтрация</string>
     <string name="tag">Тег</string>
     <string name="top">Верхнее</string>
-    <string name="un_select_all">Снять все</string>
     <string name="unpin">Открепить</string>
     <string name="use_default">Использовать по умолчанию</string>
     <!-- Extensions -->
@@ -826,7 +782,6 @@
     <string name="vertically">Вертикально</string>
     <string name="horizontally">Горизонтально</string>
     <string name="reader_settings">Настройки читалки</string>
-    <string name="_details">%1$s подробности</string>
     <string name="_must_be_enabled_first">%1$s должен быть включён сначала</string>
     <string name="app_info">О приложении</string>
     <string name="filter_languages">Языковой фильтр</string>

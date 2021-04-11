@@ -15,7 +15,6 @@
     <string name="lock_when_idle">Bloquear con inactividade</string>
     <string name="lock_with_biometrics">Bloquear con datos biométricos</string>
     <string name="requires_app_restart">Require reiniciar a aplicación para que surxa efecto</string>
-    <string name="app_not_available">Aplicación non dispoñible</string>
     <string name="loading">Cargando…</string>
     <string name="history">Historial</string>
     <plurals name="chapters_plural">
@@ -26,7 +25,6 @@
     <string name="browse">Explorar</string>
     <string name="manhwa">Manhwa</string>
     <string name="manga">Manga</string>
-    <string name="name">Nome</string>
     <string name="app_short_name" translatable="false">TachiJ2K</string>
     <string name="app_name" translatable="false">TachiyomiJ2K</string>
     <string name="webtoon">Webtoon</string>
@@ -44,7 +42,6 @@
     <string name="date_format">Formato de data</string>
     <string name="security">Seguridade</string>
     <string name="edit_categories">editar categorías</string>
-    <string name="rename_category">Renomear categoría</string>
     <string name="update">Actualizar</string>
     <string name="library">Biblioteca</string>
     <string name="total_chapters">Capítulos totais</string>
@@ -53,7 +50,6 @@
     <string name="latest_chapter">Capítulo máis recente</string>
     <string name="list">Lista</string>
     <string name="download_badge">Descargar insignias</string>
-    <string name="unread_badges">Insignias sen ler</string>
     <string name="library_update_frequency">Frecuancia de actualización da biblioteca</string>
     <string name="library_update_order">Orden de actualización da biblioteca</string>
     <string name="library_update_restriction">Restriccións de actualización da biblioteca</string>
@@ -175,7 +171,6 @@
     <string name="open_in_webview">Abrir en WebView</string>
     <string name="pause">Pausar</string>
     <string name="pin">Fixar</string>
-    <string name="refresh">Refrescar</string>
     <string name="remove">Quitar</string>
     <string name="reorder">Reordenar</string>
     <string name="reset">Resetear</string>

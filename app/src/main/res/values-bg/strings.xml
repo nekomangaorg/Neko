@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Име</string>
     <!-- Activities and fragments labels (toolbar title) -->
     <string name="settings">Настройки</string>
     <string name="download_queue">Изтегляния</string>
@@ -25,7 +24,6 @@
     <string name="edit">Редактирай</string>
     <string name="add">Добави</string>
     <string name="edit_categories">Редактирай категории</string>
-    <string name="rename_category">Преименувай категория</string>
     <string name="move_to_categories">Премести в категории</string>
     <string name="start">Започни</string>
     <string name="stop">Спри</string>
@@ -79,8 +77,6 @@
     <string name="dark">Тъмна тема</string>
     <string name="dark_blue">Тъмно син</string>
     <string name="amoled_black">AMOLED тема</string>
-    <string name="system_default_amoled">Система по подразбиране (AMOLED)</string>
-    <string name="system_default_all_blue">Система по подразбиране(Тъмно син)</string>
     <string name="language">Език</string>
     <string name="system_default">По подразбиране</string>
     <!-- Reader section -->
@@ -158,10 +154,8 @@
     <string name="log_in_to_">Влизане в %1$s</string>
     <string name="username">Потребителско име</string>
     <string name="password">Парола</string>
-    <string name="show_password">Покажи парола</string>
     <string name="login">Влез</string>
     <string name="successfully_logged_in">Влизане успешно</string>
-    <string name="could_not_log_in">Получи се грешка при влизане</string>
     <string name="unknown_error">Неизвестна грешка</string>
     <!-- Library fragment -->
     <!-- Catalogue fragment -->
@@ -200,7 +194,6 @@
     <string name="picture_saved">Изображението запазено</string>
     <string name="options">Опции</string>
     <!-- Reader activity -->
-    <string name="custom_filter">Персонализиран филтър</string>
     <string name="set_as_cover">Постави за корица</string>
     <string name="cover_updated">Корицата обновена</string>
     <string name="page_">Страница: %1$d</string>
@@ -211,7 +204,6 @@
     <!-- Backup fragment -->
     <string name="backup">Резервно копие</string>
     <!-- Recent manga fragment -->
-    <string name="source_dash_chapter_">%1$s - Глава %2$s</string>
     <!-- Downloads activity and service -->
     <string name="could_not_download_chapter_can_try_again">Получи се грешка при изтеглянето на главите. Може да опитате пак в секцията на изтеглянията</string>
     <!-- Library update service notifications -->
@@ -260,7 +252,6 @@
     <string name="restore_backup">Възстанови резервно копие</string>
     <string name="restore_from_backup_file">Възстанови библиотеката от резервно копие</string>
     <string name="backup_location">Директория за резервното копие</string>
-    <string name="service">Обслужване</string>
     <string name="backup_frequency">Честота на запазване</string>
     <string name="max_auto_backups">Максимален брой автоматични запазвания</string>
     <string name="backup_created">Резервно копие създадено</string>
@@ -272,7 +263,6 @@
     <string name="local_source">Локална манга</string>
     <string name="paused">На пауза</string>
     <string name="download_paused">Изтеглянето спряно</string>
-    <string name="restore_message">За възстановяването се изтеглят данни от източника, за които може да бъде отчетен разход на данни. Също проверете дали сте влезли коректно в източниците, които го изискват, преди възстановяването.</string>
     <string name="other">Други</string>
     <string name="global_search">Глобално търсене…</string>
     <string name="latest">Последни</string>
@@ -283,7 +273,6 @@
     <string name="source_migration">Смяна на източник</string>
     <string name="extensions">Разширения</string>
     <string name="extension_info">Информация</string>
-    <string name="details">Подробности</string>
     <string name="pending">На изчакване</string>
     <string name="installing">Инсталира се</string>
     <string name="installed">Инсталирани</string>
@@ -298,7 +287,6 @@
 \nПотвърждавайки този сертификат, вие приемате тези рискове.</string>
     <string name="version_">Версия: %1$s</string>
     <string name="language_">Език: %1$s</string>
-    <string name="empty_preferences_for_extension">Няма предпочитания за това разширение</string>
     <string name="double_tap_anim_speed">Скорост на анимацията</string>
     <string name="no_animation">Без анимация</string>
     <string name="normal">Нормална</string>
@@ -308,7 +296,6 @@
     <string name="removed_from_library">Премахната от библиотеката</string>
     <string name="_copied_to_clipboard">%1$s копирано към клипборда</string>
     <string name="custom_range">Изтегли определен брой</string>
-    <string name="select">Избери</string>
     <string name="migrate">Мигрирай</string>
     <string name="source_not_installed_">Източникът не е инсталиран: %1$s</string>
     <string name="rereading">Препрочитане</string>
@@ -343,7 +330,6 @@
     <string name="updating_library">Обновяване на библиотеката</string>
     <string name="date_added">Добавено на</string>
     <string name="latest_chapter">Последна глава</string>
-    <string name="unread_badges">Значка за непрочетени глави</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 актуализация не бе успешна%1$d актуализации не бяха успешни</item>
         <item quantity="other"/>
@@ -392,7 +378,6 @@
     <string name="failed_to_bypass_cloudflare">Грешка при минаването през Cloudflare</string>
     <string name="please_update_webview">Моля, обновете WebView за по-добра съвместимост</string>
     <string name="always">Винаги</string>
-    <string name="app_not_available">Приложението не е достъпно</string>
     <string name="back">Назад</string>
     <string name="forward">Напред</string>
     <string name="less">По-малко</string>
@@ -405,7 +390,6 @@
     <string name="oldest">Най-стари</string>
     <string name="pin">Закачи</string>
     <string name="pinned">Закачени</string>
-    <string name="refresh">Обнови</string>
     <string name="reorder">Пренареди</string>
     <string name="tracked">Следени</string>
     <string name="default_reading_mode">Режим на четене по подразбиране</string>
@@ -450,7 +434,6 @@
     <string name="categories_on_manual">Категории за актуализиране при ръчно опресняване</string>
     <string name="first_category">Първа категория</string>
     <string name="top_category">Топ категория %1$s</string>
-    <string name="category_is_hidden">Категорията е скрита</string>
     <string name="category_is_empty">Категорията е празна</string>
     <string name="create_new_category">Създайте нова категория</string>
     <string name="_already_in_queue">%1$s вече е на опашка</string>

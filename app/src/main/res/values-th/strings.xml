@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">ชื่อ</string>
     <string name="categories">หมวดหมู่</string>
     <string name="manga">มังงะ</string>
     <string name="chapters">ตอน</string>
@@ -29,7 +28,6 @@
     <string name="edit">แก้ไข</string>
     <string name="add">เพิ่ม</string>
     <string name="edit_categories">แก้ไขประเภท</string>
-    <string name="rename_category">เปลี่ยนชื่อประเภท</string>
     <string name="close">ปิด</string>
     <string name="retry">ลองอีกครั้ง</string>
     <string name="open_in_browser">เปิดในเบราว์เซอร์</string>
@@ -61,7 +59,6 @@
     <string name="language">ภาษา</string>
     <string name="system_default">ค่าเริ่มต้นของระบบ</string>
     <string name="always_ask">ถามทุกครั้ง</string>
-    <string name="details">รายละเอียด</string>
     <string name="pending">รอดำเนินการ</string>
     <string name="installing">กำลังติดตั้ง</string>
     <string name="installed">ติดตั้งแล้ว</string>
@@ -112,7 +109,6 @@
 \n
 \nคุณยอมต้องยอมรับความเสี่ยง กรณีเชื่อถือใบรับรองนี้</string>
     <string name="version_">เวอร์ชัน: %1$s</string>
-    <string name="empty_preferences_for_extension">ไม่มีการตั้งค่าสำหรับส่วนต่อขยายนี้</string>
     <string name="fullscreen">เต็มจอ</string>
     <string name="double_tap_anim_speed">เพื่อความเร็วภาพเคลื่อนไหว</string>
     <string name="show_page_number">แสดงเลขหน้า</string>
@@ -170,7 +166,6 @@
     <string name="restore_backup">เรียกคืนการสำรองข้อมูล</string>
     <string name="restore_from_backup_file">เรียกคืนค่าห้องสมุดจากแฟ้มสำรองข้อมูล</string>
     <string name="backup_location">ไดเรกทอรีการสำรองข้อมูล</string>
-    <string name="service">บริการ</string>
     <string name="backup_frequency">ความถี่ในการสำรองข้อมูล</string>
     <string name="max_auto_backups">จำนวนการสำรองข้อมูลอัตโนมัติสูงสุด</string>
     <string name="backup_created">การสำรองข้อมูลที่สร้างขึ้น</string>
@@ -199,10 +194,8 @@
     <string name="log_in_to_">เข้าสู่ระบบสำหรับ %1$s</string>
     <string name="username">ชื่อผู้ใช้</string>
     <string name="password">รหัส ผ่าน</string>
-    <string name="show_password">แสดงรหัสผ่าน</string>
     <string name="login">ลงชื่อเข้าใช้</string>
     <string name="successfully_logged_in">เข้าสู่ระบบสำเร็จ</string>
-    <string name="could_not_log_in">ข้อผิดพลาดในการเข้าสู่ระบบ</string>
     <string name="unknown_error">ข้อผิดพลาดที่ไม่รู้จัก</string>
     <string name="local">ท้องถิ่น</string>
     <string name="search_filters">ตัวกรองค้นหา</string>
@@ -249,8 +242,6 @@
     <string name="library_update_order">ลำดับการปรับปรุงห้องสมุด</string>
     <string name="select_order_to_update">เลือกลำดับที่ให้ Tachiyomi ตรวจสอบการปรับปรุง</string>
     <string name="no_results_found">ไม่พบผลลัพธ์</string>
-    <string name="restore_message">คืนค่าใช้แหล่งที่มาเพื่อดึงข้อมูลอาจมีค่าใช้จ่ายของผู้ให้บริการ
-\nตรวจสอบให้แน่ใจว่าคุณได้เข้าสู่ระบบอย่างถูกต้องในแหล่งที่ต้องใช้ก่อนที่จะกู้</string>
     <string name="title">ชื่อเรื่อง</string>
     <string name="started">เริ่มต้นแล้ว</string>
     <string name="type">ชนิด</string>
@@ -259,7 +250,6 @@
     <string name="this_will_remove_the_read_date_question">สิ่งนี้จะลบวันที่อ่านของบทนี้ คุณแน่ใจไหม\?</string>
     <string name="picture_saved">บันทึกรูปภาพแล้ว</string>
     <string name="options">ตัวเลือก</string>
-    <string name="custom_filter">ตัวกรองที่กำหนดเอง</string>
     <string name="set_as_cover">ตั้งเป็นปก</string>
     <string name="cover_updated">อัปเดตปกแล้ว</string>
     <string name="page_">หน้า: %1$d</string>
@@ -275,8 +265,6 @@
     <string name="theres_no_previous_chapter">ไม่มีบทก่อนหน้านี้</string>
     <string name="loading_pages">กำลังโหลดหน้า …</string>
     <string name="failed_to_load_pages_">ไม่สามารถโหลดหน้าได้: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
-    <string name="select">เลือก</string>
     <string name="migrate">โยกย้าย</string>
     <string name="could_not_download_chapter_can_try_again">เกิดข้อผิดพลาดขณะดาวน์โหลดบท คุณสามารถลองอีกครั้งในส่วนการดาวน์โหลด</string>
     <string name="new_chapters_found">พบบทใหม่</string>

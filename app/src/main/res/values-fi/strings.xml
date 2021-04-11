@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Nimi</string>
     <string name="categories">Kategoriat</string>
     <string name="manga">Manga</string>
     <string name="tracking">Seuranta</string>
@@ -19,7 +18,6 @@
     <string name="mark_previous_as_read">Merkitse aiemmat luetuiksi</string>
     <string name="move_to_categories">Siirrä kategorioihin</string>
     <string name="options">Asetukset</string>
-    <string name="custom_filter">Mukautettu suodatus</string>
     <string name="set_as_cover">Aseta kansikuvaksi</string>
     <string name="cover_updated">Kansikuva päivitetty</string>
     <string name="page_">Sivu: %1$d</string>
@@ -35,8 +33,6 @@
     <string name="theres_no_previous_chapter">Aiempaa lukua ei ole</string>
     <string name="loading_pages">Ladataan sivuja…</string>
     <string name="failed_to_load_pages_">Sivujen lataus epäonnistui: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Luku %2$s</string>
-    <string name="select">Valitse</string>
     <string name="migrate">Vaihda</string>
     <string name="could_not_download_chapter_can_try_again">Virhe tapahtui ladatessa lukuja. Voit yrittää uudelleen lataukset-osiossa</string>
     <string name="new_chapters_found">Uusia lukuja löydetty</string>
@@ -75,7 +71,6 @@
     <string name="edit">Muokkaa</string>
     <string name="add">Lisää</string>
     <string name="edit_categories">Muokkaa kategorioita</string>
-    <string name="rename_category">Nimeä kategoria uudelleen</string>
     <string name="retry">Yritä uudelleen</string>
     <string name="start">Aloita</string>
     <string name="stop">Lopeta</string>
@@ -135,7 +130,6 @@
     <string name="system_default">Järjestelmän oletus</string>
     <string name="default_category">Oletus kategoria</string>
     <string name="always_ask">Kysy aina</string>
-    <string name="details">Tiedot</string>
     <string name="pending">Odotetaan</string>
     <string name="installing">Asennetaan</string>
     <string name="installed">Asennettu</string>
@@ -150,7 +144,6 @@
 \nLuottamalla tähän sertifikaattiin hyväksyt nämä riskit.</string>
     <string name="version_">Versio: %1$s</string>
     <string name="language_">"Kieli:  %1$s"</string>
-    <string name="empty_preferences_for_extension">Tällä laajennuksella ei ole muokattavia asetuksia</string>
     <string name="fullscreen">Koko näyttö</string>
     <string name="double_tap_anim_speed">Tuplanäpäytyksen animaation nopeus</string>
     <string name="show_page_number">Näytä sivunumero</string>
@@ -211,13 +204,10 @@
     <string name="services">Palvelut</string>
     <string name="can_be_used_to_restore">Voidaan käyttää nykyisen kirjaston palauttamiseen</string>
     <string name="restore_from_backup_file">Palauta kirjasto varmuuskopiointi-tiedostosta</string>
-    <string name="service">Palvelu</string>
     <string name="backup_frequency">Varmuuskopioinnin tiheys</string>
     <string name="max_auto_backups">Maksimimäärä automaattisia varmuuskopioita</string>
     <string name="backup_created">Varmuuskopio luotu</string>
     <string name="restore_completed">Palautus valmis</string>
-    <string name="restore_message">Palautus käyttää lähdettä noutaakseen tietoja, tämä voi aiheuttaa kustannuksia.
-\nVarmista myös että olet kirjautunut lähteisiin jotka vaativat sitä ennen palauttamista.</string>
     <string name="what_should_backup">Mitä haluat varmuuskopioida\?</string>
     <string name="restoring_backup">Palautetaan varmuuskopiota</string>
     <string name="clear_chapter_cache">Tyhjennä lukujen välimuisti</string>
@@ -242,10 +232,8 @@
     <string name="log_in_to_">%1$s kirjautuminen</string>
     <string name="username">Käyttäjätunnus</string>
     <string name="password">Salasana</string>
-    <string name="show_password">Näytä salasana</string>
     <string name="login">Kirjaudu</string>
     <string name="successfully_logged_in">Kirjautuminen onnistui</string>
-    <string name="could_not_log_in">Virhe kirjautuessa</string>
     <string name="unknown_error">Tuntematon virhe</string>
     <string name="local">Paikallinen</string>
     <string name="no_more_results">Ei enempää tuloksia</string>
@@ -301,8 +289,6 @@
     <string name="help">Apu</string>
     <string name="library_update_order">Kirjaston päivitys järjestys</string>
     <string name="select_order_to_update">Valitse järjestys jossa päivitykset tarkistetaan</string>
-    <string name="system_default_all_blue">Järjestelmän oletus (Tumman sininen)</string>
-    <string name="system_default_amoled">Järjestelmän oletus (AMOLED)</string>
     <string name="no_results_found">Ei tuloksia</string>
     <string name="lock_with_biometrics">Lukitse biometrisillä tiedoilla</string>
     <string name="lock_when_idle">Lukitse käyttämättömänä</string>
@@ -320,7 +306,6 @@
     <string name="updating_library">Päivittää kirjastoa</string>
     <string name="date_added">Lisäyspäivämäärä</string>
     <string name="latest_chapter">Viimeisin luku</string>
-    <string name="unread_badges">Näytä lukemattomien määrä</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 päivitys epäonnistui%1$d päivitystä epäonnistui</item>
         <item quantity="other"/>
@@ -348,7 +333,6 @@
     <string name="oldest">Vanhin</string>
     <string name="pin">Kiinnitä</string>
     <string name="pinned">Kiinnitetyt</string>
-    <string name="refresh">Päivitä</string>
     <string name="reorder">Uudelleenjärjestä</string>
     <string name="unpin">Poista kiinnitys</string>
     <string name="view_chapters">Näytä luvut</string>
@@ -374,7 +358,6 @@
     <string name="failed_to_bypass_cloudflare">Cloudflaren ohittaminen epäonnistui</string>
     <string name="please_update_webview">Päivitä WebView-sovellus yhteensopivuuden parantamiseksi</string>
     <string name="always">Aina</string>
-    <string name="app_not_available">Sovellus ei ole saatavilla</string>
     <string name="back">Takaisin</string>
     <plurals name="category_plural">
         <item quantity="one">%d kategoria</item>
@@ -416,7 +399,6 @@
     <string name="uniform_covers">Yhtenäiset kannet</string>
     <string name="hide_start_reading_button">Piilota aloita lukeminen -painike</string>
     <string name="no_matches_for_filters">Nykyisillä suodattimillasi ei löytynyt osumaa</string>
-    <string name="start_with_filters_hidden">Aloita piilotetuilla suodattimilla</string>
     <string name="comfortable_grid">Mukava ruudukko</string>
     <string name="display_options">Näyttöasetukset</string>
     <string name="drag_and_drop">Vedä &amp; pudota</string>
@@ -449,7 +431,6 @@
     <string name="categories_on_manual">Päivitettävät kategoriat, kun ne päivitetään manuaalisesti</string>
     <string name="first_category">Ensimmäinen kategoria</string>
     <string name="top_category">Ylin kategoria (%1$s)</string>
-    <string name="category_is_hidden">Kategoria on piilotettu</string>
     <string name="category_is_empty">Kategoria on tyhjä</string>
     <string name="create_new_category">Luo uusi kategoria</string>
     <string name="_already_in_queue">%1$s on jo jonossa</string>
@@ -527,16 +508,6 @@
     </plurals>
     <string name="data_management">Tiedonhallinta</string>
     <string name="not_logged_into_">Et ole kirjautunut sisään: %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d manga on nyt lisensoitu eikä sitä voida palauttaa</item>
-        <item quantity="other">%d manga on nyt lisensoitu eikä sitä voida palauttaa</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d lähde puuttuu</item>
-        <item quantity="other">%d lähdettä puuttuu</item>
-    </plurals>
-    <string name="restoring_progress">Palautus (%1$d / %2$d)</string>
-    <string name="restore_content_skipped">%1$d ohitettu</string>
     <string name="restore_error">Varmuuskopion palauttaminen epäonnistui</string>
     <string name="backup_in_progress">Varmuuskopiointi on jo käynnissä</string>
     <string name="restore_in_progress">Palautus on jo käynnissä</string>
@@ -645,7 +616,6 @@
     <string name="reading_">Luettavana %1$s</string>
     <string name="set_as_default_for_all">Aseta kaikkien oletusasetukseksi</string>
     <string name="reader_settings">Lukijan asetukset</string>
-    <string name="_details">%1$s tiedot</string>
     <string name="_must_be_enabled_first">%1$s on otettava käyttöön ensin</string>
     <string name="app_info">Sovelluksen tiedot</string>
     <string name="filter_languages">Suodata kieliä</string>
@@ -654,12 +624,7 @@
     <string name="all_sources">Kaikki lähteet</string>
     <string name="search_extensions">Etsi laajennuksia…</string>
     <string name="in_library">Kirjastossa</string>
-    <string name="press_and_hold_to_reset_history">Pidä painettuna nollataksesi luvun historian</string>
     <string name="reset_chapter_question">Nollaa luku\?</string>
-    <string name="only_updates">Vain päivitykset</string>
-    <string name="only_history">Vain historia</string>
-    <string name="ungroup_all">Poista kaikkien ryhmittely</string>
-    <string name="group_all">Ryhmittele kaikki</string>
     <string name="search_recents">Hae viimeisimpiä…</string>
     <string name="view_all_updates">Katso kaikki päivitykset</string>
     <string name="view_history">Näytä historia</string>
@@ -723,12 +688,10 @@
     <string name="dns_over_https">DNS HTTPS:n kautta (Cloudflare)</string>
     <string name="view_all_errors">Näytä kaikki virheet</string>
     <string name="use_default">Käytä oletusta</string>
-    <string name="un_select_all">Poista kaikki valinnat</string>
     <string name="tag">Tunniste</string>
     <string name="sort_and_filter">Lajittele &amp; suodata</string>
     <string name="selection">Valinta</string>
     <string name="select_none">Älä valitse mitään</string>
-    <string name="refreshing">Päivittää</string>
     <string name="previous">Edellinen</string>
     <string name="preview">Esikatselu</string>
     <string name="moved_to_">Siirretty %1$s</string>
@@ -744,10 +707,8 @@
     <string name="download_unread">Lataa lukemattomat</string>
     <string name="deleted_">Poistettu: %1$s</string>
     <string name="change">Muuta</string>
-    <string name="bug_report">Tee virheraportti</string>
     <string name="bottom">Alaosa</string>
     <string name="beta">BETA</string>
-    <string name="auto">Auto</string>
     <string name="added_to_">Lisätty %1$s</string>
     <string name="add_to_">lisää %1$s</string>
     <plurals name="after_minutes">
@@ -809,7 +770,6 @@
     <string name="add_x_to">Lisää %1$s kohteeseen…</string>
     <string name="move_x_to">Siirrä %1$s kohtaan…</string>
     <string name="drag_handle">Veto kahva</string>
-    <string name="collasped">Pienennetty</string>
     <string name="match_enabled_sources">Sovita käytössä olevat lähteet</string>
     <string name="match_pinned_sources">Sovita kiinnitetyt lähteet</string>
     <string name="cutout_behavior_only_applies">Leikkausalueen toiminta pätee vain pystytilassa tietyissä skaalaustyypeissä</string>

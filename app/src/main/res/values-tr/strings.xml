@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Ad</string>
     <string name="categories">Kategoriler</string>
     <string name="manga">Manga</string>
     <string name="chapters">Bölümler</string>
@@ -32,7 +31,6 @@
     <string name="edit">Düzenle</string>
     <string name="add">Ekle</string>
     <string name="edit_categories">Kategorileri düzenle</string>
-    <string name="rename_category">Kategoriyi yeniden adlandır</string>
     <string name="move_to_categories">Kategorilere taşı</string>
     <string name="start">Başlat</string>
     <string name="stop">Durdur</string>
@@ -91,7 +89,6 @@
     <string name="system_default">Sistem öntanımlı</string>
     <string name="default_category">Varsayılan kategori</string>
     <string name="always_ask">Her zaman sor</string>
-    <string name="details">Ayrıntılar</string>
     <string name="pending">Beklemede</string>
     <string name="installing">Kuruluyor</string>
     <string name="installed">Kuruldu</string>
@@ -106,7 +103,6 @@
 \nBu sertifikaya güvenerek bu riskleri kabul etmiş oluyorsunuz.</string>
     <string name="version_">Sürüm: %1$s</string>
     <string name="language_">Dil: %1$s</string>
-    <string name="empty_preferences_for_extension">Bu uzantı için düzenlenebilecek tercih yok</string>
     <string name="fullscreen">Tam Ekran</string>
     <string name="double_tap_anim_speed">Çift dokunma animasyon hızı</string>
     <string name="show_page_number">Sayfa numarası göster</string>
@@ -168,13 +164,10 @@
     <string name="restore_backup">Yedeği geri yükle</string>
     <string name="restore_from_backup_file">Kitaplığı yedek dosyasından geri yükle</string>
     <string name="backup_location">Yedekleme dizini</string>
-    <string name="service">Hizmet</string>
     <string name="backup_frequency">Yedekleme sıklığı</string>
     <string name="max_auto_backups">Kendiliğinden yedek sınırı</string>
     <string name="backup_created">Yedek oluşturuldu</string>
     <string name="restore_completed">Geri yükleme tamamlandı</string>
-    <string name="restore_message">Geri yükleme veriyi almak için kaynağı kullanır, taşıyıcı ücreti uygulanabilir.
-\nAyrıca geri yüklemeden önce giriş gerektiren kaynaklara uygun biçimde giriş yaptığınızdan emin olun.</string>
     <string name="what_should_backup">Neyi yedeklemek istiyorsunuz?</string>
     <string name="restoring_backup">Yedek geri yükleniyor</string>
     <string name="clear_chapter_cache">Bölüm önbelleğini temizle</string>
@@ -199,10 +192,8 @@
     <string name="log_in_to_">%1$s için giriş</string>
     <string name="username">Kullanıcı adı</string>
     <string name="password">Parola</string>
-    <string name="show_password">Parolayı göster</string>
     <string name="login">Giriş</string>
     <string name="successfully_logged_in">Giriş başarılı</string>
-    <string name="could_not_log_in">Giriş hatası</string>
     <string name="unknown_error">Bilinmeyen hata</string>
     <string name="local">Yerel</string>
     <string name="search_filters">Arama süzgeçleri</string>
@@ -246,7 +237,6 @@
     <string name="this_will_remove_the_read_date_question">Bu, bu bölümün okunma tarihini kaldıracak. Emin misiniz?</string>
     <string name="picture_saved">Resim kaydedildi</string>
     <string name="options">Seçenekler</string>
-    <string name="custom_filter">Özel filtre</string>
     <string name="set_as_cover">Kapak olarak ayarla</string>
     <string name="cover_updated">Kapak güncellendi</string>
     <string name="page_">Sayfa: %1$d</string>
@@ -254,8 +244,6 @@
     <string name="decode_image_error">Görsel kodu çözülemedi</string>
     <string name="use_image_as_cover">Bu görseli kapak olarak ayarlamak istiyor musunuz?</string>
     <string name="viewer_for_this_series">Bu dizi için görüntüleyici</string>
-    <string name="source_dash_chapter_">%1$s - Böl.%2$s</string>
-    <string name="select">Seç</string>
     <string name="migrate">Taşın</string>
     <string name="could_not_download_chapter_can_try_again">Bölümler indirilirken bir hata oluştu. İndirmeler bölümünden yeniden deneyebilirsiniz</string>
     <string name="new_chapters_found">Yeni bölümler bulundu</string>
@@ -301,8 +289,6 @@
     <string name="help">Yardım</string>
     <string name="library_update_order">Kitaplık güncelleme sırası</string>
     <string name="select_order_to_update">Tachiyomi\'nin güncelleme denetleme sırasını seçin</string>
-    <string name="system_default_all_blue">Sistem öntanımlı (Koyu mavi)</string>
-    <string name="system_default_amoled">Sistem öntanımlı (AMOLED)</string>
     <string name="no_results_found">Sonuç bulunmadı</string>
     <string name="lock_with_biometrics">Biyometriyle kilitle</string>
     <string name="lock_when_idle">Boştayken kilitle</string>
@@ -310,7 +296,6 @@
     <string name="updating_library">Kitaplık güncelleniyor</string>
     <string name="date_added">Eklendiği tarih</string>
     <string name="latest_chapter">Son bölüm</string>
-    <string name="unread_badges">Okunmamış rozetler</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 güncelleme başarısız%1$d güncelleme başarısız</item>
         <item quantity="other"/>
@@ -361,7 +346,6 @@
     <string name="failed_to_bypass_cloudflare">Cloudflare bypass edilemedi</string>
     <string name="please_update_webview">Daha iyi uyumluluk için lütfen WebView\'i güncelleyin</string>
     <string name="always">Her zaman</string>
-    <string name="app_not_available">Uygulama yok</string>
     <string name="back">Geri</string>
     <string name="forward">İleri</string>
     <string name="less">Daha az</string>
@@ -374,7 +358,6 @@
     <string name="oldest">En eski</string>
     <string name="pin">Sabitle</string>
     <string name="pinned">Sabit</string>
-    <string name="refresh">Yenile</string>
     <string name="reorder">Yeniden sırala</string>
     <string name="read_progress">Okuma durumu</string>
     <string name="always_show_current_category">Her zaman şu anki kategoriyi göster</string>
@@ -394,7 +377,6 @@
     <string name="categories_on_manual">Elle yenileyince güncellenecek kategoriler</string>
     <string name="first_category">İlk kategori</string>
     <string name="top_category">Üst kategori (%1$s)</string>
-    <string name="category_is_hidden">Kategori gizli</string>
     <string name="category_is_empty">Kategori boş</string>
     <string name="create_new_category">Yeni kategori oluştur</string>
     <string name="_already_in_queue">%1$s zaten kuyrukta</string>
@@ -470,10 +452,6 @@
     <string name="smart_based_on_page_and_theme">Akıllı (sayfaya ve temaya dayalı)</string>
     <string name="extension_updates">Eklenti Güncellemeleri</string>
     <string name="search_extensions">Eklentileri ara…</string>
-    <string name="only_updates">Sadece güncellemeler</string>
-    <string name="only_history">Sadece geçmiş</string>
-    <string name="ungroup_all">Hepsini gruplandırma</string>
-    <string name="group_all">Hepsini gruplandır</string>
     <string name="view_all_updates">Tüm güncellemeleri göster</string>
     <string name="view_history">Geçmişi göster</string>
     <string name="newly_added">Yeni eklenen</string>
@@ -496,7 +474,6 @@
     <string name="mark_all_as_unread">Tümünü okunmamış olarak işaretle</string>
     <string name="mark_all_as_read">Tümünü okunmuş olarak işaretle</string>
     <string name="deleted_">Silindi: %1$s</string>
-    <string name="bug_report">Bir hata şikayet et</string>
     <string name="always_delete">Daima sil</string>
     <string name="always_keep">Daima sakla</string>
     <string name="nothing_is_downloading">Şu anda hiçbirşey indirilmiyor</string>

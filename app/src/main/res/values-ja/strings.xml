@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">名前</string>
     <string name="categories">カテゴリ</string>
     <string name="manga">マンガ</string>
     <string name="chapters">章</string>
@@ -82,7 +81,6 @@
     <string name="system_default">システム標準</string>
     <string name="default_category">デフォルトカテゴリ</string>
     <string name="always_ask">毎回尋ねる</string>
-    <string name="details">詳細</string>
     <string name="pending">保留</string>
     <string name="installing">インストール</string>
     <string name="installed">インストール済み</string>
@@ -143,7 +141,6 @@
     <string name="restore_backup">バックアップを復元</string>
     <string name="restore_from_backup_file">バックアップファイルからライブラリを復元する</string>
     <string name="backup_location">バックアップディレクトリ</string>
-    <string name="service">サービス</string>
     <string name="backup_frequency">バックアップ頻度</string>
     <string name="max_auto_backups">最大自動バックアップ</string>
     <string name="backup_created">バックアップが作成されました</string>
@@ -159,13 +156,9 @@
     <string name="log_in_to_">%1$s のためにログイン</string>
     <string name="username">ユーザー名</string>
     <string name="password">パスワード</string>
-    <string name="show_password">パスワードを表示</string>
     <string name="login">ログイン</string>
     <string name="successfully_logged_in">ログイン成功</string>
-    <string name="system_default_all_blue">システム標準 (ダークブルー)</string>
-    <string name="system_default_amoled">システム標準 (AMOLED)</string>
     <string name="add">追加</string>
-    <string name="rename_category">カテゴリー名を変更</string>
     <string name="move_to_categories">カテゴリーに移動</string>
     <string name="stop">停止</string>
     <string name="remove">削除</string>
@@ -207,7 +200,6 @@
     <string name="local">ローカル</string>
     <string name="date_added">ライブラリへの追加日付順</string>
     <string name="latest_chapter">最新章の更新順</string>
-    <string name="unread_badges">未読の章の数</string>
     <string name="new_chapters_found">新しい章が見つかりました</string>
     <plurals name="notification_update_failed">
         <item quantity="other">%1$dのアップデートに失敗しました</item>
@@ -234,7 +226,6 @@
     <plurals name="extension_updates_available">
         <item quantity="other">%d件の拡張機能の更新が利用可能</item>
     </plurals>
-    <string name="custom_filter">カスタム フィルタ</string>
     <string name="set_as_cover">カバーとして設定</string>
     <string name="cover_updated">カバーとして設定しました</string>
     <string name="next_chapter_not_found">次の章が見つかりません</string>
@@ -303,7 +294,6 @@
     <string name="open_source_licenses">オープンソースライセンス</string>
     <string name="email">メールアドレス</string>
     <string name="successfully_logged_out">ログアウトしました</string>
-    <string name="could_not_log_in">ログインできませんでした</string>
     <string name="cancel_all">全てキャンセル</string>
     <string name="downloading">ダウンロード中</string>
     <string name="downloading_progress">ダウンロード中（%1$d/%2$d）</string>
@@ -323,7 +313,6 @@
     <string name="failed_to_bypass_cloudflare">Cloudflareをバイパスできませんでした</string>
     <string name="please_update_webview">WebViewアプリを更新して互換性を向上させてください</string>
     <string name="always">常時</string>
-    <string name="app_not_available">アプリは利用不可</string>
     <string name="back">前へ</string>
     <string name="common">一般設定</string>
     <string name="cover_of_image">マンガカバー</string>
@@ -344,7 +333,6 @@
     <string name="picture_saved">画像を保存しました</string>
     <string name="pin">ピン留め</string>
     <string name="pinned">ピン留め済み</string>
-    <string name="refresh">再ロード</string>
     <string name="marked_as_unread">未読とマーク</string>
     <string name="marked_as_read">既読とマーク</string>
     <string name="all_chapters_read">全章読了</string>
@@ -373,7 +361,6 @@
     <string name="categories_on_manual">手動でリロード時、アップデートするカテゴリー</string>
     <string name="first_category">最初のカテゴリー</string>
     <string name="top_category">トップカテゴリー（%1$s）</string>
-    <string name="category_is_hidden">カテゴリーは非表示されています</string>
     <string name="category_is_empty">カテゴリーが空です</string>
     <string name="create_new_category">新しいカテゴリーを作成</string>
     <string name="_already_in_queue">%1$sは既にキュー内に存在しています</string>

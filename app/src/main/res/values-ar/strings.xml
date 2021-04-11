@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">الاسم</string>
     <string name="categories">الفئات</string>
     <string name="manga">المانجا</string>
     <string name="chapters">الفصول</string>
@@ -29,7 +28,6 @@
     <string name="edit">تعديل</string>
     <string name="add">إضافة</string>
     <string name="edit_categories">تعديل الفئات</string>
-    <string name="rename_category">إعادة تسمية الفئة</string>
     <string name="move_to_categories">النقل إلى فئة</string>
     <string name="start">بدء</string>
     <string name="stop">إيقاف</string>
@@ -83,8 +81,6 @@
     <string name="light_blue">السمة الرئيسية</string>
     <string name="dark">السمة الليلية</string>
     <string name="dark_blue">أزرق غامق</string>
-    <string name="system_default_amoled">النظام الافتراضي (AMOLED)</string>
-    <string name="system_default_all_blue">النظام الافتراضي (أزرق غامق)</string>
     <string name="amoled_black">سمة شاشات AMOLED</string>
     <string name="language">اللغة</string>
     <string name="system_default">لغة النظام الافتراضية</string>
@@ -143,14 +139,10 @@
     <string name="restore_backup">استعادة النسخة الاحتياطية</string>
     <string name="restore_from_backup_file">استعادة المكتبة من ملف نسخة احتياطية</string>
     <string name="backup_location">مجلد النسخ الاحتياطي</string>
-    <string name="service">الخدمة</string>
     <string name="backup_frequency">معدل النسخ الاحتياطي</string>
     <string name="max_auto_backups">أقصي عدد للنسخ الاحتياطية التلقائية</string>
     <string name="backup_created">تم إنشاء النسخة الإحتياطية</string>
     <string name="restore_completed">اكتملت الاستعادة</string>
-    <string name="restore_message">عملية الاستعادة تستخدم المصادر لجلب البيانات؛ قد يتم تطبيق تكاليف مزود الخدمة.
-\n
-\nتأكّد من تثبيت كافة اﻹضافات الضرورية وتسجيل الدخول للمصادر و خدمات التتبع المطلوبة قبل عملية الاستعادة.</string>
     <string name="what_should_backup">ما الذي تريد نسخه احتياطيا؟</string>
     <string name="restoring_backup">جار استعادة النسخة الاحتياطية</string>
     <string name="red_initial">R</string>
@@ -179,10 +171,8 @@
     <string name="log_in_to_">تسجيل الدخول إلى %1$s</string>
     <string name="username">اسم المستخدم</string>
     <string name="password">كلمة المرور</string>
-    <string name="show_password">عرض كلمة المرور</string>
     <string name="login">تسجيل الدخول</string>
     <string name="successfully_logged_in">تم تسجيل الدخول بنجاح</string>
-    <string name="could_not_log_in">حدث خطأ في تسجيل الدخول</string>
     <string name="unknown_error">خطأ غير معروف</string>
     <string name="no_more_results">لا يوجد نتائج أخرى</string>
     <string name="local_source">مصدر محلّي</string>
@@ -215,7 +205,6 @@
     <string name="this_will_remove_the_read_date_question">سيؤدي هذا إلى إزالة تاريخ قراءة هذا الفصل. هل أنت متأكد؟</string>
     <string name="picture_saved">تم حفظ الصورة</string>
     <string name="options">الخيارات</string>
-    <string name="custom_filter">مُرشح مخصص</string>
     <string name="set_as_cover">تعيين كغلاف</string>
     <string name="cover_updated">تم تحديث صورة الغلاف</string>
     <string name="page_">الصفحة: %1$d</string>
@@ -223,7 +212,6 @@
     <string name="decode_image_error">لا يمكن فكّ تشفير هذه الصورةِ</string>
     <string name="use_image_as_cover">هل تريد تعيين هذه الصورة كغلاف؟</string>
     <string name="viewer_for_this_series">العارض لهذه السلسلة</string>
-    <string name="source_dash_chapter_">%1$s - الفصل %2$s</string>
     <string name="could_not_download_chapter_can_try_again">حدث خطأ أثناء تنزيل الفصول. يمكنك إعادة المحاولة في قسم التنزيلات</string>
     <string name="new_chapters_found">تم إيجاد فصول جديدة</string>
     <string name="failed_to_update_cover">فشل تحديث الغلاف</string>
@@ -250,7 +238,6 @@
     <string name="extensions">اﻹضافات</string>
     <string name="extension_info">معلومات اﻹضافة</string>
     <string name="download_badge">شارات لعدد الفصول المحملة</string>
-    <string name="details">التفاصيل</string>
     <string name="pending">المُعلقة</string>
     <string name="installing">جاري التثبيت</string>
     <string name="installed">تم التثبيت</string>
@@ -265,7 +252,6 @@
 \nبالثقة في هذه الشهادة تقبل هذه المخاطر.</string>
     <string name="version_">الإصدار %1$s</string>
     <string name="language_">اللغة: %1$s</string>
-    <string name="empty_preferences_for_extension">لا توجد تفضيلات خاصة بهذه اﻹضافة لتعديلها</string>
     <string name="double_tap_anim_speed">سرعة مؤثر النقر المزدوج</string>
     <string name="no_animation">لا مؤثرات</string>
     <string name="normal">طبيعي</string>
@@ -281,7 +267,6 @@
     <string name="started">تم البدء فيها</string>
     <string name="type">النوع</string>
     <string name="url_not_set_click_again">لم يتم تعيين رابط المانجت، برجاء الضغط على العنوان وتحديد مانجا مرة أخرى</string>
-    <string name="select">تحديد</string>
     <string name="migrate">ترحيل</string>
     <string name="finished_chapter">تمَّ الانتهاء من:</string>
     <string name="current_chapter">الحالي:</string>
@@ -311,7 +296,6 @@
     <string name="updating_library">تحديث المكتبة</string>
     <string name="date_added">تاريخ الاضافة</string>
     <string name="latest_chapter">أحدث الفصول</string>
-    <string name="unread_badges">شارات لعدد الفصول غير المقروءة</string>
     <plurals name="notification_update_failed">
         <item quantity="zero">تم التحديث بنجاح</item>
         <item quantity="one">فشل تحديث واحد فقط</item>
@@ -340,7 +324,6 @@
     <string name="oldest">الأقدم</string>
     <string name="pin">تثبيت</string>
     <string name="pinned">المثبتة</string>
-    <string name="refresh">تحديث</string>
     <string name="reorder">إعادة ترتيب</string>
     <string name="always_show_chapter_transition">اظهار فواصل الانتقال بين الفصول</string>
     <string name="pref_webtoon_side_padding">المساحة الجانبية</string>
@@ -373,7 +356,6 @@
     <string name="failed_to_bypass_cloudflare">فشل في تجاوز Cloudflare</string>
     <string name="please_update_webview">يرجى تحديث تطبيق WebView لتوافق أفضل</string>
     <string name="always">دائماً</string>
-    <string name="app_not_available">التطبيق غير متوفر</string>
     <string name="back">عودة</string>
     <string name="forward">تقدم</string>
     <string name="less">أقل</string>
@@ -387,7 +369,6 @@
     <string name="view_chapters">عرض الفصول</string>
     <string name="first_category">أول فئة</string>
     <string name="top_category">الفئة العليا (%1$s)</string>
-    <string name="category_is_hidden">الفئة مخفية</string>
     <string name="category_is_empty">الفئة فارغة</string>
     <string name="create_new_category">إنشاء فئة جديدة</string>
     <string name="_already_in_queue">%1$s موجود في قائمة الإنتظار بالفعل</string>
@@ -481,10 +462,8 @@
     </plurals>
     <string name="top">الأعلى</string>
     <string name="use_default">استخدم الافتراضيّ</string>
-    <string name="un_select_all">إلغاء تحديد الكل</string>
     <string name="tag">وسم</string>
     <string name="select_none">إلغاء التحديد</string>
-    <string name="refreshing">تحديث</string>
     <string name="moved_to_">تم النقل إلى %1$s</string>
     <string name="mark_previous_as_unread">تحديد السابق كغير مقروء</string>
     <string name="mark_all_as_read">تحديد الكل كمقروء</string>
@@ -494,10 +473,7 @@
     <string name="enabled">ممكّن</string>
     <string name="drag_handle">مقبض السحب</string>
     <string name="deleted_">تم الحذف: %1$s</string>
-    <string name="collasped">انهيار</string>
-    <string name="bug_report">الإبلاغ عن خطأ</string>
     <string name="bottom">الأسفل</string>
-    <string name="auto">تلقائي</string>
     <plurals name="after_minutes">
         <item quantity="zero">بعد %1$s دقيقة</item>
         <item quantity="one">بعد %1$s دقيقة</item>
@@ -549,8 +525,6 @@
     <string name="clean_up_downloaded_chapters">تنظيف الفصول التي تم تنزيلها</string>
     <string name="data_management">إدارة البيانات</string>
     <string name="not_logged_into_">لم يتم تسجيل الدخول: %1$s</string>
-    <string name="restoring_progress">جاري استعادة (%1$d/%2$d)</string>
-    <string name="restore_content_skipped">%1$d تم تخطيه</string>
     <string name="restore_error">خطأ في الاستعادة</string>
     <string name="white_theme">أبيض نقي</string>
     <string name="skipping_">(تخطي %1$d)</string>
@@ -626,12 +600,7 @@
     <string name="all_sources">جميع المصادر</string>
     <string name="search_extensions">البحث عن الإضافات…</string>
     <string name="in_library">في المكتبة</string>
-    <string name="press_and_hold_to_reset_history">اضغط مطولا لإعادة تعيين سجل الفصل</string>
     <string name="reset_chapter_question">إعادة تعيين الفصل؟</string>
-    <string name="only_updates">التحديثات فقط</string>
-    <string name="only_history">السجل فقط</string>
-    <string name="ungroup_all">الغاء تجميع الكل</string>
-    <string name="group_all">تجميع الكل</string>
     <string name="search_recents">بحث في مؤخرا…</string>
     <string name="reset_all_chapters_for_this_">إعادة تعيين كافة الفصول ل %1$s</string>
     <string name="this_will_remove_the_read_date_for_x_question">سيؤدي هذا إلى إزالة تاريخ قراءة\"%1$s\". هل أنت متأكد؟</string>
@@ -686,7 +655,6 @@
     <string name="medium">M</string>
     <string name="x_small">XS</string>
     <string name="hide_start_reading_button">إخفاء زر بدء القراءة</string>
-    <string name="start_with_filters_hidden">البدء بالمرشحات المخفية</string>
     <string name="drag_and_drop">سحب و إفلات</string>
     <string name="tracked">مُتتبَعة</string>
     <string name="sort_and_filter">ترتب و ترشيح</string>
@@ -701,14 +669,6 @@
     <string name="search_globally">إبحث عن \"%1$s\" بشكلٍ شامل</string>
     <string name="_unread">%d غير مقروء</string>
     <string name="reorder_filters">إعادة ترتيب الترشيحات</string>
-    <plurals name="sources_missing">
-        <item quantity="zero">المصدر مفقود</item>
-        <item quantity="one">المصدر مفقود</item>
-        <item quantity="two">مصدران مفقود</item>
-        <item quantity="few">%d مصادر مفقود</item>
-        <item quantity="many">%d مصادر مفقود</item>
-        <item quantity="other">%d مصادر مفقود</item>
-    </plurals>
     <string name="next_page">صفحة التالية</string>
     <string name="previous_page">الصفحة سابقة</string>
     <string name="next_chapter">صفحة التالية</string>

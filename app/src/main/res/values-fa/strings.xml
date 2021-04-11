@@ -98,7 +98,6 @@
     <string name="open_in_browser">باز کردن در مرورگر</string>
     <string name="open_in_webview">در WebView باز کنید</string>
     <string name="edit_categories">ویرایش دسته ها</string>
-    <string name="rename_category">تغییر نام دسته</string>
     <string name="update">آپدیت</string>
     <string name="new_version_available">نسخه جدید موجود است!</string>
     <string name="no_new_updates_available">هیچ آپدیت جدیدی موجود نیست</string>
@@ -111,7 +110,6 @@
     <string name="latest_chapter">اخرین فصل</string>
     <string name="list">لیست</string>
     <string name="download_badge">تعداد دانلود شده</string>
-    <string name="unread_badges">تعداد خوانده نشده</string>
     <string name="new_chapters_found">فصل‌های جدید پیدا شدند</string>
     <plurals name="notification_update_failed">
         <item quantity="one">۱ آپدیت با خطا مواجه شد%1$d آپدیت با خطا مواجه شد</item>
@@ -186,7 +184,6 @@
     <string name="open_source_licenses">مجوزهای منبع باز</string>
     <string name="log_in_to_">ورود به %1$s</string>
     <string name="successfully_logged_out">شما خارج شدید</string>
-    <string name="could_not_log_in">ورود به سیستم ناموفق بود</string>
     <string name="downloads">بارگیری ها</string>
     <string name="download_queue">صف دانلود</string>
     <string name="cancel_all">لغو همه</string>
@@ -214,7 +211,6 @@
     <string name="pause">مکث</string>
     <string name="pin">پین</string>
     <string name="pinned">منابع پین شده</string>
-    <string name="refresh">بازآوری‌</string>
     <string name="remove">حذف</string>
     <string name="reorder">دوباره مرتب کردن</string>
     <string name="reset">از اول</string>
@@ -240,7 +236,6 @@
     <string name="loading">درحال بارگیری…</string>
     <string name="download_unread">خوانده نشده</string>
     <string name="charging">درحال شارژ</string>
-    <string name="app_not_available">برنامه موجود نیست</string>
     <string name="all">همه</string>
     <string name="fifth_to_last">پنجم به آخرین قسمت خوانده شده</string>
     <string name="fourth_to_last">چهارم به آخرین قسمت خوانده شده</string>
@@ -250,7 +245,6 @@
     <string name="downloading">درحال دانلود…</string>
     <string name="logout">خروج</string>
     <string name="login">ورود</string>
-    <string name="show_password">نمایش گذرواژه</string>
     <string name="password">گذرواژه</string>
     <string name="email">آدرس ایمیل</string>
     <string name="username">نام کاربری</string>
@@ -300,7 +294,6 @@
     <string name="decode_image_error">بازکردن عکس با خطا مواجه شد</string>
     <string name="cover_updated">عکس روی جلد بروزرسانی شد</string>
     <string name="set_as_cover">تنظیم به عنوان عکس روی جلد</string>
-    <string name="custom_filter">فیلتر سفارشی</string>
     <string name="obsolete_extension_message">این افزونه دیگر موجود نیست.</string>
     <string name="untrusted_extension_message">این افزونه با یک گواهی نامطمئن امضا شده است و فعال نشده است.
 \n
@@ -334,7 +327,6 @@
     <string name="description">توضیحات</string>
     <string name="title">عنوان</string>
     <string name="manga">مانگا</string>
-    <string name="name">نام</string>
     <string name="artist">هنرمند</string>
     <string name="read">خواندن</string>
     <string name="in_progress">در حال پیشرفت</string>
@@ -414,19 +406,12 @@
     <string name="set_as_default_for_all">به عنوان حالت پیشرفض برای همه قرار بده</string>
     <string name="app_info">اطلاعات اپلیکیشن</string>
     <string name="may_contain_nsfw">ممکن است دارای صحنه های نامناسب برای کار(+18) باشد</string>
-    <string name="empty_preferences_for_extension">هیچ اولویتی برای ویرایش این افزونه وجود ندارد</string>
-    <string name="details">جزئیات</string>
     <string name="filter_languages">فیلترکردن زبان ها</string>
     <string name="extension_updates">بروزرسانی های افزونه</string>
     <string name="source_hidden">منبع پنهان شده</string>
     <string name="all_sources">همه منابع</string>
     <string name="search_filters">فیلترهای جست و جو</string>
-    <string name="press_and_hold_to_reset_history">برای بازنشانی تاریخچه چپتر بزنید و نگه دارید</string>
     <string name="reset_chapter_question">چپتر را بازنشانی می کنید؟</string>
-    <string name="only_updates">فقط بروزرسانی ها</string>
-    <string name="only_history">فقط تاریخچه</string>
-    <string name="ungroup_all">همه را از گروه بندی در بیاور</string>
-    <string name="group_all">همه را گروه بندی کن</string>
     <string name="no_recently_read_manga">هیچ مانگایی که تازه خوانده باشید ندارید</string>
     <string name="no_recent_chapters">هیچ چپتر جدیدی یافت نشد</string>
     <string name="view_all_updates">همه بروزرسانی ها را نشان دهید</string>
@@ -445,7 +430,6 @@
     <string name="medium">متوسط</string>
     <string name="small">کوچک</string>
     <string name="hide_start_reading_button">دکمه شروع به خواندن را پنهان کن</string>
-    <string name="start_with_filters_hidden">با مخفی کردن فیلترها شروع کن</string>
     <string name="display_options">گزینه های نمایش</string>
     <string name="drag_and_drop">بکشید و رها کنید</string>
     <string name="last_updated">آخرین بروزرسانی شده ها</string>
@@ -479,7 +463,6 @@
     <string name="categories_in_global_update">همه دسته بندی های آپدیت جهانی</string>
     <string name="categories_on_manual">دسته بندی های که با به روزرسانی دستی آپدیت بشوند</string>
     <string name="first_category">دسته بندی اول</string>
-    <string name="category_is_hidden">این دسته بندی مخفی است</string>
     <string name="category_is_empty">این دسته بندی خالی است</string>
     <string name="create_new_category">ساخت دسته بندی جدید</string>
     <string name="category">دسته بندی</string>

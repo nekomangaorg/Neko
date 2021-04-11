@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Назва</string>
     <string name="categories">Категорії</string>
     <string name="manga">Манґа</string>
     <string name="chapters">Глави</string>
@@ -32,7 +31,6 @@
     <string name="edit">Редагувати</string>
     <string name="add">Додати</string>
     <string name="edit_categories">Редагувати категорію</string>
-    <string name="rename_category">Перейменувати категорію</string>
     <string name="move_to_categories">Помістити в категорію</string>
     <string name="start">Старт</string>
     <string name="stop">Стоп</string>
@@ -92,7 +90,6 @@
     <string name="system_default">Системний</string>
     <string name="default_category">Категорія за замовчуванням</string>
     <string name="always_ask">Завжди запитувати</string>
-    <string name="details">Деталі</string>
     <string name="pending">Очікується</string>
     <string name="installing">Встановлюється</string>
     <string name="installed">Встановлено</string>
@@ -107,7 +104,6 @@
 \nДовіряючи цьому сертифікату, ви приймаєте ці ризики.</string>
     <string name="version_">Версія:%1$s</string>
     <string name="language_">Мова: %1$s</string>
-    <string name="empty_preferences_for_extension">У цього розширення немає налаштувань для редагування</string>
     <string name="fullscreen">Повноекранний режим</string>
     <string name="double_tap_anim_speed">Швидкість анімації при подвійному натиснені</string>
     <string name="show_page_number">Показувати номер сторінки</string>
@@ -169,14 +165,10 @@
     <string name="restore_backup">Відновити резервну копію</string>
     <string name="restore_from_backup_file">Відновити бібліотеку з резервної копії</string>
     <string name="backup_location">Директорія резервної копії</string>
-    <string name="service">Служба</string>
     <string name="backup_frequency">Частота створення резервної копії</string>
     <string name="max_auto_backups">Максимальна кількість резервних копій</string>
     <string name="backup_created">Резервна копія створена</string>
     <string name="restore_completed">Відновлення завершено</string>
-    <string name="restore_message">При відновленні використовуються данні з каталогів, що може викликати великий споживання трафіку.
-\n
-\nТакож авторизуйтесь в каталогах, що цього вимагають.</string>
     <string name="what_should_backup">Що ви хочете зберегти до резервної копії\?</string>
     <string name="restoring_backup">Відновлення резервної копії</string>
     <string name="clear_chapter_cache">Очистити кеш глав</string>
@@ -201,10 +193,8 @@
     <string name="log_in_to_">Авторизація для %1$s</string>
     <string name="username">Ім`я користувача</string>
     <string name="password">Пароль</string>
-    <string name="show_password">Показувати пароль</string>
     <string name="login">Логін</string>
     <string name="successfully_logged_in">Вхід успішний</string>
-    <string name="could_not_log_in">Помилка авторизації</string>
     <string name="unknown_error">Невідома помилка</string>
     <string name="local">Локальна</string>
     <string name="search_filters">Пошукові фільтри</string>
@@ -248,7 +238,6 @@
     <string name="this_will_remove_the_read_date_question">Ця дія видалить дату прочитання глави. Ви впевнені\?</string>
     <string name="picture_saved">Картинку збережено</string>
     <string name="options">Опції</string>
-    <string name="custom_filter">Користувацький фільтр</string>
     <string name="set_as_cover">Встановити як обкладинку</string>
     <string name="cover_updated">Обкладинку оновлено</string>
     <string name="page_">Сторінка %1$d</string>
@@ -264,8 +253,6 @@
     <string name="theres_no_previous_chapter">Попередньої частини немає</string>
     <string name="loading_pages">Завантаження сторінок…</string>
     <string name="failed_to_load_pages_">Не вдалось завантажити сторінки %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Гл.%2$s</string>
-    <string name="select">Вибрати</string>
     <string name="migrate">Мігрувати</string>
     <string name="could_not_download_chapter_can_try_again">Сталась помилка при завантаженні глав. Спробуйте ще раз у розділі завантаження</string>
     <string name="new_chapters_found">Знайдено нові глави</string>
@@ -302,8 +289,6 @@
     <string name="help">Допомога</string>
     <string name="library_update_order">Порядок оновлення бібліотеки</string>
     <string name="select_order_to_update">Оберіть порядок у якому Tachiyomi перевірятиме оновлення</string>
-    <string name="system_default_all_blue">Системний (Темно-синя)</string>
-    <string name="system_default_amoled">Системний (AMOLED)</string>
     <string name="lock_with_biometrics">Біометричне блокування</string>
     <string name="lock_when_idle">Блокувати в режимі очікування</string>
     <string name="creating_backup">Створення резервної копії</string>
@@ -322,7 +307,6 @@
     <string name="updating_library">Оновлення бібліотеки</string>
     <string name="date_added">Дата додавання</string>
     <string name="latest_chapter">Остання глава</string>
-    <string name="unread_badges">Значок непрочитаних</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 оновлення схалепилось</item>
         <item quantity="few">%1$d оновлень схалепилось</item>
@@ -363,7 +347,6 @@
     <string name="failed_to_bypass_cloudflare">Не вдалось обійти Cloudflare</string>
     <string name="please_update_webview">Будь ласка, оновіть WebView для кращої сумісності</string>
     <string name="always">Завжди</string>
-    <string name="app_not_available">Програма не відповідає</string>
     <string name="back">Назад</string>
     <string name="forward">Вперед</string>
     <string name="less">Менше</string>
@@ -376,7 +359,6 @@
     <string name="oldest">Найстаріші</string>
     <string name="pin">Закріпити</string>
     <string name="pinned">Прикріплено</string>
-    <string name="refresh">Оновити</string>
     <string name="reorder">Переупорядкувати</string>
     <string name="unpin">Відкріпити</string>
     <string name="view_chapters">Подивитись глави</string>
@@ -386,7 +368,6 @@
     <string name="categories_on_manual">Категорії, які потрібно оновити при ручному оновленні</string>
     <string name="first_category">Перша категорія</string>
     <string name="top_category">Вища категорія (%1$s)</string>
-    <string name="category_is_hidden">Категорія прихована</string>
     <string name="category_is_empty">Категорія порожня</string>
     <string name="create_new_category">Створити нову категорію</string>
     <string name="_already_in_queue">%1$s вже в черзі</string>
@@ -441,12 +422,7 @@
     <string name="all_sources">Всі джерела</string>
     <string name="search_extensions">Розширення пошуку…</string>
     <string name="in_library">В бібліотеці</string>
-    <string name="press_and_hold_to_reset_history">Натисніть та утримуйте для скиданні історії глави</string>
     <string name="reset_chapter_question">Скинути главу\?</string>
-    <string name="only_updates">Тільки оновлення</string>
-    <string name="only_history">Тільки історія</string>
-    <string name="ungroup_all">Розгрупувати все</string>
-    <string name="group_all">Групувати все</string>
     <string name="search_recents">Нещодавно шукалось…</string>
     <string name="view_all_updates">Переглянути всі оновлення</string>
     <string name="view_history">Історія перегляду</string>
@@ -489,7 +465,6 @@
     <string name="uniform_covers">Вигляд обкладинки</string>
     <string name="reorder_filters">Пересортувати фільтри</string>
     <string name="hide_start_reading_button">Приховувати кнопку початку читання</string>
-    <string name="start_with_filters_hidden">Починати з прихованими фільтрами</string>
     <string name="comfortable_grid">Зручна сітка</string>
     <string name="display_options">Налаштування відображення</string>
     <string name="drag_and_drop">Перетягування</string>
@@ -573,20 +548,6 @@
     </plurals>
     <string name="data_management">Керування даними</string>
     <string name="not_logged_into_">Не залогінено в %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d мангу ліцензовано і не може бути відновлено</item>
-        <item quantity="few">%d манги ліцензовано і не можуть бути відновлені</item>
-        <item quantity="many">%d манги ліцензовано і не можуть бути відновлені</item>
-        <item quantity="other">%d манги ліцензовано і не можуть бути відновлені</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d джерело відсутнє</item>
-        <item quantity="few">%d джерел відсутні</item>
-        <item quantity="many">%d джерел відсутні</item>
-        <item quantity="other">%d джерел відсутні</item>
-    </plurals>
-    <string name="restoring_progress">Відновлення (%1$d/%2$d)</string>
-    <string name="restore_content_skipped">%1$d пропущено</string>
     <string name="restore_error">Помилка відновлення</string>
     <string name="white_theme">Чисто-білий</string>
     <plurals name="manga_migrated">
@@ -666,12 +627,10 @@
     <string name="visit_recents_for_download_queue">Відвідайте вкладку \"недавні\", щоб отримати доступ до черги завантаження. Ви також можете двічі торкнутися або натиснути та утримувати для швидшого доступу</string>
     <string name="view_all_errors">Переглянути всі помилки</string>
     <string name="use_default">Використовувати за замовчуванням</string>
-    <string name="un_select_all">Зняти вибір</string>
     <string name="top">Згори</string>
     <string name="tag">Тег</string>
     <string name="sort_and_filter">Сортування та фільтри</string>
     <string name="select_none">Ніц не вибрано</string>
-    <string name="refreshing">Оновлюється</string>
     <string name="moved_to_">Переміщено до %1$s</string>
     <string name="mark_previous_as_unread">Відмітити попередні як непрочитані</string>
     <string name="mark_all_as_unread">Відмітити все як непрочитане</string>
@@ -682,10 +641,7 @@
     <string name="drag_handle">Перетягування</string>
     <string name="download_unread">Завантажити непрочитане</string>
     <string name="deleted_">Видалено: %1$s</string>
-    <string name="collasped">Сколапсував</string>
-    <string name="bug_report">Повідомити про помилку</string>
     <string name="bottom">Знизу</string>
-    <string name="auto">Автоматично</string>
     <plurals name="after_minutes">
         <item quantity="one">Через %1$s хвилину</item>
         <item quantity="few">Через %1$s хвилин</item>

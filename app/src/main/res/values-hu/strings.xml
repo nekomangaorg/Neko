@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Név</string>
     <string name="categories">Kategóriák</string>
     <string name="manga">Manga</string>
     <string name="chapters">Fejezetek</string>
@@ -93,7 +92,6 @@
     <string name="edit">Szerkesztés</string>
     <string name="add">Hozzáadás</string>
     <string name="edit_categories">Kategóriák szerkesztése</string>
-    <string name="rename_category">Kategória átnevezése</string>
     <string name="move_to_categories">Áthelyezés kategóriákba</string>
     <string name="start">Kezdés</string>
     <string name="stop">Megállítás</string>
@@ -125,10 +123,7 @@
     <string name="untrusted">Nem megbízható</string>
     <string name="uninstall">Eltávolítás</string>
     <string name="dark_blue">Sötétkék</string>
-    <string name="system_default_all_blue">Rendszer alapértelmezése (Sötétkék)</string>
-    <string name="system_default_amoled">Rendszer alapértelmezése (AMOLED)</string>
     <string name="extension_info">Bővítmény információ</string>
-    <string name="details">Részletek</string>
     <string name="pending">Függőben</string>
     <string name="installing">Telepítés</string>
     <string name="installed">Telepítve</string>
@@ -145,7 +140,6 @@
         <item quantity="one">Egy új bővítményfrissítés érhető el%d bővítményfrissítés érhető el</item>
         <item quantity="other"/>
     </plurals>
-    <string name="refresh">Frissít</string>
     <string name="view_chapters">Fejezetek megtekintése</string>
     <string name="date_format">Dátum formátum</string>
     <string name="pref_global_search">Globális keresés</string>
@@ -156,7 +150,6 @@
     <string name="could_not_download_unexpected_error">Egy váratlan hiba miatt nem sikerült letölteni a fejezetet</string>
     <string name="no_wifi_connection">Nincs Wi-Fi kapcsolat</string>
     <string name="please_update_webview">A jobb kompatibilitás érdekében kérlek, frissítsd a WebView alkalmazást</string>
-    <string name="app_not_available">Az app nem elérhető</string>
     <string name="back">Vissza</string>
     <string name="common">Gyakori</string>
     <string name="forward">Előre</string>
@@ -201,10 +194,8 @@
     <string name="backup_created">Biztonsági mentés létrehozva</string>
     <string name="website">Weboldal</string>
     <string name="check_for_updates">Frissítések keresése</string>
-    <string name="show_password">Jelszó megjelenítése</string>
     <string name="cover_updated">Borító frissítve</string>
     <string name="set_as_cover">Beállítás borítóként</string>
-    <string name="custom_filter">Egyedi szűrő</string>
     <string name="right_and_left_nav">Jobb és bal</string>
     <string name="badges">Jelvények</string>
     <plurals name="notification_update_failed">

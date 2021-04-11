@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="manga">Манкӑ</string>
-    <string name="name">Ят</string>
     <string name="app_short_name" translatable="false">TachiJ2K</string>
     <string name="app_name" translatable="false">TachiyomiJ2K</string>
     <string name="dns_over_https" translatable="false">HTTPS урлӑ DNS (Cloudflare)</string>
@@ -38,7 +37,6 @@
     <string name="pref_global_search">Пур ҫӗрте шыра</string>
     <string name="check_for_extension_updates">Хушмасем валли ҫӗнетӳ пуррине тӗрӗслемелле</string>
     <string name="edit_categories">Пухмӑшсене тӳрлет</string>
-    <string name="rename_category">Пухмӑш ячӗне улӑштар</string>
     <string name="update">Ҫӗнет</string>
     <string name="new_version_available">Ҫӗнӗ версси пур!</string>
     <string name="no_new_updates_available">Ҫӗнетӳсем тупӑнман</string>
@@ -51,7 +49,6 @@
     <string name="latest_chapter">Юлашки сыпӑкпа</string>
     <string name="list">Ят-йыш</string>
     <string name="download_badge">Тиенисен палли</string>
-    <string name="unread_badges">Вуламанисен палли</string>
     <string name="new_chapters_found">Ҫӗнӗ сыпӑксем тупӑнман</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 ҫӗнетӳ йӑнӑшӗ%1$d ҫӗнетӳ йӑнӑшӗ</item>
@@ -146,7 +143,6 @@
     <string name="open_source_licenses">Уҫӑ юмлӑ лиссенсисем</string>
     <string name="log_in_to_">%1$s кӗр</string>
     <string name="successfully_logged_out">Эсӗ тухрӑн</string>
-    <string name="could_not_log_in">Кӗни йӑнӑшӗ</string>
     <string name="downloads">Тиевсем</string>
     <string name="download_queue">Тиев черечӗ</string>
     <string name="cancel_all">Веҫех пӑрахӑҫла</string>
@@ -219,7 +215,6 @@
     <string name="pause">Вӑхӑтлӑха чар</string>
     <string name="pin">Ҫаклат</string>
     <string name="pinned">Ҫакнӑ</string>
-    <string name="refresh">Ҫӗнет</string>
     <string name="remove">Катерт</string>
     <string name="reorder">Ҫӗнӗрен йӗркеле</string>
     <string name="reset">Тасат</string>
@@ -245,7 +240,6 @@
     <string name="loading">Тиени…</string>
     <string name="download_unread">Вуламаннине</string>
     <string name="charging">Тулать</string>
-    <string name="app_not_available">Хушӑма кӗме май ҫук</string>
     <string name="fifth_to_last">Вуланӑ сыпӑкран пиллӗкмӗшӗ</string>
     <string name="fourth_to_last">Вуланӑ сыпӑкран тӑваттӑмӗшӗ</string>
     <string name="third_to_last">Вуланӑ сыпӑкран виҫҫӗмӗшӗ</string>
@@ -254,7 +248,6 @@
     <string name="downloading">Тиенет…</string>
     <string name="logout">Тух</string>
     <string name="login">Кӗр</string>
-    <string name="show_password">Кӗме сӑмах кӑтарт</string>
     <string name="password">Кӗме сӑмах</string>
     <string name="email">Ылӑккӑтрунлӑ пуштӑ тӗлӗ</string>
     <string name="username">Усӑҫ ячӗ</string>
@@ -301,7 +294,6 @@
     <string name="decode_image_error"/>
     <string name="cover_updated">Хуплашкана ҫӗнетнӗ</string>
     <string name="set_as_cover">Хуплашка пек ларт</string>
-    <string name="custom_filter">Усӑҫ али</string>
     <string name="obsolete_extension_message">Ҫак хушмана урӑх кӗме май ҫук.</string>
     <string name="untrusted_extension_message">Ку хушмана шанчӑклӑ мар сертификатпа алӑ пуснӑ тата ӑна активламан.
 \n
@@ -367,7 +359,6 @@
     <string name="removed_bookmark">Карт катертнӗ</string>
     <string name="marked_as_unread">Вуламан пек паллӑ тунӑ</string>
     <string name="first_category">Пӗрремӗш пухмӑш</string>
-    <string name="category_is_hidden">Пухмӑша пытарнӑ</string>
     <string name="category_is_empty">Пухмӑшӗ пушӑ</string>
     <string name="create_new_category">Ҫӗнӗ пухмӑш ту</string>
     <string name="read_progress">Вуланӑ ӳсӗмӗ</string>

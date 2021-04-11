@@ -3,7 +3,6 @@
     <string name="app_name" translatable="false">TachiyomiJ2K</string>
     <string name="app_short_name" translatable="false">TachiJ2K</string>
     <!--Models-->
-    <string name="name">Nome</string>
     <!-- Manga Type -->
     <string name="manga">Mangá</string>
     <string name="manhwa">Manhwa</string>
@@ -61,7 +60,6 @@
     <string name="_already_in_queue">%1$s já está na fila</string>
     <string name="create_new_category">Criar nova categoria</string>
     <string name="category_is_empty">A categoria está vazia</string>
-    <string name="category_is_hidden">A categoria está oculta</string>
     <string name="top_category">Categoria principal (%1$s)</string>
     <string name="default_category">Categoria padrão</string>
     <string name="first_category">Primeira categoria</string>
@@ -73,7 +71,6 @@
     <string name="already_in_category">O manga já está na categoria</string>
     <string name="edit_categories">Editar categorias</string>
     <string name="manage_category">Gerenciar categoria</string>
-    <string name="rename_category">Renomear categoria</string>
     <string name="move_to_categories">Mover para categorias</string>
     <plurals name="category_plural">
         <item quantity="one">%d categoria</item>
@@ -125,10 +122,8 @@
     <string name="list">Lista</string>
     <string name="comfortable_grid">Grade Confortável</string>
     <string name="compact_grid">Grade Compacta</string>
-    <string name="start_with_filters_hidden">Começar com filtros ocultos</string>
     <string name="download_badge">Selos de download</string>
     <string name="hide_start_reading_button">Ocultar botão de iniciar leitura</string>
-    <string name="unread_badges">Selos de não lido</string>
     <string name="uniform_covers">Capas uniformes</string>
     <string name="x_small">XP</string>
     <string name="small">P</string>
@@ -178,7 +173,6 @@
     <string name="this_will_remove_the_read_date_for_x_question">Isto removerá a data de leitura de \"%1$s\". Tem certeza\?</string>
     <string name="this_will_remove_the_read_date_question">Isto removerá a data de leitura deste capítulo. Tem certeza\?</string>
     <string name="reset_all_chapters_for_this_">Redefinir todos os capítulos para este %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Cap.%2$s</string>
     <string name="last_read_">Última leitura %1$s</string>
     <string name="read_">%1$s lido</string>
     <string name="updated_">%1$s atualizado</string>
@@ -188,12 +182,7 @@
     <string name="search_recents">Pesquisar recentes…</string>
     <string name="no_recent_chapters">Sem capítulos recentes</string>
     <string name="no_recently_read_manga">Sem mangás lidos recentemente</string>
-    <string name="group_all">Agrupar tudo</string>
-    <string name="ungroup_all">Desagrupar tudo</string>
-    <string name="only_history">Somente histórico</string>
-    <string name="only_updates">Apenas atualizações</string>
     <string name="reset_chapter_question">Redefinir capítulo?</string>
-    <string name="press_and_hold_to_reset_history">Pressione e segure para redefinir o histórico do capítulo</string>
     <!-- Browse -->
     <string name="search_filters">Filtros de busca</string>
     <string name="no_more_results">Não há mais resultados</string>
@@ -216,7 +205,6 @@
     <string name="extensions">Extensões</string>
     <string name="extension_updates">Atualizações da extensão</string>
     <string name="extension_info">Informações da extensão</string>
-    <string name="details">Detalhes</string>
     <string name="obsolete">Obsoleto</string>
     <string name="pending">Pendente</string>
     <string name="installing">Instalando</string>
@@ -233,13 +221,11 @@
     <string name="obsolete_extension_message">Esta extensão não está mais disponível.</string>
     <string name="version_">Versão: %1$s</string>
     <string name="language_">Idioma: %1$s</string>
-    <string name="empty_preferences_for_extension">Não há preferências a serem editadas para esta extensão</string>
     <plurals name="extension_updates_available">
         <item quantity="one">Atualização de extensão disponível</item>
         <item quantity="other">%d atualizações de extensão disponíveis</item>
     </plurals>
     <!-- Reader -->
-    <string name="custom_filter">Filtro personalizado</string>
     <string name="set_as_cover">Usar como capa</string>
     <string name="set_as_default_for_all">Defina como padrão para todos</string>
     <string name="cover_updated">Capa atualizada</string>
@@ -408,7 +394,6 @@
     <string name="search_manually">Pesquise manualmente</string>
     <string name="migrate_now">Migrar agora</string>
     <string name="copy_now">Copiar agora</string>
-    <string name="select">Selecionar</string>
     <string name="migrate">Migrar</string>
     <string name="migrate_">Migrar %1$s</string>
     <string name="copy_value">Copiar</string>
@@ -443,8 +428,6 @@
     <string name="amoled_black">Preto AMOLED</string>
     <string name="dark_blue">Azul Escuro</string>
     <string name="white_theme">Branco puro</string>
-    <string name="system_default_amoled">Padrão do sistema (AMOLED)</string>
-    <string name="system_default_all_blue">Padrão do sistema (Azul escuro)</string>
     <string name="language">Idioma</string>
     <string name="system_default">Padrão do sistema</string>
     <string name="date_format">Formato da data</string>
@@ -459,28 +442,14 @@
     <string name="restore_backup">Restaurar backup</string>
     <string name="restore_from_backup_file">Restaurar biblioteca de um arquivo de backup</string>
     <string name="backup_location">Pasta de backup</string>
-    <string name="service">Serviço</string>
     <string name="backup_frequency">Frequência de backup</string>
     <string name="max_auto_backups">Máximo de backups automáticos</string>
     <string name="backup_failed">Falha no backup</string>
     <string name="backup_created">Backup criado</string>
     <string name="restore_completed">Restauração concluída</string>
     <string name="restore_error">Erro de restauração</string>
-    <string name="restore_content_skipped">%1$d ignorado</string>
-    <string name="restore_message">A restauração usa as fontes para obter os dados, logo cobranças poderão ser efetuadas pela sua operadora devido ao uso de dados móveis. 
-\n
-\nAlém disso, verifique se as fontes que requerem uma conta foram configuradas corretamente antes de iniciar a restauração.</string>
     <string name="what_should_backup">Do que você deseja fazer backup?</string>
     <string name="restoring_backup">Restaurando backup</string>
-    <string name="restoring_progress">Restaurando (%1$d/%2$d)</string>
-    <plurals name="sources_missing">
-        <item quantity="one">%d fonte ausente</item>
-        <item quantity="other">%d fontes ausentes</item>
-    </plurals>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d mangá agora está licenciado e não pôde ser restaurado</item>
-        <item quantity="other">%d mangás agora estão licenciados e não puderam ser restaurados</item>
-    </plurals>
     <string name="not_logged_into_">Não conectado ao %1$s</string>
     <!-- Advanced section -->
     <string name="clear_chapter_cache">Limpar cache do capítulo</string>
@@ -543,12 +512,10 @@
     <string name="username">Nome de usuário</string>
     <string name="email">Endereço de email</string>
     <string name="password">Senha</string>
-    <string name="show_password">Mostrar senha</string>
     <string name="login">Fazer login</string>
     <string name="logout">Sair</string>
     <string name="successfully_logged_in">Conectado com sucesso</string>
     <string name="successfully_logged_out">Agora você está desconectado</string>
-    <string name="could_not_log_in">Não foi possível fazer login</string>
     <!-- Downloads -->
     <string name="downloads">Downloads</string>
     <string name="download_queue">Fila de download</string>
@@ -620,18 +587,14 @@
     <string name="alphabetically">Alfabeticamente</string>
     <string name="always">Sempre</string>
     <string name="always_ask">Sempre perguntar</string>
-    <string name="app_not_available">Aplicativo indisponível</string>
-    <string name="auto">Auto</string>
     <string name="automatic">Automático</string>
     <string name="back">Voltar</string>
     <string name="bottom">Inferior</string>
-    <string name="bug_report">Reportar um Erro</string>
     <string name="cancel">Cancelar</string>
     <string name="center">Centro</string>
     <string name="charging">Carregando</string>
     <string name="clear">Limpar</string>
     <string name="close">Fechar</string>
-    <string name="collasped">Recolhido</string>
     <string name="common">Comum</string>
     <string name="cover_of_image">Capa do mangá</string>
     <string name="create">Criar</string>
@@ -674,8 +637,6 @@
     <string name="picture_saved">Imagem salva</string>
     <string name="pin">Fixar</string>
     <string name="pinned">Fixado</string>
-    <string name="refresh">Atualizar</string>
-    <string name="refreshing">Atualizando</string>
     <string name="remove">Excluir</string>
     <string name="reorder">Reordenar</string>
     <string name="reset">Redefinir</string>
@@ -696,7 +657,6 @@
     <string name="top">Início</string>
     <string name="undo">Desfazer</string>
     <string name="unknown_error">Erro desconhecido</string>
-    <string name="un_select_all">Desmarque todos os</string>
     <string name="unpin">Desafixar</string>
     <string name="use_default">Usar padrão</string>
     <string name="view_all_errors">Ver todos os erros</string>

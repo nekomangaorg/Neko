@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Meno</string>
     <string name="categories">Kategórie</string>
     <string name="manga">Manga</string>
     <string name="chapters">Kapitoly</string>
@@ -33,7 +32,6 @@
     <string name="edit">Upraviť</string>
     <string name="add">Pridať</string>
     <string name="edit_categories">Upraviť kategórie</string>
-    <string name="rename_category">Premenovať kategóriu</string>
     <string name="move_to_categories">Presunúť do kategórie</string>
     <string name="start">Začať</string>
     <string name="stop">Zastaviť</string>
@@ -96,7 +94,6 @@
     <string name="system_default">Predvolené nastavenie systému</string>
     <string name="default_category">Predvolená kategória</string>
     <string name="always_ask">Vždy sa opýtať</string>
-    <string name="details">Podrobnosti</string>
     <string name="pending">Čakajúce</string>
     <string name="installing">Inštalácia</string>
     <string name="installed">Nainštalované</string>
@@ -111,7 +108,6 @@
 \nDôverovaním tohto certifikátu akceptujete tieto riziká.</string>
     <string name="version_">Verzia: %1$s</string>
     <string name="language_">Jazyk: %1$s</string>
-    <string name="empty_preferences_for_extension">Nie sú k dispozícii žiadne preferencie na úpravu pre toto rozšírenie</string>
     <string name="fullscreen">Na celú obrazovku</string>
     <string name="double_tap_anim_speed">Rýchlosť animácie pre dvojité ťuknutie</string>
     <string name="show_page_number">Zobraziť číslo strany</string>
@@ -182,7 +178,6 @@
     <string name="restore_backup">Obnoviť zálohu</string>
     <string name="restore_from_backup_file">Obnoviť knižnicu zo záložného súboru</string>
     <string name="backup_location">Adresár na zálohy</string>
-    <string name="service">Služby</string>
     <string name="backup_frequency">Frekvencia zálohovania</string>
     <string name="max_auto_backups">Max. počet automatických záloh</string>
     <string name="backup_created">Záloha bola vytvorená</string>
@@ -213,7 +208,6 @@
     <string name="browse">Prehľadávať</string>
     <string name="obsolete">Zastaraný</string>
     <string name="obsolete_extension_message">Toto rozšírenie už nie je k dispozícii.</string>
-    <string name="custom_filter">Vlastný filter</string>
     <string name="set_as_cover">Nastaviť ako obal</string>
     <string name="cover_updated">Obal bol aktualizovaný</string>
     <string name="next_chapter_not_found">Ďalšia kapitola nebola nájdená</string>
@@ -257,9 +251,7 @@
     <string name="helps_fix_bugs">Pomáha opraviť akékoľvek chyby. Nebudú odoslané žiadne citlivé údaje</string>
     <string name="username">Užívateľské meno</string>
     <string name="password">Heslo</string>
-    <string name="show_password">Ukázať heslo</string>
     <string name="login">Prihlásenie</string>
-    <string name="could_not_log_in">Nepodarilo sa prihlásiť</string>
     <string name="cancel_all">Zrušiť všetky</string>
     <string name="downloading">Sťahujem</string>
     <string name="downloading_progress">Sťahovanie (%1$d/%2$d)</string>
@@ -271,7 +263,6 @@
     <string name="no_network_connection">Sieťové pripojenie nie je dostupné</string>
     <string name="select_cover_image">Vyberte obrázok obalu</string>
     <string name="select_backup_file">Vyberte záložný súbor</string>
-    <string name="app_not_available">Aplikácia nedostupná</string>
     <string name="back">Späť</string>
     <string name="common">Bežný</string>
     <string name="cover_of_image">Obal mangy</string>
@@ -283,7 +274,6 @@
     <string name="oldest">Najstaršie</string>
     <string name="options">Možnosti</string>
     <string name="picture_saved">Obrázok bol uložený</string>
-    <string name="refresh">Obnoviť</string>
     <string name="reorder">Zmeniť poradie</string>
     <string name="unknown_error">Neznáma chyba</string>
     <string name="view_chapters">Zobraziť kapitoly</string>

@@ -12,7 +12,6 @@
     <!--====-->
     <!--Tabs-->
     <!--====-->
-    <style name="Theme.ActionBar.Tab" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -22,12 +21,6 @@
     <!--===========-->
     <!--AlertDialog-->
     <!--===========-->
-
-    <style name="Theme.AlertDialog.DayNight" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
 
     <!--===============-->
     <!--Text Appearance-->
@@ -90,10 +83,6 @@
 
     <style name="TextAppearance.Medium">
         <item name="android:fontFamily">sans-serif-medium</item>
-    </style>
-
-    <style name="TextAppearance.Medium.Title">
-        <item name="android:textSize">20sp</item>
     </style>
 
     <style name="TextAppearance.Medium.Body2">
@@ -246,10 +235,6 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">?attr/colorAccent</item>
         <item name="rippleColor">@color/fullRippleColor</item>
-    </style>
-
-    <style name="Theme.Widget.Button.Borderless.Negative">
-        <item name="android:textColor">@color/md_red_500</item>
     </style>
 
     <style name="Theme.Widget.Button.Borderless.Small">

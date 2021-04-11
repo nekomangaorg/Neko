@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Ime</string>
     <string name="categories">Kategorije</string>
     <string name="manga">Manga</string>
     <string name="chapters">Poglavlje</string>
@@ -32,7 +31,6 @@
     <string name="edit">Uredi</string>
     <string name="add">Dodaj</string>
     <string name="edit_categories">Uredi kategorije</string>
-    <string name="rename_category">Preimenuj kategoriju</string>
     <string name="move_to_categories">Premesti u kategoriju</string>
     <string name="start">Počni</string>
     <string name="stop">Zaustavi</string>
@@ -92,7 +90,6 @@
     <string name="system_default">Podrazumevani jezik sistema</string>
     <string name="default_category">Podrazumevana kategorija</string>
     <string name="always_ask">Uvijek pitaj</string>
-    <string name="details">Detalji</string>
     <string name="pending">U toku</string>
     <string name="installing">Instaliranje</string>
     <string name="installed">Instalirano</string>
@@ -108,7 +105,6 @@
 \n</string>
     <string name="version_">Verzija: %1$s</string>
     <string name="language_">Jezik: %1$s</string>
-    <string name="empty_preferences_for_extension">Nema prefrenca za podešavanje na ovom dodatku</string>
     <string name="fullscreen">Ceo ekran</string>
     <string name="double_tap_anim_speed">Brzina animacije dvoklika</string>
     <string name="show_page_number">Prikaži broj stranice</string>
@@ -170,13 +166,10 @@
     <string name="restore_backup">Vrati rezernu kopiju</string>
     <string name="restore_from_backup_file">Vrati biblioteku iz fajla rezerne kopije</string>
     <string name="backup_location">Direktorijum rezernih kopija</string>
-    <string name="service">Servis</string>
     <string name="backup_frequency">Učestalost pravljenja rezernih kopija</string>
     <string name="max_auto_backups">Maksimalano automatskih rezernih kopija</string>
     <string name="backup_created">Rezerna kopija napravljena</string>
     <string name="restore_completed">Vraćanje završeno</string>
-    <string name="restore_message">Vraćanja koriste izvore da dobiju podatke, troškovi prenošenja se mogu primijeniti.
-\nTakođe budite sigurni da se tačno prijavljeni na izvorima koji je to potrebno prije vraćanja.</string>
     <string name="what_should_backup">\?Šta želite da stavite u rezernu kopiju\?</string>
     <string name="restoring_backup">Vraćanje rezerne kopije</string>
     <string name="clear_chapter_cache">Izbriši keš poglavlja</string>
@@ -201,10 +194,8 @@
     <string name="log_in_to_">Prijavi se za %1$s</string>
     <string name="username">Korisničko ime</string>
     <string name="password">Lozinka</string>
-    <string name="show_password">Prikaži lozinku</string>
     <string name="login">Prijavi se</string>
     <string name="successfully_logged_in">Prijava uspješna</string>
-    <string name="could_not_log_in">Prijava neuspešna</string>
     <string name="unknown_error">Nepoznata greška</string>
     <string name="local">Lokalno</string>
     <string name="search_filters">Filteri pretrage</string>
@@ -234,8 +225,6 @@
     <string name="custom_range">Preuzmi određeno</string>
     <string name="all_chapters">Preuzmi sve</string>
     <string name="all_unread_chapters">Preuzmi nepročitano</string>
-    <string name="system_default_all_blue">Podrazumevani sistem (Tamno plava)</string>
-    <string name="system_default_amoled">Podrazumevani sistem (AMOLED)</string>
     <string name="title">Ime</string>
     <string name="completed">Završeno</string>
     <string name="lock_with_biometrics">Biometrijski zaključaj</string>
@@ -250,7 +239,6 @@
     <string name="updating_library">Ažuriranje biblioteke</string>
     <string name="date_added">Datum dodavanja</string>
     <string name="latest_chapter">Poslednje poglavlje</string>
-    <string name="unread_badges">Oznaka za nepročitano</string>
     <string name="new_chapters_found">Pronađena su nova poglavlja</string>
     <string name="library_update_order">Red ažuriranja biblioteke</string>
     <string name="this_will_remove_the_read_date_question">Ovo će ukloniti datum čitanja ovog poglavlja. Da li ste sigurni\?</string>
@@ -264,7 +252,6 @@
         <item quantity="few"/>
         <item quantity="other"/>
     </plurals>
-    <string name="custom_filter">Prilagođeni filter</string>
     <string name="set_as_cover">Postavi kao naslov</string>
     <string name="next_chapter_not_found">Sledeće poglavlje nije pronađeno</string>
     <string name="use_image_as_cover">Koristite ovu sliku kao naslovnu\?</string>
@@ -322,7 +309,6 @@
     <string name="failed_to_bypass_cloudflare">Neuspelo zaobilaženje Cloudflare</string>
     <string name="please_update_webview">Ažurirajte aplikaciju \"WebView\" za bolju kompatibilnost</string>
     <string name="always">Uvek</string>
-    <string name="app_not_available">Aplikacija nije dostupna</string>
     <string name="back">Nazad</string>
     <string name="cover_of_image">Naslovna slika mange</string>
     <string name="forward">Napred</string>
@@ -339,7 +325,6 @@
     <string name="picture_saved">Slika sačuvana</string>
     <string name="pin">Označi</string>
     <string name="pinned">Zakačeno</string>
-    <string name="refresh">Osveži</string>
     <string name="reorder">Presloži</string>
     <string name="unofficial_extension_message">Ovaj dodatak nije iz oficijalne liste Tachiyomi dodataka.</string>
     <string name="nsfw_short">18+</string>

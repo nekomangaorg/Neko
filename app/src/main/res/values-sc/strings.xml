@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Nùmene</string>
     <string name="categories">Categorias</string>
     <string name="manga">Manga</string>
     <string name="chapters">Capìtulos</string>
@@ -32,7 +31,6 @@
     <string name="edit">Modìfica</string>
     <string name="add">Annanghe</string>
     <string name="edit_categories">Modìfica sas categorias</string>
-    <string name="rename_category">Cambia su nùmene de sa categoria</string>
     <string name="move_to_categories">Pone in sas categorias</string>
     <string name="start">Incumintza</string>
     <string name="stop">Firma</string>
@@ -92,7 +90,6 @@
     <string name="system_default">Predefinida de su sistema</string>
     <string name="default_category">Categoria predefinida</string>
     <string name="always_ask">Pedi semper</string>
-    <string name="details">Detàllios</string>
     <string name="pending">Isetende</string>
     <string name="installing">Installende</string>
     <string name="installed">Installada</string>
@@ -107,7 +104,6 @@
 \nPonende fidùtzia in custu tzertificadu atzetas custos arriscos.</string>
     <string name="version_">Versione: %1$s</string>
     <string name="language_">Limba: %1$s</string>
-    <string name="empty_preferences_for_extension">Non bi sunt preferèntzias de modificare pro custa estensione</string>
     <string name="fullscreen">Ischermu intreu</string>
     <string name="double_tap_anim_speed">Lestresa de s\'animatzione de su tocu dòpiu</string>
     <string name="show_page_number">Ammustra su nùmeru de sa pàgina</string>
@@ -170,14 +166,10 @@
     <string name="restore_backup">Riprìstina una còpia de seguresa</string>
     <string name="restore_from_backup_file">Riprìstina sa biblioteca dae una còpia de seguresa</string>
     <string name="backup_location">Cartella de sa còpia de seguresa</string>
-    <string name="service">Servìtziu</string>
     <string name="backup_frequency">Frecuèntzia de sarvatàgiu de sas còpias de seguresa</string>
     <string name="max_auto_backups">Nùmeru màssimu de còpias automàticas</string>
     <string name="backup_created">Còpia de seguresa creada</string>
     <string name="restore_completed">Riprìstinu acabadu</string>
-    <string name="restore_message">Su riprìstinu impreat sa retza pro otènnere sos datos. Bi diant pòdere èssere costos de s\'operadore.
-\n
-\nIn antis de ripristinare assegura·ti fintzas de àere installadu totu sas estensiones chi ti bisòngiant e de àere fatu s\'atzessu pro sas mitzas chi lu pedint.</string>
     <string name="what_should_backup">De ite cheres fàghere una còpia de seguresa\?</string>
     <string name="restoring_backup">Ripristinende sa còpia de seguresa</string>
     <string name="clear_chapter_cache">Isbòida sa memòria temporànea de sos capìtulos</string>
@@ -202,10 +194,8 @@
     <string name="log_in_to_">Intrada pro %1$s</string>
     <string name="username">Nùmene impreadore</string>
     <string name="password">Crae de intrada</string>
-    <string name="show_password">Ammustra sa crae</string>
     <string name="login">Intra</string>
     <string name="successfully_logged_in">S\'intrada at tentu sutzessu</string>
-    <string name="could_not_log_in">Errore de atzessu</string>
     <string name="unknown_error">Errore disconnotu</string>
     <string name="local">Locale</string>
     <string name="search_filters">Filtros de chirca</string>
@@ -249,7 +239,6 @@
     <string name="this_will_remove_the_read_date_question">Custu at a bogare sa data de leghidura de custu capìtulu. Seguru ses\?</string>
     <string name="picture_saved">Immàgine sarvada</string>
     <string name="options">Optziones</string>
-    <string name="custom_filter">Filtru personalizadu</string>
     <string name="set_as_cover">Imposta comente cobertedda</string>
     <string name="cover_updated">Cobertedda agiornada</string>
     <string name="page_">Pàgina: %1$d</string>
@@ -265,8 +254,6 @@
     <string name="theres_no_previous_chapter">Non b\'at unu capìtulu antepostu</string>
     <string name="loading_pages">Carrighende pàginas…</string>
     <string name="failed_to_load_pages_">Carrigamentu de pàginas fallidu: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Cap.%2$s</string>
-    <string name="select">Ischerta</string>
     <string name="migrate">Tràmuda</string>
     <string name="could_not_download_chapter_can_try_again">B’at àpidu un\'errore in s’iscarrigamentu de sos capìtulos. Podes torrare a proare in sa setzione de sos iscarrigamentos</string>
     <string name="new_chapters_found">Capìtulos noos agatados</string>
@@ -311,7 +298,6 @@
     <string name="updating_library">Agiornende sa biblioteca</string>
     <string name="date_added">Data de annanghidura</string>
     <string name="latest_chapter">Ùrtimu capìtulu</string>
-    <string name="unread_badges">Iconas de sos non lèghidos</string>
     <plurals name="notification_update_failed">
         <item quantity="one">1 agiornamentu fallidu</item>
         <item quantity="other">%1$d agiornamentos fallidos</item>
@@ -358,7 +344,6 @@
     <string name="failed_to_bypass_cloudflare">Isfrancamentu de Cloudflare fallidu</string>
     <string name="please_update_webview">Agiorna s\'aplicatzione de WebView pro otènnere una cumpatibilidade prus manna</string>
     <string name="always">Semper</string>
-    <string name="app_not_available">Aplicatzione non disponìbile</string>
     <string name="back">In segus</string>
     <string name="forward">In antis</string>
     <string name="less">De mancu</string>
@@ -371,18 +356,15 @@
     <string name="oldest">Prus betzos</string>
     <string name="pin">Apica</string>
     <string name="pinned">Apicadu</string>
-    <string name="refresh">Annoa</string>
     <string name="reorder">Riòrdina</string>
     <string name="unpin">Boga</string>
     <string name="view_chapters">Pòmpia sos capìtulos</string>
     <string name="view_all_errors">Pòmpia totu sos errores</string>
     <string name="use_default">Imprea su valore predefinidu</string>
-    <string name="un_select_all">Boga s\'ischerta a totu</string>
     <string name="top">In artu</string>
     <string name="tag">Eticheta</string>
     <string name="sort_and_filter">Òrdina e filtra</string>
     <string name="select_none">No ischertes nudda</string>
-    <string name="refreshing">Annoende</string>
     <string name="moved_to_">Tramudadu a %1$s</string>
     <string name="mark_previous_as_unread">Marca sos antepostos comente non lèghidos</string>
     <string name="mark_all_as_unread">Marca totu comente non lèghidu</string>
@@ -393,10 +375,7 @@
     <string name="drag_handle">Manìllia de tragadura</string>
     <string name="download_unread">Iscàrriga sos non lèghidos</string>
     <string name="deleted_">Iscantzelladu: %1$s</string>
-    <string name="collasped">Minimadu</string>
-    <string name="bug_report">Sinnala una faddina</string>
     <string name="bottom">In bassu</string>
-    <string name="auto">Automàticu</string>
     <plurals name="after_minutes">
         <item quantity="one">A pustis de %1$s minutu</item>
         <item quantity="other">A pustis de %1$s minutos</item>
@@ -450,19 +429,7 @@
     </plurals>
     <string name="data_management">Amministratzione de sos datos</string>
     <string name="not_logged_into_">Non ses intradu in %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d manga como l\'ant cuntzessu in litzèntzia e non si podet ripristinare</item>
-        <item quantity="other">%d manga como los ant cuntzessos in litzèntzia e non si podent ripristinare</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d mitza chi mancat</item>
-        <item quantity="other">%d mitzas chi mancant</item>
-    </plurals>
-    <string name="restoring_progress">Ripristinende (%1$d/%2$d)</string>
-    <string name="restore_content_skipped">%1$d brincadu</string>
     <string name="restore_error">Riprìstinu de sa còpia de seguresa fallidu</string>
-    <string name="system_default_all_blue">Predefinidu de su sistema (Totu biaitu)</string>
-    <string name="system_default_amoled">Predefinidu de su sistema (Biancu + Nieddu)</string>
     <string name="white_theme">Biancu puru</string>
     <plurals name="manga_migrated">
         <item quantity="one">%d manga tramudadu</item>
@@ -563,12 +530,7 @@
     <string name="all_sources">Totu sas mitzas</string>
     <string name="search_extensions">Chirca estensiones…</string>
     <string name="in_library">In sa biblioteca</string>
-    <string name="press_and_hold_to_reset_history">Incarca a longu pro resetare sa cronologia de sos capìtulos</string>
     <string name="reset_chapter_question">Resetare su capìtulu\?</string>
-    <string name="only_updates">Agiornamentos ebbia</string>
-    <string name="only_history">Cronologia ebbia</string>
-    <string name="ungroup_all">Iscroba totu</string>
-    <string name="group_all">Agrupa totu</string>
     <string name="search_recents">Chirca reghentes…</string>
     <string name="view_all_updates">Pòmpia totu sos agiornamentos</string>
     <string name="view_history">Pòmpia sa cronologia</string>
@@ -606,7 +568,6 @@
     <string name="x_small">XS</string>
     <string name="uniform_covers">Coberteddas uniformes</string>
     <string name="hide_start_reading_button">Cua su butone pro incumintzare a lèghere</string>
-    <string name="start_with_filters_hidden">Incumintza cun sos filtros cuados</string>
     <string name="comfortable_grid">Grìllia discansosa</string>
     <string name="display_options">Optziones de visualizatzione</string>
     <string name="drag_and_drop">Traga e lassa</string>
@@ -640,7 +601,6 @@
     <string name="categories_on_manual">Categorias de agiornare cando annoas sos datos manualmente</string>
     <string name="first_category">Prima categoria</string>
     <string name="top_category">Mègius categoria (%1$s)</string>
-    <string name="category_is_hidden">Sa categoria est cuada</string>
     <string name="category_is_empty">Sa categoria est bòida</string>
     <string name="create_new_category">Crea una categoria noa</string>
     <string name="_already_in_queue">%1$s est giai in sa lista de isetu</string>
@@ -769,7 +729,6 @@
     <string name="custom_manga_info">Informatziones personalizadas de su manga</string>
     <string name="ignore_cutout_areas">Ignora sas àreas segadas</string>
     <string name="cutout_area_behavior">Cumportamentu de s\'àrea de segadura</string>
-    <string name="_details">Detàllios %1$s</string>
     <string name="filter_languages">Filtra sas limbas</string>
     <string name="hide_hopper_on_scroll">Cua su mojolu de categorias iscurrende</string>
     <string name="dns_over_https">DNS pro mèdiu de HTTPS (Cloudflare)</string>

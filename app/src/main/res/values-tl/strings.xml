@@ -24,7 +24,6 @@
     <string name="last_updated">Huling na-update</string>
     <string name="search">Maghanap</string>
     <string name="select_all">Piliin lahat</string>
-    <string name="name">Pangalan</string>
     <string name="mark_as_read">Markahang nabasa</string>
     <string name="mark_previous_as_read">Markahang nabasa ang huli</string>
     <string name="download">I-download</string>
@@ -32,7 +31,6 @@
     <string name="edit">I-edit</string>
     <string name="add">Idagdag</string>
     <string name="edit_categories">I-edit ang mga kategorya</string>
-    <string name="rename_category">Baguhin ang pangalan ng kategorya</string>
     <string name="move_to_categories">Ilipat sa (mga) kategorya</string>
     <string name="start">Mag-umpisa</string>
     <string name="stop">Itigil</string>
@@ -93,7 +91,6 @@
     <string name="system_default">Default ng sistema</string>
     <string name="default_category">Default na kategorya</string>
     <string name="always_ask">Palaging tanungin</string>
-    <string name="details">Mga Detalye</string>
     <string name="pending">Hinihintay</string>
     <string name="installing">Ini-install</string>
     <string name="installed">Naka-install</string>
@@ -108,7 +105,6 @@
 \nSa pamamagitan ng pagtitiwala sa certificate na ito, tinatanggap mo ang mga panganib na ito.</string>
     <string name="version_">Bersyon: %1$s</string>
     <string name="language_">Wika: %1$s</string>
-    <string name="empty_preferences_for_extension">Walang mga pagsasaayos na ma-e-edit para sa extension na ito</string>
     <string name="fullscreen">I-fullscreen</string>
     <string name="double_tap_anim_speed">Bilis ng animation sa pag-dobleng pindot</string>
     <string name="show_page_number">Ipakita ang bilang ng pahina</string>
@@ -173,13 +169,10 @@
     <string name="restore_backup">I-restore ang backup</string>
     <string name="restore_from_backup_file">I-restore ang aklatan mula sa backup file</string>
     <string name="backup_location">Directory ng backup</string>
-    <string name="service">Serbisyo</string>
     <string name="backup_frequency">Dalas ng pag-backup</string>
     <string name="max_auto_backups">Hangganan ng mga awtomatikong backup</string>
     <string name="backup_created">Nagawa na ang backup</string>
     <string name="restore_completed">Nakumpleto na ang pagre-restore</string>
-    <string name="restore_message">Ginagamit ng pagre-restore ang source para makakuha ng data, maaring magamit ang inyong data.
-\nSiguraduhin din na ikaw ay maayos na naka-login sa mga source that nangangailangan nito bago mag-restore.</string>
     <string name="color_filter_blend_mode">Blend mode ng color filter</string>
     <string name="overlay">Patong (Overlay)</string>
     <string name="multiply">Paramihin (Multiply)</string>
@@ -213,10 +206,8 @@
     <string name="log_in_to_">Mag-login para kay %1$s</string>
     <string name="username">Taguri (Username)</string>
     <string name="password">Kontrasenyas (Password)</string>
-    <string name="show_password">Ipakita ang kontrasenyas</string>
     <string name="login">Mag-login</string>
     <string name="successfully_logged_in">Tagumpay ang login</string>
-    <string name="could_not_log_in">Error sa login</string>
     <string name="unknown_error">Hindi malamang error</string>
     <string name="local">Lokal</string>
     <string name="search_filters">Pagsasala sa Paghahanap</string>
@@ -260,7 +251,6 @@
     <string name="this_will_remove_the_read_date_question">Tatanggalin nito ang petsa ng pagbasa ng kabanatang ito. Sigurado ka ba\?</string>
     <string name="picture_saved">Na-save ang larawan</string>
     <string name="options">Mga Pagpipilian</string>
-    <string name="custom_filter">Pasadyang pagsala</string>
     <string name="set_as_cover">I-set bilang pabalat</string>
     <string name="cover_updated">Na-update ang pabalat</string>
     <string name="page_">Pahina: %1$d</string>
@@ -276,8 +266,6 @@
     <string name="theres_no_previous_chapter">Walang nakaraang kabanata</string>
     <string name="loading_pages">Kinakarga ang mga pahina…</string>
     <string name="failed_to_load_pages_">Pumalya sa pagkarga ng mga pahina: %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Kab. %2$s</string>
-    <string name="select">Pumili</string>
     <string name="migrate">Lumipat</string>
     <string name="could_not_download_chapter_can_try_again">Nagkaproblema habang nagda-download ng mga kabanata. Maaring mong ulitin ito sa Downloads section.</string>
     <string name="new_chapters_found">May nakitang bagong (mga) kabanata</string>
@@ -301,6 +289,4 @@
     <string name="no_network_connection">Walang koneksyon sa Network</string>
     <string name="download_paused">Nakahinto ang pag-download</string>
     <string name="common">Karaniwan</string>
-    <string name="system_default_all_blue">Default ng sistema (Madilim na bughaw)</string>
-    <string name="system_default_amoled">Default ng sistema (AMOLED)</string>
 </resources>

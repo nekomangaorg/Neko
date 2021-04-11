@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">নাম</string>
     <string name="categories">ধরণ</string>
     <string name="manga">মাংগা</string>
     <string name="chapters">অধ্যায়গুলো</string>
@@ -29,7 +28,6 @@
     <string name="edit">সম্পাদন</string>
     <string name="add">যোগ করুন</string>
     <string name="edit_categories">ধরন সম্পাদন</string>
-    <string name="rename_category">ধরণ নামান্তর</string>
     <string name="move_to_categories">ধরণে সরান</string>
     <string name="start">শুরু</string>
     <string name="stop">থামুন</string>
@@ -84,8 +82,6 @@
     <string name="light_blue">প্রধান থিম</string>
     <string name="dark">কালো থিম</string>
     <string name="amoled_black">এমোলেড থিম</string>
-    <string name="system_default_amoled">সিস্টেমের ডিফল্ট (এমোলেড)</string>
-    <string name="system_default_all_blue">সিস্টেমের ডিফল্ট (কালো থিম)</string>
     <string name="language">ভাষা</string>
     <string name="system_default">প্রথম অবস্থা</string>
     <string name="default_category">নির্ধারিত ধরণ</string>
@@ -147,12 +143,10 @@
     <string name="restore_backup">ব্যাকআপ পুনরুদ্ধার</string>
     <string name="restore_from_backup_file">ব্যাকআপ ফাইল থেকে মাংগাশালা পুনরুদ্ধার করুন</string>
     <string name="backup_location">নির্দেশক ব্যাকআপ</string>
-    <string name="service">সেবা</string>
     <string name="backup_frequency">ব্যাকআপ ফ্রিকোয়েন্সি</string>
     <string name="max_auto_backups">স্বয়ংক্রিয় ব্যাকআপের উচ্চমাত্রা</string>
     <string name="backup_created">পুনরুদ্ধার তৈরী হয়েছে</string>
     <string name="restore_completed">পুনরুদ্ধার হয়েছে</string>
-    <string name="restore_message">পুনরুদ্ধারের সন্ধান করার জন্য উৎস ব্যবহার করা হয়, ক্যারিয়ারের খরচগুলি প্রযোজ্য হতে পারে। এছাড়াও নিশ্চিত করুন যে আপনি পুনরুদ্ধারের আগে উৎসগুলোতে যথাযথভাবে লগ-ইন করা আছেন যেখানে প্রোয়জন হয়।</string>
     <string name="what_should_backup">আপনি কি ব্যাকআপ করতে ইচ্ছুক?</string>
     <string name="restoring_backup">ব্যাকআপ পুনরুদ্ধার হচ্ছে</string>
     <string name="clear_chapter_cache">অধ্যায়ের ক্যাশ পরিষ্কার করুন</string>
@@ -177,10 +171,8 @@
     <string name="log_in_to_">লগিন করা হয়েছে %1$s</string>
     <string name="username">ব্যাবহারকারীর নাম</string>
     <string name="password">গোপন শব্দ</string>
-    <string name="show_password">গোপন শব্দ দেখান</string>
     <string name="login">লগ ইন</string>
     <string name="successfully_logged_in">লগ ইন সফল</string>
-    <string name="could_not_log_in">লগ ইন ত্রুটি</string>
     <string name="unknown_error">অজানা ত্রুটি</string>
     <string name="local">স্থানীয়</string>
     <string name="no_more_results">আর কিছু নেই</string>
@@ -214,7 +206,6 @@
     <string name="this_will_remove_the_read_date_question">এটা এই অধ্যায়ের পড়ার সময়কাল সরিয়ে ফেলবে। আপনি নিশ্চিত?</string>
     <string name="picture_saved">ছবি সংরক্ষিত হয়েছে</string>
     <string name="options">অপশন্স</string>
-    <string name="custom_filter">স্বীয় ফিল্টার</string>
     <string name="set_as_cover">কভার হিসেবে সেট করুন</string>
     <string name="cover_updated">কভার আপডেট হয়েছে</string>
     <string name="page_">পৃষ্ঠা: %1$d</string>
@@ -222,7 +213,6 @@
     <string name="decode_image_error">ছবি decoded করা যাবে না</string>
     <string name="use_image_as_cover">আপনি কি এই ছবিটিকে কভার হিসেবে সেট করতে চান?</string>
     <string name="viewer_for_this_series">এই সিরিজের দর্শক</string>
-    <string name="source_dash_chapter_">%1$s - অধ্যায়.%2$s</string>
     <string name="could_not_download_chapter_can_try_again">অধ্যায়গুলো ডাউনলোডের সময় একটি ত্রুটি দেখা দিয়েছে। ডাউনলোডস সেকশন থেকে আপনি আবার চেষ্টা করতে পারেন</string>
     <string name="new_chapters_found">নতুন অধ্যায় পাওয়া গিয়েছে</string>
     <string name="failed_to_update_cover">কভার আপডেট করতে অসফল হয়েছে</string>
@@ -248,7 +238,6 @@
     <string name="source_migration">উৎস পরিবর্তন</string>
     <string name="extensions">সংযোজিত অংশ</string>
     <string name="extension_info">সংযোজিত অংশ তথ্য</string>
-    <string name="details">বিস্তারিত</string>
     <string name="pending">প্রক্রিয়াধীন</string>
     <string name="installing">ইন্সটল হচ্ছে</string>
     <string name="installed">ইন্সটল হয়েছে</string>
@@ -263,7 +252,6 @@
 \nএই সার্টিফিকেট টি বিশ্বাস করা মানে আপনি ঝুঁকি নিতে সম্মত আছেন।</string>
     <string name="version_">ভার্সন: %1$s</string>
     <string name="language_">ভাষা: %1$s</string>
-    <string name="empty_preferences_for_extension">এই অংশটিকে সম্পাদন করার জন্য কোন প্রকার পছন্দ নেই</string>
     <string name="double_tap_anim_speed">দুই টোকায় এনিমেশনের গতি</string>
     <string name="no_animation">এনিমেশন নেই</string>
     <string name="normal">সাধারণ</string>
@@ -273,7 +261,6 @@
     <string name="removed_from_library">মাংগাশালা থেকে সরিয়ে ফেলা হয়েছে</string>
     <string name="_copied_to_clipboard">%1$s ক্লিপবোর্ডে কপি হয়েছে</string>
     <string name="custom_range">কাস্টম ডাউনলোড</string>
-    <string name="select">নির্বাচন</string>
     <string name="migrate">সরিয়ে ফেলুন</string>
     <string name="source_not_installed_">উৎস ইন্সটল করা নেই: %1$s</string>
     <string name="rereading">পুনরায় পড়া</string>
@@ -316,7 +303,6 @@
     <string name="updating_library">সংগ্রহশালার হালনাগাদ হচ্ছে</string>
     <string name="date_added">তারিখে যোগকৃত</string>
     <string name="latest_chapter">সর্বশেষ অধ্যায়</string>
-    <string name="unread_badges">অপঠিত চিহ্ন</string>
     <plurals name="notification_update_failed">
         <item quantity="one">১টি হালনাগাদ ব্যর্থ হয়েছে%1$dটি হালনাগাদ ব্যর্থ হয়েছে</item>
         <item quantity="other"/>
@@ -357,7 +343,6 @@
     <string name="failed_to_bypass_cloudflare">ক্লাউডফ্লেয়ারকে বাইপাস করতে ব্যর্থ</string>
     <string name="please_update_webview">অনুগ্রহ করে উন্নততর সামঞ্জস্যতার জন্য ওয়েবভিউ অ্যাপটি হালনাগাদ করুন</string>
     <string name="always">সবসময়</string>
-    <string name="app_not_available">অ্যাপটি অনুপলব্ধ</string>
     <string name="back">পেছনে</string>
     <string name="forward">অগ্রবর্তী</string>
     <string name="less">কম</string>
@@ -370,14 +355,12 @@
     <string name="oldest">প্রবীণতম</string>
     <string name="pin">আটকান</string>
     <string name="pinned">গাঁথুনিকৃত</string>
-    <string name="refresh">রেফ্রেস করুন</string>
     <string name="reorder">পুনরায় সাজান</string>
     <string name="unpin">আলগা করুন</string>
     <string name="view_chapters">অধ্যায়গুলি দেখুন</string>
     <string name="confirm_category_deletion">বিভাগ মুছবো\?</string>
     <string name="first_category">প্রথম বিভাগ</string>
     <string name="top_category">শীর্ষ বিভাগ (%1$s)</string>
-    <string name="category_is_hidden">বিভাগটি লুকানো আছে</string>
     <string name="category_is_empty">বিভাগটি খালি</string>
     <string name="create_new_category">নতুন বিভাগ তৈরি করুন</string>
     <string name="_already_in_queue">%1$s আগে থেকেই সারিতে আছে</string>
@@ -433,9 +416,7 @@
     <string name="hide">লুকান</string>
     <string name="enabled">সক্ষম করা হয়েছে</string>
     <string name="deleted_">মুছা হয়েছে: %1$s</string>
-    <string name="bug_report">একটি বাগ রিপোর্ট করুন</string>
     <string name="bottom">নীচ</string>
-    <string name="auto">স্বয়ংক্রিয়</string>
     <string name="always_delete">সর্বদা মুছুন</string>
     <string name="always_keep">সর্বদা রাখুন</string>
     <string name="delete_removed_chapters">সরানো অধ্যায়গুলি মুছুন</string>
@@ -521,12 +502,7 @@
     <string name="all_sources">সব উৎস</string>
     <string name="search_extensions">এক্সটেনশন খুঁজুন…</string>
     <string name="in_library">লাইব্রেরীতে</string>
-    <string name="press_and_hold_to_reset_history">অধ্যায় ইতিহাস রিসেট করতে টিপুন এবং ধরে রাখুন</string>
     <string name="reset_chapter_question">রিসেট অধ্যায়\?</string>
-    <string name="only_updates">শুধু আপডেটগুলো</string>
-    <string name="only_history">শুধু ইতিহাস</string>
-    <string name="ungroup_all">সব দলমুক্ত করুন</string>
-    <string name="group_all">সব দলবদ্ধ করুন</string>
     <string name="search_recents">নতুন গুলো খুঁজুন…</string>
     <string name="view_all_updates">সকল আপডেট প্রদর্শন করুন</string>
     <string name="view_history">ইতিহাস প্রদর্শন করুন</string>
@@ -551,7 +527,6 @@
     <string name="small">S</string>
     <string name="x_small">XS</string>
     <string name="hide_start_reading_button">পড়া শুরু করুন বোতামটি লুকান</string>
-    <string name="start_with_filters_hidden">ফিল্টারগুলো লুকানো দিয়ে শুরু করুন</string>
     <string name="drag_and_drop">টেনে আনুন এবং ছাড়ুন</string>
     <string name="ungrouped">গ্রুপহীন</string>
     <string name="read_progress">পড়ার অগ্রগতি</string>

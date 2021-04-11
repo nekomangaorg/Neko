@@ -4,7 +4,6 @@
     <string name="app_short_name" translatable="false">TachiJ2K</string>
 
     <!--Models-->
-    <string name="name">Name</string>
 
     <!-- Manga Type -->
     <string name="manga">Manga</string>
@@ -73,7 +72,6 @@
     <string name="create_new_category">Create new category</string>
     <string name="new_category">New category</string>
     <string name="category_is_empty">Category is empty</string>
-    <string name="category_is_hidden">Category is hidden</string>
     <string name="top_category">Top category (%1$s)</string>
     <string name="default_category">Default category</string>
     <string name="first_category">First category</string>
@@ -87,7 +85,6 @@
     <string name="add_edit_categories">Add/Edit categories</string>
     <string name="edit_categories">Edit categories</string>
     <string name="manage_category">Manage category</string>
-    <string name="rename_category">Rename category</string>
     <string name="move_to_categories">Move to categories</string>
     <plurals name="category_plural">
         <item quantity="one">%d category</item>
@@ -148,10 +145,8 @@
     <string name="list">List</string>
     <string name="comfortable_grid">Comfortable Grid</string>
     <string name="compact_grid">Compact Grid</string>
-    <string name="start_with_filters_hidden">Start with filters hidden</string>
     <string name="download_badge">Download badges</string>
     <string name="hide_start_reading_button">Hide start reading button</string>
-    <string name="unread_badges">Unread badges</string>
     <string name="badges">Badges</string>
     <string name="uniform_covers">Uniform covers</string>
     <string name="x_small">XS</string>
@@ -214,7 +209,6 @@
     <string name="this_will_remove_the_read_date_question">This will remove the read date of this
         chapter. Are you sure?</string>
     <string name="reset_all_chapters_for_this_">Reset all chapters for this %1$s</string>
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <string name="last_read_">Last read %1$s</string>
     <string name="read_">Read %1$s</string>
     <string name="updated_">Updated %1$s</string>
@@ -225,13 +219,8 @@
     <string name="no_recent_read_updated_manga">No recently read or updated manga</string>
     <string name="no_recent_chapters">No recent chapters</string>
     <string name="no_recently_read_manga">No recently read manga</string>
-    <string name="group_all">Group all</string>
     <string name="grouped">Grouped</string>
-    <string name="ungroup_all">Ungroup all</string>
-    <string name="only_history">Only history</string>
-    <string name="only_updates">Only updates</string>
     <string name="reset_chapter_question">Reset chapter?</string>
-    <string name="press_and_hold_to_reset_history">Press and hold to reset chapter history</string>
     <string name="press_and_hold_to_also_reset">Press and hold can also reset chapter history</string>
     <string name="show_download_button">Show download button</string>
     <string name="only_unread">Only unread</string>
@@ -266,7 +255,6 @@
     <string name="extension_updates">Extension Updates</string>
     <string name="extension_info">Extension info</string>
     <string name="filter_languages">Filter Languages</string>
-    <string name="details">Details</string>
     <string name="obsolete">Obsolete</string>
     <string name="pending">Pending</string>
     <string name="installing">Installing</string>
@@ -280,7 +268,6 @@
     <string name="unofficial_extension_message">This extension is not from the official Tachiyomi extensions list.</string>
     <string name="version_">Version: %1$s</string>
     <string name="language_">Language: %1$s</string>
-    <string name="empty_preferences_for_extension">No preferences to edit for this extension</string>
     <string name="nsfw_short">18+</string>
     <string name="unofficial">Unofficial</string>
     <string name="may_contain_nsfw">May contain NSFW (18+) content</string>
@@ -292,9 +279,7 @@
     </plurals>
 
     <!-- Reader -->
-    <string name="custom_filter">Custom filter</string>
     <string name="set_as_cover">Set as cover</string>
-    <string name="_details">%1$s details</string>
     <string name="reader_settings">Reader settings</string>
     <string name="set_as_default_for_all">Set as default for all</string>
     <string name="cover_updated">Cover updated</string>
@@ -529,7 +514,6 @@
     <string name="search_manually">Search manually</string>
     <string name="migrate_now">Migrate now</string>
     <string name="copy_now">Copy now</string>
-    <string name="select">Select</string>
     <string name="migrate">Migrate</string>
     <string name="migrate_">Migrate %1$s</string>
     <string name="copy_value">Copy</string>
@@ -570,8 +554,6 @@
     <string name="spring_blossom">Spring Blossom</string>
     <string name="black_and_red">Black \'n\' Red</string>
     <string name="white_theme">Pure White</string>
-    <string name="system_default_amoled">System default (White + Black)</string>
-    <string name="system_default_all_blue">System default (All Blue)</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Recents)</string>
     <string name="language">Language</string>
@@ -603,7 +585,6 @@
     <string name="backup_in_progress">Backup already in progress</string>
     <string name="backup_location">Backup location</string>
     <string name="automatic_backups">Automatic backups</string>
-    <string name="service">Service</string>
     <string name="backup_frequency">Backup frequency</string>
     <string name="max_auto_backups">Max automatic backups</string>
     <string name="also_create_legacy_backup">Also create legacy backup</string>
@@ -615,8 +596,6 @@
     <string name="backup_created">Backup created</string>
     <string name="restore_completed">Restore completed</string>
     <string name="restore_error">Failed to restore backup</string>
-    <string name="restore_content_skipped">%1$d skipped</string>
-    <string name="restore_message">Restore uses the network to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
     <string name="restore_missing_sources">Missing sources:</string>
     <string name="restore_missing_trackers">Trackers not logged into:</string>
     <string name="restore_content">Restore uses sources to fetch data, carrier costs may apply.\n\nMake sure you have installed all necessary extensions and are logged in to sources and tracking services before restoring.</string>
@@ -625,21 +604,12 @@
     <string name="creating_backup">Creating backup</string>
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
-    <string name="restoring_progress">Restoring (%1$d/%2$d)</string>
     <string name="restore_duration">%02d min, %02d sec</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>
     <plurals name="restore_completed_message">
         <item quantity="one">Done in %1$s with %2$s error</item>
         <item quantity="other">Done in %1$s with %2$s errors</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="one">%d source missing</item>
-        <item quantity="other">%d sources missing</item>
-    </plurals>
-    <plurals name="licensed_manga">
-        <item quantity="one">%d manga is now licensed and could not be restored</item>
-        <item quantity="other">%d manga are now licensed and could not be restored</item>
     </plurals>
     <string name="not_logged_into_">Not logged into %1$s</string>
 
@@ -729,7 +699,6 @@
     <string name="username">Username</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
-    <string name="show_password">Show password</string>
     <string name="login">Login</string>
     <string name="logout">Logout</string>
     <string name="logout_from_">Logout from %1$s?</string>
@@ -738,7 +707,6 @@
     <string name="username_must_not_be_blank">Username or password cannot be blank</string>
 
     <string name="successfully_logged_out">You are now logged out</string>
-    <string name="could_not_log_in">Could not log in</string>
 
     <!-- Downloads -->
     <string name="downloads">Downloads</string>
@@ -820,20 +788,16 @@
     <string name="alphabetically">Alphabetically</string>
     <string name="always">Always</string>
     <string name="always_ask">Always ask</string>
-    <string name="app_not_available">App not available</string>
-    <string name="auto">Auto</string>
     <string name="automatic">Automatic</string>
     <string name="back">Back</string>
     <string name="beta">BETA</string>
     <string name="bottom">Bottom</string>
-    <string name="bug_report">Report a Bug</string>
     <string name="cancel">Cancel</string>
     <string name="center">Center</string>
     <string name="change">Change</string>
     <string name="charging">Charging</string>
     <string name="clear">Clear</string>
     <string name="close">Close</string>
-    <string name="collasped">Collapsed</string>
     <string name="common">Common</string>
     <string name="cover_of_image">Cover of manga</string>
     <string name="create">Create</string>
@@ -886,8 +850,6 @@
     <string name="pinned">Pinned</string>
     <string name="preview">Preview</string>
     <string name="previous">Previous</string>
-    <string name="refresh">Refresh</string>
-    <string name="refreshing">Refreshing</string>
     <string name="remove">Remove</string>
     <string name="reorder">Reorder</string>
     <string name="reset">Reset</string>
@@ -910,7 +872,6 @@
     <string name="top">Top</string>
     <string name="undo">Undo</string>
     <string name="unknown_error">Unknown error</string>
-    <string name="un_select_all">Un-select all</string>
     <string name="unpin">Unpin</string>
     <string name="use_default">Use default</string>
     <string name="view_all_errors">View all errors</string>

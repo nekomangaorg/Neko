@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Nama</string>
     <string name="categories">Kategori</string>
     <string name="manga">Manga</string>
     <string name="chapters">Bab-bab</string>
@@ -29,7 +28,6 @@
     <string name="edit">Ubah</string>
     <string name="add">Tambah</string>
     <string name="edit_categories">Edit kategori</string>
-    <string name="rename_category">Ubah nama kategori</string>
     <string name="move_to_categories">Pindahkan ke kategori</string>
     <string name="start">Mula</string>
     <string name="stop">Henti</string>
@@ -144,14 +142,10 @@
     <string name="restore_backup">Pulihkan sandaran</string>
     <string name="restore_from_backup_file">Pulihkan koleksi daripada fail sandaran</string>
     <string name="backup_location">Direktori sandaran</string>
-    <string name="service">Perkhidmatan</string>
     <string name="backup_frequency">Kekerapan sandaran</string>
     <string name="max_auto_backups">Sandaran automatik maksimum</string>
     <string name="backup_created">Sandaran dibuat</string>
     <string name="restore_completed">Pemulihan selesai</string>
-    <string name="restore_message">Pemulihan menggunakan sumber untuk memperolehi data; caj telco mungkin dikenakan.
-\n
-\nPastikan anda telah log masuk ke dalam sumber yang memerlukan pengesahan sebelum memulakan pemulihan.</string>
     <string name="what_should_backup">Apakah yang ingin anda sandarkan?</string>
     <string name="restoring_backup">Dalam proses memulihkan sandaran</string>
     <string name="clear_chapter_cache">Hapus cache bab</string>
@@ -176,10 +170,8 @@
     <string name="log_in_to_">Log masuk untuk %1$s</string>
     <string name="username">Nama pengguna</string>
     <string name="password">Kata laluan</string>
-    <string name="show_password">Perlihatkan kata laluan</string>
     <string name="login">Log masuk</string>
     <string name="successfully_logged_in">Log masuk berjaya</string>
-    <string name="could_not_log_in">Log masuk gagal</string>
     <string name="unknown_error">Ralat tidak diketahui</string>
     <string name="local">lokal</string>
     <string name="no_more_results">Tiada lagi hasil</string>
@@ -214,7 +206,6 @@
     <string name="download_badge">Lambang muat turun</string>
     <string name="picture_saved">Gambar disimpan</string>
     <string name="options">Pilihan</string>
-    <string name="custom_filter">Tapisan tersuai</string>
     <string name="set_as_cover">Set sebagai muka hadapan</string>
     <string name="cover_updated">Muka hadapan dikemas kini</string>
     <string name="page_">Halaman: %1$d</string>
@@ -222,7 +213,6 @@
     <string name="decode_image_error">Imej tidak dapat diyahkod</string>
     <string name="use_image_as_cover">Adakah anda ingin set imej ini sebagai muka hadapan?</string>
     <string name="viewer_for_this_series">Pemapar bagi siri ini</string>
-    <string name="source_dash_chapter_">%1$s - Bab.%2$s</string>
     <string name="could_not_download_chapter_can_try_again">Ralat ketika memuat turun bab. Anda boleh mencuba lagi di bahagian muat turun</string>
     <string name="new_chapters_found">Bab baharu dijumpai</string>
     <string name="failed_to_update_cover">Gagal untuk kemas kini muka hadapan</string>
@@ -250,7 +240,6 @@
     <string name="extension_info">Info sambungan</string>
     <string name="open_in_webview">Buka dalam WebView</string>
     <string name="dark_blue">Biru gelap</string>
-    <string name="details">Perincian</string>
     <string name="pending">Masih menunggu</string>
     <string name="installing">Memasang</string>
     <string name="installed">Dipasang</string>
@@ -265,7 +254,6 @@
 \nDengan mempercayai sijil ini, anda menerima risiko tersebut.</string>
     <string name="version_">Versi: %1$s</string>
     <string name="language_">Bahasa: %1$s</string>
-    <string name="empty_preferences_for_extension">Tiada apa untuk disunting di sambungan ini</string>
     <string name="double_tap_anim_speed">Kelajuan animasi ketik dua kali</string>
     <string name="true_32bit_color">32-bit warna</string>
     <string name="skip_read_chapters">Langkau bab yang sudah dibaca</string>
@@ -291,7 +279,6 @@
     <string name="theres_no_previous_chapter">Tiada bab sebelumnya dijumpai</string>
     <string name="loading_pages">Memuatkan halaman…</string>
     <string name="failed_to_load_pages_">Gagal untuk memuatkan halaman: %1$s</string>
-    <string name="select">Pilih</string>
     <string name="migrate">Beralih</string>
     <string name="color_filter_blend_mode">Mod turas warna campuran</string>
     <string name="help">Bantuan</string>
@@ -302,8 +289,6 @@
     <string name="screen">Skrin</string>
     <string name="dodge_lighten">Elak/</string>
     <string name="burn_darken">Bakar / Darken</string>
-    <string name="system_default_all_blue">Tetapan sistem (Biru gelap)</string>
-    <string name="system_default_amoled">Tetapan sistem (AMOLED)</string>
     <string name="no_results_found">Tiada hasil dijumpai</string>
     <string name="lock_with_biometrics">Kunci dengan biometrik</string>
     <string name="lock_when_idle">Kunci apabila terbiar</string>
@@ -340,7 +325,6 @@
     <string name="failed_to_bypass_cloudflare">Gagal untuk memintas Cloudflare</string>
     <string name="please_update_webview">Sila kemas kini aplikasi WebView untuk keserasian yang lebih baik</string>
     <string name="always">Selalu</string>
-    <string name="app_not_available">Aplikasi tidak tersedia</string>
     <string name="back">Ke belakang</string>
     <string name="forward">Ke depan</string>
     <string name="less">Tutup</string>
@@ -353,7 +337,6 @@
     <string name="oldest">Terlama</string>
     <string name="pin">Sematkan</string>
     <string name="pinned">Disematkan</string>
-    <string name="refresh">Segar semula</string>
     <string name="reorder">Susun semula</string>
     <string name="unpin">Buang sematkan</string>
     <string name="view_chapters">Buka bab</string>
@@ -361,7 +344,6 @@
     <string name="updating_library">Mengemas kini pustaka</string>
     <string name="date_added">Tarikh ditambah</string>
     <string name="latest_chapter">Bab terkini</string>
-    <string name="unread_badges">Penanda tidak dibaca</string>
     <plurals name="notification_update_failed">
         <item quantity="other">%1$d gagal kemas kini</item>
     </plurals>
@@ -388,7 +370,6 @@
     <string name="grid_options">Pilihan</string>
     <string name="uniform_covers">Lapis</string>
     <string name="hide_start_reading_button">Sembunyi butang mula</string>
-    <string name="start_with_filters_hidden">Mula dengan tapisan</string>
     <string name="comfortable_grid">Grid</string>
     <string name="display_options">Pilihan</string>
     <string name="drag_and_drop">Heret dan</string>
@@ -422,7 +403,6 @@
     <string name="categories_on_manual">Kategori untuk dikemas kini apabila menyegarkan semula secara manual</string>
     <string name="first_category">Kategori pertama</string>
     <string name="top_category">Kategori teratas (%1$s)</string>
-    <string name="category_is_hidden">Kategori disembunyikan</string>
     <string name="category_is_empty">Kategori kosong</string>
     <string name="create_new_category">Cipta kategori baharu</string>
     <string name="_already_in_queue">%1$s sudah tersedia di barisan</string>
@@ -445,7 +425,6 @@
     <string name="unlock_library">Buka kunci untuk akses Pustaka</string>
     <string name="unknown_status">Status tidak diketahui</string>
     <string name="not_started">Belum dimulakan</string>
-    <string name="group_all">kumpulkan</string>
     <string name="search_recents">Cari terkini…</string>
     <string name="view_all_updates">Lihat semua kemas</string>
     <string name="view_history">Lihat</string>
@@ -473,10 +452,8 @@
     <string name="enabled">Di</string>
     <string name="only_enable_enabled_for_migration">Hanya benarkan sumber yang di telah di benarkan untuk</string>
     <string name="use_default">Pilih</string>
-    <string name="un_select_all">Nyah-pilih</string>
     <string name="sort_and_filter">Susun dan</string>
     <string name="select_none">Pilih</string>
-    <string name="refreshing">Menyegar</string>
     <string name="moved_to_">Di pindahkan ke %1$s</string>
     <string name="mark_previous_as_unread">Tanda sebelumnya sebagai belum di</string>
     <string name="mark_all_as_unread">Tanda semua sebagai belum di</string>
@@ -485,8 +462,6 @@
     <string name="drag_handle">Heret</string>
     <string name="download_unread">Muat turun yang belum di</string>
     <string name="deleted_">Di padam: %1$s</string>
-    <string name="collasped">Di</string>
-    <string name="bug_report">Laporkan</string>
     <plurals name="after_minutes">
         <item quantity="other">Selepas %1$s</item>
     </plurals>
@@ -536,14 +511,6 @@
     </plurals>
     <string name="data_management">Pengurusan</string>
     <string name="not_logged_into_">Tidak terlog masuk ke %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="other">%d manga telah di lesenkan and tidak boleh di</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="other">%d sumber</item>
-    </plurals>
-    <string name="restoring_progress">Memulihkan(%1$d/%2$d)</string>
-    <string name="restore_content_skipped">%1$d telah di</string>
     <string name="restore_error">Gagal memulihkan sandaran</string>
     <string name="white_theme">Putih</string>
     <plurals name="manga_migrated">
@@ -639,16 +606,11 @@
     <string name="all_sources">Semua</string>
     <string name="search_extensions">Cari penambahan…</string>
     <string name="in_library">Dalam</string>
-    <string name="press_and_hold_to_reset_history">Tekan dan tahan untuk ulang semula sejarah</string>
     <string name="reset_chapter_question">Ulang semula bab\?</string>
-    <string name="only_updates">Hanya kemas</string>
-    <string name="only_history">Hanya</string>
-    <string name="ungroup_all">Nyahkumpul</string>
     <string name="keep">kekal</string>
     <string name="top">Atas</string>
     <string name="tag">Tag</string>
     <string name="bottom">Bawah</string>
-    <string name="auto">Auto</string>
     <string name="migration">Pemindahan</string>
     <string name="large">L</string>
     <string name="medium">M</string>
@@ -740,7 +702,6 @@
     <string name="vertically">Menegak</string>
     <string name="horizontally">Melintang</string>
     <string name="reader_settings">Tetapan pembaca</string>
-    <string name="_details">%1$s butiran</string>
     <string name="_must_be_enabled_first">%1$s perlu dihidupkan terlebih dahulu</string>
     <string name="app_info">Maklumat aplikasi</string>
     <string name="filter_languages">Tapis Bahasa</string>

@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">Tên</string>
     <!-- Activities and fragments labels (toolbar title) -->
     <string name="settings">Cài đặt</string>
     <string name="download_queue">Hàng chờ tải xuống</string>
@@ -25,7 +24,6 @@
     <string name="edit">Sửa</string>
     <string name="add">Thêm</string>
     <string name="edit_categories">Chỉnh sửa danh mục</string>
-    <string name="rename_category">Đổi tên danh mục</string>
     <string name="move_to_categories">Chuyển đến danh mục</string>
     <string name="start">Bắt đầu</string>
     <string name="stop">Dừng lại</string>
@@ -154,10 +152,8 @@
     <string name="log_in_to_">Đăng nhập vào %1$s</string>
     <string name="username">Tên đăng nhập</string>
     <string name="password">Mật khẩu</string>
-    <string name="show_password">Hiện mật khẩu</string>
     <string name="login">Đăng nhập</string>
     <string name="successfully_logged_in">Đăng nhập thành công</string>
-    <string name="could_not_log_in">Lỗi đăng nhập</string>
     <string name="unknown_error">Lỗi không xác định</string>
     <!-- Library fragment -->
     <!-- Catalogue fragment -->
@@ -197,7 +193,6 @@
     <string name="picture_saved">Đã lưu ảnh</string>
     <string name="options">Tùy chọn</string>
     <!-- Reader activity -->
-    <string name="custom_filter">Bộ lọc tùy chỉnh</string>
     <string name="set_as_cover">Đặt làm ảnh bìa</string>
     <string name="cover_updated">Đã cập nhật ảnh bìa</string>
     <string name="page_">Trang: %1$d</string>
@@ -208,7 +203,6 @@
     <!-- Backup fragment -->
     <string name="backup">Sao lưu</string>
     <!-- Recent manga fragment -->
-    <string name="source_dash_chapter_">%1$s - Ch.%2$s</string>
     <!-- Downloads activity and service -->
     <string name="could_not_download_chapter_can_try_again">Có lỗi đã xảy ra khi đang tải chương. Bạn có thể thử lại trong phần tải xuống</string>
     <!-- Library update service notifications -->
@@ -256,7 +250,6 @@
     <string name="dark_blue">Xanh đậm</string>
     <string name="default_category">Danh mục Mặc định</string>
     <string name="always_ask">Luôn hỏi</string>
-    <string name="details">Chi tiết</string>
     <string name="pending">Đang chờ xử lý</string>
     <string name="installing">Đang cài đặt</string>
     <string name="installed">"Đã cài "</string>
@@ -271,7 +264,6 @@
 \nBạn sẽ chấp nhận những rủi ro khi tin tưởng chứng chỉ này.</string>
     <string name="version_">Phiên bản: %1$s</string>
     <string name="language_">Ngôn ngữ: %1$s</string>
-    <string name="empty_preferences_for_extension">Không có tùy chọn để sửa chữa cho tiện ích mở rộng này</string>
     <string name="double_tap_anim_speed">Double tap tốc độ hình ảnh động</string>
     <string name="crop_borders">Cắt viền</string>
     <string name="invert_volume_keys">Đảo ngược phím âm lượng</string>
@@ -284,13 +276,10 @@
     <string name="restore_backup">Khôi phục sao lưu</string>
     <string name="restore_from_backup_file">Khôi phục thư viện từ tập tin sao lưu</string>
     <string name="backup_location">Thư mục sao lưu</string>
-    <string name="service">Dịch vụ</string>
     <string name="backup_frequency">Lịch sao lưu</string>
     <string name="max_auto_backups">Sao lưu tự động tối đa</string>
     <string name="backup_created">Sao lưu đã được tạo</string>
     <string name="restore_completed">Khôi phục hoàn tất</string>
-    <string name="restore_message">Khôi phục sử dụng nguồn để lấy dữ liệu, yêu cầu sử dụng mạng
-\nHãy đảm bảo rằng bạn đã đăng nhập đúng cách vào các nguồn trước khi khôi phục.</string>
     <string name="what_should_backup">Bạn có muốn sao lưu không\?</string>
     <string name="restoring_backup">Khôi phục sao lưu</string>
     <string name="refresh_tracking_metadata">Làm mới siêu dữ liệu nguồn</string>
@@ -319,11 +308,8 @@
     <string name="theres_no_previous_chapter">Không có chương trước đó</string>
     <string name="loading_pages">Đang tải trang…</string>
     <string name="failed_to_load_pages_">Tải trang thất bại: %1$s</string>
-    <string name="select">Chọn</string>
     <string name="migrate">Di chuyển</string>
     <string name="common">Thường gặp</string>
-    <string name="system_default_all_blue">Mặc định hệ thống (Xanh đậm)</string>
-    <string name="system_default_amoled">Mặc định hệ thống (AMOLED)</string>
     <string name="long_tap_dialog">Nhấn giữ mở hộp thoại</string>
     <string name="open_in_webview">Mở bằng webview</string>
     <string name="true_32bit_color">Màu 32-bit</string>
@@ -354,7 +340,6 @@
     <string name="failed_to_bypass_cloudflare">Bỏ qua Cloudflare thất bại</string>
     <string name="please_update_webview">Vui lòng cập nhật WebView để tương thích tốt hơn</string>
     <string name="always">Luôn luôn</string>
-    <string name="app_not_available">Ứng dụng không có sẵn</string>
     <string name="back">Trở lại</string>
     <string name="forward">Chuyển tới trước</string>
     <string name="mark_as_unread">Đánh dấu là chưa đọc</string>
@@ -365,7 +350,6 @@
     <string name="newest">Mới nhất</string>
     <string name="oldest">Cũ nhất</string>
     <string name="pin">Ghim</string>
-    <string name="refresh">Làm mới</string>
     <string name="reorder">Sắp xếp lại</string>
     <string name="unpin">Bỏ ghim</string>
     <string name="view_chapters">Xem các chương</string>
@@ -373,7 +357,6 @@
     <string name="updating_library">Đang cập nhật thư viện</string>
     <string name="date_added">Ngày thêm</string>
     <string name="latest_chapter">Chương mới nhất</string>
-    <string name="unread_badges">Phù hiệu chưa đọc</string>
     <string name="check_site_in_web">Kiểm tra trang web bằng WebView</string>
     <string name="obsolete">Lỗi thời</string>
     <string name="obsolete_extension_message">Tiện ích bổ sung này không còn tồn tại.</string>

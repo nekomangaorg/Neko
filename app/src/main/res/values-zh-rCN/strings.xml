@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="name">名称</string>
     <string name="categories">分类</string>
     <string name="manga">漫画</string>
     <string name="chapters">章节</string>
@@ -29,7 +28,6 @@
     <string name="edit">编辑</string>
     <string name="add">添加</string>
     <string name="edit_categories">编辑分类</string>
-    <string name="rename_category">重命名分类</string>
     <string name="move_to_categories">移至分类</string>
     <string name="start">开始</string>
     <string name="stop">停止</string>
@@ -91,7 +89,6 @@
     <string name="system_default">系统默认</string>
     <string name="default_category">默认分类</string>
     <string name="always_ask">每次询问</string>
-    <string name="details">详细</string>
     <string name="pending">等待</string>
     <string name="installing">安装中</string>
     <string name="installed">已安装</string>
@@ -106,7 +103,6 @@
 \n信任这个证书，即代表你愿意承担上述风险。</string>
     <string name="version_">版本: %1$s</string>
     <string name="language_">语言: %1$s</string>
-    <string name="empty_preferences_for_extension">此插件没有可用的偏好设置</string>
     <string name="fullscreen">全屏</string>
     <string name="double_tap_anim_speed">双击动画速度</string>
     <string name="show_page_number">显示页数</string>
@@ -168,14 +164,10 @@
     <string name="restore_backup">恢复备份</string>
     <string name="restore_from_backup_file">从备份文件中恢复</string>
     <string name="backup_location">备份目录</string>
-    <string name="service">自动备份</string>
     <string name="backup_frequency">备份频率</string>
     <string name="max_auto_backups">最大自动备份数</string>
     <string name="backup_created">已创建备份</string>
     <string name="restore_completed">还原完成</string>
-    <string name="restore_message">恢复备份将抓取图源数据，需要用到网络。
-\n
-\n如果图源需要登录，请先进行登录再恢复备份。</string>
     <string name="what_should_backup">需要备份什么？</string>
     <string name="restoring_backup">正在还原备份</string>
     <string name="clear_chapter_cache">清除缓存数据</string>
@@ -200,10 +192,8 @@
     <string name="log_in_to_">登录到%1$s</string>
     <string name="username">用户名</string>
     <string name="password">密码</string>
-    <string name="show_password">显示密码</string>
     <string name="login">登录</string>
     <string name="successfully_logged_in">登录成功</string>
-    <string name="could_not_log_in">登录失败</string>
     <string name="unknown_error">未知错误</string>
     <string name="local">本地</string>
     <string name="search_filters">按分类搜索</string>
@@ -247,7 +237,6 @@
     <string name="this_will_remove_the_read_date_question">将清除此章节的阅读日期，确定吗？</string>
     <string name="picture_saved">图片已保存</string>
     <string name="options">选项</string>
-    <string name="custom_filter">滤镜</string>
     <string name="set_as_cover">设置为封面</string>
     <string name="cover_updated">封面已更新</string>
     <string name="page_">第 %1$d 页</string>
@@ -263,8 +252,6 @@
     <string name="theres_no_previous_chapter">前面没有啦</string>
     <string name="loading_pages">页面加载中…</string>
     <string name="failed_to_load_pages_">加载页面: %1$s失败</string>
-    <string name="source_dash_chapter_">%1$s - 第%2$s章</string>
-    <string name="select">选择</string>
     <string name="migrate">迁移</string>
     <string name="could_not_download_chapter_can_try_again">下载时发生错误。请再试一次</string>
     <string name="new_chapters_found">发现新章节</string>
@@ -290,8 +277,6 @@
     <string name="common">普通</string>
     <string name="dark_blue">暗蓝色主题</string>
     <string name="long_tap_dialog">长按菜单</string>
-    <string name="system_default_all_blue">系统默认 (暗蓝色主题)</string>
-    <string name="system_default_amoled">系统默认 (AMOLED)</string>
     <string name="open_in_webview">用外部浏览器打开</string>
     <string name="true_32bit_color">32位色彩</string>
     <string name="skip_read_chapters">跳过已读章节</string>
@@ -306,7 +291,6 @@
     <string name="burn_darken">颜色加深/变暗</string>
     <string name="lock_with_biometrics">启用生物识别锁定</string>
     <string name="lock_when_idle">应用待机时锁定</string>
-    <string name="unread_badges">未读标记</string>
     <plurals name="notification_update_failed">
         <item quantity="other">%1$d 本漫画更新失败</item>
     </plurals>
@@ -358,7 +342,6 @@
     <string name="failed_to_bypass_cloudflare">无法绕过 Cloudflare</string>
     <string name="please_update_webview">请更新 WebView 应用以获得更好的兼容性</string>
     <string name="always">总是</string>
-    <string name="app_not_available">应用程序不可用</string>
     <string name="back">返回</string>
     <string name="forward">前进</string>
     <string name="less">显示更少</string>
@@ -371,7 +354,6 @@
     <string name="oldest">最旧</string>
     <string name="pin">置顶</string>
     <string name="pinned">已置顶</string>
-    <string name="refresh">刷新</string>
     <string name="reorder">重新排序</string>
     <string name="unpin">取消置顶</string>
     <string name="view_chapters">查看章节</string>
@@ -410,7 +392,6 @@
     <string name="manage_category">管理分类</string>
     <string name="add_categories">添加分类</string>
     <string name="confirm_category_deletion">删除分类？</string>
-    <string name="category_is_hidden">分类已隐藏</string>
     <string name="category_is_empty">分类为空</string>
     <string name="create_new_category">创建新分类</string>
     <string name="_already_in_queue">%1$s 已在队列中</string>
@@ -447,7 +428,6 @@
     <string name="x_small">特小</string>
     <string name="uniform_covers">统一封面</string>
     <string name="hide_start_reading_button">隐藏开始阅读按钮</string>
-    <string name="start_with_filters_hidden">从隐藏的过滤开始</string>
     <string name="comfortable_grid">宽松网格</string>
     <string name="display_options">显示选项</string>
     <string name="drag_and_drop">拖放</string>
@@ -483,7 +463,6 @@
     <string name="comic">漫画</string>
     <string name="manhua">漫画</string>
     <string name="manhwa">韩国漫画</string>
-    <string name="restoring_progress">正在还原（%1$d/%2$d）</string>
     <string name="restore_error">还原备份失败</string>
     <string name="add_x_to_library">添加 %1$s 至书架？</string>
     <string name="recents">最近</string>
@@ -552,12 +531,10 @@
     <string name="smart_by_theme">智能（跟随主题）</string>
     <string name="view_all_errors">查看所有错误</string>
     <string name="use_default">使用默认</string>
-    <string name="un_select_all">全不选</string>
     <string name="top">顶部</string>
     <string name="tag">标签</string>
     <string name="sort_and_filter">排序 &amp; 筛选</string>
     <string name="select_none">全不选</string>
-    <string name="refreshing">刷新中</string>
     <string name="moved_to_">已移至%1$s</string>
     <string name="keep">保留</string>
     <string name="hide">隐藏</string>
@@ -565,8 +542,6 @@
     <string name="drag_handle">拖动手柄</string>
     <string name="download_unread">下载但未读</string>
     <string name="deleted_">已删除：%1$s</string>
-    <string name="collasped">折叠</string>
-    <string name="auto">自动</string>
     <plurals name="after_minutes">
         <item quantity="other">在%1$s分钟之后</item>
     </plurals>
@@ -611,18 +586,10 @@
     <string name="clean_up_downloaded_chapters">清除已下载章节</string>
     <string name="delete_unused_chapters">删除不存在、部分下载和已读过章节目录</string>
     <string name="data_management">数据管理</string>
-    <string name="restore_content_skipped">%1$d 已跳过</string>
     <string name="not_logged_into_">尚未登陆 %1$s</string>
-    <plurals name="licensed_manga">
-        <item quantity="other">%d 个漫画现已被授权，无法还原</item>
-    </plurals>
-    <plurals name="sources_missing">
-        <item quantity="other">%d 图源缺失</item>
-    </plurals>
     <plurals name="cache_cleared">
         <item quantity="other">缓存已清除，%d 的文件已被删除</item>
     </plurals>
-    <string name="bug_report">报告BUG</string>
     <string name="bottom">底部</string>
     <string name="downloading_">正在下载: %1$s</string>
     <string name="enable_zoom_out">启用缩小</string>
@@ -635,12 +602,7 @@
     <string name="all_sources">所有图源</string>
     <string name="search_extensions">搜索拓展…</string>
     <string name="in_library">在书架中</string>
-    <string name="press_and_hold_to_reset_history">长按以重置章节历史</string>
     <string name="reset_chapter_question">重置章节？</string>
-    <string name="only_updates">只看更新</string>
-    <string name="only_history">只看历史</string>
-    <string name="ungroup_all">不分组</string>
-    <string name="group_all">所有分组</string>
     <string name="search_recents">搜索近期…</string>
     <string name="view_history">查看历史</string>
     <string name="view_all_updates">查看所有更新</string>
@@ -728,7 +690,6 @@
     <string name="vertically">垂直地</string>
     <string name="horizontally">水平地</string>
     <string name="reader_settings">阅读器设置</string>
-    <string name="_details">%1$s 细节</string>
     <string name="_must_be_enabled_first">%1$s 必须先被启用</string>
     <string name="app_info">应用信息</string>
     <string name="filter_languages">过滤语言</string>
