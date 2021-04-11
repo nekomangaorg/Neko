@@ -147,6 +147,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
+        binding.toolbar.overflowIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
         searchDrawable = ContextCompat.getDrawable(
             this,
             R.drawable.ic_search_24dp
