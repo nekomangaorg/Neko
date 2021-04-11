@@ -40,6 +40,7 @@ class RecentsPresenter(
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
+    private var recentsJob: Job? = null
     var recentItems = listOf<RecentMangaItem>()
         private set
     var query = ""
@@ -88,10 +89,11 @@ class RecentsPresenter(
         getRecents()
     }
 
-    fun getRecents(updatePageCount: Boolean = false, retryCount: Int = 0, itemCount: Int = 0) {
+    fun getRecents(updatePageCount: Boolean = false) {
         val oldQuery = query
-        scope.launch {
-            runRecents(oldQuery, updatePageCount, retryCount, itemCount)
+        recentsJob?.cancel()
+        recentsJob = scope.launch {
+            runRecents(oldQuery, updatePageCount)
         }
     }
 
@@ -320,7 +322,7 @@ class RecentsPresenter(
      * @param chapters the list of chapter from the database.
      */
     private fun setDownloadedChapters(chapters: List<RecentMangaItem>) {
-        for (item in chapters) {
+        for (item in chapters.filter { it.chapter.id != null }) {
             if (downloadManager.isChapterDownloaded(item.chapter, item.mch.manga)) {
                 item.status = Download.DOWNLOADED
             } else if (downloadManager.hasQueue()) {
