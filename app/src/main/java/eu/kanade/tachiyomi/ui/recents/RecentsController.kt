@@ -137,6 +137,9 @@ class RecentsController(bundle: Bundle? = null) :
             includeTabView = true,
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight + 48.dpToPx
+                binding.fakeAppBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    height = it.systemWindowInsetTop + appBarHeight
+                }
                 binding.recycler.updatePaddingRelative(
                     bottom = activityBinding?.bottomNav?.height ?: 0
                 )
@@ -152,13 +155,23 @@ class RecentsController(bundle: Bundle? = null) :
                 setBottomPadding()
             }
         )
+        binding.recycler.addOnScrollListener(
+            object : RecyclerView.OnScrollListener() {
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    binding.fakeAppBar.y = activityBinding?.appBar?.y ?: 0f
+                }
+            }
+        )
 
         activityBinding?.bottomNav?.post {
             binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
                 bottom = activityBinding?.bottomNav?.height ?: 0
             )
-            activityBinding?.tabsFrameLayout?.isVisible = !binding.downloadBottomSheet.root.sheetBehavior.isExpanded()
+            activityBinding?.tabsFrameLayout?.isVisible =
+                !binding.downloadBottomSheet.root.sheetBehavior.isExpanded()
+            binding.fakeAppBar.alpha =
+                if (binding.downloadBottomSheet.root.sheetBehavior.isExpanded()) 1f else 0f
         }
 
         presenter.onCreate()
@@ -188,11 +201,13 @@ class RecentsController(bundle: Bundle? = null) :
                         (1f - progress / cap) * 15f,
                         if (binding.recycler.canScrollVertically(-1)) 15f else 0f
                     ).coerceIn(0f, 15f)
+                    binding.fakeAppBar.alpha = max(0f, (progress - cap) / (1f - cap))
                     binding.downloadBottomSheet.sheetLayout.alpha = 1 - max(0f, progress / cap)
                     activityBinding?.appBar?.y = max(
                         activityBinding!!.appBar.y,
                         -headerHeight * (1 - progress)
                     )
+                    binding.fakeAppBar.y = activityBinding?.appBar?.y ?: 0f
                     activityBinding?.tabsFrameLayout?.let { tabs ->
                         tabs.alpha = 1 - max(0f, progress / cap)
                         if (tabs.alpha <= 0 && tabs.isVisible) {
