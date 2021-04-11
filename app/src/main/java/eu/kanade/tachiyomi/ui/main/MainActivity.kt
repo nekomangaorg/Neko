@@ -109,6 +109,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
+    var tabAnimation: ValueAnimator? = null
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -669,19 +670,20 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     fun showTabBar(show: Boolean, animate: Boolean = true) {
+        tabAnimation?.cancel()
         if (animate) {
             if (show && !binding.tabsFrameLayout.isVisible) {
                 binding.tabsFrameLayout.alpha = 0f
                 binding.tabsFrameLayout.isVisible = true
             }
-            val alphaAnimation = ValueAnimator.ofFloat(
+            tabAnimation = ValueAnimator.ofFloat(
                 binding.tabsFrameLayout.alpha,
                 if (show) 1f else 0f
             )
-            alphaAnimation.addUpdateListener { valueAnimator ->
+            tabAnimation?.addUpdateListener { valueAnimator ->
                 binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
             }
-            alphaAnimation.addListener(
+            tabAnimation?.addListener(
                 EndAnimatorListener {
                     binding.tabsFrameLayout.isVisible = show
                     if (!show) {
@@ -690,8 +692,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     }
                 }
             )
-            alphaAnimation.duration = 200
-            alphaAnimation.start()
+            tabAnimation?.duration = 200
+            tabAnimation?.start()
         } else {
             binding.tabsFrameLayout.isVisible = show
         }
