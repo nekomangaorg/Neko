@@ -476,17 +476,28 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         when (intent.action) {
             SHORTCUT_LIBRARY -> binding.bottomNav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
-                binding.bottomNav.selectedItemId = R.id.nav_recents
-                val viewType = when (intent.action) {
-                    SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
-                    else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
+                if (binding.bottomNav.selectedItemId != R.id.nav_recents) {
+                    binding.bottomNav.selectedItemId = R.id.nav_recents
+                } else {
+                    router.popToRoot()
                 }
-                router.pushController(RecentsController(viewType).withFadeTransaction())
+                binding.bottomNav.post {
+                    val controller = router.backstack.firstOrNull()?.controller() as? RecentsController
+                    controller?.tempJumpTo(
+                        when (intent.action) {
+                            SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+                            else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
+                        }
+                    )
+                }
             }
             SHORTCUT_BROWSE -> binding.bottomNav.selectedItemId = R.id.nav_browse
             SHORTCUT_EXTENSIONS -> {
-                binding.bottomNav.selectedItemId = R.id.nav_browse
-                router.popToRoot()
+                if (binding.bottomNav.selectedItemId != R.id.nav_recents) {
+                    binding.bottomNav.selectedItemId = R.id.nav_browse
+                } else {
+                    router.popToRoot()
+                }
                 binding.bottomNav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller() as? BrowseController

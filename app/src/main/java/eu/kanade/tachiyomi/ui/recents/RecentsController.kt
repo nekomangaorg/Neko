@@ -323,7 +323,7 @@ class RecentsController(bundle: Bundle? = null) :
             return true
         }
         if (presenter.preferences.recentsViewType().get() != presenter.viewType) {
-            tempJumpTo(RecentsPresenter.VIEW_TYPE_GROUP_ALL)
+            tempJumpTo(presenter.preferences.recentsViewType().get())
             return true
         }
         return false
@@ -440,7 +440,7 @@ class RecentsController(bundle: Bundle? = null) :
         onItemLongClick(position)
     }
 
-    private fun tempJumpTo(viewType: Int) {
+    fun tempJumpTo(viewType: Int) {
         presenter.toggleGroupRecents(viewType, false)
         activityBinding?.mainTabs?.selectTab(activityBinding?.mainTabs?.getTabAt(viewType))
     }
