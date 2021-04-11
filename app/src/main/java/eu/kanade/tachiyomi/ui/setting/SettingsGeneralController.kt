@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import kotlinx.coroutines.flow.launchIn
 import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -104,7 +105,18 @@ class SettingsGeneralController : SettingsController() {
                 key = "theme_preference"
                 titleRes = R.string.app_theme
                 lastScrollPostion = lastThemeX
-                summaryRes = context.getPrefTheme(preferences).nameRes
+                summary = if (preferences.nightMode()
+                    .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                ) {
+                    val lightTheme = preferences.lightTheme().get().nameRes
+                    val darkTheme = preferences.darkTheme().get().nameRes
+                    val nightMode = context.isInNightMode()
+                    mutableListOf(context.getString(lightTheme), context.getString(darkTheme)).apply {
+                        if (nightMode) reverse()
+                    }.joinToString(" / ")
+                } else {
+                    context.getString(context.getPrefTheme(preferences).nameRes)
+                }
                 activity = this@SettingsGeneralController.activity
             }
 
