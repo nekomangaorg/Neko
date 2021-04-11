@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isExpanded
+import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
@@ -131,6 +132,12 @@ class ExtensionBottomSheet @JvmOverloads constructor(context: Context, attrs: At
                     else -> migrationFrameLayout
                 }?.binding?.recycler?.isNestedScrollingEnabled = true
                 sheetBehavior?.isDraggable = true
+                if (!isExpanding) {
+                    when (tab?.position) {
+                        0 -> extensionFrameLayout
+                        else -> migrationFrameLayout
+                    }?.binding?.recycler?.smoothScrollToTop()
+                }
             }
         })
         presenter.onCreate()
