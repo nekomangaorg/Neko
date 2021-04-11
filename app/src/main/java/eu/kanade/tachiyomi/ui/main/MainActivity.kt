@@ -534,7 +534,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onDestroy() {
         super.onDestroy()
         DownloadService.removeListener(this)
-        binding.toolbar.setNavigationOnClickListener(null)
+        if (isBindingInitialized) {
+            binding.toolbar.setNavigationOnClickListener(null)
+        }
     }
 
     override fun onBackPressed() {
