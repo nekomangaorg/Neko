@@ -15,6 +15,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     val preferences: PreferencesHelper by injectLazy()
     lateinit var binding: VB
+    val isBindingInitialized get() = this::binding.isInitialized
 
     init {
         @Suppress("LeakingThis")

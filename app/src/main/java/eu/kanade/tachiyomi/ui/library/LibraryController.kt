@@ -805,7 +805,7 @@ class LibraryController(
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (view == null) return
+        if (!isBindingInitialized) return
         updateFilterSheetY()
         if (observeLater && ::presenter.isInitialized) {
             presenter.getLibrary()

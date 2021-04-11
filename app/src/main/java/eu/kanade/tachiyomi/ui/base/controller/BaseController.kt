@@ -18,6 +18,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
     lateinit var binding: VB
 
+    val isBindingInitialized get() = this::binding.isInitialized
     init {
         addLifecycleListener(
             object : LifecycleListener() {

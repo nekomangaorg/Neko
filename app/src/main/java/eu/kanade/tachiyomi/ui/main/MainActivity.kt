@@ -395,6 +395,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (router.backstackSize == 1 && this !is SearchActivity &&
             downloadManager.hasQueue() && !preferences.shownDownloadQueueTutorial().get()
         ) {
+            if (!isBindingInitialized) return
             val recentsItem = binding.bottomNav.getItemView(R.id.nav_recents) ?: return
             preferences.shownDownloadQueueTutorial().set(true)
             TapTargetView.showFor(

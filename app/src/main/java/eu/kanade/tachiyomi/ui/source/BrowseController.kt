@@ -375,6 +375,7 @@ class BrowseController :
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
+        if (!isBindingInitialized) return
         binding.bottomSheet.root.presenter.refreshExtensions()
         binding.bottomSheet.root.presenter.refreshMigrations()
         setBottomPadding()

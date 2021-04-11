@@ -344,11 +344,10 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        if (view != null) {
-            refresh()
-            setBottomPadding()
-            binding.downloadBottomSheet.dlBottomSheet.update()
-        }
+        if (!isBindingInitialized) return
+        refresh()
+        setBottomPadding()
+        binding.downloadBottomSheet.dlBottomSheet.update()
     }
 
     override fun onDestroy() {
