@@ -5,6 +5,7 @@ import android.content.ClipData
 import android.content.Context
 import android.content.Intent
 import android.content.pm.ActivityInfo
+import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
@@ -25,6 +26,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.ViewCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -57,6 +59,7 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -212,6 +215,11 @@ class ReaderActivity :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             systemUiFlag = systemUiFlag.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
         }
+        binding.appBar.setBackgroundColor(contextCompatColor(R.color.secondary_alpha))
+        ViewCompat.setBackgroundTintList(
+            binding.readerNav.root,
+            ColorStateList.valueOf(contextCompatColor(R.color.secondary_alpha))
+        )
         binding.readerLayout.systemUiVisibility = when (lightStatusBar) {
             true -> binding.readerLayout.systemUiVisibility.or(systemUiFlag)
             false -> binding.readerLayout.systemUiVisibility.rem(systemUiFlag)
@@ -595,7 +603,6 @@ class ReaderActivity :
         setMenuVisibility(menuVisible)
         binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = !menuVisible
         if (!menuVisible) binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
-        // val peek = binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.peekHeight ?: 30.dpToPx
         binding.readerLayout.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = when {
                 insets.isBottomTappable() -> {
@@ -627,6 +634,11 @@ class ReaderActivity :
             binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = 12.dpToPx + insets.systemWindowInsetLeft
                 rightMargin = 12.dpToPx + insets.systemWindowInsetRight
+            }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                val peek = 50.dpToPx
+                binding.chaptersSheet.root.sheetBehavior?.peekHeight =
+                    peek + insets.systemWindowInsetBottom
             }
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             binding.viewerContainer.requestLayout()
