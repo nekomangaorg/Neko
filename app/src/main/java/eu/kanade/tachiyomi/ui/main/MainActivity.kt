@@ -403,7 +403,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
                     getString(R.string.visit_recents_for_download_queue)
-                ).outerCircleColor(getResourceColor(R.attr.colorAccent)).outerCircleAlpha(0.95f).titleTextSize(20)
+                ).outerCircleColorInt(getResourceColor(R.attr.colorAccent)).outerCircleAlpha(0.95f).titleTextSize(20)
                     .titleTextColor(android.R.color.white).descriptionTextSize(16)
                     .descriptionTextColor(R.color.md_white_1000_76)
                     .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
