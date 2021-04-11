@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -173,10 +174,10 @@ class RecentsController(bundle: Bundle? = null) :
             if (isExpanded) {
                 (activity as? MainActivity)?.showTabBar(show = false, animate = false)
             }
-            binding.shadow2.alpha = if (!isExpanded) 0.25f else 0f
-            binding.shadow.alpha = if (!isExpanded) 0.5f else 0f
-            binding.fakeAppBar.alpha =
-                if (binding.downloadBottomSheet.root.sheetBehavior.isExpanded()) 1f else 0f
+            val isCollapsed = binding.downloadBottomSheet.root.sheetBehavior.isCollapsed()
+            binding.shadow2.alpha = if (isCollapsed) 0.25f else 0f
+            binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
+            binding.fakeAppBar.alpha = if (isExpanded) 1f else 0f
         }
 
         presenter.onCreate()
