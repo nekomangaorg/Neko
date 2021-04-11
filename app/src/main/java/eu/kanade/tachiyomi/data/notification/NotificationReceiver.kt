@@ -98,6 +98,15 @@ class NotificationReceiver : BroadcastReceiver() {
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
                 markAsRead(urls, mangaId)
             }
+
+            // Share crash dump file
+            ACTION_SHARE_CRASH_LOG ->
+                shareFile(
+                    context,
+                    intent.getParcelableExtra(EXTRA_URI),
+                    "text/plain",
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                )
         }
     }
 
@@ -170,6 +179,26 @@ class NotificationReceiver : BroadcastReceiver() {
         } else {
             context.toast(context.getString(R.string.next_chapter_not_found))
         }
+    }
+
+    /**
+     * Called to start share intent to share backup file
+     *
+     * @param context context of application
+     * @param path path of file
+     * @param notificationId id of notification
+     */
+    private fun shareFile(context: Context, uri: Uri, fileMimeType: String, notificationId: Int) {
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = ClipData.newRawUri(null, uri)
+            type = fileMimeType
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        // Dismiss notification
+        dismissNotification(context, notificationId)
+        // Launch share activity
+        context.startActivity(sendIntent)
     }
 
     /**
