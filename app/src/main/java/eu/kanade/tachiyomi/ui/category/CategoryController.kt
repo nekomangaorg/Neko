@@ -113,6 +113,10 @@ class CategoryController(bundle: Bundle? = null) :
 
     override fun onCategoryRename(position: Int, newName: String): Boolean {
         val category = adapter?.getItem(position)?.category ?: return false
+        if (newName.isBlank()) {
+            activity?.toast(R.string.category_cannot_be_blank)
+            return false
+        }
         if (category.order == CREATE_CATEGORY_ORDER) {
             return (presenter.createCategory(newName))
         }
