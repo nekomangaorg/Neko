@@ -968,6 +968,16 @@ class ReaderActivity :
                     2,
                     R.drawable.ic_photo_24dp,
                     R.string.set_first_page_as_cover
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    6,
+                    R.drawable.ic_share_all_outline_24dp,
+                    R.string.share_combined_pages
+                ),
+                MaterialMenuSheet.MenuSheetItem(
+                    7,
+                    R.drawable.ic_save_all_outline_24dp,
+                    R.string.save_combined_pages
                 )
             )
         } else {
@@ -997,6 +1007,22 @@ class ReaderActivity :
                 3 -> extraPage?.let { shareImage(it) }
                 4 -> extraPage?.let { saveImage(it) }
                 5 -> extraPage?.let { showSetCoverPrompt(it) }
+                6, 7 -> extraPage?.let { secondPage ->
+                    (viewer as? PagerViewer)?.let { viewer ->
+                        val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+                        val bg =
+                            if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
+                                Color.WHITE
+                            } else {
+                                Color.BLACK
+                            }
+                        if (item == 6) {
+                            presenter.shareImages(page, secondPage, isLTR, bg)
+                        } else {
+                            presenter.saveImages(page, secondPage, isLTR, bg)
+                        }
+                    }
+                }
             }
             true
         }.show()
@@ -1051,17 +1077,22 @@ class ReaderActivity :
      * Called from the presenter when a page is ready to be shared. It shows Android's default
      * sharing tool.
      */
-    fun onShareImageResult(file: File, page: ReaderPage) {
+    fun onShareImageResult(file: File, page: ReaderPage, secondPage: ReaderPage? = null) {
         val manga = presenter.manga ?: return
         val chapter = page.chapter.chapter
 
         val decimalFormat =
             DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
 
+        val pageNumber = if (secondPage != null) {
+            getString(R.string.pages_, if (resources.isLTR) "${page.number}-${page.number + 1}" else "${page.number + 1}-${page.number}")
+        } else {
+            getString(R.string.page_, page.number)
+        }
         val text = "${manga.title}: ${getString(
             R.string.chapter_,
             decimalFormat.format(chapter.chapter_number)
-        )}, ${getString(R.string.page_, page.number)}"
+        )}, $pageNumber"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {

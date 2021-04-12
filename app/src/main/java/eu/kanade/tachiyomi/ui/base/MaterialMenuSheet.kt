@@ -12,6 +12,7 @@ import android.widget.ImageView
 import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.widget.TextViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -52,9 +53,19 @@ open class MaterialMenuSheet(
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.isInNightMode() && !activity.window.decorView.rootWindowInsets.hasSideNavBar()) {
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }
-        maxHeight?.let {
-            binding.menuScrollView.maxHeight = it + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        if (maxHeight != null) {
+            binding.menuScrollView.maxHeight = maxHeight + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
             binding.menuScrollView.requestLayout()
+        } else {
+            binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener {
+                binding.menuScrollView.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    val fullHeight = activity.window.decorView.height
+                    val insets = activity.window.decorView.rootWindowInsets
+                    matchConstraintMaxHeight =
+                        fullHeight - (insets?.systemWindowInsetTop ?: 0) -
+                        binding.titleLayout.height - 26.dpToPx
+                }
+            }
         }
 
         binding.divider.visibleIf(showDivider)

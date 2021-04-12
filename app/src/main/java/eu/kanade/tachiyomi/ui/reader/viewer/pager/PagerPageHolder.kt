@@ -3,12 +3,9 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
-import android.graphics.Bitmap
 import android.graphics.BitmapFactory
-import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.PointF
-import android.graphics.Rect
 import android.graphics.drawable.Drawable
 import android.view.GestureDetector
 import android.view.Gravity
@@ -54,11 +51,8 @@ import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.injectLazy
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
-import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -683,36 +677,24 @@ class PagerPageHolder(
             skipExtra = true
             return imageBytes.inputStream()
         }
-
-        val maxHeight = max(height, height2)
-
-        val result = Bitmap.createBitmap(width + width2, max(height, height2), Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(result)
-        canvas.drawColor(if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) Color.WHITE else Color.BLACK)
         val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
-        val upperPart = Rect(
-            if (isLTR) 0 else width2,
-            (maxHeight - imageBitmap.height) / 2,
-            (if (isLTR) 0 else width2) + imageBitmap.width,
-            imageBitmap.height + (maxHeight - imageBitmap.height) / 2
-        )
-        canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
-        scope?.launchUI { progressBar.setProgress(98) }
-        val bottomPart = Rect(
-            if (!isLTR) 0 else width,
-            (maxHeight - imageBitmap2.height) / 2,
-            (if (!isLTR) 0 else width) + imageBitmap2.width,
-            imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2
-        )
-        canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
-        scope?.launchUI { progressBar.setProgress(99) }
+        val bg = if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) {
+            Color.WHITE
+        } else {
+            Color.BLACK
+        }
 
-        val output = ByteArrayOutputStream()
-        result.compress(Bitmap.CompressFormat.JPEG, 100, output)
         imageStream.close()
         imageStream2.close()
-        scope?.launchUI { progressBar.completeAndFadeOut() }
-        return ByteArrayInputStream(output.toByteArray())
+        return ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg) {
+            scope?.launchUI {
+                if (it == 100) {
+                    progressBar.completeAndFadeOut()
+                } else {
+                    progressBar.setProgress(it)
+                }
+            }
+        }
     }
 
     private fun splitDoublePages() {
@@ -733,9 +715,6 @@ class PagerPageHolder(
             target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))
         }
     }
-
-    private val Bitmap.rect: Rect
-        get() = Rect(0, 0, width, height)
 
     companion object {
         fun getBGType(readerTheme: Int, context: Context): Int {

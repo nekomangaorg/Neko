@@ -1,9 +1,11 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.app.Application
+import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import androidx.annotation.ColorInt
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -32,8 +34,11 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.withUIContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Completable
@@ -116,6 +121,8 @@ class ReaderPresenter(
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
+
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     /**
      * Called when the presenter is created. It retrieves the saved active chapter if the process
@@ -611,6 +618,40 @@ class ReaderPresenter(
     }
 
     /**
+     * Saves the image of this [page] in the given [directory] and returns the file location.
+     */
+    private fun saveImages(page1: ReaderPage, page2: ReaderPage, isLTR: Boolean, @ColorInt bg: Int, directory: File, manga: Manga): File {
+        val stream1 = page1.stream!!
+        ImageUtil.findImageType(stream1) ?: throw Exception("Not an image")
+        val stream2 = page2.stream!!
+        ImageUtil.findImageType(stream2) ?: throw Exception("Not an image")
+        val imageBytes = stream1().readBytes()
+        val imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+        val imageBytes2 = stream2().readBytes()
+        val imageBitmap2 = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
+
+        val stream = ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg)
+        directory.mkdirs()
+
+        val chapter = page1.chapter.chapter
+
+        // Build destination file.
+        val filename = DiskUtil.buildValidFilename(
+            "${manga.title} - ${chapter.name}".take(225)
+        ) + " - ${page1.number}-${page2.number}.jpg"
+
+        val destFile = File(directory, filename)
+        stream.use { input ->
+            destFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        stream.close()
+        return destFile
+    }
+
+    /**
      * Saves the image of this [page] on the pictures directory and notifies the UI of the result.
      * There's also a notification to allow sharing the image somewhere else or deleting it.
      */
@@ -644,6 +685,34 @@ class ReaderPresenter(
             )
     }
 
+    fun saveImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
+        scope.launch {
+            if (firstPage.status != Page.READY) return@launch
+            if (secondPage.status != Page.READY) return@launch
+            val manga = manga ?: return@launch
+            val context = Injekt.get<Application>()
+
+            val notifier = SaveImageNotifier(context)
+            notifier.onClear()
+
+            // Pictures directory.
+            val destDir = File(
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator + Environment.DIRECTORY_PICTURES +
+                    File.separator + "Tachiyomi"
+            )
+
+            try {
+                val file = saveImages(firstPage, secondPage, isLTR, bg, destDir, manga)
+                DiskUtil.scanMedia(context, file)
+                notifier.onComplete(file)
+                withUIContext { view?.onSaveImageResult(SaveImageResult.Success(file)) }
+            } catch (e: Exception) {
+                withUIContext { view?.onSaveImageResult(SaveImageResult.Error(e)) }
+            }
+        }
+    }
+
     /**
      * Shares the image of this [page] and notifies the UI with the path of the file to share.
      * The image must be first copied to the internal partition because there are many possible
@@ -666,6 +735,25 @@ class ReaderPresenter(
                 { view, file -> view.onShareImageResult(file, page) },
                 { _, _ -> /* Empty */ }
             )
+    }
+
+    fun shareImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
+        scope.launch {
+            if (firstPage.status != Page.READY) return@launch
+            if (secondPage.status != Page.READY) return@launch
+            val manga = manga ?: return@launch
+            val context = Injekt.get<Application>()
+
+            val destDir = File(context.cacheDir, "shared_image")
+            destDir.deleteRecursively()
+            try {
+                val file = saveImages(firstPage, secondPage, isLTR, bg, destDir, manga)
+                withUIContext {
+                    view?.onShareImageResult(file, firstPage, secondPage)
+                }
+            } catch (e: Exception) {
+            }
+        }
     }
 
     /**

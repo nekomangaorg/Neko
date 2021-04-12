@@ -284,6 +284,7 @@
     <string name="set_as_default_for_all">Set as default for all</string>
     <string name="cover_updated">Cover updated</string>
     <string name="page_">Page %1$d</string>
+    <string name="pages_">Pages %1$s</string>
     <string name="next_chapter_not_found">Next chapter not found</string>
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
@@ -310,6 +311,9 @@
     <string name="set_second_page_as_cover">Set second page as cover</string>
     <string name="share_second_page">Share second page</string>
     <string name="save_second_page">Save second page</string>
+
+    <string name="share_combined_pages">Share combined pages</string>
+    <string name="save_combined_pages">Save combined pages</string>
 
     <!-- Reader settings -->
     <string name="fullscreen">Fullscreen</string>
