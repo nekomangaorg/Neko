@@ -361,7 +361,7 @@ class PagerPageHolder(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { isAnimated ->
                 if (skipExtra) {
-                    onPageSplit()
+                    splitDoublePages()
                 }
                 if (!isAnimated) {
                     if (viewer.config.readerTheme >= 2) {
@@ -715,9 +715,9 @@ class PagerPageHolder(
         return ByteArrayInputStream(output.toByteArray())
     }
 
-    private fun onPageSplit() {
+    private fun splitDoublePages() {
         extraPage ?: return
-        viewer.onPageSplit(page)
+        viewer.splitDoublePages(page)
         if (extraPage?.fullPage == true) {
             extraPage = null
         }

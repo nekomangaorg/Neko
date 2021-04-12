@@ -143,7 +143,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         return POSITION_NONE
     }
 
-    fun onPageSplit(current: ReaderPage) {
+    fun splitDoublePages(current: ReaderPage) {
         val oldCurrent = joinedItems.getOrNull(viewer.pager.currentItem)
         setJoinedItems(
             oldCurrent?.second == current ||

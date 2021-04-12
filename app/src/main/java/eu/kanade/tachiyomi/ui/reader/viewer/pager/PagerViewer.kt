@@ -372,8 +372,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         return true
     }
 
-    fun onPageSplit(currentPage: ReaderPage) {
-        adapter.onPageSplit(currentPage)
+    fun splitDoublePages(currentPage: ReaderPage) {
+        adapter.splitDoublePages(currentPage)
     }
 
     /**
