@@ -103,16 +103,16 @@
     <!--=======-->
     <style name="Theme.Widget" />
 
-    <style name="Theme.Widget.FAB">
+    <style name="Theme.Widget.FAB" parent="@style/Widget.MaterialComponents.ExtendedFloatingActionButton.Icon">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="fabCustomSize">@dimen/fab_size</item>
+        <item name="android:minWidth">@dimen/fab_size</item>
         <item name="android:layout_gravity">bottom|end</item>
         <item name="android:layout_margin">@dimen/fab_margin</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="layout_anchorGravity">bottom|right|end</item>
         <item name="tint">?attr/colorOnAccent</item>
-        <item name="android:minHeight">@dimen/fab_size</item>
         <item name="backgroundTint">?attr/colorAccent</item>
         <item name="android:tint">?attr/colorOnAccent</item>
         <item name="iconTint">?attr/colorOnAccent</item>
