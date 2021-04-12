@@ -43,7 +43,7 @@ object ThemeUtil {
     }
 
     fun isPitchBlack(context: Context, theme: Themes): Boolean {
-        return context.isInNightMode() && theme.styleRes == R.style.Theme_Tachiyomi_Amoled
+        return context.isInNightMode() && theme.darkBackground == Color.BLACK
     }
 
     fun hasDarkActionBarInLight(context: Context, theme: Themes): Boolean {
@@ -171,8 +171,7 @@ object ThemeUtil {
         val darkBackground: Int = Color.parseColor(
             when (styleRes) {
                 R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
-                R.style.Theme_Tachiyomi_FlatLime -> "#16151D"
+                R.style.Theme_Tachiyomi_MidnightDusk, R.style.Theme_Tachiyomi_FlatLime -> "#16151D"
                 else -> "#1C1C1D"
             }
         )

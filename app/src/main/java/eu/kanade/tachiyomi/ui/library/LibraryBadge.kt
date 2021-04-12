@@ -39,9 +39,9 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             setTextColor(
                 // hide the badge text when preference is only show badge
                 when {
-                    unread == -1 && !showTotalChapters -> context.getResourceColor(R.attr.colorAccent)
+                    unread == -1 && !showTotalChapters -> unreadBadgeBackground
                     showTotalChapters -> context.contextCompatColor(R.color.total_badge_text)
-                    else -> context.contextCompatColor(R.color.unread_badge_text)
+                    else -> context.getResourceColor(R.attr.colorOnAccent)
                 }
             )
             setBackgroundColor(unreadBadgeBackground)

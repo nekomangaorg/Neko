@@ -7,7 +7,6 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import com.chuckerteam.chucker.api.ChuckerInterceptor
 import okhttp3.OkHttpClient
 
 class CoilSetup(context: Context) {
@@ -28,7 +27,7 @@ class CoilSetup(context: Context) {
                 add(ByteArrayFetcher())
             }.okHttpClient {
                 OkHttpClient.Builder()
-                    .addInterceptor(ChuckerInterceptor(context))
+//                    .addInterceptor(ChuckerInterceptor(context))
                     .build()
             }
             .build()

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import android.content.Context
-import com.chuckerteam.chucker.api.ChuckerInterceptor
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import okhttp3.Cache
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -25,7 +24,7 @@ class NetworkHelper(context: Context) {
         OkHttpClient.Builder()
             .cookieJar(cookieManager)
             .cache(Cache(cacheDir, cacheSize))
-            .addInterceptor(ChuckerInterceptor(context))
+//            .addInterceptor(ChuckerInterceptor(context))
             .apply {
                 if (preferences.enableDoh()) {
                     dns(

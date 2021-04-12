@@ -72,6 +72,7 @@
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled"/>
     <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled"/>
+    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi">
         <item name="colorPrimary">@color/dialogDuskDawn</item>
         <item name="colorPrimaryDark">@color/dialogDuskDawn</item>
@@ -83,19 +84,6 @@
         <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
-    </style>
-    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/backgroundLime</item>
-        <item name="colorPrimaryDark">@color/backgroundLime</item>
-        <item name="colorAccent">@color/colorAccentLime</item>
-        <item name="colorAccentText">@color/colorAccentLime</item>
-        <item name="colorPrimaryVariant">@color/dialogLime</item>
-        <item name="colorSecondary">@color/backgroundLime</item>
-        <item name="background">@color/backgroundLime</item>
-        <item name="android:colorBackground">@color/backgroundLime</item>
-        <item name="colorOnSurface">@color/colorAccentLimeText</item>
-        <item name="colorOnAccent">@color/colorOnLime</item>
-
     </style>
 
 

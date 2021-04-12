@@ -32,6 +32,18 @@
         <item name="colorAccentText">@color/colorAccentPink</item>
     </style>
 
+    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi">
+        <item name="colorPrimary">@color/backgroundLime</item>
+        <item name="colorPrimaryDark">@color/backgroundLime</item>
+        <item name="colorAccent">@color/colorAccentLime</item>
+        <item name="colorAccentText">@color/colorAccentLime</item>
+        <item name="colorPrimaryVariant">@color/dialogLime</item>
+        <item name="colorSecondary">@color/backgroundLime</item>
+        <item name="background">@color/backgroundLime</item>
+        <item name="android:colorBackground">@color/backgroundLime</item>
+        <item name="colorSurface">@color/colorAccentLimeText</item>
+        <item name="colorOnAccent">@color/colorOnLime</item>
+    </style>
 
 
 </resources>
