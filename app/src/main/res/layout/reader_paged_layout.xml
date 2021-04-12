@@ -65,6 +65,14 @@
             android:entries="@array/zoom_start" />
 
         <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/invert_double_pages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/invert_double_pages"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/crop_borders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

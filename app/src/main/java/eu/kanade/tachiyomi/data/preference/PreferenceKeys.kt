@@ -71,6 +71,8 @@ object PreferenceKeys {
 
     const val pageLayout = "page_layout"
 
+    const val invertDoublePages = "invert_double_pages"
+
     const val showNavigationOverlayNewUser = "reader_navigation_overlay_new_user"
     const val showNavigationOverlayNewUserWebtoon = "reader_navigation_overlay_new_user_webtoon"
 

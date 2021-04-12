@@ -48,6 +48,8 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
             }
         }
 
+    var invertDoublePages = false
+
     var autoDoublePages = preferences.pageLayout().get() == PageLayout.AUTOMATIC
 
     init {
@@ -86,6 +88,9 @@ class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelpe
 
         preferences.readerTheme()
             .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.invertDoublePages()
+            .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.pageLayout()
             .asFlow()

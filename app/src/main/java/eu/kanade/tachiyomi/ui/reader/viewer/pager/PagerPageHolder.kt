@@ -689,7 +689,7 @@ class PagerPageHolder(
         val result = Bitmap.createBitmap(width + width2, max(height, height2), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         canvas.drawColor(if (viewer.config.readerTheme >= 2 || viewer.config.readerTheme == 0) Color.WHITE else Color.BLACK)
-        val isLTR = viewer !is R2LPagerViewer
+        val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
         val upperPart = Rect(
             if (isLTR) 0 else width2,
             (maxHeight - imageBitmap.height) / 2,

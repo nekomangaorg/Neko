@@ -154,6 +154,8 @@ class PreferencesHelper(val context: Context) {
 
     fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC)
 
+    fun invertDoublePages() = flowPrefs.getBoolean(Keys.invertDoublePages, false)
+
     fun showNavigationOverlayNewUser() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
     fun showNavigationOverlayNewUserWebtoon() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)

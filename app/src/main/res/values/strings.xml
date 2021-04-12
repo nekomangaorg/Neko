@@ -322,6 +322,7 @@
     <string name="amount_of_pages_to_preload">The amount of pages to preload when reading. Higher values will result in a smoother reading experience, at the cost of higher cache and network usage.</string>
     <string name="reduces_banding_impacts_performance">Reduces banding, but impacts
         performance</string>
+    <string name="invert_double_pages">Invert double pages</string>
     <string name="crop_borders">Crop borders</string>
     <string name="use_custom_brightness">Use custom brightness</string>
     <string name="use_custom_color_filter">Use custom color filter</string>

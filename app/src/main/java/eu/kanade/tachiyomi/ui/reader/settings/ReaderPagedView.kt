@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi.ui.reader.settings
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderPagedLayoutBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -17,34 +19,44 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
 
     override fun inflateBinding() = ReaderPagedLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
-        binding.scaleType.bindToPreference(preferences.imageScaleType(), 1) {
+        with(binding) {
+            scaleType.bindToPreference(preferences.imageScaleType(), 1) {
+                val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaViewer() ?: 0
+                val isWebtoonView =
+                    mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
+                updatePagedGroup(!isWebtoonView)
+            }
+            zoomStart.bindToPreference(preferences.zoomStart(), 1)
+            cropBorders.bindToPreference(preferences.cropBorders())
+            pageTransitions.bindToPreference(preferences.pageTransitions())
+            pagerNav.bindToPreference(preferences.navigationModePager())
+            pagerInvert.bindToPreference(preferences.pagerNavInverted())
+            extendPastCutout.bindToPreference(preferences.pagerCutoutBehavior())
+            pageLayout.bindToPreference(preferences.pageLayout()) {
+                val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaViewer() ?: 0
+                val isWebtoonView =
+                    mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
+                updatePagedGroup(!isWebtoonView)
+            }
+            invertDoublePages.bindToPreference(preferences.invertDoublePages())
+
+            pageLayout.title = pageLayout.title.toString().addBetaTag(context)
+
             val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaViewer() ?: 0
-            val isWebtoonView = mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
+            val isWebtoonView =
+                mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
+            val hasMargins = mangaViewer == ReaderActivity.VERTICAL_PLUS
+            cropBordersWebtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
+            webtoonSidePadding.bindToIntPreference(
+                preferences.webtoonSidePadding(),
+                R.array.webtoon_side_padding_values
+            )
+            webtoonEnableZoomOut.bindToPreference(preferences.webtoonEnableZoomOut())
+            webtoonNav.bindToPreference(preferences.navigationModeWebtoon())
+            webtoonInvert.bindToPreference(preferences.webtoonNavInverted())
+
             updatePagedGroup(!isWebtoonView)
         }
-        binding.zoomStart.bindToPreference(preferences.zoomStart(), 1)
-        binding.cropBorders.bindToPreference(preferences.cropBorders())
-        binding.pageTransitions.bindToPreference(preferences.pageTransitions())
-        binding.pagerNav.bindToPreference(preferences.navigationModePager())
-        binding.pagerInvert.bindToPreference(preferences.pagerNavInverted())
-        binding.extendPastCutout.bindToPreference(preferences.pagerCutoutBehavior())
-        binding.pageLayout.bindToPreference(preferences.pageLayout())
-
-        binding.pageLayout.title = binding.pageLayout.title.toString().addBetaTag(context)
-
-        val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaViewer() ?: 0
-        val isWebtoonView = mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
-        val hasMargins = mangaViewer == ReaderActivity.VERTICAL_PLUS
-        binding.cropBordersWebtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
-        binding.webtoonSidePadding.bindToIntPreference(
-            preferences.webtoonSidePadding(),
-            R.array.webtoon_side_padding_values
-        )
-        binding.webtoonEnableZoomOut.bindToPreference(preferences.webtoonEnableZoomOut())
-        binding.webtoonNav.bindToPreference(preferences.navigationModeWebtoon())
-        binding.webtoonInvert.bindToPreference(preferences.webtoonNavInverted())
-
-        updatePagedGroup(!isWebtoonView)
     }
 
     fun updatePrefs() {
@@ -84,6 +96,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         } else {
             false
         }
-        binding.extendPastCutout.visibleIf(show && isFullFit && hasCutout)
+        binding.extendPastCutout.isVisible = show && isFullFit && hasCutout
+        binding.invertDoublePages.isVisible = show && preferences.pageLayout().get() != PageLayout.SINGLE_PAGE
     }
 }
