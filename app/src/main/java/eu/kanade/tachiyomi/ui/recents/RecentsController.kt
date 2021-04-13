@@ -464,6 +464,8 @@ class RecentsController(bundle: Bundle? = null) :
         }
     }
 
+    override fun getViewType(): Int = presenter.viewType
+
     override fun scope() = adapterScope
 
     override fun onItemClick(view: View?, position: Int): Boolean {

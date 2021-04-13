@@ -2,7 +2,9 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.app.Activity
 import android.view.View
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
@@ -10,6 +12,7 @@ import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.isLocal
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 
 class RecentMangaHolder(
@@ -32,6 +35,35 @@ class RecentMangaHolder(
             RecentMangaAdapter.ShowRecentsDLs.All -> true
         } && !item.mch.manga.isLocal()
 
+        val isUpdates = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+        binding.cardLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            height = (if (isUpdates) 40 else 80).dpToPx
+            width = (if (isUpdates) 40 else 60).dpToPx
+        }
+        listOf(binding.title, binding.subtitle).forEach {
+            it.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                if (isUpdates) {
+                    if (it == binding.title) topMargin = 5.dpToPx
+                    endToStart = R.id.button_layout
+                    endToEnd = -1
+                } else {
+                    if (it == binding.title) topMargin = 2.dpToPx
+                    endToStart = -1
+                    endToEnd = R.id.front_view
+                }
+            }
+        }
+        binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            if (isUpdates) {
+                topToBottom = -1
+                topToTop = R.id.front_view
+            } else {
+                topToTop = -1
+                topToBottom = R.id.subtitle
+            }
+        }
+        binding.subtitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        }
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
         binding.title.apply {
             text = if (!showTitleFirst) {
@@ -50,11 +82,13 @@ class RecentMangaHolder(
             setTextColor(ChapterUtil.readColor(context, item))
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
+        binding.body.isVisible = !isUpdates
         binding.body.text = when {
             item.mch.chapter.id == null -> binding.body.context.getString(
                 R.string.added_,
                 item.mch.manga.date_added.timeSpanFromNow
             )
+            adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> ""
             item.mch.history.id == null -> binding.body.context.getString(
                 R.string.updated_,
                 item.chapter.date_upload.timeSpanFromNow

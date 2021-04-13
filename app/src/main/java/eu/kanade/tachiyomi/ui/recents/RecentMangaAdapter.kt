@@ -21,6 +21,9 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var showRemoveHistory = true
     var showTitleFirst = false
 
+    val viewType: Int
+        get() = delegate.getViewType()
+
     fun updateItems(items: List<IFlexible<*>>?) {
         updateDataSet(items)
     }
@@ -55,6 +58,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         fun markAsRead(position: Int)
         fun isSearching(): Boolean
         fun scope(): CoroutineScope
+        fun getViewType(): Int
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {
