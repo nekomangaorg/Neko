@@ -125,12 +125,12 @@ class RecentsPresenter(
         val viewType = customViewType ?: viewType
 
         val showRead = preferences.showReadInAllRecents().get() && !limit
-        val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL && query.isEmpty()
+        val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
 
         val isCustom = customViewType != null
         val isEndless = isUngrouped && !limit
         val cReading = when {
-            query.isNotEmpty() || viewType <= VIEW_TYPE_UNGROUP_ALL -> {
+            viewType <= VIEW_TYPE_UNGROUP_ALL -> {
                 db.getAllRecentsTypes(
                     query,
                     showRead,
@@ -265,7 +265,7 @@ class RecentsPresenter(
         }
         val newCount = itemCount + newItems.size
         val hasNewItems = newItems.isNotEmpty()
-        if (updatePageCount && newCount < 25 && viewType != VIEW_TYPE_GROUP_ALL && query.isEmpty() && !limit) {
+        if (updatePageCount && newCount < 25 && (viewType != VIEW_TYPE_GROUP_ALL || query.isNotEmpty()) && !limit) {
             runRecents(oldQuery, true, retryCount + (if (hasNewItems) 0 else 1), newCount)
             return
         }

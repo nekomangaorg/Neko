@@ -378,18 +378,18 @@ class RecentsController(bundle: Bundle? = null) :
         adapter.removeAllScrollableHeaders()
         adapter.updateItems(recents)
         adapter.onLoadMoreComplete(null)
-        if (!hasNewItems || presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL || presenter.query.isNotEmpty() ||
+        if (!hasNewItems || presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL ||
             recents.isEmpty()
         ) {
             loadNoMore()
-        } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL && presenter.query.isEmpty()) {
+        } else if (hasNewItems && presenter.viewType != RecentsPresenter.VIEW_TYPE_GROUP_ALL) {
             resetProgressItem()
         }
         if (recents.isEmpty()) {
             binding.recentsEmptyView.show(
-                if (presenter.query.isEmpty()) R.drawable.ic_history_off_24dp
+                if (!isSearching()) R.drawable.ic_history_off_24dp
                 else R.drawable.ic_search_off_24dp,
-                if (presenter.query.isNotEmpty()) R.string.no_results_found
+                if (isSearching()) R.string.no_results_found
                 else when (presenter.viewType) {
                     RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.no_recent_chapters
                     RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.no_recently_read_manga
@@ -551,7 +551,7 @@ class RecentsController(bundle: Bundle? = null) :
             val searchItem = menu.findItem(R.id.action_search)
             val searchView = searchItem.actionView as SearchView
             searchView.queryHint = view?.context?.getString(R.string.search_recents)
-            if (presenter.query.isNotEmpty()) {
+            if (isSearching()) {
                 searchItem.expandActionView()
                 searchView.setQuery(presenter.query, true)
                 searchView.clearFocus()
@@ -559,7 +559,8 @@ class RecentsController(bundle: Bundle? = null) :
             setOnQueryTextChangeListener(searchView) {
                 if (presenter.query != it) {
                     presenter.query = it ?: return@setOnQueryTextChangeListener false
-                    loadNoMore()
+                    // loadNoMore()
+                    resetProgressItem()
                     refresh()
                 }
                 true
@@ -662,8 +663,10 @@ class RecentsController(bundle: Bundle? = null) :
         val view = view ?: return
         if (presenter.finished ||
             BackupRestoreService.isRunning(view.context.applicationContext) ||
-            presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL ||
-            presenter.query.isNotEmpty()
+            (
+                presenter.viewType == RecentsPresenter.VIEW_TYPE_GROUP_ALL &&
+                    !isSearching()
+                )
         ) {
             loadNoMore()
             return
