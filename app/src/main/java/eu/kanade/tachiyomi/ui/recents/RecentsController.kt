@@ -181,6 +181,8 @@ class RecentsController(bundle: Bundle? = null) :
         }
 
         presenter.onCreate()
+        binding.swipeRefresh.isRefreshing = true
+
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
         }
@@ -345,7 +347,9 @@ class RecentsController(bundle: Bundle? = null) :
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
         if (!isBindingInitialized) return
-        refresh()
+        if (!presenter.isLoading) {
+            refresh()
+        }
         setBottomPadding()
         binding.downloadBottomSheet.dlBottomSheet.update()
     }

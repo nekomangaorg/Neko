@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolve
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.util.lang.sqLite
-import java.util.Date
 
 interface HistoryQueries : DbProvider {
 
@@ -18,36 +17,36 @@ interface HistoryQueries : DbProvider {
      * Insert history into database
      * @param history object containing history information
      */
-    fun insertHistory(history: History) = db.put().`object`(history).prepare()
+//    fun insertHistory(history: History) = db.put().`object`(history).prepare()
+
+//    /**
+//     * Returns history of recent manga containing last read chapter in 25s
+//     * @param date recent date range
+//     * @offset offset the db by
+//     */
+//    fun getRecentManga(date: Date, offset: Int = 0, search: String = "") = db.get()
+//        .listOfObjects(MangaChapterHistory::class.java)
+//        .withQuery(
+//            RawQuery.builder()
+//                .query(getRecentMangasQuery(offset, search.sqLite))
+//                .args(date.time)
+//                .observesTables(HistoryTable.TABLE)
+//                .build()
+//        )
+//        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+//        .prepare()
 
     /**
      * Returns history of recent manga containing last read chapter in 25s
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentManga(date: Date, offset: Int = 0, search: String = "") = db.get()
+    fun getRecentlyAdded(search: String = "", endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentMangasQuery(offset, search.sqLite))
-                .args(date.time)
-                .observesTables(HistoryTable.TABLE)
-                .build()
-        )
-        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
-        .prepare()
-
-    /**
-     * Returns history of recent manga containing last read chapter in 25s
-     * @param date recent date range
-     * @offset offset the db by
-     */
-    fun getRecentlyAdded(startDate: Date, date: Date, search: String = "", endless: Boolean) = db.get()
-        .listOfObjects(MangaChapterHistory::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getRecentAdditionsQuery(search.sqLite, endless))
-                .args(date.time, startDate.time)
+                .query(getRecentAdditionsQuery(search.sqLite, endless, offset, isResuming))
+//                .args(date.time, startDate.time)
                 .observesTables(MangaTable.TABLE)
                 .build()
         )
@@ -59,20 +58,12 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentMangaLimit(date: Date, limit: Int = 0, search: String = "") =
-        getRecentMangaLimit(Date(), date, limit, search)
-
-    /**
-     * Returns history of recent manga containing last read chapter in 25s
-     * @param date recent date range
-     * @offset offset the db by
-     */
-    fun getRecentMangaLimit(startDate: Date, date: Date, limit: Int = 0, search: String = "") = db.get()
+    fun getRecentMangaLimit(search: String = "", endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentMangasLimitQuery(limit, search.sqLite))
-                .args(date.time, startDate.time)
+                .query(getRecentMangasLimitQuery(search.sqLite, endless, offset, isResuming))
+//                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
                 .build()
         )
@@ -84,29 +75,20 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentsWithUnread(startDate: Date, date: Date, search: String = "", endless: Boolean) = db.get()
+    fun getAllRecents(search: String = "", includeRead: Boolean, endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentReadWithUnreadChapters(search.sqLite, endless))
-                .args(date.time, startDate.time)
-                .observesTables(HistoryTable.TABLE)
-                .build()
-        )
-        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
-        .prepare()
-
-    /**
-     * Returns history of recent manga containing last read chapter in 25s
-     * @param date recent date range
-     * @offset offset the db by
-     */
-    fun getAllRecents(startDate: Date, date: Date, search: String = "", endless: Boolean) = db.get()
-        .listOfObjects(MangaChapterHistory::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getRecentRead(search.sqLite, endless))
-                .args(date.time, startDate.time)
+                .query(
+                    getRecentRead(
+                        search.sqLite,
+                        includeRead,
+                        endless,
+                        offset,
+                        isResuming
+                    )
+                )
+//                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
                 .build()
         )

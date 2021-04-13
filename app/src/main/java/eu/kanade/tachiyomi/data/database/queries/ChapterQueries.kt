@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterGetResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.util.lang.sqLite
-import java.util.Date
 
 interface ChapterQueries : DbProvider {
 
@@ -32,14 +31,12 @@ interface ChapterQueries : DbProvider {
         )
         .prepare()
 
-    fun getRecentChapters(date: Date) = getRecentChapters(Date(), date)
-
-    fun getRecentChapters(startDate: Date, date: Date, search: String = "") = db.get()
+    fun getRecentChapters(search: String = "", offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapter::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentsQuery(search.sqLite))
-                .args(date.time, startDate.time)
+                .query(getRecentsQuery(search.sqLite, offset, isResuming))
+//                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()
         )
@@ -51,15 +48,12 @@ interface ChapterQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) =
-        getUpdatedManga(Date(), date, search, endless)
-
-    fun getUpdatedManga(startDate: Date, date: Date, search: String = "", endless: Boolean) = db.get()
+    fun getUpdatedManga(search: String = "", endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentsQueryDistinct(search.sqLite, endless))
-                .args(date.time, startDate.time)
+                .query(getRecentsQueryDistinct(search.sqLite, endless, offset, isResuming))
+//                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()
         )

@@ -56,5 +56,7 @@ open class DatabaseHelper(context: Context) :
 
     inline fun inTransaction(block: () -> Unit) = db.inTransaction(block)
 
+    inline fun <T> inTransactionReturn(block: () -> T): T = db.inTransactionReturn(block)
+
     fun lowLevel() = db.lowLevel()
 }

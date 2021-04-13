@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -46,7 +45,7 @@ class RecentsPresenter(
     var query = ""
         set(value) {
             field = value
-            page = 0
+            resetOffsets()
         }
     private val newAdditionsHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEWLY_ADDED)
     private val newChaptersHeader = RecentMangaHeaderItem(RecentMangaHeaderItem.NEW_CHAPTERS)
@@ -55,23 +54,37 @@ class RecentsPresenter(
             .CONTINUE_READING
     )
     var finished = false
-    var shouldMoveToTop = false
+    var heldItems: HashMap<Int, List<RecentMangaItem>> = hashMapOf()
+    private var shouldMoveToTop = false
     var viewType: Int = preferences.recentsViewType().get()
-    private var page = 0
         set(value) {
             field = value
-            if (value == 0) {
-                finished = false
-                shouldMoveToTop = true
-            }
+            ENDLESS_LIMIT = if (value == VIEW_TYPE_UNGROUP_ALL) 25 else 50
         }
+
+    private fun resetOffsets() {
+        finished = false
+        shouldMoveToTop = true
+        updatesOffset = 0
+        historyOffset = 0
+        additionsOffset = 0
+    }
+
+    private var updatesOffset = 0
+    private var historyOffset = 0
+    private var additionsOffset = 0
+    var isLoading = false
+        private set
+
+    private val isOnFirstPage: Boolean
+        get() = additionsOffset + historyOffset + updatesOffset == 0
 
     init {
         preferences.showReadInAllRecents()
             .asFlow()
             .drop(1)
             .onEach {
-                page = 0
+                resetOffsets()
                 getRecents()
             }
             .launchIn(scope)
@@ -97,97 +110,107 @@ class RecentsPresenter(
         }
     }
 
-    private suspend fun runRecents(oldQuery: String = "", updatePageCount: Boolean = false, retryCount: Int = 0, itemCount: Int = 0, limit: Boolean = false) {
+    private suspend fun runRecents(
+        oldQuery: String = "",
+        updatePageCount: Boolean = false,
+        retryCount: Int = 0,
+        itemCount: Int = 0,
+        limit: Boolean = false,
+        customViewType: Int? = null
+    ) {
         if (retryCount > 15) {
             finished = true
             setDownloadedChapters(recentItems)
-            withContext(Dispatchers.Main) { controller?.showLists(recentItems, false) }
+            if (customViewType == null) {
+                withContext(Dispatchers.Main) {
+                    controller?.showLists(recentItems, false)
+                    isLoading = false
+                }
+            }
             return
         }
+        val viewType = customViewType ?: viewType
 
+//        Timber.d("starting up items new page: $updatePageCount")
         val showRead = preferences.showReadInAllRecents().get() && !limit
-        if (updatePageCount) {
-            page++
-        }
-
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL && query.isEmpty()
-        val cal = Calendar.getInstance().apply {
-            time = Date()
-            when {
-                query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                isUngrouped -> add(Calendar.MONTH, -(page + 1))
-                else -> add(Calendar.MONTH, -1)
-            }
-        }
 
-        val startCal = Calendar.getInstance().apply {
-            time = Date()
-            when {
-                query.isNotEmpty() -> {}
-                isUngrouped && !updatePageCount -> {}
-                isUngrouped -> add(Calendar.MONTH, -page)
-                else -> {}
-            }
-        }
-
-        val calWeek = Calendar.getInstance().apply {
-            time = Date()
-            when {
-                query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                isUngrouped -> add(Calendar.MONTH, -(page + 1))
-                else -> add(Calendar.WEEK_OF_YEAR, -1)
-            }
-        }
-
-        val calDay = Calendar.getInstance().apply {
-            time = Date()
-            when {
-                query.isNotEmpty() -> add(Calendar.YEAR, -50)
-                isUngrouped -> add(Calendar.MONTH, -(page + 1))
-                else -> add(Calendar.DAY_OF_YEAR, -1)
-            }
-        }
-
-        val cReading = if (viewType != VIEW_TYPE_ONLY_UPDATES) {
-            if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) {
-                if (showRead) {
-                    db.getAllRecents(startCal.time, cal.time, query, isUngrouped && !limit)
-                        .executeOnIO()
+        val isCustom = customViewType != null
+        val isEndless = isUngrouped && !limit
+//        Timber.d("set up cal items")
+        val (cReading, rUpdates, nAdditions) = db.inTransactionReturn {
+            val cReading = if (viewType != VIEW_TYPE_ONLY_UPDATES) {
+                if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) {
+                    db.getAllRecents(
+                        query,
+                        showRead,
+                        isEndless,
+                        if (isCustom) ENDLESS_LIMIT else historyOffset,
+                        !updatePageCount && !isOnFirstPage
+                    )
                 } else {
-                    db.getRecentsWithUnread(startCal.time, cal.time, query, isUngrouped && !limit)
-                        .executeOnIO()
+                    db.getRecentMangaLimit(
+                        query,
+                        isEndless,
+                        if (isCustom) ENDLESS_LIMIT else historyOffset,
+                        !updatePageCount && !isOnFirstPage
+                    )
+                }.executeAsBlocking()
+            } else emptyList()
+//            Timber.d("set up cReader items: ${cReading.size}")
+            val rUpdates = when {
+                viewType == VIEW_TYPE_ONLY_UPDATES -> db.getRecentChapters(
+                    query,
+                    if (isCustom) ENDLESS_LIMIT else updatesOffset,
+                    !updatePageCount && !isOnFirstPage
+                ).executeAsBlocking().map {
+                    MangaChapterHistory(it.manga, it.chapter, HistoryImpl())
                 }
-            } else db.getRecentMangaLimit(
-                startCal.time,
-                cal.time,
-                if (viewType == VIEW_TYPE_ONLY_HISTORY) 200 else 8,
-                query
-            ).executeOnIO()
-        } else emptyList()
-        val rUpdates = when {
-            viewType == VIEW_TYPE_ONLY_UPDATES -> db.getRecentChapters(startCal.time, calWeek.time, query).executeOnIO().map {
-                MangaChapterHistory(it.manga, it.chapter, HistoryImpl())
+                viewType != VIEW_TYPE_ONLY_HISTORY -> db.getUpdatedManga(
+                    query,
+                    isEndless,
+                    if (isCustom) ENDLESS_LIMIT else updatesOffset,
+                    !updatePageCount && !isOnFirstPage
+                ).executeAsBlocking()
+                else -> emptyList()
             }
-            viewType != VIEW_TYPE_ONLY_HISTORY -> db.getUpdatedManga(startCal.time, calWeek.time, query, isUngrouped && !limit).executeOnIO()
-            else -> emptyList()
+            rUpdates.forEach {
+                it.history.last_read = it.chapter.date_fetch
+            }
+//            Timber.d("set up rUpdates items: ${rUpdates.size}")
+            val nAdditions = if (viewType < VIEW_TYPE_ONLY_HISTORY) {
+                db.getRecentlyAdded(
+                    query,
+                    isEndless,
+                    if (isCustom) ENDLESS_LIMIT else additionsOffset,
+                    !updatePageCount && !isOnFirstPage
+                ).executeAsBlocking()
+            } else emptyList()
+            nAdditions.forEach {
+                it.history.last_read = it.manga.date_added
+            }
+//            Timber.d("set up nAdditons items: ${nAdditions.size}")
+            Triple(cReading, rUpdates, nAdditions)
         }
-        rUpdates.forEach {
-            it.history.last_read = it.chapter.date_fetch
+
+        if (!isCustom &&
+            (historyOffset + updatesOffset + additionsOffset == 0 || updatePageCount)
+        ) {
+            additionsOffset += nAdditions.size
+            historyOffset += cReading.size
+            updatesOffset += rUpdates.size
         }
-        val nAdditions = if (viewType < VIEW_TYPE_ONLY_HISTORY) {
-            db.getRecentlyAdded(startCal.time, calDay.time, query, isUngrouped && !limit).executeOnIO()
-        } else emptyList()
-        nAdditions.forEach {
-            it.history.last_read = it.manga.date_added
-        }
+
+//        Timber.d("loaded items: ")
         if (query != oldQuery) return
+//        Timber.d("query matches items: ")
         val mangaList = (cReading + rUpdates + nAdditions).sortedByDescending {
             it.history.last_read
         }.distinctBy {
-            if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY) it.manga.id else it.chapter.id
+            if (query.isEmpty() && viewType != VIEW_TYPE_ONLY_HISTORY && viewType != VIEW_TYPE_ONLY_UPDATES) it.manga.id else it.chapter.id
         }.filter { mch ->
-            if (updatePageCount && page > 0 && query.isEmpty()) {
-                if (viewType != VIEW_TYPE_ONLY_HISTORY) {
+            if (updatePageCount && !isOnFirstPage && query.isEmpty()) {
+                if (viewType != VIEW_TYPE_ONLY_HISTORY && viewType != VIEW_TYPE_ONLY_UPDATES) {
                     recentItems.none { mch.manga.id == it.mch.manga.id }
                 } else {
                     recentItems.none { mch.chapter.id == it.mch.chapter.id }
@@ -209,9 +232,11 @@ class RecentsPresenter(
             else null
             else Pair(it, chapter)
         }
+//        Timber.d("setting new items")
         val newItems = if (query.isEmpty() && !isUngrouped) {
             val nChaptersItems =
-                pairs.asSequence().filter { it.first.history.id == null && it.first.chapter.id != null }
+                pairs.asSequence()
+                    .filter { it.first.history.id == null && it.first.chapter.id != null }
                     .sortedWith { f1, f2 ->
                         if (abs(f1.second.date_fetch - f2.second.date_fetch) <=
                             TimeUnit.HOURS.toMillis(12)
@@ -249,11 +274,11 @@ class RecentsPresenter(
             }.flatten()
         } else {
             if (viewType == VIEW_TYPE_ONLY_UPDATES) {
-                val map = TreeMap<Date, MutableList<Pair<MangaChapterHistory, Chapter>>> {
-                    d1, d2 ->
-                    d2
-                        .compareTo(d1)
-                }
+                val map =
+                    TreeMap<Date, MutableList<Pair<MangaChapterHistory, Chapter>>> { d1, d2 ->
+                        d2
+                            .compareTo(d1)
+                    }
                 val byDay =
                     pairs.groupByTo(map, { getMapKey(it.first.history.last_read) })
                 byDay.flatMap {
@@ -264,23 +289,40 @@ class RecentsPresenter(
                 }
             } else pairs.map { RecentMangaItem(it.first, it.second, null) }
         }
-        recentItems = if (page == 0 || !updatePageCount) {
-            newItems
+//        Timber.d("setting some items")
+        if (customViewType == null) {
+            recentItems = if (isOnFirstPage || !updatePageCount) {
+                newItems
+            } else {
+                recentItems + newItems
+            }
         } else {
-            recentItems + newItems
+            heldItems[customViewType] = newItems
         }
         val newCount = itemCount + newItems.size
         val hasNewItems = newItems.isNotEmpty()
         if (updatePageCount && newCount < 25 && viewType != VIEW_TYPE_GROUP_ALL && query.isEmpty() && !limit) {
-            page++
+            // Timber.d("needs to retry. has New items: $hasNewItems, offset: $subUpdatesOffset")
             runRecents(oldQuery, true, retryCount + (if (hasNewItems) 0 else 1), newCount)
             return
         }
         if (!limit) {
             setDownloadedChapters(recentItems)
-            withContext(Dispatchers.Main) {
-                controller?.showLists(recentItems, hasNewItems, shouldMoveToTop)
-                shouldMoveToTop = false
+            if (customViewType == null) {
+                withContext(Dispatchers.Main) {
+                    controller?.showLists(recentItems, hasNewItems, shouldMoveToTop)
+                    isLoading = false
+                    shouldMoveToTop = false
+                }
+//                scope.launchIO {
+//                    (0..3).map {
+//                        async {
+//                            if (this@RecentsPresenter.viewType != it) {
+//                                runRecents(oldQuery, customViewType = it)
+//                            }
+//                        }
+//                    }.awaitAll()
+//                }
             }
         }
     }
@@ -312,7 +354,7 @@ class RecentsPresenter(
             preferences.recentsViewType().set(pref)
         }
         viewType = pref
-        page = 0
+        resetOffsets()
         getRecents()
     }
 
@@ -452,7 +494,10 @@ class RecentsPresenter(
     }
 
     fun requestNext() {
-        getRecents(true)
+        if (!isLoading) {
+            isLoading = true
+            getRecents(true)
+        }
     }
 
     companion object {
@@ -462,6 +507,7 @@ class RecentsPresenter(
         const val VIEW_TYPE_UNGROUP_ALL = 1
         const val VIEW_TYPE_ONLY_HISTORY = 2
         const val VIEW_TYPE_ONLY_UPDATES = 3
+        var ENDLESS_LIMIT = 50
 
         suspend fun getRecentManga(): List<Pair<Manga, Long>> {
             val presenter = RecentsPresenter(null)
