@@ -242,12 +242,13 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = 2
             }
             infoPreference(R.string.automatic_can_still_switch).apply {
-                preferences.pageLayout().asImmediateFlow { isVisible = it == PageLayout.AUTOMATIC }.launchIn(viewScope)
+                preferences.pageLayout().asImmediateFlow(viewScope) { isVisible = it == PageLayout.AUTOMATIC }
             }
             switchPreference {
                 key = Keys.invertDoublePages
                 titleRes = R.string.invert_double_pages
                 defaultValue = false
+                preferences.pageLayout().asImmediateFlow(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE }
             }
         }
         preferenceCategory {
