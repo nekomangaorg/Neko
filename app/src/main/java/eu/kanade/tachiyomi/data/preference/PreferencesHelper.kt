@@ -15,7 +15,10 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.io.File
 import java.text.DateFormat
@@ -30,6 +33,14 @@ fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(block: (value: T) 
     return asFlow()
         .onEach { block(it) }
 }
+
+fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(scope: CoroutineScope, block: (value: T) -> Unit): Job {
+    block(get())
+    return asFlow()
+        .onEach { block(it) }
+        .launchIn(scope)
+}
+
 fun Preference<Boolean>.invert(): Boolean = getOrDefault().let { set(!it); !it }
 
 private class DateFormatConverter : Preference.Adapter<DateFormat> {
