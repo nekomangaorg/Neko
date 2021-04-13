@@ -40,6 +40,11 @@ open class MatPreference @JvmOverloads constructor(
             summaryProvider = customSummaryProvider
         }
 
+    override fun getSummary(): CharSequence? {
+        customSummaryProvider?.let { return it.provideSummary(this) }
+        return super.getSummary()
+    }
+
     override fun setSummary(summaryResId: Int) {
         if (summaryResId == 0) {
             summaryProvider = customSummaryProvider
