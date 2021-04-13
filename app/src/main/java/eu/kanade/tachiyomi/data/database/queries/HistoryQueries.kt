@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryLastReadPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
-import eu.kanade.tachiyomi.data.database.tables.MangaTable
 import eu.kanade.tachiyomi.util.lang.sqLite
 
 interface HistoryQueries : DbProvider {
@@ -41,23 +40,6 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentlyAdded(search: String = "", endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
-        .listOfObjects(MangaChapterHistory::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(getRecentAdditionsQuery(search.sqLite, endless, offset, isResuming))
-//                .args(date.time, startDate.time)
-                .observesTables(MangaTable.TABLE)
-                .build()
-        )
-        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
-        .prepare()
-
-    /**
-     * Returns history of recent manga containing last read chapter in 25s
-     * @param date recent date range
-     * @offset offset the db by
-     */
     fun getRecentMangaLimit(search: String = "", endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
@@ -75,12 +57,12 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getAllRecents(search: String = "", includeRead: Boolean, endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
+    fun getAllRecentsTypes(search: String = "", includeRead: Boolean, endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
                 .query(
-                    getRecentRead(
+                    getAllRecentsType(
                         search.sqLite,
                         includeRead,
                         endless,

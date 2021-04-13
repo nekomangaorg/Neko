@@ -49,7 +49,13 @@ class MangaChapterHistoryGetResolver : DefaultGetResolver<MangaChapterHistory>()
         val history =
             if (!cursor.isNull(cursor.getColumnIndex(HistoryTable.COL_ID))) historyGetResolver.mapFromCursor(
                 cursor
-            ) else HistoryImpl()
+            ) else HistoryImpl().apply {
+                last_read = try {
+                    cursor.getLong(cursor.getColumnIndex(HistoryTable.COL_LAST_READ))
+                } catch (e: Exception) {
+                    0L
+                }
+            }
 
         // Make certain column conflicts are dealt with
         if (chapter.id != null) {
