@@ -86,12 +86,12 @@ class RecentMangaHolder(
         binding.body.text = when {
             item.mch.chapter.id == null -> binding.body.context.getString(
                 R.string.added_,
-                item.mch.manga.date_added.timeSpanFromNow
+                item.mch.manga.date_added.timeSpanFromNow(itemView.context)
             )
             adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> ""
             item.mch.history.id == null -> binding.body.context.getString(
                 R.string.updated_,
-                item.chapter.date_upload.timeSpanFromNow
+                item.chapter.date_upload.timeSpanFromNow(itemView.context)
             )
             item.chapter.id != item.mch.chapter.id ->
                 binding.body.context.getString(
@@ -104,7 +104,7 @@ class RecentMangaHolder(
             item.chapter.pages_left > 0 && !item.chapter.read ->
                 binding.body.context.getString(
                     R.string.read_,
-                    item.mch.history.last_read.timeSpanFromNow
+                    item.mch.history.last_read.timeSpanFromNow(itemView.context)
                 ) + "\n" + itemView.resources.getQuantityString(
                     R.plurals.pages_left,
                     item.chapter.pages_left,
@@ -112,7 +112,7 @@ class RecentMangaHolder(
                 )
             else -> binding.body.context.getString(
                 R.string.read_,
-                item.mch.history.last_read.timeSpanFromNow
+                item.mch.history.last_read.timeSpanFromNow(itemView.context)
             )
         }
         if ((itemView.context as? Activity)?.isDestroyed != true) {

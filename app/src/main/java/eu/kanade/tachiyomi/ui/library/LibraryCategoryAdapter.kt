@@ -146,7 +146,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                         if (last != null && last.last_read > 100) {
                             recyclerView.context.getString(
                                 R.string.read_,
-                                last.last_read.timeSpanFromNow
+                                last.last_read.timeSpanFromNow(preferences.context)
                             )
                         } else {
                             "N/A"
@@ -173,7 +173,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                         if (lastUpdate > 0) {
                             recyclerView.context.getString(
                                 R.string.updated_,
-                                lastUpdate.timeSpanFromNow
+                                lastUpdate.timeSpanFromNow(preferences.context)
                             )
                         } else {
                             "N/A"
@@ -182,7 +182,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                     LibrarySort.DATE_ADDED -> {
                         val added = item.manga.date_added
                         if (added > 0) {
-                            recyclerView.context.getString(R.string.added_, added.timeSpanFromNow)
+                            recyclerView.context.getString(R.string.added_, added.timeSpanFromNow(preferences.context))
                         } else {
                             "N/A"
                         }
