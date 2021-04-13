@@ -26,26 +26,15 @@ class IntListMatPreference @JvmOverloads constructor(
     var entries: List<String> = emptyList()
     var customSelectedValue: Int? = null
 
-    override fun onSetInitialValue(defaultValue: Any?) {
-        super.onSetInitialValue(defaultValue)
-        defValue = defaultValue as? Int ?: defValue
-    }
-    override fun getSummary(): CharSequence {
-        if (customSummary != null) return customSummary!!
-        if (key == null) return super.getSummary()
+    override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
         val index = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
-        return if (entries.isEmpty() || index == -1) ""
+        if (entries.isEmpty() || index == -1) ""
         else entries[index]
     }
 
-    override fun setSummary(summaryResId: Int) {
-        super.setSummary(summaryResId)
-        customSummary = summary.toString()
-    }
-
-    override fun setSummary(summary: CharSequence?) {
-        super.setSummary(summary)
-        customSummary = summary?.toString()
+    override fun onSetInitialValue(defaultValue: Any?) {
+        super.onSetInitialValue(defaultValue)
+        defValue = defaultValue as? Int ?: defValue
     }
 
     override fun dialog(): MaterialDialog {

@@ -20,13 +20,9 @@ class MultiListMatPreference @JvmOverloads constructor(
     ListMatPreference(activity, context, attrs) {
 
     var allSelectionRes: Int? = null
-    var customSummaryRes: Int
-        get() = 0
-        set(value) { customSummary = context.getString(value) }
 
-    override fun getSummary(): CharSequence {
-        if (customSummary != null) return customSummary!!
-        return prefs.getStringSet(key, emptySet<String>()).getOrDefault().mapNotNull {
+    override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
+        prefs.getStringSet(key, emptySet<String>()).getOrDefault().mapNotNull {
             if (entryValues.indexOf(it) == -1) null
             else entryValues.indexOf(it) + if (allSelectionRes != null) 1 else 0
         }.toIntArray().joinToString(",") {
@@ -50,9 +46,9 @@ class MultiListMatPreference @JvmOverloads constructor(
             val pos = mutableListOf<Int>()
             for (i in items.indices)
                 if (!(allSelectionRes != null && i == 0) && isItemChecked(i)) pos.add(i)
-            var value = pos.map {
-                entryValues[it - if (allSelectionRes != null) 1 else 0]
-            }?.toSet() ?: emptySet()
+            var value = pos.mapNotNull {
+                entryValues.getOrNull(it - if (allSelectionRes != null) 1 else 0)
+            }.toSet()
             if (allSelectionRes != null && isItemChecked(0)) value = emptySet()
             prefs.getStringSet(key, emptySet()).set(value)
             callChangeListener(value)

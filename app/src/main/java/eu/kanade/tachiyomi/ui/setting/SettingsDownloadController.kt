@@ -94,14 +94,14 @@ class SettingsDownloadController : SettingsController() {
                 entryValues = dbCategories.map { it.id.toString() }
                 allSelectionRes = R.string.all
 
-                preferences.downloadNew().asImmediateFlow { isVisible = it }
+                preferences.downloadNew().asImmediateFlow(viewScope) { isVisible = it }
 
-                preferences.downloadNewCategories().asImmediateFlow { list ->
+                preferences.downloadNewCategories().asImmediateFlow(viewScope) { list ->
                     val selectedCategories = list
                         .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
                         .sortedBy { it.order }
 
-                    customSummary = if (selectedCategories.isEmpty()) {
+                    summary = if (selectedCategories.isEmpty()) {
                         resources?.getString(R.string.all)
                     } else {
                         selectedCategories.joinToString { it.name }
@@ -112,7 +112,7 @@ class SettingsDownloadController : SettingsController() {
                 intListPreference(activity) {
                     key = Keys.deleteRemovedChapters
                     titleRes = R.string.delete_removed_chapters
-                    customSummary = activity?.getString(R.string.delete_downloaded_if_removed_online)
+                    summary = activity?.getString(R.string.delete_downloaded_if_removed_online)
                     entriesRes = arrayOf(
                         R.string.ask_on_chapters_page,
                         R.string.always_keep,

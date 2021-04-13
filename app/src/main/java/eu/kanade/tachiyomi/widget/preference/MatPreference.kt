@@ -22,7 +22,6 @@ open class MatPreference @JvmOverloads constructor(
 
     protected val prefs: PreferencesHelper = Injekt.get()
     private var isShowing = false
-    var customSummary: String? = null
 
     @StringRes var dialogTitleRes: Int? = null
 
@@ -35,8 +34,30 @@ open class MatPreference @JvmOverloads constructor(
         isShowing = true
     }
 
-    override fun getSummary(): CharSequence {
-        return customSummary ?: super.getSummary()
+    protected open var customSummaryProvider: SummaryProvider<MatPreference>? = null
+        set(value) {
+            field = value
+            summaryProvider = customSummaryProvider
+        }
+
+    override fun setSummary(summaryResId: Int) {
+        if (summaryResId == 0) {
+            summaryProvider = customSummaryProvider
+            return
+        } else {
+            summaryProvider = null
+        }
+        super.setSummary(summaryResId)
+    }
+
+    override fun setSummary(summary: CharSequence?) {
+        if (summary == null) {
+            summaryProvider = customSummaryProvider
+            return
+        } else {
+            summaryProvider = null
+        }
+        super.setSummary(summary)
     }
 
     open fun dialog(): MaterialDialog {

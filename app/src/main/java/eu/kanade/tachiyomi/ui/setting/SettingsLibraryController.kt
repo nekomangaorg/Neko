@@ -96,7 +96,7 @@ class SettingsLibraryController : SettingsController() {
                 titleRes = R.string.library_update_restriction
                 entriesRes = arrayOf(R.string.wifi, R.string.charging)
                 entryValues = listOf("wifi", "ac")
-                customSummaryRes = R.string.library_update_restriction_summary
+                summaryRes = R.string.library_update_restriction_summary
 
                 preferences.libraryUpdateInterval().asObservable()
                     .subscribeUntilDestroy { isVisible = it > 0 }
@@ -140,7 +140,7 @@ class SettingsLibraryController : SettingsController() {
                         list.mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
                             .sortedBy { it.order }
 
-                    customSummary =
+                    summary =
                         if (selectedCategories.isEmpty()) context.getString(R.string.all)
                         else selectedCategories.joinToString { it.name }
                 }

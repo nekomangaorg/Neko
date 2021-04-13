@@ -30,10 +30,10 @@ open class ListMatPreference @JvmOverloads constructor(
         super.onSetInitialValue(defaultValue)
         defValue = defaultValue as? String ?: defValue
     }
-    override fun getSummary(): CharSequence {
-        if (customSummary != null) return customSummary!!
+
+    override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
         val index = entryValues.indexOf(prefs.getStringPref(key, defValue).getOrDefault())
-        return if (entries.isEmpty() || index == -1) ""
+        if (entries.isEmpty() || index == -1) ""
         else entries[index]
     }
 
