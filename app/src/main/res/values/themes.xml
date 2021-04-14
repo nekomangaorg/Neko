@@ -13,7 +13,7 @@
         <item name="colorPrimary">@color/app_color_primary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
-        <item name="colorPrimaryDark">@color/app_color_primary</item>
+        <item name="colorPrimaryDark">?colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorAccentText">@color/colorAccentText</item>
         <item name="colorControlActivated">?colorAccent</item>
@@ -74,8 +74,7 @@
     <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled"/>
     <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi"/>
     <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/dialogDuskDawn</item>
-        <item name="colorPrimaryDark">@color/dialogDuskDawn</item>
+        <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
         <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
         <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>

@@ -10,7 +10,6 @@
     <!-- Amoled Theme -->
     <!--==============-->
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/colorAmoledPrimary</item>
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
@@ -23,17 +22,19 @@
     </style>
 
     <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled">
+        <item name="colorPrimary">@color/primaryRed</item>
         <item name="colorAccent">@color/holo_red</item>
         <item name="colorAccentText">@color/md_red_500</item>
     </style>
 
     <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled">
+        <item name="colorPrimary">@color/colorPrimaryPink</item>
         <item name="colorAccent">@color/colorAccentPink</item>
         <item name="colorAccentText">@color/colorAccentPink</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/backgroundLime</item>
+        <item name="colorPrimary">@color/primaryLime</item>
         <item name="colorPrimaryDark">@color/backgroundLime</item>
         <item name="colorAccent">@color/colorAccentLime</item>
         <item name="colorAccentText">@color/colorAccentLime</item>
