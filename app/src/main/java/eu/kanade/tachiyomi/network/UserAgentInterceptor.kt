@@ -12,7 +12,7 @@ class UserAgentInterceptor : Interceptor {
             val newRequest = originalRequest
                 .newBuilder()
                 .removeHeader("User-Agent")
-                .addHeader("User-Agent", HttpSource.DEFAULT_USERAGENT)
+                .addHeader("User-Agent", HttpSource.DEFAULT_USER_AGENT)
                 .build()
             chain.proceed(newRequest)
         } else {

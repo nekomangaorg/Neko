@@ -1,8 +1,37 @@
 package eu.kanade.tachiyomi.util.system
 
+import android.annotation.SuppressLint
+import android.content.Context
+import android.content.pm.PackageManager
+import android.webkit.CookieManager
 import android.webkit.WebSettings
 import android.webkit.WebView
+import timber.log.Timber
 
+object WebViewUtil {
+    const val REQUESTED_WITH = "com.android.browser"
+
+    const val MINIMUM_WEBVIEW_VERSION = 88
+
+    fun supportsWebView(context: Context): Boolean {
+        try {
+            // May throw android.webkit.WebViewFactory$MissingWebViewPackageException if WebView
+            // is not installed
+            CookieManager.getInstance()
+        } catch (e: Throwable) {
+            Timber.e(e)
+            return false
+        }
+
+        return context.packageManager.hasSystemFeature(PackageManager.FEATURE_WEBVIEW)
+    }
+}
+
+fun WebView.isOutdated(): Boolean {
+    return getWebViewMajorVersion() < WebViewUtil.MINIMUM_WEBVIEW_VERSION
+}
+
+@SuppressLint("SetJavaScriptEnabled")
 fun WebView.setDefaultSettings() {
     with(settings) {
         javaScriptEnabled = true
@@ -15,32 +44,25 @@ fun WebView.setDefaultSettings() {
     }
 }
 
-private val WEBVIEW_UA_VERSION_REGEX by lazy {
-    Regex(""".*Chrome/(\d+)\..*""")
-}
-
-private const val MINIMUM_WEBVIEW_VERSION = 86
-
-fun WebView.isOutdated(): Boolean {
-    return getWebviewMajorVersion(this) < MINIMUM_WEBVIEW_VERSION
-}
-
-// Based on https://stackoverflow.com/a/29218966
-private fun getWebviewMajorVersion(webview: WebView): Int {
-    val originalUA: String = webview.settings.userAgentString
-
-    // Next call to getUserAgentString() will get us the default
-    webview.settings.userAgentString = null
-
-    val uaRegexMatch = WEBVIEW_UA_VERSION_REGEX.matchEntire(webview.settings.userAgentString)
-    val webViewVersion: Int = if (uaRegexMatch != null && uaRegexMatch.groupValues.size > 1) {
+private fun WebView.getWebViewMajorVersion(): Int {
+    val uaRegexMatch = """.*Chrome/(\d+)\..*""".toRegex().matchEntire(getDefaultUserAgentString())
+    return if (uaRegexMatch != null && uaRegexMatch.groupValues.size > 1) {
         uaRegexMatch.groupValues[1].toInt()
     } else {
         0
     }
+}
+
+// Based on https://stackoverflow.com/a/29218966
+private fun WebView.getDefaultUserAgentString(): String {
+    val originalUA: String = settings.userAgentString
+
+    // Next call to getUserAgentString() will get us the default
+    settings.userAgentString = null
+    val defaultUserAgentString = settings.userAgentString
 
     // Revert to original UA string
-    webview.settings.userAgentString = originalUA
+    settings.userAgentString = originalUA
 
-    return webViewVersion
+    return defaultUserAgentString
 }
