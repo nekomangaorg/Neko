@@ -25,7 +25,8 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     FrameLayout(context, attrs) {
 
     private var entries = emptyList<String>()
-    private var selectedPosition = 0
+    var selectedPosition = 0
+        private set
     private var pref: Preference<Int>? = null
     private var prefOffset = 0
     private var popup: PopupMenu? = null
@@ -62,6 +63,12 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         this.entries = entries
 
         binding.detailView.text = entries.firstOrNull().orEmpty()
+
+        popup = makeSettingsPopup()
+        setOnTouchListener(popup?.dragToOpenListener)
+        setOnClickListener {
+            popup?.show()
+        }
 
         a.recycle()
     }
