@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.LNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.RightAndLeftNavigation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -16,12 +17,15 @@ import uy.kohesive.injekt.api.get
 /**
  * Configuration used by webtoon viewers.
  */
-class WebtoonConfig(preferences: PreferencesHelper = Injekt.get()) : ViewerConfig(preferences) {
+class WebtoonConfig(
+    scope: CoroutineScope,
+    preferences: PreferencesHelper = Injekt.get()
+) : ViewerConfig(preferences, scope) {
 
     var webtoonCropBorders = false
         private set
 
-    var verticalCropBorders = false
+    var verticalCropBorders = true
         private set
 
     var sidePadding = 0

@@ -7,6 +7,8 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import androidx.core.view.isGone
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.WebtoonLayoutManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -15,7 +17,8 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import rx.subscriptions.CompositeSubscription
 import timber.log.Timber
 import kotlin.math.max
@@ -25,6 +28,8 @@ import kotlin.math.min
  * Implementation of a [BaseViewer] to display pages with a [RecyclerView].
  */
 class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = false) : BaseViewer {
+
+    private val scope = MainScope()
 
     /**
      * Recycler view used by this viewer.
@@ -59,7 +64,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     /**
      * Configuration used by this viewer, like allow taps, or crop image borders.
      */
-    val config = WebtoonConfig()
+    val config = WebtoonConfig(scope)
 
     /**
      * Subscriptions to keep while this viewer is used.
@@ -68,7 +73,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
 
     init {
         recycler.setBackgroundColor(Color.BLACK)
-        recycler.visibility = View.GONE // Don't let the recycler layout yet
+        recycler.isVisible = false // Don't let the recycler layout yet
         recycler.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         recycler.itemAnimator = null
         recycler.layoutManager = layoutManager
@@ -154,7 +159,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         // Initial opening - preload allowed
         currentPage ?: return true
 
-        val nextItem = adapter.items.getOrNull(adapter.items.count() - 1)
+        val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
         val nextChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
 
         // Allow preload for
@@ -179,6 +184,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
      */
     override fun destroy() {
         super.destroy()
+        scope.cancel()
         subscriptions.unsubscribe()
     }
 
@@ -228,11 +234,11 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         val forceTransition = config.alwaysShowChapterTransition || currentPage is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
-        if (recycler.visibility == View.GONE) {
+        if (recycler.isGone) {
             Timber.d("Recycler first layout")
             val pages = chapters.currChapter.pages ?: return
-            moveToPage(pages[chapters.currChapter.requestedPage])
-            recycler.visible()
+            moveToPage(pages[min(chapters.currChapter.requestedPage, pages.lastIndex)])
+            recycler.isVisible = true
         }
     }
 

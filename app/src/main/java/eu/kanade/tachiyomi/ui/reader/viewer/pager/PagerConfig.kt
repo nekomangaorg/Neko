@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.KindlishNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.LNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.RightAndLeftNavigation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -17,8 +18,12 @@ import uy.kohesive.injekt.api.get
 /**
  * Configuration used by pager viewers.
  */
-class PagerConfig(private val viewer: PagerViewer, preferences: PreferencesHelper = Injekt.get()) :
-    ViewerConfig(preferences) {
+class PagerConfig(
+    scope: CoroutineScope,
+    private val viewer: PagerViewer,
+    preferences: PreferencesHelper = Injekt.get()
+) :
+    ViewerConfig(preferences, scope) {
 
     var usePageTransitions = false
         private set

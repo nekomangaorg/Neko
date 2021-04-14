@@ -3,17 +3,13 @@ package eu.kanade.tachiyomi.ui.reader.viewer
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
 /**
  * Common configuration for all viewers.
  */
-abstract class ViewerConfig(preferences: PreferencesHelper) {
-
-    protected val scope = CoroutineScope(Job() + Dispatchers.Main)
+abstract class ViewerConfig(preferences: PreferencesHelper, protected val scope: CoroutineScope) {
 
     var imagePropertyChangedListener: (() -> Unit)? = null
     var reloadChapterListener: ((Boolean) -> Unit)? = null

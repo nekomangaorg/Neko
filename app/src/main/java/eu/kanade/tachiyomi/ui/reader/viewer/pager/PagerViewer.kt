@@ -16,6 +16,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import timber.log.Timber
 
 /**
@@ -23,6 +25,8 @@ import timber.log.Timber
  */
 @Suppress("LeakingThis")
 abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
+
+    private val scope = MainScope()
 
     /**
      * View pager used by this viewer. It's abstract to implement L2R, R2L and vertical pagers on
@@ -33,7 +37,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     /**
      * Configuration used by the pager, like allow taps, scale mode on images, page transitions...
      */
-    val config = PagerConfig(this)
+    val config = PagerConfig(scope, this)
 
     /**
      * Adapter of the pager.
@@ -137,6 +141,11 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      */
     override fun getView(): View {
         return pager
+    }
+
+    override fun destroy() {
+        super.destroy()
+        scope.cancel()
     }
 
     /**

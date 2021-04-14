@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import coil.api.clear
 import coil.api.loadAny
 import coil.request.CachePolicy
@@ -109,7 +110,7 @@ class WebtoonPageHolder(
     private var readImageHeaderSubscription: Subscription? = null
 
     init {
-        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        refreshLayoutParams()
         frame.setBackgroundColor(Color.BLACK)
     }
 
@@ -143,9 +144,9 @@ class WebtoonPageHolder(
 
         removeDecodeErrorLayout()
         subsamplingImageView?.recycle()
-        subsamplingImageView?.gone()
+        subsamplingImageView?.isVisible = false
         imageView?.clear()
-        imageView?.gone()
+        imageView?.isVisible = false
         progressBar.setProgress(0)
     }
 
