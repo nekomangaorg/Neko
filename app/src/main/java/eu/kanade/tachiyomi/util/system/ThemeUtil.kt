@@ -171,7 +171,8 @@ object ThemeUtil {
         val darkBackground: Int = Color.parseColor(
             when (styleRes) {
                 R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
-                R.style.Theme_Tachiyomi_MidnightDusk, R.style.Theme_Tachiyomi_FlatLime -> "#16151D"
+                R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
+                R.style.Theme_Tachiyomi_FlatLime -> "#202125"
                 else -> "#1C1C1D"
             }
         )
@@ -235,6 +236,7 @@ object ThemeUtil {
                 R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
                 R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
                 R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
+                R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"
                 else -> "#212121"
             }
         )
