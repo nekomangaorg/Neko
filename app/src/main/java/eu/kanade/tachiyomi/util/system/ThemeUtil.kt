@@ -142,6 +142,7 @@ object ThemeUtil {
             )
         }
 
+        /** Complies with textColorPrimary (probably night) */
         @ColorInt
         val lightPrimaryText: Int = Color.parseColor(
             when (styleRes) {
@@ -150,15 +151,19 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with textColorPrimary (probably night) */
         @ColorInt
         val darkPrimaryText: Int = Color.parseColor("#FFFFFFFF")
 
+        /** Complies with textColorSecondary (primary with alpha) */
         @ColorInt
         val lightSecondaryText: Int = ColorUtils.setAlphaComponent(lightPrimaryText, (0.54f * 255f).roundToInt())
 
+        /** Complies with textColorSecondary (primary with alpha) */
         @ColorInt
         val darkSecondaryText: Int = ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
 
+        /** Complies with colorBackground */
         @ColorInt
         val lightBackground: Int = Color.parseColor(
             when (styleRes) {
@@ -167,6 +172,7 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with colorBackground (probably night) */
         @ColorInt
         val darkBackground: Int = Color.parseColor(
             when (styleRes) {
@@ -177,6 +183,7 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with colorAccent */
         @ColorInt
         val lightAccent: Int = Color.parseColor(
             when (styleRes) {
@@ -185,6 +192,7 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with colorAccent (probably night) */
         @ColorInt
         val darkAccent: Int = Color.parseColor(
             when (styleRes) {
@@ -196,18 +204,21 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with colorSecondary */
         @ColorInt
         val lightAppBar: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
             else -> lightBackground
         }
 
+        /** Complies with colorSecondary (probably night) */
         @ColorInt
         val darkAppBar: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
             else -> darkBackground
         }
 
+        /** Complies with actionBarTintColor */
         @ColorInt
         val lightAppBarText: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#FFFFFF")
@@ -215,12 +226,14 @@ object ThemeUtil {
             else -> lightPrimaryText
         }
 
+        /** Complies with actionBarTintColor (probably night) */
         @ColorInt
         val darkAppBarText: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#FFFFFF")
             else -> darkPrimaryText
         }
 
+        /** Complies with colorPrimaryVariant */
         @ColorInt
         val lightBottomBar: Int = Color.parseColor(
             when (styleRes) {
@@ -230,6 +243,7 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with colorPrimaryVariant (probably night) */
         @ColorInt
         val darkBottomBar: Int = Color.parseColor(
             when (styleRes) {
@@ -241,24 +255,28 @@ object ThemeUtil {
             }
         )
 
+        /** Complies with tabBarIconInactive */
         @ColorInt
         val lightInactiveTab: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#80FFFFFF")
             else -> Color.parseColor("#C2424242")
         }
 
+        /** Complies with tabBarIconInactive (probably night) */
         @ColorInt
         val darkInactiveTab: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#80FFFFFF")
             else -> Color.parseColor("#C2FFFFFF")
         }
 
+        /** Complies with tabBarIconColor */
         @ColorInt
         val lightActiveTab: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> lightAppBarText
             else -> lightAccent
         }
 
+        /** Complies with tabBarIconColor (probably night) */
         @ColorInt
         val darkActiveTab: Int = when (styleRes) {
             R.style.Theme_Tachiyomi_AllBlue -> darkAppBarText
