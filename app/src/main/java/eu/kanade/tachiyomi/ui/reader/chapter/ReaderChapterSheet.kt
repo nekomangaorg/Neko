@@ -19,8 +19,8 @@ import eu.kanade.tachiyomi.databinding.ReaderChaptersSheetBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
-import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -53,7 +53,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
     fun setup(activity: ReaderActivity) {
         presenter = activity.presenter
-        val fullPrimary = activity.contextCompatColor(R.color.secondary_alpha)
+        val fullPrimary = activity.getResourceColor(R.attr.colorSecondary)
 
         val primary = ColorUtils.setAlphaComponent(fullPrimary, 200)
 
