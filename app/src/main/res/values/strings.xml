@@ -329,6 +329,7 @@
         performance</string>
     <string name="invert_double_pages">Invert double pages</string>
     <string name="crop_borders">Crop borders</string>
+    <string name="remove_crop">Remove crop</string>
     <string name="use_custom_brightness">Use custom brightness</string>
     <string name="use_custom_color_filter">Use custom color filter</string>
     <string name="color_filter_blend_mode">Color filter blend mode</string>

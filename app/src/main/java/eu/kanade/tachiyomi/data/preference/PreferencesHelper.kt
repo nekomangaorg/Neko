@@ -41,7 +41,7 @@ fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(scope: CoroutineSc
         .launchIn(scope)
 }
 
-fun Preference<Boolean>.invert(): Boolean = getOrDefault().let { set(!it); !it }
+fun com.tfcporciuncula.flow.Preference<Boolean>.toggle() = set(!get())
 
 private class DateFormatConverter : Preference.Adapter<DateFormat> {
     override fun get(key: String, preferences: SharedPreferences): DateFormat {

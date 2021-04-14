@@ -9,6 +9,7 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
@@ -36,6 +37,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -73,6 +75,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
@@ -349,11 +352,35 @@ class ReaderActivity :
                 else R.drawable.ic_book_open_variant_24dp
             )
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            binding.chaptersSheet.doublePage.tooltipText =
+        binding.chaptersSheet.doublePage.compatToolTipText =
+            getString(
+                if (isDoublePage) R.string.switch_to_single
+                else R.string.switch_to_double
+            )
+    }
+
+    private fun updateCropBordersShortcut() {
+        val isPagerType = viewer is PagerViewer || (viewer as? WebtoonViewer)?.hasMargins == true
+        val enabled = if (isPagerType) {
+            preferences.cropBorders().get()
+        } else {
+            preferences.cropBordersWebtoon().get()
+        }
+
+        with(binding.chaptersSheet.cropBordersSheetButton) {
+            setImageResource(
+                if (enabled) {
+                    R.drawable.free_to_crop
+                } else {
+                    R.drawable.crop_to_free
+                }
+            )
+            val animDrawable = drawable as AnimatedVectorDrawable
+            animDrawable.start()
+            compatToolTipText =
                 getString(
-                    if (isDoublePage) R.string.switch_to_single
-                    else R.string.switch_to_double
+                    if (enabled) R.string.remove_crop
+                    else R.string.crop_borders
                 )
         }
     }
@@ -500,6 +527,20 @@ class ReaderActivity :
                 preferences.pageLayout().set(1 - preferences.pageLayout().get())
             }
         }
+        binding.chaptersSheet.cropBordersSheetButton.setOnClickListener {
+            (viewer as? WebtoonViewer)?.let {
+                val pref = if (it.hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon()
+                pref.toggle()
+            }
+        }
+
+        listOf(preferences.cropBorders(), preferences.cropBordersWebtoon())
+            .forEach { pref ->
+                pref.asFlow()
+                    .onEach { updateCropBordersShortcut() }
+                    .launchIn(scope)
+            }
+
         binding.chaptersSheet.shiftPageButton.setOnClickListener {
             shiftDoublePages()
         }
@@ -708,7 +749,6 @@ class ReaderActivity :
         val prevViewer = viewer
         val noDefault = manga.viewer == -1
         val mangaViewer = presenter.getMangaViewer()
-        invalidateOptionsMenu()
         val newViewer = when (mangaViewer) {
             RIGHT_TO_LEFT -> R2LPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
@@ -745,6 +785,7 @@ class ReaderActivity :
         }
         viewer = newViewer
         binding.chaptersSheet.doublePage.isVisible = viewer is PagerViewer
+        binding.chaptersSheet.cropBordersSheetButton.isVisible = viewer !is PagerViewer
         binding.viewerContainer.addView(newViewer.getView())
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -780,6 +821,7 @@ class ReaderActivity :
         binding.pleaseWait.visible()
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
         invalidateOptionsMenu()
+        updateCropBordersShortcut()
     }
 
     override fun onPause() {
