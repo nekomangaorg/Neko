@@ -22,7 +22,6 @@
         android:visibility="gone"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_marginEnd="8dp"
         android:layout_gravity="center"
         android:layout_marginStart="56dp" />
 
@@ -33,7 +32,6 @@
         android:layout_gravity="center"
         android:layout_marginStart="56dp"
         android:background="?selectableItemBackgroundBorderless"
-        android:layout_marginEnd="8dp"
         android:contentDescription="@string/previous_chapter"
         android:padding="@dimen/material_layout_keylines_screen_edge_margin"
         app:tint="?actionBarTintColor"
@@ -46,12 +44,12 @@
 
         <TextView
             android:id="@+id/left_page_text"
-            android:layout_width="48dp"
+            android:layout_width="32sp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:textColor="?actionBarTintColor"
             android:textSize="15sp"
-            tools:text="12-14" />
+            tools:text="1-2" />
 
         <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
             android:id="@+id/page_seekbar"
@@ -64,7 +62,7 @@
 
         <TextView
             android:id="@+id/right_page_text"
-            android:layout_width="48dp"
+            android:layout_width="32sp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:textColor="?actionBarTintColor"
@@ -78,7 +76,6 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="56dp"
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/next_chapter"
@@ -93,7 +90,6 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginStart="8dp"
         android:layout_marginEnd="56dp" />
 
 </LinearLayout>

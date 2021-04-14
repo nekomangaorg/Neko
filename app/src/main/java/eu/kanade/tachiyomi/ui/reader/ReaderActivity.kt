@@ -73,6 +73,7 @@ import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.setThemeAndNight
+import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
@@ -352,6 +353,14 @@ class ReaderActivity :
                 else R.drawable.ic_book_open_variant_24dp
             )
         )
+        with(binding.readerNav) {
+            listOf(leftPageText, rightPageText).forEach {
+                it.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    val isCurrent = (viewer is R2LPagerViewer).xor(it === leftPageText)
+                    width = if (isDoublePage && isCurrent) 48.spToPx else 32.spToPx
+                }
+            }
+        }
         binding.chaptersSheet.doublePage.compatToolTipText =
             getString(
                 if (isDoublePage) R.string.switch_to_single
