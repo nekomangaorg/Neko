@@ -83,6 +83,7 @@ import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -727,14 +728,14 @@ class MangaDetailsController :
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
-            manga?.source != LocalSource.ID
+            presenter.manga.isLocal()
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             presenter.anyRead() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch &&
-            manga?.source != LocalSource.ID
+            presenter.manga.isLocal()
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_migrate).isVisible = !presenter.isLockedFromSearch &&
@@ -761,7 +762,8 @@ class MangaDetailsController :
 
         val menuItems = menu.iterator()
         while (menuItems.hasNext()) {
-            menuItems.next().isVisible = !fullCoverActive
+            val menuItem = menuItems.next()
+            menuItems.next().isVisible = !fullCoverActive && menuItem.isVisible
         }
         val saveItem = menu.findItem(R.id.save)
         val shareItem = menu.findItem(R.id.share)
