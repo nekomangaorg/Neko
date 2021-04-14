@@ -729,7 +729,6 @@ class LibraryPresenter(
         scope.launch {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
-                db.resetMangaInfo(manga).executeOnIO()
                 coverCache.deleteFromCache(manga)
                 val source = sourceManager.get(manga.source) as? HttpSource
                 if (source != null) {
@@ -927,7 +926,7 @@ class LibraryPresenter(
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
 
-        /** Give library manga to a date added based on min chapter fetch + remove custom info */
+        /** Give library manga to a date added based on min chapter fetch */
         fun updateDB() {
             val db: DatabaseHelper = Injekt.get()
             db.inTransaction {
@@ -938,7 +937,6 @@ class LibraryPresenter(
                         manga.date_added = chapters.minByOrNull { it.date_fetch }?.date_fetch ?: 0L
                         db.insertManga(manga).executeAsBlocking()
                     }
-                    db.resetMangaInfo(manga).executeAsBlocking()
                 }
             }
         }

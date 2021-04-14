@@ -280,7 +280,6 @@ open class BrowseSourcePresenter(
         coverCache.deleteFromCache(manga)
         val downloadManager: DownloadManager = Injekt.get()
         downloadManager.deleteManga(manga, source)
-        db.resetMangaInfo(manga).executeAsBlocking()
     }
 
     /**
