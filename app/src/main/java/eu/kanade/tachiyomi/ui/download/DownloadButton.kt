@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadButtonBinding
@@ -16,7 +17,14 @@ import eu.kanade.tachiyomi.util.view.visible
 class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
 
-    private val activeColor = context.getResourceColor(R.attr.colorAccent)
+    private val activeColor = ColorUtils.blendARGB(
+        context.getResourceColor(R.attr.colorAccent),
+        ContextCompat.getColor(
+            context,
+            R.color.download
+        ),
+        0.3f
+    )
     private val progressBGColor = ContextCompat.getColor(
         context,
         R.color.divider
@@ -25,10 +33,8 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         context,
         R.color.material_on_surface_disabled
     )
-    private val downloadedColor = ContextCompat.getColor(
-        context,
-        R.color.download
-    )
+    private val downloadedColor = context.getResourceColor(R.attr.colorAccent)
+    private val downloadedTextColor = context.getResourceColor(R.attr.colorOnAccent)
     private val errorColor = ContextCompat.getColor(
         context,
         R.color.material_red_500
@@ -120,7 +126,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 binding.downloadProgressIndeterminate.gone()
                 binding.downloadBorder.setImageDrawable(filledCircle)
                 binding.downloadBorder.drawable.setTint(downloadedColor)
-                binding.downloadIcon.drawable.setTint(Color.WHITE)
+                binding.downloadIcon.drawable.setTint(downloadedTextColor)
             }
             Download.ERROR -> {
                 binding.downloadProgress.gone()
