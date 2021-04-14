@@ -64,6 +64,7 @@ class WebtoonPageHolder(
      * Image view that supports subsampling on zoom.
      */
     private var subsamplingImageView: SubsamplingScaleImageView? = null
+    private var cropBorders: Boolean = false
 
     /**
      * Simple image view only used on GIFs.
@@ -349,9 +350,18 @@ class WebtoonPageHolder(
      * Initializes a subsampling scale view.
      */
     private fun initSubsamplingImageView(): SubsamplingScaleImageView {
-        if (subsamplingImageView != null) return subsamplingImageView!!
-
         val config = viewer.config
+        val newCropBorders = if (viewer.hasMargins) config.verticalCropBorders else config.webtoonCropBorders
+
+        subsamplingImageView?.apply {
+            if (newCropBorders != cropBorders) {
+                cropBorders = newCropBorders
+                setCropBorders(newCropBorders)
+            }
+            return this
+        }
+
+        cropBorders = newCropBorders
 
         subsamplingImageView = WebtoonSubsamplingImageView(context).apply {
             setMaxTileSize(viewer.activity.maxBitmapSize)
@@ -359,7 +369,7 @@ class WebtoonPageHolder(
             setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH)
             setMinimumDpi(90)
             setMinimumTileDpi(180)
-            setCropBorders(if (viewer.hasMargins) config.verticalCropBorders else config.webtoonCropBorders)
+            setCropBorders(cropBorders)
             setOnImageEventListener(
                 object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                     override fun onReady() {
