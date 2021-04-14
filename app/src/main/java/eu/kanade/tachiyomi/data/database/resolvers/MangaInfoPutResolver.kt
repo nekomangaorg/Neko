@@ -31,5 +31,6 @@ class MangaInfoPutResolver() : PutResolver<Manga>() {
         put(MangaTable.COL_AUTHOR, manga.originalAuthor)
         put(MangaTable.COL_ARTIST, manga.originalArtist)
         put(MangaTable.COL_DESCRIPTION, manga.originalDescription)
+        put(MangaTable.COL_STATUS, manga.originalStatus)
     }
 }

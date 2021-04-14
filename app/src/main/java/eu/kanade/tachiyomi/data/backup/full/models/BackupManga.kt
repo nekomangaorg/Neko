@@ -36,6 +36,9 @@ data class BackupManga(
     @ProtoNumber(101) var chapterFlags: Int = 0,
     @ProtoNumber(102) var history: List<BackupHistory> = emptyList(),
 
+    // SY specific values
+    @ProtoNumber(602) var customStatus: Int = 0,
+
     // J2K specific values
     @ProtoNumber(800) var customTitle: String? = null,
     @ProtoNumber(801) var customArtist: String? = null,
@@ -67,12 +70,13 @@ data class BackupManga(
         }
     }
 
-    fun getCustomMangaInfo(): CustomMangaManager.MangaJson? {
+    fun getCustomMangaInfo(manga: Manga): CustomMangaManager.MangaJson? {
         if (customTitle != null ||
             customArtist != null ||
             customAuthor != null ||
             customDescription != null ||
-            customGenre != null
+            customGenre != null ||
+            manga.status != customStatus
         ) {
             return CustomMangaManager.MangaJson(
                 id = 0L,
@@ -80,7 +84,8 @@ data class BackupManga(
                 author = customAuthor,
                 artist = customArtist,
                 description = customDescription,
-                genre = customGenre?.toTypedArray()
+                genre = customGenre?.toTypedArray(),
+                status = if (manga.status != customStatus) customStatus else null
             )
         }
         return null
@@ -101,7 +106,7 @@ data class BackupManga(
                 author = manga.originalAuthor,
                 description = manga.originalDescription,
                 genre = manga.getOriginalGenres() ?: emptyList(),
-                status = manga.status,
+                status = manga.originalStatus,
                 thumbnailUrl = manga.thumbnail_url,
                 favorite = manga.favorite,
                 source = manga.source,
@@ -115,6 +120,7 @@ data class BackupManga(
                     backupManga.customAuthor = it.author
                     backupManga.customDescription = it.description
                     backupManga.customGenre = it.getGenres()
+                    backupManga.customStatus = it.status
                 }
             }
         }

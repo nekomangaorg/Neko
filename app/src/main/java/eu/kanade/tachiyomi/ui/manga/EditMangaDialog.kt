@@ -14,7 +14,9 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.view.visibleIf
 import uy.kohesive.injekt.Injekt
@@ -66,7 +68,7 @@ class EditMangaDialog : DialogController {
 
     fun onViewCreated() {
         binding.mangaCover.loadAny(manga)
-        val isLocal = manga.source == LocalSource.ID
+        val isLocal = manga.isLocal()
 
         if (isLocal) {
             if (manga.title != manga.url) {
@@ -107,13 +109,14 @@ class EditMangaDialog : DialogController {
                     )?.chop(20)}"
             }
         }
+        binding.mangaStatus.setSelection(manga.status.coerceIn(SManga.UNKNOWN, SManga.LICENSED))
         binding.mangaGenresTags.clearFocus()
         binding.coverLayout.setOnClickListener {
             infoController.changeCover()
         }
         binding.resetTags.setOnClickListener { resetTags() }
         binding.resetTags.text = resources?.getString(
-            if (manga.genre.isNullOrBlank() || manga.source == LocalSource.ID) {
+            if (manga.originalGenre.isNullOrBlank() || isLocal) {
                 R.string.clear_tags
             } else {
                 R.string.reset_tags
@@ -152,6 +155,7 @@ class EditMangaDialog : DialogController {
             customCoverUri,
             binding.mangaDescription.text.toString(),
             binding.mangaGenresTags.tags,
+            binding.mangaStatus.selectedPosition,
             willResetCover
         )
     }

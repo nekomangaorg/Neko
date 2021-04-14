@@ -57,7 +57,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_DESCRIPTION, obj.originalDescription)
         put(COL_GENRE, obj.originalGenre)
         put(COL_TITLE, obj.originalTitle)
-        put(COL_STATUS, obj.status)
+        put(COL_STATUS, obj.originalStatus)
         put(COL_THUMBNAIL_URL, obj.thumbnail_url)
         put(COL_FAVORITE, obj.favorite)
         put(COL_LAST_UPDATE, obj.last_update)

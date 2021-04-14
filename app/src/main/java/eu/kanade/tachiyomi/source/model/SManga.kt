@@ -34,6 +34,8 @@ interface SManga : Serializable {
         get() = (this as? MangaImpl)?.ogDesc ?: description
     val originalGenre: String?
         get() = (this as? MangaImpl)?.ogGenre ?: genre
+    val originalStatus: Int
+        get() = (this as? MangaImpl)?.ogStatus ?: status
 
     fun copyFrom(other: SManga) {
         if (other.author != null) {
@@ -56,7 +58,7 @@ interface SManga : Serializable {
             thumbnail_url = other.thumbnail_url
         }
 
-        status = other.status
+        status = other.originalStatus
 
         if (!initialized) {
             initialized = other.initialized

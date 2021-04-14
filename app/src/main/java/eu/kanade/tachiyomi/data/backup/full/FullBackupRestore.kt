@@ -66,7 +66,7 @@ class FullBackupRestore(context: Context, notifier: BackupNotifier) : AbstractBa
         val categories = backupManga.categories
         val history = backupManga.history
         val tracks = backupManga.getTrackingImpl()
-        val customManga = backupManga.getCustomMangaInfo()
+        val customManga = backupManga.getCustomMangaInfo(manga)
 
         try {
             restoreMangaData(manga, chapters, categories, history, tracks, backupCategories, customManga)

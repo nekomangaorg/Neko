@@ -30,6 +30,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
@@ -573,7 +574,6 @@ class MangaDetailsPresenter(
 
     fun confirmDeletion() {
         coverCache.deleteFromCache(manga)
-        db.resetMangaInfo(manga).executeAsBlocking()
         downloadManager.deleteManga(manga, source)
         customMangaManager.saveMangaInfo(CustomMangaManager.MangaJson(manga.id!!))
         asyncUpdateMangaAndChapters(true)
@@ -629,6 +629,7 @@ class MangaDetailsPresenter(
         uri: Uri?,
         description: String?,
         tags: Array<String>?,
+        status: Int?,
         resetCover: Boolean = false
     ) {
         if (manga.source == LocalSource.ID) {
@@ -638,6 +639,7 @@ class MangaDetailsPresenter(
             manga.description = description?.trimOrNull()
             val tagsString = tags?.joinToString(", ") { it.capitalize() }
             manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
+            manga.status = status ?: SManga.UNKNOWN
             LocalSource(downloadManager.context).updateMangaInfo(manga)
             db.updateMangaInfo(manga).executeAsBlocking()
         } else {
@@ -652,7 +654,8 @@ class MangaDetailsPresenter(
                 author?.trimOrNull(),
                 artist?.trimOrNull(),
                 description?.trimOrNull(),
-                genre
+                genre,
+                if (status != this.manga.originalStatus) status else null
             )
             customMangaManager.saveMangaInfo(manga)
         }

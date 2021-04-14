@@ -43,7 +43,9 @@ open class MangaImpl : Manga {
         get() = if (favorite) customMangaManager.getManga(this)?.genre ?: ogGenre else ogGenre
         set(value) { ogGenre = value }
 
-    override var status: Int = 0
+    override var status: Int
+        get() = if (favorite) customMangaManager.getManga(this)?.status ?: ogStatus else ogStatus
+        set(value) { ogStatus = value }
 
     override var thumbnail_url: String? = null
 
@@ -70,6 +72,8 @@ open class MangaImpl : Manga {
     var ogDesc: String? = null
         private set
     var ogGenre: String? = null
+        private set
+    var ogStatus: Int = 0
         private set
 
     override fun copyFrom(other: SManga) {

@@ -26,6 +26,13 @@
         <item>@string/smart_fit</item>
     </string-array>
 
+    <string-array name="manga_statuses">
+        <item>@string/unknown_status</item>
+        <item>@string/ongoing</item>
+        <item>@string/completed</item>
+        <item>@string/licensed</item>
+    </string-array>
+
     <string-array name="webtoon_side_padding">
         <item>@string/webtoon_side_padding_0</item>
         <item>@string/webtoon_side_padding_10</item>

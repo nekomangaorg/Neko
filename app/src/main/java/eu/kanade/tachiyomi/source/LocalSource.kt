@@ -200,7 +200,7 @@ class LocalSource(private val context: Context) : CatalogueSource {
     }
 
     fun SManga.toJson(): MangaJson {
-        return MangaJson(title, author, artist, description, genre?.split(", ")?.toTypedArray())
+        return MangaJson(title, author, artist, description, genre?.split(", ")?.toTypedArray(), status)
     }
 
     data class MangaJson(
@@ -208,7 +208,8 @@ class LocalSource(private val context: Context) : CatalogueSource {
         val author: String?,
         val artist: String?,
         val description: String?,
-        val genre: Array<String>?
+        val genre: Array<String>?,
+        val status: Int?,
     ) {
 
         override fun equals(other: Any?): Boolean {
