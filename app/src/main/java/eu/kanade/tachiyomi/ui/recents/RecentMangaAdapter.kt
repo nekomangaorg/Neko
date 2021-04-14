@@ -17,9 +17,9 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    var showDownloads = ShowRecentsDLs.All
-    var showRemoveHistory = true
-    var showTitleFirst = false
+    var showDownloads = preferences.showRecentsDownloads().get()
+    var showRemoveHistory = preferences.showRecentsRemHistory().get()
+    var showTitleFirst = preferences.showTitleFirstInRecents().get()
 
     val viewType: Int
         get() = delegate.getViewType()

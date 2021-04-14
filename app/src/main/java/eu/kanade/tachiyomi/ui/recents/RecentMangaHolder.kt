@@ -146,7 +146,7 @@ class RecentMangaHolder(
             when (adapter.showDownloads) {
                 RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
                 RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded ->
-                    status !in Download.CHECKED..Download.NOT_DOWNLOADED && !isChapterRead
+                    status !in Download.CHECKED..Download.NOT_DOWNLOADED || !isChapterRead
                 else -> binding.downloadButton.downloadButton.isVisible
             }
     }
