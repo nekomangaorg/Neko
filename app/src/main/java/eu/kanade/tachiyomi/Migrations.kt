@@ -1,13 +1,17 @@
 package eu.kanade.tachiyomi
 
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.extension.ExtensionUpdateJob
+import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.Injekt
@@ -94,6 +98,17 @@ object Migrations {
                 if (trackManager.myAnimeList.isLogged) {
                     trackManager.myAnimeList.logout()
                     context.toast(R.string.myanimelist_relogin)
+                }
+            }
+            if (oldVersion < 71) {
+                // Migrate DNS over HTTPS setting
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                val wasDohEnabled = prefs.getBoolean("enable_doh", false)
+                if (wasDohEnabled) {
+                    prefs.edit {
+                        putInt(PreferenceKeys.dohProvider, PREF_DOH_CLOUDFLARE)
+                        remove("enable_doh")
+                    }
                 }
             }
             return true

@@ -191,7 +191,7 @@ object PreferenceKeys {
 
     const val createLegacyBackup = "create_legacy_backup"
 
-    const val enableDoh = "enable_doh"
+    const val dohProvider = "doh_provider"
 
     const val showNsfwSource = "show_nsfw_source"
     const val showNsfwExtension = "show_nsfw_extension"

@@ -23,6 +23,8 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
+import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
@@ -164,12 +166,17 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
 
-            switchPreference {
-                key = "enable_doh"
-                key = PreferenceKeys.enableDoh
-                titleRes = R.string.dns_over_https
-                summaryRes = R.string.requires_app_restart
-                defaultValue = false
+            intListPreference(activity) {
+                key = PreferenceKeys.dohProvider
+                titleRes = R.string.doh
+                entriesRes = arrayOf(R.string.disabled, R.string.cloudflare, R.string.google)
+                entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE)
+
+                defaultValue = -1
+                onChange {
+                    activity?.toast(R.string.requires_app_restart)
+                    true
+                }
             }
         }
 

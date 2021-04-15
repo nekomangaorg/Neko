@@ -51,6 +51,7 @@
     <string name="chapters_removed">Chapters removed.</string>
     <string name="chapter_not_found">Chapter not found</string>
     <string name="no_chapters_error">No chapters found</string>
+    <string name="no_pages_found">No pages found</string>
     <plurals name="remove_n_chapters">
         <item quantity="one">Remove %1$d downloaded chapter?</item>
         <item quantity="other">Remove %1$d downloaded chapters?</item>
@@ -630,7 +631,10 @@
     <string name="saves_error_logs">Saves error logs to a file for sharing with the developers</string>
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
-    <string name="dns_over_https">DNS over HTTPS (Cloudflare)</string>
+    <string name="doh">DNS over HTTPS</string>
+    <string name="disabled">Disabled</string>
+    <string name="cloudflare" translatable="false">Cloudflare</string>
+    <string name="google" translatable="false">Google</string>
     <string name="requires_app_restart">Requires app restart to take effect</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">

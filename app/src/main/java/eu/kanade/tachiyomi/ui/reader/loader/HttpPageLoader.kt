@@ -106,7 +106,8 @@ class HttpPageLoader(
             .getPageListFromCache(chapter.chapter)
             .onErrorResumeNext { source.fetchPageList(chapter.chapter) }
             .map { pages ->
-                pages.mapIndexed { index, page -> // Don't trust sources and use our own indexing
+                pages.mapIndexed { index, page ->
+                    // Don't trust sources and use our own indexing
                     ReaderPage(index, page.url, page.imageUrl)
                 }
             }
@@ -231,28 +232,32 @@ class HttpPageLoader(
     private fun HttpSource.getCachedImage(page: ReaderPage): Observable<ReaderPage> {
         val imageUrl = page.imageUrl ?: return Observable.just(page)
 
-        return Observable.just(page).flatMap {
-            if (!chapterCache.isImageInCache(imageUrl)) {
-                cacheImage(page)
-            } else {
-                Observable.just(page)
+        return Observable.just(page)
+            .flatMap {
+                if (!chapterCache.isImageInCache(imageUrl)) {
+                    cacheImage(page)
+                } else {
+                    Observable.just(page)
+                }
             }
-        }.doOnNext {
-            val readerTheme = preferences.readerTheme().get()
-            if (readerTheme >= 2) {
-                val stream = chapterCache.getImageFile(imageUrl).inputStream()
-                val image = BitmapFactory.decodeStream(stream)
-                page.bg = ImageUtil.autoSetBackground(
-                    image,
-                    readerTheme == 2,
-                    preferences.context
-                )
-                page.bgType = PagerPageHolder.getBGType(readerTheme, preferences.context)
-                stream.close()
+            .doOnNext {
+                val readerTheme = preferences.readerTheme().get()
+                if (readerTheme >= 2) {
+                    val stream = chapterCache.getImageFile(imageUrl).inputStream()
+                    val image = BitmapFactory.decodeStream(stream)
+                    page.bg = ImageUtil.autoSetBackground(
+                        image,
+                        readerTheme == 2,
+                        preferences.context
+                    )
+                    page.bgType = PagerPageHolder.getBGType(readerTheme, preferences.context)
+                    stream.close()
+                }
+                page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
+                page.status = Page.READY
             }
-            page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
-            page.status = Page.READY
-        }.doOnError { page.status = Page.ERROR }.onErrorReturn { page }
+            .doOnError { page.status = Page.ERROR }
+            .onErrorReturn { page }
     }
 
     /**

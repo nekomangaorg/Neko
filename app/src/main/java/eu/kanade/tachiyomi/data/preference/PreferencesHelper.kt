@@ -366,5 +366,5 @@ class PreferencesHelper(val context: Context) {
     fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
-    fun enableDoh() = prefs.getBoolean(Keys.enableDoh, false)
+    fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 }

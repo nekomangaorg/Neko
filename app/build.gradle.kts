@@ -130,9 +130,9 @@ dependencies {
     implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
 
     // Network client
-    implementation("com.squareup.okhttp3:okhttp:${Versions.OKHTTP}")
-    implementation("com.squareup.okhttp3:logging-interceptor:${Versions.OKHTTP}")
-    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${Versions.OKHTTP}")
+    implementation("com.squareup.okhttp3:okhttp:${Versions.okhttp}")
+    implementation("com.squareup.okhttp3:logging-interceptor:${Versions.okhttp}")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:${Versions.okhttp}")
     implementation("com.squareup.okio:okio:2.10.0")
 
     // Chucker
