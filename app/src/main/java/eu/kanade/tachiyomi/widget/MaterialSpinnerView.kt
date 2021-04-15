@@ -56,23 +56,34 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
 
     init {
         addView(binding.root)
-        val a = context.obtainStyledAttributes(attrs, R.styleable.ReaderSpinnerView, 0, 0)
+        val a = context.obtainStyledAttributes(attrs, R.styleable.MaterialSpinnerView, 0, 0)
 
-        val str = a.getString(R.styleable.ReaderSpinnerView_title) ?: ""
+        val str = a.getString(R.styleable.MaterialSpinnerView_title) ?: ""
         title = str
 
-        val entries = (a.getTextArray(R.styleable.ReaderSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
+        val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
         this.entries = entries
 
         binding.detailView.text = entries.firstOrNull().orEmpty()
 
+        if (entries.isNotEmpty()) {
+            popup = makeSettingsPopup()
+            setOnTouchListener(popup?.dragToOpenListener)
+            setOnClickListener {
+                popup?.show()
+            }
+        }
+
+        a.recycle()
+    }
+
+    fun setEntries(entries: List<String>) {
+        this.entries = entries
         popup = makeSettingsPopup()
         setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {
             popup?.show()
         }
-
-        a.recycle()
     }
 
     fun setSelection(selection: Int) {

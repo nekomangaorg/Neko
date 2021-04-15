@@ -289,7 +289,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     private fun showFilters() {
-        val sheet = SourceSearchSheet(activity!!)
+        val sheet = SourceFilterSheet(activity!!)
         sheet.setFilters(presenter.filterItems)
         presenter.filtersChanged = false
         val oldFilters = mutableListOf<Any?>()

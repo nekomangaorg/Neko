@@ -19,7 +19,7 @@
     <attr name="tabBarIconInactive" format="reference|integer"/>
     <attr name="tabHighlightBackground" format="color"/>
 
-    <declare-styleable name="ReaderSpinnerView">
+    <declare-styleable name="MaterialSpinnerView">
         <attr name="title" format="reference|string"/>
         <attr name="android:entries"/>
         <attr name="summary" format="reference|string" />

@@ -9,7 +9,6 @@ import android.widget.CheckBox
 import android.widget.CheckedTextView
 import android.widget.EditText
 import android.widget.RadioButton
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.widget.TintTypedArray
 import androidx.core.view.ViewCompat
@@ -154,8 +153,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     class SpinnerHolder(parent: ViewGroup, listener: OnClickListener? = null) :
         ClickableHolder(parent.inflate(TR.layout.navigation_view_spinner), listener) {
 
-        val text: TextView = itemView.findViewById(TR.id.nav_view_item_text)
-        val spinner: Spinner = itemView.findViewById(TR.id.nav_view_item)
+        val spinnerView: MaterialSpinnerView = itemView.findViewById(TR.id.nav_view_item)
     }
 
     class EditTextHolder(parent: ViewGroup) :
