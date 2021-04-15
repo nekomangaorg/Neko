@@ -13,6 +13,7 @@ import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
+import android.view.Gravity
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -24,11 +25,14 @@ import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
 import androidx.annotation.StringRes
+import androidx.appcompat.view.menu.MenuBuilder
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.forEach
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -51,6 +55,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
@@ -59,6 +64,7 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
+import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -214,6 +220,7 @@ class ReaderActivity :
     enum class BottomButton(val value: String, @StringRes val stringRes: Int) {
         ViewChapters("vc", R.string.view_chapters),
         WebView("wb", R.string.open_in_webview),
+        ReadingMode("rm", R.string.reading_mode),
         CropBordersPaged("cbp", R.string.crop_borders_paged),
         CropBordersWebtoon("cbw", R.string.crop_borders_webtoon),
         PageLayout("pl", R.string.page_layout),
@@ -420,8 +427,9 @@ class ReaderActivity :
         }
     }
 
-    private fun updateBasicShortcuts() {
+    private fun updateBottomShortcuts() {
         with(binding.chaptersSheet) {
+            readingMode.isVisible = presenter?.manga?.isLongStrip() != true && BottomButton.ReadingMode.value in preferences.readerBottomButtons().get()
             doublePage.isVisible = viewer is PagerViewer &&
                 BottomButton.PageLayout.value in preferences.readerBottomButtons().get()
             cropBordersSheetButton.isVisible =
@@ -542,7 +550,7 @@ class ReaderActivity :
     /**
      * Initializes the reader menu. It sets up click listeners and the initial visibility.
      */
-    @SuppressLint("ClickableViewAccessibility")
+    @SuppressLint("ClickableViewAccessibility", "RestrictedApi")
     private fun initializeMenu() {
         // Set binding.toolbar
         setSupportActionBar(binding.toolbar)
@@ -582,6 +590,38 @@ class ReaderActivity :
                         (viewer is PagerViewer)
                     ) preferences.cropBorders() else preferences.cropBordersWebtoon()
                 pref.toggle()
+            }
+            readingMode.setOnClickListener {
+                val popup = PopupMenu(this@ReaderActivity, readingMode, Gravity.END)
+                val enumConstants = ReadingModeType::class.java.enumConstants
+                val array = enumConstants?.map { it.stringRes }.orEmpty().toTypedArray()
+                array.forEachIndexed { index, entry ->
+                    popup.menu.add(0, index, 0, entry)
+                }
+                if (popup.menu is MenuBuilder) {
+                    val m = popup.menu as MenuBuilder
+                    m.setOptionalIconsVisible(true)
+                }
+                val blendedAccent = ColorUtils.blendARGB(
+                    this@ReaderActivity.getResourceColor(android.R.attr.colorAccent),
+                    this@ReaderActivity.getResourceColor(android.R.attr.textColorPrimary),
+                    0.5f
+                )
+                popup.menu.forEach {
+                    it.icon = ContextCompat.getDrawable(this@ReaderActivity, R.drawable.ic_blank_24dp)
+                }
+                popup.menu.getItem(presenter.manga?.viewer ?: 0)?.let { menuItem ->
+                    menuItem.icon =
+                        ContextCompat.getDrawable(this@ReaderActivity, R.drawable.ic_check_24dp)
+                            ?.mutate()?.apply { setTint(blendedAccent) }
+                    menuItem.title =
+                        menuItem.title?.tintText(blendedAccent)
+                }
+                popup.setOnMenuItemClickListener { menuItem ->
+                    presenter.setMangaViewer(menuItem.itemId)
+                    true
+                }
+                popup.show()
             }
         }
 
@@ -870,7 +910,9 @@ class ReaderActivity :
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
         invalidateOptionsMenu()
         updateCropBordersShortcut()
-        updateBasicShortcuts()
+        updateBottomShortcuts()
+        val viewerMode = ReadingModeType.fromPreference(presenter?.manga?.viewer ?: 0)
+        binding.chaptersSheet.readingMode.setImageResource(viewerMode.iconRes)
     }
 
     override fun onPause() {
@@ -1394,7 +1436,7 @@ class ReaderActivity :
 
             preferences.readerBottomButtons().asFlow()
                 .onEach {
-                    updateBasicShortcuts()
+                    updateBottomShortcuts()
                 }
                 .launchIn(scope)
         }
