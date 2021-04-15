@@ -433,15 +433,25 @@ class ReaderActivity :
 
     private fun updateBottomShortcuts() {
         with(binding.chaptersSheet) {
-            readingMode.isVisible = presenter?.manga?.isLongStrip() != true && BottomButton.ReadingMode.value in preferences.readerBottomButtons().get()
+            readingMode.isVisible =
+                presenter?.manga?.isLongStrip() != true &&
+                BottomButton.ReadingMode.value in preferences.readerBottomButtons().get()
             doublePage.isVisible = viewer is PagerViewer &&
                 BottomButton.PageLayout.value in preferences.readerBottomButtons().get()
             cropBordersSheetButton.isVisible =
-                if (viewer is PagerViewer) BottomButton.CropBordersPaged.value in preferences.readerBottomButtons().get()
-                else BottomButton.CropBordersWebtoon.value in preferences.readerBottomButtons().get()
-            webviewButton.isVisible = BottomButton.WebView.value in preferences.readerBottomButtons().get()
-            chaptersButton.isVisible = BottomButton.ViewChapters.value in preferences.readerBottomButtons().get()
-            shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
+                if (viewer is PagerViewer) {
+                    BottomButton.CropBordersPaged.value in preferences.readerBottomButtons().get()
+                } else {
+                    BottomButton.CropBordersWebtoon.value in preferences.readerBottomButtons().get()
+                }
+            webviewButton.isVisible =
+                BottomButton.WebView.value in preferences.readerBottomButtons().get()
+            chaptersButton.isVisible =
+                BottomButton.ViewChapters.value in preferences.readerBottomButtons().get()
+            shiftPageButton.isVisible =
+                ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
+            binding.toolbar.menu.findItem(R.id.action_shift_double_page)?.isVisible =
+                ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !canShowSplitAtBottom()
         }
     }
 
