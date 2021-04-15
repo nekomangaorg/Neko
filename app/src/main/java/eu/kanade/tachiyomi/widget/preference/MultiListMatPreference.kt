@@ -40,7 +40,7 @@ class MultiListMatPreference @JvmOverloads constructor(
 
     override fun onSetInitialValue(defaultValue: Any?) {
         super.onSetInitialValue(defaultValue)
-        defValue = (defaultValue as? Set<*>).orEmpty().mapNotNull { it as? String }.toSet()
+        defValue = (defaultValue as? Collection<*>).orEmpty().mapNotNull { it as? String }.toSet()
     }
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {

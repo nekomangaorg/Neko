@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.lang.addBetaTag
+import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.activityBinding
 import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -76,7 +77,11 @@ class SettingsReaderController : SettingsController() {
                 allSelectionRes = R.string.display_options
                 allIsAlwaysSelected = true
                 showAllLast = true
-                defaultValue = ReaderActivity.BUTTONS_DEFAULTS
+                val defaults = ReaderActivity.BUTTONS_DEFAULTS.toMutableList()
+                if (context.isTablet()) {
+                    defaults.add(ReaderActivity.BottomButton.ShiftDoublePage.value)
+                }
+                defaultValue = defaults
             }
             infoPreference(R.string.certain_buttons_can_be_found)
         }
