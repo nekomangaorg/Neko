@@ -23,7 +23,7 @@ open class ListMatPreference @JvmOverloads constructor(
     var entriesRes: Array<Int>
         get() = emptyArray()
         set(value) { entries = value.map { context.getString(it) } }
-    protected var defValue: String = ""
+    private var defValue: String = ""
     var entries: List<String> = emptyList()
 
     override fun onSetInitialValue(defaultValue: Any?) {

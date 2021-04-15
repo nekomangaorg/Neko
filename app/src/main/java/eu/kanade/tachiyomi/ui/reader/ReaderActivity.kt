@@ -23,6 +23,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
+import androidx.annotation.StringRes
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -194,6 +195,13 @@ class ReaderActivity :
         const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
         const val SHIFTED_CHAP_INDEX = "shiftedChapterIndex"
 
+        val BUTTONS_DEFAULTS = setOf(
+            BottomButton.ViewChapters,
+            BottomButton.WebView,
+            BottomButton.PageLayout,
+            BottomButton.CropBordersWebtoon
+        ).map { it.value }.toSet()
+
         fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
@@ -201,6 +209,15 @@ class ReaderActivity :
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
+    }
+
+    enum class BottomButton(val value: String, @StringRes val stringRes: Int) {
+        ViewChapters("vc", R.string.view_chapters),
+        WebView("wb", R.string.open_in_webview),
+        CropBordersPaged("cbp", R.string.crop_borders_paged),
+        CropBordersWebtoon("cbw", R.string.crop_borders_webtoon),
+        PageLayout("pl", R.string.page_layout),
+        ShiftDoublePage("sdp", R.string.shift_double_pages)
     }
 
     /**
@@ -324,8 +341,8 @@ class ReaderActivity :
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val splitItem = menu?.findItem(R.id.action_shift_double_page)
-        splitItem?.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !isTablet()
-        binding.chaptersSheet.shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && isTablet()
+        splitItem?.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !canShowSplitAtBottom()
+        binding.chaptersSheet.shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
         (viewer as? PagerViewer)?.config?.let { config ->
             val icon = ContextCompat.getDrawable(
                 this,
@@ -342,6 +359,14 @@ class ReaderActivity :
             layerDrawable.findDrawableByLayerId(R.id.layer_one_item).alpha = if (isDoublePage) 255 else 0
         }
         return super.onPrepareOptionsMenu(menu)
+    }
+
+    private fun canShowSplitAtBottom(): Boolean {
+        return if (preferences.readerBottomButtons().isNotSet()) {
+            isTablet()
+        } else {
+            BottomButton.ShiftDoublePage.value in preferences.readerBottomButtons().get()
+        }
     }
 
     fun setBottomNavButtons(pageLayout: Int) {
@@ -392,6 +417,19 @@ class ReaderActivity :
                     if (enabled) R.string.remove_crop
                     else R.string.crop_borders
                 )
+        }
+    }
+
+    private fun updateBasicShortcuts() {
+        with(binding.chaptersSheet) {
+            doublePage.isVisible = viewer is PagerViewer &&
+                BottomButton.PageLayout.value in preferences.readerBottomButtons().get()
+            cropBordersSheetButton.isVisible =
+                if (viewer is PagerViewer) BottomButton.CropBordersPaged.value in preferences.readerBottomButtons().get()
+                else BottomButton.CropBordersWebtoon.value in preferences.readerBottomButtons().get()
+            webviewButton.isVisible = BottomButton.WebView.value in preferences.readerBottomButtons().get()
+            chaptersButton.isVisible = BottomButton.ViewChapters.value in preferences.readerBottomButtons().get()
+            shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
         }
     }
 
@@ -527,19 +565,22 @@ class ReaderActivity :
             }
         }
 
-        binding.chaptersSheet.doublePage.setOnClickListener {
-            if (preferences.pageLayout().get() == PageLayout.AUTOMATIC) {
-                (viewer as? PagerViewer)?.config?.let { config ->
-                    config.doublePages = !config.doublePages
-                    reloadChapters(config.doublePages, true)
+        with(binding.chaptersSheet) {
+            doublePage.setOnClickListener {
+                if (preferences.pageLayout().get() == PageLayout.AUTOMATIC) {
+                    (viewer as? PagerViewer)?.config?.let { config ->
+                        config.doublePages = !config.doublePages
+                        reloadChapters(config.doublePages, true)
+                    }
+                } else {
+                    preferences.pageLayout().set(1 - preferences.pageLayout().get())
                 }
-            } else {
-                preferences.pageLayout().set(1 - preferences.pageLayout().get())
             }
-        }
-        binding.chaptersSheet.cropBordersSheetButton.setOnClickListener {
-            (viewer as? WebtoonViewer)?.let {
-                val pref = if (it.hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon()
+            cropBordersSheetButton.setOnClickListener {
+                val pref =
+                    if ((viewer as? WebtoonViewer)?.hasMargins == true ||
+                        (viewer is PagerViewer)
+                    ) preferences.cropBorders() else preferences.cropBordersWebtoon()
                 pref.toggle()
             }
         }
@@ -793,8 +834,6 @@ class ReaderActivity :
             binding.viewerContainer.removeAllViews()
         }
         viewer = newViewer
-        binding.chaptersSheet.doublePage.isVisible = viewer is PagerViewer
-        binding.chaptersSheet.cropBordersSheetButton.isVisible = viewer !is PagerViewer
         binding.viewerContainer.addView(newViewer.getView())
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -831,6 +870,7 @@ class ReaderActivity :
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
         invalidateOptionsMenu()
         updateCropBordersShortcut()
+        updateBasicShortcuts()
     }
 
     override fun onPause() {
@@ -1349,6 +1389,12 @@ class ReaderActivity :
             preferences.pageLayout().asFlow()
                 .onEach {
                     setBottomNavButtons(it)
+                }
+                .launchIn(scope)
+
+            preferences.readerBottomButtons().asFlow()
+                .onEach {
+                    updateBasicShortcuts()
                 }
                 .launchIn(scope)
         }

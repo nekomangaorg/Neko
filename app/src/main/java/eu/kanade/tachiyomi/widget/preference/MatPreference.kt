@@ -50,6 +50,7 @@ open class MatPreference @JvmOverloads constructor(
             summaryProvider = customSummaryProvider
             return
         } else {
+            customSummaryProvider = null
             summaryProvider = null
         }
         super.setSummary(summaryResId)
@@ -60,6 +61,7 @@ open class MatPreference @JvmOverloads constructor(
             summaryProvider = customSummaryProvider
             return
         } else {
+            customSummaryProvider = null
             summaryProvider = null
         }
         super.setSummary(summary)

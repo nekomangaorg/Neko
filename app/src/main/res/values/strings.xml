@@ -166,6 +166,7 @@
     <string name="hide_hopper_on_scroll">Hide category hopper on scroll</string>
     <string name="more_library_settings">More library settings</string>
     <string name="shift_one_page_over">Shift one page over</string>
+    <string name="shift_double_pages">Shift double pages</string>
 
     <!-- Library update service notifications -->
     <string name="new_chapters_found">New chapters found</string>
@@ -198,6 +199,8 @@
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
     <string name="show_notification_error">Show a notification for errors</string>
+    <string name="display_buttons_bottom_reader">Buttons at bottom of reader</string>
+    <string name="certain_buttons_can_be_found">Certain buttons can be found in other places if disabled here</string>
 
     <!-- Recents -->
     <string name="recents">Recents</string>
@@ -332,6 +335,8 @@
         performance</string>
     <string name="invert_double_pages">Invert double pages</string>
     <string name="crop_borders">Crop borders</string>
+    <string name="crop_borders_paged">Crop borders (Paged)</string>
+    <string name="crop_borders_webtoon">Crop borders (Webtoon)</string>
     <string name="remove_crop">Remove crop</string>
     <string name="use_custom_brightness">Use custom brightness</string>
     <string name="use_custom_color_filter">Use custom color filter</string>

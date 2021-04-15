@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.lang.addBetaTag
@@ -66,6 +67,18 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = 6
                 summaryRes = R.string.amount_of_pages_to_preload
             }
+            multiSelectListPreferenceMat(activity) {
+                key = Keys.readerBottomButtons
+                titleRes = R.string.display_buttons_bottom_reader
+                val enumConstants = ReaderActivity.BottomButton::class.java.enumConstants
+                entriesRes = enumConstants?.map { it.stringRes }.orEmpty().toTypedArray()
+                entryValues = enumConstants?.map { it.value }.orEmpty()
+                allSelectionRes = R.string.display_options
+                allIsAlwaysSelected = true
+                showAllLast = true
+                defaultValue = ReaderActivity.BUTTONS_DEFAULTS
+            }
+            infoPreference(R.string.certain_buttons_can_be_found)
         }
 
         preferenceCategory {

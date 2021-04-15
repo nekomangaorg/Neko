@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
@@ -134,16 +133,6 @@ class SettingsLibraryController : SettingsController() {
                 entries = dbCategories.map { it.name }
                 entryValues = dbCategories.map { it.id.toString() }
                 allSelectionRes = R.string.all
-
-                preferences.libraryUpdateCategories().asImmediateFlow { list ->
-                    val selectedCategories =
-                        list.mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
-                            .sortedBy { it.order }
-
-                    summary =
-                        if (selectedCategories.isEmpty()) context.getString(R.string.all)
-                        else selectedCategories.joinToString { it.name }
-                }
             }
             intListPreference(activity) {
                 key = Keys.updateOnRefresh
