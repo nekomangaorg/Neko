@@ -406,6 +406,7 @@
     <string name="page_layout">Page layout</string>
     <string name="automatic_can_still_switch">While using automatic page layout, you can still switch between layouts while reading without overriding this setting</string>
     <string name="automatic_orientation">Automatic (based on orientation)</string>
+    <string name="webtoon_cannot_change">Cannot change reading mode from webtoon. Edit the series type first to change.</string>
     <plurals name="pages_plural">
         <item quantity="one">%1$d page</item>
         <item quantity="other">%1$d pages</item>

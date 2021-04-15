@@ -9,6 +9,7 @@ import android.view.LayoutInflater
 import android.view.MenuItem
 import android.widget.FrameLayout
 import androidx.annotation.ArrayRes
+import androidx.annotation.StringRes
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.MaterialSpinnerViewBinding
 import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
 
 class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
@@ -84,6 +86,17 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
             it.title = it.title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
         }
         binding.detailView.text = entries.getOrNull(selection).orEmpty()
+    }
+
+    fun setDisabledState(@StringRes messageRes: Int = 0) {
+        alpha = 0.5f
+        popup = null
+        setOnTouchListener(null)
+        setOnClickListener {
+            if (messageRes != 0) {
+                context.toast(messageRes)
+            }
+        }
     }
 
     fun bindToPreference(pref: Preference<Int>, offset: Int = 0, block: ((Int) -> Unit)? = null) {

@@ -60,6 +60,7 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
         generalView.activity = readerActivity
         pagedView.activity = readerActivity
         filterView.activity = readerActivity
+        generalView.checkIfShouldDisableReadingMode()
         filterView.window = window
         generalView.sheet = this
 
