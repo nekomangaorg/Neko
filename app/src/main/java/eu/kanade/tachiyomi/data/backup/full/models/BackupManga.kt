@@ -70,13 +70,13 @@ data class BackupManga(
         }
     }
 
-    fun getCustomMangaInfo(manga: Manga): CustomMangaManager.MangaJson? {
+    fun getCustomMangaInfo(): CustomMangaManager.MangaJson? {
         if (customTitle != null ||
             customArtist != null ||
             customAuthor != null ||
             customDescription != null ||
             customGenre != null ||
-            manga.status != customStatus
+            customStatus != 0
         ) {
             return CustomMangaManager.MangaJson(
                 id = 0L,
@@ -85,7 +85,7 @@ data class BackupManga(
                 artist = customArtist,
                 description = customDescription,
                 genre = customGenre?.toTypedArray(),
-                status = if (manga.status != customStatus) customStatus else null
+                status = customStatus.takeUnless { it == 0 }
             )
         }
         return null
