@@ -189,6 +189,8 @@ class ReaderActivity :
     var indexPageToShift: Int? = null
     var indexChapterToShift: Long? = null
 
+    var lastCropRes = 0
+
     companion object {
         @Suppress("unused")
         const val LEFT_TO_RIGHT = 1
@@ -410,15 +412,17 @@ class ReaderActivity :
         }
 
         with(binding.chaptersSheet.cropBordersSheetButton) {
-            setImageResource(
-                if (enabled) {
-                    R.drawable.free_to_crop
-                } else {
-                    R.drawable.crop_to_free
-                }
-            )
-            val animDrawable = drawable as AnimatedVectorDrawable
-            animDrawable.start()
+            val drawableRes = if (enabled) {
+                R.drawable.free_to_crop
+            } else {
+                R.drawable.crop_to_free
+            }
+            if (lastCropRes != drawableRes) {
+                setImageResource(drawableRes)
+                val animDrawable = drawable as AnimatedVectorDrawable
+                animDrawable.start()
+                lastCropRes = drawableRes
+            }
             compatToolTipText =
                 getString(
                     if (enabled) R.string.remove_crop
