@@ -21,13 +21,31 @@
         android:paddingTop="0dp"
         android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area">
 
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:textSize="15sp"
+            android:layout_width="match_parent"
+            android:textColor="?colorAccent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/series" />
+
         <eu.kanade.tachiyomi.widget.MaterialSpinnerView
             android:id="@+id/viewer_series"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
-            app:title="@string/viewer_for_this_series"
+            app:title="@string/reading_mode"
             android:entries="@array/viewers_selector" />
+
+        <com.google.android.material.textview.MaterialTextView
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:textSize="15sp"
+            android:layout_width="match_parent"
+            android:textColor="?colorAccent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:text="@string/general" />
 
         <eu.kanade.tachiyomi.widget.MaterialSpinnerView
             android:id="@+id/rotation_mode"

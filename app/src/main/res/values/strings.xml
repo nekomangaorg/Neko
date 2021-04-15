@@ -128,6 +128,7 @@
 
     <string name="read_progress">Read progress</string>
     <string name="series_type">Series type</string>
+    <string name="series">Series</string>
     <string name="group_library_by">Group library by…</string>
     <string name="tracking_status">Tracking status</string>
     <string name="ungrouped">Ungrouped</string>
@@ -290,7 +291,7 @@
     <string name="next_chapter_not_found">Next chapter not found</string>
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
-    <string name="viewer_for_this_series">Viewer for this series</string>
+    <string name="reading_mode">Reading mode</string>
     <string name="finished_chapter">Finished:</string>
     <string name="current_chapter">Current:</string>
     <string name="next_title">Next:</string>
