@@ -292,6 +292,7 @@
     <string name="decode_image_error">The image could not be decoded</string>
     <string name="use_image_as_cover">Use this image as cover art?</string>
     <string name="reading_mode">Reading mode</string>
+    <string name="changing_will_reset_reading_mode">Changing this will reset the reading mode for this series</string>
     <string name="finished_chapter">Finished:</string>
     <string name="current_chapter">Current:</string>
     <string name="next_title">Next:</string>
