@@ -13,6 +13,7 @@ import androidx.annotation.StringRes
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.forEach
 import androidx.core.view.get
 import com.tfcporciuncula.flow.Preference
@@ -39,6 +40,12 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         set(value) {
             binding.titleView.text = value
         }
+
+    val blendedAccent = ColorUtils.blendARGB(
+        context.getResourceColor(android.R.attr.colorAccent),
+        context.getResourceColor(android.R.attr.textColorPrimary),
+        0.5f
+    )
 
     var onItemSelectedListener: ((Int) -> Unit)? = null
         set(value) {
@@ -94,7 +101,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         selectedPosition = selection
         popup?.menu?.get(selectedPosition)?.let {
             it.icon = tintedCheck()
-            it.title = it.title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
+            it.title = it.title?.tintText(blendedAccent)
         }
         binding.detailView.text = entries.getOrNull(selection).orEmpty()
     }
@@ -220,7 +227,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         popup.menu.getItem(selectedPosition)?.let { menuItem ->
             menuItem.icon = tintedCheck()
             menuItem.title =
-                menuItem.title?.tintText(context.getResourceColor(android.R.attr.colorAccent))
+                menuItem.title?.tintText(blendedAccent)
         }
         this.popup = popup
         return popup
@@ -228,7 +235,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
 
     private fun tintedCheck(): Drawable? {
         return ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)?.mutate()?.apply {
-            setTint(context.getResourceColor(android.R.attr.colorAccent))
+            setTint(blendedAccent)
         }
     }
 }
