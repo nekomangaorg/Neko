@@ -2,14 +2,13 @@ package eu.kanade.tachiyomi.network
 
 import android.content.Context
 import com.chuckerteam.chucker.api.ChuckerInterceptor
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import okhttp3.Cache
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
-import okhttp3.dnsoverhttps.DnsOverHttps
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.net.InetAddress
+import java.util.concurrent.TimeUnit
 
 class NetworkHelper(context: Context) {
 
@@ -25,32 +24,24 @@ class NetworkHelper(context: Context) {
         OkHttpClient.Builder()
             .cookieJar(cookieManager)
             .cache(Cache(cacheDir, cacheSize))
-            .addInterceptor(ChuckerInterceptor(context))
+            .connectTimeout(30, TimeUnit.SECONDS)
+            .readTimeout(30, TimeUnit.SECONDS)
+            .addInterceptor(UserAgentInterceptor())
             .apply {
-                if (preferences.enableDoh()) {
-                    dns(
-                        DnsOverHttps.Builder().client(build())
-                            .url("https://cloudflare-dns.com/dns-query".toHttpUrl())
-                            .bootstrapDnsHosts(
-                                listOf(
-                                    InetAddress.getByName("162.159.36.1"),
-                                    InetAddress.getByName("162.159.46.1"),
-                                    InetAddress.getByName("1.1.1.1"),
-                                    InetAddress.getByName("1.0.0.1"),
-                                    InetAddress.getByName("162.159.132.53"),
-                                    InetAddress.getByName("2606:4700:4700::1111"),
-                                    InetAddress.getByName("2606:4700:4700::1001"),
-                                    InetAddress.getByName("2606:4700:4700::0064"),
-                                    InetAddress.getByName("2606:4700:4700::6400")
-                                )
-                            ).build()
-                    )
+                if (BuildConfig.DEBUG) {
+                    addInterceptor(ChuckerInterceptor(context))
+                }
+
+                when (preferences.dohProvider()) {
+                    PREF_DOH_CLOUDFLARE -> dohCloudflare()
+                    PREF_DOH_GOOGLE -> dohGoogle()
                 }
             }.build()
     }
 
-    val cloudflareClient = client.newBuilder()
-        .addInterceptor(UserAgentInterceptor())
-        .addInterceptor(CloudflareInterceptor(context))
-        .build()
+    val cloudflareClient by lazy {
+        client.newBuilder()
+            .addInterceptor(CloudflareInterceptor(context))
+            .build()
+    }
 }
