@@ -171,7 +171,7 @@ class MangaHeaderHolder(
         }
         binding.mangaSummaryLabel.text = itemView.context.getString(
             R.string.about_this_,
-            manga.mangaType(itemView.context)
+            manga.seriesType(itemView.context)
         )
         with(binding.favoriteButton) {
             icon = ContextCompat.getDrawable(

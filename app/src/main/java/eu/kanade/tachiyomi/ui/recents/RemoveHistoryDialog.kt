@@ -40,7 +40,7 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
         ).checkBoxPrompt(
             text = activity.getString(
                 R.string.reset_all_chapters_for_this_,
-                manga!!.mangaType(activity)
+                manga!!.seriesType(activity)
             )
         ) {}.negativeButton(android.R.string.cancel).positiveButton(R.string.reset) {
             onPositive(it.isCheckPromptChecked())

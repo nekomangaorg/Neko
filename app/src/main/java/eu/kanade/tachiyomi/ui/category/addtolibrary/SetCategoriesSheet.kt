@@ -68,7 +68,7 @@ class SetCategoriesSheet(
                 R.string.move_x_to
             },
             if (listManga.size == 1) {
-                listManga.first().mangaType(context)
+                listManga.first().seriesType(context)
             } else {
                 context.getString(R.string.selection).lowercase(Locale.ROOT)
             }

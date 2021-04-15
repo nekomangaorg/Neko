@@ -280,9 +280,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
             val libraryManga = db.getLibraryMangas().executeAsBlocking()
             val types = mutableListOf<Int>()
-            if (libraryManga.any { it.mangaType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
-            if (libraryManga.any { it.mangaType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
-            if (libraryManga.any { it.mangaType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
+            if (libraryManga.any { it.seriesType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
+            if (libraryManga.any { it.seriesType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
+            if (libraryManga.any { it.seriesType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
             if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_tag_group) as FilterTagGroup

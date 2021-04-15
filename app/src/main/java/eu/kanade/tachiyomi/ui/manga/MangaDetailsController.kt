@@ -742,7 +742,7 @@ class MangaDetailsController :
             manga?.source != LocalSource.ID && presenter.manga.favorite
         menu.findItem(R.id.action_migrate).title = view?.context?.getString(
             R.string.migrate_,
-            presenter.manga.mangaType(view!!.context)
+            presenter.manga.seriesType(view!!.context)
         )
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
@@ -980,7 +980,7 @@ class MangaDetailsController :
         presenter.downloadChapters(chapters)
         val text = view.context.getString(
             R.string.add_x_to_library,
-            presenter.manga.mangaType
+            presenter.manga.seriesType
             (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
