@@ -63,6 +63,7 @@ import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
@@ -653,6 +654,8 @@ class ReaderActivity :
         setMenuVisibility(menuVisible)
         binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = !menuVisible
         if (!menuVisible) binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
+        binding.chaptersSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
+        val peek = 50.dpToPx
         binding.readerLayout.doOnApplyWindowInsets { v, insets, _ ->
             sheetManageNavColor = when {
                 insets.isBottomTappable() -> {
@@ -685,11 +688,8 @@ class ReaderActivity :
                 leftMargin = 12.dpToPx + insets.systemWindowInsetLeft
                 rightMargin = 12.dpToPx + insets.systemWindowInsetRight
             }
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
-                val peek = 50.dpToPx
-                binding.chaptersSheet.root.sheetBehavior?.peekHeight =
-                    peek + insets.systemWindowInsetBottom
-            }
+            binding.chaptersSheet.root.sheetBehavior?.peekHeight =
+                peek + insets.getBottomGestureInsets()
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             binding.viewerContainer.requestLayout()
         }
