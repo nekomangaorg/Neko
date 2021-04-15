@@ -560,7 +560,10 @@ class ReaderPresenter(
         val default = preferences.defaultViewer()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
-        if (manga.viewer == -1 || (readerType == ReaderActivity.WEBTOON && readerType != manga.viewer)) {
+        if (manga.viewer == -1 ||
+            // Force webtoon mode
+            (manga.isLongStrip() && readerType != manga.viewer)
+        ) {
             val cantSwitchToLTR =
                 (readerType == ReaderActivity.LEFT_TO_RIGHT && default != ReaderActivity.RIGHT_TO_LEFT)
             manga.viewer = if (cantSwitchToLTR) 0 else readerType

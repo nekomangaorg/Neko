@@ -86,6 +86,11 @@ interface Manga : SManga {
             isComicSource(sourceName)
         ) {
             TYPE_COMIC
+        } else if (sourceName.contains("webtoon", true) &&
+            currentTags.none { tag -> isManhuaTag(tag) } &&
+            currentTags.none { tag -> isManhwaTag(tag) }
+        ) {
+            TYPE_WEBTOON
         } else if (currentTags.any { tag -> isManhuaTag(tag) } || sourceName.contains("manhua", true)
         ) {
             TYPE_MANHUA
@@ -107,7 +112,7 @@ interface Manga : SManga {
         val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
         return if (currentTags?.any
             { tag ->
-                tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
+                isManhwaTag(tag) || tag.contains("webtoon")
             } == true || isWebtoonSource(sourceName)
         ) {
             ReaderActivity.WEBTOON
@@ -130,6 +135,13 @@ interface Manga : SManga {
         return tag in listOf("manhua", "маньхуа", "cn", "hk", "zh-Hans", "zh-Hant") || tag.startsWith("chinese")
     }
 
+    fun isLongStrip(): Boolean {
+        val currentTags =
+            genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+        val sourceName by lazy { Injekt.get<SourceManager>().getOrStub(source).name }
+        return currentTags.any { it == "long strip" } || sourceName.contains("webtoon", true)
+    }
+
     fun isManhwaTag(tag: String): Boolean {
         return tag in listOf("long strip", "manhwa", "манхва", "kr") || tag.startsWith("korean")
     }
@@ -140,7 +152,7 @@ interface Manga : SManga {
 
     fun isWebtoonSource(sourceName: String): Boolean {
         return sourceName.contains("webtoon", true) ||
-            sourceName.contains("manwha", true) ||
+            sourceName.contains("manhwa", true) ||
             sourceName.contains("toonily", true)
     }
 

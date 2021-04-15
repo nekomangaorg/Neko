@@ -781,7 +781,7 @@ class ReaderActivity :
                 ),
                 4000
             ) {
-                if (mangaViewer != WEBTOON) setAction(R.string.use_default) {
+                if (presenter.manga?.isLongStrip() != true) setAction(R.string.use_default) {
                     presenter.setMangaViewer(0)
                 }
             }
