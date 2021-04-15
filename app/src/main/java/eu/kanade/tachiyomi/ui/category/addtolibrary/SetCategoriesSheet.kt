@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Date

@@ -66,38 +66,44 @@ interface Manga : SManga {
     }
 
     fun getGenres(): List<String>? {
-        return genre?.split(", ")?.map { it.trim() }
+        return genre?.split(",")
+            ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
     }
 
     fun getOriginalGenres(): List<String>? {
-        return (originalGenre ?: genre)?.split(", ")?.map { it.trim() }
+        return (originalGenre ?: genre)?.split(",")
+            ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
     }
 
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */
-    fun seriesType(): Int {
+    fun seriesType(useOriginalTags: Boolean = false, customTags: String? = null): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
-        val currentTags =
-            genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+        val tags = customTags ?: if (useOriginalTags) originalGenre else genre
+        val currentTags = tags?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
         return if (currentTags.any { tag -> isMangaTag(tag) }) {
             TYPE_MANGA
         } else if (currentTags.any { tag -> isComicTag(tag) } ||
             isComicSource(sourceName)
         ) {
             TYPE_COMIC
-        } else if (sourceName.contains("webtoon", true) &&
-            currentTags.none { tag -> isManhuaTag(tag) } &&
-            currentTags.none { tag -> isManhwaTag(tag) }
+        } else if (currentTags.any { tag -> isWebtoonTag(tag) } ||
+            (
+                sourceName.contains("webtoon", true) &&
+                    currentTags.none { tag -> isManhuaTag(tag) } &&
+                    currentTags.none { tag -> isManhwaTag(tag) }
+                )
         ) {
             TYPE_WEBTOON
-        } else if (currentTags.any { tag -> isManhuaTag(tag) } || sourceName.contains("manhua", true)
+        } else if (currentTags.any { tag -> isManhuaTag(tag) } || sourceName.contains(
+                "manhua",
+                true
+            )
         ) {
             TYPE_MANHUA
         } else if (currentTags.any { tag -> isManhwaTag(tag) } || isWebtoonSource(sourceName)) {
             TYPE_MANHWA
-        } else if (currentTags.any { tag -> tag.startsWith("webtoon") }) {
-            TYPE_WEBTOON
         } else {
             TYPE_MANGA
         }
@@ -109,22 +115,35 @@ interface Manga : SManga {
      */
     fun defaultReaderType(): Int {
         val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
-        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
-        return if (currentTags?.any
+        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
+        return if (currentTags.any
             { tag ->
                 isManhwaTag(tag) || tag.contains("webtoon")
-            } == true || isWebtoonSource(sourceName)
+            } || (
+                isWebtoonSource(sourceName) &&
+                    currentTags.none { tag -> isManhuaTag(tag) } &&
+                    currentTags.none { tag -> isComicTag(tag) }
+                )
         ) {
             ReaderActivity.WEBTOON
-        } else if (currentTags?.any
+        } else if (currentTags.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
-            } == true || (isComicSource(sourceName) && !sourceName.contains("tapas", true)) ||
-            sourceName.contains("manhua", true)
+            } || (
+                isComicSource(sourceName) && !sourceName.contains("tapas", true) &&
+                    currentTags.none { tag -> isMangaTag(tag) }
+                ) ||
+            (sourceName.contains("manhua", true) && currentTags.none { tag -> isMangaTag(tag) })
         ) {
             ReaderActivity.LEFT_TO_RIGHT
         } else 0
+    }
+
+    fun isSeriesTag(tag: String): Boolean {
+        val tagLower = tag.toLowerCase(Locale.ROOT)
+        return isMangaTag(tagLower) || isManhuaTag(tagLower) ||
+            isManhwaTag(tagLower) || isComicTag(tagLower) || isWebtoonTag(tagLower)
     }
 
     fun isMangaTag(tag: String): Boolean {
@@ -148,6 +167,10 @@ interface Manga : SManga {
 
     fun isComicTag(tag: String): Boolean {
         return tag in listOf("comic", "комикс", "en", "gb") || tag.startsWith("english")
+    }
+
+    fun isWebtoonTag(tag: String): Boolean {
+        return tag.startsWith("webtoon")
     }
 
     fun isWebtoonSource(sourceName: String): Boolean {

@@ -630,6 +630,7 @@ class MangaDetailsPresenter(
         description: String?,
         tags: Array<String>?,
         status: Int?,
+        seriesType: Int?,
         resetCover: Boolean = false
     ) {
         if (manga.source == LocalSource.ID) {
@@ -639,14 +640,24 @@ class MangaDetailsPresenter(
             manga.description = description?.trimOrNull()
             val tagsString = tags?.joinToString(", ") { it.capitalize() }
             manga.genre = if (tags.isNullOrEmpty()) null else tagsString?.trim()
+            if (seriesType != null) {
+                manga.genre = setSeriesType(seriesType, manga.genre).joinToString(", ") { it.capitalize() }
+                manga.viewer = -1
+                db.updateMangaViewer(manga).executeAsBlocking()
+            }
             manga.status = status ?: SManga.UNKNOWN
             LocalSource(downloadManager.context).updateMangaInfo(manga)
             db.updateMangaInfo(manga).executeAsBlocking()
         } else {
-            val genre = if (!tags.isNullOrEmpty() && tags.joinToString(", ") != manga.genre) {
+            var genre = if (!tags.isNullOrEmpty() && tags.joinToString(", ") != manga.genre) {
                 tags.map { it.capitalize() }.toTypedArray()
             } else {
                 null
+            }
+            if (seriesType != null) {
+                genre = setSeriesType(seriesType, genre?.joinToString(", "))
+                manga.viewer = -1
+                db.updateMangaViewer(manga).executeAsBlocking()
             }
             val manga = CustomMangaManager.MangaJson(
                 manga.id!!,
@@ -666,6 +677,19 @@ class MangaDetailsPresenter(
             controller.setPaletteColor()
         }
         controller.updateHeader()
+    }
+
+    private fun setSeriesType(seriesType: Int, genres: String? = null): Array<String> {
+        val tags = (genres ?: manga.genre)?.split(",")?.map { it.trim() }?.toMutableList() ?: mutableListOf()
+        tags.removeAll { manga.isSeriesTag(it) }
+        when (seriesType) {
+            Manga.TYPE_MANGA -> tags.add("Manga")
+            Manga.TYPE_MANHUA -> tags.add("Manhua")
+            Manga.TYPE_MANHWA -> tags.add("Manhwa")
+            Manga.TYPE_COMIC -> tags.add("Comic")
+            Manga.TYPE_WEBTOON -> tags.add("Webtoon")
+        }
+        return tags.toTypedArray()
     }
 
     fun editCoverWithStream(uri: Uri): Boolean {

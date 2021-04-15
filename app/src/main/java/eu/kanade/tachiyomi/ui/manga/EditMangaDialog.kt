@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
+import androidx.core.view.isVisible
 import coil.api.loadAny
 import coil.request.Parameters
 import com.afollestad.materialdialogs.MaterialDialog
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.view.visibleIf
+import me.gujun.android.taggroup.TagGroup
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -92,7 +94,11 @@ class EditMangaDialog : DialogController {
             if (manga.description != manga.originalDescription) {
                 binding.mangaDescription.append(manga.description ?: "")
             }
-            binding.mangaGenresTags.setTags(manga.genre?.split(", ") ?: emptyList())
+            binding.mangaGenresTags.setTags(
+                manga.genre?.split(",")
+                    ?.map { it.trim() }
+                    ?.filter { it.isNotBlank() } ?: emptyList()
+            )
 
             binding.title.hint = "${resources?.getString(R.string.title)}: ${manga.originalTitle}"
             if (manga.originalAuthor != null) {
@@ -109,7 +115,24 @@ class EditMangaDialog : DialogController {
                     )?.chop(20)}"
             }
         }
+        binding.mangaGenresTags.setOnTagChangeListener(object : TagGroup.OnTagChangeListener {
+            override fun onAppend(tagGroup: TagGroup?, tag: String?): Boolean {
+                val tags: List<String> = tagGroup?.tags.orEmpty().toList() + (tag ?: "")
+                binding.seriesType.setSelection(manga.seriesType(customTags = tags.joinToString(", ")) - 1)
+                return true
+            }
+
+            override fun onDelete(tagGroup: TagGroup?, tag: String?) {
+                val tags: List<String> = tagGroup?.tags.orEmpty().toList() - (tag ?: "")
+                binding.seriesType.setSelection(manga.seriesType(customTags = tags.joinToString(", ")) - 1)
+            }
+        })
         binding.mangaStatus.setSelection(manga.status.coerceIn(SManga.UNKNOWN, SManga.LICENSED))
+        val oldType = manga.seriesType()
+        binding.seriesType.setSelection(oldType - 1)
+        binding.seriesType.onItemSelectedListener = {
+            binding.resetsReadingMode.isVisible = it + 1 != oldType
+        }
         binding.mangaGenresTags.clearFocus()
         binding.coverLayout.setOnClickListener {
             infoController.changeCover()
@@ -138,7 +161,11 @@ class EditMangaDialog : DialogController {
         if (manga.genre.isNullOrBlank() || manga.source == LocalSource.ID) binding.mangaGenresTags.setTags(
             emptyList()
         )
-        else binding.mangaGenresTags.setTags(manga.originalGenre?.split(", "))
+        else {
+            binding.mangaGenresTags.setTags(manga.originalGenre?.split(", "))
+            binding.seriesType.setSelection(manga.seriesType(true) - 1)
+            binding.resetsReadingMode.isVisible = false
+        }
     }
 
     fun updateCover(uri: Uri) {
@@ -156,6 +183,7 @@ class EditMangaDialog : DialogController {
             binding.mangaDescription.text.toString(),
             binding.mangaGenresTags.tags,
             binding.mangaStatus.selectedPosition,
+            if (binding.resetsReadingMode.isVisible) binding.seriesType.selectedPosition + 1 else null,
             willResetCover
         )
     }
