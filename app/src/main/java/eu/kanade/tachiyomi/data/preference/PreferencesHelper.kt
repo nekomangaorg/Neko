@@ -342,6 +342,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterOrder() = flowPrefs.getString("filter_order", "rudcmt")
 
+    fun hopperLongPressAction() = flowPrefs.getInt(Keys.hopperLongPress, 0)
+
     fun hideHopper() = flowPrefs.getBoolean("hide_hopper", false)
 
     fun autohideHopper() = flowPrefs.getBoolean(Keys.autoHideHopper, true)

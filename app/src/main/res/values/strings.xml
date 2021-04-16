@@ -120,6 +120,8 @@
     <string name="no_matches_for_filters">No matches found for your current filters</string>
     <string name="show_all_categories">Show all categories</string>
     <string name="always_show_current_category">Always show current category</string>
+    <string name="category_hopper_long_press">Category hopper long-press action</string>
+    <string name="expand_collapse_all_categories">Expand/collapse all categories</string>
     <string name="expand_all_categories">Expand all categories</string>
     <string name="collapse_all_categories">Collapse all categories</string>
     <string name="reorder_filters">Reorder filters</string>
@@ -163,7 +165,6 @@
     <string name="tap_library_to_show_filters">Tap the Library icon to show filters</string>
     <string name="display_as">Display as</string>
     <string name="hide_category_hopper">Hide category hopper</string>
-    <string name="hide_hopper_on_scroll">Hide category hopper on scroll</string>
     <string name="more_library_settings">More library settings</string>
     <string name="shift_one_page_over">Shift one page over</string>
     <string name="shift_double_pages">Shift double pages</string>

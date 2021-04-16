@@ -140,6 +140,8 @@ object PreferenceKeys {
 
     const val autoHideHopper = "autohide_hopper"
 
+    const val hopperLongPress = "hopper_long_press"
+
     const val onlySearchPinned = "only_search_pinned"
 
     const val downloadNew = "download_new"

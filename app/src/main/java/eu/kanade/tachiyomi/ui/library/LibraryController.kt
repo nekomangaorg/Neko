@@ -99,6 +99,10 @@ import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -143,6 +147,8 @@ class LibraryController(
 
     var singleCategory: Boolean = false
         private set
+
+    val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     /**
      * Library search query.
@@ -376,6 +382,35 @@ class LibraryController(
         filterTooltip?.show()
     }
 
+    private fun showGroupOptions() {
+        val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
+        if (presenter.isLoggedIntoTracking) {
+            groupItems.add(BY_TRACK_STATUS)
+        }
+        if (presenter.allCategories.size > 1) {
+            groupItems.add(UNGROUPED)
+        }
+        val items = groupItems.map { id ->
+            MaterialMenuSheet.MenuSheetItem(
+                id,
+                LibraryGroup.groupTypeDrawableRes(id),
+                LibraryGroup.groupTypeStringRes(id, presenter.allCategories.size > 1)
+            )
+        }
+        MaterialMenuSheet(
+            activity!!,
+            items,
+            activity!!.getString(R.string.group_library_by),
+            presenter.groupType
+        ) { _, item ->
+            preferences.groupLibraryBy().set(item)
+            presenter.groupType = item
+            shouldScrollToTop = true
+            presenter.getLibrary()
+            true
+        }.show()
+    }
+
     private fun showDisplayOptions() {
         if (displaySheet == null) {
             displaySheet = TabbedLibraryDisplaySheet(this)
@@ -523,34 +558,7 @@ class LibraryController(
                 FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> showFilterTip()
                 FilterBottomSheet.ACTION_DISPLAY -> showDisplayOptions()
                 FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL -> presenter.toggleAllCategoryVisibility()
-                FilterBottomSheet.ACTION_GROUP_BY -> {
-                    val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
-                    if (presenter.isLoggedIntoTracking) {
-                        groupItems.add(BY_TRACK_STATUS)
-                    }
-                    if (presenter.allCategories.size > 1) {
-                        groupItems.add(UNGROUPED)
-                    }
-                    val items = groupItems.map { id ->
-                        MaterialMenuSheet.MenuSheetItem(
-                            id,
-                            LibraryGroup.groupTypeDrawableRes(id),
-                            LibraryGroup.groupTypeStringRes(id, presenter.allCategories.size > 1)
-                        )
-                    }
-                    MaterialMenuSheet(
-                        activity!!,
-                        items,
-                        activity!!.getString(R.string.group_library_by),
-                        presenter.groupType
-                    ) { _, item ->
-                        preferences.groupLibraryBy().set(item)
-                        presenter.groupType = item
-                        shouldScrollToTop = true
-                        presenter.getLibrary()
-                        true
-                    }.show()
-                }
+                FilterBottomSheet.ACTION_GROUP_BY -> showGroupOptions()
             }
         }
     }
@@ -589,7 +597,15 @@ class LibraryController(
         }
 
         binding.roundedCategoryHopper.categoryButton.setOnLongClickListener {
-            activityBinding?.toolbar?.menu?.performIdentifierAction(R.id.action_search, 0)
+            when (preferences.hopperLongPressAction().get()) {
+                3 -> showGroupOptions()
+                2 -> showDisplayOptions()
+                1 -> presenter.toggleAllCategoryVisibility()
+                else -> activityBinding?.toolbar?.menu?.performIdentifierAction(
+                    R.id.action_search,
+                    0
+                )
+            }
             true
         }
 
@@ -823,6 +839,7 @@ class LibraryController(
 
     override fun onDestroy() {
         if (::presenter.isInitialized) presenter.onDestroy()
+        scope.cancel()
         super.onDestroy()
     }
 
@@ -873,12 +890,14 @@ class LibraryController(
 
         binding.categoryHopperFrame.visibleIf(!singleCategory && !preferences.hideHopper().get())
         binding.filterBottomSheet.filterBottomSheet.updateButtons(
-            showExpand = !singleCategory && presenter.showAllCategories,
             groupType = presenter.groupType
         )
         adapter.isLongPressDragEnabled = canDrag()
         binding.categoryRecycler.setCategories(presenter.categories)
-        binding.filterBottomSheet.filterBottomSheet.setExpandText(preferences.collapsedCategories().getOrDefault().isNotEmpty())
+        displaySheet?.setExpandText(
+            showExpanded = !singleCategory && presenter.showAllCategories,
+            allExpanded = preferences.collapsedCategories().getOrDefault().isNotEmpty()
+        )
         if (shouldScrollToTop) {
             binding.libraryGridRecycler.recycler.scrollToPosition(0)
             shouldScrollToTop = false

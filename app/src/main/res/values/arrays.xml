@@ -17,6 +17,19 @@
         <item>@string/smart_by_theme</item>
     </string-array>
 
+    <string-array name="hopper_long_press">
+        <item>@string/search</item>
+        <item>@string/expand_collapse_all_categories</item>
+        <item>@string/display_options</item>
+        <item>@string/group_library_by</item>
+    </string-array>
+
+    <string-array name="hide_hopper">
+        <item>@string/never</item>
+        <item>@string/hides_on_scroll</item>
+        <item>@string/always</item>
+    </string-array>
+
     <string-array name="image_scale_type">
         <item>@string/fit_screen</item>
         <item>@string/stretch</item>

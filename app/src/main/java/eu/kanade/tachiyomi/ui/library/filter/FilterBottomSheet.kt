@@ -6,12 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -25,17 +20,17 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -132,34 +127,12 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
 
-        post {
-            if (binding.secondLayout.width + binding.firstLayout.width + 20.dpToPx < width) {
-                binding.secondLayout.removeView(binding.viewOptions)
-                binding.secondLayout.removeView(binding.reorderFilters)
-                binding.firstLayout.addView(binding.reorderFilters)
-                binding.firstLayout.addView(binding.viewOptions)
-                binding.secondLayout.gone()
-            } else if (binding.reorderFilters.parent == binding.firstLayout) {
-                binding.firstLayout.removeView(binding.viewOptions)
-                binding.firstLayout.removeView(binding.reorderFilters)
-                binding.secondLayout.addView(binding.reorderFilters)
-                binding.secondLayout.addView(binding.viewOptions)
-                binding.secondLayout.visible()
-            }
-        }
-
         sheetBehavior?.hide()
-        binding.expandCategories.setOnClickListener {
-            onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
-        }
         binding.groupBy.setOnClickListener {
             onGroupClicked(ACTION_GROUP_BY)
         }
         binding.viewOptions.setOnClickListener {
             onGroupClicked(ACTION_DISPLAY)
-        }
-        binding.reorderFilters.setOnClickListener {
-            manageFilterPopup()
         }
 
         val activeFilters = hasActiveFiltersFromPref()
@@ -181,23 +154,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         createTags()
         clearButton.setOnClickListener { clearFilters() }
-    }
 
-    fun setExpandText(expand: Boolean) {
-        binding.expandCategories.setText(
-            if (expand) {
-                R.string.expand_all_categories
-            } else {
-                R.string.collapse_all_categories
+        preferences.filterOrder().asFlow()
+            .drop(1)
+            .onEach {
+                filterOrder = it
+                clearFilters()
             }
-        )
-        binding.expandCategories.setIconResource(
-            if (expand) {
-                R.drawable.ic_expand_less_24dp
-            } else {
-                R.drawable.ic_expand_more_24dp
-            }
-        )
+            .launchIn(controller.scope)
     }
 
     private fun stateChanged(state: Int) {
@@ -383,33 +347,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun manageFilterPopup() {
-        val recycler = RecyclerView(context)
-        if (filterOrder.count() != 6) {
-            filterOrder = "urdcmt"
-        }
-        val adapter = FlexibleAdapter(
-            filterOrder.toCharArray().map(::ManageFilterItem),
-            this,
-            true
-        )
-        recycler.layoutManager = LinearLayoutManager(context)
-        recycler.adapter = adapter
-        adapter.isHandleDragEnabled = true
-        adapter.isLongPressDragEnabled = true
-        MaterialDialog(context).title(R.string.reorder_filters)
-            .customView(view = recycler, scrollable = false)
-            .negativeButton(android.R.string.cancel)
-            .positiveButton(android.R.string.ok) {
-                val order = adapter.currentItems.map { it.char }.joinToString("")
-                preferences.filterOrder().set(order)
-                filterOrder = order
-                clearFilters()
-                recycler.adapter = null
-            }
-            .show()
-    }
-
     private fun mapOfFilters(char: Char): FilterTagGroup? {
         return when (char) {
             'u' -> unreadProgress
@@ -478,12 +415,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun updateButtons(showExpand: Boolean, groupType: Int) {
-        binding.expandCategories.visibleIf(showExpand && groupType == 0)
+    fun updateButtons(groupType: Int) {
         binding.groupBy.setIconResource(LibraryGroup.groupTypeDrawableRes(groupType))
     }
 
-    private fun clearFilters() {
+    fun clearFilters() {
         preferences.filterDownloaded().set(0)
         preferences.filterUnread().set(0)
         preferences.filterCompleted().set(0)
