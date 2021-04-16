@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MigrationBottomSheetBinding
 import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setBottomEdge
@@ -147,8 +148,6 @@ class MigrationBottomSheetDialog(
             pref.set(index == 1)
         }
     }
-
-    private fun Boolean.toInt() = if (this) 1 else 0
 }
 
 interface StartMigrationListener {
