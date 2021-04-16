@@ -226,7 +226,7 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                         onLeavingController?.invoke()
                     }
-                    if (!customPadding && router.backstackSize == 2) {
+                    if (!customPadding && router.backstackSize == 2 && changeType == ControllerChangeType.PUSH_EXIT) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val bottomNav = activityBinding?.bottomNav ?: return
                         val v = View(activity)
