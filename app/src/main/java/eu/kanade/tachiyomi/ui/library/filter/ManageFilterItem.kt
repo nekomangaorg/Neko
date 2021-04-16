@@ -83,17 +83,7 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
         }
 
         fun bind(char: Char) {
-            binding.title.setText(
-                when (char) {
-                    'u' -> R.string.read_progress
-                    'r' -> R.string.unread
-                    'd' -> R.string.downloaded
-                    'c' -> R.string.status
-                    'm' -> R.string.series_type
-                    't' -> R.string.tracked
-                    else -> R.string.unread
-                }
-            )
+            binding.title.setText(FilterBottomSheet.Filters.filterOf(char)?.stringRes ?: 0)
         }
     }
 }

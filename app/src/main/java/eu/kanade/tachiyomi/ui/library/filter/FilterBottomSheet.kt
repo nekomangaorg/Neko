@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
+import androidx.annotation.StringRes
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -324,37 +325,19 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
             }
     }
-    private fun indexOf(filterTagGroup: FilterTagGroup): Int {
-        charOfFilter(filterTagGroup)?.let {
-            return filterOrder.indexOf(it)
-        }
-        return 0
-    }
 
     private fun addForClear(): Int {
         return if (clearButton.parent != null) 1 else 0
     }
 
-    private fun charOfFilter(filterTagGroup: FilterTagGroup): Char? {
-        return when (filterTagGroup) {
-            unreadProgress -> 'u'
-            unread -> 'r'
-            downloaded -> 'd'
-            completed -> 'c'
-            mangaType -> 'm'
-            tracked -> 't'
-            else -> null
-        }
-    }
-
     private fun mapOfFilters(char: Char): FilterTagGroup? {
-        return when (char) {
-            'u' -> unreadProgress
-            'r' -> unread
-            'd' -> downloaded
-            'c' -> completed
-            'm' -> mangaType
-            't' -> if (hasTracking) tracked else null
+        return when (Filters.filterOf(char)) {
+            Filters.UnreadProgress -> unreadProgress
+            Filters.Unread -> unread
+            Filters.Downloaded -> downloaded
+            Filters.Completed -> completed
+            Filters.SeriesType -> mangaType
+            Filters.Tracked -> if (hasTracking) tracked else null
             else -> null
         }
     }
@@ -469,5 +452,29 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         var FILTER_TRACKER = ""
             private set
+    }
+
+    enum class Filters(val value: Char, @StringRes val stringRes: Int) {
+        UnreadProgress('u', R.string.read_progress),
+        Unread('r', R.string.unread),
+        Downloaded('d', R.string.downloaded),
+        Completed('c', R.string.status),
+        SeriesType('m', R.string.series_type),
+        Tracked('t', R.string.tracked);
+
+        companion object {
+            val DEFAULT_ORDER = listOf(
+                UnreadProgress,
+                Unread,
+                Downloaded,
+                Completed,
+                SeriesType,
+                Tracked
+            ).joinToString("")
+
+            fun filterOf(char: Char): Filters? {
+                return Filters::class.java.enumConstants?.find { it.value == char }
+            }
+        }
     }
 }

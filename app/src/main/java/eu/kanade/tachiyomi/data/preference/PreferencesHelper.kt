@@ -11,6 +11,7 @@ import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
@@ -340,7 +341,7 @@ class PreferencesHelper(val context: Context) {
 
     fun hopperGravity() = flowPrefs.getInt("hopper_gravity", 1)
 
-    fun filterOrder() = flowPrefs.getString("filter_order", "rudcmt")
+    fun filterOrder() = flowPrefs.getString("filter_order", FilterBottomSheet.Filters.DEFAULT_ORDER)
 
     fun hopperLongPressAction() = flowPrefs.getInt(Keys.hopperLongPress, 0)
 

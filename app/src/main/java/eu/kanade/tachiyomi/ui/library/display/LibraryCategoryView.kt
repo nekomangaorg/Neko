@@ -12,6 +12,7 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.LibraryCategoryLayoutBinding
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Filters.Companion.DEFAULT_ORDER
 import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.system.toInt
@@ -57,7 +58,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 val recycler = RecyclerView(context)
                 var filterOrder = preferences.filterOrder().get()
                 if (filterOrder.count() != 6) {
-                    filterOrder = "urdcmt"
+                    filterOrder = DEFAULT_ORDER
                 }
                 val adapter = FlexibleAdapter(
                     filterOrder.toCharArray().map(::ManageFilterItem),
@@ -71,7 +72,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                 MaterialDialog(context).title(R.string.reorder_filters)
                     .customView(view = recycler, scrollable = false)
                     .negativeButton(android.R.string.cancel)
-                    .positiveButton(android.R.string.ok) {
+                    .positiveButton(R.string.reorder) {
                         val order = adapter.currentItems.map { it.char }.joinToString("")
                         preferences.filterOrder().set(order)
                         recycler.adapter = null
