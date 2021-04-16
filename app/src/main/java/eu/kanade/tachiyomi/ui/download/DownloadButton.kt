@@ -1,18 +1,21 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.animation.ObjectAnimator
+import android.animation.ValueAnimator
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import android.widget.FrameLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadButtonBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.widget.EndAnimatorListener
 
 class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
@@ -55,6 +58,14 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         context,
         R.drawable.ic_check_24dp
     )?.mutate()
+    private val filledAnim = AnimatedVectorDrawableCompat.create(
+        context,
+        R.drawable.anim_outline_to_filled
+    )
+    private val checkAnim = AnimatedVectorDrawableCompat.create(
+        context,
+        R.drawable.anim_dl_to_check_to_dl
+    )
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
 
@@ -65,7 +76,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         binding = DownloadButtonBinding.bind(this)
     }
 
-    fun setDownloadStatus(state: Int, progress: Int = 0) {
+    fun setDownloadStatus(state: Int, progress: Int = 0, animated: Boolean = false) {
         if (state != Download.DOWNLOADING) {
             iconAnimation?.cancel()
             binding.downloadIcon.alpha = 1f
@@ -124,9 +135,28 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                 binding.downloadProgress.gone()
                 binding.downloadBorder.visible()
                 binding.downloadProgressIndeterminate.gone()
-                binding.downloadBorder.setImageDrawable(filledCircle)
                 binding.downloadBorder.drawable.setTint(downloadedColor)
-                binding.downloadIcon.drawable.setTint(downloadedTextColor)
+                if (animated) {
+                    binding.downloadBorder.setImageDrawable(filledAnim)
+                    binding.downloadIcon.setImageDrawable(checkAnim)
+                    filledAnim?.start()
+                    val alphaAnimation = ValueAnimator.ofArgb(disabledColor, downloadedTextColor)
+                    alphaAnimation.addUpdateListener { valueAnimator ->
+                        binding.downloadIcon.drawable.setTint(valueAnimator.animatedValue as Int)
+                    }
+                    alphaAnimation.addListener(
+                        EndAnimatorListener {
+                            binding.downloadIcon.drawable.setTint(downloadedTextColor)
+                            checkAnim?.start()
+                        }
+                    )
+                    alphaAnimation.duration = 150
+                    alphaAnimation.start()
+                    binding.downloadBorder.drawable.setTint(downloadedColor)
+                } else {
+                    binding.downloadBorder.setImageDrawable(filledCircle)
+                    binding.downloadIcon.drawable.setTint(downloadedTextColor)
+                }
             }
             Download.ERROR -> {
                 binding.downloadProgress.gone()

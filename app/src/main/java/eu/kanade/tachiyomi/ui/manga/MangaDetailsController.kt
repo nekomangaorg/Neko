@@ -523,7 +523,8 @@ class MangaDetailsController :
         getHolder(download.chapter)?.notifyStatus(
             download.status,
             presenter.isLockedFromSearch,
-            download.progress
+            download.progress,
+            true
         )
     }
 

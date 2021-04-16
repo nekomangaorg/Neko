@@ -152,12 +152,12 @@ class ChapterHolder(
         if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
-    fun notifyStatus(status: Int, locked: Boolean, progress: Int) = with(binding.downloadButton.downloadButton) {
+    fun notifyStatus(status: Int, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
         if (locked) {
             gone()
             return
         }
         visibleIf(!localSource)
-        setDownloadStatus(status, progress)
+        setDownloadStatus(status, progress, animated)
     }
 }
