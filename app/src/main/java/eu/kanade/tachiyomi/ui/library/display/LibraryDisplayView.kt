@@ -11,14 +11,8 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
 
     override fun inflateBinding() = LibraryDisplayLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
-        binding.displayGroup.bindToPreference(preferences.libraryLayout()) {
-            controller.reattachAdapter()
-        }
-        binding.uniformGrid.bindToPreference(preferences.uniformGrid()) {
-            controller.reattachAdapter()
-        }
-        binding.gridSizeToggleGroup.bindToPreference(preferences.gridSize()) {
-            controller.reattachAdapter()
-        }
+        binding.displayGroup.bindToPreference(preferences.libraryLayout())
+        binding.uniformGrid.bindToPreference(preferences.uniformGrid())
+        binding.gridSizeToggleGroup.bindToPreference(preferences.gridSize())
     }
 }

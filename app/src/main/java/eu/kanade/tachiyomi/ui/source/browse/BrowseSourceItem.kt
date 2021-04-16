@@ -8,13 +8,12 @@ import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
-import com.f2prateek.rx.preferences.Preference
+import com.tfcporciuncula.flow.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -28,7 +27,7 @@ class BrowseSourceItem(
     AbstractFlexibleItem<BrowseSourceHolder>() {
 
     override fun getLayoutRes(): Int {
-        return if (catalogueAsList.getOrDefault()) {
+        return if (catalogueAsList.get()) {
             R.layout.manga_list_item
         } else {
             R.layout.manga_grid_item
@@ -37,8 +36,8 @@ class BrowseSourceItem(
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): BrowseSourceHolder {
         val parent = adapter.recyclerView
-        return if (parent is AutofitRecyclerView && !catalogueAsList.getOrDefault()) {
-            val listType = catalogueListType.getOrDefault()
+        return if (parent is AutofitRecyclerView && !catalogueAsList.get()) {
+            val listType = catalogueListType.get()
             view.apply {
                 val binding = MangaGridItemBinding.bind(this)
                 val coverHeight = (parent.itemWidth / 3 * 4f).toInt()

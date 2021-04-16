@@ -325,7 +325,7 @@ class LibraryPresenter(
     }
 
     private fun setUnreadBadge(itemList: List<LibraryItem>) {
-        val unreadType = preferences.unreadBadgeType().getOrDefault()
+        val unreadType = preferences.unreadBadgeType().get()
         for (item in itemList) {
             item.unreadType = unreadType
         }

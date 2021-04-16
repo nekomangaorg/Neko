@@ -26,12 +26,12 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
     override fun initGeneralPreferences() {
         with(binding) {
             showAll.bindToPreference(preferences.showAllCategories()) {
-                controller.presenter.getLibrary()
+                controller?.presenter?.getLibrary()
                 binding.categoryShow.isEnabled = it
             }
             categoryShow.isEnabled = showAll.isChecked
             categoryShow.bindToPreference(preferences.showCategoryInTitle()) {
-                controller.showMiniBar()
+                controller?.showMiniBar()
             }
             val hideHopper = min(
                 2,
@@ -42,15 +42,15 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             hideHopperSpinner.onItemSelectedListener = {
                 preferences.hideHopper().set(it == 2)
                 preferences.autohideHopper().set(it == 1)
-                controller.hideHopper(it == 2)
-                controller.resetHopperY()
+                controller?.hideHopper(it == 2)
+                controller?.resetHopperY()
             }
             addCategoriesButton.setOnClickListener {
-                controller.showCategoriesController()
+                controller?.showCategoriesController()
             }
             expandCollapseCategories.setOnClickListener {
-                controller.binding.filterBottomSheet.root
-                    .onGroupClicked(FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL)
+                controller?.binding?.filterBottomSheet?.root
+                    ?.onGroupClicked?.invoke(FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL)
             }
             hopperLongPress.bindToPreference(preferences.hopperLongPressAction())
 

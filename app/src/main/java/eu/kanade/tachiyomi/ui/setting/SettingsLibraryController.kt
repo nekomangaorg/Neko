@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.ui.category.CategoryController
+import eu.kanade.tachiyomi.ui.library.display.TabbedLibraryDisplaySheet
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -26,6 +27,17 @@ class SettingsLibraryController : SettingsController() {
                 summaryRes = R.string.when_sorting_ignore_articles
                 defaultValue = false
             }
+
+            preference {
+                key = "library_display_options"
+                isPersistent = false
+                titleRes = R.string.display_options
+                summaryRes = R.string.can_be_found_in_library_filters
+
+                onClick {
+                    TabbedLibraryDisplaySheet(this@SettingsLibraryController).show()
+                }
+            }
         }
 
         val dbCategories = db.getCategories().executeAsBlocking()
@@ -34,6 +46,7 @@ class SettingsLibraryController : SettingsController() {
             titleRes = R.string.categories
             preference {
                 key = "edit_categories"
+                isPersistent = false
                 val catCount = db.getCategories().executeAsBlocking().size
                 titleRes = if (catCount > 0) R.string.edit_categories else R.string.add_categories
                 if (catCount > 0) summary = context.resources.getQuantityString(R.plurals.category_plural, catCount, catCount)

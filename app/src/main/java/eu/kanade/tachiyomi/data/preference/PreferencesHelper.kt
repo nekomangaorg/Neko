@@ -192,7 +192,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
-    fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
+    fun browseAsList() = flowPrefs.getBoolean(Keys.catalogueAsList, false)
 
     fun enabledLanguages() = flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
@@ -240,11 +240,11 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
-    fun libraryLayout() = rxPrefs.getInteger(Keys.libraryLayout, 2)
+    fun libraryLayout() = flowPrefs.getInt(Keys.libraryLayout, 2)
 
-    fun gridSize() = rxPrefs.getInteger(Keys.gridSize, 2)
+    fun gridSize() = flowPrefs.getInt(Keys.gridSize, 2)
 
-    fun uniformGrid() = rxPrefs.getBoolean(Keys.uniformGrid, true)
+    fun uniformGrid() = flowPrefs.getBoolean(Keys.uniformGrid, true)
 
     fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
 
@@ -329,7 +329,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastAppCheck() = flowPrefs.getLong("last_app_check", 0)
 
-    fun unreadBadgeType() = rxPrefs.getInteger("unread_badge_type", 2)
+    fun unreadBadgeType() = flowPrefs.getInt("unread_badge_type", 2)
 
     fun hideStartReadingButton() = rxPrefs.getBoolean("hide_reading_button", false)
 

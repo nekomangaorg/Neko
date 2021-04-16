@@ -13,7 +13,8 @@ import uy.kohesive.injekt.injectLazy
 abstract class BaseTabbedScrollView<VB : ViewBinding> @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     NestedScrollView(context, attrs) {
 
-    protected lateinit var binding: VB
+    lateinit var binding: VB
+        private set
     init {
         clipToPadding = false
     }
@@ -32,7 +33,7 @@ abstract class BaseTabbedScrollView<VB : ViewBinding> @JvmOverloads constructor(
 
 abstract class BaseLibraryDisplayView<VB : ViewBinding> @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseTabbedScrollView<VB>(context, attrs) {
-    lateinit var controller: LibraryController
+    var controller: LibraryController? = null
 }
 
 abstract class BaseReaderSettingsView<VB : ViewBinding> @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :

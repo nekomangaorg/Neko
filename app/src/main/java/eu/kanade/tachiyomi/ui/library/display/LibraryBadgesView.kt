@@ -12,13 +12,11 @@ class LibraryBadgesView @JvmOverloads constructor(context: Context, attrs: Attri
     override fun inflateBinding() = LibraryBadgesLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
         binding.unreadBadgeGroup.bindToPreference(preferences.unreadBadgeType()) {
-            controller.presenter.requestUnreadBadgesUpdate()
+            controller?.presenter?.requestUnreadBadgesUpdate()
         }
-        binding.hideReading.bindToPreference(preferences.hideStartReadingButton()) {
-            controller.reattachAdapter()
-        }
+        binding.hideReading.bindToPreference(preferences.hideStartReadingButton())
         binding.downloadBadge.bindToPreference(preferences.downloadBadge()) {
-            controller.presenter.requestDownloadBadgesUpdate()
+            controller?.presenter?.requestDownloadBadgesUpdate()
         }
     }
 }

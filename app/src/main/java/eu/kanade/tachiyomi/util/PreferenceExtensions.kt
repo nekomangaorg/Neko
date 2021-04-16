@@ -88,6 +88,18 @@ fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = nu
 }
 
 /**
+ * Binds a radio group with a int preference.
+ */
+fun RadioGroup.bindToPreference(pref: com.tfcporciuncula.flow.Preference<Int>, block: (() -> Unit)? = null) {
+    (getChildAt(pref.get()) as RadioButton).isChecked = true
+    setOnCheckedChangeListener { _, checkedId ->
+        val index = indexOfChild(findViewById(checkedId))
+        pref.set(index)
+        block?.invoke()
+    }
+}
+
+/**
  * Binds a spinner to an int preference with an optional offset for the value.
  */
 fun Spinner.bindToPreference(

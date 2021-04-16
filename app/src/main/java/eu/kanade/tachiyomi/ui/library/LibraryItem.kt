@@ -37,10 +37,10 @@ class LibraryItem(
     var unreadType = 2
 
     private val uniformSize: Boolean
-        get() = preferences.uniformGrid().getOrDefault()
+        get() = preferences.uniformGrid().get()
 
     private val libraryLayout: Int
-        get() = preferences.libraryLayout().getOrDefault()
+        get() = preferences.libraryLayout().get()
 
     val hideReadingButton: Boolean
         get() = preferences.hideStartReadingButton().getOrDefault()

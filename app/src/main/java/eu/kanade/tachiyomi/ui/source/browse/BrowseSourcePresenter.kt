@@ -28,6 +28,12 @@ import eu.kanade.tachiyomi.ui.source.filter.TextItem
 import eu.kanade.tachiyomi.ui.source.filter.TextSectionItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -109,6 +115,8 @@ open class BrowseSourcePresenter(
      */
     private var initializerSubscription: Subscription? = null
 
+    private var scope = CoroutineScope(Job() + Dispatchers.IO)
+
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)
 
@@ -118,12 +126,16 @@ open class BrowseSourcePresenter(
             query = savedState.getString(::query.name, "")
         }
 
-        add(
-            prefs.browseAsList().asObservable()
-                .subscribe { setDisplayMode(it) }
-        )
+        prefs.browseAsList().asFlow()
+            .onEach { setDisplayMode(it) }
+            .launchIn(scope)
 
         restartPager()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        scope.cancel()
     }
 
     override fun onSave(state: Bundle) {

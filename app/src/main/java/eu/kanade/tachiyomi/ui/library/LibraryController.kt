@@ -104,6 +104,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.abs
@@ -143,7 +146,7 @@ class LibraryController(
      */
     private var actionMode: ActionMode? = null
 
-    private var libraryLayout: Int = preferences.libraryLayout().getOrDefault()
+    private var libraryLayout: Int = preferences.libraryLayout().get()
 
     var singleCategory: Boolean = false
         private set
@@ -469,6 +472,7 @@ class LibraryController(
         }
         setupFilterSheet()
         setUpHopper()
+        setPreferenceFlows()
 
         elevateAppBar =
             scrollViewWith(
@@ -497,8 +501,24 @@ class LibraryController(
                 updateHopperY()
             }
         }
-        binding.swipeRefresh.setOnRefreshListener {
-            binding.swipeRefresh.isRefreshing = false
+        setSwipeRefresh()
+
+        if (selectedMangas.isNotEmpty()) {
+            createActionModeIfNeeded()
+        }
+
+        presenter.onRestore()
+        if (presenter.libraryItems.isNotEmpty()) {
+            presenter.restoreLibrary()
+        } else {
+            binding.recyclerLayout.alpha = 0f
+            presenter.getLibrary()
+        }
+    }
+
+    private fun setSwipeRefresh() = with(binding.swipeRefresh) {
+        setOnRefreshListener {
+            isRefreshing = false
             if (!LibraryUpdateService.isRunning()) {
                 when {
                     !presenter.showAllCategories && presenter.groupType == BY_DEFAULT -> {
@@ -514,11 +534,11 @@ class LibraryController(
                             .negativeButton(android.R.string.cancel)
                             .listItemsSingleChoice(
                                 items = listOf(
-                                    view.context.getString(
+                                    context.getString(
                                         R.string.top_category,
                                         presenter.allCategories.first().name
                                     ),
-                                    view.context.getString(
+                                    context.getString(
                                         R.string.categories_in_global_update
                                     )
                                 ),
@@ -539,18 +559,6 @@ class LibraryController(
                     }
                 }
             }
-        }
-
-        if (selectedMangas.isNotEmpty()) {
-            createActionModeIfNeeded()
-        }
-
-        presenter.onRestore()
-        if (presenter.libraryItems.isNotEmpty()) {
-            presenter.restoreLibrary()
-        } else {
-            binding.recyclerLayout.alpha = 0f
-            presenter.getLibrary()
         }
     }
 
@@ -786,7 +794,7 @@ class LibraryController(
                 end = 0
             )
         } else {
-            binding.libraryGridRecycler.recycler.columnWidth = when (preferences.gridSize().getOrDefault()) {
+            binding.libraryGridRecycler.recycler.columnWidth = when (preferences.gridSize().get()) {
                 1 -> 1f
                 2 -> 1.25f
                 3 -> 1.66f
@@ -797,6 +805,17 @@ class LibraryController(
                 start = 5.dpToPx,
                 end = 5.dpToPx
             )
+        }
+    }
+
+    private fun setPreferenceFlows() {
+        listOf(preferences.libraryLayout(), preferences.uniformGrid(), preferences.gridSize(), preferences.unreadBadgeType()).forEach {
+            it.asFlow()
+                .drop(1)
+                .onEach {
+                    reattachAdapter()
+                }
+                .launchIn(scope)
         }
     }
 
@@ -1049,7 +1068,7 @@ class LibraryController(
     }
 
     fun reattachAdapter() {
-        libraryLayout = preferences.libraryLayout().getOrDefault()
+        libraryLayout = preferences.libraryLayout().get()
         setRecyclerLayout()
         val position =
             (binding.libraryGridRecycler.recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()

@@ -18,7 +18,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.BrowseSourceControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
@@ -168,7 +167,7 @@ open class BrowseSourceController(bundle: Bundle) :
             }
         } else {
             (binding.catalogueView.inflate(R.layout.manga_recycler_autofit) as AutofitRecyclerView).apply {
-                columnWidth = when (preferences.gridSize().getOrDefault()) {
+                columnWidth = when (preferences.gridSize().get()) {
                     1 -> 1f
                     2 -> 1.25f
                     3 -> 1.66f
