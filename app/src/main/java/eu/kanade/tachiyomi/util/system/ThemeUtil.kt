@@ -71,6 +71,11 @@ object ThemeUtil {
             AppCompatDelegate.MODE_NIGHT_YES,
             R.string.midnight_dusk
         ),
+        LIME(
+            R.style.Theme_Tachiyomi_FlatLime,
+            AppCompatDelegate.MODE_NIGHT_YES,
+            R.string.flat_lime
+        ),
         AMOLED(
             R.style.Theme_Tachiyomi_Amoled,
             AppCompatDelegate.MODE_NIGHT_YES,
@@ -85,11 +90,6 @@ object ThemeUtil {
             R.style.Theme_Tachiyomi_HotPink,
             AppCompatDelegate.MODE_NIGHT_YES,
             R.string.hot_pink
-        ),
-        LIME(
-            R.style.Theme_Tachiyomi_FlatLime,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.flat_lime
         ),
         LIGHT_BLUE(
             R.style.Theme_Tachiyomi_AllBlue,
