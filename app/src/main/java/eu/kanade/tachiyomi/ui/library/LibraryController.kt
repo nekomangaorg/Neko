@@ -376,6 +376,13 @@ class LibraryController(
         filterTooltip?.show()
     }
 
+    private fun showDisplayOptions() {
+        if (displaySheet == null) {
+            displaySheet = TabbedLibraryDisplaySheet(this)
+            displaySheet?.show()
+        }
+    }
+
     private fun closeTip() {
         if (filterTooltip != null) {
             filterTooltip?.close()
@@ -392,7 +399,6 @@ class LibraryController(
 
         adapter = LibraryCategoryAdapter(this)
         setRecyclerLayout()
-
         binding.libraryGridRecycler.recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
@@ -515,10 +521,7 @@ class LibraryController(
                 FilterBottomSheet.ACTION_REFRESH -> onRefresh()
                 FilterBottomSheet.ACTION_FILTER -> onFilterChanged()
                 FilterBottomSheet.ACTION_HIDE_FILTER_TIP -> showFilterTip()
-                FilterBottomSheet.ACTION_DISPLAY -> {
-                    displaySheet = TabbedLibraryDisplaySheet(this)
-                    displaySheet?.show()
-                }
+                FilterBottomSheet.ACTION_DISPLAY -> showDisplayOptions()
                 FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL -> presenter.toggleAllCategoryVisibility()
                 FilterBottomSheet.ACTION_GROUP_BY -> {
                     val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
@@ -826,7 +829,11 @@ class LibraryController(
     override fun onDestroyView(view: View) {
         LibraryUpdateService.removeListener(this)
         destroyActionModeIfNeeded()
-        binding.libraryGridRecycler.recycler.removeOnScrollListener(scrollListener)
+        if (isBindingInitialized) {
+            binding.libraryGridRecycler.recycler.removeOnScrollListener(scrollListener)
+        }
+        displaySheet?.dismiss()
+        displaySheet = null
         super.onDestroyView(view)
     }
 
@@ -1364,7 +1371,7 @@ class LibraryController(
         when {
             binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.collapse()
             !binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isExpanded() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.expand()
-            else -> TabbedLibraryDisplaySheet(this).show()
+            else -> showDisplayOptions()
         }
     }
 
