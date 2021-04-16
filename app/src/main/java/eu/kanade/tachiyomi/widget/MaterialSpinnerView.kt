@@ -41,7 +41,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
             binding.titleView.text = value
         }
 
-    val blendedAccent = ColorUtils.blendARGB(
+    private val blendedAccent = ColorUtils.blendARGB(
         context.getResourceColor(android.R.attr.colorAccent),
         context.getResourceColor(android.R.attr.textColorPrimary),
         0.5f
@@ -69,6 +69,10 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         title = str
 
         val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
+        this.entries = entries
+
+        val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, 1)
+        binding.titleView.maxLines = maxLines
         this.entries = entries
 
         binding.detailView.text = entries.firstOrNull().orEmpty()
