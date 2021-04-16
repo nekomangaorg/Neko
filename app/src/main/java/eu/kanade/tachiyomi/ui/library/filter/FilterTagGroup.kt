@@ -1,12 +1,12 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import com.f2prateek.rx.preferences.Preference
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -119,10 +119,16 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         if (itemCount == 1) {
             binding.firstButton.isActivated = !binding.firstButton.isActivated
             binding.firstButton.setTextColor(
-                if (binding.firstButton.isActivated) Color.WHITE else context
-                    .getResourceColor(android.R.attr.textColorPrimary)
+                context.getResourceColor(
+                    if (binding.firstButton.isActivated) R.attr.colorOnAccent
+                    else android.R.attr.textColorPrimary
+                )
             )
-            listener?.onFilterClicked(this, if (binding.firstButton.isActivated) index else -1, callBack)
+            listener?.onFilterClicked(
+                this,
+                if (binding.firstButton.isActivated) index else -1,
+                callBack
+            )
             return
         }
         val mainButton = buttons[index]
@@ -145,8 +151,10 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             separators.forEach { it.gone() }
         }
         mainButton.setTextColor(
-            if (mainButton.isActivated) Color.WHITE else context
-                .getResourceColor(android.R.attr.textColorPrimary)
+            context.getResourceColor(
+                if (mainButton.isActivated) R.attr.colorOnAccent
+                else android.R.attr.textColorPrimary
+            )
         )
     }
 }

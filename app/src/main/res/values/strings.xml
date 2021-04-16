@@ -821,6 +821,7 @@
     <string name="change">Change</string>
     <string name="charging">Charging</string>
     <string name="clear">Clear</string>
+    <string name="clear_filters">Clear filters</string>
     <string name="close">Close</string>
     <string name="common">Common</string>
     <string name="cover_of_image">Cover of manga</string>

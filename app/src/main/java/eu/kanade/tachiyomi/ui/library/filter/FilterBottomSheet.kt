@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -156,6 +157,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         createTags()
         clearButton.setOnClickListener { clearFilters() }
 
+        clearButton.compatToolTipText = context.getString(R.string.clear_filters)
         preferences.filterOrder().asFlow()
             .drop(1)
             .onEach {
