@@ -413,9 +413,9 @@ class ReaderActivity :
 
         with(binding.chaptersSheet.cropBordersSheetButton) {
             val drawableRes = if (enabled) {
-                R.drawable.free_to_crop
+                R.drawable.anim_free_to_crop
             } else {
-                R.drawable.crop_to_free
+                R.drawable.anim_crop_to_free
             }
             if (lastCropRes != drawableRes) {
                 setImageResource(drawableRes)

@@ -94,7 +94,7 @@
             app:layout_constraintEnd_toStartOf="@id/double_page"
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible"
-            app:srcCompat="@drawable/crop_to_free" />
+            app:srcCompat="@drawable/anim_crop_to_free" />
 
         <ImageButton
             android:id="@+id/double_page"

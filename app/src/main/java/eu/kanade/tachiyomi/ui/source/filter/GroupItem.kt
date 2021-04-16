@@ -36,9 +36,9 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
 
         holder.icon.setAnimVectorCompat(
             if (isExpanded) {
-                R.drawable.expand_more_to_less
+                R.drawable.anim_expand_more_to_less
             } else {
-                R.drawable.expand_less_to_more
+                R.drawable.anim_expand_less_to_more
             }
         )
 
