@@ -62,7 +62,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun findSourceDir(source: Source): UniFile? {
-        return downloadsDir.findFile(getSourceDirName(source))
+        return downloadsDir.findFile(getSourceDirName(source), true)
     }
 
     /**
