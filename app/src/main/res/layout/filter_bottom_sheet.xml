@@ -8,6 +8,8 @@
     android:background="@drawable/bottom_sheet_rounded_background"
     android:elevation="7dp"
     android:orientation="vertical"
+    android:clickable="true"
+    android:focusable="true"
     app:behavior_peekHeight="60dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
