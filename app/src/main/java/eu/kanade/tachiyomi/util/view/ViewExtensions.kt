@@ -37,8 +37,13 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import kotlin.math.max
+import kotlin.math.pow
+import kotlin.math.roundToInt
 
 /**
  * Returns coordinates of view.
@@ -336,6 +341,17 @@ fun RecyclerView.smoothScrollToTop() {
     } else {
         scrollToPosition(0)
     }
+}
+
+fun View.rowsForValue(value: Int): Int {
+    return rowsForValue((value / 2f) - .5f)
+}
+
+fun View.rowsForValue(value: Float): Int {
+    val size = 1.5f.pow(value)
+    val trueSize = AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) / 100f
+    val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
+    return max(1, (dpWidth / trueSize).roundToInt())
 }
 
 var View.compatToolTipText: CharSequence?

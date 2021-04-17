@@ -794,13 +794,7 @@ class LibraryController(
                 end = 0
             )
         } else {
-            binding.libraryGridRecycler.recycler.columnWidth = when (preferences.gridSize().get()) {
-                1 -> 1f
-                2 -> 1.25f
-                3 -> 1.66f
-                4 -> 3f
-                else -> .75f
-            }
+            binding.libraryGridRecycler.recycler.setGridSize(preferences)
             binding.libraryGridRecycler.recycler.updatePaddingRelative(
                 start = 5.dpToPx,
                 end = 5.dpToPx
@@ -809,7 +803,12 @@ class LibraryController(
     }
 
     private fun setPreferenceFlows() {
-        listOf(preferences.libraryLayout(), preferences.uniformGrid(), preferences.gridSize(), preferences.unreadBadgeType()).forEach {
+        listOf(
+            preferences.libraryLayout(),
+            preferences.uniformGrid(),
+            preferences.gridSize(),
+            preferences.unreadBadgeType()
+        ).forEach {
             it.asFlow()
                 .drop(1)
                 .onEach {

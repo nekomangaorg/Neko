@@ -242,7 +242,7 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryLayout() = flowPrefs.getInt(Keys.libraryLayout, 2)
 
-    fun gridSize() = flowPrefs.getInt(Keys.gridSize, 2)
+    fun gridSize() = flowPrefs.getFloat(Keys.gridSize, 1f)
 
     fun uniformGrid() = flowPrefs.getBoolean(Keys.uniformGrid, true)
 

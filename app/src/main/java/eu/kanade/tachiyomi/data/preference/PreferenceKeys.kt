@@ -150,7 +150,7 @@ object PreferenceKeys {
 
     const val libraryLayout = "pref_display_library_layout"
 
-    const val gridSize = "grid_size"
+    const val gridSize = "grid_size_float"
 
     const val uniformGrid = "uniform_grid"
 

@@ -167,13 +167,7 @@ open class BrowseSourceController(bundle: Bundle) :
             }
         } else {
             (binding.catalogueView.inflate(R.layout.manga_recycler_autofit) as AutofitRecyclerView).apply {
-                columnWidth = when (preferences.gridSize().get()) {
-                    1 -> 1f
-                    2 -> 1.25f
-                    3 -> 1.66f
-                    4 -> 3f
-                    else -> .75f
-                }
+                setGridSize(preferences)
 
                 (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
                     override fun getSpanSize(position: Int): Int {

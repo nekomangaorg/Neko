@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.widget
 import android.content.Context
 import android.util.AttributeSet
 import androidx.recyclerview.widget.GridLayoutManager
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.pxToDp
 import kotlin.math.max
+import kotlin.math.pow
 import kotlin.math.roundToInt
 
 class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -51,11 +53,22 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         setSpan()
     }
 
+    fun setGridSize(preferences: PreferencesHelper) {
+        val size = 1.5f.pow(preferences.gridSize().get())
+        val trueSize = MULTIPLE * ((size * 100 / MULTIPLE).roundToInt()) / 100f
+        columnWidth = trueSize
+    }
+
     private fun setSpan(force: Boolean = false) {
         if ((spanCount == 0 || force) && columnWidth > 0) {
             val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
             val count = max(1, (dpWidth / columnWidth).roundToInt())
             spanCount = count
         }
+    }
+
+    companion object {
+        private const val MULTIPLE_PERCENT = 0.25f
+        const val MULTIPLE = MULTIPLE_PERCENT * 100
     }
 }
