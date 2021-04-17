@@ -2,21 +2,16 @@ package eu.kanade.tachiyomi.ui.base
 
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
-import android.content.res.ColorStateList
 import android.os.Build
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.TextViewCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
-import com.google.android.material.textview.MaterialTextView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -24,14 +19,14 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.visibleIf
+import eu.kanade.tachiyomi.widget.MenuSheetItemView
 
+@SuppressLint("InflateParams")
 open class MaterialMenuSheet(
     activity: Activity,
     items: List<MenuSheetItem>,
@@ -72,42 +67,35 @@ open class MaterialMenuSheet(
         var currentIndex: Int? = null
         items.forEachIndexed { index, item ->
             val view =
-                activity.layoutInflater.inflate(R.layout.menu_sheet_item, null) as ViewGroup
-            val textView = view.getChildAt(0) as MaterialTextView
+                activity.layoutInflater.inflate(R.layout.menu_sheet_item, null) as MenuSheetItemView
             if (index == 0 && title == null) {
                 view.setBackgroundResource(R.drawable.rounded_item_background)
             }
             with(view) {
                 id = item.id
                 binding.menuLayout.addView(this)
-                setOnClickListener {
-                    val shouldDismiss = onMenuItemClicked(this@MaterialMenuSheet, id)
-                    if (shouldDismiss) {
-                        dismiss()
-                    }
-                }
-            }
-            with(textView) {
+
                 if (item.text != null) {
                     text = item.text
                 } else {
                     setText(item.textRes)
                 }
-                setCompoundDrawablesRelativeWithIntrinsicBounds(item.drawable, 0, 0, 0)
+                setIcon(item.drawable)
                 if (item.drawable == 0) {
                     textSize = 14f
                 }
+
                 if (item.id == selectedId) {
                     currentIndex = index
-                    setTextColor(context.getResourceColor(R.attr.colorAccent))
-                    TextViewCompat.setCompoundDrawableTintList(
-                        this,
-                        ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
-                    )
+                    setIconColor(activity.getResourceColor(R.attr.colorAccent))
+                    setTextColor(activity.getResourceColor(R.attr.colorAccent))
                 }
-                updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    height = 48.dpToPx
-                    width = MATCH_PARENT
+
+                setOnClickListener {
+                    val shouldDismiss = onMenuItemClicked(this@MaterialMenuSheet, id)
+                    if (shouldDismiss) {
+                        dismiss()
+                    }
                 }
             }
         }
@@ -122,7 +110,7 @@ open class MaterialMenuSheet(
 
         currentIndex?.let {
             binding.root.post {
-                binding.menuScrollView?.scrollTo(0, it * 48.dpToPx - binding.menuScrollView.height / 2)
+                binding.menuScrollView.scrollTo(0, it * 48.dpToPx - binding.menuScrollView.height / 2)
             }
         }
 
@@ -154,14 +142,10 @@ open class MaterialMenuSheet(
 
     private fun clearEndDrawables() {
         (0 until binding.menuLayout.childCount).forEach {
-            val textView = (binding.menuLayout.getChildAt(it) as ViewGroup).getChildAt(0) as TextView
-            val imageView = (binding.menuLayout.getChildAt(it) as ViewGroup).getChildAt(1) as ImageView
-            textView.setTextColor(primaryColor)
-            TextViewCompat.setCompoundDrawableTintList(
-                textView,
-                ColorStateList.valueOf(primaryColor)
-            )
-            imageView.invisible()
+            val itemView = (binding.menuLayout.getChildAt(it) as MenuSheetItemView)
+            itemView.setTextColor(primaryColor)
+            itemView.setIconColor(primaryColor)
+            itemView.setEndIcon(0)
         }
     }
 
@@ -169,18 +153,10 @@ open class MaterialMenuSheet(
         if (clearAll) {
             clearEndDrawables()
         }
-        val layout = binding.menuLayout.findViewById<ViewGroup>(id) ?: return
-        val textView = layout.getChildAt(0) as? TextView
-        val imageView = layout.getChildAt(1) as? ImageView
-        textView?.setTextColor(textView.context.getResourceColor(R.attr.colorAccent))
-        textView?.let {
-            TextViewCompat.setCompoundDrawableTintList(
-                it,
-                ColorStateList.valueOf(it.context.getResourceColor(R.attr.colorAccent))
-            )
-        }
-        imageView?.visible()
-        imageView?.setImageResource(drawableRes)
+        val layout = binding.menuLayout.findViewById<MenuSheetItemView>(id) ?: return
+        layout.setTextColor(layout.context.getResourceColor(R.attr.colorAccent))
+        layout.setIconColor(layout.context.getResourceColor(R.attr.colorAccent))
+        layout.setEndIcon(drawableRes)
     }
 
     data class MenuSheetItem(

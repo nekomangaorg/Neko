@@ -26,5 +26,11 @@
         <attr name="summary" format="reference|string" />
     </declare-styleable>
 
+    <declare-styleable name="MenuSheetItemView">
+        <attr name="android:text"/>
+        <attr name="icon" format="reference"/>
+        <attr name="endIcon" format="reference"/>
+    </declare-styleable>
+
     <bool name="isTablet">false</bool>
 </resources>
