@@ -13,7 +13,7 @@
         android:id="@+id/card_view"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        app:layout_constraintBottom_toTopOf="@id/title_layout"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_space"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:cardCornerRadius="@dimen/rounded_radius"
@@ -26,6 +26,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="12dp"
             android:paddingBottom="12dp"
+            android:layout_marginBottom="12dp"
             android:clipToPadding="false"
             android:background="@drawable/bottom_sheet_rounded_background"
             android:backgroundTint="?attr/colorSecondary"
@@ -36,18 +37,23 @@
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.cardview.widget.CardView>
 
+    <Space
+        android:id="@+id/bottom_space"
+        android:layout_width="match_parent"
+        app:layout_constraintTop_toTopOf="@id/title_layout"
+        android:layout_marginTop="12dp"
+        android:layout_height="0dp"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="top"
-        android:background="@drawable/bottom_sheet_rounded_background"
-        android:backgroundTint="?attr/colorSecondary"
+        android:background="?attr/colorSecondary"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/card_view"
         app:layout_constraintBottom_toBottomOf="parent"
         android:orientation="horizontal">
 
