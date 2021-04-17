@@ -59,7 +59,11 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
             }
         }
 
-    private val binding = MaterialSpinnerViewBinding.inflate(LayoutInflater.from(context), this, false)
+    private val binding = MaterialSpinnerViewBinding.inflate(
+        LayoutInflater.from(context),
+        this,
+        false
+    )
 
     init {
         addView(binding.root)
@@ -71,7 +75,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
         this.entries = entries
 
-        val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, 1)
+        val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, Int.MAX_VALUE)
         binding.titleView.maxLines = maxLines
         this.entries = entries
 
@@ -142,7 +146,11 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         }
     }
 
-    fun bindToIntPreference(pref: Preference<Int>, @ArrayRes intValuesResource: Int, block: ((Int) -> Unit)? = null) {
+    fun bindToIntPreference(
+        pref: Preference<Int>,
+        @ArrayRes intValuesResource: Int,
+        block: ((Int) -> Unit)? = null
+    ) {
         this.pref = pref
         prefOffset = 0
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
@@ -173,7 +181,11 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         return popup
     }
 
-    private fun makeSettingsPopup(preference: Preference<Int>, intValues: List<Int?>, block: ((Int) -> Unit)? = null): PopupMenu {
+    private fun makeSettingsPopup(
+        preference: Preference<Int>,
+        intValues: List<Int?>,
+        block: ((Int) -> Unit)? = null
+    ): PopupMenu {
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
@@ -185,7 +197,11 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         return popup
     }
 
-    private fun makeSettingsPopup(preference: Preference<Int>, offset: Int = 0, block: ((Int) -> Unit)? = null): PopupMenu {
+    private fun makeSettingsPopup(
+        preference: Preference<Int>,
+        offset: Int = 0,
+        block: ((Int) -> Unit)? = null
+    ): PopupMenu {
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->

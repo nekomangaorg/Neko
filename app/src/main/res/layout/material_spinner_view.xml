@@ -15,7 +15,6 @@
         android:layout_marginEnd="24dp"
         android:layout_marginBottom="12dp"
         android:ellipsize="end"
-        android:maxLines="2"
         android:textColor="?android:attr/textColorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/halfway_point"
@@ -37,7 +36,7 @@
         app:layout_constraintTop_toTopOf="parent"
         android:ellipsize="end"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
-        tools:text="Details dsfdsfsdfs df sfs dfsf er sd" />
+        tools:text="Details that are so long we need to" />
 
     <ImageView
         android:id="@+id/dropdown_caret"
