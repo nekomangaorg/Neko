@@ -38,13 +38,6 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorSecondary">
 
-            <LinearLayout
-                android:id="@+id/title_layout"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:orientation="horizontal">
-
                 <com.google.android.material.textview.MaterialTextView
                     android:id="@+id/toolbar_title"
                     style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
@@ -52,14 +45,13 @@
                     android:layout_height="wrap_content"
                     android:drawableTint="?actionBarTintColor"
                     android:ellipsize="end"
-                    android:gravity="start"
+                    android:layout_gravity="center"
                     android:maxLines="1"
                     android:textColor="?actionBarTintColor"
                     android:textSize="20sp"
                     tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
                     tools:drawableStart="@drawable/ic_blank_24dp"
                     tools:text="Title Text" />
-            </LinearLayout>
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
 
         <FrameLayout
