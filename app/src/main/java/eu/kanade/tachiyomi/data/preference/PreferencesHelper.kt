@@ -156,13 +156,16 @@ class PreferencesHelper(val context: Context) {
             .apply()
     }
 
-    fun trackToken(sync: TrackService) = rxPrefs.getString(Keys.trackToken(sync.id), "")
+    fun trackToken(sync: TrackService) = flowPrefs.getString(Keys.trackToken(sync.id), "")
 
     fun anilistScoreType() = rxPrefs.getString("anilist_score_type", "POINT_10")
 
     fun backupsDirectory() = rxPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat() = rxPrefs.getObject(Keys.dateFormat, DateFormat.getDateInstance(DateFormat.SHORT), DateFormatConverter())
+    fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat = when (format) {
+        "" -> DateFormat.getDateInstance(DateFormat.SHORT)
+        else -> SimpleDateFormat(format, Locale.getDefault())
+    }
 
     fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 

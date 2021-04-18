@@ -1,17 +1,13 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.content.Intent
-import android.net.Uri
-import androidx.browser.customtabs.CustomTabsIntent
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.anilist.AnilistApi
-import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
-import eu.kanade.tachiyomi.ui.setting.track.MyAnimeListLoginActivity
-import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
@@ -37,33 +33,39 @@ class SettingsTrackingController :
             titleRes = R.string.services
 
             trackPreference(trackManager.myAnimeList) {
-                onClick {
-                    showDialog(trackManager.myAnimeList)
-                }
+                activity?.openInBrowser(MyAnimeListApi.authUrl(), trackManager.myAnimeList.getLogoColor())
             }
             trackPreference(trackManager.aniList) {
-                onClick {
-                    showDialog(trackManager.aniList, AnilistApi.authUrl())
-                }
+                activity?.openInBrowser(AnilistApi.authUrl(), trackManager.aniList.getLogoColor())
             }
             trackPreference(trackManager.kitsu) {
-                onClick {
-                    showDialog(trackManager.kitsu, userNameLabel = context.getString(R.string.email))
-                }
+                val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)
+                dialog.targetController = this@SettingsTrackingController
+                dialog.showDialog(router)
             }
         }
     }
 
-    inline fun PreferenceScreen.trackPreference(
+    private inline fun PreferenceScreen.trackPreference(
         service: TrackService,
-        block: (@DSL LoginPreference).() -> Unit
+        crossinline login: () -> Unit
     ): LoginPreference {
         return initThenAdd(
             LoginPreference(context).apply {
                 key = Keys.trackUsername(service.id)
-                title = service.name
+                title = context.getString(service.nameRes())
             },
-            block
+            {
+                onClick {
+                    if (service.isLogged) {
+                        val dialog = TrackLogoutDialog(service)
+                        dialog.targetController = this@SettingsTrackingController
+                        dialog.showDialog(router)
+                    } else {
+                        login()
+                    }
+                }
+            }
         )
     }
 
@@ -71,28 +73,6 @@ class SettingsTrackingController :
         super.onActivityResumed(activity)
         // Manually refresh anilist holder
         updatePreference(trackManager.aniList.id)
-    }
-
-    private fun showDialog(trackService: TrackService, url: Uri? = null, userNameLabel: String? = null) {
-        if (trackService.isLogged) {
-            val dialog = TrackLogoutDialog(trackService)
-            dialog.targetController = this@SettingsTrackingController
-            dialog.showDialog(router)
-        } else if (url == null) {
-            if (trackService is MyAnimeList) {
-                startActivity(MyAnimeListLoginActivity.newIntent(activity!!))
-            } else {
-                val dialog = TrackLoginDialog(trackService, userNameLabel)
-                dialog.targetController = this@SettingsTrackingController
-                dialog.showDialog(router)
-            }
-        } else {
-            val tabsIntent = CustomTabsIntent.Builder()
-                .setToolbarColor(activity!!.getResourceColor(R.attr.colorPrimaryVariant))
-                .build()
-            tabsIntent.intent.addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
-            tabsIntent.launchUrl(activity!!, url)
-        }
     }
 
     private fun updatePreference(id: Int) {

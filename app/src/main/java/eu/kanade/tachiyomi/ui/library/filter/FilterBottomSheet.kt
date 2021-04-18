@@ -317,7 +317,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             if (filterItems.contains(tracked)) {
                 val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
                 if (loggedServices.size > 1) {
-                    val serviceNames = loggedServices.map { it.name }
+                    val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
                     withContext(Dispatchers.Main) {
                         trackers = inflate(R.layout.filter_buttons) as FilterTagGroup
                         trackers?.setup(

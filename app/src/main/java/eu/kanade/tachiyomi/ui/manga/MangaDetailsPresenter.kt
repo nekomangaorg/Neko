@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
+import eu.kanade.tachiyomi.ui.manga.track.SetTrackReadingDatesDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
@@ -413,9 +414,10 @@ class MangaDetailsPresenter(
             var errorFromMerged: java.lang.Exception? = null
             var error = false
             val thumbnailUrl = manga.thumbnail_url
-            if (usingCache && manga.isMerged().not()) {
+
+            if (usingCache.not() && source.checkIfUp().not()) {
                 withContext(Dispatchers.Main) {
-                    controller.showError("Using cached source, and manga is not merged.  No reason to update")
+                    controller.showError("MangaDex appears to be down, or under heavy load")
                 }
                 return@launch
             }
@@ -1075,6 +1077,27 @@ class MangaDetailsPresenter(
                 }
             }
         }
+    }
+
+    fun setTrackerStartDate(item: TrackItem, date: Long) {
+        val track = item.track!!
+        track.started_reading_date = date
+        updateRemote(track, item.service)
+    }
+
+    fun setTrackerFinishDate(item: TrackItem, date: Long) {
+        val track = item.track!!
+        track.finished_reading_date = date
+        updateRemote(track, item.service)
+    }
+
+    fun getSuggestedDate(readingDate: SetTrackReadingDatesDialog.ReadingDate): Long? {
+        val chapters = db.getHistoryByMangaId(manga.id ?: 0L).executeAsBlocking()
+        val date = when (readingDate) {
+            SetTrackReadingDatesDialog.ReadingDate.Start -> chapters.minOfOrNull { it.last_read }
+            SetTrackReadingDatesDialog.ReadingDate.Finish -> chapters.maxOfOrNull { it.last_read }
+        } ?: return null
+        return if (date <= 0L) null else date
     }
 
     companion object {

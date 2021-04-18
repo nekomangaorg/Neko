@@ -207,6 +207,7 @@ dependencies {
     implementation(Libs.UI.filePicker)
     implementation(Libs.UI.materialDialogsCore)
     implementation(Libs.UI.materialDialogsInput)
+    implementation(Libs.UI.materialDateTime)
     implementation(Libs.UI.systemUiHelper)
     implementation(Libs.UI.viewStatePager)
     implementation(Libs.UI.numberSlidingPicker)

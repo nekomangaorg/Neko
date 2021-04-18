@@ -278,10 +278,12 @@ open class MangaDex() : HttpSource() {
                 formBody.add("two_factor", it)
             }
 
+
+
             runCatching {
                 clientBuilder().newCall(
                     POST(
-                        "$baseUrl/ajax/actions.ajax.php?function=login",
+                        "${MdUtil.apiUrl}${MdUtil.apiLogin}",
                         headers,
                         formBody.build()
                     )

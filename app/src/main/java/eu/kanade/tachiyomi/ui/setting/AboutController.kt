@@ -11,7 +11,6 @@ import com.mikepenz.aboutlibraries.LibsBuilder
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
 import eu.kanade.tachiyomi.data.updater.UpdaterService
@@ -41,7 +40,7 @@ class AboutController : SettingsController() {
 
     private val userPreferences: PreferencesHelper by injectLazy()
 
-    private val dateFormat: DateFormat = userPreferences.dateFormat().getOrDefault()
+    private val dateFormat: DateFormat = userPreferences.dateFormat()
 
     /**
      * The subscribtion service of the obtained release object

@@ -7,6 +7,7 @@ import android.os.Looper
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.isOutdated
@@ -67,6 +68,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     private fun resolveWithWebView(request: Request, oldCookie: Cookie?) {
         // We need to lock this thread until the WebView finds the challenge solution url, because
         // OkHttp doesn't support asynchronous interceptors.
+        XLog.d("Resolve with webview")
         val latch = CountDownLatch(1)
 
         var webView: WebView? = null
@@ -77,7 +79,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
 
         val origRequestUrl = request.url.toString()
         val headers = request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
-
+        XLog.d("headers")
         handler.post {
             val webview = WebView(context)
             webView = webview
@@ -88,7 +90,10 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
                 request.header("User-Agent") ?: "Mozilla/5.0 (Windows NT 6.3; WOW64)"
 
             webview.webViewClient = object : WebViewClientCompat() {
+
                 override fun onPageFinished(view: WebView, url: String) {
+                    XLog.d("Page Finished for $url")
+
                     fun isCloudFlareBypassed(): Boolean {
                         return networkHelper.cookieManager.get(origRequestUrl.toHttpUrl())
                             .firstOrNull { it.name == "cf_clearance" }
@@ -131,7 +136,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
 
         // Wait a reasonable amount of time to retrieve the solution. The minimum should be
         // around 4 seconds but it can take more due to slow networks or server issues.
-        latch.await(12, TimeUnit.SECONDS)
+        latch.await(30, TimeUnit.SECONDS)
 
         handler.post {
             if (!cloudflareBypassed) {

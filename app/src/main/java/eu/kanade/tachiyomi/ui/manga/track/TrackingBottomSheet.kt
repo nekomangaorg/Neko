@@ -21,12 +21,13 @@ import kotlinx.android.synthetic.main.tracking_bottom_sheet.*
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
     BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogTheme),
+        (controller.activity!!, R.style.BottomSheetDialogTheme),
     TrackAdapter.OnClickListener,
     SetTrackStatusDialog.Listener,
     SetTrackChaptersDialog.Listener,
     SetTrackScoreDialog.Listener,
-    TrackRemoveDialog.Listener {
+    TrackRemoveDialog.Listener,
+    SetTrackReadingDatesDialog.Listener {
 
     val activity = controller.activity!!
 
@@ -218,6 +219,43 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     override fun removeTracker(item: TrackItem, fromServiceAlso: Boolean) {
         refreshTrack(item.service)
         presenter.removeTracker(item, fromServiceAlso)
+    }
+
+    override fun onStartDateClick(position: Int) {
+        val item = adapter?.getItem(position) ?: return
+        if (item.track == null) return
+
+        val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Start)
+        SetTrackReadingDatesDialog(
+            controller,
+            this,
+            SetTrackReadingDatesDialog.ReadingDate.Start,
+            item,
+            suggestedDate
+        )
+            .showDialog(controller.router)
+    }
+
+    override fun onFinishDateClick(position: Int) {
+        val item = adapter?.getItem(position) ?: return
+        if (item.track == null) return
+
+        val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
+        SetTrackReadingDatesDialog(
+            controller,
+            this,
+            SetTrackReadingDatesDialog.ReadingDate.Finish,
+            item,
+            suggestedDate
+        )
+            .showDialog(controller.router)
+    }
+
+    override fun setReadingDate(item: TrackItem, type: SetTrackReadingDatesDialog.ReadingDate, date: Long) {
+        when (type) {
+            SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(item, date)
+            SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(item, date)
+        }
     }
 
     private companion object {

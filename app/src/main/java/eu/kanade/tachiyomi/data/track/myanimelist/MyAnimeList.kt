@@ -2,21 +2,28 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 
 import android.content.Context
 import android.graphics.Color
-import com.elvishew.xlog.XLog
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import timber.log.Timber
+import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
-    private val interceptor by lazy { MyAnimeListInterceptor(this) }
+    private val json: Json by injectLazy()
+    private val interceptor by lazy { MyAnimeListInterceptor(this, getPassword()) }
     private val api by lazy { MyAnimeListApi(client, interceptor) }
 
-    override val name = "MyAnimeList"
+    @StringRes
+    override fun nameRes() = R.string.myanimelist
+
+    override val supportsReadingDates: Boolean = true
 
     override fun getLogo() = R.drawable.ic_tracker_mal
 
@@ -58,26 +65,25 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return track.score.toInt().toString()
     }
 
-    override suspend fun update(track: Track): Track {
-        if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
-            track.status = COMPLETED
-        }
+    override suspend fun add(track: Track): Track {
+        track.status = READING
+        track.score = 0F
+        return api.updateItem(track)
+    }
 
-        return api.updateLibManga(track)
+    override suspend fun update(track: Track): Track {
+        return api.updateItem(track)
     }
 
     override suspend fun bind(track: Track): Track {
-        val remoteTrack = api.findLibManga(track)
-        if (remoteTrack != null) {
+        val remoteTrack = api.findListItem(track)
+        return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
             update(track)
         } else {
             // Set default fields if it's not found in the list
-            track.score = DEFAULT_SCORE.toFloat()
-            track.status = DEFAULT_STATUS
-            return api.addLibManga(track)
+            add(track)
         }
-        return track
     }
 
     override fun canRemoveFromService(): Boolean = true
@@ -87,57 +93,57 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
+        if (query.startsWith(SEARCH_ID_PREFIX)) {
+            query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
+                return listOf(api.getMangaDetails(id))
+            }
+        }
+
+        if (query.startsWith(SEARCH_LIST_PREFIX)) {
+            query.substringAfter(SEARCH_LIST_PREFIX).let { title ->
+                return api.findListItems(title)
+            }
+        }
+
         return api.search(query, manga, wasPreviouslyTracked)
     }
 
     override suspend fun refresh(track: Track): Track {
-        val remoteTrack = api.getLibManga(track)
-        track.copyPersonalFrom(remoteTrack)
-        track.total_chapters = remoteTrack.total_chapters
-        return track
+        return api.findListItem(track) ?: add(track)
     }
 
-    suspend fun login(csrfToken: String) = login("myanimelist", csrfToken)
+    override suspend fun login(username: String, password: String) = login(password)
 
-    override suspend fun login(username: String, password: String): Boolean {
+    suspend fun login(authCode: String): Boolean {
         return try {
-            saveCSRF(password)
-            saveCredentials(username, password)
+            val oauth = api.getAccessToken(authCode)
+            interceptor.setAuth(oauth)
+            val username = api.getCurrentUser()
+            saveCredentials(username, oauth.access_token)
             true
         } catch (e: Exception) {
-            XLog.e(e)
+            Timber.e(e)
             logout()
             false
         }
     }
 
-    // Attempt to login again if cookies have been cleared but credentials are still filled
-    suspend fun ensureLoggedIn() {
-        if (isAuthorized) return
-        if (!isLogged) throw Exception(context.getString(R.string.myanimelist_creds_missing))
-    }
-
     override fun logout() {
         super.logout()
         preferences.trackToken(this).delete()
-        networkService.cookieManager.remove(BASE_URL.toHttpUrlOrNull()!!)
+        interceptor.setAuth(null)
     }
 
-    private val isAuthorized: Boolean
-        get() = super.isLogged && getCSRF().isNotEmpty() && checkCookies()
+    fun saveOAuth(oAuth: OAuth?) {
+        preferences.trackToken(this).set(json.encodeToString(oAuth))
+    }
 
-    fun getCSRF(): String = preferences.trackToken(this).getOrDefault()
-
-    private fun saveCSRF(csrf: String) = preferences.trackToken(this).set(csrf)
-
-    private fun checkCookies(): Boolean {
-        var ckCount = 0
-        val url = BASE_URL.toHttpUrlOrNull()!!
-        for (ck in networkService.cookieManager.get(url)) {
-            if (ck.name == USER_SESSION_COOKIE || ck.name == LOGGED_IN_COOKIE) ckCount++
+    fun loadOAuth(): OAuth? {
+        return try {
+            json.decodeFromString<OAuth>(preferences.trackToken(this).get())
+        } catch (e: Exception) {
+            null
         }
-
-        return ckCount == 2
     }
 
     companion object {
@@ -146,9 +152,13 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         const val ON_HOLD = 3
         const val DROPPED = 4
         const val PLAN_TO_READ = 6
+        const val REREADING = 7
 
         const val DEFAULT_STATUS = READING
         const val DEFAULT_SCORE = 0
+
+        private const val SEARCH_ID_PREFIX = "id:"
+        private const val SEARCH_LIST_PREFIX = "my:"
 
         const val BASE_URL = "https://myanimelist.net"
         const val USER_SESSION_COOKIE = "MALSESSIONID"

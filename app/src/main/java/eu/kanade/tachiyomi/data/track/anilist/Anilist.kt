@@ -13,7 +13,7 @@ import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
-    override val name = "AniList"
+    override fun nameRes() = R.string.anilist
 
     private val gson: Gson by injectLazy()
 
@@ -136,6 +136,12 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return api.updateLibraryManga(track)
     }
 
+    override suspend fun add(track: Track): Track {
+        track.score = DEFAULT_SCORE.toFloat()
+        track.status = DEFAULT_STATUS
+        return api.addLibManga(track)
+    }
+
     override suspend fun bind(track: Track): Track {
         val remoteTrack = api.findLibManga(track, getUsername().toInt())
 
@@ -144,10 +150,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
             track.library_id = remoteTrack.library_id
             update(track)
         } else {
-            // Set default fields if it's not found in the list
-            track.score = DEFAULT_SCORE.toFloat()
-            track.status = DEFAULT_STATUS
-            api.addLibManga(track)
+            add(track)
         }
     }
 
@@ -186,7 +189,7 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
 
     override fun logout() {
         super.logout()
-        preferences.trackToken(this).set(null)
+        preferences.trackToken(this).delete()
         interceptor.setAuth(null)
     }
 

@@ -19,19 +19,19 @@
         android:name=".App"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
-        android:hasFragileUserData="true"
         android:hardwareAccelerated="true"
+        android:hasFragileUserData="true"
         android:icon="@mipmap/ic_launcher"
-        android:requestLegacyExternalStorage="true"
-        android:usesCleartextTraffic="true"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:label="@string/neko_app_name"
         android:largeHeap="true"
-        android:theme="@style/Theme.Tachiyomi">
+        android:requestLegacyExternalStorage="true"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:theme="@style/Theme.Tachiyomi"
+        android:usesCleartextTraffic="true">
         <activity
             android:name=".ui.main.MainActivity"
-            android:windowSoftInputMode="adjustPan"
-            android:theme="@style/Theme.Splash">
+            android:theme="@style/Theme.Splash"
+            android:windowSoftInputMode="adjustPan">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
@@ -50,21 +50,21 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.org"
-                    android:pathPattern="/chapter/..*" />
+                    android:pathPattern="/chapter/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="mangadex.org"
-                    android:pathPattern="/chapter/..*" />
+                    android:pathPattern="/chapter/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/chapter/..*" />
+                    android:pathPattern="/chapter/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="mangadex.cc"
-                    android:pathPattern="/chapter/..*" />
+                    android:pathPattern="/chapter/..*"
+                    android:scheme="https" />
             </intent-filter>
 
             <intent-filter>
@@ -85,7 +85,18 @@
             android:theme="@style/FilePickerTheme" />
         <activity
             android:name=".ui.setting.track.MyAnimeListLoginActivity"
-            android:configChanges="uiMode|orientation|screenSize" />
+            android:label="MyAnimeList">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+
+                <data
+                    android:host="myanimelist-auth"
+                    android:scheme="neko" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".ui.setting.track.AnilistLoginActivity"
             android:label="Anilist">
@@ -111,38 +122,38 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.org"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPattern="/manga/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="mangadex.org"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPattern="/manga/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPattern="/manga/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/manga/..*" />
+                    android:pathPattern="/manga/..*"
+                    android:scheme="https" />
 
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.org"
-                    android:pathPattern="/title/..*" />
+                    android:pathPattern="/title/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="mangadex.org"
-                    android:pathPattern="/title/..*" />
+                    android:pathPattern="/title/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/title/..*" />
+                    android:pathPattern="/title/..*"
+                    android:scheme="https" />
                 <data
-                    android:scheme="https"
                     android:host="www.mangadex.cc"
-                    android:pathPattern="/title/..*" />
+                    android:pathPattern="/title/..*"
+                    android:scheme="https" />
             </intent-filter>
 
 

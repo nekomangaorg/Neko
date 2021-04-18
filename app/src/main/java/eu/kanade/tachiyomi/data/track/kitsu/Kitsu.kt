@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.data.track.kitsu
 
 import android.content.Context
 import android.graphics.Color
+import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.database.models.Manga
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 
@@ -25,7 +25,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         const val DEFAULT_SCORE = 0f
     }
 
-    override val name = "Kitsu"
+    override fun nameRes() = R.string.kitsu
 
     private val gson: Gson by injectLazy()
 
@@ -91,16 +91,20 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return api.updateLibManga(track)
     }
 
+    override suspend fun add(track: Track): Track {
+        track.score = DEFAULT_SCORE
+        track.status = DEFAULT_STATUS
+        return api.addLibManga(track, getUserId())
+    }
+
     override suspend fun bind(track: Track): Track {
         val remoteTrack = api.findLibManga(track, getUserId())
-        if (remoteTrack != null) {
+        return if (remoteTrack != null) {
             track.copyPersonalFrom(remoteTrack)
             track.media_id = remoteTrack.media_id
-            return update(track)
+            update(track)
         } else {
-            track.score = DEFAULT_SCORE
-            track.status = DEFAULT_STATUS
-            return api.addLibManga(track, getUserId())
+            add(track)
         }
     }
 

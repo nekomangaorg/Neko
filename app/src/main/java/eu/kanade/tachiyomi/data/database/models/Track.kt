@@ -26,10 +26,16 @@ interface Track : Serializable {
 
     var tracking_url: String
 
+    var started_reading_date: Long
+
+    var finished_reading_date: Long
+
     fun copyPersonalFrom(other: Track) {
         last_chapter_read = other.last_chapter_read
         score = other.score
         status = other.status
+        started_reading_date = other.started_reading_date
+        finished_reading_date = other.finished_reading_date
     }
 
     companion object {

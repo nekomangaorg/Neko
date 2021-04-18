@@ -211,8 +211,8 @@ class LegacyRestore(val context: Context, val job: Job?) {
                     errors.add("${manga.title} - ${e.message}")
                 }
             } else {
-                errors.add("${manga.title} - ${context.getString(R.string.not_logged_into_, service?.name)}")
-                val notLoggedIn = context.getString(R.string.not_logged_into_, service?.name)
+                errors.add("${manga.title} - ${context.getString(R.string.not_logged_into_, context.getString(service?.nameRes()!!))}")
+                val notLoggedIn = context.getString(R.string.not_logged_into_, context.getString(service?.nameRes()!!))
                 trackingErrors.add(notLoggedIn)
             }
         }

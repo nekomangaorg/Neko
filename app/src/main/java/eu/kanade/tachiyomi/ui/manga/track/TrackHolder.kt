@@ -5,6 +5,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys.dateFormat
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visibleIf
@@ -21,6 +22,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         track_status.setOnClickListener { listener.onStatusClick(adapterPosition) }
         track_chapters.setOnClickListener { listener.onChaptersClick(adapterPosition) }
         score_container.setOnClickListener { listener.onScoreClick(adapterPosition) }
+        track_start_date.setOnClickListener { listener.onStartDateClick(adapterPosition) }
+        track_finish_date.setOnClickListener { listener.onFinishDateClick(adapterPosition) }
     }
 
     @SuppressLint("SetTextI18n")
@@ -31,7 +34,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         logo_container.updateLayoutParams<ConstraintLayout.LayoutParams> {
             bottomToBottom = if (track != null) divider.id else track_details.id
         }
-        track_logo.contentDescription = item.service.name
+        val serviceName = track_logo.context.getString(item.service.nameRes())
+        track_logo.contentDescription = serviceName
         track_group.visibleIf(track != null)
         add_tracking.visibleIf(track == null)
         if (track != null) {
@@ -62,6 +66,14 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             else track_status.text = item.service.getStatus(track.status)
             track_score.text = if (track.score == 0f) "-" else item.service.displayScore(track)
             track_score.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
+            date_group.visibleIf(item.service.supportsReadingDates)
+            if (item.service.supportsReadingDates) {
+                track_start_date.text =
+                    if (track.started_reading_date != 0L) dateFormat.format(track.started_reading_date) else "-"
+                track_finish_date.text =
+                    if (track.finished_reading_date != 0L) dateFormat.format(track.finished_reading_date) else "-"
+            } else {
+            }
         }
     }
 

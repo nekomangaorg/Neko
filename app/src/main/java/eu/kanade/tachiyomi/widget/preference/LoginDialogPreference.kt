@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.widget.preference
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import androidx.annotation.StringRes
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.bluelinelabs.conductor.ControllerChangeHandler
@@ -10,8 +11,10 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import kotlinx.android.synthetic.main.pref_account_login.view.*
 import kotlinx.android.synthetic.main.pref_account_login.view.login
 import kotlinx.android.synthetic.main.pref_site_login.view.*
+import kotlinx.android.synthetic.main.pref_site_login.view.username_input
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -20,7 +23,7 @@ import rx.Subscription
 import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(
-    private val usernameLabel: String? = null,
+    @StringRes private val usernameLabelRes: Int? = null,
     bundle: Bundle? = null
 ) :
     DialogController(bundle) {
@@ -49,8 +52,8 @@ abstract class LoginDialogPreference(
     fun onViewCreated(view: View) {
         v = view.apply {
 
-            if (!usernameLabel.isNullOrEmpty()) {
-                username_input.hint = usernameLabel
+            if (usernameLabelRes != null) {
+                username_input.hint = view.context.getString(usernameLabelRes)
             }
 
             login.setOnClickListener {

@@ -48,6 +48,8 @@
     <string name="scanlator_groups">Scanlator groups</string>
     <string name="reset_group_filter">Reset to all</string>
 
+    <string name="mdlist">MDList</string>
+
     <string name="missing_chapters">%1$s missing chapters</string>
 
     <string name="using_cached_source_cant_open">Using cached source, can\'t open this chapter</string>
@@ -153,7 +155,6 @@
     <string name="two_factor">2FA Code</string>
     <string name="fields_cannot_be_blank">Fields cannot be blank</string>
     <string name="myanimelist_creds_missing">MAL login credentials not found</string>
-    <string name="myanimelist_relogin">Please login to MAL again</string>
 
     <!-- S Pen actions -->
     <string name="spen_previous_page">Previous page</string>

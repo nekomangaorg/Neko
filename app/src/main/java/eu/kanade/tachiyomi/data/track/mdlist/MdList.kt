@@ -24,7 +24,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() }
     private val db: DatabaseHelper by lazy { Injekt.get<DatabaseHelper>() }
 
-    override val name = "MDList"
+    override fun nameRes() = R.string.mdlist
 
     override fun getLogo(): Int {
         return R.drawable.ic_tracker_mangadex_logo
@@ -46,6 +46,10 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun getScoreList() = IntRange(0, 10).map(Int::toString)
 
     override fun displayScore(track: Track) = track.score.toInt().toString()
+
+    override suspend fun add(track: Track): Track {
+        throw Exception("Not Used")
+    }
 
     override suspend fun update(track: Track): Track {
         return withContext(Dispatchers.IO) {

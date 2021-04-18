@@ -12,7 +12,7 @@ class MdUtil {
         const val cdnUrl = "https://mangadex.org" // "https://s0.mangadex.org"
         const val baseUrl = "https://mangadex.org"
         const val randMangaPage = "/manga/"
-        const val apiUrl = "https://api.mangadex.org"
+        const val apiUrl = "http://api.mangadex.org.dev.mdcloud.moe"
         const val apiUrlCdnCache = "https://cdn.statically.io/gh/goldbattle/MangadexRecomendations/master/output/api/"
         const val apiUrlCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
         const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
@@ -28,6 +28,7 @@ class MdUtil {
         const val apiCovers = "/covers"
         const val reportUrl = "https://api.mangadex.network/report"
         const val imageUrl = "$baseUrl/data"
+        const val apiLogin = "/auth/login"
 
         val jsonParser =
             Json {

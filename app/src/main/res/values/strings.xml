@@ -427,6 +427,13 @@
     <string name="add_tracking">Add tracking</string>
     <string name="remove_tracking">Remove tracking from app</string>
     <string name="remove_tracking_from_">Also remove from %1$s</string>
+    <string name="anilist" translatable="false">AniList</string>
+    <string name="myanimelist" translatable="false">MyAnimeList</string>
+    <string name="kitsu" translatable="false">Kitsu</string>
+    <string name="myanimelist_relogin">Please login to MAL again</string>
+    <string name="started_reading_date">Started reading date</string>
+    <string name="finished_reading_date">Finished reading date</string>
+    <string name="suggested_date_">Suggested date: %1$s</string>
 
     <!-- Migration -->
     <string name="select_target_sources">Select target sources</string>

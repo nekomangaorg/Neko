@@ -15,14 +15,18 @@ import android.content.res.Resources
 import android.graphics.drawable.Drawable
 import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
+import android.net.Uri
 import android.os.Build
 import android.os.PowerManager
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.AttrRes
+import androidx.annotation.ColorInt
 import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AppCompatDelegate
+import androidx.browser.customtabs.CustomTabColorSchemeParams
 import androidx.browser.customtabs.CustomTabsIntent
 import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import androidx.core.app.NotificationCompat
@@ -35,6 +39,7 @@ import com.mikepenz.iconics.utils.sizeDp
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
+import java.io.File
 
 /**
  * Display a toast in this context.
@@ -122,35 +127,6 @@ fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
 }
 
 /**
- * Returns the color
- *
- * @param resource the attribute.
- */
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
-    return this.iconicsDrawable(icon, size, color, attributeColor)
-}
-
-@SuppressLint("ResourceType")
-/**
- * default tinted to actionbar
- */
-fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
-    return this.iconicsDrawable(icon, size, color, attributeColor)
-}
-
-@SuppressLint("ResourceType")
-fun Context.iconicsDrawable(icon: IIcon, size: Int = 15, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
-    return IconicsDrawable(this, icon).apply {
-        sizeDp = size
-        colorInt = when {
-            attributeColor -> getResourceColor(color)
-            else -> contextCompatColor(color)
-        }
-    }
-}
-
-/**
  * Converts to dp.
  */
 val Int.pxToDp: Int
@@ -161,6 +137,9 @@ val Int.pxToDp: Int
  */
 val Int.dpToPx: Int
     get() = (this * Resources.getSystem().displayMetrics.density).toInt()
+
+val Int.spToPx: Int
+    get() = (this * Resources.getSystem().displayMetrics.scaledDensity).toInt()
 
 val Float.dpToPx: Float
     get() = (this * Resources.getSystem().displayMetrics.density)
@@ -182,13 +161,25 @@ val Resources.isLTR
  * @param block the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-fun Context.notificationBuilder(channelId: String, block: (NotificationCompat.Builder.() -> Unit)? = null): NotificationCompat.Builder {
+fun Context.notificationBuilder(
+    channelId: String,
+    block: (NotificationCompat.Builder.() -> Unit)? = null
+): NotificationCompat.Builder {
     val builder = NotificationCompat.Builder(this, channelId)
         .setColor(ContextCompat.getColor(this, R.color.colorAccent))
     if (block != null) {
         builder.block()
     }
     return builder
+}
+
+/**
+ * Convenience method to acquire a partial wake lock.
+ */
+fun Context.acquireWakeLock(tag: String): PowerManager.WakeLock {
+    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag:WakeLock")
+    wakeLock.acquire()
+    return wakeLock
 }
 
 /**
@@ -215,7 +206,9 @@ val Context.powerManager: PowerManager
  * @param intent intent that contains broadcast information
  */
 fun Context.sendLocalBroadcast(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(intent)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
+        intent
+    )
 }
 
 /**
@@ -224,7 +217,9 @@ fun Context.sendLocalBroadcast(intent: Intent) {
  * @param intent intent that contains broadcast information
  */
 fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(intent)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(
+        intent
+    )
 }
 
 /**
@@ -233,7 +228,10 @@ fun Context.sendLocalBroadcastSync(intent: Intent) {
  * @param receiver receiver that gets registered.
  */
 fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(receiver, filter)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
+        receiver,
+        filter
+    )
 }
 
 /**
@@ -242,7 +240,9 @@ fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFil
  * @param receiver receiver that gets unregistered.
  */
 fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(receiver)
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(
+        receiver
+    )
 }
 
 /**
@@ -256,14 +256,37 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
         .any { className == it.service.className }
 }
 
+fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
+    this.openInBrowser(url.toUri(), toolbarColor)
+}
+
+fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
+    try {
+        val intent = CustomTabsIntent.Builder()
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
+                    .build()
+            )
+            .build()
+        intent.launchUrl(this, uri)
+    } catch (e: Exception) {
+        toast(e.message)
+    }
+}
+
 /**
  * Opens a URL in a custom tab.
  */
-fun Context.openInBrowser(url: String, forceBrowser: Boolean = false): Boolean {
+fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
     try {
         val parsedUrl = url.toUri()
         val intent = CustomTabsIntent.Builder()
-            .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
+                    .build()
+            )
             .build()
         if (forceBrowser) {
             val packages = getCustomTabsPackages().maxBy { it.preferredOrder }
@@ -305,6 +328,11 @@ fun Context.isInNightMode(): Boolean {
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
 }
 
+fun Context.appDelegateNightMode(): Int {
+    return if (isInNightMode()) AppCompatDelegate.MODE_NIGHT_YES
+    else AppCompatDelegate.MODE_NIGHT_NO
+}
+
 fun Context.isOnline(): Boolean {
     val connectivityManager = this
         .getSystemService(Context.CONNECTIVITY_SERVICE) as? ConnectivityManager
@@ -320,4 +348,42 @@ fun Context.isOnline(): Boolean {
         result = (NetworkCapabilities.TRANSPORT_CELLULAR..maxTransport).any(actNw::hasTransport)
     }
     return result
+}
+
+fun Context.createFileInCacheDir(name: String): File {
+    val file = File(externalCacheDir, name)
+    if (file.exists()) {
+        file.delete()
+    }
+    file.createNewFile()
+    return file
+}
+
+/**
+ * Returns the color
+ *
+ * @param resource the attribute.
+ */
+@SuppressLint("ResourceType")
+fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
+    return this.iconicsDrawable(icon, size, color, attributeColor)
+}
+
+@SuppressLint("ResourceType")
+    /**
+     * default tinted to actionbar
+     */
+fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
+    return this.iconicsDrawable(icon, size, color, attributeColor)
+}
+
+@SuppressLint("ResourceType")
+fun Context.iconicsDrawable(icon: IIcon, size: Int = 15, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
+    return IconicsDrawable(this, icon).apply {
+        sizeDp = size
+        colorInt = when {
+            attributeColor -> getResourceColor(color)
+            else -> contextCompatColor(color)
+        }
+    }
 }

@@ -49,6 +49,17 @@ object Migrations {
                 context.toast(R.string.myanimelist_relogin)
             }
 
+            if (oldVersion < 113 && oldVersion != 0) {
+                // Force MAL log out due to login flow change
+                // v67: switched from scraping to WebView
+                // v68: switched from WebView to OAuth
+                val trackManager = Injekt.get<TrackManager>()
+                if (trackManager.myAnimeList.isLogged) {
+                    trackManager.myAnimeList.logout()
+                    context.toast(R.string.myanimelist_relogin)
+                }
+            }
+
             return true
         }
         return false
