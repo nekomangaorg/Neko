@@ -97,22 +97,22 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.3.0-beta01")
+    implementation("androidx.appcompat:appcompat:1.3.0-rc01")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.3.0")
-    implementation("androidx.recyclerview:recyclerview:1.2.0-beta02")
+    implementation("androidx.recyclerview:recyclerview:1.2.0")
     implementation("androidx.preference:preference:1.1.1")
-    implementation("androidx.annotation:annotation:1.2.0-rc01")
+    implementation("androidx.annotation:annotation:1.2.0")
     implementation("androidx.browser:browser:1.3.0")
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.5.0-beta03")
+    implementation("androidx.core:core-ktx:1.5.0-rc01")
 
     implementation("androidx.constraintlayout:constraintlayout:2.0.4")
 
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-core:18.0.2")
+    implementation("com.google.firebase:firebase-core:18.0.3")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
