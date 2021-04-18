@@ -81,7 +81,7 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
         binding.menu.setImageDrawable(
             ContextCompat.getDrawable(
                 context,
-                R.drawable.ic_settings_24dp
+                R.drawable.ic_outline_settings_24dp
             )
         )
         binding.menu.setOnClickListener {
