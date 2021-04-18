@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
@@ -79,6 +80,7 @@ import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -321,6 +323,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         preferences.extensionUpdatesCount().asObservable().subscribe {
             setExtensionsBadge()
         }
+
+        preferences.incognitoMode()
+            .asImmediateFlow { binding.toolbar.setIncognitoMode(it) }
+            .launchIn(lifecycleScope)
         setExtensionsBadge()
     }
 

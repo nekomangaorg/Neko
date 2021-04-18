@@ -376,4 +376,6 @@ class PreferencesHelper(val context: Context) {
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
+
+    fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 }

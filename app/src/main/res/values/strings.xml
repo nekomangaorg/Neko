@@ -564,6 +564,11 @@
     <string name="help">Help</string>
     <string name="search_settings">Search settings</string>
 
+    <string name="turn_on_">Turn on %s</string>
+    <string name="turn_off_">Turn off %s</string>
+    <string name="incognito_mode">Incognito mode</string>
+    <string name="pauses_reading_history">Pauses reading history</string>
+
     <!-- General settings -->
     <string name="app_theme">App theme</string>
     <string name="light_blue">Light Blue</string>

@@ -124,6 +124,13 @@ class ReaderPresenter(
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
+    private var hasTrackers: Boolean = false
+    private val checkTrackers: (Manga) -> Unit = { manga ->
+        val tracks = db.getTracks(manga).executeAsBlocking()
+
+        hasTrackers = tracks.size > 0
+    }
+
     /**
      * Called when the presenter is created. It retrieves the saved active chapter if the process
      * was restored.
@@ -249,6 +256,8 @@ class ReaderPresenter(
 
         this.manga = manga
         if (chapterId == -1L) chapterId = initialChapterId
+
+        checkTrackers(manga)
 
         NotificationReceiver.dismissNotification(
             preferences.context,
@@ -476,9 +485,13 @@ class ReaderPresenter(
         selectedChapter.chapter.last_page_read = page.index
         selectedChapter.chapter.pages_left =
             (selectedChapter.pages?.size ?: page.index) - page.index
-        // For double pages, check if the second to last page is doubled up
-        if (selectedChapter.pages?.lastIndex == page.index ||
-            (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
+        val shouldTrack = !preferences.incognitoMode().get() || hasTrackers
+        if (shouldTrack &&
+            // For double pages, check if the second to last page is doubled up
+            (
+                selectedChapter.pages?.lastIndex == page.index ||
+                    (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
+                )
         ) {
             selectedChapter.chapter.read = true
             updateTrackChapterRead(selectedChapter)
@@ -521,20 +534,25 @@ class ReaderPresenter(
 
     /**
      * Saves this [chapter] progress (last read page and whether it's read).
+     * If incognito mode isn't on or has at least 1 tracker
      */
     private fun saveChapterProgress(chapter: ReaderChapter) {
         db.getChapter(chapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
             chapter.chapter.bookmark = dbChapter.bookmark
         }
-        db.updateChapterProgress(chapter.chapter).executeAsBlocking()
+        if (!preferences.incognitoMode().get() || hasTrackers) {
+            db.updateChapterProgress(chapter.chapter).executeAsBlocking()
+        }
     }
 
     /**
      * Saves this [chapter] last read history.
      */
     private fun saveChapterHistory(chapter: ReaderChapter) {
-        val history = History.create(chapter.chapter).apply { last_read = Date().time }
-        db.updateHistoryLastRead(history).executeAsBlocking()
+        if (!preferences.incognitoMode().get()) {
+            val history = History.create(chapter.chapter).apply { last_read = Date().time }
+            db.updateHistoryLastRead(history).executeAsBlocking()
+        }
     }
 
     /**

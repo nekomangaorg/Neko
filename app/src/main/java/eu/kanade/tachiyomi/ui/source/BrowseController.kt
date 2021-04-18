@@ -440,15 +440,17 @@ class BrowseController :
      * Opens a catalogue with the given controller.
      */
     private fun openCatalogue(source: CatalogueSource, controller: BrowseSourceController) {
-        preferences.lastUsedCatalogueSource().set(source.id)
-        if (source !is LocalSource) {
-            val list = preferences.lastUsedSources().get().toMutableSet()
-            list.removeAll { it.startsWith("${source.id}:") }
-            list.add("${source.id}:${Date().time}")
-            val sortedList = list.filter { it.split(":").size == 2 }
-                .sortedByDescending { it.split(":").last().toLong() }
-            preferences.lastUsedSources()
-                .set(sortedList.take(2).toSet())
+        if (!preferences.incognitoMode().get()) {
+            preferences.lastUsedCatalogueSource().set(source.id)
+            if (source !is LocalSource) {
+                val list = preferences.lastUsedSources().get().toMutableSet()
+                list.removeAll { it.startsWith("${source.id}:") }
+                list.add("${source.id}:${Date().time}")
+                val sortedList = list.filter { it.split(":").size == 2 }
+                    .sortedByDescending { it.split(":").last().toLong() }
+                preferences.lastUsedSources()
+                    .set(sortedList.take(2).toSet())
+            }
         }
         router.pushController(controller.withFadeTransaction())
     }

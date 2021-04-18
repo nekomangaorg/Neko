@@ -201,6 +201,8 @@ object PreferenceKeys {
     const val showNsfwExtension = "show_nsfw_extension"
     const val labelNsfwExtension = "label_nsfw_extension"
 
+    const val incognitoMode = "incognito_mode"
+
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
