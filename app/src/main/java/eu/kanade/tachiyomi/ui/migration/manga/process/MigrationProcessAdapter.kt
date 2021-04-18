@@ -111,7 +111,7 @@ class MigrationProcessAdapter(
         if (MigrationFlags.hasChapters(flags)) {
             val prevMangaChapters = db.getChapters(prevManga).executeAsBlocking()
             val maxChapterRead =
-                prevMangaChapters.filter { it.read }.maxOf { it.chapter_number }
+                prevMangaChapters.filter { it.read }.maxOfOrNull { it.chapter_number } ?: 0f
             val dbChapters = db.getChapters(manga).executeAsBlocking()
             val prevHistoryList = db.getHistoryByMangaId(prevManga.id!!).executeAsBlocking()
             val historyList = mutableListOf<History>()
