@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -127,21 +128,25 @@ class CoverCache(val context: Context) {
     fun deleteCachedCovers() {
         if (lastClean + renewInterval < System.currentTimeMillis()) {
             GlobalScope.launch(Dispatchers.IO) {
-                val directory = onlineCoverDirectory
-                val size = DiskUtil.getDirectorySize(directory)
-                if (size <= maxOnlineCacheSize) {
-                    return@launch
-                }
-                var deletedSize = 0L
-                val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
-                    ?: return@launch
-                while (files.hasNext()) {
-                    val file = files.next()
-                    deletedSize += file.length()
-                    file.delete()
-                    if (size - deletedSize <= maxOnlineCacheSize) {
-                        break
+                try {
+                    val directory = onlineCoverDirectory
+                    val size = DiskUtil.getDirectorySize(directory)
+                    if (size <= maxOnlineCacheSize) {
+                        return@launch
                     }
+                    var deletedSize = 0L
+                    val files = directory.listFiles()?.sortedBy { it.lastModified() }?.iterator()
+                        ?: return@launch
+                    while (files.hasNext()) {
+                        val file = files.next()
+                        deletedSize += file.length()
+                        file.delete()
+                        if (size - deletedSize <= maxOnlineCacheSize) {
+                            break
+                        }
+                    }
+                } catch (e: Exception) {
+                    Timber.e(e)
                 }
             }
             lastClean = System.currentTimeMillis()

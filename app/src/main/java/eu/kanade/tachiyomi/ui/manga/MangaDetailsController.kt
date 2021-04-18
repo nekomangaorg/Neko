@@ -1079,7 +1079,7 @@ class MangaDetailsController :
         } else {
             val favButton = getHeader()?.binding?.favoriteButton ?: return
             val popup = makeFavPopup(favButton, manga, categories)
-            popup.show()
+            popup?.show()
         }
     }
 
@@ -1091,11 +1091,12 @@ class MangaDetailsController :
             return
         }
         val popup = makeFavPopup(popupView, manga, presenter.getCategories())
-        popupView.setOnTouchListener(popup.dragToOpenListener)
+        popupView.setOnTouchListener(popup?.dragToOpenListener)
     }
 
-    private fun makeFavPopup(popupView: View, manga: Manga, categories: List<Category>): PopupMenu {
-        val popup = PopupMenu(view!!.context, popupView)
+    private fun makeFavPopup(popupView: View, manga: Manga, categories: List<Category>): PopupMenu? {
+        val view = view ?: return null
+        val popup = PopupMenu(view.context, popupView)
         popup.menu.add(0, 1, 0, R.string.remove_from_library)
         if (categories.isNotEmpty()) {
             popup.menu.add(0, 0, 1, R.string.edit_categories)
