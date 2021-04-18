@@ -165,7 +165,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
                         LibraryUpdateService.stop(context)
-                        Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+                        Handler().post {
+                            NotificationReceiver.dismissNotification(
+                                context,
+                                Notifications.ID_LIBRARY_PROGRESS
+                            )
+                        }
                     }
                 }
             }
@@ -404,7 +409,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
                     getString(R.string.visit_recents_for_download_queue)
-                ).outerCircleColorInt(getResourceColor(R.attr.colorAccent)).outerCircleAlpha(0.95f).titleTextSize(20)
+                ).outerCircleColorInt(getResourceColor(R.attr.colorAccent)).outerCircleAlpha(0.95f)
+                    .titleTextSize(
+                        20
+                    )
                     .titleTextColor(android.R.color.white).descriptionTextSize(16)
                     .descriptionTextColor(R.color.md_white_1000_76)
                     .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
@@ -485,7 +493,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     router.popToRoot()
                 }
                 binding.bottomNav.post {
-                    val controller = router.backstack.firstOrNull()?.controller() as? RecentsController
+                    val controller =
+                        router.backstack.firstOrNull()?.controller() as? RecentsController
                     controller?.tempJumpTo(
                         when (intent.action) {
                             SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
@@ -664,7 +673,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         alphaAnimation.addListener(
             EndAnimatorListener {
                 binding.bottomNav.visibleIf(!hideBottomNav)
-                binding.bottomView.visibility = if (hideBottomNav) View.GONE else binding.bottomView.visibility
+                binding.bottomView.visibility =
+                    if (hideBottomNav) View.GONE else binding.bottomView.visibility
             }
         )
         alphaAnimation.duration = 200
