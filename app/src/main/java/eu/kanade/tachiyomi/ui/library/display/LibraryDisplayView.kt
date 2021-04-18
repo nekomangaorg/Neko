@@ -7,8 +7,15 @@ import android.view.ViewTreeObserver
 import android.widget.SeekBar
 import androidx.core.animation.addListener
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.customview.customView
+import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.LibraryDisplayLayoutBinding
+import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -28,6 +35,33 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         binding.resetGridSize.setOnClickListener {
             binding.gridSeekbar.progress = 3
         }
+
+        binding.reorderFiltersButton.setOnClickListener {
+            val recycler = RecyclerView(context)
+            var filterOrder = preferences.filterOrder().get()
+            if (filterOrder.count() != 6) {
+                filterOrder = FilterBottomSheet.Filters.DEFAULT_ORDER
+            }
+            val adapter = FlexibleAdapter(
+                filterOrder.toCharArray().map(::ManageFilterItem),
+                this,
+                true
+            )
+            recycler.layoutManager = LinearLayoutManager(context)
+            recycler.adapter = adapter
+            adapter.isHandleDragEnabled = true
+            adapter.isLongPressDragEnabled = true
+            MaterialDialog(context).title(R.string.reorder_filters)
+                .customView(view = recycler, scrollable = false)
+                .negativeButton(android.R.string.cancel)
+                .positiveButton(R.string.reorder) {
+                    val order = adapter.currentItems.map { it.char }.joinToString("")
+                    preferences.filterOrder().set(order)
+                    recycler.adapter = null
+                }
+                .show()
+        }
+
         binding.root.viewTreeObserver.addOnGlobalLayoutListener(object : ViewTreeObserver.OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 if (binding.root.width > 0) {

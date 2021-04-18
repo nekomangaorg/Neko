@@ -4,16 +4,9 @@ import android.content.Context
 import android.graphics.drawable.AnimatedVectorDrawable
 import android.util.AttributeSet
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.LinearLayoutManager
-import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.LibraryCategoryLayoutBinding
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Filters.Companion.DEFAULT_ORDER
-import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
@@ -53,32 +46,6 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
                     ?.onGroupClicked?.invoke(FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL)
             }
             hopperLongPress.bindToPreference(preferences.hopperLongPressAction())
-
-            reorderFiltersButton.setOnClickListener {
-                val recycler = RecyclerView(context)
-                var filterOrder = preferences.filterOrder().get()
-                if (filterOrder.count() != 6) {
-                    filterOrder = DEFAULT_ORDER
-                }
-                val adapter = FlexibleAdapter(
-                    filterOrder.toCharArray().map(::ManageFilterItem),
-                    this,
-                    true
-                )
-                recycler.layoutManager = LinearLayoutManager(context)
-                recycler.adapter = adapter
-                adapter.isHandleDragEnabled = true
-                adapter.isLongPressDragEnabled = true
-                MaterialDialog(context).title(R.string.reorder_filters)
-                    .customView(view = recycler, scrollable = false)
-                    .negativeButton(android.R.string.cancel)
-                    .positiveButton(R.string.reorder) {
-                        val order = adapter.currentItems.map { it.char }.joinToString("")
-                        preferences.filterOrder().set(order)
-                        recycler.adapter = null
-                    }
-                    .show()
-            }
         }
     }
 
