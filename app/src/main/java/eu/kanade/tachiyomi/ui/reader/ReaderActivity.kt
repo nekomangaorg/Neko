@@ -575,7 +575,12 @@ class ReaderActivity :
         binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.navigationIcon?.setTint(ContextCompat.getColor(this, R.color.tint_color_secondary))
+        binding.toolbar.navigationIcon?.setTint(
+            ContextCompat.getColor(
+                this,
+                R.color.tint_color_secondary
+            )
+        )
         binding.toolbar.setNavigationOnClickListener {
             popToMain()
         }
@@ -622,7 +627,8 @@ class ReaderActivity :
                     0.5f
                 )
                 popup.menu.forEach {
-                    it.icon = ContextCompat.getDrawable(this@ReaderActivity, R.drawable.ic_blank_24dp)
+                    it.icon =
+                        ContextCompat.getDrawable(this@ReaderActivity, R.drawable.ic_blank_24dp)
                 }
                 popup.menu.getItem(presenter.manga?.viewer ?: 0)?.let { menuItem ->
                     menuItem.icon =
