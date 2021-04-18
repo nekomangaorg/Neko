@@ -14,6 +14,7 @@ import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
+import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -39,7 +40,11 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         binding.toolbar.setNavigationOnClickListener {
             super.onBackPressed()
         }
-        binding.toolbar.navigationIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
+        val tintColor = getResourceColor(R.attr.actionBarTintColor)
+        binding.toolbar.navigationIcon?.setTint(tintColor)
+        binding.toolbar.navigationIcon?.setTint(tintColor)
+        binding.toolbar.overflowIcon?.mutate()
+        binding.toolbar.overflowIcon?.setTint(tintColor)
 
         val container: ViewGroup = findViewById(R.id.web_view_layout)
         val content: LinearLayout = binding.webLinearLayout
@@ -145,6 +150,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val lightMode = !isInNightMode()
+        setTheme(getPrefTheme(preferences).styleRes)
         window.statusBarColor = ColorUtils.setAlphaComponent(
             getResourceColor(
                 R.attr
@@ -160,6 +166,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         binding.toolbar.overflowIcon?.mutate()
         binding.toolbar.setTitleTextColor(tintColor)
         binding.toolbar.overflowIcon?.setTint(tintColor)
+        binding.swipeRefresh.setStyle()
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)

@@ -22,6 +22,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorSecondary"
             android:theme="?attr/actionBarTheme"
+            app:titleTextColor="?actionBarTintColor"
             app:navigationIcon="@drawable/ic_close_24dp"
             app:layout_scrollFlags="scroll|enterAlways" />
 
