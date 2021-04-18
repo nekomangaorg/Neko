@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
 import eu.kanade.tachiyomi.util.view.invisible
@@ -89,18 +88,9 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 window.statusBarColor = Color.BLACK
             else window.statusBarColor = getResourceColor(R.attr.colorPrimary)*/
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                val colorPrimary = getResourceColor(R.attr.colorPrimaryVariant)
-                if (colorPrimary == Color.WHITE) Color.BLACK
-                else getResourceColor(android.R.attr.colorPrimary)
-            }
-            // if the android q+ device has gesture nav, transparent nav bar
-            else if (v.rootWindowInsets.isBottomTappable()) {
-                getColor(android.R.color.transparent)
+                Color.BLACK
             } else {
-                ColorUtils.setAlphaComponent(
-                    getResourceColor(R.attr.colorPrimaryVariant),
-                    179
-                )
+                getResourceColor(R.attr.colorPrimaryVariant)
             }
             v.setPadding(
                 insets.systemWindowInsetLeft,
@@ -130,8 +120,9 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 }
             }
             val marginB = binding.webview.marginBottom
-            binding.webview.setOnApplyWindowInsetsListener { v, insets ->
+            binding.swipeRefresh.setOnApplyWindowInsetsListener { v, insets ->
                 val bottomInset = insets.systemWindowInsetBottom
+//                v.updatePaddingRelative(bottom = bottomInset)
                 v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = marginB + bottomInset
                 }
@@ -168,24 +159,41 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         binding.toolbar.overflowIcon?.setTint(tintColor)
         binding.swipeRefresh.setStyle()
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
-        } else if (window.navigationBarColor != getColor(android.R.color.transparent)) {
-            window.navigationBarColor = getResourceColor(android.R.attr.colorBackground)
-        }
+        window.navigationBarColor =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) getResourceColor(R.attr.colorPrimaryVariant)
+            else Color.BLACK
 
         binding.webLinearLayout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && lightMode) {
-            binding.webLinearLayout.systemUiVisibility = binding.webLinearLayout.systemUiVisibility.or(
-                View
-                    .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val lightNav =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    val typedValue = TypedValue()
+                    theme.resolveAttribute(
+                        android.R.attr.windowLightNavigationBar,
+                        typedValue,
+                        true
+                    )
+                    typedValue.data == -1
+                } else {
+                    lightMode
+                }
+            if (lightNav) {
+                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility.or(
+                    View
+                        .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                )
+            } else {
+                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility.rem(
+                    View
+                        .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                )
+            }
         }
+
         val typedValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
-
         if (typedValue.data == -1) {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)

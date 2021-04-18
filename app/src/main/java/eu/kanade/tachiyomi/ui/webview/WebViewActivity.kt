@@ -69,10 +69,7 @@ open class WebViewActivity : BaseWebViewActivity() {
                     invalidateOptionsMenu()
                     title = view?.title
                     binding.swipeRefresh.isEnabled = true
-                    binding.swipeRefresh?.isRefreshing = false
-                    view?.evaluateJavascript("getComputedStyle(document.querySelector('body')).backgroundColor") {
-                        binding.nestedView.setBackgroundColor(parseHTMLColor(it))
-                    }
+                    binding.swipeRefresh.isRefreshing = false
                 }
 
                 override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/web_view_layout"
@@ -31,18 +31,13 @@
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nested_view"
-        android:layout_width="match_parent"
         android:layout_height="match_parent">
+
         <WebView
             android:id="@+id/webview"
             android:nestedScrollingEnabled="true"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="match_parent" >
 
             <ProgressBar
                 android:id="@+id/progressBar"
@@ -54,8 +49,6 @@
                 />
         </WebView>
 
-    </androidx.core.widget.NestedScrollView>
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</LinearLayout>
