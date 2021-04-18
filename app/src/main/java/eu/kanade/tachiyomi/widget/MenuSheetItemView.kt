@@ -13,6 +13,7 @@ import androidx.core.view.isGone
 import androidx.core.widget.TextViewCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
@@ -68,6 +69,23 @@ class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: Attri
 
     fun setText(@StringRes res: Int) {
         text = context.getString(res)
+    }
+
+    fun selectWithEndIcon(@DrawableRes endDrawableRes: Int) {
+        isSelected = true
+        setEndIcon(endDrawableRes)
+    }
+
+    override fun setSelected(selected: Boolean) {
+        super.setSelected(selected)
+        if (isSelected) {
+            setIconColor(context.getResourceColor(R.attr.colorAccent))
+            setTextColor(context.getResourceColor(R.attr.colorAccent))
+        } else {
+            setTextColor(context.getResourceColor(android.R.attr.textColorPrimary))
+            setIconColor(context.getResourceColor(android.R.attr.textColorPrimary))
+            setEndIcon(0)
+        }
     }
 
     fun setTextColor(@ColorInt color: Int) {

@@ -87,8 +87,7 @@ open class MaterialMenuSheet(
 
                 if (item.id == selectedId) {
                     currentIndex = index
-                    setIconColor(activity.getResourceColor(R.attr.colorAccent))
-                    setTextColor(activity.getResourceColor(R.attr.colorAccent))
+                    isSelected = true
                 }
 
                 setOnClickListener {
@@ -142,10 +141,7 @@ open class MaterialMenuSheet(
 
     private fun clearEndDrawables() {
         (0 until binding.menuLayout.childCount).forEach {
-            val itemView = (binding.menuLayout.getChildAt(it) as MenuSheetItemView)
-            itemView.setTextColor(primaryColor)
-            itemView.setIconColor(primaryColor)
-            itemView.setEndIcon(0)
+            (binding.menuLayout.getChildAt(it) as? MenuSheetItemView)?.isSelected = false
         }
     }
 
@@ -153,10 +149,7 @@ open class MaterialMenuSheet(
         if (clearAll) {
             clearEndDrawables()
         }
-        val layout = binding.menuLayout.findViewById<MenuSheetItemView>(id) ?: return
-        layout.setTextColor(layout.context.getResourceColor(R.attr.colorAccent))
-        layout.setIconColor(layout.context.getResourceColor(R.attr.colorAccent))
-        layout.setEndIcon(drawableRes)
+        binding.menuLayout.findViewById<MenuSheetItemView>(id)?.selectWithEndIcon(drawableRes)
     }
 
     data class MenuSheetItem(
