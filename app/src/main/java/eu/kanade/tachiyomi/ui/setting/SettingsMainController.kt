@@ -10,7 +10,6 @@ import com.bluelinelabs.conductor.RouterTransaction
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SettingsMainController : SettingsController() {
@@ -78,12 +77,6 @@ class SettingsMainController : SettingsController() {
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
-        preference {
-            iconRes = R.drawable.ic_info_24dp
-            iconTint = tintColor
-            titleRes = R.string.about
-            onClick { navigateTo(AboutController()) }
-        }
         this
     }
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
@@ -112,14 +105,6 @@ class SettingsMainController : SettingsController() {
                 }
             }
         )
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_help -> activity?.openInBrowser(URL_HELP)
-            else -> return super.onOptionsItemSelected(item)
-        }
-        return true
     }
 
     private fun navigateTo(controller: Controller) {

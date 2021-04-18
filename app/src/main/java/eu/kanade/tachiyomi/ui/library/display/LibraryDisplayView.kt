@@ -2,9 +2,6 @@ package eu.kanade.tachiyomi.ui.library.display
 
 import android.animation.ValueAnimator
 import android.content.Context
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
 import android.util.AttributeSet
 import android.view.ViewTreeObserver
 import android.widget.SeekBar
@@ -15,7 +12,6 @@ import eu.kanade.tachiyomi.databinding.LibraryDisplayLayoutBinding
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.rowsForValue
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
 import eu.kanade.tachiyomi.widget.EndAnimatorListener

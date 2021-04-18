@@ -59,7 +59,6 @@ class SettingsSearchController :
         inflater.inflate(R.menu.settings_main, menu)
 
         // Initialize search menu
-        menu.findItem(R.id.action_help).isVisible = false
         val searchItem = menu.findItem(R.id.action_search)
         searchView = searchItem.actionView as SearchView
         searchView.maxWidth = Int.MAX_VALUE

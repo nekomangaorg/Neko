@@ -1,9 +1,6 @@
 package eu.kanade.tachiyomi.ui.recents
 
 import android.app.Activity
-import android.text.Spannable
-import android.text.SpannableStringBuilder
-import android.text.style.ForegroundColorSpan
 import android.view.ViewGroup
 import androidx.core.text.set
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -13,7 +10,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.RecentsOptionsSheetBinding
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.withSubtitle
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import uy.kohesive.injekt.injectLazy

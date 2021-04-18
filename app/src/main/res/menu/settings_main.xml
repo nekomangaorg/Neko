@@ -8,10 +8,4 @@
         android:title="@string/search"
         app:actionViewClass="androidx.appcompat.widget.SearchView"
         app:showAsAction="collapseActionView|ifRoom" />
-
-    <item
-        android:id="@+id/action_help"
-        android:title="@string/help"
-        android:icon="@drawable/ic_help_24dp"
-        app:showAsAction="ifRoom"/>
 </menu>
