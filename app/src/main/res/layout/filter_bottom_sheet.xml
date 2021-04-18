@@ -8,14 +8,23 @@
     android:background="@drawable/bottom_sheet_rounded_background"
     android:elevation="7dp"
     android:orientation="vertical"
-    android:clickable="true"
-    android:focusable="true"
     app:behavior_peekHeight="60dp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <!-- View for dragging the sheet without highlighting everything -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:clickable="true"
+            android:focusable="true" />
 
         <LinearLayout
             android:id="@+id/sheet_layout"
