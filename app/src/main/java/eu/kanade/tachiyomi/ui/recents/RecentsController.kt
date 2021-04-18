@@ -627,6 +627,7 @@ class RecentsController(bundle: Bundle? = null) :
     fun hasQueue() = presenter.downloadManager.hasQueue()
 
     override fun showSheet() {
+        if (!isBindingInitialized) return
         if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == false || hasQueue()) {
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }

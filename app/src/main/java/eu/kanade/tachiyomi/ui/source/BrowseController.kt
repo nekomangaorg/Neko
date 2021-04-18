@@ -305,6 +305,7 @@ class BrowseController :
     }
 
     override fun showSheet() {
+        if (!isBindingInitialized) return
         binding.bottomSheet.root.sheetBehavior?.expand()
     }
 
