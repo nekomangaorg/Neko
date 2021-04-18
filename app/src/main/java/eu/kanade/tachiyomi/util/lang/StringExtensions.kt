@@ -99,6 +99,17 @@ fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
     }
 }
 
+fun String.withSubtitle(context: Context, subtitle: String): Spanned {
+    val spannable = SpannableStringBuilder(this + "\n" + subtitle)
+    spannable.setSpan(
+        ForegroundColorSpan(context.getResourceColor(android.R.attr.textColorSecondary)),
+        this.length + 1,
+        spannable.length,
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+    )
+    return spannable
+}
+
 fun String.addBetaTag(context: Context): Spanned {
     val betaText = context.getString(R.string.beta)
     val betaSpan = SpannableStringBuilder(this + betaText)

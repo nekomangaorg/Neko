@@ -187,6 +187,15 @@
         <item name="android:statusBarColor">@android:color/transparent</item>
     </style>
 
+    <style name="OverflowDialogTheme" parent="BottomSheetDialogTheme">
+        <item name="android:windowAnimationStyle">@style/Theme.Widget.Animation.DropFromAbove</item>
+    </style>
+
+    <style name="Theme.Widget.Animation.DropFromAbove" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/fade_in_grow_from_top</item>
+        <item name="android:windowExitAnimation">@anim/fade_out_short</item>
+    </style>
+
     <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/text_input_stroke</item>
         <item name="hintTextColor">?colorAccent</item>

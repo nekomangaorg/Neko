@@ -16,9 +16,8 @@
         app:showAsAction="ifRoom"/>
 
     <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_24dp"
-        android:title="@string/settings"
-        app:showAsAction="ifRoom"
-        />
+        android:id="@+id/action_more"
+        android:icon="@drawable/ic_more_vert_24dp"
+        android:title="@string/more"
+        app:showAsAction="ifRoom" />
 </menu>

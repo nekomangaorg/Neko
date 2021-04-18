@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
@@ -29,8 +30,6 @@ import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
-import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.snackbar.Snackbar
@@ -112,6 +111,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     var tabAnimation: ValueAnimator? = null
+    var overflowDialog: Dialog? = null
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -548,6 +548,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     override fun onDestroy() {
         super.onDestroy()
+        overflowDialog?.dismiss()
+        overflowDialog = null
         DownloadService.removeListener(this)
         if (isBindingInitialized) {
             binding.toolbar.setNavigationOnClickListener(null)
@@ -609,16 +611,26 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             // Initialize option to open catalogue settings.
-            R.id.action_settings -> {
-                router.pushController(
-                    (RouterTransaction.with(SettingsMainController())).popChangeHandler(
-                        FadeChangeHandler()
-                    ).pushChangeHandler(FadeChangeHandler())
-                )
+            R.id.action_more -> {
+                if (overflowDialog != null) return false
+                val overflowDialog = OverflowDialog(this)
+                this.overflowDialog = overflowDialog
+                overflowDialog.setOnDismissListener {
+                    this.overflowDialog = null
+                }
+                overflowDialog.show()
             }
             else -> return super.onOptionsItemSelected(item)
         }
         return super.onOptionsItemSelected(item)
+    }
+
+    fun showSettings() {
+        router.pushController(SettingsMainController().withFadeTransaction())
+    }
+
+    fun showAbout() {
+        router.pushController(AboutController().withFadeTransaction())
     }
 
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
