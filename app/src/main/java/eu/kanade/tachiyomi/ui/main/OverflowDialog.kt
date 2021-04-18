@@ -66,7 +66,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
             dismiss()
         }
 
-        binding.aboutItem.text = context.getString(R.string.about).withSubtitle(context, "v${BuildConfig.VERSION_NAME}")
+        binding.aboutItem.text = context.getString(R.string.about).withSubtitle(binding.aboutItem.context, "v${BuildConfig.VERSION_NAME}")
 
         binding.aboutItem.setOnClickListener {
             activity.showAbout()
