@@ -9,7 +9,7 @@ import android.widget.LinearLayout
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.core.view.isInvisible
+import androidx.core.view.isGone
 import androidx.core.widget.TextViewCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
@@ -19,6 +19,7 @@ class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: Attri
     private val mText: String
     private val mIconRes: Int
     private val mEndIconRes: Int
+    private val mMaxLines: Int
 
     private var binding: MenuSheetItemBinding? = null
 
@@ -34,6 +35,9 @@ class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: Attri
         val e = a.getResourceId(R.styleable.MenuSheetItemView_endIcon, 0)
         mEndIconRes = e
 
+        val m = a.getInt(R.styleable.MenuSheetItemView_android_maxLines, Int.MAX_VALUE)
+        mMaxLines = m
+
         a.recycle()
     }
 
@@ -47,6 +51,7 @@ class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: Attri
         text = mText
         setIcon(mIconRes)
         setEndIcon(mEndIconRes)
+        binding?.itemTextView?.maxLines = mMaxLines
     }
 
     var text: CharSequence?
@@ -85,13 +90,26 @@ class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: Attri
         )
     }
 
+    fun setIcon(drawable: Drawable?) {
+        binding?.itemTextView?.setCompoundDrawablesRelativeWithIntrinsicBounds(
+            drawable,
+            null,
+            null,
+            null,
+        )
+    }
+
+    fun getIcon(): Drawable? {
+        return binding?.itemTextView?.compoundDrawablesRelative?.getOrNull(0)
+    }
+
     fun setEndIcon(@DrawableRes res: Int) {
-        binding?.menuEndItem?.isInvisible = res == 0
+        binding?.menuEndItem?.isGone = res == 0
         binding?.menuEndItem?.setImageResource(res)
     }
 
     fun setEndIcon(drawable: Drawable?) {
-        binding?.menuEndItem?.isInvisible = drawable == null
+        binding?.menuEndItem?.isGone = drawable == null
         binding?.menuEndItem?.setImageDrawable(drawable)
     }
 }

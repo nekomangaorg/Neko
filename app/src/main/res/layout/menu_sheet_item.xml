@@ -5,8 +5,6 @@
     android:layout_height="48sp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
     android:orientation="horizontal"
     tools:icon="@drawable/ic_share_24dp"
     tools:endIcon="@drawable/ic_arrow_downward_24dp"
@@ -22,6 +20,7 @@
         android:gravity="center|start"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:ellipsize="end"
         android:textColor="?android:textColorPrimary"
         android:textSize="13sp"
         android:tint="@color/md_white_1000_54" />

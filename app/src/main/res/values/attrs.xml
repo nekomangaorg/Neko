@@ -28,6 +28,7 @@
 
     <declare-styleable name="MenuSheetItemView">
         <attr name="android:text"/>
+        <attr name="android:maxLines"/>
         <attr name="icon" format="reference"/>
         <attr name="endIcon" format="reference"/>
     </declare-styleable>
