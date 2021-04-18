@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.LibraryDisplayLayoutBinding
 import eu.kanade.tachiyomi.util.bindToPreference
+import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.rowsForValue
@@ -96,14 +97,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
             val rows = this@LibraryDisplayView.rowsForValue(progress)
             val titleText = context.getString(R.string.grid_size)
             val subtitleText = context.getString(R.string._per_row, rows)
-            val spannable = SpannableStringBuilder(titleText + "\n" + subtitleText)
-            spannable.setSpan(
-                ForegroundColorSpan(context.getResourceColor(android.R.attr.textColorSecondary)),
-                titleText.length + 1,
-                spannable.length,
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-            )
-            text = spannable
+            text = titleText.withSubtitle(context, subtitleText)
         }
     }
 

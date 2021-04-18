@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.RecentsOptionsSheetBinding
 import eu.kanade.tachiyomi.util.bindToPreference
+import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
@@ -36,14 +37,7 @@ class RecentsOptionsSheet(activity: Activity) :
 
         val titleText = context.getString(R.string.show_reset_history_button)
         val subtitleText = context.getString(R.string.press_and_hold_to_also_reset)
-        val spannable = SpannableStringBuilder(titleText + "\n" + subtitleText)
-        spannable.setSpan(
-            ForegroundColorSpan(binding.showRemoveHistory.context.getResourceColor(android.R.attr.textColorSecondary)),
-            titleText.length + 1,
-            spannable.length,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
-        )
-        binding.showRemoveHistory.text = spannable
+        binding.showRemoveHistory.text = titleText.withSubtitle(context, subtitleText)
     }
 
     private fun initGeneralPreferences() {
