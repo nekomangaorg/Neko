@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.database.resolvers
 
-import android.content.ContentValues
 import androidx.annotation.NonNull
+import androidx.core.content.contentValuesOf
 import com.pushtorefresh.storio.sqlite.StorIOSQLite
 import com.pushtorefresh.storio.sqlite.operations.put.PutResult
 import com.pushtorefresh.storio.sqlite.queries.Query
@@ -27,19 +27,15 @@ class HistoryLastReadPutResolver : HistoryPutResolver() {
                 .build()
         )
 
-        val putResult: PutResult
-
-        try {
-            if (cursor.count == 0) {
+        val putResult = cursor.use { putCursor ->
+            if (putCursor.count == 0) {
                 val insertQuery = mapToInsertQuery(history)
                 val insertedId = db.lowLevel().insert(insertQuery, mapToContentValues(history))
-                putResult = PutResult.newInsertResult(insertedId, insertQuery.table())
+                PutResult.newInsertResult(insertedId, insertQuery.table())
             } else {
                 val numberOfRowsUpdated = db.lowLevel().update(updateQuery, mapToUpdateContentValues(history))
-                putResult = PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
+                PutResult.newUpdateResult(numberOfRowsUpdated, updateQuery.table())
             }
-        } finally {
-            cursor.close()
         }
 
         putResult
@@ -59,7 +55,8 @@ class HistoryLastReadPutResolver : HistoryPutResolver() {
      * Create content query
      * @param history object
      */
-    fun mapToUpdateContentValues(history: History) = ContentValues(1).apply {
-        put(HistoryTable.COL_LAST_READ, history.last_read)
-    }
+    private fun mapToUpdateContentValues(history: History) =
+        contentValuesOf(
+            HistoryTable.COL_LAST_READ to history.last_read
+        )
 }
