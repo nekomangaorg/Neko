@@ -760,6 +760,7 @@
     <string name="manage_whats_downloading">Manage what\'s downloading</string>
     <string name="visit_recents_for_download_queue">Visit the recents tab to access the download
         queue. You can also double tap or press and hold for quicker access</string>
+    <string name="couldnt_download_low_space">Couldn\'t download chapters due to low disk space</string>
 
     <!-- Download Notification -->
     <string name="could_not_download_unexpected_error">Could not download chapter due to unexpected error</string>

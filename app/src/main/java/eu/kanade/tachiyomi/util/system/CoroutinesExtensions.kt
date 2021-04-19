@@ -11,6 +11,9 @@ import kotlinx.coroutines.withContext
 fun launchUI(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.DEFAULT, block)
 
+fun launchIO(block: suspend CoroutineScope.() -> Unit): Job =
+    GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT, block)
+
 fun launchNow(block: suspend CoroutineScope.() -> Unit): Job =
     GlobalScope.launch(Dispatchers.Main, CoroutineStart.UNDISPATCHED, block)
 
