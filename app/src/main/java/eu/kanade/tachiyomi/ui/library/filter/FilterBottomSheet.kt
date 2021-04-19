@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
+import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.StringRes
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -129,7 +131,22 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
 
+        post {
+            if (binding.secondLayout.width + binding.firstLayout.width + 20.dpToPx < width) {
+                binding.secondLayout.removeView(binding.viewOptions)
+                binding.firstLayout.addView(binding.viewOptions)
+                binding.secondLayout.isVisible = false
+            } else if (binding.viewOptions.parent == binding.firstLayout) {
+                binding.firstLayout.removeView(binding.viewOptions)
+                binding.secondLayout.addView(binding.viewOptions)
+                binding.secondLayout.isVisible = true
+            }
+        }
+
         sheetBehavior?.hide()
+        binding.expandCategories.setOnClickListener {
+            onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
+        }
         binding.groupBy.setOnClickListener {
             onGroupClicked(ACTION_GROUP_BY)
         }
@@ -156,6 +173,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         createTags()
         clearButton.setOnClickListener { clearFilters() }
+
+        setExpandText(controller.canCollapseOrExpandCategory(), false)
 
         clearButton.compatToolTipText = context.getString(R.string.clear_filters)
         preferences.filterOrder().asFlow()
@@ -202,6 +221,36 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             libraryRecyler?.updatePaddingRelative(bottom = value + 10.dpToPx + bottomBarHeight)
         } else {
             libraryRecyler?.updatePaddingRelative(bottom = (minHeight * (1 + trueProgress)).toInt() + bottomBarHeight)
+        }
+    }
+
+    fun setExpandText(allExpanded: Boolean?, animated: Boolean = true) {
+        binding.expandCategories.isVisible = allExpanded != null
+        allExpanded ?: return
+        binding.expandCategories.setText(
+            if (!allExpanded) {
+                R.string.expand_all_categories
+            } else {
+                R.string.collapse_all_categories
+            }
+        )
+        if (animated) {
+            binding.expandCategories.setIconResource(
+                if (!allExpanded) {
+                    R.drawable.anim_expand_less_to_more
+                } else {
+                    R.drawable.anim_expand_more_to_less
+                }
+            )
+            (binding.expandCategories.icon as? AnimatedVectorDrawable)?.start()
+        } else {
+            binding.expandCategories.setIconResource(
+                if (!allExpanded) {
+                    R.drawable.ic_expand_more_24dp
+                } else {
+                    R.drawable.ic_expand_less_24dp
+                }
+            )
         }
     }
 
@@ -400,7 +449,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun updateButtons(groupType: Int) {
+    fun updateGroupTypeButton(groupType: Int) {
         binding.groupBy.setIconResource(LibraryGroup.groupTypeDrawableRes(groupType))
     }
 

@@ -94,6 +94,24 @@
                     app:iconTint="?android:attr/textColorPrimary" />
 
                 <com.google.android.material.button.MaterialButton
+                    android:id="@+id/expand_categories"
+                    style="@style/Theme.Widget.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:maxLines="2"
+                    android:text="@string/expand_all_categories"
+                    android:textColor="?android:attr/textColorPrimary"
+                    app:icon="@drawable/ic_expand_more_24dp"
+                    app:iconTint="?android:attr/textColorPrimary" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/second_layout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+
+                <com.google.android.material.button.MaterialButton
                     android:id="@+id/view_options"
                     style="@style/Theme.Widget.Button.TextButton"
                     android:layout_width="wrap_content"
@@ -104,6 +122,7 @@
                     android:textColor="?android:attr/textColorPrimary"
                     app:icon="@drawable/ic_tune_24dp"
                     app:iconTint="?android:attr/textColorPrimary" />
+
             </LinearLayout>
         </LinearLayout>
 

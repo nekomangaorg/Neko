@@ -11,18 +11,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/expand_collapse_categories"
-            style="@style/Theme.Widget.Button.TextButton"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:textAlignment="textStart"
-            app:icon="@drawable/ic_expand_more_24dp"
-            android:layout_marginStart="8dp"
-            android:textColor="?android:attr/textColorPrimary"
-            app:iconTint="?android:attr/textColorPrimary"
-            android:text="@string/expand_all_categories" />
-
         <com.google.android.material.checkbox.MaterialCheckBox
             android:id="@+id/category_show"
             android:layout_width="match_parent"

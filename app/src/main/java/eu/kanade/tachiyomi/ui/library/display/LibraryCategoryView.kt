@@ -1,12 +1,8 @@
 package eu.kanade.tachiyomi.ui.library.display
 
 import android.content.Context
-import android.graphics.drawable.AnimatedVectorDrawable
 import android.util.AttributeSet
-import androidx.core.view.isVisible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.LibraryCategoryLayoutBinding
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
@@ -41,41 +37,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             addCategoriesButton.setOnClickListener {
                 controller?.showCategoriesController()
             }
-            expandCollapseCategories.setOnClickListener {
-                controller?.binding?.filterBottomSheet?.root
-                    ?.onGroupClicked?.invoke(FilterBottomSheet.ACTION_EXPAND_COLLAPSE_ALL)
-            }
             hopperLongPress.bindToPreference(preferences.hopperLongPressAction())
-        }
-    }
-
-    fun setExpandText(allExpanded: Boolean?, animated: Boolean = true) {
-        binding.expandCollapseCategories.isVisible = allExpanded != null
-        allExpanded ?: return
-        binding.expandCollapseCategories.setText(
-            if (!allExpanded) {
-                R.string.expand_all_categories
-            } else {
-                R.string.collapse_all_categories
-            }
-        )
-        if (animated) {
-            binding.expandCollapseCategories.setIconResource(
-                if (!allExpanded) {
-                    R.drawable.anim_expand_less_to_more
-                } else {
-                    R.drawable.anim_expand_more_to_less
-                }
-            )
-            (binding.expandCollapseCategories.icon as? AnimatedVectorDrawable)?.start()
-        } else {
-            binding.expandCollapseCategories.setIconResource(
-                if (!allExpanded) {
-                    R.drawable.ic_expand_more_24dp
-                } else {
-                    R.drawable.ic_expand_less_24dp
-                }
-            )
         }
     }
 }

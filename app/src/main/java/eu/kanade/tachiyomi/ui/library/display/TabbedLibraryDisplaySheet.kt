@@ -37,17 +37,8 @@ open class TabbedLibraryDisplaySheet(val controller: Controller) :
             controller.router.pushController(SettingsLibraryController().withFadeTransaction())
             dismiss()
         }
-
-        if (controller is LibraryController) {
-            setExpandText(controller.canCollapseOrExpandCategory(), false)
-        } else {
-            setExpandText(null)
-            categoryView.binding.addCategoriesButton.isVisible = false
-        }
+        categoryView.binding.addCategoriesButton.isVisible = controller is LibraryController
     }
-
-    fun setExpandText(allExpanded: Boolean?, animated: Boolean = true) =
-        categoryView.setExpandText(allExpanded, animated)
 
     override fun dismiss() {
         super.dismiss()

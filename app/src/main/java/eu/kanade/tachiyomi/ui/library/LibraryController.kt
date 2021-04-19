@@ -913,12 +913,12 @@ class LibraryController(
         }
 
         binding.categoryHopperFrame.visibleIf(!singleCategory && !preferences.hideHopper().get())
-        binding.filterBottomSheet.filterBottomSheet.updateButtons(
-            groupType = presenter.groupType
-        )
         adapter.isLongPressDragEnabled = canDrag()
         binding.categoryRecycler.setCategories(presenter.categories)
-        displaySheet?.setExpandText(canCollapseOrExpandCategory())
+        with(binding.filterBottomSheet.root) {
+            updateGroupTypeButton(presenter.groupType)
+            setExpandText(canCollapseOrExpandCategory())
+        }
         if (shouldScrollToTop) {
             binding.libraryGridRecycler.recycler.scrollToPosition(0)
             shouldScrollToTop = false
