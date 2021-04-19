@@ -80,14 +80,6 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         }
         val category = item.category
 
-        if (category.isDynamic) {
-            binding.categoryHeaderLayout.background = null
-            binding.categoryTitle.background = null
-        } else {
-            binding.categoryHeaderLayout.setBackgroundResource(R.drawable.list_item_selector)
-            binding.categoryTitle.setBackgroundResource(R.drawable.square_ripple)
-        }
-
         if (category.isAlone && !category.isDynamic) binding.categoryTitle.text = ""
         else binding.categoryTitle.text = category.name
         if (category.sourceId != null) {
@@ -115,7 +107,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
                 binding.checkbox.visibleIf(!category.isHidden)
-                binding.collapseArrow.visibleIf(category.isHidden && !adapter.isSingleCategory && !category.isDynamic)
+                binding.collapseArrow.visibleIf(category.isHidden && !adapter.isSingleCategory)
                 binding.updateButton.gone()
                 binding.catProgress.gone()
                 setSelection()
@@ -127,13 +119,13 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 binding.updateButton.gone()
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
-                binding.collapseArrow.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
+                binding.collapseArrow.visibleIf(!adapter.isSingleCategory)
                 binding.checkbox.gone()
                 binding.catProgress.visible()
                 binding.updateButton.invisible()
             }
             else -> {
-                binding.collapseArrow.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
+                binding.collapseArrow.visibleIf(!adapter.isSingleCategory)
                 binding.catProgress.gone()
                 binding.checkbox.gone()
                 binding.updateButton.visibleIf(!adapter.isSingleCategory)

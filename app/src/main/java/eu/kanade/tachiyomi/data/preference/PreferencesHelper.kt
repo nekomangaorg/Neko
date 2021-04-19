@@ -69,6 +69,14 @@ operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.minusAssign(item: T)
     set(get() - item)
 }
 
+operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.plusAssign(item: Collection<T>) {
+    set(get() + item)
+}
+
+operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.minusAssign(item: Collection<T>) {
+    set(get() - item)
+}
+
 class PreferencesHelper(val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
@@ -269,6 +277,8 @@ class PreferencesHelper(val context: Context) {
     fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, true)
 
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
+
+    fun collapsedDynamicCategories() = flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())
 
     fun hiddenSources() = flowPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 

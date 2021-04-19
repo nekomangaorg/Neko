@@ -918,10 +918,7 @@ class LibraryController(
         )
         adapter.isLongPressDragEnabled = canDrag()
         binding.categoryRecycler.setCategories(presenter.categories)
-        displaySheet?.setExpandText(
-            showExpanded = !singleCategory && presenter.showAllCategories,
-            allExpanded = preferences.collapsedCategories().getOrDefault().isNotEmpty()
-        )
+        displaySheet?.setExpandText(canCollapseOrExpandCategory())
         if (shouldScrollToTop) {
             binding.libraryGridRecycler.recycler.scrollToPosition(0)
             shouldScrollToTop = false
@@ -1380,6 +1377,19 @@ class LibraryController(
         }
         val catId = (adapter.getItem(position) as? LibraryHeaderItem)?.category?.id ?: return
         presenter.toggleCategoryVisibility(catId)
+    }
+
+    /**
+     * Nullable Boolean to tell is all is collapsed/expanded/applicable
+     * true = all categories are expanded
+     * false = all or some categories are collapsed
+     * null = is in single category mode
+     */
+    fun canCollapseOrExpandCategory(): Boolean? {
+        if (singleCategory || !presenter.showAllCategories) {
+            return null
+        }
+        return presenter.allCategoriesExpanded()
     }
 
     override fun manageCategory(position: Int) {

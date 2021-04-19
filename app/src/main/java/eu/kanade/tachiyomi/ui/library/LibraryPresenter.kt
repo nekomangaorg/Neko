@@ -11,6 +11,8 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.preference.minusAssign
+import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
@@ -581,12 +583,13 @@ class LibraryPresenter(
                 }
                 BY_SOURCE -> {
                     val source = sourceManager.getOrStub(manga.source)
-                    listOf(LibraryItem(manga, makeOrGetHeader("${source.name}◘•◘${source.id}")))
+                    listOf(LibraryItem(manga, makeOrGetHeader("${source.name}$sourceSplitter${source.id}")))
                 }
                 else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))
             }
-        }.flatten()
+        }.flatten().toMutableList()
 
+        val hiddenDynamics = preferences.collapsedDynamicCategories().get()
         val headers = tagItems.map { item ->
             Category.createCustom(
                 item.key,
@@ -594,11 +597,12 @@ class LibraryPresenter(
                 preferences.librarySortingAscending().getOrDefault()
             ).apply {
                 id = item.value.catId
-                if (name.contains("◘•◘")) {
-                    val split = name.split("◘•◘")
+                if (name.contains(sourceSplitter)) {
+                    val split = name.split(sourceSplitter)
                     name = split.first()
                     sourceId = split.last().toLongOrNull()
                 }
+                isHidden = getDynamicCategoryName(this) in hiddenDynamics
             }
         }.sortedBy {
             if (groupType == BY_TRACK_STATUS) {
@@ -607,6 +611,22 @@ class LibraryPresenter(
                 it.name
             }
         }
+        headers.forEach { category ->
+            val catId = category.id ?: return@forEach
+            val headerItem = tagItems[if (category.sourceId != null) "${category.name}$sourceSplitter${category.sourceId}" else category.name]
+            if (category.isHidden) {
+                val mangaToRemove = items.filter { it.header.catId == catId }
+                val mergedTitle = mangaToRemove.joinToString("-") {
+                    it.manga.title + "-" + it.manga.author
+                }
+                sectionedLibraryItems[catId] = mangaToRemove
+                items.removeAll { it.header.catId == catId }
+                if (headerItem != null) items.add(
+                    LibraryItem(LibraryManga.createHide(catId, mergedTitle), headerItem)
+                )
+            }
+        }
+
         headers.forEachIndexed { index, category -> category.order = index }
         return items to headers
     }
@@ -858,26 +878,59 @@ class LibraryPresenter(
     }
 
     fun toggleCategoryVisibility(categoryId: Int) {
-        if (categories.find { it.id == categoryId }?.isDynamic == true) return
-        val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
-            it.toIntOrNull()
-        }.toMutableSet()
-        if (categoryId in categoriesHidden) {
-            categoriesHidden.remove(categoryId)
+        // if (categories.find { it.id == categoryId }?.isDynamic == true) return
+        if (groupType == BY_DEFAULT) {
+            val categoriesHidden = preferences.collapsedCategories().getOrDefault().mapNotNull {
+                it.toIntOrNull()
+            }.toMutableSet()
+            if (categoryId in categoriesHidden) {
+                categoriesHidden.remove(categoryId)
+            } else {
+                categoriesHidden.add(categoryId)
+            }
+            preferences.collapsedCategories()
+                .set(categoriesHidden.map { it.toString() }.toMutableSet())
         } else {
-            categoriesHidden.add(categoryId)
+            val categoriesHidden = preferences.collapsedDynamicCategories().get().toMutableSet()
+            val category = getCategory(categoryId)
+            val dynamicName = getDynamicCategoryName(category)
+            if (dynamicName in categoriesHidden) {
+                categoriesHidden.remove(dynamicName)
+            } else {
+                categoriesHidden.add(dynamicName)
+            }
+            preferences.collapsedDynamicCategories().set(categoriesHidden)
         }
-        preferences.collapsedCategories().set(categoriesHidden.map { it.toString() }.toMutableSet())
         getLibrary()
     }
 
+    private fun getDynamicCategoryName(category: Category): String =
+        groupType.toString() + dynamicCategorySplitter + (category.sourceId?.toString() ?: category.name)
+
     fun toggleAllCategoryVisibility() {
-        if (preferences.collapsedCategories().getOrDefault().isEmpty()) {
-            preferences.collapsedCategories().set(allCategories.map { it.id.toString() }.toMutableSet())
+        if (groupType == BY_DEFAULT) {
+            if (allCategoriesExpanded()) {
+                preferences.collapsedCategories()
+                    .set(allCategories.map { it.id.toString() }.toMutableSet())
+            } else {
+                preferences.collapsedCategories().set(mutableSetOf())
+            }
         } else {
-            preferences.collapsedCategories().set(mutableSetOf())
+            if (allCategoriesExpanded()) {
+                preferences.collapsedDynamicCategories() += categories.map { getDynamicCategoryName(it) }
+            } else {
+                preferences.collapsedDynamicCategories() -= categories.map { getDynamicCategoryName(it) }
+            }
         }
         getLibrary()
+    }
+
+    fun allCategoriesExpanded(): Boolean {
+        return if (groupType == BY_DEFAULT) {
+            preferences.collapsedCategories().getOrDefault().isEmpty()
+        } else {
+            categories.none { it.isHidden }
+        }
     }
 
     /** download All unread */
@@ -925,6 +978,8 @@ class LibraryPresenter(
     companion object {
         private var lastLibraryItems: List<LibraryItem>? = null
         private var lastCategories: List<Category>? = null
+        private const val sourceSplitter = "◘•◘"
+        private const val dynamicCategorySplitter = "▄╪\t▄╪\t▄"
 
         /** Give library manga to a date added based on min chapter fetch */
         fun updateDB() {

@@ -49,13 +49,11 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         }
     }
 
-    fun showExpandCategories(show: Boolean) {
-        binding.expandCollapseCategories.isVisible = show
-    }
-
-    fun setExpandText(expand: Boolean, animated: Boolean = true) {
+    fun setExpandText(allExpanded: Boolean?, animated: Boolean = true) {
+        binding.expandCollapseCategories.isVisible = allExpanded != null
+        allExpanded ?: return
         binding.expandCollapseCategories.setText(
-            if (expand) {
+            if (!allExpanded) {
                 R.string.expand_all_categories
             } else {
                 R.string.collapse_all_categories
@@ -63,7 +61,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
         )
         if (animated) {
             binding.expandCollapseCategories.setIconResource(
-                if (expand) {
+                if (!allExpanded) {
                     R.drawable.anim_expand_less_to_more
                 } else {
                     R.drawable.anim_expand_more_to_less
@@ -72,7 +70,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             (binding.expandCollapseCategories.icon as? AnimatedVectorDrawable)?.start()
         } else {
             binding.expandCollapseCategories.setIconResource(
-                if (expand) {
+                if (!allExpanded) {
                     R.drawable.ic_expand_more_24dp
                 } else {
                     R.drawable.ic_expand_less_24dp

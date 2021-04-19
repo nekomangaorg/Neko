@@ -6,15 +6,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.Controller
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 
 open class TabbedLibraryDisplaySheet(val controller: Controller) :
     TabbedBottomSheetDialog(controller.activity!!) {
@@ -43,21 +39,15 @@ open class TabbedLibraryDisplaySheet(val controller: Controller) :
         }
 
         if (controller is LibraryController) {
-            setExpandText(
-                !controller.singleCategory && controller.presenter.showAllCategories,
-                Injekt.get<PreferencesHelper>().collapsedCategories().getOrDefault().isNotEmpty(),
-                false
-            )
+            setExpandText(controller.canCollapseOrExpandCategory(), false)
         } else {
-            setExpandText(showExpanded = false, allExpanded = false)
+            setExpandText(null)
             categoryView.binding.addCategoriesButton.isVisible = false
         }
     }
 
-    fun setExpandText(showExpanded: Boolean, allExpanded: Boolean, animated: Boolean = true) {
-        categoryView.showExpandCategories(showExpanded)
+    fun setExpandText(allExpanded: Boolean?, animated: Boolean = true) =
         categoryView.setExpandText(allExpanded, animated)
-    }
 
     override fun dismiss() {
         super.dismiss()
