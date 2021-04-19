@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.util.storage.saveTo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import okhttp3.Response
@@ -80,6 +81,7 @@ class ChapterCache(private val context: Context) {
 
     init {
         preferences.preloadSize().asFlow()
+            .drop(1)
             .onEach {
                 // Save old cache for destruction later
                 val oldCache = diskCache
