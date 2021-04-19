@@ -784,21 +784,25 @@ class LibraryController(
     }
 
     private fun setRecyclerLayout() {
-        binding.libraryGridRecycler.recycler.post {
-            binding.libraryGridRecycler.recycler.updatePaddingRelative(bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0))
-        }
-        if (libraryLayout == 0) {
-            binding.libraryGridRecycler.recycler.spanCount = 1
-            binding.libraryGridRecycler.recycler.updatePaddingRelative(
-                start = 0,
-                end = 0
-            )
-        } else {
-            binding.libraryGridRecycler.recycler.setGridSize(preferences)
-            binding.libraryGridRecycler.recycler.updatePaddingRelative(
-                start = 5.dpToPx,
-                end = 5.dpToPx
-            )
+        with(binding.libraryGridRecycler.recycler) {
+            post {
+                updatePaddingRelative(
+                    bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0)
+                )
+            }
+            if (libraryLayout == 0) {
+                spanCount = 1
+                updatePaddingRelative(
+                    start = 0,
+                    end = 0
+                )
+            } else {
+                setGridSize(preferences)
+                updatePaddingRelative(
+                    start = 5.dpToPx,
+                    end = 5.dpToPx
+                )
+            }
         }
     }
 
