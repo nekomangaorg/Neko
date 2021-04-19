@@ -131,18 +131,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
 
-        post {
-            if (binding.secondLayout.width + binding.firstLayout.width + 20.dpToPx < width) {
-                binding.secondLayout.removeView(binding.viewOptions)
-                binding.firstLayout.addView(binding.viewOptions)
-                binding.secondLayout.isVisible = false
-            } else if (binding.viewOptions.parent == binding.firstLayout) {
-                binding.firstLayout.removeView(binding.viewOptions)
-                binding.secondLayout.addView(binding.viewOptions)
-                binding.secondLayout.isVisible = true
-            }
-        }
-
         sheetBehavior?.hide()
         binding.expandCategories.setOnClickListener {
             onGroupClicked(ACTION_EXPAND_COLLAPSE_ALL)
@@ -169,6 +157,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
             )
             shadow.alpha = if (sheetBehavior.isHidden()) 0f else 1f
+
+            if (binding.secondLayout.width + binding.firstLayout.width + 20.dpToPx < width) {
+                binding.secondLayout.removeView(binding.viewOptions)
+                binding.firstLayout.addView(binding.viewOptions)
+                binding.secondLayout.isVisible = false
+            } else if (binding.viewOptions.parent == binding.firstLayout) {
+                binding.firstLayout.removeView(binding.viewOptions)
+                binding.secondLayout.addView(binding.viewOptions)
+                binding.secondLayout.isVisible = true
+            }
         }
 
         createTags()
