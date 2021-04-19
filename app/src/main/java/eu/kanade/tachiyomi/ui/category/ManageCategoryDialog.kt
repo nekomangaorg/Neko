@@ -91,7 +91,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         } else if (categoryExists) {
             binding.categoryTextLayout.error = binding.categoryTextLayout.context.getString(R.string.category_with_name_exists)
             return false
-        } else {
+        } else if (text.isBlank()) {
             binding.categoryTextLayout.error = binding.categoryTextLayout.context.getString(R.string.category_cannot_be_blank)
             return false
         }
@@ -101,7 +101,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             preferences.downloadNew().set(true)
         }
         if (preferences.libraryUpdateInterval().getOrDefault() > 0 &&
-            !updatePref(preferences.libraryUpdateCategories(), binding.downloadNew)
+            !updatePref(preferences.libraryUpdateCategories(), binding.includeGlobal)
         ) {
             preferences.libraryUpdateInterval().set(0)
             LibraryUpdateJob.setupTask(0)
