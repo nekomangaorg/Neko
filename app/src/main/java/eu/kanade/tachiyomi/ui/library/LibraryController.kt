@@ -1402,7 +1402,16 @@ class LibraryController(
     }
 
     override fun sortCategory(catId: Int, sortBy: Int) {
-        presenter.sortCategory(catId, sortBy)
+        val category = presenter.categories.find { it.id == catId }
+        if (category?.isDynamic == false && ('a' + (sortBy - 1)) == Category.DRAG_AND_DROP) {
+            val item = adapter.findCategoryHeader(catId) ?: return
+            val libraryItems = adapter.getSectionItems(item)
+                .filterIsInstance<LibraryItem>()
+            val mangaIds = libraryItems.mapNotNull { (it as? LibraryItem)?.manga?.id }
+            presenter.rearrangeCategory(catId, mangaIds)
+        } else {
+            presenter.sortCategory(catId, sortBy)
+        }
     }
 
     override fun selectAll(position: Int) {

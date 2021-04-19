@@ -69,6 +69,17 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
      *
      * @param manga the manga to find.
      */
+    fun findCategoryHeader(catId: Int): LibraryHeaderItem? {
+        return currentItems.find {
+            (it is LibraryHeaderItem) && it.category.id == catId
+        } as LibraryHeaderItem
+    }
+
+    /**
+     * Returns the position in the adapter for the given manga.
+     *
+     * @param manga the manga to find.
+     */
     fun indexOf(manga: Manga): Int {
         return currentItems.indexOfFirst {
             if (it is LibraryItem) it.manga.id == manga.id

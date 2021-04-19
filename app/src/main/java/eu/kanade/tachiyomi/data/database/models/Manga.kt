@@ -30,6 +30,7 @@ interface Manga : SManga {
     var hide_title: Boolean
 
     fun isBlank() = id == Long.MIN_VALUE
+    fun isHidden() = status == -1
 
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)

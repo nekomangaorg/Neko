@@ -34,7 +34,7 @@ interface Category : Serializable {
         return ((mangaSort?.minus('a') ?: 0) % 2) != 1
     }
 
-    fun sortingMode(): Int? = when (mangaSort) {
+    fun sortingMode(nullAsDND: Boolean = false): Int? = when (mangaSort) {
         ALPHA_ASC, ALPHA_DSC -> LibrarySort.ALPHA
         UPDATED_ASC, UPDATED_DSC -> LibrarySort.LATEST_CHAPTER
         UNREAD_ASC, UNREAD_DSC -> LibrarySort.UNREAD
@@ -42,8 +42,11 @@ interface Category : Serializable {
         TOTAL_ASC, TOTAL_DSC -> LibrarySort.TOTAL
         DRAG_AND_DROP -> LibrarySort.DRAG_AND_DROP
         DATE_ADDED_ASC, DATE_ADDED_DSC -> LibrarySort.DATE_ADDED
-        else -> null
+        else -> if (nullAsDND && !isDynamic) LibrarySort.DRAG_AND_DROP else null
     }
+
+    val isDragAndDrop
+        get() = (mangaSort == null || mangaSort == DRAG_AND_DROP) && !isDynamic
 
     fun sortRes(): Int = when (mangaSort) {
         ALPHA_ASC, ALPHA_DSC -> R.string.title

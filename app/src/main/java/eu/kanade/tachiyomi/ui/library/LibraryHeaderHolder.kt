@@ -184,8 +184,16 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                         R.string.category
                     )
                 )
+            } else {
+                items.add(
+                    MaterialMenuSheet.MenuSheetItem(
+                        LibrarySort.DRAG_AND_DROP,
+                        R.drawable.ic_swap_vert_24dp,
+                        R.string.drag_and_drop
+                    )
+                )
             }
-            val sortingMode = category.sortingMode()
+            val sortingMode = category.sortingMode(true)
             val sheet = MaterialMenuSheet(
                 activity,
                 items,

@@ -125,7 +125,7 @@ class LibraryItem(
      * Returns true if this item is draggable.
      */
     override fun isDraggable(): Boolean {
-        return !manga.isBlank()
+        return !manga.isBlank() && header.category.isDragAndDrop
     }
 
     override fun isEnabled(): Boolean {
