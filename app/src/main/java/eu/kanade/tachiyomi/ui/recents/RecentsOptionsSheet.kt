@@ -33,7 +33,7 @@ class RecentsOptionsSheet(activity: Activity) :
 
         val titleText = context.getString(R.string.show_reset_history_button)
         val subtitleText = context.getString(R.string.press_and_hold_to_also_reset)
-        binding.showRemoveHistory.text = titleText.withSubtitle(context, subtitleText)
+        binding.showRemoveHistory.text = titleText.withSubtitle(binding.showRemoveHistory.context, subtitleText)
     }
 
     private fun initGeneralPreferences() {
