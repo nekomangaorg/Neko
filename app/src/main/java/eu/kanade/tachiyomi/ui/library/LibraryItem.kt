@@ -165,11 +165,11 @@ class LibraryItem(
         if (tag.trim().isEmpty()) return true
         return if (tag.startsWith("-")) {
             genres?.find {
-                it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
+                it.trim().equals(tag.substringAfter("-"), ignoreCase = true)
             } == null
         } else {
             genres?.find {
-                it.trim().toLowerCase() == tag.toLowerCase()
+                it.trim().equals(tag, ignoreCase = true)
             } != null
         }
     }
