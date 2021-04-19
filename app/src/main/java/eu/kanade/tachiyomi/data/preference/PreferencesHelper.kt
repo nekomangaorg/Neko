@@ -280,6 +280,8 @@ class PreferencesHelper(val context: Context) {
 
     fun collapsedDynamicCategories() = flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())
 
+    fun collapsedDynamicAtBottom() = flowPrefs.getBoolean("collapsed_dynamic_at_bottom", false)
+
     fun hiddenSources() = flowPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 
     fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())

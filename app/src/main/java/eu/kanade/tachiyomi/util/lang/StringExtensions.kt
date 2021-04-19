@@ -12,6 +12,7 @@ import android.text.style.RelativeSizeSpan
 import android.text.style.StyleSpan
 import android.text.style.SuperscriptSpan
 import androidx.annotation.ColorInt
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import kotlin.math.floor
@@ -98,6 +99,9 @@ fun String.indexesOf(substr: String, ignoreCase: Boolean = true): List<Int> {
         }
     }
 }
+
+fun String.withSubtitle(context: Context, @StringRes subtitleRes: Int) =
+    withSubtitle(context, context.getString(subtitleRes))
 
 fun String.withSubtitle(context: Context, subtitle: String): Spanned {
     val spannable = SpannableStringBuilder(this + "\n" + subtitle)

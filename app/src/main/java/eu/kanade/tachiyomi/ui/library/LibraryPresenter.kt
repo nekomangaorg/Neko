@@ -590,7 +590,7 @@ class LibraryPresenter(
         }.flatten().toMutableList()
 
         val hiddenDynamics = preferences.collapsedDynamicCategories().get()
-        val headers = tagItems.map { item ->
+        var headers = tagItems.map { item ->
             Category.createCustom(
                 item.key,
                 preferences.librarySortingMode().getOrDefault(),
@@ -610,6 +610,9 @@ class LibraryPresenter(
             } else {
                 it.name
             }
+        }
+        if (preferences.collapsedDynamicAtBottom().get()) {
+            headers = headers.filterNot { it.isHidden } + headers.filter { it.isHidden }
         }
         headers.forEach { category ->
             val catId = category.id ?: return@forEach
