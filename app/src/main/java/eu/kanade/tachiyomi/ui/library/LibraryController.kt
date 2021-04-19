@@ -614,7 +614,7 @@ class LibraryController(
             when (preferences.hopperLongPressAction().get()) {
                 3 -> showGroupOptions()
                 2 -> showDisplayOptions()
-                1 -> presenter.toggleAllCategoryVisibility()
+                1 -> if (canCollapseOrExpandCategory() != null) presenter.toggleAllCategoryVisibility()
                 else -> activityBinding?.toolbar?.menu?.performIdentifierAction(
                     R.id.action_search,
                     0
