@@ -31,7 +31,7 @@ class DownloadQueue(
         updatedRelay.call(Unit)
     }
 
-    fun remove(download: Download, callListeners: Boolean = true) {
+    fun remove(download: Download) {
         val removed = queue.remove(download)
         store.remove(download)
         download.setStatusSubject(null)
@@ -39,9 +39,7 @@ class DownloadQueue(
         if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE) {
             download.status = Download.NOT_DOWNLOADED
         }
-        if (callListeners) {
-            downloadListeners.forEach { it.updateDownload(download) }
-        }
+        downloadListeners.forEach { it.updateDownload(download) }
         if (removed) {
             updatedRelay.call(Unit)
         }
@@ -88,7 +86,9 @@ class DownloadQueue(
             callListeners(download)
         } else if (download.status == Download.DOWNLOADED || download.status == Download.ERROR) {
             setPagesSubject(download.pages, null)
-            callListeners(download)
+            if (download.status == Download.ERROR) {
+                callListeners(download)
+            }
         } else {
             callListeners(download)
         }

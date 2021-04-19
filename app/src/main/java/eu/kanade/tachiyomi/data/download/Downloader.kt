@@ -512,7 +512,7 @@ class Downloader(
         // Delete successful downloads from queue
         if (download.status == Download.DOWNLOADED) {
             // remove downloaded chapter from queue
-            queue.remove(download, false)
+            queue.remove(download)
         }
         if (areAllDownloadsFinished()) {
             DownloadService.stop(context)
