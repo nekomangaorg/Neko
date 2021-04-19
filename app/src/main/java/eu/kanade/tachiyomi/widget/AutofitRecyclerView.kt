@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.widget
 
 import android.content.Context
 import android.util.AttributeSet
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.pxToDp
@@ -54,6 +56,27 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     fun setGridSize(preferences: PreferencesHelper) {
+        // Migrate to float for grid size
+        if (preferences.gridSize().isNotSet()) {
+            val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+            val oldGridSize = prefs.getInt("grid_size", -1)
+            if (oldGridSize != -1) {
+                preferences.gridSize().set(
+                    when (oldGridSize) {
+                        4 -> 3f
+                        3 -> 1.5f
+                        2 -> 1f
+                        1 -> 0f
+                        0 -> -.5f
+                        else -> .5f
+                    }
+                )
+                prefs.edit {
+                    remove("grid_size")
+                }
+            }
+        }
+
         val size = 1.5f.pow(preferences.gridSize().get())
         val trueSize = MULTIPLE * ((size * 100 / MULTIPLE).roundToInt()) / 100f
         columnWidth = trueSize

@@ -110,25 +110,6 @@ object Migrations {
                         remove("enable_doh")
                     }
                 }
-
-                val oldGridSize = prefs.getInt("grid_size", -1)
-                // Migrate to float for grid size
-                if (oldGridSize != -1) {
-                    prefs.edit {
-                        putFloat(
-                            PreferenceKeys.gridSize,
-                            when (oldGridSize) {
-                                4 -> 3f
-                                3 -> 1.5f
-                                2 -> 1f
-                                1 -> 0f
-                                0 -> -.5f
-                                else -> .5f
-                            }
-                        )
-                        remove("grid_size")
-                    }
-                }
             }
             return true
         }
