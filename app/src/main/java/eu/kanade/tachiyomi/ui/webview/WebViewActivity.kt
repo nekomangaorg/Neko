@@ -79,7 +79,7 @@ open class WebViewActivity : BaseWebViewActivity() {
 
                 override fun onPageCommitVisible(view: WebView?, url: String?) {
                     super.onPageCommitVisible(view, url)
-                    binding.nestedView.scrollTo(0, 0)
+                    binding.webview.scrollTo(0, 0)
                 }
             }
 
