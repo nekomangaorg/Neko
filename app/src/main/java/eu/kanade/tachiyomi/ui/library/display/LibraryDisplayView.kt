@@ -43,7 +43,10 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                 filterOrder = FilterBottomSheet.Filters.DEFAULT_ORDER
             }
             val adapter = FlexibleAdapter(
-                filterOrder.toCharArray().map(::ManageFilterItem),
+                filterOrder.toCharArray().map {
+                    if (FilterBottomSheet.Filters.filterOf(it) != null) ManageFilterItem(it)
+                    else null
+                }.filterNotNull(),
                 this,
                 true
             )

@@ -519,7 +519,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 Completed,
                 SeriesType,
                 Tracked
-            ).joinToString("")
+            ).joinToString("") { it.value.toString() }
 
             fun filterOf(char: Char): Filters? {
                 return Filters::class.java.enumConstants?.find { it.value == char }
