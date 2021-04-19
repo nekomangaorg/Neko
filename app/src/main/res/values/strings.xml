@@ -238,7 +238,7 @@
     <string name="only_downloaded">Only downloaded</string>
     <string name="unread_or_downloaded">Unread or downloaded</string>
     <string name="show_reset_history_button">Show reset history button</string>
-    <string name="show_read_in_all">Show read in all</string>
+    <string name="show_read_chapters_all">Show read chapters in Grouped and All</string>
     <string name="show_title_first">Show title first</string>
     <string name="a_while_ago">A while ago</string>
 
