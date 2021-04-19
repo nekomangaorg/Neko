@@ -2,10 +2,15 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.app.Activity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import coil.size.Precision
+import coil.size.Scale
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
@@ -62,7 +67,18 @@ class RecentMangaHolder(
                 topToBottom = R.id.subtitle
             }
         }
-        binding.subtitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        with(binding.coverThumbnail) {
+            adjustViewBounds = !isUpdates
+            scaleType = if (isUpdates) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
+        }
+        listOf(binding.coverThumbnail, binding.card).forEach {
+            it.updateLayoutParams<ViewGroup.LayoutParams> {
+                width = if (isUpdates) {
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                } else {
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                }
+            }
         }
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
         binding.title.apply {
