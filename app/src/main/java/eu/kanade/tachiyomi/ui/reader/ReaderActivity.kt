@@ -56,6 +56,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
+import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
@@ -610,6 +611,20 @@ class ReaderActivity :
                     ) preferences.cropBorders() else preferences.cropBordersWebtoon()
                 pref.toggle()
             }
+
+            webviewButton.setOnClickListener {
+                openMangaInBrowser()
+            }
+
+            displayOptions.setOnClickListener {
+                TabbedReaderSettingsSheet(this@ReaderActivity).show()
+            }
+
+            displayOptions.setOnLongClickListener {
+                TabbedReaderSettingsSheet(this@ReaderActivity, true).show()
+                true
+            }
+
             readingMode.setOnClickListener {
                 val popup = PopupMenu(this@ReaderActivity, readingMode, Gravity.END)
                 val enumConstants = ReadingModeType::class.java.enumConstants

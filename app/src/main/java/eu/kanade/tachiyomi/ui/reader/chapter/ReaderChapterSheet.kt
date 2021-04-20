@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderChaptersSheetBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
-import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -64,14 +63,6 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             } else {
                 sheetBehavior?.expand()
             }
-        }
-
-        binding.webviewButton.setOnClickListener {
-            activity.openMangaInBrowser()
-        }
-
-        binding.displayOptions.setOnClickListener {
-            TabbedReaderSettingsSheet(activity).show()
         }
 
         post {

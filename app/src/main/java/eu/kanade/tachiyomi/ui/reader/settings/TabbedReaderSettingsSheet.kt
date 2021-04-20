@@ -18,8 +18,10 @@ import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 
-class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
-    TabbedBottomSheetDialog(readerActivity) {
+class TabbedReaderSettingsSheet(
+    val readerActivity: ReaderActivity,
+    showColorFilterSettings: Boolean = false
+) : TabbedBottomSheetDialog(readerActivity) {
     private val generalView: ReaderGeneralView = View.inflate(
         readerActivity,
         R.layout.reader_general_layout,
@@ -92,11 +94,12 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
 
         val attrs = window?.attributes
         val ogDim = attrs?.dimAmount ?: 0.25f
+        val filterTabIndex = getTabViews().indexOf(filterView)
         binding.pager.adapter?.notifyDataSetChanged()
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                window?.setDimAmount(if (tab?.position == 2) 0f else ogDim)
-                readerActivity.binding.appBar.visInvisIf(tab?.position != 2)
+                window?.setDimAmount(if (tab?.position == filterTabIndex) 0f else ogDim)
+                readerActivity.binding.appBar.visInvisIf(tab?.position != filterTabIndex)
                 if (tab?.position == 2) {
                     sheetBehavior.skipCollapsed = false
                     sheetBehavior.peekHeight = 110.dpToPx
@@ -114,6 +117,16 @@ class TabbedReaderSettingsSheet(val readerActivity: ReaderActivity) :
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
         })
+
+        if (showColorFilterSettings) {
+            binding.tabs.getTabAt(filterTabIndex)?.select()
+        }
+    }
+
+    override fun onStart() {
+        super.onStart()
+        val filterTabIndex = getTabViews().indexOf(filterView)
+        sheetBehavior.skipCollapsed = binding.tabs.selectedTabPosition != filterTabIndex
     }
 
     override fun dismiss() {
