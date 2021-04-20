@@ -9,7 +9,6 @@ import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.AnimatedVectorDrawable
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
@@ -33,6 +32,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.forEach
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -419,9 +419,9 @@ class ReaderActivity :
                 R.drawable.anim_crop_to_free
             }
             if (lastCropRes != drawableRes) {
-                setImageResource(drawableRes)
-                val animDrawable = drawable as AnimatedVectorDrawable
-                animDrawable.start()
+                val drawable = AnimatedVectorDrawableCompat.create(context, drawableRes)
+                setImageDrawable(drawable)
+                drawable?.start()
                 lastCropRes = drawableRes
             }
             compatToolTipText =

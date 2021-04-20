@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.app.Dialog
 import android.graphics.Color
-import android.graphics.drawable.AnimatedVectorDrawable
 import android.view.View
 import android.view.ViewGroup
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -49,11 +49,13 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
                     incogText
                 )
                 text = newTitle.withSubtitle(context, subtitleText)
-                setIcon(
+                val drawable = AnimatedVectorDrawableCompat.create(
+                    context,
                     if (incog) R.drawable.anim_read_to_incog
                     else R.drawable.anim_incog_to_read
                 )
-                (getIcon() as? AnimatedVectorDrawable)?.start()
+                setIcon(drawable)
+                (getIcon() as? AnimatedVectorDrawableCompat)?.start()
             }
         }
         binding.settingsItem.setOnClickListener {

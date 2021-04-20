@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
-import android.graphics.drawable.AnimatedVectorDrawable
 import android.os.Parcelable
 import android.util.AttributeSet
 import android.view.View
@@ -9,6 +8,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -233,14 +233,15 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
         )
         if (animated) {
-            binding.expandCategories.setIconResource(
+            binding.expandCategories.icon = AnimatedVectorDrawableCompat.create(
+                binding.expandCategories.context,
                 if (!allExpanded) {
                     R.drawable.anim_expand_less_to_more
                 } else {
                     R.drawable.anim_expand_more_to_less
                 }
             )
-            (binding.expandCategories.icon as? AnimatedVectorDrawable)?.start()
+            (binding.expandCategories.icon as? AnimatedVectorDrawableCompat)?.start()
         } else {
             binding.expandCategories.setIconResource(
                 if (!allExpanded) {
