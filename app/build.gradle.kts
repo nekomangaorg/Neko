@@ -208,8 +208,8 @@ dependencies {
     // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("br.com.simplepass:loading-button-android:2.2.0")
-    implementation("com.mikepenz:fastadapter:${Versions.FASTADAPTER}")
-    implementation("com.mikepenz:fastadapter-extensions-binding:${Versions.FASTADAPTER}")
+    implementation("com.mikepenz:fastadapter:${Versions.fastAdapter}")
+    implementation("com.mikepenz:fastadapter-extensions-binding:${Versions.fastAdapter}")
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
