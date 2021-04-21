@@ -6,6 +6,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.injectLazy
@@ -20,6 +21,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var showDownloads = preferences.showRecentsDownloads().get()
     var showRemoveHistory = preferences.showRecentsRemHistory().get()
     var showTitleFirst = preferences.showTitleFirstInRecents().get()
+    var showUpdatedTime = preferences.showUpdatedTime().get()
 
     val viewType: Int
         get() = delegate.getViewType()
@@ -39,10 +41,12 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showRecentsDownloads().register { showDownloads = it }
         preferences.showRecentsRemHistory().register { showRemoveHistory = it }
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
+        preferences.showUpdatedTime().register { showUpdatedTime = it }
     }
 
     private fun <T> Preference<T>.register(onChanged: (T) -> Unit) {
         asFlow()
+            .drop(1)
             .onEach {
                 onChanged(it)
                 notifyDataSetChanged()

@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
@@ -91,6 +92,7 @@ class RecentsController(bundle: Bundle? = null) :
      * Adapter containing the recent manga.
      */
     private var adapter = RecentMangaAdapter(this)
+    var displaySheet: TabbedRecentsOptionsSheet? = null
 
     private var progressItem: ProgressItem? = null
     private var presenter = RecentsPresenter(this)
@@ -362,6 +364,12 @@ class RecentsController(bundle: Bundle? = null) :
         snack = null
         adapterScope.cancel()
         presenter.cancelScope()
+    }
+
+    override fun onDestroyView(view: View) {
+        super.onDestroyView(view)
+        displaySheet?.dismiss()
+        displaySheet = null
     }
 
     fun refresh() = presenter.getRecents()
@@ -653,7 +661,13 @@ class RecentsController(bundle: Bundle? = null) :
             return binding.downloadBottomSheet.dlBottomSheet.onOptionsItemSelected(item)
         }
         when (item.itemId) {
-            R.id.display_options -> RecentsOptionsSheet(activity!!).show()
+            R.id.display_options -> {
+                displaySheet = TabbedRecentsOptionsSheet(
+                    this,
+                    (presenter.viewType - 1).coerceIn(0, 2)
+                )
+                displaySheet?.show()
+            }
         }
         return super.onOptionsItemSelected(item)
     }

@@ -29,7 +29,10 @@ class RecentMangaHolder(
         binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
     }
 
-    fun bind(item: RecentMangaItem, showDLs: RecentMangaAdapter.ShowRecentsDLs, showRemoveHistory: Boolean, showTitleFirst: Boolean) {
+    fun bind(item: RecentMangaItem) {
+        val showDLs = adapter.showDownloads
+        val showRemoveHistory = adapter.showRemoveHistory
+        val showTitleFirst = adapter.showTitleFirst
         binding.downloadButton.downloadButton.isVisible = when (showDLs) {
             RecentMangaAdapter.ShowRecentsDLs.None -> false
             RecentMangaAdapter.ShowRecentsDLs.OnlyUnread, RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded -> !item.chapter.read
@@ -37,7 +40,8 @@ class RecentMangaHolder(
             RecentMangaAdapter.ShowRecentsDLs.All -> true
         } && !item.mch.manga.isLocal()
 
-        val isUpdates = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+        val isUpdates = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES &&
+            !adapter.showUpdatedTime
         binding.cardLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = (if (isUpdates) 40 else 80).dpToPx
             width = (if (isUpdates) 40 else 60).dpToPx
@@ -101,7 +105,7 @@ class RecentMangaHolder(
                 R.string.added_,
                 item.mch.manga.date_added.timeSpanFromNow(itemView.context)
             )
-            adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> ""
+            isUpdates -> ""
             item.mch.history.id == null -> binding.body.context.getString(
                 R.string.updated_,
                 item.chapter.date_upload.timeSpanFromNow(itemView.context)

@@ -40,11 +40,28 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getRecentMangaLimit(search: String = "", endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
+    fun getRecentMangaLimit(search: String = "", offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentMangasLimitQuery(search.sqLite, endless, offset, isResuming))
+                .query(getRecentMangasLimitQuery(search.sqLite, offset, isResuming))
+//                .args(date.time, startDate.time)
+                .observesTables(HistoryTable.TABLE)
+                .build()
+        )
+        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .prepare()
+
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
+    fun getHistoryUngrouped(search: String = "", offset: Int, isResuming: Boolean) = db.get()
+        .listOfObjects(MangaChapterHistory::class.java)
+        .withQuery(
+            RawQuery.builder()
+                .query(getRecentHistoryUngrouped(search.sqLite, offset, isResuming))
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
                 .build()

@@ -335,6 +335,12 @@ class PreferencesHelper(val context: Context) {
 
     fun showReadInAllRecents() = flowPrefs.getBoolean(Keys.showReadInAllRecents, false)
 
+    fun showUpdatedTime() = flowPrefs.getBoolean(Keys.showUpdatedTime, false)
+
+    fun groupChaptersUpdates() = flowPrefs.getBoolean(Keys.groupChaptersUpdates, true)
+
+    fun groupChaptersHistory() = flowPrefs.getBoolean(Keys.groupChaptersHistory, false)
+
     fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
 
     fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)

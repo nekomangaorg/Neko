@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.recents.options.RecentsHistoryView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <LinearLayout
+        android:id="@+id/sort_layout"
+        style="@style/BottomSheetDialogTheme"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:orientation="vertical"
+        android:background="@android:color/transparent">
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/group_chapters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="@string/group_chapters_together"
+            android:textColor="?android:attr/textColorPrimary" />
+    </LinearLayout>
+</eu.kanade.tachiyomi.ui.recents.options.RecentsHistoryView>
