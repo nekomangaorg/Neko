@@ -116,7 +116,7 @@ class RecentsPresenter(
         limit: Boolean = false,
         customViewType: Int? = null
     ) {
-        if (retryCount > 15) {
+        if (retryCount > 5) {
             finished = true
             setDownloadedChapters(recentItems)
             if (customViewType == null) {
