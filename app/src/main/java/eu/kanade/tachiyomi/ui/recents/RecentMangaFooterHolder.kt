@@ -21,4 +21,9 @@ class RecentMangaFooterHolder(
             }
         }
     }
+
+    override fun onLongClick(view: View?): Boolean {
+        super.onLongClick(view)
+        return false
+    }
 }

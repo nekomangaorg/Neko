@@ -71,6 +71,11 @@ class RecentMangaHeaderItem(val recentsType: Int) :
                 }
             )
         }
+
+        override fun onLongClick(view: View?): Boolean {
+            super.onLongClick(view)
+            return false
+        }
     }
 
     companion object {

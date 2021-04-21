@@ -52,5 +52,10 @@ class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeade
             sectionText.text =
                 if (item.addedString) itemView.context.getString(R.string.fetched_, dateString) else dateString
         }
+
+        override fun onLongClick(view: View?): Boolean {
+            super.onLongClick(view)
+            return false
+        }
     }
 }
