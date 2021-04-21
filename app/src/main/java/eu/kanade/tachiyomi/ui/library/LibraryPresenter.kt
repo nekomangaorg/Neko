@@ -661,7 +661,7 @@ class LibraryPresenter(
 
     /** Create a default category with the sort set */
     private fun createDefaultCategory(): Category {
-        val default = Category.createDefault(context)
+        val default = Category.createDefault(view.applicationContext ?: context)
         default.order = -1
         val defOrder = preferences.defaultMangaOrder().getOrDefault()
         if (defOrder.firstOrNull()?.isLetter() == true) default.mangaSort = defOrder.first()
