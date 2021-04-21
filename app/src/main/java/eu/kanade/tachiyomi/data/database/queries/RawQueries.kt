@@ -123,6 +123,7 @@ fun getRecentMangasLimitQuery(
     GROUP BY ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}) AS max_last_read
     ON ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} = max_last_read.${Chapter.COL_MANGA_ID}
     AND max_last_read.${History.COL_CHAPTER_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
+    AND max_last_read.${History.COL_LAST_READ} > 0
     AND lower(${Manga.TABLE}.${Manga.COL_TITLE}) LIKE '%$search%'
     ORDER BY max_last_read.${History.COL_LAST_READ} DESC
     ${limitAndOffset(endless, isResuming, offset)}
@@ -164,14 +165,15 @@ fun getAllRecentsType(
     ON mangas._id = chapters.manga_id
     JOIN history
     ON chapters._id = history.history_chapter_id
-    JOIN (
-        SELECT chapters.manga_id,chapters._id as history_chapter_id, MAX(history.history_last_read) as history_last_read
-        FROM chapters JOIN history
-        ON chapters._id = history.history_chapter_id
-        GROUP BY chapters.manga_id) AS max_last_read
-    ON chapters.manga_id = max_last_read.manga_id
-    AND max_last_read.history_chapter_id = history.history_chapter_id
-    AND lower(mangas.title) LIKE '%$search%')
+     JOIN (
+        SELECT ${Chapter.TABLE}.${Chapter.COL_MANGA_ID},${Chapter.TABLE}.${Chapter.COL_ID} as ${History.COL_CHAPTER_ID}, MAX(${History.TABLE}.${History.COL_LAST_READ}) as ${History.COL_LAST_READ}
+        FROM ${Chapter.TABLE} JOIN ${History.TABLE}
+        ON ${Chapter.TABLE}.${Chapter.COL_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
+        GROUP BY ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}) AS max_last_read
+    ON ${Chapter.TABLE}.${Chapter.COL_MANGA_ID} = max_last_read.${Chapter.COL_MANGA_ID}
+    AND max_last_read.${History.COL_CHAPTER_ID} = ${History.TABLE}.${History.COL_CHAPTER_ID}
+    AND max_last_read.${History.COL_LAST_READ} > 0
+    AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
 	UNION
 	SELECT * FROM
 	(SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, 
@@ -210,7 +212,10 @@ fun getAllRecentsType(
 		Null as pages_left,
 		Null as chapter_number,
 		Null as source_order,
-		Null as history_id, Null as history_chapter_id, mangas.date_added as history_last_read, Null as history_time_read
+		Null as history_id, 
+        Null as history_chapter_id, 
+        ${Manga.TABLE}.${Manga.COL_DATE_ADDED} as history_last_read, 
+        Null as history_time_read
 		FROM mangas
     WHERE ${Manga.COL_FAVORITE} = 1
     AND lower(${Manga.COL_TITLE}) LIKE '%$search%')
