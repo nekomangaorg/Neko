@@ -98,6 +98,11 @@ class RecentMangaHolder(
             }
             setTextColor(ChapterUtil.readColor(context, item))
         }
+        if (binding.frontView.translationX == 0f) {
+            binding.read.setImageResource(
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
+            )
+        }
         val notValidNum = item.mch.chapter.chapter_number <= 0
         binding.body.isVisible = !isUpdates
         binding.body.text = when {

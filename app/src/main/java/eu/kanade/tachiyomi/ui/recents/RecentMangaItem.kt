@@ -33,7 +33,7 @@ class RecentMangaItem(
     }
 
     override fun isSwipeable(): Boolean {
-        return mch.manga.id != null && !chapter.read
+        return mch.manga.id != null
     }
 
     override fun equals(other: Any?): Boolean {

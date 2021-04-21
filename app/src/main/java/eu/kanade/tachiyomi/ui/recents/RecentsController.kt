@@ -524,19 +524,26 @@ class RecentsController(bundle: Bundle? = null) :
         val lastRead = chapter.last_page_read
         val pagesLeft = chapter.pages_left
         lastChapterId = chapter.id
-        presenter.markChapterRead(chapter, true)
-        snack = view?.snack(R.string.marked_as_read, Snackbar.LENGTH_INDEFINITE) {
+        val wasRead = chapter.read
+        presenter.markChapterRead(chapter, !wasRead)
+        snack = view?.snack(
+            if (wasRead) R.string.marked_as_unread
+            else R.string.marked_as_read,
+            Snackbar.LENGTH_INDEFINITE
+        ) {
             anchorView = activityBinding?.bottomNav
             var undoing = false
             setAction(R.string.undo) {
-                presenter.markChapterRead(chapter, false, lastRead, pagesLeft)
+                presenter.markChapterRead(chapter, wasRead, lastRead, pagesLeft)
                 undoing = true
             }
             addCallback(
                 object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
-                        if (!undoing && presenter.preferences.removeAfterMarkedAsRead()) {
+                        if (!undoing && presenter.preferences.removeAfterMarkedAsRead() &&
+                            !wasRead
+                        ) {
                             lastChapterId = chapter.id
                             presenter.deleteChapter(chapter, manga)
                         }
