@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.category
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.drawable.Drawable
-import android.text.InputType
 import android.view.View
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
@@ -80,7 +79,6 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         binding.title.visibility = if (editing) View.INVISIBLE else View.VISIBLE
         binding.editText.visibility = if (!editing) View.INVISIBLE else View.VISIBLE
         if (editing) {
-            binding.editText.inputType = InputType.TYPE_TEXT_FLAG_AUTO_CORRECT
             binding.editText.requestFocus()
             binding.editText.selectAll()
             binding.editButton.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
@@ -123,7 +121,6 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 .onCategoryRename(flexibleAdapterPosition, binding.editText.text.toString())
             ) {
                 isEditing(false)
-                binding.editText.inputType = InputType.TYPE_NULL
                 if (!createCategory) {
                     binding.title.text = binding.editText.text.toString()
                 }
