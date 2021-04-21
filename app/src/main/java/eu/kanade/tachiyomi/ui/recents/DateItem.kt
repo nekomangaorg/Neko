@@ -45,12 +45,12 @@ class DateItem(val date: Date, val addedString: Boolean = false) : AbstractHeade
 
         private val now = Date().time
 
-        val section_text: TextView = view.findViewById(R.id.section_text)
+        private val sectionText: TextView = view.findViewById(R.id.section_text)
 
         fun bind(item: DateItem) {
             val dateString = DateUtils.getRelativeTimeSpanString(item.date.time, now, DateUtils.DAY_IN_MILLIS)
-            section_text.text =
-                if (item.addedString) itemView.context.getString(R.string.added_, dateString) else dateString
+            sectionText.text =
+                if (item.addedString) itemView.context.getString(R.string.fetched_, dateString) else dateString
         }
     }
 }

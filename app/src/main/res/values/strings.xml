@@ -224,6 +224,7 @@
     <string name="read_">Read %1$s</string>
     <string name="updated_">Updated %1$s</string>
     <string name="added_">Added %1$s</string>
+    <string name="fetched_">Fetched %1$s</string>
     <string name="view_history">View history</string>
     <string name="view_all_updates">View all updates</string>
     <string name="search_recents">Search recents…</string>
