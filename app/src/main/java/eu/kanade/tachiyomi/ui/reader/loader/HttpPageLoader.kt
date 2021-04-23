@@ -1,15 +1,12 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
-import android.graphics.BitmapFactory
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPageHolder
 import eu.kanade.tachiyomi.util.lang.plusAssign
-import eu.kanade.tachiyomi.util.system.ImageUtil
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -240,18 +237,6 @@ class HttpPageLoader(
                 }
             }
             .doOnNext {
-                val readerTheme = preferences.readerTheme().get()
-                if (readerTheme >= 2) {
-                    val stream = chapterCache.getImageFile(imageUrl).inputStream()
-                    val image = BitmapFactory.decodeStream(stream)
-                    page.bg = ImageUtil.autoSetBackground(
-                        image,
-                        readerTheme == 2,
-                        preferences.context
-                    )
-                    page.bgType = PagerPageHolder.getBGType(readerTheme, preferences.context)
-                    stream.close()
-                }
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 page.status = Page.READY
             }

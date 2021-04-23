@@ -6,6 +6,7 @@ import android.content.Intent
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
+import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.view.GestureDetector
 import android.view.Gravity
@@ -50,6 +51,7 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -374,9 +376,18 @@ class PagerPageHolder(
                             bytesStream.close()
 
                             launchUI {
-                                imageView.background = setBG(bytesArray)
-                                page.bg = imageView.background
-                                page.bgType = getBGType(viewer.config.readerTheme, context) + item.hashCode()
+                                try {
+                                    imageView.background = setBG(bytesArray)
+                                } catch (e: Exception) {
+                                    Timber.e(e.localizedMessage)
+                                    imageView.background = ColorDrawable(Color.WHITE)
+                                } finally {
+                                    page.bg = imageView.background
+                                    page.bgType = getBGType(
+                                        viewer.config.readerTheme,
+                                        context
+                                    ) + item.hashCode()
+                                }
                             }
                         }
                     } else {
