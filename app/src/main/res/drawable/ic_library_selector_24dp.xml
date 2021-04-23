@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/ic_library_24dp" android:state_checked="true" />
-    <item android:drawable="@drawable/ic_library_outline_24dp" android:state_checked="false" />
-</selector>
+<animated-selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/checked" android:drawable="@drawable/ic_libary_filled_24dp" android:state_checked="true" />
+    <item android:id="@+id/normal" android:drawable="@drawable/ic_library_outline_24dp" android:state_checked="false" />
+
+    <transition
+        android:fromId="@id/checked"
+        android:toId="@id/normal"
+        android:drawable="@drawable/anim_lib_filled_to_outline"/>
+
+    <transition
+        android:fromId="@id/normal"
+        android:toId="@id/checked"
+        android:drawable="@drawable/anim_lib_outline_to_filled"/>
+
+</animated-selector>
