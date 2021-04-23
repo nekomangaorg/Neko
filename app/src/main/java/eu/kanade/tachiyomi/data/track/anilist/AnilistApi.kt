@@ -15,10 +15,9 @@ import com.google.gson.JsonParser
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.jsonType
+import eu.kanade.tachiyomi.network.jsonMime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -44,7 +43,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "query" to addToLibraryQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
 
             val netResponse = authClient.newCall(request).execute()
@@ -74,7 +73,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "query" to updateInLibraryQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val response = authClient.newCall(request).await()
 
@@ -91,7 +90,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "query" to searchQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val netResponse = authClient.newCall(request).await()
             val response = responseToJson(netResponse)
@@ -112,7 +111,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "query" to findLibraryMangaQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val result = authClient.newCall(request).await()
 
@@ -146,7 +145,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     "variables" to variables
                 )
 
-                val body = payload.toString().toRequestBody(MediaType.jsonType())
+                val body = payload.toString().toRequestBody(jsonMime)
                 val request = Request.Builder().url(apiUrl).post(body).build()
                 val result = authClient.newCall(request).await()
                 return@withContext true
@@ -171,7 +170,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val payload = jsonObject(
                 "query" to currentUserQuery()
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val netResponse = authClient.newCall(request).await()
 
