@@ -2,8 +2,6 @@ package eu.kanade.tachiyomi.data.cache
 
 import android.content.Context
 import android.text.format.Formatter
-import com.github.salomonbrys.kotson.fromJson
-import com.google.gson.Gson
 import com.jakewharton.disklrucache.DiskLruCache
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -16,10 +14,12 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
 import okhttp3.Response
 import okio.buffer
 import okio.sink
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.IOException
@@ -52,7 +52,7 @@ class ChapterCache(private val context: Context) {
     }
 
     /** Google Json class used for parsing JSON files.  */
-    private val gson: Gson by injectLazy()
+    private val json: Json by injectLazy()
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -127,17 +127,15 @@ class ChapterCache(private val context: Context) {
      * Get page list from cache.
      *
      * @param chapter the chapter.
-     * @return an observable of the list of pages.
+     * @return the list of pages.
      */
-    fun getPageListFromCache(chapter: Chapter): Observable<List<Page>> {
-        return Observable.fromCallable {
-            // Get the key for the chapter.
-            val key = DiskUtil.hashKeyForDisk(getKey(chapter))
+    fun getPageListFromCache(chapter: Chapter): List<Page> {
+        // Get the key for the chapter.
+        val key = DiskUtil.hashKeyForDisk(getKey(chapter))
 
-            // Convert JSON string to list of objects. Throws an exception if snapshot is null
-            diskCache.get(key).use {
-                gson.fromJson<List<Page>>(it.getString(0))
-            }
+        // Convert JSON string to list of objects. Throws an exception if snapshot is null
+        return diskCache.get(key).use {
+            json.decodeFromString(it.getString(0))
         }
     }
 
@@ -149,7 +147,7 @@ class ChapterCache(private val context: Context) {
      */
     fun putPageListToCache(chapter: Chapter, pages: List<Page>) {
         // Convert list of pages to json string.
-        val cachedValue = gson.toJson(pages)
+        val cachedValue = json.encodeToString(pages)
 
         // Initialize the editor (edits the values for an entry).
         var editor: DiskLruCache.Editor? = null

@@ -161,8 +161,8 @@ dependencies {
     implementation(kotlin("reflect", version = Versions.kotlin))
 
     // JSON
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.KOTLINSERIALIZATION}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.KOTLINSERIALIZATION}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${Versions.kotlinSerialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${Versions.kotlinSerialization}")
     implementation("com.google.code.gson:gson:2.8.6")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
