@@ -35,6 +35,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     private var doubledUp = viewer.config.doublePages
 
     var currentChapter: ReaderChapter? = null
+    var forceTransition = false
 
     /**
      * Updates this adapter with the given [chapters]. It handles setting a few pages of the
@@ -44,6 +45,7 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     fun setChapters(chapters: ViewerChapters, forceTransition: Boolean) {
         val newItems = mutableListOf<Any>()
 
+        this.forceTransition = forceTransition
         // Add previous chapter pages and transition.
         if (chapters.prevChapter != null) {
             // We only need to add the last few pages of the previous chapter, because it'll be
@@ -277,7 +279,19 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                 useSecondPage -> (oldCurrent?.second ?: oldCurrent?.first)
                 else -> oldCurrent?.first ?: return
             }
-        val index = joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
+        var index = joinedItems.indexOfFirst { it.first == newPage || it.second == newPage }
+        if (newPage is ChapterTransition && index == -1 && !forceTransition) {
+            val newerPage = if (newPage is ChapterTransition.Next) {
+                joinedItems.filter {
+                    (it.first as? ReaderPage)?.chapter == newPage.to
+                }.minByOrNull { (it.first as? ReaderPage)?.index ?: Int.MAX_VALUE }?.first
+            } else {
+                joinedItems.filter {
+                    (it.first as? ReaderPage)?.chapter == newPage.to
+                }.maxByOrNull { (it.first as? ReaderPage)?.index ?: Int.MIN_VALUE }?.first
+            }
+            index = joinedItems.indexOfFirst { it.first == newerPage || it.second == newerPage }
+        }
         viewer.pager.setCurrentItem(index, false)
     }
 }
