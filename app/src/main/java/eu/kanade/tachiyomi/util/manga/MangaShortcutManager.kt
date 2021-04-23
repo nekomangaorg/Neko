@@ -68,8 +68,8 @@ class MangaShortcutManager(
                                 context,
                                 "Manga-${item.id?.toString() ?: item.title}"
                             )
-                                .setShortLabel(item.title)
-                                .setLongLabel(item.title)
+                                .setShortLabel(item.title.takeUnless { it.isNotBlank() } ?: context.getString(R.string.manga))
+                                .setLongLabel(item.title.takeUnless { it.isNotBlank() } ?: context.getString(R.string.manga))
                                 .setIcon(
                                     if (bitmap != null) if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                         Icon.createWithAdaptiveBitmap(bitmap.toSquare())
