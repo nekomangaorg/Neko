@@ -52,6 +52,9 @@
     <string name="chapter_not_found">Chapter not found</string>
     <string name="no_chapters_error">No chapters found</string>
     <string name="no_pages_found">No pages found</string>
+    <string name="remove_all_downloads">Remove all downloads?</string>
+    <string name="no_chapters_to_delete">No chapters to delete</string>
+
     <plurals name="remove_n_chapters">
         <item quantity="one">Remove %1$d downloaded chapter?</item>
         <item quantity="other">Remove %1$d downloaded chapters?</item>

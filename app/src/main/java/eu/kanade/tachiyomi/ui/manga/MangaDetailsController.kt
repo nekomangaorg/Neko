@@ -910,26 +910,31 @@ class MangaDetailsController :
 
     private fun massDeleteChapters(choice: Int) {
         val chaptersToDelete = when (choice) {
-            R.id.remove_all -> presenter.chapters
-            R.id.remove_non_bookmarked -> presenter.chapters.filter { !it.bookmark }
-            R.id.remove_read -> presenter.chapters.filter { it.read }
+            R.id.remove_all -> presenter.allChapters
+            R.id.remove_non_bookmarked -> presenter.allChapters.filter { !it.bookmark }
+            R.id.remove_read -> presenter.allChapters.filter { it.read }
             else -> emptyList()
         }.filter { it.isDownloaded }
-        if (chaptersToDelete.isNotEmpty()) {
-            massDeleteChapters(chaptersToDelete)
+        if (chaptersToDelete.isNotEmpty() || choice == R.id.remove_all) {
+            massDeleteChapters(chaptersToDelete, choice == R.id.remove_all)
+        } else {
+            snack?.dismiss()
+            snack = view?.snack(R.string.no_chapters_to_delete)
         }
     }
 
-    private fun massDeleteChapters(chapters: List<ChapterItem>) {
+    private fun massDeleteChapters(chapters: List<ChapterItem>, isEverything: Boolean) {
         val context = view?.context ?: return
         MaterialDialog(context).message(
-            text = context.resources.getQuantityString(
+            text =
+            if (isEverything) context.getString(R.string.remove_all_downloads)
+            else context.resources.getQuantityString(
                 R.plurals.remove_n_chapters,
                 chapters.size,
                 chapters.size
             )
         ).positiveButton(R.string.remove) {
-            presenter.deleteChapters(chapters)
+            presenter.deleteChapters(chapters, isEverything = isEverything)
         }.negativeButton(android.R.string.cancel).show()
     }
 
@@ -941,8 +946,8 @@ class MangaDetailsController :
                 createActionModeIfNeeded()
                 return
             }
-            R.id.download_unread -> presenter.chapters.filter { !it.read }
-            R.id.download_all -> presenter.chapters
+            R.id.download_unread -> presenter.allChapters.filter { !it.read }
+            R.id.download_all -> presenter.allChapters
             else -> emptyList()
         }
         if (chaptersToDownload.isNotEmpty()) {

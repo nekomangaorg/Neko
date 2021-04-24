@@ -54,6 +54,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -92,6 +93,9 @@ class MangaDetailsPresenter(
     var chapters: List<ChapterItem> = emptyList()
         private set
 
+    var allChapters: List<ChapterItem> = emptyList()
+        private set
+
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
 
     fun onCreate() {
@@ -108,7 +112,7 @@ class MangaDetailsPresenter(
             controller.updateHeader()
             refreshAll()
         } else {
-            updateChapters()
+            runBlocking { getChapters() }
             controller.updateChapters(this.chapters)
         }
         setTrackItems()
@@ -139,17 +143,7 @@ class MangaDetailsPresenter(
         setDownloadedChapters(chapters)
 
         // Store the last emission
-        this.chapters = applyChapterFilters(chapters)
-    }
-
-    private fun updateChapters(fetchedChapters: List<Chapter>? = null) {
-        val chapters =
-            (fetchedChapters ?: db.getChapters(manga).executeAsBlocking()).map { it.toModel() }
-
-        // Find downloaded chapters
-        setDownloadedChapters(chapters)
-
-        // Store the last emission
+        allChapters = chapters
         this.chapters = applyChapterFilters(chapters)
     }
 
@@ -178,7 +172,7 @@ class MangaDetailsPresenter(
 
     override fun updateDownloads() {
         scope.launch(Dispatchers.Default) {
-            updateChapters(chapters)
+            getChapters()
             withContext(Dispatchers.Main) {
                 controller.updateChapters(chapters)
             }
@@ -261,12 +255,12 @@ class MangaDetailsPresenter(
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
 
-    fun anyRead(): Boolean = chapters.any { it.read }
-    fun hasBookmark(): Boolean = chapters.any { it.bookmark }
-    fun hasDownloads(): Boolean = chapters.any { it.isDownloaded }
+    fun anyRead(): Boolean = allChapters.any { it.read }
+    fun hasBookmark(): Boolean = allChapters.any { it.bookmark }
+    fun hasDownloads(): Boolean = allChapters.any { it.isDownloaded }
 
     fun getUnreadChaptersSorted() =
-        chapters.filter { !it.read && it.status == Download.NOT_DOWNLOADED }.distinctBy { it.name }
+        allChapters.filter { !it.read && it.status == Download.NOT_DOWNLOADED }.distinctBy { it.name }
             .sortedByDescending { it.source_order }
 
     fun startDownloadingNow(chapter: Chapter) {
@@ -299,8 +293,14 @@ class MangaDetailsPresenter(
      * Deletes the given list of chapter.
      * @param chapters the list of chapters to delete.
      */
-    fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true) {
-        downloadManager.deleteChapters(chapters, manga, source)
+    fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true, isEverything: Boolean = false) {
+        scope.launchIO {
+            if (isEverything) {
+                downloadManager.deleteManga(manga, source)
+            } else {
+                downloadManager.deleteChapters(chapters, manga, source)
+            }
+        }
         chapters.forEach { chapter ->
             this.chapters.find { it.id == chapter.id }?.apply {
                 status = Download.QUEUE
@@ -394,7 +394,7 @@ class MangaDetailsPresenter(
                         }
                     }
                 }
-                withContext(Dispatchers.IO) { updateChapters() }
+                getChapters()
             }
             isLoading = false
             if (chapterError == null) withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
@@ -431,7 +431,7 @@ class MangaDetailsPresenter(
             try {
                 syncChaptersWithSource(db, chapters, manga, source)
 
-                updateChapters()
+                getChapters()
                 withContext(Dispatchers.Main) { controller.updateChapters(this@MangaDetailsPresenter.chapters) }
             } catch (e: java.lang.Exception) {
                 withContext(Dispatchers.Main) {
@@ -534,7 +534,7 @@ class MangaDetailsPresenter(
     private fun asyncUpdateMangaAndChapters(justChapters: Boolean = false) {
         scope.launch {
             if (!justChapters) db.updateFlags(manga).executeOnIO()
-            updateChapters()
+            getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
     }

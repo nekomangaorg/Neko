@@ -327,6 +327,7 @@ class DownloadManager(val context: Context) {
         queue.remove(manga)
         provider.findMangaDir(manga, source)?.delete()
         cache.removeManga(manga)
+        queue.updateListeners()
     }
 
     /**
