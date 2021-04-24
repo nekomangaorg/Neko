@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.fastscroller.FastScroller
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.view.marginTop
 import kotlin.math.abs
@@ -53,7 +54,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             }
             MotionEvent.ACTION_MOVE -> {
                 val y = event.y
-                if (!canScroll && abs(y - startY) > 10) {
+                if (!canScroll && abs(y - startY) > 15.dpToPx) {
                     canScroll = true
                     handle.isSelected = true
                     notifyScrollStateChange(true)
@@ -69,6 +70,22 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 startY = 0f
                 canScroll = false
+                val newEvent = MotionEvent.obtain(event)
+                recyclerView.post {
+                    // Mimic touch event for recycler so it doesn't scroll back
+                    val lastTag = recyclerView.tag
+                    recyclerView.tag = noUpdate
+                    newEvent.action = MotionEvent.ACTION_MOVE
+                    recyclerView.dispatchTouchEvent(newEvent)
+                    val newEvent2 = MotionEvent.obtain(newEvent)
+                    newEvent2.action = MotionEvent.ACTION_CANCEL
+                    recyclerView.dispatchTouchEvent(newEvent2)
+                    newEvent2.recycle()
+                    newEvent.recycle()
+                    recyclerView.post {
+                        recyclerView.tag = lastTag
+                    }
+                }
             }
         }
         return super.onTouchEvent(event)
@@ -91,7 +108,10 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
                     scrollOffset
                 )
             } else {
-                (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(targetPos, scrollOffset)
+                (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                    targetPos,
+                    scrollOffset
+                )
             }
             updateBubbleText(targetPos)
         }
@@ -113,5 +133,9 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
                 }
             }
         }
+    }
+
+    companion object {
+        const val noUpdate = "don't update scroll"
     }
 }
