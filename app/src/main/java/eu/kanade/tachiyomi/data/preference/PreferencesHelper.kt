@@ -284,7 +284,7 @@ class PreferencesHelper(val context: Context) {
 
     fun hiddenSources() = flowPrefs.getStringSet("hidden_catalogues", mutableSetOf())
 
-    fun pinnedCatalogues() = rxPrefs.getStringSet("pinned_catalogues", emptySet())
+    fun pinnedCatalogues() = flowPrefs.getStringSet("pinned_catalogues", mutableSetOf())
 
     fun downloadNew() = flowPrefs.getBoolean(Keys.downloadNew, false)
 

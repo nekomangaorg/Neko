@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.util.SparseArray
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.kanade.tachiyomi.source.CatalogueSource
 
 /**
  * Adapter that holds the search cards.
@@ -12,6 +13,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  */
 class GlobalSearchAdapter(val controller: GlobalSearchController) :
     FlexibleAdapter<GlobalSearchItem>(null, controller, true) {
+
+    val titleClickListener: OnTitleClickListener = controller
 
     /**
      * Bundle where the view state of the holders is saved.
@@ -65,6 +68,10 @@ class GlobalSearchAdapter(val controller: GlobalSearchController) :
             holder.itemView.restoreHierarchyState(holderState)
             bundle.remove(key)
         }
+    }
+
+    interface OnTitleClickListener {
+        fun onTitleClick(source: CatalogueSource)
     }
 
     private companion object {

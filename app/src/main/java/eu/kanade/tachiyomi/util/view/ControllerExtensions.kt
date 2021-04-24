@@ -42,6 +42,7 @@ import kotlin.random.Random
 fun Controller.setOnQueryTextChangeListener(
     searchView: SearchView,
     onlyOnSubmit: Boolean = false,
+    hideKbOnSubmit: Boolean = true,
     f: (text: String?) -> Boolean
 ) {
     searchView.setOnQueryTextListener(
@@ -57,10 +58,12 @@ fun Controller.setOnQueryTextChangeListener(
 
             override fun onQueryTextSubmit(query: String?): Boolean {
                 if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
-                    val imm =
-                        activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                            ?: return f(query)
-                    imm.hideSoftInputFromWindow(searchView.windowToken, 0)
+                    if (hideKbOnSubmit) {
+                        val imm =
+                            activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                                ?: return f(query)
+                        imm.hideSoftInputFromWindow(searchView.windowToken, 0)
+                    }
                     return f(query)
                 }
                 return true

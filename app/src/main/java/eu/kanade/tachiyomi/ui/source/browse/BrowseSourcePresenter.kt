@@ -48,6 +48,7 @@ import uy.kohesive.injekt.api.get
  */
 open class BrowseSourcePresenter(
     sourceId: Long,
+    searchQuery: String? = null,
     sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
@@ -116,6 +117,10 @@ open class BrowseSourcePresenter(
     private var initializerSubscription: Subscription? = null
 
     private var scope = CoroutineScope(Job() + Dispatchers.IO)
+
+    init {
+        query = searchQuery ?: ""
+    }
 
     override fun onCreate(savedState: Bundle?) {
         super.onCreate(savedState)

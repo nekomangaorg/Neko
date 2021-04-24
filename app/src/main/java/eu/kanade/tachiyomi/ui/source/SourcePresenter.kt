@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.source
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
@@ -57,7 +56,7 @@ class SourcePresenter(
     private fun loadSources() {
         scope.launch {
             val pinnedSources = mutableListOf<SourceItem>()
-            val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
+            val pinnedCatalogues = preferences.pinnedCatalogues().get()
 
             val map = TreeMap<String, MutableList<CatalogueSource>> { d1, d2 ->
                 // Catalogues without a lang defined will be placed at the end
@@ -105,7 +104,7 @@ class SourcePresenter(
 
     private fun getLastUsedSource(value: Long): SourceItem? {
         return (sourceManager.get(value) as? CatalogueSource)?.let { source ->
-            val pinnedCatalogues = preferences.pinnedCatalogues().getOrDefault()
+            val pinnedCatalogues = preferences.pinnedCatalogues().get()
             val isPinned = source.id.toString() in pinnedCatalogues
             if (isPinned) null
             else SourceItem(source, null, isPinned)

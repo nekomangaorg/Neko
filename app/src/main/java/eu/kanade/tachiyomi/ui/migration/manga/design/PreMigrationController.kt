@@ -177,7 +177,7 @@ class PreMigrationController(bundle: Bundle? = null) :
                 val enabledSources = if (item.itemId == R.id.action_match_enabled) {
                     prefs.hiddenSources().get().mapNotNull { it.toLongOrNull() }
                 } else {
-                    prefs.pinnedCatalogues().get()?.mapNotNull { it.toLongOrNull() } ?: emptyList()
+                    prefs.pinnedCatalogues().get().mapNotNull { it.toLongOrNull() } ?: emptyList()
                 }
                 val items = adapter?.currentItems?.toList() ?: return true
                 items.forEach {

@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.ExtensionManager
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.Source
@@ -25,6 +24,7 @@ import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Date
 
 /**
  * Presenter of [GlobalSearchController]
@@ -32,7 +32,7 @@ import uy.kohesive.injekt.injectLazy
  *
  * @param sourceManager manages the different sources.
  * @param db manages the database calls.
- * @param preferencesHelper manages the preference calls.
+ * @param preferences manages the preference calls.
  */
 open class GlobalSearchPresenter(
     private val initialQuery: String? = "",
@@ -40,7 +40,7 @@ open class GlobalSearchPresenter(
     private val sourcesToUse: List<CatalogueSource>? = null,
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
-    private val preferencesHelper: PreferencesHelper = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<GlobalSearchController>() {
 
@@ -59,6 +59,8 @@ open class GlobalSearchPresenter(
      * Fetches the different sources by user settings.
      */
     private var fetchSourcesSubscription: Subscription? = null
+
+    private var loadTime = hashMapOf<Long, Long>()
 
     /**
      * Subject which fetches image of given manga.
@@ -104,16 +106,16 @@ open class GlobalSearchPresenter(
      * @return list containing enabled sources.
      */
     protected open fun getEnabledSources(): List<CatalogueSource> {
-        val languages = preferencesHelper.enabledLanguages().get()
-        val hiddenCatalogues = preferencesHelper.hiddenSources().get()
-        val pinnedCatalogues = preferencesHelper.pinnedCatalogues().getOrDefault()
+        val languages = preferences.enabledLanguages().get()
+        val hiddenCatalogues = preferences.hiddenSources().get()
+        val pinnedCatalogues = preferences.pinnedCatalogues().get()
 
         val list = sourceManager.getCatalogueSources()
             .filter { it.lang in languages }
             .filterNot { it.id.toString() in hiddenCatalogues }
             .sortedBy { "(${it.lang}) ${it.name}" }
 
-        return if (preferencesHelper.onlySearchPinned().get()) {
+        return if (preferences.onlySearchPinned().get()) {
             list.filter { it.id.toString() in pinnedCatalogues }
         } else {
             list.sortedBy { it.id.toString() !in pinnedCatalogues }
@@ -176,6 +178,8 @@ open class GlobalSearchPresenter(
         val initialItems = sources.map { createCatalogueSearchItem(it, null) }
         var items = initialItems
 
+        val pinnedSourceIds = preferences.pinnedCatalogues().get()
+
         fetchSourcesSubscription?.unsubscribe()
         fetchSourcesSubscription = Observable.from(sources).flatMap(
             { source ->
@@ -197,6 +201,9 @@ open class GlobalSearchPresenter(
                     } // Convert to local manga.
                     .doOnNext { fetchImage(it, source) } // Load manga covers.
                     .map {
+                        if (it.isNotEmpty() && !loadTime.containsKey(source.id)) {
+                            loadTime[source.id] = Date().time
+                        }
                         createCatalogueSearchItem(
                             source,
                             it.map { GlobalSearchMangaItem(it) }
@@ -204,10 +211,22 @@ open class GlobalSearchPresenter(
                     }
             },
             5
-        ).observeOn(AndroidSchedulers.mainThread())
+        )
+            .observeOn(AndroidSchedulers.mainThread())
             // Update matching source with the obtained results
             .map { result ->
-                items.map { item -> if (item.source == result.source) result else item }
+                items
+                    .map { item -> if (item.source == result.source) result else item }
+                    .sortedWith(
+                        compareBy(
+                            // Bubble up sources that actually have results
+                            { it.results.isNullOrEmpty() },
+                            // Same as initial sort, i.e. pinned first then alphabetically
+                            { it.source.id.toString() !in pinnedSourceIds },
+                            { loadTime[it.source.id] ?: 0L },
+                            { "${it.source.name.toLowerCase()} (${it.source.lang})" }
+                        )
+                    )
             }
             // Update current state
             .doOnNext { items = it }

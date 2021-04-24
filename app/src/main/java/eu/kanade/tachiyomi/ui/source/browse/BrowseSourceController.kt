@@ -12,7 +12,6 @@ import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -29,6 +28,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.source.BrowseController
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
@@ -37,6 +37,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -44,12 +45,8 @@ import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
-import rx.Observable
-import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -106,11 +103,6 @@ open class BrowseSourceController(bundle: Bundle) :
     private var recycler: RecyclerView? = null
 
     /**
-     * Subscription for the search view.
-     */
-    private var searchViewSubscription: Subscription? = null
-
-    /**
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
@@ -124,7 +116,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY))
+        return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY), args.getString(SEARCH_QUERY_KEY))
     }
 
     override fun createBinding(inflater: LayoutInflater) = BrowseSourceControllerBinding.inflate(inflater)
@@ -142,8 +134,6 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun onDestroyView(view: View) {
-        searchViewSubscription?.unsubscribe()
-        searchViewSubscription = null
         adapter = null
         snack = null
         recycler = null
@@ -222,31 +212,40 @@ open class BrowseSourceController(bundle: Bundle) :
         val searchView = searchItem.actionView as SearchView
 
         val query = presenter.query
-        if (!query.isBlank()) {
+        if (query.isNotBlank()) {
             searchItem.expandActionView()
             searchView.setQuery(query, true)
             searchView.clearFocus()
         }
 
-        val searchEventsObservable = searchView.queryTextChangeEvents()
-            .skip(1)
-            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseSourceController }
-            .share()
-        val writingObservable = searchEventsObservable
-            .filter { !it.isSubmitted }
-            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-        val submitObservable = searchEventsObservable
-            .filter { it.isSubmitted }
+//        val searchEventsObservable = searchView.queryTextChangeEvents()
+//            .skip(1)
+//            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseSourceController }
+//            .share()
+//        val writingObservable = searchEventsObservable
+//            .filter { !it.isSubmitted }
+//            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
+//        val submitObservable = searchEventsObservable
+//            .filter { it.isSubmitted }
+//
+//        searchViewSubscription?.unsubscribe()
+//        searchViewSubscription = Observable.merge(writingObservable, submitObservable)
+//            .map { it.queryText().toString() }
+//            .subscribeUntilDestroy { searchWithQuery(it) }
 
-        searchViewSubscription?.unsubscribe()
-        searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-            .map { it.queryText().toString() }
-            .subscribeUntilDestroy { searchWithQuery(it) }
+        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
+            searchWithQuery(it ?: "")
+            true
+        }
 
         searchItem.fixExpand(
             onExpand = { invalidateMenuOnExpand() },
             onCollapse = {
-                searchWithQuery("")
+                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller() is GlobalSearchController) {
+                    router.popController(this)
+                } else {
+                    searchWithQuery("")
+                }
                 true
             }
         )

@@ -24,7 +24,6 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.BrowseControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.source.LocalSource
@@ -390,7 +389,7 @@ class BrowseController :
     }
 
     private fun pinCatalogue(source: Source, isPinned: Boolean) {
-        val current = preferences.pinnedCatalogues().getOrDefault()
+        val current = preferences.pinnedCatalogues().get()
         if (isPinned) {
             preferences.pinnedCatalogues().set(current - source.id.toString())
         } else {

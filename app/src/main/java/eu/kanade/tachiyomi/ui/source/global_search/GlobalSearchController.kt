@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -33,9 +34,10 @@ import uy.kohesive.injekt.injectLazy
  */
 open class GlobalSearchController(
     protected val initialQuery: String? = null,
-    protected val extensionFilter: String? = null
+    val extensionFilter: String? = null
 ) : NucleusController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(),
     FloatingSearchInterface,
+    GlobalSearchAdapter.OnTitleClickListener,
     GlobalSearchCardAdapter.OnMangaClickListener {
 
     /**
@@ -80,6 +82,11 @@ open class GlobalSearchController(
      */
     override fun createPresenter(): GlobalSearchPresenter {
         return GlobalSearchPresenter(initialQuery, extensionFilter)
+    }
+
+    override fun onTitleClick(source: CatalogueSource) {
+        preferences.lastUsedCatalogueSource().set(source.id)
+        router.pushController(BrowseSourceController(source, presenter.query).withFadeTransaction())
     }
 
     /**
@@ -179,6 +186,9 @@ open class GlobalSearchController(
         if (extensionFilter != null) {
             customTitle = view.context?.getString(R.string.loading)
             setTitle()
+        }
+        binding.recycler.post {
+            binding.recycler.scrollToPosition(0)
         }
     }
 
