@@ -26,6 +26,7 @@ import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
@@ -360,7 +361,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.toolbar.isVisible = !show
         binding.cardFrame.isVisible = show
         binding.appBar.setBackgroundColor(
-            if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
+            if (show && !solidBG && binding.tabsFrameLayout.isGone) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
         )
         currentToolbar?.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller()
@@ -786,6 +787,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             tabAnimation?.start()
         } else {
             binding.tabsFrameLayout.isVisible = show
+        }
+        if (show) {
+            binding.appBar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
         }
     }
 
