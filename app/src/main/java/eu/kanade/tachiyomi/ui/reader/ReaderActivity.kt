@@ -42,7 +42,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
@@ -1432,51 +1432,31 @@ class ReaderActivity :
                 }
                 .launchIn(scope)
 
-            preferences.showPageNumber().asFlow()
-                .onEach { setPageNumberVisibility(it) }
-                .launchIn(scope)
+            preferences.showPageNumber().asImmediateFlowIn(scope) { setPageNumberVisibility(it) }
 
-            preferences.trueColor().asFlow()
-                .onEach { setTrueColor(it) }
-                .launchIn(scope)
+            preferences.trueColor().asImmediateFlowIn(scope) { setTrueColor(it) }
 
-            preferences.fullscreen().asFlow()
-                .onEach { setFullscreen(it) }
-                .launchIn(scope)
+            preferences.fullscreen().asImmediateFlowIn(scope) { setFullscreen(it) }
 
-            preferences.keepScreenOn().asFlow()
-                .onEach { setKeepScreenOn(it) }
-                .launchIn(scope)
+            preferences.keepScreenOn().asImmediateFlowIn(scope) { setKeepScreenOn(it) }
 
-            preferences.customBrightness().asFlow()
-                .onEach { setCustomBrightness(it) }
-                .launchIn(scope)
+            preferences.customBrightness().asImmediateFlowIn(scope) { setCustomBrightness(it) }
 
-            preferences.colorFilter().asFlow()
-                .onEach { setColorFilter(it) }
-                .launchIn(scope)
+            preferences.colorFilter().asImmediateFlowIn(scope) { setColorFilter(it) }
 
-            preferences.colorFilterMode().asFlow()
-                .onEach { setColorFilter(preferences.colorFilter().get()) }
-                .launchIn(scope)
+            preferences.colorFilterMode().asImmediateFlowIn(scope) {
+                setColorFilter(preferences.colorFilter().get())
+            }
 
-            preferences.alwaysShowChapterTransition().asFlow()
-                .onEach { showNewChapter = it }
-                .launchIn(scope)
+            preferences.alwaysShowChapterTransition().asImmediateFlowIn(scope) {
+                showNewChapter = it
+            }
 
-            preferences.pageLayout().asFlow()
-                .onEach {
-                    setBottomNavButtons(it)
-                }
-                .launchIn(scope)
+            preferences.pageLayout().asImmediateFlowIn(scope) { setBottomNavButtons(it) }
 
-            preferences.readerBottomButtons().asFlow()
-                .onEach {
-                    updateBottomShortcuts()
-                }
-                .launchIn(scope)
+            preferences.readerBottomButtons().asImmediateFlowIn(scope) { updateBottomShortcuts() }
 
-            preferences.readWithTapping().asImmediateFlow(scope) {
+            preferences.readWithTapping().asImmediateFlowIn(scope) {
                 binding?.navigationOverlay.tappingEnabled = it
             }
         }

@@ -16,7 +16,7 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.getFilePicker
@@ -94,7 +94,7 @@ class SettingsDownloadController : SettingsController() {
                 entryValues = dbCategories.map { it.id.toString() }
                 allSelectionRes = R.string.all
 
-                preferences.downloadNew().asImmediateFlow(viewScope) { isVisible = it }
+                preferences.downloadNew().asImmediateFlowIn(viewScope) { isVisible = it }
             }
             preferenceCategory {
                 intListPreference(activity) {

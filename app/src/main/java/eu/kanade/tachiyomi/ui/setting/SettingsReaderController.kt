@@ -4,6 +4,7 @@ import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
@@ -260,13 +261,13 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = 2
             }
             infoPreference(R.string.automatic_can_still_switch).apply {
-                preferences.pageLayout().asImmediateFlow(viewScope) { isVisible = it == PageLayout.AUTOMATIC }
+                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC }
             }
             switchPreference {
                 key = Keys.invertDoublePages
                 titleRes = R.string.invert_double_pages
                 defaultValue = false
-                preferences.pageLayout().asImmediateFlow(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE }
+                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE }
             }
         }
         preferenceCategory {

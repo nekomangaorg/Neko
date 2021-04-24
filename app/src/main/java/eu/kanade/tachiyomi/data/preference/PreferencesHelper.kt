@@ -36,7 +36,7 @@ fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(block: (value: T) 
         .onEach { block(it) }
 }
 
-fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(scope: CoroutineScope, block: (value: T) -> Unit): Job {
+fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlowIn(scope: CoroutineScope, block: (value: T) -> Unit): Job {
     block(get())
     return asFlow()
         .onEach { block(it) }
