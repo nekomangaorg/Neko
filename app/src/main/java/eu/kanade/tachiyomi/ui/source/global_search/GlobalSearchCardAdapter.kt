@@ -22,6 +22,6 @@ class GlobalSearchCardAdapter(controller: GlobalSearchController) :
      */
     interface OnMangaClickListener {
         fun onMangaClick(manga: Manga)
-        fun onMangaLongClick(manga: Manga)
+        fun onMangaLongClick(position: Int, adapter: GlobalSearchCardAdapter)
     }
 }

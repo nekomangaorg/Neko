@@ -18,6 +18,8 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceItem
+import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchCardAdapter
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchPresenter
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -126,8 +128,9 @@ class SearchController(
         dialog.showDialog(router)
     }
 
-    override fun onMangaLongClick(manga: Manga) {
+    override fun onMangaLongClick(position: Int, adapter: GlobalSearchCardAdapter) {
         // Call parent's default click listener
+        val manga = adapter.getItem(position)?.manga ?: return
         super.onMangaClick(manga)
     }
 

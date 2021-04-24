@@ -7,17 +7,23 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import androidx.appcompat.widget.SearchView
+import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import uy.kohesive.injekt.injectLazy
 
 /**
  * This controller shows and manages the different search result in global search.
@@ -31,11 +37,21 @@ open class GlobalSearchController(
     GlobalSearchCardAdapter.OnMangaClickListener {
 
     /**
+     * Preferences helper.
+     */
+    private val preferences: PreferencesHelper by injectLazy()
+
+    /**
      * Adapter containing search results grouped by lang.
      */
     protected var adapter: GlobalSearchAdapter? = null
 
     private var customTitle: String? = null
+
+    /**
+     * Snackbar containing an error message when a request fails.
+     */
+    private var snack: Snackbar? = null
 
     /**
      * Called when controller is initialized.
@@ -79,9 +95,27 @@ open class GlobalSearchController(
      *
      * @param manga clicked item containing manga information.
      */
-    override fun onMangaLongClick(manga: Manga) {
-        // Delegate to single click by default.
-        onMangaClick(manga)
+    override fun onMangaLongClick(position: Int, adapter: GlobalSearchCardAdapter) {
+        val manga = adapter.getItem(position)?.manga ?: return
+
+        val view = view ?: return
+        val activity = activity ?: return
+        snack?.dismiss()
+        snack = manga.addOrRemoveToFavorites(
+            presenter.db,
+            preferences,
+            view,
+            activity,
+            onMangaAdded = {
+                adapter.notifyItemChanged(position)
+                snack = view.snack(R.string.added_to_library)
+            },
+            onMangaMoved = { adapter.notifyItemChanged(position) },
+            onMangaDeleted = { presenter.confirmDeletion(manga) }
+        )
+        if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
+            (activity as? MainActivity)?.setUndoSnackBar(snack)
+        }
     }
 
     /**

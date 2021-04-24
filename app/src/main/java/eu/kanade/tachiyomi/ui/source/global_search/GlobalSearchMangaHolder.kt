@@ -24,10 +24,7 @@ class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
             }
         }
         itemView.setOnLongClickListener {
-            val item = adapter.getItem(flexibleAdapterPosition)
-            if (item != null) {
-                adapter.mangaClickListener.onMangaLongClick(item.manga)
-            }
+            adapter.mangaClickListener.onMangaLongClick(flexibleAdapterPosition, adapter)
             true
         }
     }

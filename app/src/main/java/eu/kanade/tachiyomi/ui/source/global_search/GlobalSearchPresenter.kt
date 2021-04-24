@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.source.global_search
 
 import android.os.Bundle
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.extension.ExtensionManager
@@ -38,7 +40,8 @@ open class GlobalSearchPresenter(
     private val sourcesToUse: List<CatalogueSource>? = null,
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
-    private val preferencesHelper: PreferencesHelper = Injekt.get()
+    private val preferencesHelper: PreferencesHelper = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get()
 ) : BasePresenter<GlobalSearchController>() {
 
     /**
@@ -144,6 +147,14 @@ open class GlobalSearchPresenter(
         results: List<GlobalSearchMangaItem>?
     ): GlobalSearchItem {
         return GlobalSearchItem(source, results)
+    }
+
+    fun confirmDeletion(manga: Manga) {
+        coverCache.deleteFromCache(manga)
+        val downloadManager: DownloadManager = Injekt.get()
+        sourceManager.get(manga.source)?.let { source ->
+            downloadManager.deleteManga(manga, source)
+        }
     }
 
     /**
