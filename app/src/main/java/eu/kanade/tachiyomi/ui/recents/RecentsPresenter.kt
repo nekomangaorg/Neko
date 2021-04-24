@@ -129,7 +129,7 @@ class RecentsPresenter(
         }
         val viewType = customViewType ?: viewType
 
-        val showRead = preferences.showReadInAllRecents().get() && !limit
+        val showRead = (preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
