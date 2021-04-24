@@ -18,6 +18,8 @@
     <color name="unread_badge_text">@color/md_white_1000</color>
     <color name="download_badge">@color/pale_green</color>
     <color name="download_badge_text">@color/md_black_1000</color>
+    <color name="download_badge_light">@color/strong_green</color>
+    <color name="download_badge_light_text">@color/md_white_1000</color>
     <color name="total_badge">@color/material_deep_purple_500</color>
     <color name="total_badge_text">@color/md_white_1000</color>
 
@@ -59,6 +61,7 @@
     <color name="primaryRed">#C14033</color>
 
     <color name="pale_green">#99CC99</color>
+    <color name="strong_green">#106010</color>
 
     <!-- Navigation overlay colors -->
     <color name="navigation_menu">#CC95818D</color>

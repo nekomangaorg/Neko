@@ -296,6 +296,11 @@ object ImageUtil {
             Color.alpha(color) > 200
     }
 
+    fun isDarkish(color: Int): Boolean {
+        return Color.red(color) < 80 && Color.blue(color) < 80 && Color.green(color) < 80 &&
+            Color.alpha(color) > 150
+    }
+
     private fun pixelIsClose(color1: Int, color2: Int): Boolean {
         return abs(Color.red(color1) - Color.red(color2)) < 30 &&
             abs(Color.green(color1) - Color.green(color2)) < 30 &&
