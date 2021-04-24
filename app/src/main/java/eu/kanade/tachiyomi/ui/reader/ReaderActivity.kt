@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
@@ -928,7 +929,7 @@ class ReaderActivity :
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
         }
 
-        binding.navigationOverlay.isLTR = !(viewer is L2RPagerViewer)
+        binding.navigationOverlay.isLTR = viewer !is L2RPagerViewer
         binding.viewerContainer.setBackgroundColor(
             if (viewer is WebtoonViewer) {
                 Color.BLACK
@@ -1474,6 +1475,10 @@ class ReaderActivity :
                     updateBottomShortcuts()
                 }
                 .launchIn(scope)
+
+            preferences.readWithTapping().asImmediateFlow(scope) {
+                binding?.navigationOverlay.tappingEnabled = it
+            }
         }
 
         /**

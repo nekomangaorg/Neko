@@ -20,6 +20,7 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
     private var navigation: ViewerNavigation? = null
 
     var isLTR = true
+    var tappingEnabled = true
 
     fun setNavigation(navigation: ViewerNavigation, showOnStart: Boolean) {
         if (!showOnStart && (this.navigation == null || this.navigation === navigation)) {
@@ -37,7 +38,7 @@ class ReaderNavigationOverlayView(context: Context, attributeSet: AttributeSet) 
     fun showNavigationAgain() {
         invalidate()
 
-        if (isVisible) return
+        if (isVisible || !tappingEnabled) return
 
         viewPropertyAnimator = animate()
             .alpha(1f)
