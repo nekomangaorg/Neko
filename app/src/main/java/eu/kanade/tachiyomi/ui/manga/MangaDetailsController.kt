@@ -69,6 +69,7 @@ import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.library.LibraryController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
@@ -445,9 +446,10 @@ class MangaDetailsController :
             if (router.backstackSize > 0 &&
                 router.backstack.last().controller() !is MangaDetailsController
             ) {
-                activityBinding?.appBar?.setBackgroundColor(colorSecondary)
+                if (router.backstack.last().controller() !is FloatingSearchInterface) {
+                    activityBinding?.appBar?.setBackgroundColor(colorSecondary)
+                }
                 activityBinding?.toolbar?.setBackgroundColor(colorSecondary)
-
                 activity?.window?.statusBarColor = activity?.getResourceColor(
                     android.R.attr.statusBarColor
                 ) ?: colorSecondary

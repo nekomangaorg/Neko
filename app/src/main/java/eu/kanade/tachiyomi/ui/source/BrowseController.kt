@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.extension.SettingsExtensionsController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsBrowseController
@@ -59,8 +60,8 @@ import kotlinx.android.parcel.Parcelize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
+import kotlin.math.abs
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * This controller shows and manages the different catalogues enabled by the user.
@@ -73,6 +74,7 @@ class BrowseController :
     FlexibleAdapter.OnItemClickListener,
     SourceAdapter.SourceListener,
     RootSearchInterface,
+    FloatingSearchInterface,
     BottomSheetController {
 
     /**
@@ -109,7 +111,7 @@ class BrowseController :
                     else -> R.string.source_migration
                 }
             )
-        } else view?.context?.getString(R.string.browse)
+        } else searchTitle(view?.context?.getString(R.string.sources))
     }
 
     val presenter = SourcePresenter(this)
@@ -142,19 +144,6 @@ class BrowseController :
                     bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
                 )
             },
-            liftOnScroll = { el ->
-                if (!binding.bottomSheet.root.sheetBehavior.isExpanded()) {
-                    elevationAnim?.cancel()
-                    elevationAnim = ValueAnimator.ofFloat(
-                        activityBinding?.appBar?.elevation ?: 0f,
-                        if (el) 15f else 0f
-                    )
-                    elevationAnim?.addUpdateListener { valueAnimator ->
-                        activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
-                    }
-                    elevationAnim?.start()
-                }
-            },
             onBottomNavUpdate = {
                 setBottomPadding()
             }
@@ -162,33 +151,31 @@ class BrowseController :
 
         binding.sourceRecycler.post {
             setBottomSheetTabs(if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f)
-            activityBinding?.appBar?.elevation = min(
-                if (binding.bottomSheet.root.sheetBehavior.isCollapsed()) 0f else 1f * 15f,
-                if (binding.sourceRecycler.canScrollVertically(-1)) 15f else 0f
-            )
             binding.sourceRecycler.updatePaddingRelative(
                 bottom = (activityBinding?.bottomNav?.height ?: 0) + 58.spToPx
             )
+            val isCollapsed = binding.bottomSheet.root.sheetBehavior.isCollapsed()
+            binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
+            updateTitleAndMenu()
         }
 
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
         binding.bottomSheet.root.onCreate(this)
+
+        binding.shadow.alpha =
+            if (binding.bottomSheet.root.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
 
         binding.bottomSheet.root.sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior
             .BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     binding.shadow2.alpha = (1 - max(0f, progress)) * 0.25f
-                    activityBinding?.appBar?.elevation = min(
-                        (1f - progress) * 15f,
-                        if (binding.sourceRecycler.canScrollVertically(-1)) 15f else 0f
-                    )
+                    binding.shadow.alpha = (1 - abs(progress)) * 0.5f
                     activityBinding?.appBar?.y = max(activityBinding!!.appBar.y, -headerHeight * (1 - progress))
                     val oldShow = showingExtensions
                     showingExtensions = progress > 0.92f
                     if (oldShow != showingExtensions) {
-                        setTitle()
-                        activity?.invalidateOptionsMenu()
+                        updateTitleAndMenu()
                     }
                     setBottomSheetTabs(max(0f, progress))
                 }
@@ -209,11 +196,15 @@ class BrowseController :
                     ) {
                         binding.bottomSheet.root.sheetBehavior?.isDraggable = true
                         showingExtensions = state == BottomSheetBehavior.STATE_EXPANDED
-                        setTitle()
+                        updateTitleAndMenu()
                         if (state == BottomSheetBehavior.STATE_EXPANDED) {
                             extBottomSheet.fetchOnlineExtensionsIfNeeded()
                         } else extBottomSheet.shouldCallApi = true
-                        activity?.invalidateOptionsMenu()
+                    }
+
+                    if (state == BottomSheetBehavior.STATE_EXPANDED || state == BottomSheetBehavior.STATE_COLLAPSED) {
+                        binding.shadow.alpha =
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
                     }
 
                     retainViewMode = if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -238,8 +229,9 @@ class BrowseController :
     }
 
     fun updateTitleAndMenu() {
-        setTitle()
+        (activity as? MainActivity)?.setFloatingToolbar(!showingExtensions)
         activity?.invalidateOptionsMenu()
+        setTitle()
     }
 
     fun setBottomSheetTabs(progress: Float) {
@@ -348,20 +340,9 @@ class BrowseController :
         }
         if (!type.isEnter) {
             binding.bottomSheet.root.canExpand = false
-            activityBinding?.appBar?.elevation =
-                when {
-                    binding.bottomSheet.root.sheetBehavior.isExpanded() -> 0f
-                    binding.sourceRecycler.canScrollVertically(-1) -> 15f
-                    else -> 0f
-                }
         } else {
             binding.bottomSheet.root.presenter.refreshMigrations()
-            activityBinding?.appBar?.elevation =
-                when {
-                    binding.bottomSheet.root.sheetBehavior.isExpanded() -> 0f
-                    binding.sourceRecycler.canScrollVertically(-1) -> 15f
-                    else -> 0f
-                }
+            updateTitleAndMenu()
         }
         setBottomPadding()
     }
@@ -458,7 +439,7 @@ class BrowseController :
 
     override fun expandSearch() {
         if (showingExtensions) binding.bottomSheet.root.sheetBehavior?.collapse()
-        else activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+        else activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
     }
 
     /**
@@ -480,13 +461,19 @@ class BrowseController :
 
                 // Change hint to show global search.
                 searchView.queryHint = view?.context?.getString(R.string.search_extensions)
-
+                searchItem.collapseActionView()
+                if (extQuery.isNotEmpty()) {
+                    searchItem.expandActionView()
+                    searchView.setQuery(extQuery, true)
+                    searchView.clearFocus()
+                }
                 // Create query listener which opens the global search view.
                 setOnQueryTextChangeListener(searchView) {
                     extQuery = it ?: ""
                     binding.bottomSheet.root.drawExtensions()
                     true
                 }
+                searchItem.fixExpandInvalidate()
             } else {
                 inflater.inflate(R.menu.migration_main, menu)
             }

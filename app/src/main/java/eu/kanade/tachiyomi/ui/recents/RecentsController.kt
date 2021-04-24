@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -74,6 +75,7 @@ class RecentsController(bundle: Bundle? = null) :
     FlexibleAdapter.OnItemMoveListener,
     FlexibleAdapter.EndlessScrollListener,
     RootSearchInterface,
+    FloatingSearchInterface,
     BottomSheetController,
     RemoveHistoryDialog.Listener {
 
@@ -100,11 +102,16 @@ class RecentsController(bundle: Bundle? = null) :
     private var lastChapterId: Long? = null
     private var showingDownloads = false
     var headerHeight = 0
+    private var query = ""
+        set(value) {
+            field = value
+            presenter.query = value
+        }
 
     override fun getTitle(): String? {
         return if (showingDownloads) {
             resources?.getString(R.string.download_queue)
-        } else resources?.getString(R.string.recents)
+        } else searchTitle(resources?.getString(R.string.recents))
     }
 
     override fun createBinding(inflater: LayoutInflater) = RecentsControllerBinding.inflate(inflater)
@@ -230,7 +237,7 @@ class RecentsController(bundle: Bundle? = null) :
                     val oldShow = showingDownloads
                     showingDownloads = progress > 0.92f
                     if (oldShow != showingDownloads) {
-                        setTitle()
+                        updateTitleAndMenu()
                         activity?.invalidateOptionsMenu()
                     }
                 }
@@ -242,7 +249,7 @@ class RecentsController(bundle: Bundle? = null) :
                         binding.downloadBottomSheet.sheetLayout.alpha =
                             if (state == BottomSheetBehavior.STATE_COLLAPSED) 1f else 0f
                         showingDownloads = state == BottomSheetBehavior.STATE_EXPANDED
-                        setTitle()
+                        updateTitleAndMenu()
                         activity?.invalidateOptionsMenu()
                     }
 
@@ -297,6 +304,11 @@ class RecentsController(bundle: Bundle? = null) :
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
+    }
+
+    fun updateTitleAndMenu() {
+        (activity as? MainActivity)?.setFloatingToolbar(!showingDownloads, true)
+        setTitle()
     }
 
     private fun setBottomPadding() {
@@ -554,7 +566,7 @@ class RecentsController(bundle: Bundle? = null) :
         (activity as? MainActivity)?.setUndoSnackBar(snack)
     }
 
-    override fun isSearching() = presenter.query.isNotEmpty()
+    override fun isSearching() = query.isNotEmpty()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingDownloads)
@@ -566,20 +578,22 @@ class RecentsController(bundle: Bundle? = null) :
             val searchItem = menu.findItem(R.id.action_search)
             val searchView = searchItem.actionView as SearchView
             searchView.queryHint = view?.context?.getString(R.string.search_recents)
+            searchItem.collapseActionView()
             if (isSearching()) {
                 searchItem.expandActionView()
-                searchView.setQuery(presenter.query, true)
+                searchView.setQuery(query, true)
                 searchView.clearFocus()
             }
             setOnQueryTextChangeListener(searchView) {
-                if (presenter.query != it) {
-                    presenter.query = it ?: return@setOnQueryTextChangeListener false
+                if (query != it) {
+                    query = it ?: return@setOnQueryTextChangeListener false
                     // loadNoMore()
                     resetProgressItem()
                     refresh()
                 }
                 true
             }
+            searchItem.fixExpandInvalidate()
         }
     }
 
@@ -636,7 +650,12 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeEnded(handler, type)
-        if (type == ControllerChangeType.POP_ENTER) setBottomPadding()
+        if (type == ControllerChangeType.POP_ENTER) {
+            setBottomPadding()
+        }
+        if (type.isEnter) {
+            updateTitleAndMenu()
+        }
     }
 
     fun hasQueue() = presenter.downloadManager.hasQueue()
@@ -659,7 +678,7 @@ class RecentsController(bundle: Bundle? = null) :
         if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
         } else {
-            activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+            activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
         }
     }
 

@@ -54,6 +54,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
+import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.CategoryController
@@ -67,6 +68,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.library.display.TabbedLibraryDisplaySheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -126,6 +128,7 @@ class LibraryController(
     LibraryCategoryAdapter.LibraryListener,
     BottomSheetController,
     RootSearchInterface,
+    FloatingSearchInterface,
     LibraryServiceListener {
 
     init {
@@ -209,11 +212,12 @@ class LibraryController(
     private var hopperOffset = 0f
 
     override fun getTitle(): String? {
-        return if (!showCategoryInTitle || binding.headerTitle.text.isNullOrBlank() || binding.recyclerCover.isClickable) {
-            view?.context?.getString(R.string.library)
-        } else {
-            binding.headerTitle.text.toString()
-        }
+        setSubtitle()
+//        return if (!showCategoryInTitle || binding.headerTitle.text.isNullOrBlank() || binding.recyclerCover.isClickable) {
+        return searchTitle(view?.context?.getString(R.string.library))
+//        } else {
+//            binding.headerTitle.text.toString()
+//        }
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener() {
@@ -338,18 +342,30 @@ class LibraryController(
         if (currentCategory > -1) {
             binding.categoryRecycler.setCategories(currentCategory)
             binding.headerTitle.text = presenter.categories[currentCategory].name
-            setTitle()
+            setSubtitle()
         }
     }
 
     fun showMiniBar() {
-        binding.headerTitle.visibleIf(showCategoryInTitle)
-        setTitle()
+        binding.headerCard.visibleIf(showCategoryInTitle)
+        setSubtitle()
+    }
+
+    private fun setSubtitle() {
+        if (!singleCategory && presenter.showAllCategories &&
+            !binding.headerTitle.text.isNullOrBlank() && !binding.recyclerCover.isClickable
+        ) {
+            activityBinding?.cardToolbar?.subtitle = binding.headerTitle.text.toString()
+        } else {
+            activityBinding?.cardToolbar?.subtitle = null
+        }
     }
 
     fun showCategoryText(name: String) {
         textAnim?.cancel()
-        textAnim = binding.jumperCategoryText.animate().alpha(0f).setDuration(250L).setStartDelay(2000)
+        textAnim = binding.jumperCategoryText.animate().alpha(0f).setDuration(250L).setStartDelay(
+            2000
+        )
         textAnim?.start()
         binding.jumperCategoryText.alpha = 1f
         binding.jumperCategoryText.text = name
@@ -432,6 +448,7 @@ class LibraryController(
 
     override fun createBinding(inflater: LayoutInflater) = LibraryControllerBinding.inflate(inflater)
 
+    @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
@@ -463,9 +480,15 @@ class LibraryController(
             showCategories(false)
         }
         binding.categoryRecycler.onCategoryClicked = {
-            binding.libraryGridRecycler.recycler.itemAnimator = null
             scrollToHeader(it)
-            showCategories(show = false)
+            showCategories(show = false, closeSearch = true)
+        }
+        binding.categoryRecycler.setOnTouchListener { _, _ ->
+            val searchView = activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView
+                ?: return@setOnTouchListener false
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            imm!!.hideSoftInputFromWindow(searchView.windowToken, 0)
+            false
         }
         binding.categoryRecycler.onShowAllClicked = { isChecked ->
             preferences.showAllCategories().set(isChecked)
@@ -486,10 +509,12 @@ class LibraryController(
                     binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                         topMargin = binding.libraryGridRecycler.recycler.paddingTop
                     }
-                    binding.headerTitle.updatePaddingRelative(top = insets.systemWindowInsetTop + 2.dpToPx)
+                    binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        topMargin = insets.systemWindowInsetTop + 4.dpToPx
+                    }
                 },
                 onLeavingController = {
-                    binding.headerTitle.gone()
+                    binding.headerCard.gone()
                 },
                 onBottomNavUpdate = {
                     updateFilterSheetY()
@@ -616,7 +641,7 @@ class LibraryController(
                 3 -> showGroupOptions()
                 2 -> showDisplayOptions()
                 1 -> if (canCollapseOrExpandCategory() != null) presenter.toggleAllCategoryVisibility()
-                else -> activityBinding?.toolbar?.menu?.performIdentifierAction(
+                else -> activityBinding?.cardToolbar?.menu?.performIdentifierAction(
                     R.id.action_search,
                     0
                 )
@@ -779,7 +804,12 @@ class LibraryController(
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
-                Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+                Handler().post {
+                    NotificationReceiver.dismissNotification(
+                        context,
+                        Notifications.ID_LIBRARY_PROGRESS
+                    )
+                }
             }
         }
     }
@@ -906,7 +936,9 @@ class LibraryController(
         binding.progress.gone()
         if (!freshStart) {
             justStarted = false
-            if (binding.recyclerLayout.alpha == 0f) binding.recyclerLayout.animate().alpha(1f).setDuration(500)
+            if (binding.recyclerLayout.alpha == 0f) binding.recyclerLayout.animate().alpha(1f).setDuration(
+                500
+            )
                 .start()
         } else binding.recyclerLayout.alpha = 1f
         if (justStarted && freshStart) {
@@ -942,6 +974,7 @@ class LibraryController(
                     showSlideAnimation()
                 }
             }
+            setSubtitle()
             showMiniBar()
         }
     }
@@ -985,9 +1018,12 @@ class LibraryController(
             .setDuration(duration)
     }
 
-    private fun showCategories(show: Boolean) {
+    private fun showCategories(show: Boolean, closeSearch: Boolean = false) {
         binding.recyclerCover.isClickable = show
         binding.recyclerCover.isFocusable = show
+        if (closeSearch) {
+            activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.collapseActionView()
+        }
         val full = binding.categoryRecycler.height.toFloat() + binding.libraryGridRecycler.recycler.paddingTop
         val translateY = if (show) full else 0f
         binding.libraryGridRecycler.recycler.animate().translationY(translateY).apply {
@@ -1002,7 +1038,7 @@ class LibraryController(
         binding.libraryGridRecycler.recycler.suppressLayout(show)
         activityBinding?.toolbar?.showDropdown(!show)
         binding.swipeRefresh.isEnabled = !show
-        setTitle()
+        setSubtitle()
         if (show) {
             binding.categoryRecycler.scrollToCategory(activeCategory)
             binding.fastScroller.hideScrollbar()
@@ -1075,7 +1111,10 @@ class LibraryController(
             (binding.libraryGridRecycler.recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
         binding.libraryGridRecycler.recycler.adapter = adapter
 
-        (binding.libraryGridRecycler.recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(position, 0)
+        (binding.libraryGridRecycler.recycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+            position,
+            0
+        )
     }
 
     fun search(query: String?): Boolean {
@@ -1085,7 +1124,9 @@ class LibraryController(
             adapter.addScrollableHeader(searchItem)
         } else if (this.query.isNotBlank()) {
             searchItem.string = this.query
-            (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(this.query)
+            (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(
+                this.query
+            )
         } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
             adapter.removeAllScrollableHeaders()
         }
@@ -1264,7 +1305,10 @@ class LibraryController(
             ) ||
             adapter.getItem(fromPosition) == null
         ) {
-            binding.libraryGridRecycler.recycler.scrollBy(0, binding.libraryGridRecycler.recycler.paddingTop)
+            binding.libraryGridRecycler.recycler.scrollBy(
+                0,
+                binding.libraryGridRecycler.recycler.paddingTop
+            )
         }
         if (lastItemPosition == toPosition) lastItemPosition = null
         else if (lastItemPosition == null) lastItemPosition = fromPosition
@@ -1481,8 +1525,26 @@ class LibraryController(
             searchView.clearFocus()
         }
 
-        setOnQueryTextChangeListener(searchView) { search(it) }
-        searchItem.fixExpand(onExpand = { invalidateMenuOnExpand() })
+        setOnQueryTextChangeListener(searchView) {
+            if (!it.isNullOrEmpty() && binding.recyclerCover.isClickable) {
+                showCategories(false)
+            }
+            search(it)
+        }
+        searchItem.fixExpand(
+            onExpand = {
+                if (!binding.recyclerCover.isClickable && query.isBlank()) {
+                    showCategories(true)
+                }
+                invalidateMenuOnExpand()
+            },
+            onCollapse = {
+                if (binding.recyclerCover.isClickable) {
+                    showCategories(false)
+                }
+                true
+            }
+        )
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

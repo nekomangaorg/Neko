@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
 
 class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.OverflowDialogTheme) {
 
@@ -76,7 +77,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
         }
 
         binding.overflowCardView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            topMargin = activity.binding.toolbar.height - 2.dpToPx
+            topMargin = max(activity.binding.toolbar.height, activity.binding.cardFrame.height) - 2.dpToPx
         }
         window?.let { window ->
             window.navigationBarColor = Color.TRANSPARENT

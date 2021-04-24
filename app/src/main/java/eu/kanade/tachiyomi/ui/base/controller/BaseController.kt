@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
+import android.app.Activity
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.MenuItem
@@ -11,6 +12,7 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RestoreViewOnCreateController
+import eu.kanade.tachiyomi.util.view.removeQueryListener
 import timber.log.Timber
 
 abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
@@ -57,6 +59,8 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         if (type.isEnter) {
             setTitle()
+        } else {
+            removeQueryListener()
         }
         setHasOptionsMenu(type.isEnter)
         super.onChangeStarted(handler, type)
@@ -67,6 +71,11 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
     open fun getTitle(): String? {
         return null
+    }
+
+    override fun onActivityPaused(activity: Activity) {
+        super.onActivityPaused(activity)
+        removeQueryListener()
     }
 
     fun setTitle() {
@@ -112,6 +121,10 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             expandActionViewFromInteraction = false
             expandActionView()
         }
+    }
+
+    fun MenuItem.fixExpandInvalidate() {
+        fixExpand { invalidateMenuOnExpand() }
     }
 
     /**

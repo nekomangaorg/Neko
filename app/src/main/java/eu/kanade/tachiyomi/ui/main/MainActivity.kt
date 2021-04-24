@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.view.GestureDetector
+import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -21,6 +22,7 @@ import android.view.WindowManager
 import android.webkit.WebView
 import androidx.annotation.IdRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
@@ -112,6 +114,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     var tabAnimation: ValueAnimator? = null
     var overflowDialog: Dialog? = null
+    var currentToolbar: Toolbar? = null
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -145,7 +148,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding = MainActivityBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
+        setFloatingToolbar(true)
 
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
@@ -270,6 +273,17 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             } else onBackPressed()
         }
 
+        binding.cardToolbar.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller()
+            if (rootSearchController is RootSearchInterface) {
+                rootSearchController.expandSearch()
+            } else onBackPressed()
+        }
+
+        binding.cardToolbar.setOnClickListener {
+            binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        }
+
         binding.bottomNav.visibleIf(!hideBottomNav)
         binding.bottomView.visibility = if (hideBottomNav) View.GONE else binding.bottomView.visibility
         binding.bottomNav.alpha = if (hideBottomNav) 0f else 1f
@@ -325,12 +339,42 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         preferences.incognitoMode()
-            .asImmediateFlow { binding.toolbar.setIncognitoMode(it) }
+            .asImmediateFlow {
+                binding.toolbar.setIncognitoMode(it)
+                binding.cardToolbar.setIncognitoMode(it)
+            }
             .launchIn(lifecycleScope)
         setExtensionsBadge()
     }
 
+    fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
+        val oldTB = currentToolbar
+        currentToolbar = if (show) {
+            binding.cardToolbar
+        } else {
+            binding.toolbar
+        }
+        if (oldTB != currentToolbar) {
+            setSupportActionBar(currentToolbar)
+        }
+        binding.toolbar.isVisible = !show
+        binding.cardFrame.isVisible = show
+        binding.appBar.setBackgroundColor(
+            if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
+        )
+        currentToolbar?.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller()
+            if (rootSearchController is RootSearchInterface) {
+                rootSearchController.expandSearch()
+            } else onBackPressed()
+        }
+        if (oldTB != currentToolbar) {
+            invalidateOptionsMenu()
+        }
+    }
+
     fun setDismissIcon(enabled: Boolean) {
+        binding.cardToolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
         binding.toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
     }
 
@@ -553,6 +597,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         DownloadService.removeListener(this)
         if (isBindingInitialized) {
             binding.toolbar.setNavigationOnClickListener(null)
+            binding.cardToolbar.setNavigationOnClickListener(null)
         }
     }
 
@@ -608,6 +653,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val searchItem = menu?.findItem(R.id.action_search)
+        searchItem?.isVisible = currentToolbar != binding.cardToolbar
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             // Initialize option to open catalogue settings.
@@ -660,6 +711,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         return super.dispatchTouchEvent(ev)
     }
 
+    protected fun canShowFloatingToolbar(controller: Controller?) =
+        controller is FloatingSearchInterface
+
     protected open fun syncActivityViewWithController(
         to: Controller?,
         from: Controller? = null,
@@ -668,14 +722,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (from is DialogController || to is DialogController) {
             return
         }
+        setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         if (onRoot) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
             binding.toolbar.navigationIcon = searchDrawable
+            binding.cardToolbar.navigationIcon = searchDrawable
         } else {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
             binding.toolbar.navigationIcon = drawerArrow
+            binding.cardToolbar.navigationIcon = drawerArrow
         }
+        binding.cardToolbar.subtitle = null
         drawerArrow?.progress = 1f
 
         binding.bottomNav.visibility = if (!hideBottomNav) View.VISIBLE else binding.bottomNav.visibility
@@ -803,8 +861,19 @@ interface BottomNavBarInterface {
 
 interface RootSearchInterface {
     fun expandSearch() {
-        if (this is Controller) (activity as? MainActivity)?.binding?.toolbar?.menu?.findItem(R.id.action_search)
-            ?.expandActionView()
+        if (this is Controller) {
+            val mainActivity = activity as? MainActivity ?: return
+            mainActivity.binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        }
+    }
+}
+
+interface FloatingSearchInterface {
+    fun searchTitle(title: String?): String? {
+        if (this is Controller) {
+            return activity?.getString(R.string.search_, title)
+        }
+        return title
     }
 }
 

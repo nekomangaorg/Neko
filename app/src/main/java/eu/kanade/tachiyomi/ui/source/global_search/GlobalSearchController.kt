@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerBinding
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
@@ -34,6 +35,7 @@ open class GlobalSearchController(
     protected val initialQuery: String? = null,
     protected val extensionFilter: String? = null
 ) : NucleusController<SourceGlobalSearchControllerBinding, GlobalSearchPresenter>(),
+    FloatingSearchInterface,
     GlobalSearchCardAdapter.OnMangaClickListener {
 
     /**

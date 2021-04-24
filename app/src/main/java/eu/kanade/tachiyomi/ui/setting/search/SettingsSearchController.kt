@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SettingsSearchControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -21,6 +22,7 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
  */
 class SettingsSearchController :
     NucleusController<SettingsSearchControllerBinding, SettingsSearchPresenter>(),
+    FloatingSearchInterface,
     SettingsSearchAdapter.OnTitleClickListener {
 
     /**
@@ -107,7 +109,7 @@ class SettingsSearchController :
 
         adapter = SettingsSearchAdapter(this)
 
-        liftAppbarWith(binding.recycler)
+        liftAppbarWith(binding.recycler, true)
         // Create recycler and set adapter.
         binding.recycler.layoutManager = LinearLayoutManager(view.context)
         binding.recycler.adapter = adapter

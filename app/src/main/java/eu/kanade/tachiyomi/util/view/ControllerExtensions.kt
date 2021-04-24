@@ -26,7 +26,9 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
+import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -67,15 +69,60 @@ fun Controller.setOnQueryTextChangeListener(
     )
 }
 
-fun Controller.liftAppbarWith(recycler: RecyclerView) {
-    view?.applyWindowInsetsForController()
-    recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+fun Controller.removeQueryListener() {
+    val searchView = activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    val searchView2 = activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String?) = true
+        override fun onQueryTextChange(newText: String?) = true
+    })
+    searchView2?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
+        override fun onQueryTextSubmit(query: String?) = true
+        override fun onQueryTextChange(newText: String?) = true
+    })
+}
+
+fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) {
+    if (padView) {
+        val attrsArray = intArrayOf(R.attr.actionBarSize)
+        val array = recycler.context.obtainStyledAttributes(attrsArray)
+        var appBarHeight = (
+            if (activityBinding?.toolbar?.height ?: 0 > 0) activityBinding!!.toolbar.height
+            else array.getDimensionPixelSize(0, 0)
+            )
+        array.recycle()
+        activityBinding!!.toolbar.post {
+            if (activityBinding!!.toolbar.height > 0) {
+                appBarHeight = activityBinding!!.toolbar.height
+                recycler.requestApplyInsets()
+            }
+        }
+        recycler.updatePaddingRelative(
+            top = activityBinding!!.toolbar.y.toInt() + appBarHeight
+        )
+        recycler.doOnApplyWindowInsets { view, insets, _ ->
+            val headerHeight = insets.systemWindowInsetTop + appBarHeight
+            view.updatePaddingRelative(
+                top = headerHeight,
+                bottom = insets.systemWindowInsetBottom
+            )
+        }
+    } else {
+        view?.applyWindowInsetsForController()
+        recycler.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+    }
 
     var elevationAnim: ValueAnimator? = null
     var elevate = false
-    val elevateFunc: (Boolean) -> Unit = { el ->
+    val elevateFunc: (Boolean) -> Unit = f@{ el ->
         elevate = el
         elevationAnim?.cancel()
+        val floatingBar =
+            !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
+        if (floatingBar) {
+            activityBinding?.appBar?.elevation = 0f
+            return@f
+        }
         elevationAnim = ValueAnimator.ofFloat(
             activityBinding?.appBar?.elevation ?: 0f,
             if (el) 15f else 0f
@@ -84,6 +131,12 @@ fun Controller.liftAppbarWith(recycler: RecyclerView) {
             activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
         }
         elevationAnim?.start()
+    }
+
+    val floatingBar =
+        !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
+    if (floatingBar) {
+        activityBinding?.appBar?.elevation = 0f
     }
     elevateFunc(recycler.canScrollVertically(-1))
     recycler.addOnScrollListener(
@@ -163,12 +216,21 @@ fun Controller.scrollViewWith(
     var elevate = false
     var isInView = true
     val preferences: PreferencesHelper by injectLazy()
-    val elevateFunc: (Boolean) -> Unit = { el ->
+    val elevateFunc: (Boolean) -> Unit = f@{ el ->
         elevate = el
         if (liftOnScroll != null) {
             liftOnScroll.invoke(el)
         } else {
             elevationAnim?.cancel()
+            val floatingBar =
+                !(
+                    activityBinding?.toolbar?.isVisible == true ||
+                        (activityBinding?.tabsFrameLayout?.isVisible == true && includeTabView)
+                    )
+            if (floatingBar) {
+                activityBinding?.appBar?.elevation = 0f
+                return@f
+            }
             elevationAnim = ValueAnimator.ofFloat(
                 activityBinding?.appBar?.elevation ?: 0f,
                 if (el) 15f else 0f
@@ -178,6 +240,14 @@ fun Controller.scrollViewWith(
             }
             elevationAnim?.start()
         }
+    }
+    val floatingBar =
+        !(
+            activityBinding?.toolbar?.isVisible == true ||
+                (activityBinding?.tabsFrameLayout?.isVisible == true && includeTabView)
+            )
+    if (floatingBar) {
+        activityBinding?.appBar?.elevation = 0f
     }
     addLifecycleListener(
         object : Controller.LifecycleListener() {
@@ -211,8 +281,10 @@ fun Controller.scrollViewWith(
                     }
                 } else {
                     if (!customPadding && lastY == 0f && (
-                        router.backstack.lastOrNull()
-                            ?.controller() is MangaDetailsController || includeTabView
+                        (
+                            this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
+                                ?.controller() is MangaDetailsController
+                            ) || includeTabView
                         )
                     ) {
                         val parent = recycler.parent as? ViewGroup ?: return

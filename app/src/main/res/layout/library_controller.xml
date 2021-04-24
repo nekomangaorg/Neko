@@ -62,27 +62,37 @@
         android:layout_height="match_parent"
         app:fastScrollerBubbleEnabled="true" />
 
-    <TextView
-        android:id="@+id/header_title"
-        style="@style/TextAppearance.MaterialComponents.Headline6"
-        android:layout_width="match_parent"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/header_card"
+        android:layout_marginTop="6dp"
+        app:cardCornerRadius="16dp"
+        app:cardBackgroundColor="@android:color/transparent"
+        app:cardElevation="2dp"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="6dp"
-        android:background="@drawable/list_item_selector"
-        android:backgroundTint="?colorSecondary"
-        android:clickable="true"
-        android:elevation="5dp"
-        android:ellipsize="end"
-        android:focusable="true"
-        android:gravity="center"
-        android:inputType="none"
-        android:maxLines="1"
-        android:paddingStart="8dp"
-        android:paddingEnd="8dp"
-        android:paddingBottom="6dp"
-        android:textColor="?actionBarTintColor"
-        android:textSize="14sp"
-        tools:text="Category" />
+        android:layout_gravity="center|top">
+
+        <TextView
+            android:id="@+id/header_title"
+            style="@style/TextAppearance.MaterialComponents.Headline6"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/list_item_selector"
+            android:backgroundTint="?colorPrimaryVariant"
+            android:clickable="true"
+            android:ellipsize="end"
+            android:focusable="true"
+            android:inputType="none"
+            android:maxLines="1"
+            android:textAlignment="center"
+            android:paddingStart="32dp"
+            android:paddingEnd="32dp"
+            android:paddingTop="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="?actionBarTintColor"
+            android:textSize="14sp"
+            tools:text="Category" />
+    </androidx.cardview.widget.CardView>
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"
@@ -116,6 +126,7 @@
     <FrameLayout
         android:id="@+id/category_hopper_frame"
         android:layout_width="wrap_content"
+        tools:translationY="400dp"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center">
 

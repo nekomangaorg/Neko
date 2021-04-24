@@ -38,21 +38,105 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorSecondary">
 
-                <com.google.android.material.textview.MaterialTextView
-                    android:id="@+id/toolbar_title"
-                    style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:drawableTint="?actionBarTintColor"
-                    android:ellipsize="end"
-                    android:layout_gravity="center"
-                    android:maxLines="1"
-                    android:textColor="?actionBarTintColor"
-                    android:textSize="20sp"
-                    tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
-                    tools:drawableStart="@drawable/ic_blank_24dp"
-                    tools:text="Title Text" />
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/toolbar_title"
+                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:drawableTint="?actionBarTintColor"
+                android:ellipsize="end"
+                android:layout_gravity="center"
+                android:maxLines="1"
+                android:textColor="?actionBarTintColor"
+                android:textSize="20sp"
+                tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
+                tools:drawableStart="@drawable/ic_blank_24dp"
+                tools:text="Title Text" />
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
+
+        <FrameLayout
+            android:id="@+id/card_frame"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize" >
+
+            <androidx.cardview.widget.CardView
+                android:id="@+id/card_view"
+                android:layout_width="match_parent"
+                android:layout_marginTop="4dp"
+                app:cardBackgroundColor="?colorPrimaryVariant"
+                android:layout_marginBottom="4dp"
+                android:layout_marginStart="14dp"
+                android:layout_marginEnd="14dp"
+                app:cardCornerRadius="8dp"
+                android:layout_height="match_parent" >
+
+                <eu.kanade.tachiyomi.ui.base.FloatingToolbar
+                    android:id="@+id/card_toolbar"
+                    tools:title="Search Library..."
+                    app:contentInsetStartWithNavigation="0dp"
+                    app:contentInsetEndWithActions="0dp"
+                    app:contentInsetStart="0dp"
+                    app:contentInsetEnd="0dp"
+                    app:navigationIconTint="@color/text_color_secondary"
+                    app:navigationIcon="@drawable/ic_search_24dp"
+                    app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
+                    app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="match_parent"
+                        android:gravity="start|center"
+                        android:orientation="horizontal">
+
+                        <ImageView
+                            android:id="@+id/card_incog_image"
+                            app:tint="?actionBarTintColor"
+                            android:layout_gravity="center|start"
+                            android:layout_width="28dp"
+                            android:layout_height="28dp"
+                            android:layout_marginEnd="6dp"
+                            android:layout_marginStart="0dp"
+                            android:contentDescription="@string/incognito_mode"
+                            android:src="@drawable/ic_incognito_circle_24dp"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:gravity="start|center"
+                            android:orientation="vertical">
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/card_title"
+                                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:drawableTint="?actionBarTintColor"
+                                android:ellipsize="end"
+                                android:layout_gravity="center"
+                                android:maxLines="1"
+                                android:textColor="?actionBarTintColor"
+                                android:textSize="20sp"
+                                tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
+                                tools:drawableStart="@drawable/ic_blank_24dp"
+                                tools:text="Title Text" />
+
+                            <com.google.android.material.textview.MaterialTextView
+                                android:id="@+id/card_subtitle"
+                                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:ellipsize="end"
+                                android:layout_gravity="start|center"
+                                android:maxLines="1"
+                                android:textColor="?actionBarTintColor"
+                                android:textSize="12sp"
+                                tools:text="Title Text" />
+                        </LinearLayout>
+                    </LinearLayout>
+                </eu.kanade.tachiyomi.ui.base.FloatingToolbar>
+            </androidx.cardview.widget.CardView>
+        </FrameLayout>
 
         <FrameLayout
             android:id="@+id/tabs_frame_layout"

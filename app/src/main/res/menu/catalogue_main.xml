@@ -8,7 +8,7 @@
         android:icon="@drawable/ic_search_24dp"
         android:visible="false"
         app:showAsAction="collapseActionView|ifRoom"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"/>
+        app:actionViewClass="eu.kanade.tachiyomi.ui.base.MiniSearchView"/>
 
     <item android:id="@+id/action_filter"
         android:title="@string/filter"

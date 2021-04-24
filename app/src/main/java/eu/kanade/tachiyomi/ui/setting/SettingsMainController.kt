@@ -8,11 +8,12 @@ import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
-class SettingsMainController : SettingsController() {
+class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     init {
         setHasOptionsMenu(true)

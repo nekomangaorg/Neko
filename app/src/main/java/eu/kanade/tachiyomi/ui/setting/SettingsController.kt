@@ -20,6 +20,7 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import kotlinx.coroutines.MainScope
 import rx.Observable
@@ -96,6 +97,9 @@ abstract class SettingsController : PreferenceController() {
     }
 
     open fun getTitle(): String? {
+        if (this is FloatingSearchInterface) {
+            return searchTitle(preferenceScreen?.title?.toString())
+        }
         return preferenceScreen?.title?.toString()
     }
 
