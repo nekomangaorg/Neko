@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomNavBarInterface
 import eu.kanade.tachiyomi.ui.migration.manga.process.MigrationListController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceItem
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchCardAdapter
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchPresenter
