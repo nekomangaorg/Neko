@@ -158,7 +158,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             )
             shadow.alpha = if (sheetBehavior.isHidden()) 0f else 1f
 
-            if (binding.secondLayout.width + binding.firstLayout.width + 20.dpToPx < width) {
+            if (binding.secondLayout.width + (binding.groupBy.width * 2) + 20.dpToPx < width) {
                 binding.secondLayout.removeView(binding.viewOptions)
                 binding.firstLayout.addView(binding.viewOptions)
                 binding.secondLayout.isVisible = false
