@@ -45,7 +45,8 @@
         </activity>
         <activity
             android:name=".ui.main.SearchActivity"
-            android:theme="@style/Theme.Splash">
+            android:theme="@style/Theme.Splash"
+            android:label="@string/label_global_search">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH" />
                 <action android:name="com.google.android.gms.actions.SEARCH_ACTION"/>
@@ -55,6 +56,11 @@
             <intent-filter>
                 <action android:name="eu.kanade.tachiyomi.SEARCH" />
                 <category android:name="android.intent.category.DEFAULT"/>
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="text/plain" />
             </intent-filter>
             <meta-data android:name="android.app.searchable" android:resource="@xml/searchable"/>
         </activity>

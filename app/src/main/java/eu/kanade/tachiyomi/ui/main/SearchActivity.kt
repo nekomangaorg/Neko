@@ -80,14 +80,16 @@ class SearchActivity : MainActivity() {
             intent.getIntExtra("groupId", 0)
         )
         when (intent.action) {
-            Intent.ACTION_SEARCH, "com.google.android.gms.actions.SEARCH_ACTION" -> {
+            Intent.ACTION_SEARCH, Intent.ACTION_SEND, "com.google.android.gms.actions.SEARCH_ACTION" -> {
                 // If the intent match the "standard" Android search intent
                 // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
                 // Get the search query provided in extras, and if not null, perform a global search with it.
-                val query = intent.getStringExtra(SearchManager.QUERY)
+                val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
                     router.replaceTopController(GlobalSearchController(query).withFadeTransaction())
+                } else {
+                    finish()
                 }
             }
             INTENT_SEARCH -> {
