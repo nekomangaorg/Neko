@@ -1118,6 +1118,9 @@ class LibraryController(
     }
 
     fun search(query: String?): Boolean {
+        if (query != this.query && !query.isNullOrBlank()) {
+            binding.libraryGridRecycler.recycler.scrollToPosition(0)
+        }
         this.query = query ?: ""
         if (this.query.isNotBlank() && adapter.scrollableHeaders.isEmpty()) {
             searchItem.string = this.query
