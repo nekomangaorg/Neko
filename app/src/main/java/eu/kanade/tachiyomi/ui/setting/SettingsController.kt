@@ -28,6 +28,7 @@ import rx.Subscription
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 abstract class SettingsController : PreferenceController() {
 
@@ -98,7 +99,7 @@ abstract class SettingsController : PreferenceController() {
 
     open fun getTitle(): String? {
         if (this is FloatingSearchInterface) {
-            return searchTitle(preferenceScreen?.title?.toString())
+            return searchTitle(preferenceScreen?.title?.toString()?.lowercase(Locale.ROOT))
         }
         return preferenceScreen?.title?.toString()
     }

@@ -58,6 +58,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -111,7 +112,15 @@ class RecentsController(bundle: Bundle? = null) :
     override fun getTitle(): String? {
         return if (showingDownloads) {
             resources?.getString(R.string.download_queue)
-        } else searchTitle(resources?.getString(R.string.recents))
+        } else searchTitle(
+            view?.context?.getString(
+                when (presenter.viewType) {
+                    RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.history
+                    RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.updates
+                    else -> R.string.updates_and_history
+                }
+            )?.lowercase(Locale.ROOT)
+        )
     }
 
     override fun createBinding(inflater: LayoutInflater) = RecentsControllerBinding.inflate(inflater)
@@ -476,11 +485,13 @@ class RecentsController(bundle: Bundle? = null) :
     fun tempJumpTo(viewType: Int) {
         presenter.toggleGroupRecents(viewType, false)
         activityBinding?.mainTabs?.selectTab(activityBinding?.mainTabs?.getTabAt(viewType))
+        updateTitleAndMenu()
     }
 
     private fun setViewType(viewType: Int) {
         if (viewType != presenter.viewType) {
             presenter.toggleGroupRecents(viewType)
+            updateTitleAndMenu()
         }
     }
 

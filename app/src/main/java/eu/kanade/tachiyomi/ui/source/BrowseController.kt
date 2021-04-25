@@ -59,6 +59,7 @@ import kotlinx.android.parcel.Parcelize
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 
@@ -110,7 +111,7 @@ class BrowseController :
                     else -> R.string.source_migration
                 }
             )
-        } else searchTitle(view?.context?.getString(R.string.sources))
+        } else searchTitle(view?.context?.getString(R.string.sources)?.lowercase(Locale.ROOT))
     }
 
     val presenter = SourcePresenter(this)

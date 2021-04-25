@@ -58,6 +58,7 @@ class RecentsPresenter(
     var heldItems: HashMap<Int, List<RecentMangaItem>> = hashMapOf()
     private var shouldMoveToTop = false
     var viewType: Int = preferences.recentsViewType().get()
+        private set
 
     private fun resetOffsets() {
         finished = false

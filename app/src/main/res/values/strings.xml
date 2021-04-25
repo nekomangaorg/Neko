@@ -113,6 +113,7 @@
 
     <!-- Library -->
     <string name="library">Library</string>
+    <string name="your_library">Your library</string>
     <string name="updating_library">Updating library</string>
     <string name="selected_">Selected: %1$d</string>
     <string name="local">Local</string>
@@ -213,6 +214,7 @@
 
     <!-- Recents -->
     <string name="recents">Recents</string>
+    <string name="updates_and_history">Updates &amp; history</string>
     <string name="updates">Updates</string>
     <string name="newly_added">Newly added</string>
     <string name="history">History</string>

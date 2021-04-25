@@ -111,6 +111,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -213,11 +214,7 @@ class LibraryController(
 
     override fun getTitle(): String? {
         setSubtitle()
-//        return if (!showCategoryInTitle || binding.headerTitle.text.isNullOrBlank() || binding.recyclerCover.isClickable) {
-        return searchTitle(view?.context?.getString(R.string.library))
-//        } else {
-//            binding.headerTitle.text.toString()
-//        }
+        return searchTitle(view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT))
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener() {
