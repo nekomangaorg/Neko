@@ -3,12 +3,12 @@ package eu.kanade.tachiyomi.data.image.coil
 import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.ImageView
+import androidx.core.view.isVisible
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import coil.target.ImageViewTarget
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visible
 
 class CoverViewTarget(
     view: ImageView,
@@ -29,7 +29,7 @@ class CoverViewTarget(
     }
 
     override fun onStart(placeholder: Drawable?) {
-        progress?.visible()
+        progress?.isVisible = true
         view.scaleType = scaleType
         super.onStart(placeholder)
     }
