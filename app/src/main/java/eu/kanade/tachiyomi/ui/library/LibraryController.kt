@@ -28,7 +28,6 @@ import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,7 +52,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asFlowsIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
@@ -99,11 +97,11 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -149,8 +147,6 @@ class LibraryController(
 
     var singleCategory: Boolean = false
         private set
-
-    val scope = CoroutineScope(Job() + Dispatchers.Main)
 
     /**
      * Library search query.
@@ -835,8 +831,13 @@ class LibraryController(
             preferences.uniformGrid(),
             preferences.gridSize(),
             preferences.unreadBadgeType()
-        ).asFlowsIn(scope, true) {
-            reattachAdapter()
+        ).forEach {
+            it.asFlow()
+                .drop(1)
+                .onEach {
+                    reattachAdapter()
+                }
+                .launchIn(viewScope)
         }
     }
 
@@ -885,7 +886,6 @@ class LibraryController(
 
     override fun onDestroy() {
         if (::presenter.isInitialized) presenter.onDestroy()
-        scope.cancel()
         super.onDestroy()
     }
 
@@ -897,6 +897,7 @@ class LibraryController(
         }
         displaySheet?.dismiss()
         displaySheet = null
+        presenter.cancelScope()
         super.onDestroyView(view)
     }
 
@@ -913,11 +914,6 @@ class LibraryController(
             )
         }
         adapter.setItems(mangaMap)
-        if (binding.libraryGridRecycler.recycler.itemAnimator == null) {
-            binding.libraryGridRecycler.recycler.post {
-                binding.libraryGridRecycler.recycler.itemAnimator = DefaultItemAnimator()
-            }
-        }
         singleCategory = presenter.categories.size <= 1
         showDropdown()
         binding.progress.isVisible = false
@@ -951,9 +947,7 @@ class LibraryController(
             listOf(activityBinding?.toolbar, binding.headerTitle).forEach {
                 it?.setOnClickListener {
                     val recycler = binding.libraryGridRecycler.recycler
-                    if (singleCategory) {
-                        recycler.scrollToPosition(0)
-                    } else {
+                    if (!singleCategory) {
                         showCategories(recycler.translationY == 0f)
                     }
                 }

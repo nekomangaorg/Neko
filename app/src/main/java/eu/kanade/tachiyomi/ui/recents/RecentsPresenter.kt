@@ -12,13 +12,15 @@ import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asFlowsIn
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -71,17 +73,6 @@ class RecentsPresenter(
     private val isOnFirstPage: Boolean
         get() = pageOffset == 0
 
-    init {
-        listOf(
-            preferences.groupChaptersHistory(),
-            preferences.showReadInAllRecents(),
-            preferences.groupChaptersUpdates()
-        ).asFlowsIn(scope, true) {
-            resetOffsets()
-            getRecents()
-        }
-    }
-
     fun onCreate() {
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
@@ -92,6 +83,20 @@ class RecentsPresenter(
             lastRecents = null
         }
         getRecents()
+        scope = CoroutineScope(Job() + Dispatchers.Default)
+        listOf(
+            preferences.groupChaptersHistory(),
+            preferences.showReadInAllRecents(),
+            preferences.groupChaptersUpdates()
+        ).forEach {
+            it.asFlow()
+                .drop(1)
+                .onEach {
+                    resetOffsets()
+                    getRecents()
+                }
+                .launchIn(scope)
+        }
     }
 
     fun getRecents(updatePageCount: Boolean = false) {

@@ -13,12 +13,16 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RestoreViewOnCreateController
 import eu.kanade.tachiyomi.util.view.removeQueryListener
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.cancel
 import timber.log.Timber
 
 abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     RestoreViewOnCreateController(bundle) {
 
     lateinit var binding: VB
+    lateinit var viewScope: CoroutineScope
 
     val isBindingInitialized get() = this::binding.isInitialized
     init {
@@ -29,6 +33,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
                 }
 
                 override fun preCreateView(controller: Controller) {
+                    viewScope = MainScope()
                     Timber.d("Create view for ${controller.instance()}")
                 }
 
@@ -41,6 +46,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
                 }
 
                 override fun preDestroyView(controller: Controller, view: View) {
+                    viewScope.cancel()
                     Timber.d("Destroy view for ${controller.instance()}")
                 }
             }

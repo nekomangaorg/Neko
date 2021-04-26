@@ -54,10 +54,6 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -89,12 +85,10 @@ class RecentsController(bundle: Bundle? = null) :
         presenter.toggleGroupRecents(viewType, false)
     }
 
-    private val adapterScope: CoroutineScope = CoroutineScope(Job() + Dispatchers.Main)
-
     /**
      * Adapter containing the recent manga.
      */
-    private var adapter = RecentMangaAdapter(this)
+    private lateinit var adapter: RecentMangaAdapter
     var displaySheet: TabbedRecentsOptionsSheet? = null
 
     private var progressItem: ProgressItem? = null
@@ -383,14 +377,13 @@ class RecentsController(bundle: Bundle? = null) :
         snack?.dismiss()
         presenter.onDestroy()
         snack = null
-        adapterScope.cancel()
-        presenter.cancelScope()
     }
 
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
         displaySheet?.dismiss()
         displaySheet = null
+        presenter.cancelScope()
     }
 
     fun refresh() = presenter.getRecents()
@@ -497,7 +490,7 @@ class RecentsController(bundle: Bundle? = null) :
 
     override fun getViewType(): Int = presenter.viewType
 
-    override fun scope() = adapterScope
+    override fun scope() = viewScope
 
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter.getItem(position) ?: return false

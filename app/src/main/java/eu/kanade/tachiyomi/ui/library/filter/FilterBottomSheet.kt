@@ -181,7 +181,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 filterOrder = it
                 clearFilters()
             }
-            .launchIn(controller.scope)
+            .launchIn(controller.viewScope)
     }
 
     private fun stateChanged(state: Int) {

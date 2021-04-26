@@ -46,7 +46,6 @@ import eu.kanade.tachiyomi.util.view.openInBrowser
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
-import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
@@ -64,7 +63,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
     private val preferences: PreferencesHelper = Injekt.get()
 
-    private val viewScope = MainScope()
     init {
         setHasOptionsMenu(true)
     }

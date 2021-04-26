@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -86,6 +87,10 @@ class LibraryPresenter(
     val libraryIsGrouped
         get() = groupType != UNGROUPED
 
+    fun cancelScope() {
+        scope.cancel()
+    }
+
     /** Save the current list to speed up loading later */
     fun onDestroy() {
         lastLibraryItems = libraryItems
@@ -105,6 +110,7 @@ class LibraryPresenter(
         if (categories.isEmpty()) {
             categories = lastCategories ?: db.getCategories().executeAsBlocking().toMutableList()
         }
+        scope = CoroutineScope(Job() + Dispatchers.Default)
         scope.launch {
             val library = withContext(Dispatchers.IO) { getLibraryFromDB() }
             library.apply {
