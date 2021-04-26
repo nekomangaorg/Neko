@@ -12,14 +12,13 @@ import eu.kanade.tachiyomi.extension.model.InstallStep
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.migration.MangaItem
 import eu.kanade.tachiyomi.ui.migration.SelectionHeader
 import eu.kanade.tachiyomi.ui.migration.SourceItem
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
@@ -38,8 +37,7 @@ class ExtensionBottomPresenter(
     private val bottomSheet: ExtensionBottomSheet,
     private val extensionManager: ExtensionManager = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get()
-) : ExtensionsChangedListener {
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+) : BaseCoroutinePresenter(), ExtensionsChangedListener {
 
     private var extensions = emptyList<ExtensionItem>()
 
@@ -56,8 +54,9 @@ class ExtensionBottomPresenter(
     private var selectedSource: Long? = null
     private val db: DatabaseHelper = Injekt.get()
 
-    fun onCreate() {
-        scope.launch {
+    override fun onCreate() {
+        super.onCreate()
+        presenterScope.launch {
             val extensionJob = async {
                 extensionManager.findAvailableExtensionsAsync()
                 extensions = toItems(
@@ -102,12 +101,13 @@ class ExtensionBottomPresenter(
         return library.filter { it.source == sourceId }.map(::MangaItem)
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
+        super.onDestroy()
         extensionManager.removeListener(this)
     }
 
     fun refreshExtensions() {
-        scope.launch {
+        presenterScope.launch {
             extensions = toItems(
                 Triple(
                     extensionManager.installedExtensions,
@@ -120,7 +120,7 @@ class ExtensionBottomPresenter(
     }
 
     fun refreshMigrations() {
-        scope.launch {
+        presenterScope.launch {
             val favs = db.getFavoriteMangas().executeOnIO()
             sourceItems = findSourcesWithManga(favs)
             mangaItems = HashMap(
@@ -241,14 +241,14 @@ class ExtensionBottomPresenter(
 
     fun setSelectedSource(source: Source) {
         selectedSource = source.id
-        scope.launch {
+        presenterScope.launch {
             withContext(Dispatchers.Main) { bottomSheet.setMigrationManga(mangaItems[source.id]) }
         }
     }
 
     fun deselectSource() {
         selectedSource = null
-        scope.launch {
+        presenterScope.launch {
             withContext(Dispatchers.Main) { bottomSheet.setMigrationSources(sourceItems) }
         }
     }

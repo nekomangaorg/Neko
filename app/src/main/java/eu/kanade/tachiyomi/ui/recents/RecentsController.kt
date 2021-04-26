@@ -29,7 +29,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
@@ -65,7 +65,7 @@ import kotlin.math.min
  * UI related actions should be called from here.
  */
 class RecentsController(bundle: Bundle? = null) :
-    BaseController<RecentsControllerBinding>(bundle),
+    BaseCoroutineController<RecentsControllerBinding, RecentsPresenter>(bundle),
     RecentMangaAdapter.RecentsInterface,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
@@ -92,7 +92,7 @@ class RecentsController(bundle: Bundle? = null) :
     var displaySheet: TabbedRecentsOptionsSheet? = null
 
     private var progressItem: ProgressItem? = null
-    private var presenter = RecentsPresenter(this)
+    override var presenter = RecentsPresenter(this)
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
     private var showingDownloads = false
@@ -191,8 +191,6 @@ class RecentsController(bundle: Bundle? = null) :
             binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
             binding.fakeAppBar.alpha = if (isExpanded) 1f else 0f
         }
-
-        presenter.onCreate()
 
         if (presenter.recentItems.isNotEmpty()) {
             adapter.updateDataSet(presenter.recentItems)
@@ -375,7 +373,6 @@ class RecentsController(bundle: Bundle? = null) :
     override fun onDestroy() {
         super.onDestroy()
         snack?.dismiss()
-        presenter.onDestroy()
         snack = null
     }
 
@@ -383,7 +380,6 @@ class RecentsController(bundle: Bundle? = null) :
         super.onDestroyView(view)
         displaySheet?.dismiss()
         displaySheet = null
-        presenter.cancelScope()
     }
 
     fun refresh() = presenter.getRecents()

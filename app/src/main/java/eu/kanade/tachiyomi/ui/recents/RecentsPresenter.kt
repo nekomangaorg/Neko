@@ -13,8 +13,9 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import kotlinx.coroutines.CoroutineScope
+import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
@@ -36,9 +37,7 @@ class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get()
-) : DownloadQueue.DownloadListener, LibraryServiceListener {
-
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private var recentsJob: Job? = null
     var recentItems = listOf<RecentMangaItem>()
@@ -73,7 +72,8 @@ class RecentsPresenter(
     private val isOnFirstPage: Boolean
         get() = pageOffset == 0
 
-    fun onCreate() {
+    override fun onCreate() {
+        super.onCreate()
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         if (lastRecents != null) {
@@ -83,7 +83,6 @@ class RecentsPresenter(
             lastRecents = null
         }
         getRecents()
-        scope = CoroutineScope(Job() + Dispatchers.Default)
         listOf(
             preferences.groupChaptersHistory(),
             preferences.showReadInAllRecents(),
@@ -95,14 +94,14 @@ class RecentsPresenter(
                     resetOffsets()
                     getRecents()
                 }
-                .launchIn(scope)
+                .launchIn(presenterScope)
         }
     }
 
     fun getRecents(updatePageCount: Boolean = false) {
         val oldQuery = query
         recentsJob?.cancel()
-        recentsJob = scope.launch {
+        recentsJob = presenterScope.launch {
             runRecents(oldQuery, updatePageCount)
         }
     }
@@ -324,14 +323,11 @@ class RecentsPresenter(
         }
     }
 
-    fun onDestroy() {
+    override fun onDestroy() {
+        super.onDestroy()
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
         lastRecents = recentItems
-    }
-
-    fun cancelScope() {
-        scope.cancel()
     }
 
     fun toggleGroupRecents(pref: Int, updatePref: Boolean = true) {
@@ -361,13 +357,11 @@ class RecentsPresenter(
 
     override fun updateDownload(download: Download) {
         recentItems.find { it.chapter.id == download.chapter.id }?.download = download
-        scope.launch(Dispatchers.Main) {
-            controller?.updateChapterDownload(download)
-        }
+        presenterScope.launchUI { controller?.updateChapterDownload(download) }
     }
 
     override fun updateDownloads() {
-        scope.launch {
+        presenterScope.launch {
             setDownloadedChapters(recentItems)
             withContext(Dispatchers.Main) {
                 controller?.showLists(recentItems, true)
@@ -377,9 +371,9 @@ class RecentsPresenter(
 
     override fun onUpdateManga(manga: Manga?) {
         if (manga == null && !LibraryUpdateService.isRunning()) {
-            scope.launch(Dispatchers.Main) { controller?.setRefreshing(false) }
+            presenterScope.launchUI { controller?.setRefreshing(false) }
         } else if (manga == null) {
-            scope.launch(Dispatchers.Main) { controller?.setRefreshing(true) }
+            presenterScope.launchUI { controller?.setRefreshing(true) }
         } else {
             getRecents()
         }
@@ -443,7 +437,7 @@ class RecentsPresenter(
         lastRead: Int? = null,
         pagesLeft: Int? = null
     ) {
-        scope.launch(Dispatchers.IO) {
+        presenterScope.launch(Dispatchers.IO) {
             chapter.apply {
                 this.read = read
                 if (!read) {
