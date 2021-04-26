@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.lang.addBetaTag
@@ -93,13 +94,9 @@ class SettingsReaderController : SettingsController() {
             intListPreference(activity) {
                 key = Keys.rotation
                 titleRes = R.string.rotation
-                entriesRes = arrayOf(
-                    R.string.free,
-                    R.string.lock,
-                    R.string.force_portrait,
-                    R.string.force_landscape
-                )
-                entryRange = 1..4
+                val enumConstants = OrientationType::class.java.enumConstants
+                entriesRes = enumConstants?.map { it.stringRes }.orEmpty().toTypedArray()
+                entryRange = 1..(enumConstants?.size ?: 5)
                 defaultValue = 1
             }
             intListPreference(activity) {

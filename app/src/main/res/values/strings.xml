@@ -393,8 +393,10 @@
     <string name="single_page">Single page</string>
     <string name="switch_to_double">Switch to double pages</string>
     <string name="switch_to_single">Switch to single page</string>
-    <string name="force_portrait">Force portrait</string>
-    <string name="force_landscape">Force landscape</string>
+    <string name="portrait">Portrait</string>
+    <string name="landscape">Landscape</string>
+    <string name="locked_portrait">Locked portrait</string>
+    <string name="locked_landscape">Locked landscape</string>
     <string name="red_initial">R</string>
     <string name="green_initial">G</string>
     <string name="blue_initial">B</string>

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ActivityInfo
 import android.content.res.ColorStateList
 import android.content.res.Configuration
 import android.graphics.Bitmap
@@ -56,6 +55,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
@@ -93,6 +93,7 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
+import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
@@ -225,6 +226,7 @@ class ReaderActivity :
         ViewChapters("vc", R.string.view_chapters),
         WebView("wb", R.string.open_in_webview),
         ReadingMode("rm", R.string.reading_mode),
+        Rotation("rot", R.string.rotation),
         CropBordersPaged("cbp", R.string.crop_borders_paged),
         CropBordersWebtoon("cbw", R.string.crop_borders_webtoon),
         PageLayout("pl", R.string.page_layout),
@@ -405,6 +407,11 @@ class ReaderActivity :
             )
     }
 
+    private fun updateRotationShortcut(preference: Int) {
+        val orientation = OrientationType.fromPreference(preference)
+        binding.chaptersSheet.rotationSheetButton.setImageResource(orientation.iconRes)
+    }
+
     private fun updateCropBordersShortcut() {
         val isPagerType = viewer is PagerViewer || (viewer as? WebtoonViewer)?.hasMargins == true
         val enabled = if (isPagerType) {
@@ -434,22 +441,25 @@ class ReaderActivity :
     }
 
     private fun updateBottomShortcuts() {
+        val enabledButtons = preferences.readerBottomButtons().get()
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                BottomButton.ReadingMode.value in preferences.readerBottomButtons().get()
+                BottomButton.ReadingMode.value in enabledButtons
+            rotationSheetButton.isVisible =
+                BottomButton.Rotation.value in enabledButtons
             doublePage.isVisible = viewer is PagerViewer &&
-                BottomButton.PageLayout.value in preferences.readerBottomButtons().get()
+                BottomButton.PageLayout.value in enabledButtons
             cropBordersSheetButton.isVisible =
                 if (viewer is PagerViewer) {
-                    BottomButton.CropBordersPaged.value in preferences.readerBottomButtons().get()
+                    BottomButton.CropBordersPaged.value in enabledButtons
                 } else {
-                    BottomButton.CropBordersWebtoon.value in preferences.readerBottomButtons().get()
+                    BottomButton.CropBordersWebtoon.value in enabledButtons
                 }
             webviewButton.isVisible =
-                BottomButton.WebView.value in preferences.readerBottomButtons().get()
+                BottomButton.WebView.value in enabledButtons
             chaptersButton.isVisible =
-                BottomButton.ViewChapters.value in preferences.readerBottomButtons().get()
+                BottomButton.ViewChapters.value in enabledButtons
             shiftPageButton.isVisible =
                 ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
             binding.toolbar.menu.findItem(R.id.action_shift_double_page)?.isVisible =
@@ -613,6 +623,22 @@ class ReaderActivity :
                 pref.toggle()
             }
 
+            with(rotationSheetButton) {
+                compatToolTipText = getString(R.string.rotation)
+
+                setOnClickListener {
+                    popupMenu(
+                        items = OrientationType.values().map { it.prefValue to it.stringRes },
+                        selectedItemId = preferences.rotation().get(),
+                    ) {
+                        val newOrientation = OrientationType.fromPreference(itemId)
+
+                        preferences.rotation().set(newOrientation.prefValue)
+                        setOrientation(newOrientation.flag)
+                    }
+                }
+            }
+
             webviewButton.setOnClickListener {
                 openMangaInBrowser()
             }
@@ -667,6 +693,7 @@ class ReaderActivity :
                     .onEach { updateCropBordersShortcut() }
                     .launchIn(scope)
             }
+        preferences.rotation().asImmediateFlowIn(scope) { updateRotationShortcut(it) }
 
         binding.chaptersSheet.shiftPageButton.setOnClickListener {
             shiftDoublePages()
@@ -1413,6 +1440,16 @@ class ReaderActivity :
     }
 
     /**
+     * Forces the user preferred [orientation] on the activity.
+     */
+    private fun setOrientation(orientation: Int) {
+        val newOrientation = OrientationType.fromPreference(orientation)
+        if (newOrientation.flag != requestedOrientation) {
+            requestedOrientation = newOrientation.flag
+        }
+    }
+
+    /**
      * Class that handles the user preferences of the reader.
      */
     private inner class ReaderConfig {
@@ -1458,33 +1495,6 @@ class ReaderActivity :
 
             preferences.readWithTapping().asImmediateFlowIn(scope) {
                 binding?.navigationOverlay.tappingEnabled = it
-            }
-        }
-
-        /**
-         * Forces the user preferred [orientation] on the activity.
-         */
-        private fun setOrientation(orientation: Int) {
-            val newOrientation = when (orientation) {
-                // Lock in current orientation
-                2 -> {
-                    val currentOrientation = resources.configuration.orientation
-                    if (currentOrientation == Configuration.ORIENTATION_PORTRAIT) {
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                    } else {
-                        ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                    }
-                }
-                // Lock in portrait
-                3 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT
-                // Lock in landscape
-                4 -> ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
-                // Rotation free
-                else -> ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
-            }
-
-            if (newOrientation != requestedOrientation) {
-                requestedOrientation = newOrientation
             }
         }
 

@@ -79,9 +79,10 @@
 
     <string-array name="rotation_type">
         <item>@string/free</item>
-        <item>@string/lock</item>
-        <item>@string/force_portrait</item>
-        <item>@string/force_landscape</item>
+        <item>@string/portrait</item>
+        <item>@string/landscape</item>
+        <item>@string/locked_portrait</item>
+        <item>@string/locked_landscape</item>
     </string-array>
 
     <string-array name="color_filter_modes">

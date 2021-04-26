@@ -8,6 +8,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Point
 import android.os.Build
+import android.view.Gravity
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
@@ -19,8 +21,11 @@ import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
+import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -33,6 +38,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getPrefTheme
@@ -363,3 +369,44 @@ var View.compatToolTipText: CharSequence?
     set(value) {
         ViewCompat.setTooltipText(this, value)
     }
+
+@SuppressLint("RestrictedApi")
+inline fun View.popupMenu(
+    items: List<Pair<Int, Int>>,
+    selectedItemId: Int? = null,
+    noinline onMenuItemClick: MenuItem.() -> Unit
+): PopupMenu {
+    val popup = PopupMenu(context, this, Gravity.NO_GRAVITY)
+    items.forEach { (id, stringRes) ->
+        popup.menu.add(0, id, 0, stringRes)
+    }
+
+    if (selectedItemId != null) {
+        val blendedAccent = ColorUtils.blendARGB(
+            context.getResourceColor(android.R.attr.colorAccent),
+            context.getResourceColor(android.R.attr.textColorPrimary),
+            0.5f
+        )
+        (popup.menu as? MenuBuilder)?.setOptionalIconsVisible(true)
+        val emptyIcon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
+        popup.menu.forEach { item ->
+            item.icon = when (item.itemId) {
+                selectedItemId -> ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)?.mutate()?.apply {
+                    setTint(blendedAccent)
+                }
+                else -> emptyIcon
+            }
+            if (item.itemId == selectedItemId) {
+                item.title = item.title?.tintText(blendedAccent)
+            }
+        }
+    }
+
+    popup.setOnMenuItemClickListener {
+        it.onMenuItemClick()
+        true
+    }
+
+    popup.show()
+    return popup
+}
