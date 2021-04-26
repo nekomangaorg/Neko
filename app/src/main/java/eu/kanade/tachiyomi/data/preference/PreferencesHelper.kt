@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
-import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.Themes
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.Flow
@@ -123,8 +123,8 @@ class PreferencesHelper(val context: Context) {
 
     fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
-    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, ThemeUtil.Themes.PURE_WHITE)
-    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, ThemeUtil.Themes.DARK)
+    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.PURE_WHITE)
+    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DARK)
 
     fun rotation() = flowPrefs.getInt(Keys.rotation, 1)
 

@@ -3,14 +3,9 @@ package eu.kanade.tachiyomi.util.system
 import android.app.Activity
 import android.content.Context
 import android.graphics.Color
-import androidx.annotation.ColorInt
-import androidx.annotation.StringRes
-import androidx.annotation.StyleRes
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import kotlin.math.roundToInt
 
 object ThemeUtil {
 
@@ -56,245 +51,6 @@ object ThemeUtil {
             else -> Color.WHITE
         }
     }
-
-    @Suppress("unused")
-    enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
-        PURE_WHITE(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_NO, R.string.white_theme),
-        DARK(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_YES, R.string.dark),
-        SPRING(
-            R.style.Theme_Tachiyomi_MidnightDusk,
-            AppCompatDelegate.MODE_NIGHT_NO,
-            R.string.spring_blossom
-        ),
-        DUSK(
-            R.style.Theme_Tachiyomi_MidnightDusk,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.midnight_dusk
-        ),
-        LIME(
-            R.style.Theme_Tachiyomi_FlatLime,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.flat_lime
-        ),
-        AMOLED(
-            R.style.Theme_Tachiyomi_Amoled,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.amoled_black
-        ),
-        BLACK_N_RED(
-            R.style.Theme_Tachiyomi_BlackAndRed,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.black_and_red
-        ),
-        HOT_PINK(
-            R.style.Theme_Tachiyomi_HotPink,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.hot_pink
-        ),
-        LIGHT_BLUE(
-            R.style.Theme_Tachiyomi_AllBlue,
-            AppCompatDelegate.MODE_NIGHT_NO,
-            R.string.light_blue
-        ),
-        DARK_BLUE(
-            R.style.Theme_Tachiyomi_AllBlue,
-            AppCompatDelegate.MODE_NIGHT_YES,
-            R.string.dark_blue
-        );
-
-        fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
-            return when (nightMode) {
-                AppCompatDelegate.MODE_NIGHT_YES -> darkColors()
-                AppCompatDelegate.MODE_NIGHT_NO -> lightColors()
-                AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM -> when (mode) {
-                    AppCompatDelegate.MODE_NIGHT_YES -> darkColors()
-                    else -> lightColors()
-                }
-                else -> lightColors()
-            }
-        }
-
-        private fun lightColors(): Colors {
-            return Colors(
-                lightPrimaryText,
-                lightSecondaryText,
-                lightBackground,
-                lightAccent,
-                lightAppBar,
-                lightAppBarText,
-                lightBottomBar,
-                lightInactiveTab,
-                lightActiveTab,
-            )
-        }
-
-        private fun darkColors(): Colors {
-            return Colors(
-                darkPrimaryText,
-                darkSecondaryText,
-                darkBackground,
-                darkAccent,
-                darkAppBar,
-                darkAppBarText,
-                darkBottomBar,
-                darkInactiveTab,
-                darkActiveTab,
-            )
-        }
-
-        /** Complies with textColorPrimary (probably night) */
-        @ColorInt
-        val lightPrimaryText: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#DE240728"
-                else -> "#DE000000"
-            }
-        )
-
-        /** Complies with textColorPrimary (probably night) */
-        @ColorInt
-        val darkPrimaryText: Int = Color.parseColor("#FFFFFFFF")
-
-        /** Complies with textColorSecondary (primary with alpha) */
-        @ColorInt
-        val lightSecondaryText: Int = ColorUtils.setAlphaComponent(lightPrimaryText, (0.54f * 255f).roundToInt())
-
-        /** Complies with textColorSecondary (primary with alpha) */
-        @ColorInt
-        val darkSecondaryText: Int = ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
-
-        /** Complies with colorBackground */
-        @ColorInt
-        val lightBackground: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#f6f0f8"
-                else -> "#FAFAFA"
-            }
-        )
-
-        /** Complies with colorBackground (probably night) */
-        @ColorInt
-        val darkBackground: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
-                R.style.Theme_Tachiyomi_FlatLime -> "#202125"
-                else -> "#1C1C1D"
-            }
-        )
-
-        /** Complies with colorAccent */
-        @ColorInt
-        val lightAccent: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
-                else -> "#2979FF"
-            }
-        )
-
-        /** Complies with colorAccent (probably night) */
-        @ColorInt
-        val darkAccent: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#F02475"
-                R.style.Theme_Tachiyomi_BlackAndRed -> "#AA2200"
-                R.style.Theme_Tachiyomi_HotPink -> "#FF3399"
-                R.style.Theme_Tachiyomi_FlatLime -> "#4AF88A"
-                else -> "#3399FF"
-            }
-        )
-
-        /** Complies with colorSecondary */
-        @ColorInt
-        val lightAppBar: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
-            else -> lightBackground
-        }
-
-        /** Complies with colorSecondary (probably night) */
-        @ColorInt
-        val darkAppBar: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
-            else -> darkBackground
-        }
-
-        /** Complies with actionBarTintColor */
-        @ColorInt
-        val lightAppBarText: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#FFFFFF")
-            R.style.Theme_Tachiyomi_MidnightDusk -> Color.parseColor("#DE4c0d4b")
-            else -> lightPrimaryText
-        }
-
-        /** Complies with actionBarTintColor (probably night) */
-        @ColorInt
-        val darkAppBarText: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#FFFFFF")
-            else -> darkPrimaryText
-        }
-
-        /** Complies with colorPrimaryVariant */
-        @ColorInt
-        val lightBottomBar: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#efe3f3"
-                else -> "#FFFFFF"
-            }
-        )
-
-        /** Complies with colorPrimaryVariant (probably night) */
-        @ColorInt
-        val darkBottomBar: Int = Color.parseColor(
-            when (styleRes) {
-                R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
-                R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
-                R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
-                R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"
-                else -> "#212121"
-            }
-        )
-
-        /** Complies with tabBarIconInactive */
-        @ColorInt
-        val lightInactiveTab: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#80FFFFFF")
-            else -> Color.parseColor("#C2424242")
-        }
-
-        /** Complies with tabBarIconInactive (probably night) */
-        @ColorInt
-        val darkInactiveTab: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#80FFFFFF")
-            else -> Color.parseColor("#C2FFFFFF")
-        }
-
-        /** Complies with tabBarIconColor */
-        @ColorInt
-        val lightActiveTab: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> lightAppBarText
-            else -> lightAccent
-        }
-
-        /** Complies with tabBarIconColor (probably night) */
-        @ColorInt
-        val darkActiveTab: Int = when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> darkAppBarText
-            else -> darkAccent
-        }
-    }
-
-    data class Colors(
-        @ColorInt val primaryText: Int,
-        @ColorInt val secondaryText: Int,
-        @ColorInt val colorBackground: Int,
-        @ColorInt val colorAccent: Int,
-        @ColorInt val appBar: Int,
-        @ColorInt val appBarText: Int,
-        @ColorInt val bottomBar: Int,
-        @ColorInt val inactiveTab: Int,
-        @ColorInt val activeTab: Int,
-    )
 }
 
 fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
@@ -306,7 +62,7 @@ fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
     setTheme(theme.styleRes)
 }
 
-fun Context.getPrefTheme(preferences: PreferencesHelper): ThemeUtil.Themes {
+fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
         (
@@ -315,8 +71,8 @@ fun Context.getPrefTheme(preferences: PreferencesHelper): ThemeUtil.Themes {
             ) preferences.darkTheme() else preferences.lightTheme()
             ).get()
     } catch (e: Exception) {
-        preferences.lightTheme().set(ThemeUtil.Themes.PURE_WHITE)
-        preferences.darkTheme().set(ThemeUtil.Themes.DARK)
-        ThemeUtil.Themes.PURE_WHITE
+        preferences.lightTheme().set(Themes.PURE_WHITE)
+        preferences.darkTheme().set(Themes.DARK)
+        Themes.PURE_WHITE
     }
 }

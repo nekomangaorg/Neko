@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ThemeItemBinding
 import eu.kanade.tachiyomi.databinding.ThemesPreferenceBinding
-import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -74,8 +74,8 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             }
         }
 
-        val enumConstants = ThemeUtil.Themes::class.java.enumConstants
-        itemAdapter.set(enumConstants?.map(::ThemeItem).orEmpty())
+        val enumConstants = Themes.values()
+        itemAdapter.set(enumConstants.map(::ThemeItem))
         isSelectable = false
     }
 
@@ -113,7 +113,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
-    inner class ThemeItem(val theme: ThemeUtil.Themes) : AbstractItem<FastAdapter.ViewHolder<ThemeItem>>() {
+    inner class ThemeItem(val theme: Themes) : AbstractItem<FastAdapter.ViewHolder<ThemeItem>>() {
 
         /** defines the type defining this item. must be unique. preferably an id */
         override val type: Int = R.id.theme_card_view
@@ -129,6 +129,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
         val colors = theme.getColors()
 
+        @Suppress("UNUSED_PARAMETER")
         override var isSelected: Boolean
             get() = when (preferences.nightMode().get()) {
                 AppCompatDelegate.MODE_NIGHT_YES -> preferences.darkTheme().get() == theme
