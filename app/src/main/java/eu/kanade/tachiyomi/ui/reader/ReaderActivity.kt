@@ -22,7 +22,6 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
-import androidx.annotation.StringRes
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
@@ -56,6 +55,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
@@ -207,13 +207,6 @@ class ReaderActivity :
         const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
         const val SHIFTED_CHAP_INDEX = "shiftedChapterIndex"
 
-        val BUTTONS_DEFAULTS = setOf(
-            BottomButton.ViewChapters,
-            BottomButton.WebView,
-            BottomButton.PageLayout,
-            BottomButton.CropBordersWebtoon
-        ).map { it.value }.toSet()
-
         fun newIntent(context: Context, manga: Manga, chapter: Chapter): Intent {
             val intent = Intent(context, ReaderActivity::class.java)
             intent.putExtra("manga", manga.id)
@@ -221,17 +214,6 @@ class ReaderActivity :
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
         }
-    }
-
-    enum class BottomButton(val value: String, @StringRes val stringRes: Int) {
-        ViewChapters("vc", R.string.view_chapters),
-        WebView("wb", R.string.open_in_webview),
-        ReadingMode("rm", R.string.reading_mode),
-        Rotation("rot", R.string.rotation),
-        CropBordersPaged("cbp", R.string.crop_borders_paged),
-        CropBordersWebtoon("cbw", R.string.crop_borders_webtoon),
-        PageLayout("pl", R.string.page_layout),
-        ShiftDoublePage("sdp", R.string.shift_double_pages)
     }
 
     /**
@@ -379,7 +361,7 @@ class ReaderActivity :
         return if (preferences.readerBottomButtons().isNotSet()) {
             isTablet()
         } else {
-            BottomButton.ShiftDoublePage.value in preferences.readerBottomButtons().get()
+            ReaderBottomButton.ShiftDoublePage.isIn(preferences.readerBottomButtons().get())
         }
     }
 
@@ -446,21 +428,21 @@ class ReaderActivity :
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                BottomButton.ReadingMode.value in enabledButtons
+                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
-                BottomButton.Rotation.value in enabledButtons
+                ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
-                BottomButton.PageLayout.value in enabledButtons
+                ReaderBottomButton.PageLayout.isIn(enabledButtons)
             cropBordersSheetButton.isVisible =
                 if (viewer is PagerViewer) {
-                    BottomButton.CropBordersPaged.value in enabledButtons
+                    ReaderBottomButton.CropBordersPaged.isIn(enabledButtons)
                 } else {
-                    BottomButton.CropBordersWebtoon.value in enabledButtons
+                    ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
                 }
             webviewButton.isVisible =
-                BottomButton.WebView.value in enabledButtons
+                ReaderBottomButton.WebView.isIn(enabledButtons)
             chaptersButton.isVisible =
-                BottomButton.ViewChapters.value in enabledButtons
+                ReaderBottomButton.ViewChapters.isIn(enabledButtons)
             shiftPageButton.isVisible =
                 ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
             binding.toolbar.menu.findItem(R.id.action_shift_double_page)?.isVisible =

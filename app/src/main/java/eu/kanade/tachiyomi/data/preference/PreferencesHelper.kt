@@ -12,7 +12,7 @@ import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
@@ -190,7 +190,7 @@ class PreferencesHelper(val context: Context) {
 
     fun readerBottomButtons() = flowPrefs.getStringSet(
         Keys.readerBottomButtons,
-        ReaderActivity.BUTTONS_DEFAULTS
+        ReaderBottomButton.BUTTONS_DEFAULTS
     )
 
     fun showNavigationOverlayNewUser() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)

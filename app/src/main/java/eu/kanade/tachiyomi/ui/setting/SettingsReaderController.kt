@@ -5,7 +5,7 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
@@ -73,15 +73,15 @@ class SettingsReaderController : SettingsController() {
             multiSelectListPreferenceMat(activity) {
                 key = Keys.readerBottomButtons
                 titleRes = R.string.display_buttons_bottom_reader
-                val enumConstants = ReaderActivity.BottomButton::class.java.enumConstants
-                entriesRes = enumConstants?.map { it.stringRes }.orEmpty().toTypedArray()
-                entryValues = enumConstants?.map { it.value }.orEmpty()
+                val enumConstants = ReaderBottomButton.values()
+                entriesRes = ReaderBottomButton.values().map { it.stringRes }.toTypedArray()
+                entryValues = enumConstants.map { it.value }
                 allSelectionRes = R.string.display_options
                 allIsAlwaysSelected = true
                 showAllLast = true
-                val defaults = ReaderActivity.BUTTONS_DEFAULTS.toMutableList()
+                val defaults = ReaderBottomButton.BUTTONS_DEFAULTS.toMutableList()
                 if (context.isTablet()) {
-                    defaults.add(ReaderActivity.BottomButton.ShiftDoublePage.value)
+                    defaults.add(ReaderBottomButton.ShiftDoublePage.value)
                 }
                 defaultValue = defaults
             }
