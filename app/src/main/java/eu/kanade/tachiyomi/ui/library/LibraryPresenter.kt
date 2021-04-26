@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
@@ -30,10 +31,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -52,9 +50,7 @@ class LibraryPresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get()
-) {
-
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+) : BaseCoroutinePresenter() {
 
     private val context = preferences.context
 
@@ -87,22 +83,20 @@ class LibraryPresenter(
     val libraryIsGrouped
         get() = groupType != UNGROUPED
 
-    fun cancelScope() {
-        scope.cancel()
-    }
-
     /** Save the current list to speed up loading later */
-    fun onDestroy() {
+    override fun onDestroy() {
+        super.onDestroy()
         lastLibraryItems = libraryItems
         lastCategories = categories
     }
 
-    /** Restore the static items to speed up reloading the view */
-    fun onRestore() {
+    override fun onCreate() {
+        super.onCreate()
         libraryItems = lastLibraryItems ?: return
         categories = lastCategories ?: return
         lastCategories = null
         lastLibraryItems = null
+        getLibrary()
     }
 
     /** Get favorited manga for library and sort and filter it */
@@ -110,8 +104,7 @@ class LibraryPresenter(
         if (categories.isEmpty()) {
             categories = lastCategories ?: db.getCategories().executeAsBlocking().toMutableList()
         }
-        scope = CoroutineScope(Job() + Dispatchers.Default)
-        scope.launch {
+        presenterScope.launch {
             val library = withContext(Dispatchers.IO) { getLibraryFromDB() }
             library.apply {
                 setDownloadCount(library)
@@ -677,7 +670,7 @@ class LibraryPresenter(
 
     /** Requests the library to be filtered. */
     fun requestFilterUpdate() {
-        scope.launch {
+        presenterScope.launch {
             var mangaMap = allLibraryItems
             mangaMap = applyFilters(mangaMap)
             mangaMap = applySort(mangaMap)
@@ -687,7 +680,7 @@ class LibraryPresenter(
 
     /** Requests the library to have download badges added/removed. */
     fun requestDownloadBadgesUpdate() {
-        scope.launch {
+        presenterScope.launch {
             val mangaMap = allLibraryItems
             setDownloadCount(mangaMap)
             allLibraryItems = mangaMap
@@ -699,7 +692,7 @@ class LibraryPresenter(
 
     /** Requests the library to have unread badges changed. */
     fun requestUnreadBadgesUpdate() {
-        scope.launch {
+        presenterScope.launch {
             val mangaMap = allLibraryItems
             setUnreadBadge(mangaMap)
             allLibraryItems = mangaMap
@@ -711,7 +704,7 @@ class LibraryPresenter(
 
     /** Requests the library to be sorted. */
     private fun requestSortUpdate() {
-        scope.launch {
+        presenterScope.launch {
             var mangaMap = libraryItems
             mangaMap = applySort(mangaMap)
             sectionLibrary(mangaMap)
@@ -743,7 +736,7 @@ class LibraryPresenter(
      * @param mangas the list of manga to delete.
      */
     fun removeMangaFromLibrary(mangas: List<Manga>) {
-        scope.launch {
+        presenterScope.launch {
             // Create a set of the list
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { it.favorite = false }
@@ -755,7 +748,7 @@ class LibraryPresenter(
 
     /** Remove manga from the library and delete the downloads */
     fun confirmDeletion(mangas: List<Manga>) {
-        scope.launch {
+        presenterScope.launch {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
                 coverCache.deleteFromCache(manga)
@@ -769,14 +762,14 @@ class LibraryPresenter(
 
     /** Called when Library Service updates a manga, update the item as well */
     fun updateManga() {
-        scope.launch {
+        presenterScope.launch {
             getLibrary()
         }
     }
 
     /** Undo the removal of the manga once in library */
     fun reAddMangas(mangas: List<Manga>) {
-        scope.launch {
+        presenterScope.launch {
             val mangaToAdd = mangas.distinctBy { it.id }
             mangaToAdd.forEach { it.favorite = true }
             db.insertMangas(mangaToAdd).executeOnIO()
@@ -829,7 +822,7 @@ class LibraryPresenter(
 
     /** Update a category's order */
     fun rearrangeCategory(catId: Int?, mangaIds: List<Long>) {
-        scope.launch {
+        presenterScope.launch {
             val category = categories.find { catId == it.id } ?: return@launch
             if (category.isDynamic) return@launch
             category.mangaSort = null
@@ -846,7 +839,7 @@ class LibraryPresenter(
         catId: Int?,
         mangaIds: List<Long>
     ) {
-        scope.launch {
+        presenterScope.launch {
             val categoryId = catId ?: return@launch
             val category = categories.find { catId == it.id } ?: return@launch
             if (category.isDynamic) return@launch
@@ -944,7 +937,7 @@ class LibraryPresenter(
 
     /** download All unread */
     fun downloadUnread(mangaList: List<Manga>) {
-        scope.launch {
+        presenterScope.launch {
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
                     val chapters = db.getChapters(it).executeAsBlocking().filter { !it.read }
@@ -958,7 +951,7 @@ class LibraryPresenter(
     }
 
     fun markReadStatus(mangaList: List<Manga>, markRead: Boolean) {
-        scope.launch {
+        presenterScope.launch {
             withContext(Dispatchers.IO) {
                 mangaList.forEach {
                     withContext(Dispatchers.IO) {

@@ -57,7 +57,7 @@ import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
-import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
@@ -114,7 +114,7 @@ import kotlin.random.nextInt
 class LibraryController(
     bundle: Bundle? = null,
     val preferences: PreferencesHelper = Injekt.get()
-) : BaseController<LibraryControllerBinding>(bundle),
+) : BaseCoroutineController<LibraryControllerBinding, LibraryPresenter>(bundle),
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
     FlexibleAdapter.OnItemLongClickListener,
@@ -165,8 +165,7 @@ class LibraryController(
     private var lastItemPosition: Int? = null
     private var lastItem: IFlexible<*>? = null
 
-    lateinit var presenter: LibraryPresenter
-        private set
+    override var presenter = LibraryPresenter(this)
 
     private var observeLater: Boolean = false
     var searchItem = SearchGlobalItem()
@@ -439,9 +438,8 @@ class LibraryController(
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        if (!::presenter.isInitialized) presenter = LibraryPresenter(this)
-
         adapter = LibraryCategoryAdapter(this)
+        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         setRecyclerLayout()
         binding.libraryGridRecycler.recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {
@@ -521,12 +519,10 @@ class LibraryController(
             createActionModeIfNeeded()
         }
 
-        presenter.onRestore()
         if (presenter.libraryItems.isNotEmpty()) {
             presenter.restoreLibrary()
         } else {
             binding.recyclerLayout.alpha = 0f
-            presenter.getLibrary()
         }
     }
 
@@ -873,7 +869,7 @@ class LibraryController(
         super.onActivityResumed(activity)
         if (!isBindingInitialized) return
         updateFilterSheetY()
-        if (observeLater && ::presenter.isInitialized) {
+        if (observeLater) {
             presenter.getLibrary()
         }
     }
@@ -881,12 +877,6 @@ class LibraryController(
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
         observeLater = true
-        if (::presenter.isInitialized) presenter.onDestroy()
-    }
-
-    override fun onDestroy() {
-        if (::presenter.isInitialized) presenter.onDestroy()
-        super.onDestroy()
     }
 
     override fun onDestroyView(view: View) {
@@ -897,7 +887,6 @@ class LibraryController(
         }
         displaySheet?.dismiss()
         displaySheet = null
-        presenter.cancelScope()
         super.onDestroyView(view)
     }
 
@@ -919,11 +908,10 @@ class LibraryController(
         binding.progress.isVisible = false
         if (!freshStart) {
             justStarted = false
-            if (binding.recyclerLayout.alpha == 0f) binding.recyclerLayout.animate().alpha(1f).setDuration(
-                500
-            )
-                .start()
-        } else binding.recyclerLayout.alpha = 1f
+        } // else binding.recyclerLayout.alpha = 1f
+        if (binding.recyclerLayout.alpha == 0f) {
+            binding.recyclerLayout.animate().alpha(1f).setDuration(500).start()
+        }
         if (justStarted && freshStart) {
             scrollToHeader(activeCategory)
         }
