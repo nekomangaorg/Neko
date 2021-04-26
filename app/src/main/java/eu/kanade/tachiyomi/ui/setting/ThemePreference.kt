@@ -6,6 +6,7 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
@@ -25,7 +26,6 @@ import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.view.visInvisIf
 import uy.kohesive.injekt.injectLazy
 
 class ThemePreference @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -146,7 +146,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.themeNameText.setText(item.theme.nameRes)
 
                 binding.checkbox.isVisible = item.isSelected
-                binding.themeSelected.visInvisIf(item.isSelected)
+                binding.themeSelected.isInvisible = !item.isSelected
 
                 if (binding.checkbox.isVisible) {
                     val themeMatchesApp = if (context.isInNightMode()) {

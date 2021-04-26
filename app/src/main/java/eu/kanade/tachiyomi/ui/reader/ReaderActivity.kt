@@ -25,6 +25,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
@@ -93,7 +94,6 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
@@ -257,7 +257,7 @@ class ReaderActivity :
             lastShiftDoubleState = savedInstanceState.get(SHIFT_DOUBLE_PAGES) as? Boolean
             indexPageToShift = savedInstanceState.get(SHIFTED_PAGE_INDEX) as? Int
             indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
-            binding.readerNav.root.visInvisIf(menuVisible)
+            binding.readerNav.root.isInvisible = !menuVisible
         } else {
             binding.readerNav.root.invisible()
         }

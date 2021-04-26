@@ -4,6 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
-import eu.kanade.tachiyomi.util.view.visInvisIf
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 
@@ -99,7 +99,7 @@ class TabbedReaderSettingsSheet(
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
                 window?.setDimAmount(if (tab?.position == filterTabIndex) 0f else ogDim)
-                readerActivity.binding.appBar.visInvisIf(tab?.position != filterTabIndex)
+                readerActivity.binding.appBar.isInvisible = tab?.position == filterTabIndex
                 if (tab?.position == 2) {
                     sheetBehavior.skipCollapsed = false
                     sheetBehavior.peekHeight = 110.dpToPx

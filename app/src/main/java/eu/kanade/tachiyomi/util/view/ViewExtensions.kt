@@ -114,10 +114,6 @@ inline fun View.gone() {
     visibility = View.GONE
 }
 
-inline fun View.visInvisIf(show: Boolean) {
-    visibility = if (show) View.VISIBLE else View.INVISIBLE
-}
-
 inline val View.marginTop: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin ?: 0
 

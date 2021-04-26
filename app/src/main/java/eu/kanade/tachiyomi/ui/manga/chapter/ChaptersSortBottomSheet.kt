@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import eu.kanade.tachiyomi.util.view.visInvisIf
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
@@ -74,7 +74,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
                     binding.settingsScrollView.paddingTop + binding.settingsScrollView.paddingBottom
             binding.closeButton.isVisible = isScrollable
             // making the view gone somehow breaks the layout so lets make it invisible
-            binding.pill.visInvisIf(!isScrollable)
+            binding.pill.isInvisible = isScrollable
         }
 
         setOnDismissListener {
@@ -104,16 +104,14 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
             }
         )
 
-        binding.setAsDefaultSort.visInvisIf(
-            defPref != presenter.manga.sortDescending() &&
-                presenter.manga.usesLocalSort()
-        )
+        binding.setAsDefaultSort.isInvisible = defPref == presenter.manga.sortDescending() ||
+            !presenter.manga.usesLocalSort()
         binding.sortGroup.setOnCheckedChangeListener { _, checkedId ->
             presenter.setSortOrder(checkedId == R.id.sort_newest)
-            binding.setAsDefaultSort.visInvisIf(
-                defPref != presenter.manga.sortDescending() &&
-                    presenter.manga.usesLocalSort()
-            )
+            binding.setAsDefaultSort.isInvisible = (
+                defPref == presenter.manga.sortDescending() ||
+                    !presenter.manga.usesLocalSort()
+                )
         }
 
         binding.setAsDefaultSort.setOnClickListener {
