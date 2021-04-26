@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
@@ -339,11 +340,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         preferences.incognitoMode()
-            .asImmediateFlow {
+            .asImmediateFlowIn(lifecycleScope) {
                 binding.toolbar.setIncognitoMode(it)
                 binding.cardToolbar.setIncognitoMode(it)
             }
-            .launchIn(lifecycleScope)
         setExtensionsBadge()
     }
 

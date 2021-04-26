@@ -42,6 +42,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.data.preference.asFlowsIn
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
@@ -688,11 +689,7 @@ class ReaderActivity :
         }
 
         listOf(preferences.cropBorders(), preferences.cropBordersWebtoon())
-            .forEach { pref ->
-                pref.asFlow()
-                    .onEach { updateCropBordersShortcut() }
-                    .launchIn(scope)
-            }
+            .asFlowsIn(scope) { updateCropBordersShortcut() }
         preferences.rotation().asImmediateFlowIn(scope) { updateRotationShortcut(it) }
 
         binding.chaptersSheet.shiftPageButton.setOnClickListener {

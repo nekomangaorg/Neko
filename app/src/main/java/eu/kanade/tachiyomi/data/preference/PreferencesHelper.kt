@@ -43,6 +43,17 @@ fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlowIn(scope: Coroutine
         .launchIn(scope)
 }
 
+fun <T> Collection<com.tfcporciuncula.flow.Preference<out T>>.asFlowsIn(scope: CoroutineScope, dropFirst: Boolean = false, block: () -> Unit): Collection<Job> {
+    return map { pref ->
+        pref.asFlow()
+            .apply {
+                if (dropFirst) drop(1)
+            }
+            .onEach { block() }
+            .launchIn(scope)
+    }
+}
+
 fun com.tfcporciuncula.flow.Preference<Boolean>.toggle() = set(!get())
 
 private class DateFormatConverter : Preference.Adapter<DateFormat> {
