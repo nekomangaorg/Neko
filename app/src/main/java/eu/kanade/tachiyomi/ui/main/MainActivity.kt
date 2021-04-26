@@ -25,6 +25,7 @@ import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
@@ -50,6 +51,7 @@ import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -69,6 +71,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
@@ -326,7 +329,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             if (Migrations.upgrade(preferences)) {
                 if (!BuildConfig.DEBUG) {
                     content.post {
-                        WhatsNewSheet(this).show()
+                        whatsNewSheet().show()
                     }
                 }
             }
@@ -799,6 +802,39 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
         }
     }
+
+    private fun whatsNewSheet() = MaterialMenuSheet(
+        this,
+        listOf(
+            MaterialMenuSheet.MenuSheetItem(
+                0,
+                textRes = R.string.whats_new_this_release,
+                drawable = R.drawable.ic_new_releases_24dp
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                1,
+                textRes = R.string.close,
+                drawable = R.drawable.ic_close_24dp
+            )
+        ),
+        title = getString(R.string.updated_to_, BuildConfig.VERSION_NAME),
+        showDivider = true,
+        selectedId = 0,
+        onMenuItemClicked = { _, item ->
+            if (item == 0) {
+                try {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        "https://github.com/jays2kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}".toUri()
+                    )
+                    startActivity(intent)
+                } catch (e: Throwable) {
+                    toast(e.message)
+                }
+            }
+            true
+        }
+    )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
