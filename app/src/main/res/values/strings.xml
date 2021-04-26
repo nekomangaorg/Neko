@@ -146,6 +146,7 @@
     <string name="total_chapters">Total chapters</string>
     <string name="date_added">Date added</string>
     <string name="last_read">Last read</string>
+    <string name="last_fetched">Last fetched</string>
     <string name="last_updated">Last Updated</string>
     <string name="latest_chapter">Latest chapter</string>
     <string name="drag_and_drop">Drag &amp; Drop</string>

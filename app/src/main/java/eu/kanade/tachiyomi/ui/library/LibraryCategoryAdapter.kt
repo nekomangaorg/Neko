@@ -150,14 +150,27 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             else title.take(10)
                         }
                     }
+                    LibrarySort.LAST_FETCHED -> {
+                        val id = item.manga.id ?: return ""
+                        val history = db.getChapters(id).executeAsBlocking()
+                        val last = history.maxOfOrNull { it.date_fetch }
+                        if (last != null && last > 100) {
+                            recyclerView.context.getString(
+                                R.string.fetched_,
+                                last.timeSpanFromNow(preferences.context)
+                            )
+                        } else {
+                            "N/A"
+                        }
+                    }
                     LibrarySort.LAST_READ -> {
                         val id = item.manga.id ?: return ""
                         val history = db.getHistoryByMangaId(id).executeAsBlocking()
-                        val last = history.maxBy { it.last_read }
-                        if (last != null && last.last_read > 100) {
+                        val last = history.maxOfOrNull { it.last_read }
+                        if (last != null && last > 100) {
                             recyclerView.context.getString(
                                 R.string.read_,
-                                last.last_read.timeSpanFromNow(preferences.context)
+                                last.timeSpanFromNow(preferences.context)
                             )
                         } else {
                             "N/A"

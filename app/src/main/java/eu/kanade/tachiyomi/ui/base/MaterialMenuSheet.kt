@@ -130,8 +130,10 @@ class MaterialMenuSheet(
         if (clearAll) {
             clearEndDrawables()
         }
-        itemAdapter.getAdapterItem(id).sheetItem.endDrawableRes = drawableRes
-        itemAdapter.getAdapterItem(id).isSelected = true
+        val pos = itemAdapter.getAdapterPosition(id.toLong())
+        val item = itemAdapter.getAdapterItem(pos)
+        item.sheetItem.endDrawableRes = drawableRes
+        item.isSelected = true
         fastAdapter.notifyAdapterDataSetChanged()
     }
 

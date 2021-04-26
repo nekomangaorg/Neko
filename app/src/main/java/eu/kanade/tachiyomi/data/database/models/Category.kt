@@ -42,6 +42,7 @@ interface Category : Serializable {
         TOTAL_ASC, TOTAL_DSC -> LibrarySort.TOTAL
         DRAG_AND_DROP -> LibrarySort.DRAG_AND_DROP
         DATE_ADDED_ASC, DATE_ADDED_DSC -> LibrarySort.DATE_ADDED
+        LAST_FETCHED_ASC, LAST_FETCHED_DSC -> LibrarySort.LAST_FETCHED
         else -> if (nullAsDND && !isDynamic) LibrarySort.DRAG_AND_DROP else null
     }
 
@@ -55,6 +56,7 @@ interface Category : Serializable {
         LAST_READ_ASC, LAST_READ_DSC -> R.string.last_read
         TOTAL_ASC, TOTAL_DSC -> R.string.total_chapters
         DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.date_added
+        LAST_FETCHED_ASC, LAST_FETCHED_DSC -> R.string.last_fetched
         else -> if (isDynamic) R.string.category else R.string.drag_and_drop
     }
 
@@ -65,6 +67,7 @@ interface Category : Serializable {
         LAST_READ_ASC, LAST_READ_DSC -> 3
         TOTAL_ASC, TOTAL_DSC -> 4
         DATE_ADDED_ASC, DATE_ADDED_DSC -> 5
+        LAST_FETCHED_ASC, LAST_FETCHED_DSC -> 6
         else -> null
     }
 
@@ -76,6 +79,7 @@ interface Category : Serializable {
             LibrarySort.LAST_READ -> LAST_READ_ASC
             LibrarySort.TOTAL -> ALPHA_ASC
             LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
+            LibrarySort.LAST_FETCHED -> LAST_FETCHED_ASC
             else -> ALPHA_ASC
         }
     }
@@ -94,6 +98,8 @@ interface Category : Serializable {
         const val TOTAL_DSC = 'j'
         const val DATE_ADDED_ASC = 'k'
         const val DATE_ADDED_DSC = 'l'
+        const val LAST_FETCHED_ASC = 'm'
+        const val LAST_FETCHED_DSC = 'n'
 
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name
@@ -113,6 +119,7 @@ interface Category : Serializable {
                     LibrarySort.LAST_READ -> LAST_READ_ASC
                     LibrarySort.TOTAL -> TOTAL_ASC
                     LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
+                    LibrarySort.LAST_FETCHED -> LAST_FETCHED_ASC
                     LibrarySort.DRAG_AND_DROP -> DRAG_AND_DROP
                     else -> DRAG_AND_DROP
                 }

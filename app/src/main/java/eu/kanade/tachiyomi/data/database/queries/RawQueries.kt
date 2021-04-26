@@ -276,6 +276,17 @@ fun getLastReadMangaQuery() =
     ORDER BY max DESC
 """
 
+fun getLastFetchedMangaQuery() =
+    """
+    SELECT ${Manga.TABLE}.*, MAX(${Chapter.TABLE}.${Chapter.COL_DATE_FETCH}) AS max
+    FROM ${Manga.TABLE}
+    JOIN ${Chapter.TABLE}
+    ON ${Manga.TABLE}.${Manga.COL_ID} = ${Chapter.TABLE}.${Chapter.COL_MANGA_ID}
+    WHERE ${Manga.TABLE}.${Manga.COL_FAVORITE} = 1
+    GROUP BY ${Manga.TABLE}.${Manga.COL_ID}
+    ORDER BY max DESC
+"""
+
 fun getTotalChapterMangaQuery() =
     """
     SELECT ${Manga.TABLE}.*

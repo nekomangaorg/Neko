@@ -92,7 +92,11 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val sortingMode = category.sortingMode()
         val sortDrawable = when {
             sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_24dp
-            if (sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
+            if (sortingMode == LibrarySort.DATE_ADDED ||
+                sortingMode == LibrarySort.LATEST_CHAPTER ||
+                sortingMode == LibrarySort.LAST_READ ||
+                sortingMode == LibrarySort.LAST_FETCHED
+            ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
             else -> R.drawable.ic_arrow_upward_24dp
         }
 
@@ -159,6 +163,11 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                     R.string.latest_chapter
                 ),
                 MaterialMenuSheet.MenuSheetItem(
+                    LibrarySort.LAST_FETCHED,
+                    R.drawable.ic_check_24dp,
+                    R.string.last_fetched
+                ),
+                MaterialMenuSheet.MenuSheetItem(
                     LibrarySort.UNREAD,
                     R.drawable.ic_eye_24dp,
                     R.string.unread
@@ -216,7 +225,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_24dp
         if (sortingMode == LibrarySort.DATE_ADDED ||
             sortingMode == LibrarySort.LATEST_CHAPTER ||
-            sortingMode == LibrarySort.LAST_READ
+            sortingMode == LibrarySort.LAST_READ ||
+            sortingMode == LibrarySort.LAST_FETCHED
         ) !isAscending else isAscending ->
             R.drawable.ic_arrow_downward_24dp
         else -> R.drawable.ic_arrow_upward_24dp
@@ -233,6 +243,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                     adapter.libraryListener.sortCategory(category.id!!, 'D' - 'a' + 1)
                     return
                 }
+                LibrarySort.LAST_FETCHED -> 6
                 LibrarySort.DATE_ADDED -> 5
                 LibrarySort.TOTAL -> 4
                 LibrarySort.LAST_READ -> 3
