@@ -5,6 +5,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.isVisible
 import com.f2prateek.rx.preferences.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -13,7 +14,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
 (context, attrs) {
@@ -69,8 +69,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         val extras = (extra.toList() + listOf<String?>(null, null, null)).take(separators.size)
         extras.forEachIndexed { index, text ->
             buttons[index + 1].text = text
-            separators[index].visibleIf(text != null)
-            buttons[index + 1].visibleIf(text != null)
+            separators[index].isVisible = text != null
+            buttons[index + 1].isVisible = text != null
         }
         itemCount = buttons.count { !it.text.isNullOrBlank() }
         this.root = root

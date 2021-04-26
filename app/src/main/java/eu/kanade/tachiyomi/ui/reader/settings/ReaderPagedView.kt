@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.addBetaTag
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 
 class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -76,14 +75,14 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             binding.pagerNav,
             binding.pagerInvert,
             binding.pageLayout
-        ).forEach { it.visibleIf(show) }
+        ).forEach { it.isVisible = show }
         listOf(
             binding.cropBordersWebtoon,
             binding.webtoonSidePadding,
             binding.webtoonEnableZoomOut,
             binding.webtoonNav,
             binding.webtoonInvert
-        ).forEach { it.visibleIf(!show) }
+        ).forEach { it.isVisible = !show }
         val isFullFit = when (preferences.imageScaleType().get()) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,

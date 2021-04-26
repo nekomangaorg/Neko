@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import coil.api.clear
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
@@ -10,7 +11,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the binding.title.
@@ -69,7 +69,7 @@ class LibraryListHolder(
         binding.subtitle.text = item.manga.author?.trim()
         binding.title.post {
             if (binding.title.text == item.manga.title) {
-                binding.subtitle.visibleIf(binding.title.lineCount == 1 && !item.manga.author.isNullOrBlank())
+                binding.subtitle.isVisible = binding.title.lineCount == 1 && !item.manga.author.isNullOrBlank()
             }
         }
 

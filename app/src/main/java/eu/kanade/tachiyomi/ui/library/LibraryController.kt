@@ -26,6 +26,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -90,7 +91,6 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
-import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -99,7 +99,6 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.CoroutineScope
@@ -342,7 +341,7 @@ class LibraryController(
     }
 
     fun showMiniBar() {
-        binding.headerCard.visibleIf(showCategoryInTitle)
+        binding.headerCard.isVisible = showCategoryInTitle
         setSubtitle()
     }
 
@@ -709,8 +708,8 @@ class LibraryController(
     }
 
     fun hideHopper(hide: Boolean) {
-        binding.categoryHopperFrame.visibleIf(!hide)
-        binding.jumperCategoryText.visibleIf(!hide)
+        binding.categoryHopperFrame.isVisible = !hide
+        binding.jumperCategoryText.isVisible = !hide
     }
 
     private fun jumpToNextCategory(next: Boolean) {
@@ -784,7 +783,7 @@ class LibraryController(
     }
 
     private fun anchorView(): View {
-        return if (binding.categoryHopperFrame.isVisible()) {
+        return if (binding.categoryHopperFrame.isVisible) {
             binding.categoryHopperFrame
         } else {
             binding.filterBottomSheet.filterBottomSheet
@@ -939,7 +938,7 @@ class LibraryController(
             setActiveCategory()
         }
 
-        binding.categoryHopperFrame.visibleIf(!singleCategory && !preferences.hideHopper().get())
+        binding.categoryHopperFrame.isVisible = !singleCategory && !preferences.hideHopper().get()
         adapter.isLongPressDragEnabled = canDrag()
         binding.categoryRecycler.setCategories(presenter.categories)
         with(binding.filterBottomSheet.root) {

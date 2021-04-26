@@ -6,6 +6,7 @@ import android.util.TypedValue
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -22,7 +23,6 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -106,8 +106,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
-                binding.checkbox.visibleIf(!category.isHidden)
-                binding.collapseArrow.visibleIf(category.isHidden && !adapter.isSingleCategory)
+                binding.checkbox.isVisible = !category.isHidden
+                binding.collapseArrow.isVisible = category.isHidden && !adapter.isSingleCategory
                 binding.updateButton.gone()
                 binding.catProgress.gone()
                 setSelection()
@@ -119,16 +119,16 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 binding.updateButton.gone()
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
-                binding.collapseArrow.visibleIf(!adapter.isSingleCategory)
+                binding.collapseArrow.isVisible = !adapter.isSingleCategory
                 binding.checkbox.gone()
                 binding.catProgress.visible()
                 binding.updateButton.invisible()
             }
             else -> {
-                binding.collapseArrow.visibleIf(!adapter.isSingleCategory)
+                binding.collapseArrow.isVisible = !adapter.isSingleCategory
                 binding.catProgress.gone()
                 binding.checkbox.gone()
-                binding.updateButton.visibleIf(!adapter.isSingleCategory)
+                binding.updateButton.isVisible = !adapter.isSingleCategory
             }
         }
     }

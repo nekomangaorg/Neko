@@ -75,7 +75,6 @@ import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.Dispatchers
@@ -251,7 +250,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 top = insets.systemWindowInsetTop
             )
             binding.bottomNav.updatePadding(bottom = insets.systemWindowInsetBottom)
-            binding.bottomView.visibleIf(insets.systemWindowInsetBottom > 0)
+            binding.bottomView.isVisible = insets.systemWindowInsetBottom > 0
             binding.bottomView.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = insets.systemWindowInsetBottom
             }
@@ -283,7 +282,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
         }
 
-        binding.bottomNav.visibleIf(!hideBottomNav)
+        binding.bottomNav.isVisible = !hideBottomNav
         binding.bottomView.visibility = if (hideBottomNav) View.GONE else binding.bottomView.visibility
         binding.bottomNav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(
@@ -746,7 +745,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         alphaAnimation.addListener(
             EndAnimatorListener {
-                binding.bottomNav.visibleIf(!hideBottomNav)
+                binding.bottomNav.isVisible = !hideBottomNav
                 binding.bottomView.visibility =
                     if (hideBottomNav) View.GONE else binding.bottomView.visibility
             }

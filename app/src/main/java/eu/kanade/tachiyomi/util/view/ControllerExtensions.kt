@@ -359,7 +359,7 @@ fun Controller.scrollViewWith(
                             0f
                         )
                         val tabBar = activityBinding!!.bottomNav
-                        if (tabBar.isVisible() && isInView) {
+                        if (tabBar.isVisible && isInView) {
                             if (preferences.hideBottomNavOnScroll().get()) {
                                 tabBar.translationY += dy
                                 tabBar.translationY = MathUtils.clamp(

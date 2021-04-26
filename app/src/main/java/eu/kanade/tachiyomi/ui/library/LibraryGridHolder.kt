@@ -4,6 +4,7 @@ import android.app.Activity
 import android.view.Gravity
 import android.view.View
 import android.widget.FrameLayout
+import androidx.core.view.isVisible
 import coil.api.clear
 import coil.size.Precision
 import coil.size.Scale
@@ -11,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visibleIf
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -55,7 +55,7 @@ class LibraryGridHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
-        binding.constraintLayout.visibleIf(!item.manga.isBlank())
+        binding.constraintLayout.isVisible = !item.manga.isBlank()
         binding.title.text = item.manga.title
         binding.subtitle.text = item.manga.author?.trim()
 

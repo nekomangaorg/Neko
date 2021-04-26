@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.view.View
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -12,9 +13,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
@@ -45,7 +44,7 @@ class ChapterHolder(
         }
 
         localSource = manga.source == LocalSource.ID
-        binding.downloadButton.downloadButton.visibleIf(!localSource && !isLocked)
+        binding.downloadButton.downloadButton.isVisible = !localSource && !isLocked
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 
@@ -115,7 +114,7 @@ class ChapterHolder(
         anim2.duration = 600
         anim2.startDelay = 500
         anim2.addUpdateListener {
-            if (binding.leftView.isVisible() && binding.frontView.translationX <= 0) {
+            if (binding.leftView.isVisible && binding.frontView.translationX <= 0) {
                 binding.leftView.gone()
                 binding.rightView.visible()
             }
@@ -157,7 +156,7 @@ class ChapterHolder(
             gone()
             return
         }
-        visibleIf(!localSource)
+        isVisible = !localSource
         setDownloadStatus(status, progress, animated)
     }
 }

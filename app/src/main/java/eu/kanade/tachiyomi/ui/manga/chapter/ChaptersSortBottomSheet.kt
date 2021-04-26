@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visInvisIf
-import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
@@ -72,7 +72,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
             val isScrollable =
                 binding.settingsScrollView.height < binding.sortLayout.height +
                     binding.settingsScrollView.paddingTop + binding.settingsScrollView.paddingBottom
-            binding.closeButton.visibleIf(isScrollable)
+            binding.closeButton.isVisible = isScrollable
             // making the view gone somehow breaks the layout so lets make it invisible
             binding.pill.visInvisIf(!isScrollable)
         }

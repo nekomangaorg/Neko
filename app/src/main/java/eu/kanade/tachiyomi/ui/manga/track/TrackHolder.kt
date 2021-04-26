@@ -3,13 +3,13 @@ package eu.kanade.tachiyomi.ui.manga.track
 import android.annotation.SuppressLint
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.TrackItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseViewHolder
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visibleIf
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 
@@ -44,8 +44,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         }
         val serviceName = binding.trackLogo.context.getString(item.service.nameRes())
         binding.trackLogo.contentDescription = serviceName
-        binding.trackGroup.visibleIf(track != null)
-        binding.addTracking.visibleIf(track == null)
+        binding.trackGroup.isVisible = track != null
+        binding.addTracking.isVisible = track == null
         if (track != null) {
             binding.trackTitle.text = track.title
             with(binding.trackChapters) {
@@ -70,7 +70,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             else binding.trackStatus.text = item.service.getStatus(track.status)
             binding.trackScore.text = if (track.score == 0f) "-" else item.service.displayScore(track)
             binding.trackScore.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
-            binding.dateGroup.visibleIf(item.service.supportsReadingDates)
+            binding.dateGroup.isVisible = item.service.supportsReadingDates
             if (item.service.supportsReadingDates) {
                 binding.trackStartDate.text =
                     if (track.started_reading_date != 0L) dateFormat.format(track.started_reading_date) else "-"
@@ -90,7 +90,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     }
 
     fun setProgress(enabled: Boolean) {
-        binding.progress.visibleIf(enabled)
-        binding.trackLogo.visibleIf(!enabled)
+        binding.progress.isVisible = enabled
+        binding.trackLogo.isVisible = !enabled
     }
 }

@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.lang.chop
-import eu.kanade.tachiyomi.util.view.visibleIf
 import me.gujun.android.taggroup.TagGroup
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -145,7 +144,7 @@ class EditMangaDialog : DialogController {
                 R.string.reset_tags
             }
         )
-        binding.resetCover.visibleIf(!isLocal)
+        binding.resetCover.isVisible = !isLocal
         binding.resetCover.setOnClickListener {
             binding.mangaCover.loadAny(
                 manga,

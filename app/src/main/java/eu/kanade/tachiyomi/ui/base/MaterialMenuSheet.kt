@@ -10,6 +10,7 @@ import android.view.ViewGroup
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
@@ -19,11 +20,9 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.widget.MenuSheetItemView
 
 @SuppressLint("InflateParams")
@@ -63,7 +62,7 @@ open class MaterialMenuSheet(
             }
         }
 
-        binding.divider.visibleIf(showDivider)
+        binding.divider.isVisible = showDivider
         var currentIndex: Int? = null
         items.forEachIndexed { index, item ->
             val view =
@@ -104,7 +103,7 @@ open class MaterialMenuSheet(
 
         setBottomEdge(binding.menuLayout, activity)
 
-        binding.titleLayout.visibleIf(title != null)
+        binding.titleLayout.isVisible = title != null
         binding.toolbarTitle.text = title
 
         currentIndex?.let {
@@ -129,7 +128,7 @@ open class MaterialMenuSheet(
             elevationAnimator?.start()
         }
         elevate(binding.menuScrollView.canScrollVertically(-1))
-        if (binding.titleLayout.isVisible()) {
+        if (binding.titleLayout.isVisible) {
             binding.menuScrollView.setOnScrollChangeListener { _: View?, _: Int, _: Int, _: Int, _: Int ->
                 val notAtTop = binding.menuScrollView.canScrollVertically(-1)
                 if (notAtTop != isElevated) {

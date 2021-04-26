@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import eu.kanade.tachiyomi.util.view.visibleIf
 
 /**
  * Class used to hold the data of a download.
@@ -53,7 +53,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             notifyDownloadedPages()
         }
 
-        binding.downloadMenu.visibleIf(flexibleAdapterPosition != 0 || flexibleAdapterPosition != adapter.itemCount - 1)
+        binding.downloadMenu.isVisible = flexibleAdapterPosition != 0 || flexibleAdapterPosition != adapter.itemCount - 1
         binding.downloadMenu.setVectorCompat(
             R.drawable.ic_more_vert_24dp,
             view.context

@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
 
@@ -175,7 +174,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         shouldShow: Boolean
     ) {
         val updateCategories = categories.get()
-        box.visibleIf(updateCategories.isNotEmpty() && shouldShow)
+        box.isVisible = updateCategories.isNotEmpty() && shouldShow
         if (updateCategories.isNotEmpty() && shouldShow) box.isChecked =
             updateCategories.any { category?.id == it.toIntOrNull() }
     }

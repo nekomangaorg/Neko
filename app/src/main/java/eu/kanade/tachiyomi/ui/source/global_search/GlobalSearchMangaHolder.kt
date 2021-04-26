@@ -1,15 +1,15 @@
 package eu.kanade.tachiyomi.ui.source.global_search
 
 import android.view.View
+import androidx.core.view.isVisible
 import coil.Coil
 import coil.api.clear
 import coil.request.CachePolicy
 import coil.request.LoadRequest
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.SourceGlobalSearchControllerCardItemBinding
+import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
 class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
@@ -31,7 +31,7 @@ class GlobalSearchMangaHolder(view: View, adapter: GlobalSearchCardAdapter) :
 
     fun bind(manga: Manga) {
         binding.title.text = manga.title
-        binding.favoriteButton.visibleIf(manga.favorite)
+        binding.favoriteButton.isVisible = manga.favorite
         setImage(manga)
     }
 

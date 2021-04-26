@@ -8,6 +8,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import coil.api.loadAny
 import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
@@ -21,11 +22,9 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.invisible
-import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -48,7 +47,7 @@ class MangaHeaderHolder(
         }
         binding.moreButton.setOnClickListener { expandDesc() }
         binding.mangaSummary.setOnClickListener {
-            if (binding.moreButton.isVisible()) {
+            if (binding.moreButton.isVisible) {
                 expandDesc()
             } else if (!hadSelection) {
                 collapseDesc()
@@ -158,10 +157,10 @@ class MangaHeaderHolder(
         binding.mangaSummary.post {
             binding.mangaSummary
             if (binding.subItemGroup.visibility != View.GONE) {
-                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible()) {
+                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
                     binding.mangaSummary.setTextIsSelectable(true)
                     binding.moreButtonGroup.gone()
-                    showMoreButton = binding.lessButton.isVisible()
+                    showMoreButton = binding.lessButton.isVisible
                 } else {
                     binding.moreButtonGroup.visible()
                 }
@@ -200,7 +199,7 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(binding.trackButton) {
-            visibleIf(presenter.hasTrackers())
+            isVisible = presenter.hasTrackers()
             text = itemView.context.getString(
                 if (tracked) R.string.tracked
                 else R.string.tracking
@@ -215,8 +214,8 @@ class MangaHeaderHolder(
 
         with(binding.startReadingButton) {
             val nextChapter = presenter.getNextUnreadChapter()
-            visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked && !adapter.hasFilter())
-            showReadingButton = isVisible()
+            isVisible = presenter.chapters.isNotEmpty() && !item.isLocked && !adapter.hasFilter()
+            showReadingButton = isVisible
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val number = adapter.decimalFormat.format(nextChapter.chapter_number.toDouble())
@@ -243,7 +242,7 @@ class MangaHeaderHolder(
             height = adapter.delegate.topCoverHeight()
         }
 
-        binding.mangaStatus.visibleIf(manga.status != 0)
+        binding.mangaStatus.isVisible = manga.status != 0
         binding.mangaStatus.text = (
             itemView.context.getString(
                 when (manga.status) {
@@ -353,7 +352,7 @@ class MangaHeaderHolder(
                 binding.mangaGenresTags.visible()
             }
         }
-        binding.startReadingButton.visibleIf(showReadingButton)
+        binding.startReadingButton.isVisible = showReadingButton
     }
 
     override fun onLongClick(view: View?): Boolean {
