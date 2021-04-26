@@ -11,7 +11,6 @@ import android.graphics.Color
 import android.graphics.drawable.LayerDrawable
 import android.os.Build
 import android.os.Bundle
-import android.view.Gravity
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -22,14 +21,11 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
-import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.isVisible
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
-import androidx.core.view.forEach
+import androidx.core.view.isVisible
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
@@ -40,8 +36,8 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.asFlowsIn
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
 import eu.kanade.tachiyomi.source.model.Page
@@ -55,8 +51,8 @@ import eu.kanade.tachiyomi.ui.reader.ReaderPresenter.SetAsCoverResult.Success
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
@@ -67,7 +63,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
-import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
@@ -157,12 +152,11 @@ class ReaderActivity :
     /**
      * Whether the menu should stay visible.
      */
-    var menuStickyVisible = false
-        private set
+    private var menuStickyVisible = false
 
     private var coroutine: Job? = null
 
-    var fromUrl = false
+    private var fromUrl = false
 
     /**
      * System UI helper to hide status & navigation bar on all different API levels.
@@ -181,19 +175,19 @@ class ReaderActivity :
 
     var sheetManageNavColor = false
 
-    var lightStatusBar = false
+    private var lightStatusBar = false
 
     private var snackbar: Snackbar? = null
 
-    var intentPageNumber: Int? = null
+    private var intentPageNumber: Int? = null
 
     var isLoading = false
 
-    var lastShiftDoubleState: Boolean? = null
-    var indexPageToShift: Int? = null
-    var indexChapterToShift: Long? = null
+    private var lastShiftDoubleState: Boolean? = null
+    private var indexPageToShift: Int? = null
+    private var indexChapterToShift: Long? = null
 
-    var lastCropRes = 0
+    private var lastCropRes = 0
 
     companion object {
         @Suppress("unused")
@@ -464,7 +458,7 @@ class ReaderActivity :
         return true
     }
 
-    fun shiftDoublePages() {
+    private fun shiftDoublePages() {
         (viewer as? PagerViewer)?.config?.let { config ->
             config.shiftDoublePage = !config.shiftDoublePage
             presenter.viewerChapters?.let {
@@ -698,7 +692,7 @@ class ReaderActivity :
             }
         }
 
-        binding.touchView.setOnTouchListener { v, event ->
+        binding.touchView.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_DOWN) {
                 if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
                     binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
@@ -754,7 +748,7 @@ class ReaderActivity :
         if (!menuVisible) binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
         binding.chaptersSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
         val peek = 50.dpToPx
-        binding.readerLayout.doOnApplyWindowInsets { v, insets, _ ->
+        binding.readerLayout.doOnApplyWindowInsets { _, insets, _ ->
             sheetManageNavColor = when {
                 insets.isBottomTappable() -> {
                     window.navigationBarColor = Color.TRANSPARENT
@@ -1210,11 +1204,11 @@ class ReaderActivity :
      * Called from the page sheet. It delegates the call to the presenter to do some IO, which
      * will call [onShareImageResult] with the path the image was saved on when it's ready.
      */
-    fun shareImage(page: ReaderPage) {
+    private fun shareImage(page: ReaderPage) {
         presenter.shareImage(page)
     }
 
-    fun showSetCoverPrompt(page: ReaderPage) {
+    private fun showSetCoverPrompt(page: ReaderPage) {
         if (page.status != Page.READY) return
 
         MaterialDialog(this).title(R.string.use_image_as_cover)
@@ -1259,7 +1253,7 @@ class ReaderActivity :
      * Called from the page sheet. It delegates saving the image of the given [page] on external
      * storage to the presenter.
      */
-    fun saveImage(page: ReaderPage) {
+    private fun saveImage(page: ReaderPage) {
         presenter.saveImage(page)
     }
 
@@ -1282,7 +1276,7 @@ class ReaderActivity :
      * Called from the page sheet. It delegates setting the image of the given [page] as the
      * cover to the presenter.
      */
-    fun setAsCover(page: ReaderPage) {
+    private fun setAsCover(page: ReaderPage) {
         presenter.setAsCover(page)
     }
 
@@ -1376,7 +1370,7 @@ class ReaderActivity :
         return true
     }
 
-    fun openMangaInBrowser() {
+    private fun openMangaInBrowser() {
         val source = presenter.getSource() ?: return
         val url = try {
             source.mangaDetailsRequest(presenter.manga!!).url.toString()
@@ -1448,7 +1442,7 @@ class ReaderActivity :
             preferences.readerBottomButtons().asImmediateFlowIn(scope) { updateBottomShortcuts() }
 
             preferences.readWithTapping().asImmediateFlowIn(scope) {
-                binding?.navigationOverlay.tappingEnabled = it
+                binding.navigationOverlay.tappingEnabled = it
             }
         }
 
