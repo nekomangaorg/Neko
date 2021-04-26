@@ -559,7 +559,7 @@ class ReaderActivity :
     /**
      * Initializes the reader menu. It sets up click listeners and the initial visibility.
      */
-    @SuppressLint("ClickableViewAccessibility", "RestrictedApi")
+    @SuppressLint("ClickableViewAccessibility")
     private fun initializeMenu() {
         // Set binding.toolbar
         setSupportActionBar(binding.toolbar)
@@ -635,38 +635,13 @@ class ReaderActivity :
                 true
             }
 
-            readingMode.setOnClickListener {
-                val popup = PopupMenu(this@ReaderActivity, readingMode, Gravity.END)
-                val enumConstants = ReadingModeType::class.java.enumConstants
-                val array = enumConstants?.map { it.stringRes }.orEmpty().toTypedArray()
-                array.forEachIndexed { index, entry ->
-                    popup.menu.add(0, index, 0, entry)
+            readingMode.setOnClickListener { readingMode ->
+                readingMode.popupMenu(
+                    items = ReadingModeType.values().map { it.prefValue to it.stringRes },
+                    selectedItemId = presenter.manga?.viewer,
+                ) {
+                    presenter.setMangaViewer(itemId)
                 }
-                if (popup.menu is MenuBuilder) {
-                    val m = popup.menu as MenuBuilder
-                    m.setOptionalIconsVisible(true)
-                }
-                val blendedAccent = ColorUtils.blendARGB(
-                    this@ReaderActivity.getResourceColor(android.R.attr.colorAccent),
-                    this@ReaderActivity.getResourceColor(android.R.attr.textColorPrimary),
-                    0.5f
-                )
-                popup.menu.forEach {
-                    it.icon =
-                        ContextCompat.getDrawable(this@ReaderActivity, R.drawable.ic_blank_24dp)
-                }
-                popup.menu.getItem(presenter.manga?.viewer ?: 0)?.let { menuItem ->
-                    menuItem.icon =
-                        ContextCompat.getDrawable(this@ReaderActivity, R.drawable.ic_check_24dp)
-                            ?.mutate()?.apply { setTint(blendedAccent) }
-                    menuItem.title =
-                        menuItem.title?.tintText(blendedAccent)
-                }
-                popup.setOnMenuItemClickListener { menuItem ->
-                    presenter.setMangaViewer(menuItem.itemId)
-                    true
-                }
-                popup.show()
             }
         }
 
