@@ -3,34 +3,24 @@ package eu.kanade.tachiyomi.widget
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.core.widget.NestedScrollView
 import androidx.viewpager.widget.ViewPager
-import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.tabs.TabLayout
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.TabbedBottomSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlin.math.max
 
 abstract class TabbedBottomSheetDialog(private val activity: Activity) :
-    BottomSheetDialog
-    (activity, R.style.BottomSheetDialogTheme) {
+    EdgeToEdgeBottomSheetDialog<TabbedBottomSheetBinding>(activity) {
 
-    private var sheetBehavior: BottomSheetBehavior<*>
-    protected val binding = TabbedBottomSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) = TabbedBottomSheetBinding.inflate(inflater)
 
     open var offset = -1
     init {
-        // Use activity theme for this layout
-        setContentView(binding.root)
-        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
-        setEdgeToEdge(activity, binding.root)
-
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
         binding.pager.maxHeight = activity.window.decorView.height - height - 125.dpToPx
 

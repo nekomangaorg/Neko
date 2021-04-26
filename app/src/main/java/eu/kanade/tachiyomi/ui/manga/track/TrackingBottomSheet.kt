@@ -2,12 +2,12 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import android.content.Intent
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
@@ -16,12 +16,13 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
+import eu.kanade.tachiyomi.util.view.checkHeightThen
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
 import timber.log.Timber
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
-    BottomSheetDialog
-    (controller.activity!!, R.style.BottomSheetDialogTheme),
+    EdgeToEdgeBottomSheetDialog<TrackingBottomSheetBinding>(controller.activity!!),
     TrackAdapter.OnClickListener,
     SetTrackStatusDialog.Listener,
     SetTrackChaptersDialog.Listener,
@@ -31,20 +32,14 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     val activity = controller.activity!!
 
-    private var sheetBehavior: BottomSheetBehavior<*>
-
     val presenter = controller.presenter
 
     private var adapter: TrackAdapter? = null
 
-    private val binding = TrackingBottomSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        TrackingBottomSheetBinding.inflate(inflater)
 
     init {
-        // Use activity theme for this layout
-        setContentView(binding.root)
-
-        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
-        setEdgeToEdge(activity, binding.root, 0)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 500.dpToPx + height
 
@@ -59,6 +54,14 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
                 }
             }
         )
+        binding.displayBottomSheet.checkHeightThen {
+            val fullHeight = activity.window.decorView.height
+            val insets = activity.window.decorView.rootWindowInsets
+            binding.trackRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                matchConstraintMaxHeight =
+                    fullHeight - (insets?.systemWindowInsetTop ?: 0) - 30.dpToPx
+            }
+        }
     }
 
     override fun onStart() {

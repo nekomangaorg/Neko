@@ -2,27 +2,24 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SourceFilterSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.collapse
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
 
 class SourceFilterSheet(val activity: Activity) :
-    BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
-
-    private val sheetBehavior: BottomSheetBehavior<*>
+    EdgeToEdgeBottomSheetDialog<SourceFilterSheetBinding>(activity) {
 
     private var filterChanged = true
 
@@ -33,16 +30,13 @@ class SourceFilterSheet(val activity: Activity) :
 
     var onResetClicked = {}
 
-    private val binding = SourceFilterSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) = SourceFilterSheetBinding.inflate(inflater)
     init {
-        setContentView(binding.root)
         binding.searchBtn.setOnClickListener { dismiss() }
         binding.resetBtn.setOnClickListener { onResetClicked() }
 
-        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
         sheetBehavior.peekHeight = 450.dpToPx
         sheetBehavior.collapse()
-        setEdgeToEdge(activity, binding.root)
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {

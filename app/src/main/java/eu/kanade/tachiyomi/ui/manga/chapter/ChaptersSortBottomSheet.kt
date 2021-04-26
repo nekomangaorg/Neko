@@ -1,37 +1,29 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.setBottomEdge
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
+import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
 import kotlin.math.max
 
-class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetDialog
-(controller.activity!!, R.style.BottomSheetDialogTheme) {
+class ChaptersSortBottomSheet(controller: MangaDetailsController) :
+    EdgeToEdgeBottomSheetDialog<ChapterSortBottomSheetBinding>(controller.activity!!) {
 
     val activity = controller.activity!!
 
-    private var sheetBehavior: BottomSheetBehavior<*>
-
     private val presenter = controller.presenter
 
-    private val binding = ChapterSortBottomSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) = ChapterSortBottomSheetBinding.inflate(inflater)
     init {
-        // Use activity theme for this layout
-        setContentView(binding.root)
-
-        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
-        setEdgeToEdge(activity, binding.root)
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 415.dpToPx + height
 

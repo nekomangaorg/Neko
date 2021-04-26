@@ -2,13 +2,12 @@ package eu.kanade.tachiyomi.ui.category.addtolibrary
 
 import android.app.Activity
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.ISelectionListener
 import com.mikepenz.fastadapter.adapters.ItemAdapter
@@ -23,9 +22,9 @@ import eu.kanade.tachiyomi.databinding.SetCategoriesSheetBinding
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
 import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Date
@@ -39,27 +38,19 @@ class SetCategoriesSheet(
     var preselected: Array<Int>,
     private val addingToLibrary: Boolean,
     val onMangaAdded: (() -> Unit) = { }
-) : BottomSheetDialog
-(activity, R.style.BottomSheetDialogTheme) {
+) : EdgeToEdgeBottomSheetDialog<SetCategoriesSheetBinding>(activity) {
 
     constructor(activity: Activity, manga: Manga, categories: MutableList<Category>, preselected: Array<Int>, addingToLibrary: Boolean, onMangaAdded: () -> Unit) :
         this(activity, listOf(manga), categories, preselected, addingToLibrary, onMangaAdded)
-
-    private var sheetBehavior: BottomSheetBehavior<*>
 
     private val fastAdapter: FastAdapter<AddCategoryItem>
     private val itemAdapter = ItemAdapter<AddCategoryItem>()
     private val selectExtension: SelectExtension<AddCategoryItem>
     private val db: DatabaseHelper by injectLazy()
 
-    private val binding = SetCategoriesSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        SetCategoriesSheetBinding.inflate(inflater)
     init {
-        // Use activity theme for this layout
-        setContentView(binding.root)
-
-        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
-        setEdgeToEdge(activity, binding.root)
-
         binding.toolbarTitle.text = context.getString(
             if (addingToLibrary) {
                 R.string.add_x_to

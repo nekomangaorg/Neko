@@ -5,6 +5,7 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Build
+import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.annotation.DrawableRes
@@ -12,17 +13,15 @@ import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setBottomEdge
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
 import eu.kanade.tachiyomi.widget.MenuSheetItemView
 
 @SuppressLint("InflateParams")
@@ -34,16 +33,11 @@ open class MaterialMenuSheet(
     maxHeight: Int? = null,
     showDivider: Boolean = false,
     onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean
-) :
-    BottomSheetDialog
-    (activity, R.style.BottomSheetDialogTheme) {
+) : EdgeToEdgeBottomSheetDialog<BottomMenuSheetBinding>(activity) {
 
-    private val primaryColor = activity.getResourceColor(android.R.attr.textColorPrimary)
-    private val binding = BottomMenuSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) = BottomMenuSheetBinding.inflate(inflater)
 
     init {
-        setContentView(binding.root)
-        setEdgeToEdge(activity, binding.root)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.isInNightMode() && !activity.window.decorView.rootWindowInsets.hasSideNavBar()) {
             window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
         }

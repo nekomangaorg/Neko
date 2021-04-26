@@ -34,7 +34,6 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.bottomnavigation.BottomNavigationItemView
 import com.google.android.material.bottomnavigation.BottomNavigationMenuView
 import com.google.android.material.bottomnavigation.BottomNavigationView
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
@@ -230,43 +229,6 @@ inline fun View.updatePaddingRelative(
     @Px bottom: Int = paddingBottom
 ) {
     setPaddingRelative(start, top, end, bottom)
-}
-
-fun BottomSheetDialog.setEdgeToEdge(
-    activity: Activity,
-    contentView: View,
-    setTopMargin: Int = -1
-) {
-    window?.setBackgroundDrawable(null)
-    window?.navigationBarColor = activity.window.navigationBarColor
-    val isLight = (activity.window?.decorView?.systemUiVisibility ?: 0) and View
-        .SYSTEM_UI_FLAG_LIGHT_STATUS_BAR == View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && isLight) {
-        window?.decorView?.systemUiVisibility = View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-    }
-    window?.findViewById<View>(com.google.android.material.R.id.container)?.fitsSystemWindows =
-        false
-    window?.findViewById<View>(com.google.android.material.R.id.coordinator)?.fitsSystemWindows =
-        false
-    contentView.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View
-        .SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-
-    val insets = activity.window.decorView.rootWindowInsets
-    (contentView.parent as View).background = null
-    contentView.post {
-        (contentView.parent as View).background = null
-    }
-    contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        leftMargin = insets.systemWindowInsetLeft
-        rightMargin = insets.systemWindowInsetRight
-    }
-    if (setTopMargin > 0) (contentView.parent as View).updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        height = activity.window.decorView.height - insets.systemWindowInsetTop - setTopMargin
-    }
-    else if (setTopMargin == 0) contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        topMargin = insets.systemWindowInsetTop
-    }
-    contentView.requestLayout()
 }
 
 fun setBottomEdge(view: View, activity: Activity) {

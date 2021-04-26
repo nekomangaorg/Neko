@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.migration.manga.design
 import android.app.Activity
 import android.content.res.Configuration
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.widget.CompoundButton
 import android.widget.LinearLayout
 import android.widget.RadioButton
@@ -12,7 +13,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.Controller
 import com.f2prateek.rx.preferences.Preference
-import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -22,23 +22,21 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.setBottomEdge
-import eu.kanade.tachiyomi.util.view.setEdgeToEdge
+import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
 import uy.kohesive.injekt.injectLazy
 
 class MigrationBottomSheetDialog(
     activity: Activity,
     private val listener: StartMigrationListener
-) : BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
+) : EdgeToEdgeBottomSheetDialog<MigrationBottomSheetBinding>(activity) {
 
     /**
      * Preferences helper.
      */
     private val preferences by injectLazy<PreferencesHelper>()
 
-    private val binding = MigrationBottomSheetBinding.inflate(activity.layoutInflater)
+    override fun createBinding(inflater: LayoutInflater) = MigrationBottomSheetBinding.inflate(inflater)
     init {
-        // Use activity theme for this layout
-        setContentView(binding.root)
         if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) {
             binding.sourceGroup.orientation = LinearLayout.HORIZONTAL
             val params = binding.skipStep.layoutParams as ConstraintLayout.LayoutParams
@@ -61,7 +59,6 @@ class MigrationBottomSheetDialog(
             params3.endToEnd = -1
             binding.extraSearchParam.layoutParams = params3
         }
-        setEdgeToEdge(activity, binding.root)
         setBottomEdge(
             if (activity.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE) binding.extraSearchParamText
             else binding.skipStep,

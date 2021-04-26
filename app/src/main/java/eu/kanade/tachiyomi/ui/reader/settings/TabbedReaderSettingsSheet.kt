@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
 import android.view.View
-import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
@@ -57,7 +55,6 @@ class TabbedReaderSettingsSheet(
         R.string.filter
     )
 
-    var sheetBehavior: BottomSheetBehavior<*>
     init {
         generalView.activity = readerActivity
         pagedView.activity = readerActivity
@@ -65,8 +62,6 @@ class TabbedReaderSettingsSheet(
         generalView.checkIfShouldDisableReadingMode()
         filterView.window = window
         generalView.sheet = this
-
-        sheetBehavior = BottomSheetBehavior.from(binding.root.parent as ViewGroup)
 
         ReaderColorFilterBinding.bind(filterView).swipeDown.setOnClickListener {
             if (sheetBehavior.isCollapsed()) {
