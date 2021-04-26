@@ -4,6 +4,7 @@ import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import coil.Coil
 import coil.request.LoadRequest
 import eu.kanade.tachiyomi.R
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -109,12 +109,12 @@ class MigrationProcessHolder(
                             )
                         }
                     } else {
-                        binding.migrationMangaCardTo.progress.gone()
+                        binding.migrationMangaCardTo.progress.isVisible = false
                         binding.migrationMangaCardTo.title.text =
                             view.context.getString(R.string.no_alternatives_found)
                     }
                     binding.migrationMenu.visible()
-                    binding.skipManga.gone()
+                    binding.skipManga.isVisible = false
                     adapter.sourceFinished()
                 }
             }
@@ -135,7 +135,7 @@ class MigrationProcessHolder(
 
     private fun MangaGridItemBinding.attachManga(manga: Manga, source: Source, isTo: Boolean) {
         (root.layoutParams as ConstraintLayout.LayoutParams).verticalBias = 1f
-        progress.gone()
+        progress.isVisible = false
 
         val request = LoadRequest.Builder(view.context).data(manga)
             .target(CoverViewTarget(coverThumbnail, progress)).build()

@@ -27,7 +27,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.GifViewTarget
@@ -239,7 +238,7 @@ class WebtoonPageHolder(
     private fun setQueued() {
         progressContainer.visible()
         progressBar.visible()
-        retryContainer?.gone()
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
 
@@ -249,7 +248,7 @@ class WebtoonPageHolder(
     private fun setLoading() {
         progressContainer.visible()
         progressBar.visible()
-        retryContainer?.gone()
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
 
@@ -259,7 +258,7 @@ class WebtoonPageHolder(
     private fun setDownloading() {
         progressContainer.visible()
         progressBar.visible()
-        retryContainer?.gone()
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
 
@@ -270,7 +269,7 @@ class WebtoonPageHolder(
         progressContainer.visible()
         progressBar.visible()
         progressBar.completeAndFadeOut()
-        retryContainer?.gone()
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
 
         unsubscribeReadImageHeader()
@@ -309,7 +308,7 @@ class WebtoonPageHolder(
      * Called when the page has an error.
      */
     private fun setError() {
-        progressContainer.gone()
+        progressContainer.isVisible = false
         initRetryLayout().visible()
     }
 
@@ -317,14 +316,14 @@ class WebtoonPageHolder(
      * Called when the image is decoded and going to be displayed.
      */
     private fun onImageDecoded() {
-        progressContainer.gone()
+        progressContainer.isVisible = false
     }
 
     /**
      * Called when the image fails to decode.
      */
     private fun onImageDecodeError() {
-        progressContainer.gone()
+        progressContainer.isVisible = false
         initDecodeErrorLayout().visible()
     }
 

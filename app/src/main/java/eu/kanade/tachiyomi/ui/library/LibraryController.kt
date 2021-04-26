@@ -87,7 +87,6 @@ import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.getItemView
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
@@ -508,7 +507,7 @@ class LibraryController(
                     }
                 },
                 onLeavingController = {
-                    binding.headerCard.gone()
+                    binding.headerCard.isVisible = false
                 },
                 onBottomNavUpdate = {
                     updateFilterSheetY()
@@ -599,7 +598,7 @@ class LibraryController(
 
     @SuppressLint("RtlHardcoded", "ClickableViewAccessibility")
     private fun setUpHopper() {
-        binding.categoryHopperFrame.gone()
+        binding.categoryHopperFrame.isVisible = false
         binding.roundedCategoryHopper.downCategory.setOnClickListener {
             jumpToNextCategory(true)
         }
@@ -922,7 +921,7 @@ class LibraryController(
         }
         singleCategory = presenter.categories.size <= 1
         showDropdown()
-        binding.progress.gone()
+        binding.progress.isVisible = false
         if (!freshStart) {
             justStarted = false
             if (binding.recyclerLayout.alpha == 0f) binding.recyclerLayout.animate().alpha(1f).setDuration(

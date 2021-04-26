@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
@@ -147,8 +146,8 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         } else {
             mainButton.isActivated = true
             listener?.onFilterClicked(this, index, callBack)
-            buttons.forEach { if (it != mainButton) it.gone() }
-            separators.forEach { it.gone() }
+            buttons.forEach { if (it != mainButton) it.isVisible = false }
+            separators.forEach { it.isVisible = false }
         }
         mainButton.setTextColor(
             context.getResourceColor(

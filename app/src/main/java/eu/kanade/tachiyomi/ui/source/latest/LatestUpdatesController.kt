@@ -3,11 +3,11 @@ package eu.kanade.tachiyomi.ui.source.latest
 import android.os.Bundle
 import android.view.Menu
 import android.view.View
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
-import eu.kanade.tachiyomi.util.view.gone
 
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseSourceController].
@@ -22,7 +22,7 @@ class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        binding.fab.gone()
+        binding.fab.isVisible = false
     }
 
     override fun createPresenter(): BrowseSourcePresenter {

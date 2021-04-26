@@ -6,11 +6,11 @@ import android.view.LayoutInflater
 import android.widget.RelativeLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
+import androidx.core.view.isVisible
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 
@@ -24,7 +24,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * Hide the information view
      */
     fun hide() {
-        this.gone()
+        this.isVisible = false
     }
 
     /**

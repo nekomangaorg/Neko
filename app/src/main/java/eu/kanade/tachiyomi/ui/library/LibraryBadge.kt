@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 
 class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -87,7 +86,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     fun setInLibrary(inLibrary: Boolean) {
         this.isVisible = inLibrary
-        binding.unreadAngle.gone()
+        binding.unreadAngle.isVisible = false
         binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
         binding.unreadText.isVisible = inLibrary
         binding.unreadText.text = resources.getText(R.string.in_library)

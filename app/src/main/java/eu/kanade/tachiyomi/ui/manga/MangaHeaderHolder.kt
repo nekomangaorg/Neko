@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -110,7 +109,7 @@ class MangaHeaderHolder(
             binding.mangaSummary.setTextIsSelectable(true)
             binding.mangaGenresTags.visible()
             binding.lessButton.visible()
-            binding.moreButtonGroup.gone()
+            binding.moreButtonGroup.isVisible = false
             binding.title.maxLines = Integer.MAX_VALUE
         }
     }
@@ -119,8 +118,8 @@ class MangaHeaderHolder(
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
-        binding.mangaGenresTags.gone()
-        binding.lessButton.gone()
+        binding.mangaGenresTags.isVisible = false
+        binding.lessButton.isVisible = false
         binding.moreButtonGroup.visible()
         binding.title.maxLines = 4
         adapter.recyclerView.post {
@@ -159,7 +158,7 @@ class MangaHeaderHolder(
             if (binding.subItemGroup.visibility != View.GONE) {
                 if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
                     binding.mangaSummary.setTextIsSelectable(true)
-                    binding.moreButtonGroup.gone()
+                    binding.moreButtonGroup.isVisible = false
                     showMoreButton = binding.lessButton.isVisible
                 } else {
                     binding.moreButtonGroup.visible()
@@ -258,8 +257,8 @@ class MangaHeaderHolder(
         binding.filtersText.text = presenter.currentFilters()
 
         if (manga.source == LocalSource.ID) {
-            binding.webviewButton.gone()
-            binding.shareButton.gone()
+            binding.webviewButton.isVisible = false
+            binding.shareButton.isVisible = false
         }
 
         if (!manga.initialized) return
@@ -311,13 +310,13 @@ class MangaHeaderHolder(
     }
 
     fun collapse() {
-        binding.subItemGroup.gone()
-        binding.startReadingButton.gone()
+        binding.subItemGroup.isVisible = false
+        binding.startReadingButton.isVisible = false
         if (binding.moreButton.isVisible || binding.moreButton.isInvisible) {
             binding.moreButtonGroup.isInvisible = true
         } else {
-            binding.lessButton.gone()
-            binding.mangaGenresTags.gone()
+            binding.lessButton.isVisible = false
+            binding.mangaGenresTags.isVisible = false
         }
     }
 
@@ -344,7 +343,7 @@ class MangaHeaderHolder(
 
     fun expand() {
         binding.subItemGroup.visible()
-        if (!showMoreButton) binding.moreButtonGroup.gone()
+        if (!showMoreButton) binding.moreButtonGroup.isVisible = false
         else {
             if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.visible()
             else {

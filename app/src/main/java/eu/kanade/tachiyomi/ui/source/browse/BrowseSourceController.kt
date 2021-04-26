@@ -35,7 +35,6 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -528,7 +527,7 @@ open class BrowseSourceController(bundle: Bundle) :
      * Shows the binding.progress bar.
      */
     private fun showProgressBar() {
-        binding.emptyView.gone()
+        binding.emptyView.isVisible = false
         binding.progress.visible()
         snack?.dismiss()
         snack = null
@@ -538,8 +537,8 @@ open class BrowseSourceController(bundle: Bundle) :
      * Hides active binding.progress bars.
      */
     private fun hideProgressBar() {
-        binding.emptyView.gone()
-        binding.progress.gone()
+        binding.emptyView.isVisible = false
+        binding.progress.isVisible = false
     }
 
     /**

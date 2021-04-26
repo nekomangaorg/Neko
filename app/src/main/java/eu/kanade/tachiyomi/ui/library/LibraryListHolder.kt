@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 
@@ -44,15 +43,15 @@ class LibraryListHolder(
             }
             if (item.manga.status == -1) {
                 binding.title.text = null
-                binding.title.gone()
+                binding.title.isVisible = false
             } else {
                 binding.title.text = itemView.context.getString(R.string.category_is_empty)
             }
             binding.title.textAlignment = View.TEXT_ALIGNMENT_CENTER
-            binding.card.gone()
-            binding.unreadDownloadBadge.badgeView.gone()
-            binding.padding.gone()
-            binding.subtitle.gone()
+            binding.card.isVisible = false
+            binding.unreadDownloadBadge.badgeView.isVisible = false
+            binding.padding.isVisible = false
+            binding.subtitle.isVisible = false
             return
         }
         binding.constraintLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {

@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
@@ -115,7 +114,7 @@ class ChapterHolder(
         anim2.startDelay = 500
         anim2.addUpdateListener {
             if (binding.leftView.isVisible && binding.frontView.translationX <= 0) {
-                binding.leftView.gone()
+                binding.leftView.isVisible = false
                 binding.rightView.visible()
             }
         }
@@ -153,7 +152,7 @@ class ChapterHolder(
 
     fun notifyStatus(status: Int, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
         if (locked) {
-            gone()
+            isVisible = false
             return
         }
         isVisible = !localSource

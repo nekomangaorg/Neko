@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.source.browse
 
 import android.app.Activity
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.api.clear
@@ -9,10 +10,9 @@ import coil.request.LoadRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
+import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -32,10 +32,10 @@ class BrowseSourceGridHolder(
     private val binding = MangaGridItemBinding.bind(view)
     init {
         if (compact) {
-            binding.textLayout.gone()
+            binding.textLayout.isVisible = false
         } else {
-            binding.compactTitle.gone()
-            binding.gradient.gone()
+            binding.compactTitle.isVisible = false
+            binding.gradient.isVisible = false
         }
     }
 

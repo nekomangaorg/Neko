@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.source
 
 import android.content.res.ColorStateList
 import android.view.View
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SourceItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
@@ -9,7 +10,6 @@ import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 
 class SourceHolder(view: View, val adapter: SourceAdapter) :
@@ -60,7 +60,7 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         if (source.supportsLatest) {
             binding.sourceLatest.visible()
         } else {
-            binding.sourceLatest.gone()
+            binding.sourceLatest.isVisible = false
         }
     }
 

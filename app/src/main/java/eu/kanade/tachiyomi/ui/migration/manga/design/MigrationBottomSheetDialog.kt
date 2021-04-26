@@ -9,6 +9,7 @@ import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.Controller
 import com.f2prateek.rx.preferences.Preference
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -20,7 +21,6 @@ import eu.kanade.tachiyomi.ui.migration.MigrationFlags
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import eu.kanade.tachiyomi.util.view.visible
@@ -103,12 +103,12 @@ class MigrationBottomSheetDialog(
         binding.migCategories.setOnCheckedChangeListener { _, _ -> setFlags() }
         binding.migTracking.setOnCheckedChangeListener { _, _ -> setFlags() }
 
-        binding.extraSearchParamText.gone()
+        binding.extraSearchParamText.isVisible = false
         binding.extraSearchParam.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
                 binding.extraSearchParamText.visible()
             } else {
-                binding.extraSearchParamText.gone()
+                binding.extraSearchParamText.isVisible = false
             }
         }
         binding.sourceGroup.bindToPreference(preferences.useSourceWithMost())

@@ -24,7 +24,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.visible
@@ -129,7 +128,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     presenter.loadChapter(item.chapter)
                     loadingPos = position
                     val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(position) as? ReaderChapterItem.ViewHolder)?.binding
-                    itemView?.bookmarkImage?.gone()
+                    itemView?.bookmarkImage?.isVisible = false
                     itemView?.progress?.visible()
                 }
                 true
@@ -171,7 +170,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
     fun resetChapter() {
         val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(loadingPos) as? ReaderChapterItem.ViewHolder)?.binding
         itemView?.bookmarkImage?.visible()
-        itemView?.progress?.gone()
+        itemView?.progress?.isVisible = false
     }
 
     fun refreshList() {

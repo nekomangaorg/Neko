@@ -4,6 +4,7 @@ import android.app.SearchManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
@@ -17,7 +18,6 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SearchActivity : MainActivity() {
@@ -68,8 +68,8 @@ class SearchActivity : MainActivity() {
         binding.toolbar.navigationIcon = drawerArrow
         drawerArrow?.progress = 1f
 
-        binding.bottomNav.gone()
-        binding.bottomView.gone()
+        binding.bottomNav.isVisible = false
+        binding.bottomView.isVisible = false
     }
 
     override fun handleIntentAction(intent: Intent): Boolean {

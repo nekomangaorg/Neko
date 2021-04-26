@@ -8,7 +8,6 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import coil.target.ImageViewTarget
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
 
 class CoverViewTarget(
     view: ImageView,
@@ -17,7 +16,7 @@ class CoverViewTarget(
 ) : ImageViewTarget(view) {
 
     override fun onError(error: Drawable?) {
-        progress?.gone()
+        progress?.isVisible = false
         view.scaleType = ImageView.ScaleType.CENTER
         val vector = VectorDrawableCompat.create(
             view.context.resources,
@@ -35,7 +34,7 @@ class CoverViewTarget(
     }
 
     override fun onSuccess(result: Drawable) {
-        progress?.gone()
+        progress?.isVisible = false
         view.scaleType = scaleType
         super.onSuccess(result)
     }

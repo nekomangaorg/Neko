@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
@@ -8,7 +9,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.view.gone
 
 /**
  * Category item for a recycler view.
@@ -76,8 +76,8 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
 
         private val binding = CategoriesItemBinding.bind(view)
         init {
-            binding.image.gone()
-            binding.editButton.gone()
+            binding.image.isVisible = false
+            binding.editButton.isVisible = false
             binding.editText.isEnabled = false
             setDragHandleView(binding.reorder)
         }

@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 
 /**
@@ -68,12 +67,12 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
                 showHolder()
             }
             results.isEmpty() -> {
-                binding.progress.gone()
+                binding.progress.isVisible = false
                 binding.noResults.visible()
-                binding.sourceCard.gone()
+                binding.sourceCard.isVisible = false
             }
             else -> {
-                binding.progress.gone()
+                binding.progress.isVisible = false
                 showHolder()
             }
         }
@@ -111,6 +110,6 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
 
     private fun showHolder() {
         binding.sourceCard.visible()
-        binding.noResults.gone()
+        binding.noResults.isVisible = false
     }
 }

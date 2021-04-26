@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import uy.kohesive.injekt.Injekt
@@ -108,26 +107,26 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
                 binding.checkbox.isVisible = !category.isHidden
                 binding.collapseArrow.isVisible = category.isHidden && !adapter.isSingleCategory
-                binding.updateButton.gone()
-                binding.catProgress.gone()
+                binding.updateButton.isVisible = false
+                binding.catProgress.isVisible = false
                 setSelection()
             }
             category.id ?: -1 < 0 -> {
-                binding.collapseArrow.gone()
-                binding.checkbox.gone()
-                binding.catProgress.gone()
-                binding.updateButton.gone()
+                binding.collapseArrow.isVisible = false
+                binding.checkbox.isVisible = false
+                binding.catProgress.isVisible = false
+                binding.updateButton.isVisible = false
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
-                binding.checkbox.gone()
+                binding.checkbox.isVisible = false
                 binding.catProgress.isVisible = true
                 binding.updateButton.isInvisible = true
             }
             else -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
-                binding.catProgress.gone()
-                binding.checkbox.gone()
+                binding.catProgress.isVisible = false
+                binding.checkbox.isVisible = false
                 binding.updateButton.isVisible = !adapter.isSingleCategory
             }
         }

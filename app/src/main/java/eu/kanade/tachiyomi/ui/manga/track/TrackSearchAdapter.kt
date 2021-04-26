@@ -4,12 +4,12 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import androidx.core.view.isVisible
 import coil.api.clear
 import coil.api.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.TrackSearchItemBinding
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import java.util.ArrayList
 import java.util.Locale
@@ -53,22 +53,22 @@ class TrackSearchAdapter(context: Context) :
             }
 
             if (track.publishing_status.isBlank()) {
-                binding.trackSearchStatus.gone()
-                binding.trackSearchStatusResult.gone()
+                binding.trackSearchStatus.isVisible = false
+                binding.trackSearchStatusResult.isVisible = false
             } else {
                 binding.trackSearchStatusResult.text = track.publishing_status.capitalize(Locale.ROOT)
             }
 
             if (track.publishing_type.isBlank()) {
-                binding.trackSearchType.gone()
-                binding.trackSearchTypeResult.gone()
+                binding.trackSearchType.isVisible = false
+                binding.trackSearchTypeResult.isVisible = false
             } else {
                 binding.trackSearchTypeResult.text = track.publishing_type.capitalize(Locale.ROOT)
             }
 
             if (track.start_date.isBlank()) {
-                binding.trackSearchStart.gone()
-                binding.trackSearchStartResult.gone()
+                binding.trackSearchStart.isVisible = false
+                binding.trackSearchStartResult.isVisible = false
             } else {
                 binding.trackSearchStartResult.text = track.start_date
             }

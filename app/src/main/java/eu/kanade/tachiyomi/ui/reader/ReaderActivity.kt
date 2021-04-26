@@ -85,7 +85,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -655,7 +654,7 @@ class ReaderActivity :
                 presenter.loadPreviousChapter()
             }
             if (result) {
-                binding.readerNav.leftChapter.gone()
+                binding.readerNav.leftChapter.isVisible = false
                 binding.readerNav.leftProgress.visible()
             } else {
                 toast(
@@ -678,7 +677,7 @@ class ReaderActivity :
                 presenter.loadPreviousChapter()
             }
             if (result) {
-                binding.readerNav.rightChapter.gone()
+                binding.readerNav.rightChapter.isVisible = false
                 binding.readerNav.rightProgress.visible()
             } else {
                 toast(
@@ -827,7 +826,7 @@ class ReaderActivity :
                 toolbarAnimation.setAnimationListener(
                     object : SimpleAnimationListener() {
                         override fun onAnimationEnd(animation: Animation) {
-                            binding.readerMenu.gone()
+                            binding.readerMenu.isVisible = false
                         }
                     }
                 )
@@ -835,7 +834,7 @@ class ReaderActivity :
                 BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable = true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else {
-                binding.readerMenu.gone()
+                binding.readerMenu.isVisible = false
             }
         }
         menuStickyVisible = false
@@ -960,7 +959,7 @@ class ReaderActivity :
      * method to the current viewer, but also set the subtitle on the binding.toolbar.
      */
     fun setChapters(viewerChapters: ViewerChapters) {
-        binding.pleaseWait.gone()
+        binding.pleaseWait.isVisible = false
         if (indexChapterToShift != null && indexPageToShift != null) {
             viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }?.let {
                 (viewer as? PagerViewer)?.updateShifting(it)
@@ -1012,8 +1011,8 @@ class ReaderActivity :
             binding.readerNav.leftChapter.visible()
             binding.readerNav.rightChapter.visible()
 
-            binding.readerNav.leftProgress.gone()
-            binding.readerNav.rightProgress.gone()
+            binding.readerNav.leftProgress.isVisible = false
+            binding.readerNav.rightProgress.isVisible = false
             binding.chaptersSheet.root.resetChapter()
         }
         if (show) {
@@ -1512,7 +1511,7 @@ class ReaderActivity :
                     .onEach { setColorFilterValue(it) }
                     .launchIn(scope)
             } else {
-                binding.colorOverlay.gone()
+                binding.colorOverlay.isVisible = false
             }
         }
 
@@ -1542,7 +1541,7 @@ class ReaderActivity :
                 val alpha = (abs(value) * 2.56).toInt()
                 binding.brightnessOverlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
             } else {
-                binding.brightnessOverlay.gone()
+                binding.brightnessOverlay.isVisible = false
             }
         }
 

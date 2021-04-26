@@ -11,7 +11,6 @@ import coil.size.Scale
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
-import eu.kanade.tachiyomi.util.view.gone
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -34,10 +33,10 @@ class LibraryGridHolder(
     init {
         binding.playLayout.setOnClickListener { playButtonClicked() }
         if (compact) {
-            binding.textLayout.gone()
+            binding.textLayout.isVisible = false
         } else {
-            binding.compactTitle.gone()
-            binding.gradient.gone()
+            binding.compactTitle.isVisible = false
+            binding.gradient.isVisible = false
             val playLayout = binding.playLayout.layoutParams as FrameLayout.LayoutParams
             val buttonLayout = binding.playButton.layoutParams as FrameLayout.LayoutParams
             playLayout.gravity = Gravity.BOTTOM or Gravity.END

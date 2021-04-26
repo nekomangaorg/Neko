@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
@@ -120,9 +119,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
 
     fun onViewCreated() {
         if (category?.id ?: 0 <= 0 && category != null) {
-            binding.title.gone()
-            binding.downloadNew.gone()
-            binding.includeGlobal.gone()
+            binding.title.isVisible = false
+            binding.downloadNew.isVisible = false
+            binding.includeGlobal.isVisible = false
             return
         }
         binding.editCategories.isVisible = category != null
@@ -142,7 +141,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             true
         )
         if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
-            binding.downloadNew.gone()
+            binding.downloadNew.isVisible = false
         } else if (!downloadNew) {
             binding.downloadNew.visible()
         }

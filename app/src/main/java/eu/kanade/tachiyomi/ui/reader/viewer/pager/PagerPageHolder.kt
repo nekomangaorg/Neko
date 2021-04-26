@@ -20,6 +20,7 @@ import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import coil.api.loadAny
 import coil.request.CachePolicy
 import com.davemorrissey.labs.subscaleview.ImageSource
@@ -38,7 +39,6 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
@@ -303,8 +303,8 @@ class PagerPageHolder(
      */
     private fun setQueued() {
         progressBar.visible()
-        retryButton?.gone()
-        decodeErrorLayout?.gone()
+        retryButton?.isVisible = false
+        decodeErrorLayout?.isVisible = false
     }
 
     /**
@@ -312,8 +312,8 @@ class PagerPageHolder(
      */
     private fun setLoading() {
         progressBar.visible()
-        retryButton?.gone()
-        decodeErrorLayout?.gone()
+        retryButton?.isVisible = false
+        decodeErrorLayout?.isVisible = false
     }
 
     /**
@@ -321,8 +321,8 @@ class PagerPageHolder(
      */
     private fun setDownloading() {
         progressBar.visible()
-        retryButton?.gone()
-        decodeErrorLayout?.gone()
+        retryButton?.isVisible = false
+        decodeErrorLayout?.isVisible = false
     }
 
     /**
@@ -335,8 +335,8 @@ class PagerPageHolder(
         } else {
             progressBar.setProgress(95)
         }
-        retryButton?.gone()
-        decodeErrorLayout?.gone()
+        retryButton?.isVisible = false
+        decodeErrorLayout?.isVisible = false
 
         unsubscribeReadImageHeader()
         val streamFn = page.stream ?: return
@@ -431,7 +431,7 @@ class PagerPageHolder(
      * Called when the page has an error.
      */
     private fun setError() {
-        progressBar.gone()
+        progressBar.isVisible = false
         initRetryButton().visible()
     }
 
@@ -439,14 +439,14 @@ class PagerPageHolder(
      * Called when the image is decoded and going to be displayed.
      */
     private fun onImageDecoded() {
-        progressBar.gone()
+        progressBar.isVisible = false
     }
 
     /**
      * Called when an image fails to decode.
      */
     private fun onImageDecodeError() {
-        progressBar.gone()
+        progressBar.isVisible = false
         initDecodeErrorLayout().visible()
     }
 

@@ -71,7 +71,6 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
@@ -232,7 +231,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
         setNavBarColor(content.rootWindowInsets)
-        binding.bottomView.gone()
+        binding.bottomView.isVisible = false
         content.doOnApplyWindowInsets { v, insets, _ ->
             setNavBarColor(insets)
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
