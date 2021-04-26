@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
 
@@ -143,7 +142,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
             binding.downloadNew.isVisible = false
         } else if (!downloadNew) {
-            binding.downloadNew.visible()
+            binding.downloadNew.isVisible = true
         }
         binding.downloadNew.isChecked =
             preferences.downloadNew().get() && binding.downloadNew.isChecked

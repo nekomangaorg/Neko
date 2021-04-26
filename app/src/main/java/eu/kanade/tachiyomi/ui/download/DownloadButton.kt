@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadButtonBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 
 class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -90,14 +89,14 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         when (state) {
             Download.CHECKED -> {
                 binding.downloadProgress.isVisible = false
-                binding.downloadBorder.visible()
+                binding.downloadBorder.isVisible = true
                 binding.downloadProgressIndeterminate.isVisible = false
                 binding.downloadBorder.setImageDrawable(filledCircle)
                 binding.downloadBorder.drawable.setTint(activeColor)
                 binding.downloadIcon.drawable.setTint(Color.WHITE)
             }
             Download.NOT_DOWNLOADED -> {
-                binding.downloadBorder.visible()
+                binding.downloadBorder.isVisible = true
                 binding.downloadProgress.isVisible = false
                 binding.downloadProgressIndeterminate.isVisible = false
                 binding.downloadBorder.setImageDrawable(borderCircle)
@@ -107,13 +106,13 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             Download.QUEUE -> {
                 binding.downloadBorder.isVisible = false
                 binding.downloadProgress.isVisible = false
-                binding.downloadProgressIndeterminate.visible()
+                binding.downloadProgressIndeterminate.isVisible = true
                 binding.downloadProgress.isIndeterminate = true
                 binding.downloadIcon.drawable.setTint(disabledColor)
             }
             Download.DOWNLOADING -> {
-                binding.downloadBorder.visible()
-                binding.downloadProgress.visible()
+                binding.downloadBorder.isVisible = true
+                binding.downloadProgress.isVisible = true
                 binding.downloadProgressIndeterminate.isVisible = false
                 binding.downloadBorder.setImageDrawable(borderCircle)
                 binding.downloadProgress.isIndeterminate = false
@@ -133,7 +132,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             }
             Download.DOWNLOADED -> {
                 binding.downloadProgress.isVisible = false
-                binding.downloadBorder.visible()
+                binding.downloadBorder.isVisible = true
                 binding.downloadProgressIndeterminate.isVisible = false
                 binding.downloadBorder.drawable.setTint(downloadedColor)
                 if (animated) {
@@ -160,7 +159,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             }
             Download.ERROR -> {
                 binding.downloadProgress.isVisible = false
-                binding.downloadBorder.visible()
+                binding.downloadBorder.isVisible = true
                 binding.downloadProgressIndeterminate.isVisible = false
                 binding.downloadBorder.setImageDrawable(borderCircle)
                 binding.downloadBorder.drawable.setTint(errorColor)

@@ -12,6 +12,7 @@ import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
@@ -23,7 +24,6 @@ import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.visible
 
 open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
@@ -111,7 +111,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
             binding.webview.webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    binding.progressBar.visible()
+                    binding.progressBar.isVisible = true
                     binding.progressBar.progress = newProgress
                     if (newProgress == 100) {
                         binding.progressBar.isInvisible = true

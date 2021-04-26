@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.visible
 
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
 (context, attrs) {
@@ -95,10 +94,10 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             it.isActivated = false
         }
         for (i in 0 until itemCount) {
-            buttons[i].visible()
+            buttons[i].isVisible = true
             buttons[i].setTextColor(context.getResourceColor(android.R.attr.textColorPrimary))
         }
-        for (i in 0 until (itemCount - 1)) separators[i].visible()
+        for (i in 0 until (itemCount - 1)) separators[i].isVisible = true
     }
 
     private fun toggleButton(index: Int, callBack: Boolean = true) {
@@ -137,9 +136,9 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             listener?.onFilterClicked(this, -1, callBack)
             buttons.forEachIndexed { viewIndex, textView ->
                 if (!textView.text.isNullOrBlank()) {
-                    textView.visible()
+                    textView.isVisible = true
                     if (viewIndex > 0) {
-                        separators[viewIndex - 1].visible()
+                        separators[viewIndex - 1].isVisible = true
                     }
                 }
             }

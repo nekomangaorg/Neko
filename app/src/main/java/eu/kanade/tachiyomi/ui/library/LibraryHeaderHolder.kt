@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -134,7 +133,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
     private fun addCategoryToUpdate() {
         if (adapter.libraryListener.updateCategory(flexibleAdapterPosition)) {
-            binding.catProgress.visible()
+            binding.catProgress.isVisible = true
             binding.updateButton.isInvisible = true
         }
     }

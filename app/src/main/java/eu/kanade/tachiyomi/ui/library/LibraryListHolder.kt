@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the binding.title.
@@ -34,7 +33,7 @@ class LibraryListHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
-        binding.title.visible()
+        binding.title.isVisible = true
         binding.constraintLayout.minHeight = 56.dpToPx
         if (item.manga.isBlank()) {
             binding.constraintLayout.minHeight = 0
@@ -57,8 +56,8 @@ class LibraryListHolder(
         binding.constraintLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             height = 52.dpToPx
         }
-        binding.padding.visible()
-        binding.card.visible()
+        binding.padding.isVisible = true
+        binding.card.isVisible = true
         binding.title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
 
         // Update the binding.title of the manga.

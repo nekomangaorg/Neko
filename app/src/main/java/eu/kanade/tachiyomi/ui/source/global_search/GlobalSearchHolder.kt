@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.migration.SearchController
 import eu.kanade.tachiyomi.util.system.LocaleHelper
-import eu.kanade.tachiyomi.util.view.visible
 
 /**
  * Holder that binds the [GlobalSearchItem] containing catalogue cards.
@@ -63,12 +62,12 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
 
         when {
             results == null -> {
-                binding.progress.visible()
+                binding.progress.isVisible = true
                 showHolder()
             }
             results.isEmpty() -> {
                 binding.progress.isVisible = false
-                binding.noResults.visible()
+                binding.noResults.isVisible = true
                 binding.sourceCard.isVisible = false
             }
             else -> {
@@ -109,7 +108,7 @@ class GlobalSearchHolder(view: View, val adapter: GlobalSearchAdapter) :
     }
 
     private fun showHolder() {
-        binding.sourceCard.visible()
+        binding.sourceCard.isVisible = true
         binding.noResults.isVisible = false
     }
 }

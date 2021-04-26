@@ -23,7 +23,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -107,8 +106,8 @@ class MangaHeaderHolder(
         if (binding.moreButton.visibility == View.VISIBLE) {
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
-            binding.mangaGenresTags.visible()
-            binding.lessButton.visible()
+            binding.mangaGenresTags.isVisible = true
+            binding.lessButton.isVisible = true
             binding.moreButtonGroup.isVisible = false
             binding.title.maxLines = Integer.MAX_VALUE
         }
@@ -120,7 +119,7 @@ class MangaHeaderHolder(
         binding.mangaSummary.maxLines = 3
         binding.mangaGenresTags.isVisible = false
         binding.lessButton.isVisible = false
-        binding.moreButtonGroup.visible()
+        binding.moreButtonGroup.isVisible = true
         binding.title.maxLines = 4
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
@@ -161,7 +160,7 @@ class MangaHeaderHolder(
                     binding.moreButtonGroup.isVisible = false
                     showMoreButton = binding.lessButton.isVisible
                 } else {
-                    binding.moreButtonGroup.visible()
+                    binding.moreButtonGroup.isVisible = true
                 }
             }
             if (adapter.hasFilter()) collapse()
@@ -342,13 +341,13 @@ class MangaHeaderHolder(
     }
 
     fun expand() {
-        binding.subItemGroup.visible()
+        binding.subItemGroup.isVisible = true
         if (!showMoreButton) binding.moreButtonGroup.isVisible = false
         else {
-            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.visible()
+            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.isVisible = true
             else {
-                binding.lessButton.visible()
-                binding.mangaGenresTags.visible()
+                binding.lessButton.isVisible = true
+                binding.mangaGenresTags.isVisible = true
             }
         }
         binding.startReadingButton.isVisible = showReadingButton

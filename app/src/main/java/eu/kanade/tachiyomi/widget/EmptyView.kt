@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import eu.kanade.tachiyomi.util.view.visible
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     RelativeLayout(context, attrs) {
@@ -62,7 +61,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             }
         }
 
-        this.visible()
+        this.isVisible = true
     }
 
     data class Action(

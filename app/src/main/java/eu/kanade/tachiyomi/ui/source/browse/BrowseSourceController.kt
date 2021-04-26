@@ -40,7 +40,6 @@ import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
@@ -129,7 +128,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
         binding.fab.setOnClickListener { showFilters() }
-        binding.progress.visible()
+        binding.progress.isVisible = true
     }
 
     override fun onDestroyView(view: View) {
@@ -528,7 +527,7 @@ open class BrowseSourceController(bundle: Bundle) :
      */
     private fun showProgressBar() {
         binding.emptyView.isVisible = false
-        binding.progress.visible()
+        binding.progress.isVisible = true
         snack?.dismiss()
         snack = null
     }

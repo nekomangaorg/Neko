@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.visible
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -93,11 +92,11 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                             adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
                             binding.chapterRecycler.height / 2 - 30.dpToPx
                         )
-                        activity.binding.readerNav.root.visible()
+                        activity.binding.readerNav.root.isVisible = true
                         activity.binding.readerNav.root.alpha = 1f
                     }
                     if (state == BottomSheetBehavior.STATE_DRAGGING || state == BottomSheetBehavior.STATE_SETTLING) {
-                        activity.binding.readerNav.root.visible()
+                        activity.binding.readerNav.root.isVisible = true
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
                         activity.binding.readerNav.root.isInvisible = true
@@ -129,7 +128,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     loadingPos = position
                     val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(position) as? ReaderChapterItem.ViewHolder)?.binding
                     itemView?.bookmarkImage?.isVisible = false
-                    itemView?.progress?.visible()
+                    itemView?.progress?.isVisible = true
                 }
                 true
             }
@@ -169,7 +168,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
     fun resetChapter() {
         val itemView = (binding.chapterRecycler.findViewHolderForAdapterPosition(loadingPos) as? ReaderChapterItem.ViewHolder)?.binding
-        itemView?.bookmarkImage?.visible()
+        itemView?.bookmarkImage?.isVisible = true
         itemView?.progress?.isVisible = false
     }
 

@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import rx.Observable
 import rx.Subscription
@@ -236,8 +235,8 @@ class WebtoonPageHolder(
      * Called when the page is queued.
      */
     private fun setQueued() {
-        progressContainer.visible()
-        progressBar.visible()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
         retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
@@ -246,8 +245,8 @@ class WebtoonPageHolder(
      * Called when the page is loading.
      */
     private fun setLoading() {
-        progressContainer.visible()
-        progressBar.visible()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
         retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
@@ -256,8 +255,8 @@ class WebtoonPageHolder(
      * Called when the page is downloading
      */
     private fun setDownloading() {
-        progressContainer.visible()
-        progressBar.visible()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
         retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
@@ -266,8 +265,8 @@ class WebtoonPageHolder(
      * Called when the page is ready.
      */
     private fun setImage() {
-        progressContainer.visible()
-        progressBar.visible()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
         progressBar.completeAndFadeOut()
         retryContainer?.isVisible = false
         removeDecodeErrorLayout()
@@ -288,11 +287,11 @@ class WebtoonPageHolder(
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
                     val subsamplingView = initSubsamplingImageView()
-                    subsamplingView.visible()
+                    subsamplingView.isVisible = true
                     subsamplingView.setImage(ImageSource.inputStream(openStream!!))
                 } else {
                     val imageView = initImageView()
-                    imageView.visible()
+                    imageView.isVisible = true
                     imageView.setImage(openStream!!)
                 }
             }
@@ -309,7 +308,7 @@ class WebtoonPageHolder(
      */
     private fun setError() {
         progressContainer.isVisible = false
-        initRetryLayout().visible()
+        initRetryLayout().isVisible = true
     }
 
     /**
@@ -324,7 +323,7 @@ class WebtoonPageHolder(
      */
     private fun onImageDecodeError() {
         progressContainer.isVisible = false
-        initDecodeErrorLayout().visible()
+        initDecodeErrorLayout().isVisible = true
     }
 
     /**

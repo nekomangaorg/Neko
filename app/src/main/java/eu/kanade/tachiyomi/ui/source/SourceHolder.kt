@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
-import eu.kanade.tachiyomi.util.view.visible
 
 class SourceHolder(view: View, val adapter: SourceAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
@@ -58,7 +57,7 @@ class SourceHolder(view: View, val adapter: SourceAdapter) :
         }
 
         if (source.supportsLatest) {
-            binding.sourceLatest.visible()
+            binding.sourceLatest.isVisible = true
         } else {
             binding.sourceLatest.isVisible = false
         }

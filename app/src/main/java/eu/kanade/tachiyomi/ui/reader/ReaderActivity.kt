@@ -92,7 +92,6 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.coroutines.Dispatchers
@@ -246,7 +245,7 @@ class ReaderActivity :
                 }
                 presenter.init(manga, chapter)
             } else {
-                binding.pleaseWait.visible()
+                binding.pleaseWait.isVisible = true
             }
         }
 
@@ -655,7 +654,7 @@ class ReaderActivity :
             }
             if (result) {
                 binding.readerNav.leftChapter.isVisible = false
-                binding.readerNav.leftProgress.visible()
+                binding.readerNav.leftProgress.isVisible = true
             } else {
                 toast(
                     if (viewer is R2LPagerViewer) {
@@ -678,7 +677,7 @@ class ReaderActivity :
             }
             if (result) {
                 binding.readerNav.rightChapter.isVisible = false
-                binding.readerNav.rightProgress.visible()
+                binding.readerNav.rightProgress.isVisible = true
             } else {
                 toast(
                     if (viewer !is R2LPagerViewer) {
@@ -796,7 +795,7 @@ class ReaderActivity :
         if (visible) {
             snackbar?.dismiss()
             systemUi?.show()
-            binding.readerMenu.visible()
+            binding.readerMenu.isVisible = true
 
             if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = false
@@ -915,7 +914,7 @@ class ReaderActivity :
 
         binding.readerNav.pageSeekbar.isRTL = newViewer is R2LPagerViewer
 
-        binding.pleaseWait.visible()
+        binding.pleaseWait.isVisible = true
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
         invalidateOptionsMenu()
         updateCropBordersShortcut()
@@ -1008,8 +1007,8 @@ class ReaderActivity :
      */
     fun setProgressDialog(show: Boolean) {
         if (!show) {
-            binding.readerNav.leftChapter.visible()
-            binding.readerNav.rightChapter.visible()
+            binding.readerNav.leftChapter.isVisible = true
+            binding.readerNav.rightChapter.isVisible = true
 
             binding.readerNav.leftProgress.isVisible = false
             binding.readerNav.rightProgress.isVisible = false
@@ -1305,7 +1304,7 @@ class ReaderActivity :
                 }
                 if (sheetManageNavColor) window.navigationBarColor =
                     getResourceColor(R.attr.colorSecondary)
-                binding.readerMenu.visible()
+                binding.readerMenu.isVisible = true
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(
                     object : SimpleAnimationListener() {
@@ -1537,7 +1536,7 @@ class ReaderActivity :
 
             // Set black overlay visibility.
             if (value < 0) {
-                binding.brightnessOverlay.visible()
+                binding.brightnessOverlay.isVisible = true
                 val alpha = (abs(value) * 2.56).toInt()
                 binding.brightnessOverlay.setBackgroundColor(Color.argb(alpha, 0, 0, 0))
             } else {
@@ -1549,7 +1548,7 @@ class ReaderActivity :
          * Sets the color filter [value].
          */
         private fun setColorFilterValue(value: Int) {
-            binding.colorOverlay.visible()
+            binding.colorOverlay.isVisible = true
             binding.colorOverlay.setFilterColor(value, preferences.colorFilterMode().get())
         }
     }

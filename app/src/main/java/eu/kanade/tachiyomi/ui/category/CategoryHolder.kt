@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.visible
 
 /**
  * Holder used to display category items.
@@ -68,7 +67,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 R.drawable
                     .ic_drag_handle_24dp
             )
-            binding.image.visible()
+            binding.image.isVisible = true
             binding.editText.setText(binding.title.text)
         }
     }

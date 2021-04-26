@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
@@ -108,14 +107,14 @@ class ChapterHolder(
         val animatorSet = AnimatorSet()
         val anim1 = slideAnimation(0f, slide)
         anim1.startDelay = 1000
-        anim1.addListener(StartAnimatorListener { binding.leftView.visible() })
+        anim1.addListener(StartAnimatorListener { binding.leftView.isVisible = true })
         val anim2 = slideAnimation(slide, -slide)
         anim2.duration = 600
         anim2.startDelay = 500
         anim2.addUpdateListener {
             if (binding.leftView.isVisible && binding.frontView.translationX <= 0) {
                 binding.leftView.isVisible = false
-                binding.rightView.visible()
+                binding.rightView.isVisible = true
             }
         }
         val anim3 = slideAnimation(-slide, 0f)

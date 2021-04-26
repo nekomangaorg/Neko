@@ -97,7 +97,6 @@ import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.CoroutineScope
@@ -844,7 +843,7 @@ class LibraryController(
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            binding.filterBottomSheet.filterBottomSheet.visible()
+            binding.filterBottomSheet.filterBottomSheet.isVisible = true
             presenter.getLibrary()
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)

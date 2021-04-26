@@ -10,6 +10,9 @@ import coil.request.LoadRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
+import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
+import eu.kanade.tachiyomi.databinding.MigrationProcessItemBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -17,11 +20,7 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
-import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
-import eu.kanade.tachiyomi.databinding.MigrationProcessItemBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -62,7 +61,7 @@ class MigrationProcessHolder(
                 )
             )
             binding.migrationMenu.isInvisible = true
-            binding.skipManga.visible()
+            binding.skipManga.isVisible = true
             binding.migrationMangaCardTo.resetManga()
             if (manga != null) {
                 withContext(Dispatchers.Main) {
@@ -113,7 +112,7 @@ class MigrationProcessHolder(
                         binding.migrationMangaCardTo.title.text =
                             view.context.getString(R.string.no_alternatives_found)
                     }
-                    binding.migrationMenu.visible()
+                    binding.migrationMenu.isVisible = true
                     binding.skipManga.isVisible = false
                     adapter.sourceFinished()
                 }
@@ -122,7 +121,7 @@ class MigrationProcessHolder(
     }
 
     private fun MangaGridItemBinding.resetManga() {
-        progress.visible()
+        progress.isVisible = true
         coverThumbnail.setImageDrawable(null)
         compactTitle.text = ""
         title.text = ""
@@ -141,15 +140,15 @@ class MigrationProcessHolder(
             .target(CoverViewTarget(coverThumbnail, progress)).build()
         Coil.imageLoader(view.context).execute(request)
 
-        compactTitle.visible()
-        gradient.visible()
+        compactTitle.isVisible = true
+        gradient.isVisible = true
         compactTitle.text = if (manga.title.isBlank()) {
             view.context.getString(R.string.unknown)
         } else {
             manga.title
         }
 
-        gradient.visible()
+        gradient.isVisible = true
         title.text = /*if (source.id == MERGED_SOURCE_ID) {
             MergedSource.MangaConfig.readFromUrl(gson, manga.url).children.map {
                 sourceManager.getOrStub(it.source).toString()

@@ -23,7 +23,6 @@ import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
-import eu.kanade.tachiyomi.util.view.visible
 import uy.kohesive.injekt.injectLazy
 
 class MigrationBottomSheetDialog(
@@ -106,7 +105,7 @@ class MigrationBottomSheetDialog(
         binding.extraSearchParamText.isVisible = false
         binding.extraSearchParam.setOnCheckedChangeListener { _, isChecked ->
             if (isChecked) {
-                binding.extraSearchParamText.visible()
+                binding.extraSearchParamText.isVisible = true
             } else {
                 binding.extraSearchParamText.isVisible = false
             }

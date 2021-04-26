@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.R
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 
 class TabbedReaderSettingsSheet(
@@ -76,7 +76,7 @@ class TabbedReaderSettingsSheet(
             }
         }
 
-        binding.menu.visible()
+        binding.menu.isVisible = true
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
             binding.menu.tooltipText = context.getString(R.string.reader_settings)
         }
@@ -131,7 +131,7 @@ class TabbedReaderSettingsSheet(
 
     override fun dismiss() {
         super.dismiss()
-        readerActivity.binding.appBar.visible()
+        readerActivity.binding.appBar.isVisible = true
     }
 
     fun updateTabs(isWebtoon: Boolean) {

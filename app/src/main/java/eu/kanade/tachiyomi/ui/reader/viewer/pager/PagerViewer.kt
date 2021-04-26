@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.util.view.visible
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import timber.log.Timber
@@ -266,7 +265,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             Timber.d("Pager first layout")
             val pages = chapters.currChapter.pages ?: return
             moveToPage(pages[chapters.currChapter.requestedPage])
-            pager.visible()
+            pager.isVisible = true
         }
         activity.invalidateOptionsMenu()
     }

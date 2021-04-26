@@ -102,10 +102,6 @@ fun Snackbar.getText(): CharSequence {
     return textView.text
 }
 
-inline fun View.visible() {
-    visibility = View.VISIBLE
-}
-
 inline val View.marginTop: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin ?: 0
 

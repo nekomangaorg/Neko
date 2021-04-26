@@ -39,7 +39,6 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -302,7 +301,7 @@ class PagerPageHolder(
      * Called when the page is queued.
      */
     private fun setQueued() {
-        progressBar.visible()
+        progressBar.isVisible = true
         retryButton?.isVisible = false
         decodeErrorLayout?.isVisible = false
     }
@@ -311,7 +310,7 @@ class PagerPageHolder(
      * Called when the page is loading.
      */
     private fun setLoading() {
-        progressBar.visible()
+        progressBar.isVisible = true
         retryButton?.isVisible = false
         decodeErrorLayout?.isVisible = false
     }
@@ -320,7 +319,7 @@ class PagerPageHolder(
      * Called when the page is downloading.
      */
     private fun setDownloading() {
-        progressBar.visible()
+        progressBar.isVisible = true
         retryButton?.isVisible = false
         decodeErrorLayout?.isVisible = false
     }
@@ -329,7 +328,7 @@ class PagerPageHolder(
      * Called when the page is ready.
      */
     private fun setImage() {
-        progressBar.visible()
+        progressBar.isVisible = true
         if (extraPage == null) {
             progressBar.completeAndFadeOut()
         } else {
@@ -432,7 +431,7 @@ class PagerPageHolder(
      */
     private fun setError() {
         progressBar.isVisible = false
-        initRetryButton().visible()
+        initRetryButton().isVisible = true
     }
 
     /**
@@ -447,7 +446,7 @@ class PagerPageHolder(
      */
     private fun onImageDecodeError() {
         progressBar.isVisible = false
-        initDecodeErrorLayout().visible()
+        initDecodeErrorLayout().isVisible = true
     }
 
     /**
