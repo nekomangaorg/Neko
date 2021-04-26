@@ -70,22 +70,6 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
                 startY = 0f
                 canScroll = false
-                val newEvent = MotionEvent.obtain(event)
-                recyclerView.post {
-                    // Mimic touch event for recycler so it doesn't scroll back
-                    val lastTag = recyclerView.tag
-                    recyclerView.tag = noUpdate
-                    newEvent.action = MotionEvent.ACTION_MOVE
-                    recyclerView.dispatchTouchEvent(newEvent)
-                    val newEvent2 = MotionEvent.obtain(newEvent)
-                    newEvent2.action = MotionEvent.ACTION_CANCEL
-                    recyclerView.dispatchTouchEvent(newEvent2)
-                    newEvent2.recycle()
-                    newEvent.recycle()
-                    recyclerView.post {
-                        recyclerView.tag = lastTag
-                    }
-                }
             }
         }
         return super.onTouchEvent(event)
