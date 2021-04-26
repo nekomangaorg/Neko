@@ -26,6 +26,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.coordinatorlayout.widget.CoordinatorLayout
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DefaultItemAnimator
 import androidx.recyclerview.widget.GridLayoutManager
@@ -88,7 +89,6 @@ import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -857,7 +857,7 @@ class LibraryController(
             updateFilterSheetY()
             closeTip()
             if (binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
-                binding.filterBottomSheet.filterBottomSheet.invisible()
+                binding.filterBottomSheet.filterBottomSheet.isInvisible = true
             }
             activityBinding?.toolbar?.hideDropdown()
         }

@@ -6,6 +6,7 @@ import android.util.TypedValue
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
@@ -20,7 +21,6 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
 import uy.kohesive.injekt.Injekt
@@ -121,8 +121,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             LibraryUpdateService.categoryInQueue(category.id) -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
                 binding.checkbox.gone()
-                binding.catProgress.visible()
-                binding.updateButton.invisible()
+                binding.catProgress.isVisible = true
+                binding.updateButton.isInvisible = true
             }
             else -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
@@ -136,7 +136,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     private fun addCategoryToUpdate() {
         if (adapter.libraryListener.updateCategory(flexibleAdapterPosition)) {
             binding.catProgress.visible()
-            binding.updateButton.invisible()
+            binding.updateButton.isInvisible = true
         }
     }
 

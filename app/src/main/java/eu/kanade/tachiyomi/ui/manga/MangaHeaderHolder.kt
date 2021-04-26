@@ -8,6 +8,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.api.loadAny
 import coil.request.CachePolicy
@@ -21,7 +22,6 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -313,8 +313,8 @@ class MangaHeaderHolder(
     fun collapse() {
         binding.subItemGroup.gone()
         binding.startReadingButton.gone()
-        if (binding.moreButton.visibility == View.VISIBLE || binding.moreButton.visibility == View.INVISIBLE) {
-            binding.moreButtonGroup.invisible()
+        if (binding.moreButton.isVisible || binding.moreButton.isInvisible) {
+            binding.moreButtonGroup.isInvisible = true
         } else {
             binding.lessButton.gone()
             binding.mangaGenresTags.gone()

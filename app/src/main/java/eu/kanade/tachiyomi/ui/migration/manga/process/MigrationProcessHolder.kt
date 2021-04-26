@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.migration.manga.process
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isInvisible
 import coil.Coil
 import coil.request.LoadRequest
 import eu.kanade.tachiyomi.R
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -61,7 +61,7 @@ class MigrationProcessHolder(
                     android.R.attr.textColorPrimary
                 )
             )
-            binding.migrationMenu.invisible()
+            binding.migrationMenu.isInvisible = true
             binding.skipManga.visible()
             binding.migrationMangaCardTo.resetManga()
             if (manga != null) {

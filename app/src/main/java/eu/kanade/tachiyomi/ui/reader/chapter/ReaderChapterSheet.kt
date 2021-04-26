@@ -7,6 +7,7 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,7 +25,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.visible
@@ -101,14 +101,14 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         activity.binding.readerNav.root.visible()
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        activity.binding.readerNav.root.invisible()
+                        activity.binding.readerNav.root.isInvisible = true
                         activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
                         if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         activity.binding.readerNav.root.alpha = 0f
-                        activity.binding.readerNav.root.invisible()
+                        activity.binding.readerNav.root.isInvisible = true
                     }
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
@@ -123,8 +123,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 false
             } else {
                 if (item.chapter.id != presenter.getCurrentChapter()?.chapter?.id) {
-                    activity.binding.readerNav.leftChapter.invisible()
-                    activity.binding.readerNav.rightChapter.invisible()
+                    activity.binding.readerNav.leftChapter.isInvisible = true
+                    activity.binding.readerNav.rightChapter.isInvisible = true
 
                     presenter.loadChapter(item.chapter)
                     loadingPos = position

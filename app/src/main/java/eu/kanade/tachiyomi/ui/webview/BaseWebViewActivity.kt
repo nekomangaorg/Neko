@@ -11,6 +11,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isInvisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
@@ -18,7 +19,6 @@ import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
@@ -114,7 +114,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                     binding.progressBar.visible()
                     binding.progressBar.progress = newProgress
                     if (newProgress == 100) {
-                        binding.progressBar.invisible()
+                        binding.progressBar.isInvisible = true
                     }
                     super.onProgressChanged(view, newProgress)
                 }

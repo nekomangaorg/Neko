@@ -87,7 +87,6 @@ import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.popupMenu
@@ -259,7 +258,7 @@ class ReaderActivity :
             indexChapterToShift = savedInstanceState.get(SHIFTED_CHAP_INDEX) as? Long
             binding.readerNav.root.isInvisible = !menuVisible
         } else {
-            binding.readerNav.root.invisible()
+            binding.readerNav.root.isInvisible = true
         }
 
         binding.chaptersSheet.chaptersBottomSheet.setup(this)

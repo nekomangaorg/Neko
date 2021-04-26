@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.util.view.setEdgeToEdge
 import kotlin.math.max
@@ -118,7 +117,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) : BottomSheetD
             val desc = binding.sortGroup.checkedRadioButtonId == R.id.sort_newest
             presenter.setGlobalChapterSort(desc)
             defPref = desc
-            binding.setAsDefaultSort.invisible()
+            binding.setAsDefaultSort.isInvisible = true
         }
 
         binding.sortMethodGroup.setOnCheckedChangeListener { _, checkedId ->
