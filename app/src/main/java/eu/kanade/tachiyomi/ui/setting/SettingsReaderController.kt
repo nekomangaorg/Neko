@@ -94,9 +94,9 @@ class SettingsReaderController : SettingsController() {
             intListPreference(activity) {
                 key = Keys.rotation
                 titleRes = R.string.rotation
-                val enumConstants = OrientationType::class.java.enumConstants
-                entriesRes = enumConstants?.map { it.stringRes }.orEmpty().toTypedArray()
-                entryRange = 1..(enumConstants?.size ?: 5)
+                val enumConstants = OrientationType.values()
+                entriesRes = enumConstants.map { it.stringRes }.toTypedArray()
+                entryRange = 1..enumConstants.size
                 defaultValue = 1
             }
             intListPreference(activity) {
