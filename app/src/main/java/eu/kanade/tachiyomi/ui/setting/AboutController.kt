@@ -18,9 +18,7 @@ import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
@@ -43,11 +41,6 @@ class AboutController : SettingsController() {
     private val dateFormat: DateFormat by lazy {
         preferences.dateFormat()
     }
-
-    /**
-     * The subscribtion service of the obtained release object
-     */
-    private val scope = CoroutineScope(Job() + Dispatchers.IO)
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
@@ -157,7 +150,7 @@ class AboutController : SettingsController() {
         if (activity == null) return
 
         activity?.toast(R.string.searching_for_updates)
-        scope.launch {
+        viewScope.launch {
             val result = try {
                 updateChecker.checkForUpdate()
             } catch (error: Exception) {
