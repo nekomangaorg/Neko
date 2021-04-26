@@ -30,6 +30,8 @@ class SourceFilterSheet(val activity: Activity) :
 
     var onResetClicked = {}
 
+    override var recyclerView: RecyclerView? = binding.filtersRecycler
+
     override fun createBinding(inflater: LayoutInflater) = SourceFilterSheetBinding.inflate(inflater)
     init {
         binding.searchBtn.setOnClickListener { dismiss() }
@@ -82,22 +84,6 @@ class SourceFilterSheet(val activity: Activity) :
                 }
             }
         )
-
-        binding.filtersRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    sheetBehavior.isDraggable = true
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (recyclerView.canScrollVertically(-1)) {
-                    sheetBehavior.isDraggable = false
-                }
-            }
-        })
     }
 
     override fun onStart() {

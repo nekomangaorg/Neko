@@ -5,6 +5,7 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -17,6 +18,7 @@ abstract class EdgeToEdgeBottomSheetDialog<VB : ViewBinding>(activity: Activity)
     protected val binding: VB
 
     protected val sheetBehavior: BottomSheetBehavior<*>
+    protected open var recyclerView: RecyclerView? = null
 
     init {
         binding = createBinding(activity.layoutInflater)
@@ -50,6 +52,31 @@ abstract class EdgeToEdgeBottomSheetDialog<VB : ViewBinding>(activity: Activity)
             rightMargin = insets.systemWindowInsetRight
         }
         contentView.requestLayout()
+    }
+
+    override fun onStart() {
+        super.onStart()
+        recyclerView?.let { recyclerView ->
+            recyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+                override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                    super.onScrollStateChanged(recyclerView, newState)
+                    if (newState == RecyclerView.SCROLL_STATE_IDLE ||
+                        newState == RecyclerView.SCROLL_STATE_SETTLING
+                    ) {
+                        sheetBehavior.isDraggable = true
+                    }
+                }
+
+                override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
+                    super.onScrolled(recyclerView, dx, dy)
+                    if (recyclerView.canScrollVertically(-1) &&
+                        recyclerView.scrollState != RecyclerView.SCROLL_STATE_SETTLING
+                    ) {
+                        sheetBehavior.isDraggable = false
+                    }
+                }
+            })
+        }
     }
 
     abstract fun createBinding(inflater: LayoutInflater): VB

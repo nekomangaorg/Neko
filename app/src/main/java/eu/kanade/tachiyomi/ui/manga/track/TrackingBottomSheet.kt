@@ -7,6 +7,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -38,6 +39,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     override fun createBinding(inflater: LayoutInflater) =
         TrackingBottomSheetBinding.inflate(inflater)
+
+    override var recyclerView: RecyclerView? = binding.trackRecycler
 
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom

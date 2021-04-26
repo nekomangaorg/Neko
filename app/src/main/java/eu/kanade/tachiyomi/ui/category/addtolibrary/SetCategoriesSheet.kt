@@ -47,6 +47,7 @@ class SetCategoriesSheet(
     private val itemAdapter = ItemAdapter<AddCategoryItem>()
     private val selectExtension: SelectExtension<AddCategoryItem>
     private val db: DatabaseHelper by injectLazy()
+    override var recyclerView: RecyclerView? = binding.categoryRecyclerView
 
     override fun createBinding(inflater: LayoutInflater) =
         SetCategoriesSheetBinding.inflate(inflater)
@@ -79,22 +80,6 @@ class SetCategoriesSheet(
                 }
             }
         )
-
-        binding.categoryRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
-            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
-                super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-                    sheetBehavior.isDraggable = true
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (recyclerView.canScrollVertically(-1)) {
-                    sheetBehavior.isDraggable = false
-                }
-            }
-        })
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener {
             binding.categoryRecyclerView.updateLayoutParams<ConstraintLayout.LayoutParams> {
