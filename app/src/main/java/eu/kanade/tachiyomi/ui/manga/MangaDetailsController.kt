@@ -730,6 +730,7 @@ class MangaDetailsController :
     //region action bar menu methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         if (fullCoverActive) {
+            colorToolbar(isColor = false)
             activityBinding?.toolbar?.navigationIcon =
                 view?.context?.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
                     setTint(Color.WHITE)
@@ -737,11 +738,11 @@ class MangaDetailsController :
             inflater.inflate(R.menu.manga_details_cover, menu)
             return
         }
+        colorToolbar(binding.recycler.canScrollVertically(-1))
         activityBinding?.toolbar?.navigationIcon =
             activityBinding?.toolbar?.navigationIcon?.mutate()?.apply {
                 setTint(view?.context?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE)
             }
-        activityBinding?.toolbar?.invalidateDrawable(activityBinding?.toolbar?.navigationIcon!!)
         inflater.inflate(R.menu.manga_details, menu)
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
