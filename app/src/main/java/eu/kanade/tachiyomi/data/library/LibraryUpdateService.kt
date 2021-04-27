@@ -28,14 +28,13 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.toMangaInfo
 import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.source.model.toSManga
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
@@ -96,10 +95,6 @@ class LibraryUpdateService(
 
     val count = AtomicInteger(0)
     val jobCount = AtomicInteger(0)
-
-    // List containing categories that get included in downloads.
-    private val categoriesToDownload =
-        preferences.downloadNewCategories().get().map(String::toInt)
 
     // Boolean to determine if user wants to automatically download new chapters.
     private val downloadNew: Boolean = preferences.downloadNew().get()
@@ -258,13 +253,7 @@ class LibraryUpdateService(
                 }
                 GlobalScope.launch(handler) {
                     val hasDLs = try {
-                        requestSemaphore.withPermit {
-                            updateMangaInSource(
-                                it.key,
-                                downloadNew,
-                                categoriesToDownload
-                            )
-                        }
+                        requestSemaphore.withPermit { updateMangaInSource(it.key) }
                     } catch (e: Exception) {
                         false
                     }
@@ -314,7 +303,7 @@ class LibraryUpdateService(
                 async {
                     try {
                         requestSemaphore.withPermit {
-                            updateMangaInSource(source, downloadNew, categoriesToDownload)
+                            updateMangaInSource(source)
                         }
                     } catch (e: Exception) {
                         Timber.e(e)
@@ -341,7 +330,7 @@ class LibraryUpdateService(
                     DownloadService.start(this)
                 }
             } else if (downloadNew && hasDownloads) {
-                DownloadService.start(this)
+                DownloadService.start(this.applicationContext)
             }
             newUpdates.clear()
         }
@@ -357,25 +346,14 @@ class LibraryUpdateService(
         notifier.cancelProgressNotification()
     }
 
-    private suspend fun updateMangaInSource(
-        source: Long,
-        downloadNew: Boolean,
-        categoriesToDownload: List<Int>
-    ): Boolean {
+    private suspend fun updateMangaInSource(source: Long): Boolean {
         if (mangaToUpdateMap[source] == null) return false
         var count = 0
         var hasDownloads = false
         while (count < mangaToUpdateMap[source]!!.size) {
-            val shouldDownload =
-                (
-                    downloadNew && (
-                        categoriesToDownload.isEmpty() ||
-                            mangaToUpdateMap[source]!![count].category in categoriesToDownload ||
-                            db.getCategoriesForManga(mangaToUpdateMap[source]!![count])
-                                .executeOnIO().any { (it.id ?: -1) in categoriesToDownload }
-                        )
-                    )
-            if (updateMangaChapters(mangaToUpdateMap[source]!![count], this.count.andIncrement, shouldDownload)) {
+            val manga = mangaToUpdateMap[source]!![count]
+            val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
+            if (updateMangaChapters(manga, this.count.andIncrement, shouldDownload)) {
                 hasDownloads = true
             }
             count++

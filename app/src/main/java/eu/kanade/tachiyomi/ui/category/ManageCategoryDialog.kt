@@ -80,7 +80,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 category.name = text
                 if (this.category == null) {
                     val categories = db.getCategories().executeAsBlocking()
-                    category.order = categories.maxOf { it.order } + 1
+                    category.order = (categories.maxOfOrNull { it.order } ?: 0) + 1
                     category.mangaSort = LibrarySort.Title.categoryValue
                     val dbCategory = db.insertCategory(category).executeAsBlocking()
                     category.id = dbCategory.insertedId()?.toInt()
@@ -124,7 +124,6 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     fun onViewCreated() {
         if (category?.id ?: 0 <= 0 && category != null) {
             binding.categoryTextLayout.isVisible = false
-            binding.downloadNew.isVisible = false
         }
         binding.editCategories.isVisible = category != null
         binding.editCategories.setOnClickListener {
@@ -134,23 +133,22 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         binding.title.addTextChangedListener {
             binding.categoryTextLayout.error = null
         }
-        binding.title.hint = category?.name ?: binding.editCategories.context.getString(R.string.category)
+        binding.title.hint =
+            category?.name ?: binding.editCategories.context.getString(R.string.category)
         binding.title.append(category?.name ?: "")
-        if (binding.downloadNew.isVisible) {
-            val downloadNew = preferences.downloadNew().get()
-            setCheckbox(
-                binding.downloadNew,
-                preferences.downloadNewCategories(),
-                true
-            )
-            if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
-                binding.downloadNew.isVisible = false
-            } else if (!downloadNew) {
-                binding.downloadNew.isVisible = true
-            }
-            binding.downloadNew.isChecked =
-                preferences.downloadNew().get() && binding.downloadNew.isChecked
+        val downloadNew = preferences.downloadNew().get()
+        setCheckbox(
+            binding.downloadNew,
+            preferences.downloadNewCategories(),
+            true
+        )
+        if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
+            binding.downloadNew.isVisible = false
+        } else if (!downloadNew) {
+            binding.downloadNew.isVisible = true
         }
+        binding.downloadNew.isChecked =
+            preferences.downloadNew().get() && binding.downloadNew.isChecked
         setCheckbox(
             binding.includeGlobal,
             preferences.libraryUpdateCategories(),

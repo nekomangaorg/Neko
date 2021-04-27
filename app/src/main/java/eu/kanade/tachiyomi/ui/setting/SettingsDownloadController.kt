@@ -15,6 +15,7 @@ import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
@@ -78,6 +79,7 @@ class SettingsDownloadController : SettingsController() {
         }
 
         val dbCategories = db.getCategories().executeAsBlocking()
+        val categories = listOf(Category.createDefault(context)) + dbCategories
 
         preferenceCategory {
             titleRes = R.string.download_new_chapters
@@ -90,8 +92,8 @@ class SettingsDownloadController : SettingsController() {
             multiSelectListPreferenceMat(activity) {
                 key = Keys.downloadNewCategories
                 titleRes = R.string.categories_to_include_in_download
-                entries = dbCategories.map { it.name }
-                entryValues = dbCategories.map { it.id.toString() }
+                entries = categories.map { it.name }
+                entryValues = categories.map { it.id.toString() }
                 allSelectionRes = R.string.all
 
                 preferences.downloadNew().asImmediateFlowIn(viewScope) { isVisible = it }
