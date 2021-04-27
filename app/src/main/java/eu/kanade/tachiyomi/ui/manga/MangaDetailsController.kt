@@ -747,14 +747,14 @@ class MangaDetailsController :
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
-            presenter.manga.isLocal()
+            !presenter.manga.isLocal()
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             presenter.anyRead() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch &&
-            presenter.manga.isLocal()
+            !presenter.manga.isLocal()
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_migrate).isVisible = !presenter.isLockedFromSearch &&
