@@ -70,36 +70,40 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     private fun onPositiveButtonClick(): Boolean {
-        if (category?.id ?: 0 <= 0 && category != null) return false
         val text = binding.title.text.toString()
         val categoryExists = categoryExists(text)
         val category = this.category ?: Category.create(text)
-        if (text.isNotBlank() && !categoryExists && !text.equals(this.category?.name ?: "", true)) {
-            category.name = text
-            if (this.category == null) {
-                val categories = db.getCategories().executeAsBlocking()
-                category.order = categories.maxOf { it.order } + 1
-                category.mangaSort = LibrarySort.Title.categoryValue
-                val dbCategory = db.insertCategory(category).executeAsBlocking()
-                category.id = dbCategory.insertedId()?.toInt()
-                this.category = category
-            } else {
-                db.insertCategory(category).executeAsBlocking()
+        if (category.id != 0) {
+            if (text.isNotBlank() && !categoryExists &&
+                !text.equals(this.category?.name ?: "", true)
+            ) {
+                category.name = text
+                if (this.category == null) {
+                    val categories = db.getCategories().executeAsBlocking()
+                    category.order = categories.maxOf { it.order } + 1
+                    category.mangaSort = LibrarySort.Title.categoryValue
+                    val dbCategory = db.insertCategory(category).executeAsBlocking()
+                    category.id = dbCategory.insertedId()?.toInt()
+                    this.category = category
+                } else {
+                    db.insertCategory(category).executeAsBlocking()
+                }
+            } else if (categoryExists) {
+                binding.categoryTextLayout.error =
+                    binding.categoryTextLayout.context.getString(R.string.category_with_name_exists)
+                return false
+            } else if (text.isBlank()) {
+                binding.categoryTextLayout.error =
+                    binding.categoryTextLayout.context.getString(R.string.category_cannot_be_blank)
+                return false
             }
-        } else if (categoryExists) {
-            binding.categoryTextLayout.error = binding.categoryTextLayout.context.getString(R.string.category_with_name_exists)
-            return false
-        } else if (text.isBlank()) {
-            binding.categoryTextLayout.error = binding.categoryTextLayout.context.getString(R.string.category_cannot_be_blank)
-            return false
         }
-        if (!updatePref(preferences.downloadNewCategories(), binding.downloadNew)) {
-            preferences.downloadNew().set(false)
-        } else {
-            preferences.downloadNew().set(true)
+        when (updatePref(preferences.downloadNewCategories(), binding.downloadNew)) {
+            true -> preferences.downloadNew().set(true)
+            false -> preferences.downloadNew().set(false)
         }
         if (preferences.libraryUpdateInterval().getOrDefault() > 0 &&
-            !updatePref(preferences.libraryUpdateCategories(), binding.includeGlobal)
+            updatePref(preferences.libraryUpdateCategories(), binding.includeGlobal) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
             LibraryUpdateJob.setupTask(0)
@@ -119,10 +123,8 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
 
     fun onViewCreated() {
         if (category?.id ?: 0 <= 0 && category != null) {
-            binding.title.isVisible = false
+            binding.categoryTextLayout.isVisible = false
             binding.downloadNew.isVisible = false
-            binding.includeGlobal.isVisible = false
-            return
         }
         binding.editCategories.isVisible = category != null
         binding.editCategories.setOnClickListener {
@@ -134,19 +136,21 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         binding.title.hint = category?.name ?: binding.editCategories.context.getString(R.string.category)
         binding.title.append(category?.name ?: "")
-        val downloadNew = preferences.downloadNew().get()
-        setCheckbox(
-            binding.downloadNew,
-            preferences.downloadNewCategories(),
-            true
-        )
-        if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
-            binding.downloadNew.isVisible = false
-        } else if (!downloadNew) {
-            binding.downloadNew.isVisible = true
+        if (binding.downloadNew.isVisible) {
+            val downloadNew = preferences.downloadNew().get()
+            setCheckbox(
+                binding.downloadNew,
+                preferences.downloadNewCategories(),
+                true
+            )
+            if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
+                binding.downloadNew.isVisible = false
+            } else if (!downloadNew) {
+                binding.downloadNew.isVisible = true
+            }
+            binding.downloadNew.isChecked =
+                preferences.downloadNew().get() && binding.downloadNew.isChecked
         }
-        binding.downloadNew.isChecked =
-            preferences.downloadNew().get() && binding.downloadNew.isChecked
         setCheckbox(
             binding.includeGlobal,
             preferences.libraryUpdateCategories(),
@@ -155,8 +159,9 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     }
 
     /** Update a pref based on checkbox, and return if the pref is not empty */
-    private fun updatePref(categories: Preference<Set<String>>, box: CompoundButton): Boolean {
-        val categoryId = category?.id ?: return true
+    private fun updatePref(categories: Preference<Set<String>>, box: CompoundButton): Boolean? {
+        val categoryId = category?.id ?: return null
+        if (!box.isVisible) return null
         val updateCategories = categories.get().toMutableSet()
         if (box.isChecked) {
             updateCategories.add(categoryId.toString())
