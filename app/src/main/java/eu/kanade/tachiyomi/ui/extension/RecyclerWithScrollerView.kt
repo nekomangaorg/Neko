@@ -22,7 +22,12 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
         binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (sheet.isOnView(this@RecyclerWithScrollerView) && newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (sheet.isOnView(this@RecyclerWithScrollerView) &&
+                    (
+                        newState == RecyclerView.SCROLL_STATE_IDLE ||
+                            newState == RecyclerView.SCROLL_STATE_SETTLING
+                        )
+                ) {
                     sheet.sheetBehavior?.isDraggable = true
                 }
             }
@@ -31,7 +36,8 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
                 super.onScrolled(recyclerView, dx, dy)
                 if (sheet.isOnView(this@RecyclerWithScrollerView) &&
                     sheet.sheetBehavior.isExpanded() &&
-                    recyclerView.canScrollVertically(-1)
+                    recyclerView.canScrollVertically(-1) &&
+                    recyclerView.scrollState != RecyclerView.SCROLL_STATE_SETTLING
                 ) {
                     sheet.sheetBehavior?.isDraggable = false
                 }
