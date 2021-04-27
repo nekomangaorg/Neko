@@ -23,11 +23,12 @@ import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
+import kotlin.math.max
 import kotlin.math.min
 
 class MaterialMenuSheet(
     activity: Activity,
-    items: List<MenuSheetItem>,
+    private val items: List<MenuSheetItem>,
     title: String? = null,
     selectedId: Int? = null,
     maxHeight: Int? = null,
@@ -83,7 +84,7 @@ class MaterialMenuSheet(
         binding.toolbarTitle.text = title
 
         if (selectedId != null) {
-            val pos = itemAdapter.getAdapterPosition(selectedId.toLong())
+            val pos = max(items.indexOfFirst { it.id == selectedId }, 0)
             itemAdapter.getAdapterItem(pos).isSelected = true
             binding.root.post {
                 binding.root.post {
@@ -131,7 +132,7 @@ class MaterialMenuSheet(
         if (clearAll) {
             clearEndDrawables()
         }
-        val pos = itemAdapter.getAdapterPosition(id.toLong())
+        val pos = max(items.indexOfFirst { it.id == id }, 0)
         val item = itemAdapter.getAdapterItem(pos)
         item.sheetItem.endDrawableRes = drawableRes
         item.isSelected = true

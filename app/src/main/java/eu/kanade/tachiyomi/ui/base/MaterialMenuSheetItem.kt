@@ -15,7 +15,7 @@ class MaterialMenuSheetItem(val sheetItem: MaterialMenuSheet.MenuSheetItem) : Ab
      * Returns the layout resource for this item.
      */
     override val layoutRes: Int = R.layout.menu_sheet_item
-    override var identifier = sheetItem.id.hashCode().toLong()
+    override var identifier = sheetItem.id.toLong()
 
     override fun getViewHolder(v: View): ViewHolder {
         return ViewHolder(v)
