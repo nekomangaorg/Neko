@@ -83,12 +83,13 @@ class MaterialMenuSheet(
         binding.toolbarTitle.text = title
 
         if (selectedId != null) {
-            itemAdapter.getAdapterItem(selectedId).isSelected = true
+            val pos = itemAdapter.getAdapterPosition(selectedId.toLong())
+            itemAdapter.getAdapterItem(pos).isSelected = true
             binding.root.post {
                 binding.root.post {
                     binding.menuSheetRecycler.scrollBy(
                         0,
-                        selectedId * 48.dpToPx - binding.menuSheetRecycler.height / 2
+                        pos * 48.dpToPx - binding.menuSheetRecycler.height / 2
                     )
                 }
             }
