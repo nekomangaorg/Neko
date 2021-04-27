@@ -30,6 +30,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.DrawableCompat.setTint
 import androidx.core.view.iterator
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -88,6 +89,7 @@ import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -727,6 +729,19 @@ class MangaDetailsController :
 
     //region action bar menu methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        if (fullCoverActive) {
+            activityBinding?.toolbar?.navigationIcon =
+                view?.context?.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
+                    setTint(Color.WHITE)
+                }
+            inflater.inflate(R.menu.manga_details_cover, menu)
+            return
+        }
+        activityBinding?.toolbar?.navigationIcon =
+            activityBinding?.toolbar?.navigationIcon?.mutate()?.apply {
+                setTint(view?.context?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE)
+            }
+        activityBinding?.toolbar?.invalidateDrawable(activityBinding?.toolbar?.navigationIcon!!)
         inflater.inflate(R.menu.manga_details, menu)
         val editItem = menu.findItem(R.id.action_edit)
         editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
@@ -761,20 +776,6 @@ class MangaDetailsController :
             searchItem.expandActionView()
             searchView.setQuery(query, true)
             searchView.clearFocus()
-        }
-
-        val menuItems = menu.iterator()
-        while (menuItems.hasNext()) {
-            val menuItem = menuItems.next()
-            menuItems.next().isVisible = !fullCoverActive && menuItem.isVisible
-        }
-        val saveItem = menu.findItem(R.id.save)
-        val shareItem = menu.findItem(R.id.share)
-        saveItem.isVisible = fullCoverActive
-        shareItem.isVisible = fullCoverActive
-        if (fullCoverActive) {
-            saveItem.icon.setTint(Color.WHITE)
-            shareItem.icon.setTint(Color.WHITE)
         }
 
         setOnQueryTextChangeListener(searchView) {
