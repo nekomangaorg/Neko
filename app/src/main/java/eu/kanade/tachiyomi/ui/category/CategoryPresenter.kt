@@ -73,7 +73,7 @@ class CategoryPresenter(
         val cat = Category.create(name)
 
         // Set the new item in the last position.
-        cat.order = categories.maxOf { it.order } + 1
+        cat.order = (categories.maxOfOrNull { it.order } ?: 0) + 1
 
         // Insert into database.
         cat.mangaSort = LibrarySort.Title.categoryValue

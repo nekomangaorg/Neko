@@ -72,7 +72,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     fun findCategoryHeader(catId: Int): LibraryHeaderItem? {
         return currentItems.find {
             (it is LibraryHeaderItem) && it.category.id == catId
-        } as LibraryHeaderItem
+        } as? LibraryHeaderItem
     }
 
     /**
