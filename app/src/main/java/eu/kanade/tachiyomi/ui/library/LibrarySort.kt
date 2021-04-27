@@ -17,10 +17,10 @@ enum class LibrarySort(
     Title(0, R.string.title, R.drawable.ic_sort_by_alpha_24dp),
     LastRead(1, R.string.last_read, R.drawable.ic_recent_read_outline_24dp, 3),
     LatestChapter(2, R.string.latest_chapter, R.drawable.ic_new_releases_24dp, 1),
-    LastFetched(6, R.string.last_fetched, R.drawable.ic_calendar_text_outline_24dp),
     Unread(3, R.string.unread, R.drawable.ic_eye_24dp, 2),
     TotalChapters(4, R.string.total_chapters, R.drawable.ic_sort_by_numeric_24dp),
     DateAdded(5, R.string.date_added, R.drawable.ic_heart_outline_24dp),
+    DateFetched(6, R.string.date_fetched, R.drawable.ic_calendar_text_outline_24dp),
     DragAndDrop(
         7,
         R.string.drag_and_drop,
@@ -44,7 +44,7 @@ enum class LibrarySort(
     fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
 
     val hasInvertedSort: Boolean
-        get() = this in listOf(LastRead, DateAdded, LatestChapter, LastFetched)
+        get() = this in listOf(LastRead, DateAdded, LatestChapter, DateFetched)
 
     fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
         return MaterialMenuSheet.MenuSheetItem(

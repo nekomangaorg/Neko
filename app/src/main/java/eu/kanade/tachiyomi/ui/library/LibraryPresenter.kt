@@ -378,7 +378,7 @@ class LibraryPresenter(
                             LibrarySort.TotalChapters -> {
                                 i1.manga.totalChapters.compareTo(i2.manga.totalChapters)
                             }
-                            LibrarySort.LastFetched -> {
+                            LibrarySort.DateFetched -> {
                                 val manga1LastRead =
                                     lastFetchedManga[i1.manga.id!!] ?: lastFetchedManga.size
                                 val manga2LastRead =

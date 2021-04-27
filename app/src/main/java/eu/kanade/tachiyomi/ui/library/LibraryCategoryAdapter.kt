@@ -150,7 +150,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             else title.take(10)
                         }
                     }
-                    LibrarySort.LastFetched -> {
+                    LibrarySort.DateFetched -> {
                         val id = item.manga.id ?: return ""
                         val history = db.getChapters(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.date_fetch }
