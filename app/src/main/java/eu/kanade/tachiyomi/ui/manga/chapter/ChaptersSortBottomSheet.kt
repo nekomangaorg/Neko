@@ -12,11 +12,11 @@ import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.setBottomEdge
-import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
+import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) :
-    EdgeToEdgeBottomSheetDialog<ChapterSortBottomSheetBinding>(controller.activity!!) {
+    E2EBottomSheetDialog<ChapterSortBottomSheetBinding>(controller.activity!!) {
 
     val activity = controller.activity!!
 

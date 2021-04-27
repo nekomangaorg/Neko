@@ -22,13 +22,13 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.setBottomEdge
-import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
+import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import uy.kohesive.injekt.injectLazy
 
 class MigrationBottomSheetDialog(
     activity: Activity,
     private val listener: StartMigrationListener
-) : EdgeToEdgeBottomSheetDialog<MigrationBottomSheetBinding>(activity) {
+) : E2EBottomSheetDialog<MigrationBottomSheetBinding>(activity) {
 
     /**
      * Preferences helper.

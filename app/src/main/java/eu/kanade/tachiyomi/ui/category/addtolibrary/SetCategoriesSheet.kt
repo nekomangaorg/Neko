@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
+import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Date
@@ -38,7 +38,7 @@ class SetCategoriesSheet(
     var preselected: Array<Int>,
     private val addingToLibrary: Boolean,
     val onMangaAdded: (() -> Unit) = { }
-) : EdgeToEdgeBottomSheetDialog<SetCategoriesSheetBinding>(activity) {
+) : E2EBottomSheetDialog<SetCategoriesSheetBinding>(activity) {
 
     constructor(activity: Activity, manga: Manga, categories: MutableList<Category>, preselected: Array<Int>, addingToLibrary: Boolean, onMangaAdded: () -> Unit) :
         this(activity, listOf(manga), categories, preselected, addingToLibrary, onMangaAdded)

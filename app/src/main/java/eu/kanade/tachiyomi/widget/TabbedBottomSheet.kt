@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.util.view.expand
 import kotlin.math.max
 
 abstract class TabbedBottomSheetDialog(private val activity: Activity) :
-    EdgeToEdgeBottomSheetDialog<TabbedBottomSheetBinding>(activity) {
+    E2EBottomSheetDialog<TabbedBottomSheetBinding>(activity) {
 
     override fun createBinding(inflater: LayoutInflater) = TabbedBottomSheetBinding.inflate(inflater)
 

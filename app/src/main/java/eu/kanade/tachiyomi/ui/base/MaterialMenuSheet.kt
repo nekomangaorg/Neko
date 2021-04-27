@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
+import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import kotlin.math.max
 import kotlin.math.min
 
@@ -34,7 +34,7 @@ class MaterialMenuSheet(
     maxHeight: Int? = null,
     showDivider: Boolean = false,
     onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean
-) : EdgeToEdgeBottomSheetDialog<BottomMenuSheetBinding>(activity) {
+) : E2EBottomSheetDialog<BottomMenuSheetBinding>(activity) {
 
     override fun createBinding(inflater: LayoutInflater) = BottomMenuSheetBinding.inflate(inflater)
     private val fastAdapter: FastAdapter<MaterialMenuSheetItem>

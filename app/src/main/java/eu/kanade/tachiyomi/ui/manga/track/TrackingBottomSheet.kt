@@ -19,11 +19,11 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.widget.EdgeToEdgeBottomSheetDialog
+import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import timber.log.Timber
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
-    EdgeToEdgeBottomSheetDialog<TrackingBottomSheetBinding>(controller.activity!!),
+    E2EBottomSheetDialog<TrackingBottomSheetBinding>(controller.activity!!),
     TrackAdapter.OnClickListener,
     SetTrackStatusDialog.Listener,
     SetTrackChaptersDialog.Listener,

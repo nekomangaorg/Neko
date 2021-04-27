@@ -12,8 +12,11 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
+/**
+ * Edge to Edge BottomSheetDiolag that uses a custom theme and settings to extend pass the nav bar
+ */
 @Suppress("LeakingThis")
-abstract class EdgeToEdgeBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
+abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
     BottomSheetDialog(activity, R.style.BottomSheetDialogTheme) {
     protected val binding: VB
 
