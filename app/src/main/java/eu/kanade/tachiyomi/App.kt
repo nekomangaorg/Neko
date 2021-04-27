@@ -34,6 +34,8 @@ import java.security.Security
 )
 open class App : Application(), LifecycleObserver {
 
+    val preferences: PreferencesHelper by injectLazy()
+
     override fun onCreate() {
         super.onCreate()
         if (BuildConfig.DEBUG) Timber.plant(Timber.DebugTree())
@@ -52,12 +54,15 @@ open class App : Application(), LifecycleObserver {
 
         LocaleHelper.updateConfiguration(this, resources.configuration)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        // Reset Incognito Mode on relaunch
+        preferences.incognitoMode().set(false)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    @Suppress("unused")
     fun onAppBackgrounded() {
         // App in background
-        val preferences: PreferencesHelper by injectLazy()
         if (preferences.lockAfter().getOrDefault() >= 0) {
             SecureActivityDelegate.locked = true
         }
