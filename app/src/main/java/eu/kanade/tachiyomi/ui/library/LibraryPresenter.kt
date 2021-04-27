@@ -102,6 +102,10 @@ class LibraryPresenter(
     /** Get favorited manga for library and sort and filter it */
     fun getLibrary() {
         if (categories.isEmpty()) {
+            val dbCategories = db.getCategories().executeAsBlocking()
+            if ((dbCategories + Category.createDefault(context)).distinctBy { it.order }.size != dbCategories.size + 1) {
+                reorderCategories(dbCategories)
+            }
             categories = lastCategories ?: db.getCategories().executeAsBlocking().toMutableList()
         }
         presenterScope.launch {
@@ -117,6 +121,12 @@ class LibraryPresenter(
             val freshStart = libraryItems.isEmpty()
             sectionLibrary(mangaMap, freshStart)
         }
+    }
+
+    private fun reorderCategories(categories: List<Category>) {
+        val sortedCategories = categories.sortedBy { it.order }
+        sortedCategories.forEachIndexed { i, category -> category.order = i }
+        db.insertCategories(sortedCategories).executeAsBlocking()
     }
 
     fun getCurrentCategory() = categories.find { it.id == currentCategory }
