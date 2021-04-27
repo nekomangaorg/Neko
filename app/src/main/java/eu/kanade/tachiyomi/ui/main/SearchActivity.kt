@@ -51,6 +51,11 @@ class SearchActivity : MainActivity() {
         }
     }
 
+    override fun setFloatingToolbar(show: Boolean, solidBG: Boolean) {
+        super.setFloatingToolbar(show, solidBG)
+        currentToolbar?.setNavigationOnClickListener { popToRoot() }
+    }
+
     private fun intentShouldGoBack() =
         intent.action in listOf(SHORTCUT_MANGA, SHORTCUT_READER_SETTINGS, SHORTCUT_BROWSE)
 

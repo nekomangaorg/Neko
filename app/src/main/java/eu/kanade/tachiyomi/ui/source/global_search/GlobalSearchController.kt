@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.CatalogueSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
@@ -26,6 +27,7 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
 
 /**
  * This controller shows and manages the different search result in global search.
@@ -127,6 +129,11 @@ open class GlobalSearchController(
         }
     }
 
+    override fun showFloatingBar() =
+        activity !is SearchActivity ||
+            customTitle == null ||
+            extensionFilter == null
+
     /**
      * Adds items to the options menu.
      *
@@ -175,7 +182,7 @@ open class GlobalSearchController(
         adapter = GlobalSearchAdapter(this)
 
         binding.recycler.updatePaddingRelative(
-            top = (activityBinding?.toolbar?.height ?: 0) +
+            top = max(activityBinding?.toolbar?.height ?: 0, (activityBinding?.cardToolbar?.height ?: 0)) +
                 (activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0)
         )
 
@@ -242,6 +249,7 @@ open class GlobalSearchController(
                 )
                 return
             } else if (results != null) {
+                (activity as? SearchActivity)?.setFloatingToolbar(true)
                 customTitle = null
                 setTitle()
                 activity?.invalidateOptionsMenu()

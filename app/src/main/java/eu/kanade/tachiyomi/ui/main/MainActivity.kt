@@ -148,7 +148,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding = MainActivityBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
-        setFloatingToolbar(true)
+        setFloatingToolbar(this !is SearchActivity)
 
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
@@ -346,7 +346,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setExtensionsBadge()
     }
 
-    fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
+    open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
         val oldTB = currentToolbar
         currentToolbar = if (show) {
             binding.cardToolbar
@@ -654,7 +654,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val searchItem = menu?.findItem(R.id.action_search)
-        searchItem?.isVisible = currentToolbar != binding.cardToolbar
+        if (currentToolbar == binding.cardToolbar) {
+            searchItem?.isVisible = false
+        }
         return super.onPrepareOptionsMenu(menu)
     }
 
@@ -711,7 +713,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     protected fun canShowFloatingToolbar(controller: Controller?) =
-        controller is FloatingSearchInterface
+        (controller is FloatingSearchInterface && controller.showFloatingBar())
 
     protected open fun syncActivityViewWithController(
         to: Controller?,
@@ -910,6 +912,8 @@ interface FloatingSearchInterface {
         }
         return title
     }
+
+    fun showFloatingBar() = true
 }
 
 interface BottomSheetController {
