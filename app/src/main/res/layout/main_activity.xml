@@ -36,6 +36,7 @@
             android:layout_width="match_parent"
             app:titleTextColor="?actionBarTintColor"
             android:layout_height="?attr/actionBarSize"
+            app:collapseIcon="@drawable/ic_arrow_back_24dp"
             android:background="?attr/colorSecondary">
 
             <com.google.android.material.textview.MaterialTextView
@@ -81,6 +82,7 @@
                     app:navigationIcon="@drawable/ic_search_24dp"
                     app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
                     app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    app:collapseIcon="@drawable/ic_arrow_back_24dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent" >
 

@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.base
 
 import android.content.Context
+import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.widget.ImageView
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
@@ -20,5 +22,8 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
         searchTextView?.setTextColor(actionColorAlpha)
         searchTextView?.setTextSize(TypedValue.COMPLEX_UNIT_SP, 16f)
         searchTextView?.setHintTextColor(actionColorAlpha)
+
+        val clearButton = findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
+        clearButton?.imageTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.actionBarTintColor))
     }
 }

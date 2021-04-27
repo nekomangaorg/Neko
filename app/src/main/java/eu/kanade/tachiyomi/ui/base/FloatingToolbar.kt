@@ -11,6 +11,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textview.MaterialTextView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
 class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -48,6 +49,9 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         cardIncogImage = findViewById(R.id.card_incog_image)
 
         setNavigationIconTint(actionColorAlpha)
+        collapseIcon = context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
+            setTint(actionColorAlpha)
+        }
     }
 
     override fun setSubtitle(resId: Int) {
