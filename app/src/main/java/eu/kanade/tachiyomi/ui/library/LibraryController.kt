@@ -97,7 +97,6 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
@@ -1422,9 +1421,9 @@ class LibraryController(
         }
     }
 
-    override fun sortCategory(catId: Int, sortBy: Int) {
+    override fun sortCategory(catId: Int, sortBy: Char) {
         val category = presenter.categories.find { it.id == catId }
-        if (category?.isDynamic == false && ('a' + (sortBy - 1)) == Category.DRAG_AND_DROP) {
+        if (category?.isDynamic == false && sortBy == LibrarySort.DragAndDrop.categoryValue) {
             val item = adapter.findCategoryHeader(catId) ?: return
             val libraryItems = adapter.getSectionItems(item)
                 .filterIsInstance<LibraryItem>()

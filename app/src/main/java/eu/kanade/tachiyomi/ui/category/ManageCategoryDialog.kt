@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.injectLazy
 
@@ -78,7 +79,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             if (this.category == null) {
                 val categories = db.getCategories().executeAsBlocking()
                 category.order = categories.maxOf { it.order } + 1
-                category.mangaSort = Category.ALPHA_ASC
+                category.mangaSort = LibrarySort.Title.categoryValue
                 val dbCategory = db.insertCategory(category).executeAsBlocking()
                 category.id = dbCategory.insertedId()?.toInt()
                 this.category = category

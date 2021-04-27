@@ -4,6 +4,7 @@ import android.app.Activity
 import android.graphics.Color
 import android.util.TypedValue
 import android.view.View
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
@@ -90,15 +91,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
         val isAscending = category.isAscending()
         val sortingMode = category.sortingMode()
-        val sortDrawable = when {
-            sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_24dp
-            if (sortingMode == LibrarySort.DATE_ADDED ||
-                sortingMode == LibrarySort.LATEST_CHAPTER ||
-                sortingMode == LibrarySort.LAST_READ ||
-                sortingMode == LibrarySort.LAST_FETCHED
-            ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
-            else -> R.drawable.ic_arrow_upward_24dp
-        }
+        val sortDrawable = getSortRes(sortingMode, isAscending, R.drawable.ic_sort_24dp)
 
         binding.categorySort.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
         binding.categorySort.setText(category.sortRes())
@@ -146,66 +139,13 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val category =
             (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category ?: return
         adapter.controller.activity?.let { activity ->
-            val items = mutableListOf(
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.ALPHA,
-                    R.drawable.ic_sort_by_alpha_24dp,
-                    R.string.title
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.LAST_READ,
-                    R.drawable.ic_recent_read_outline_24dp,
-                    R.string.last_read
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.LATEST_CHAPTER,
-                    R.drawable.ic_new_releases_24dp,
-                    R.string.latest_chapter
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.LAST_FETCHED,
-                    R.drawable.ic_check_24dp,
-                    R.string.last_fetched
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.UNREAD,
-                    R.drawable.ic_eye_24dp,
-                    R.string.unread
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.TOTAL,
-                    R.drawable.ic_sort_by_numeric_24dp,
-                    R.string.total_chapters
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.DATE_ADDED,
-                    R.drawable.ic_heart_outline_24dp,
-                    R.string.date_added
-                )
-            )
-            if (category.isDynamic) {
-                items.add(
-                    MaterialMenuSheet.MenuSheetItem(
-                        LibrarySort.DRAG_AND_DROP,
-                        R.drawable.ic_label_outline_24dp,
-                        R.string.category
-                    )
-                )
-            } else {
-                items.add(
-                    MaterialMenuSheet.MenuSheetItem(
-                        LibrarySort.DRAG_AND_DROP,
-                        R.drawable.ic_swap_vert_24dp,
-                        R.string.drag_and_drop
-                    )
-                )
-            }
+            val items = LibrarySort.values().map { it.menuSheetItem(category.isDynamic) }
             val sortingMode = category.sortingMode(true)
             val sheet = MaterialMenuSheet(
                 activity,
                 items,
                 activity.getString(R.string.sort_by),
-                sortingMode
+                sortingMode?.mainValue
             ) { sheet, item ->
                 onCatSortClicked(category, item)
                 val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
@@ -216,46 +156,62 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             }
             val isAscending = category.isAscending()
             val drawableRes = getSortRes(sortingMode, isAscending)
-            sheet.setDrawable(sortingMode ?: -1, drawableRes)
+            sheet.setDrawable(sortingMode?.mainValue ?: -1, drawableRes)
             sheet.show()
         }
     }
 
-    private fun getSortRes(sortingMode: Int?, isAscending: Boolean): Int = when {
-        sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_24dp
-        if (sortingMode == LibrarySort.DATE_ADDED ||
-            sortingMode == LibrarySort.LATEST_CHAPTER ||
-            sortingMode == LibrarySort.LAST_READ ||
-            sortingMode == LibrarySort.LAST_FETCHED
-        ) !isAscending else isAscending ->
-            R.drawable.ic_arrow_downward_24dp
-        else -> R.drawable.ic_arrow_upward_24dp
+    private fun getSortRes(
+        sortMode: LibrarySort?,
+        isAscending: Boolean,
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+    ): Int {
+        sortMode ?: return defaultDrawableRes
+        return when (sortMode) {
+            LibrarySort.DragAndDrop -> defaultDrawableRes
+            else -> {
+                if (if (sortMode.hasInvertedSort) !isAscending else isAscending) {
+                    R.drawable.ic_arrow_downward_24dp
+                } else {
+                    R.drawable.ic_arrow_upward_24dp
+                }
+            }
+        }
+    }
+
+    private fun getSortRes(
+        sortingMode: Int?,
+        isAscending: Boolean,
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+    ): Int {
+        sortingMode ?: return defaultDrawableRes
+        return when (val sortMode = LibrarySort.valueOf(sortingMode)) {
+            LibrarySort.DragAndDrop -> defaultDrawableRes
+            else -> {
+                if (if (sortMode?.hasInvertedSort == true) !isAscending else isAscending) {
+                    R.drawable.ic_arrow_downward_24dp
+                } else {
+                    R.drawable.ic_arrow_upward_24dp
+                }
+            }
+        }
     }
 
     private fun onCatSortClicked(category: Category, menuId: Int?) {
         val modType = if (menuId == null) {
-            val t = (category.mangaSort?.minus('a') ?: 0) + 1
-            if (t % 2 != 0) t + 1
-            else t - 1
-        } else {
-            val order = when (menuId) {
-                LibrarySort.DRAG_AND_DROP -> {
-                    adapter.libraryListener.sortCategory(category.id!!, 'D' - 'a' + 1)
-                    return
-                }
-                LibrarySort.LAST_FETCHED -> 6
-                LibrarySort.DATE_ADDED -> 5
-                LibrarySort.TOTAL -> 4
-                LibrarySort.LAST_READ -> 3
-                LibrarySort.UNREAD -> 2
-                LibrarySort.LATEST_CHAPTER -> 1
-                else -> 0
+            val sortingMode = category.sortingMode() ?: LibrarySort.Title
+            if (category.isAscending()) {
+                sortingMode.categoryValueDescending
+            } else {
+                sortingMode.categoryValue
             }
-            if (order == category.catSortingMode()) {
+        } else {
+            val sortingMode = LibrarySort.valueOf(menuId) ?: LibrarySort.Title
+            if (sortingMode != LibrarySort.DragAndDrop && sortingMode == category.sortingMode()) {
                 onCatSortClicked(category, null)
                 return
             }
-            (2 * order + 1)
+            sortingMode.categoryValue
         }
         adapter.libraryListener.sortCategory(category.id!!, modType)
     }

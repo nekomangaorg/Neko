@@ -27,7 +27,7 @@ abstract class LibraryHolder(
     abstract fun onSetValues(item: LibraryItem)
 
     fun setUnreadBadge(badge: LibraryBadge, item: LibraryItem) {
-        val showTotal = item.header.category.sortingMode() == LibrarySort.TOTAL
+        val showTotal = item.header.category.sortingMode() == LibrarySort.TotalChapters
         badge.setUnreadDownload(
             when {
                 showTotal -> item.manga.totalChapters

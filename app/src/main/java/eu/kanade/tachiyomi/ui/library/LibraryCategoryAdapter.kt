@@ -140,7 +140,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
             is LibraryItem -> {
                 val text = if (item.manga.isBlank()) return item.header?.category?.name.orEmpty()
                 else when (getSort(position)) {
-                    LibrarySort.DRAG_AND_DROP -> {
+                    LibrarySort.DragAndDrop -> {
                         if (item.header.category.isDynamic) {
                             val category = db.getCategoriesForManga(item.manga).executeAsBlocking().firstOrNull()?.name
                             category ?: recyclerView.context.getString(R.string.default_value)
@@ -150,7 +150,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             else title.take(10)
                         }
                     }
-                    LibrarySort.LAST_FETCHED -> {
+                    LibrarySort.LastFetched -> {
                         val id = item.manga.id ?: return ""
                         val history = db.getChapters(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.date_fetch }
@@ -163,7 +163,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             "N/A"
                         }
                     }
-                    LibrarySort.LAST_READ -> {
+                    LibrarySort.LastRead -> {
                         val id = item.manga.id ?: return ""
                         val history = db.getHistoryByMangaId(id).executeAsBlocking()
                         val last = history.maxOfOrNull { it.last_read }
@@ -176,12 +176,12 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             "N/A"
                         }
                     }
-                    LibrarySort.UNREAD -> {
+                    LibrarySort.Unread -> {
                         val unread = item.manga.unread
                         if (unread > 0) recyclerView.context.getString(R.string._unread, unread)
                         else recyclerView.context.getString(R.string.read)
                     }
-                    LibrarySort.TOTAL -> {
+                    LibrarySort.TotalChapters -> {
                         val total = item.manga.totalChapters
                         if (total > 0) recyclerView.resources.getQuantityString(
                             R.plurals.chapters_plural,
@@ -192,7 +192,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             "N/A"
                         }
                     }
-                    LibrarySort.LATEST_CHAPTER -> {
+                    LibrarySort.LatestChapter -> {
                         val lastUpdate = item.manga.last_update
                         if (lastUpdate > 0) {
                             recyclerView.context.getString(
@@ -203,7 +203,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             "N/A"
                         }
                     }
-                    LibrarySort.DATE_ADDED -> {
+                    LibrarySort.DateAdded -> {
                         val added = item.manga.date_added
                         if (added > 0) {
                             recyclerView.context.getString(R.string.added_, added.timeSpanFromNow(preferences.context))
@@ -211,7 +211,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             "N/A"
                         }
                     }
-                    else -> {
+                    LibrarySort.Title -> {
                         val title = if (preferences.removeArticles().getOrDefault()) {
                             item.manga.title.removeArticles()
                         } else {
@@ -230,13 +230,9 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         }
     }
 
-    private fun getSort(position: Int): Int {
+    private fun getSort(position: Int): LibrarySort {
         val header = (getItem(position) as? LibraryItem)?.header
-        return if (header != null) {
-            header.category.sortingMode() ?: LibrarySort.DRAG_AND_DROP
-        } else {
-            LibrarySort.DRAG_AND_DROP
-        }
+        return header?.category?.sortingMode() ?: LibrarySort.DragAndDrop
     }
 
     interface LibraryListener {
@@ -244,7 +240,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         fun onItemReleased(position: Int)
         fun canDrag(): Boolean
         fun updateCategory(catId: Int): Boolean
-        fun sortCategory(catId: Int, sortBy: Int)
+        fun sortCategory(catId: Int, sortBy: Char)
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
         fun toggleCategoryVisibility(position: Int)

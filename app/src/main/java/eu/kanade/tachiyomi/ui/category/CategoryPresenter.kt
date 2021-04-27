@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -75,7 +76,7 @@ class CategoryPresenter(
         cat.order = categories.maxOf { it.order } + 1
 
         // Insert into database.
-        cat.mangaSort = Category.ALPHA_ASC
+        cat.mangaSort = LibrarySort.Title.categoryValue
         db.insertCategory(cat).executeAsBlocking()
         val cats = db.getCategories().executeAsBlocking()
         val newCat = cats.find { it.name == name } ?: return false

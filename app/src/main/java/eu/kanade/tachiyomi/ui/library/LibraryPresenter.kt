@@ -359,31 +359,35 @@ class LibraryPresenter(
                 }
                 val compare = when {
                     category.mangaSort != null -> {
-                        var sort = when (category.sortingMode()) {
-                            LibrarySort.ALPHA -> sortAlphabetical(i1, i2)
-                            LibrarySort.LATEST_CHAPTER -> i2.manga.last_update.compareTo(i1.manga.last_update)
-                            LibrarySort.UNREAD -> when {
+                        var sort = when (category.sortingMode() ?: LibrarySort.Title) {
+                            LibrarySort.Title -> sortAlphabetical(i1, i2)
+                            LibrarySort.LatestChapter -> i2.manga.last_update.compareTo(i1.manga.last_update)
+                            LibrarySort.Unread -> when {
                                 i1.manga.unread == i2.manga.unread -> 0
                                 i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
                                 i2.manga.unread == 0 -> if (category.isAscending()) -1 else 1
                                 else -> i1.manga.unread.compareTo(i2.manga.unread)
                             }
-                            LibrarySort.LAST_READ -> {
-                                val manga1LastRead = lastReadManga[i1.manga.id!!] ?: lastReadManga.size
-                                val manga2LastRead = lastReadManga[i2.manga.id!!] ?: lastReadManga.size
+                            LibrarySort.LastRead -> {
+                                val manga1LastRead =
+                                    lastReadManga[i1.manga.id!!] ?: lastReadManga.size
+                                val manga2LastRead =
+                                    lastReadManga[i2.manga.id!!] ?: lastReadManga.size
                                 manga1LastRead.compareTo(manga2LastRead)
                             }
-                            LibrarySort.TOTAL -> {
+                            LibrarySort.TotalChapters -> {
                                 i1.manga.totalChapters.compareTo(i2.manga.totalChapters)
                             }
-                            LibrarySort.LAST_FETCHED -> {
-                                val manga1LastRead = lastFetchedManga[i1.manga.id!!] ?: lastFetchedManga.size
-                                val manga2LastRead = lastFetchedManga[i2.manga.id!!] ?: lastFetchedManga.size
+                            LibrarySort.LastFetched -> {
+                                val manga1LastRead =
+                                    lastFetchedManga[i1.manga.id!!] ?: lastFetchedManga.size
+                                val manga2LastRead =
+                                    lastFetchedManga[i2.manga.id!!] ?: lastFetchedManga.size
                                 manga1LastRead.compareTo(manga2LastRead)
                             }
-                            LibrarySort.DATE_ADDED -> i2.manga.date_added.compareTo(i1.manga.date_added)
-                            else -> {
-                                if (LibrarySort.DRAG_AND_DROP == category.sortingMode() && category.isDynamic) {
+                            LibrarySort.DateAdded -> i2.manga.date_added.compareTo(i1.manga.date_added)
+                            LibrarySort.DragAndDrop -> {
+                                if (category.isDynamic) {
                                     val category1 =
                                         allCategories.find { i1.manga.category == it.id }?.order
                                             ?: 0
@@ -813,12 +817,12 @@ class LibraryPresenter(
     }
 
     /** Update a category's sorting */
-    fun sortCategory(catId: Int, order: Int) {
+    fun sortCategory(catId: Int, order: Char) {
         val category = categories.find { catId == it.id } ?: return
-        category.mangaSort = ('a' + (order - 1))
+        category.mangaSort = order
         if (catId == -1 || category.isDynamic) {
-            val sort = category.sortingMode() ?: LibrarySort.ALPHA
-            preferences.librarySortingMode().set(sort)
+            val sort = category.sortingMode() ?: LibrarySort.Title
+            preferences.librarySortingMode().set(sort.mainValue)
             preferences.librarySortingAscending().set(category.isAscending())
             categories.forEach {
                 it.mangaSort = category.mangaSort
