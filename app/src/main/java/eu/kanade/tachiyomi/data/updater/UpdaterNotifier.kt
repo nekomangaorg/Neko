@@ -99,6 +99,12 @@ internal class UpdaterNotifier(private val context: Context) {
             setOngoing(true)
             clearActions()
 
+            // Cancel action
+            addAction(
+                R.drawable.ic_close_24dp,
+                context.getString(R.string.cancel),
+                NotificationReceiver.cancelUpdateDownloadPendingBroadcast(context)
+            )
             addReleasePageAction()
         }
         notificationBuilder.show()
@@ -179,5 +185,8 @@ internal class UpdaterNotifier(private val context: Context) {
         }
         notificationBuilder.show(Notifications.ID_UPDATER)
     }
+
+    fun cancel() {
+        NotificationReceiver.dismissNotification(context, Notifications.ID_UPDATER)
     }
 }

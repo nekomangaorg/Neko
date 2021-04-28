@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -72,6 +73,7 @@ class NotificationReceiver : BroadcastReceiver() {
             )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
+            ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Share backup file
             ACTION_SHARE_BACKUP ->
@@ -260,6 +262,10 @@ class NotificationReceiver : BroadcastReceiver() {
     private fun cancelRestoreUpdate(context: Context) {
         BackupRestoreService.stop(context)
         Handler().post { dismissNotification(context, Notifications.ID_RESTORE_PROGRESS) }
+    }
+
+    private fun cancelDownloadUpdate(context: Context) {
+        UpdaterService.stop(context)
     }
 
     companion object {
@@ -596,6 +602,19 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun cancelLibraryUpdatePendingBroadcast(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_LIBRARY_UPDATE
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that cancels the download for a Tachiyomi update
+         *
+         * @param context context of application
+         * @return [PendingIntent]
+         */
+        internal fun cancelUpdateDownloadPendingBroadcast(context: Context): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_CANCEL_UPDATE_DOWNLOAD
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
