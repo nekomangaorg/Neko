@@ -801,6 +801,8 @@
     <string name="ask_on_chapters_page">Delete during global updates, ask on chapters page</string>
     <string name="always_keep">Always keep</string>
     <string name="always_delete">Always delete</string>
+    <string name="save_pages_separately">Save pages in separate folders</string>
+    <string name="create_folders_by_manga_title">Creates folders according to manga title</string>
 
     <!-- Time -->
     <string name="manual">Manual</string>

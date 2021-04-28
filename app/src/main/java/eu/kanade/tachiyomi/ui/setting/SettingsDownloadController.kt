@@ -56,8 +56,8 @@ class SettingsDownloadController : SettingsController() {
         }
         switchPreference {
             key = Keys.folderPerManga
-            titleRes = R.string.pref_create_folder_per_manga
-            summaryRes = R.string.pref_create_folder_per_manga_summary
+            titleRes = R.string.save_pages_separately
+            summaryRes = R.string.create_folders_by_manga_title
             defaultValue = false
         }
         preferenceCategory {
