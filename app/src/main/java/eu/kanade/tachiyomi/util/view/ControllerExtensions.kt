@@ -427,6 +427,12 @@ fun Controller.scrollViewWith(
                         if (recycler.canScrollVertically(-1) && !elevate) elevateFunc(true)
                         else if (!recycler.canScrollVertically(-1) && elevate) elevateFunc(false)
                     }
+                } else if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+                    val view = activity?.window?.currentFocus ?: return
+                    val imm =
+                        activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                            ?: return
+                    imm.hideSoftInputFromWindow(view.windowToken, 0)
                 }
             }
         }
