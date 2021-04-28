@@ -51,6 +51,7 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -151,7 +152,7 @@ class RecentsController(bundle: Bundle? = null) :
             afterInsets = {
                 headerHeight = it.systemWindowInsetTop + appBarHeight + 48.dpToPx
                 binding.fakeAppBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    height = it.systemWindowInsetTop + (activityBinding?.toolbar?.height ?: appBarHeight)
+                    height = it.systemWindowInsetTop + (toolbarHeight ?: appBarHeight)
                 }
                 binding.recycler.updatePaddingRelative(
                     bottom = activityBinding?.bottomNav?.height ?: 0

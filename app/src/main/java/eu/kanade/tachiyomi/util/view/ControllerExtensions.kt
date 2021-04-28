@@ -90,13 +90,13 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         val attrsArray = intArrayOf(R.attr.actionBarSize)
         val array = recycler.context.obtainStyledAttributes(attrsArray)
         var appBarHeight = (
-            if (activityBinding?.toolbar?.height ?: 0 > 0) activityBinding!!.toolbar.height
+            if (toolbarHeight ?: 0 > 0) toolbarHeight!!
             else array.getDimensionPixelSize(0, 0)
             )
         array.recycle()
         activityBinding!!.toolbar.post {
-            if (activityBinding!!.toolbar.height > 0) {
-                appBarHeight = activityBinding!!.toolbar.height
+            if (toolbarHeight!! > 0) {
+                appBarHeight = toolbarHeight!!
                 recycler.requestApplyInsets()
             }
         }
@@ -174,14 +174,14 @@ fun Controller.scrollViewWith(
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
-        if (activityBinding?.toolbar?.height ?: 0 > 0) activityBinding!!.toolbar.height
+        if (toolbarHeight ?: 0 > 0) toolbarHeight!!
         else array.getDimensionPixelSize(0, 0)
         ) + if (includeTabView) tabBarHeight else 0
     array.recycle()
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     activityBinding!!.toolbar.post {
-        if (activityBinding!!.toolbar.height > 0) {
-            appBarHeight = activityBinding!!.toolbar.height + if (includeTabView) tabBarHeight else 0
+        if (toolbarHeight!! > 0) {
+            appBarHeight = toolbarHeight!! + if (includeTabView) tabBarHeight else 0
             recycler.requestApplyInsets()
         }
     }
@@ -460,3 +460,6 @@ fun Controller.openInBrowser(url: String) {
 
 val Controller.activityBinding: MainActivityBinding?
     get() = (activity as? MainActivity)?.binding
+
+val Controller.toolbarHeight: Int?
+    get() = (activity as? MainActivity)?.toolbarHeight

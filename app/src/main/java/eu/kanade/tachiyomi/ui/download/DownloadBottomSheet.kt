@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
 import eu.kanade.tachiyomi.ui.extension.ExtensionDividerItemDecoration
 import eu.kanade.tachiyomi.ui.recents.RecentsController
-import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
@@ -21,6 +20,7 @@ import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
+import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
 class DownloadBottomSheet @JvmOverloads constructor(
@@ -74,7 +74,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         binding.recyclerLayout.doOnApplyWindowInsets { v, windowInsets, _ ->
             v.updateLayoutParams<MarginLayoutParams> {
                 topMargin = windowInsets.systemWindowInsetTop +
-                    (controller.activityBinding?.toolbar?.height ?: headerHeight) -
+                    (controller.toolbarHeight ?: headerHeight) -
                     binding.sheetLayout.height
             }
         }

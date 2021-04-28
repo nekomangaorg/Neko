@@ -90,6 +90,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.max
 
 open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
 
@@ -128,6 +129,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         extraViewForUndo = extraViewToCheck
     }
+
+    val toolbarHeight: Int
+        get() = max(binding.toolbar.height, binding.cardFrame.height)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Create a webview before extensions do or else they will break night mode theme
