@@ -560,12 +560,7 @@ class ReaderActivity :
         binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.navigationIcon?.setTint(
-            ContextCompat.getColor(
-                this,
-                R.color.tint_color_secondary
-            )
-        )
+        binding.toolbar.navigationIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
         binding.toolbar.setNavigationOnClickListener {
             popToMain()
         }
