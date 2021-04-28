@@ -556,7 +556,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
             SHORTCUT_BROWSE -> binding.bottomNav.selectedItemId = R.id.nav_browse
             SHORTCUT_EXTENSIONS -> {
-                if (binding.bottomNav.selectedItemId != R.id.nav_recents) {
+                if (binding.bottomNav.selectedItemId != R.id.nav_browse) {
                     binding.bottomNav.selectedItemId = R.id.nav_browse
                 } else {
                     router.popToRoot()
