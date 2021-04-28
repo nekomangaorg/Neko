@@ -93,8 +93,8 @@ class LibraryPresenter(
 
     override fun onCreate() {
         super.onCreate()
-        libraryItems = lastLibraryItems ?: return
-        categories = lastCategories ?: return
+        lastLibraryItems?.let { libraryItems = it }
+        lastCategories?.let { categories = it }
         lastCategories = null
         lastLibraryItems = null
         getLibrary()

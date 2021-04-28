@@ -840,7 +840,9 @@ class LibraryController(
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             binding.filterBottomSheet.filterBottomSheet.isVisible = true
-            presenter.getLibrary()
+            if (type == ControllerChangeType.POP_ENTER) {
+                presenter.getLibrary()
+            }
             DownloadService.callListeners()
             LibraryUpdateService.setListener(this)
             binding.recyclerCover.isClickable = false
