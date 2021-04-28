@@ -1532,7 +1532,9 @@ class LibraryController(
         }
         searchItem.fixExpand(
             onExpand = {
-                if (!binding.recyclerCover.isClickable && query.isBlank()) {
+                if (!binding.recyclerCover.isClickable && query.isBlank() &&
+                    !singleCategory && presenter.showAllCategories
+                ) {
                     showCategories(true)
                 }
                 invalidateMenuOnExpand()
