@@ -112,7 +112,8 @@ class RecentsPresenter(
         retryCount: Int = 0,
         itemCount: Int = 0,
         limit: Boolean = false,
-        customViewType: Int? = null
+        customViewType: Int? = null,
+        includeReadAnyway: Boolean = false
     ) {
         if (retryCount > 5) {
             finished = true
@@ -127,7 +128,8 @@ class RecentsPresenter(
         }
         val viewType = customViewType ?: viewType
 
-        val showRead = (preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit
+        val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit) ||
+            includeReadAnyway == true
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
@@ -487,11 +489,15 @@ class RecentsPresenter(
         const val VIEW_TYPE_ONLY_HISTORY = 2
         const val VIEW_TYPE_ONLY_UPDATES = 3
         const val ENDLESS_LIMIT = 50
+        var SHORT_LIMIT = 25
+            private set
 
-        suspend fun getRecentManga(): List<Pair<Manga, Long>> {
+        suspend fun getRecentManga(includeRead: Boolean = false): List<Pair<Manga, Long>> {
             val presenter = RecentsPresenter(null)
             presenter.viewType = 1
-            presenter.runRecents(limit = true)
+            SHORT_LIMIT = if (includeRead) 50 else 25
+            presenter.runRecents(limit = true, includeReadAnyway = includeRead)
+            SHORT_LIMIT = 25
             return presenter.recentItems.filter { it.mch.manga.id != null }.map { it.mch.manga to it.mch.history.last_read }
         }
     }

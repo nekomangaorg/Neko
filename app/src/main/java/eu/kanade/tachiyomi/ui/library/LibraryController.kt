@@ -203,7 +203,15 @@ class LibraryController(
 
     override fun getTitle(): String? {
         setSubtitle()
-        return searchTitle(view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT))
+        return searchTitle(
+            if (preferences.showLibrarySearchSuggestions().get() &&
+                preferences.librarySearchSuggestion().get().isNotBlank()
+            ) {
+                "\"${preferences.librarySearchSuggestion().get()}\""
+            } else {
+                view?.context?.getString(R.string.your_library)?.lowercase(Locale.ROOT)
+            }
+        )
     }
 
     private var scrollListener = object : RecyclerView.OnScrollListener() {
@@ -849,6 +857,23 @@ class LibraryController(
             binding.recyclerCover.isFocusable = false
             singleCategory = presenter.categories.size <= 1
             showDropdown()
+
+            if (preferences.showLibrarySearchSuggestions().get()) {
+                activityBinding?.cardToolbar?.setOnLongClickListener {
+                    val suggestion = preferences.librarySearchSuggestion().get()
+                    if (suggestion.isNotBlank()) {
+                        val searchItem =
+                            activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)
+                        val searchView = searchItem?.actionView as? SearchView
+                            ?: return@setOnLongClickListener false
+                        searchItem.expandActionView()
+                        searchView.setQuery(suggestion, false)
+                        true
+                    } else {
+                        false
+                    }
+                }
+            }
         } else {
             updateFilterSheetY()
             closeTip()
@@ -856,6 +881,7 @@ class LibraryController(
                 binding.filterBottomSheet.filterBottomSheet.isInvisible = true
             }
             activityBinding?.toolbar?.hideDropdown()
+            activityBinding?.cardToolbar?.setOnLongClickListener(null)
         }
     }
 

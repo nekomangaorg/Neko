@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.preference.minusAssign
@@ -28,18 +29,26 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
+import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
+import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.ArrayList
+import java.util.Calendar
 import java.util.Comparator
+import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
+import kotlin.random.Random
 
 /**
  * Presenter of [LibraryController].
@@ -98,6 +107,17 @@ class LibraryPresenter(
         lastCategories = null
         lastLibraryItems = null
         getLibrary()
+        if (preferences.showLibrarySearchSuggestions().isNotSet()) {
+            DelayedLibrarySuggestionsJob.setupTask(true)
+        } else if (preferences.showLibrarySearchSuggestions().get() &&
+            Date().time >= preferences.lastLibrarySuggestion().get() + TimeUnit.HOURS.toMillis(2)
+        ) {
+            // Doing this instead of a job in case the app isn't used often
+            presenterScope.launchIO {
+                setSearchSuggestion(preferences, db, sourceManager)
+                withUIContext { view.setTitle() }
+            }
+        }
     }
 
     /** Get favorited manga for library and sort and filter it */
@@ -1025,6 +1045,82 @@ class LibraryPresenter(
         private var lastCategories: List<Category>? = null
         private const val sourceSplitter = "◘•◘"
         private const val dynamicCategorySplitter = "▄╪\t▄╪\t▄"
+
+        private val randomTags = arrayOf(0, 1, 2)
+        private const val randomSource = 4
+        private const val randomTitle = 3
+        private const val randomTag = 0
+        private val randomGroupOfTags = arrayOf(1, 2)
+        private const val randomGroupOfTagsNormal = 1
+        private const val randomGroupOfTagsNegate = 2
+
+        suspend fun setSearchSuggestion(
+            preferences: PreferencesHelper,
+            db: DatabaseHelper,
+            sourceManager: SourceManager
+        ) {
+            val random: Random = {
+                val cal = Calendar.getInstance()
+                cal.time = Date()
+                cal[Calendar.MINUTE] = 0
+                cal[Calendar.SECOND] = 0
+                cal[Calendar.MILLISECOND] = 0
+                Random(cal.time.time)
+            }()
+
+            val recentManga by lazy {
+                runBlocking {
+                    RecentsPresenter.getRecentManga(true).map { it.first }
+                }
+            }
+            val libraryManga by lazy { db.getLibraryMangas().executeAsBlocking() }
+            preferences.librarySearchSuggestion().set(
+                when (val value = random.nextInt(0, 5)) {
+                    randomSource -> {
+                        val distinctSources = libraryManga.distinctBy { it.source }
+                        val randomSource =
+                            sourceManager.get(
+                                distinctSources.randomOrNull(random)?.source ?: 0L
+                            )?.name
+                        randomSource?.chopByWords(15)
+                    }
+                    randomTitle -> {
+                        libraryManga.randomOrNull(random)?.title?.chopByWords(15)
+                    }
+                    in randomTags -> {
+                        val tags = recentManga.map {
+                            it.genre.orEmpty().split(",").map(String::trim)
+                        }
+                            .flatten()
+                            .filter { it.isNotBlank() }
+                        val distinctTags = tags.distinct()
+                        if (value in randomGroupOfTags && distinctTags.size > 6) {
+                            val shortestTagsSort = distinctTags.sortedBy { it.length }
+                            val offset = random.nextInt(0, distinctTags.size / 2 - 2)
+                            var offset2 = random.nextInt(0, distinctTags.size / 2 - 2)
+                            while (offset2 == offset) {
+                                offset2 = random.nextInt(0, distinctTags.size / 2 - 2)
+                            }
+                            if (value == randomGroupOfTagsNormal) {
+                                "${shortestTagsSort[offset]}, " + shortestTagsSort[offset2]
+                            } else {
+                                "${shortestTagsSort[offset]}, -" + shortestTagsSort[offset2]
+                            }
+                        } else {
+                            val group = tags.groupingBy { it }.eachCount()
+                            val groupedTags = distinctTags.sortedByDescending { group[it] }
+                            groupedTags.take(8).randomOrNull(random)
+                        }
+                    }
+                    else -> ""
+                } ?: ""
+            )
+
+            if (preferences.showLibrarySearchSuggestions().isNotSet()) {
+                preferences.showLibrarySearchSuggestions().set(true)
+            }
+            preferences.lastLibrarySuggestion().set(Date().time)
+        }
 
         /** Give library manga to a date added based on min chapter fetch */
         fun updateDB() {

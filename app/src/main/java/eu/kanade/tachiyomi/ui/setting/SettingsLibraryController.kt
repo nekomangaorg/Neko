@@ -6,8 +6,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.ui.category.CategoryController
+import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.library.display.TabbedLibraryDisplaySheet
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -26,6 +29,25 @@ class SettingsLibraryController : SettingsController() {
                 titleRes = R.string.sort_by_ignoring_articles
                 summaryRes = R.string.when_sorting_ignore_articles
                 defaultValue = false
+            }
+
+            switchPreference {
+                key = Keys.showLibrarySearchSuggestions
+                titleRes = R.string.search_suggestions
+                summaryRes = R.string.search_tips_show_periodically
+
+                onChange {
+                    it as Boolean
+                    if (it) {
+                        launchIO {
+                            LibraryPresenter.setSearchSuggestion(preferences, db, Injekt.get())
+                        }
+                    } else {
+                        DelayedLibrarySuggestionsJob.setupTask(false)
+                        preferences.librarySearchSuggestion().set("")
+                    }
+                    true
+                }
             }
 
             preference {

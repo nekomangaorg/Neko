@@ -106,6 +106,10 @@ object PreferenceKeys {
 
     const val folderPerManga = "create_folder_per_manga"
 
+    const val showLibrarySearchSuggestions = "show_library_search_suggestions"
+
+    const val librarySearchSuggestion = "library_search_suggestion"
+
     const val numberOfBackups = "backup_slots"
 
     const val backupInterval = "backup_interval"

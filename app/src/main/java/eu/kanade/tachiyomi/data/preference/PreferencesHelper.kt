@@ -234,6 +234,12 @@ class PreferencesHelper(val context: Context) {
 
     fun folderPerManga() = prefs.getBoolean(Keys.folderPerManga, false)
 
+    fun librarySearchSuggestion() = flowPrefs.getString(Keys.librarySearchSuggestion, "")
+
+    fun showLibrarySearchSuggestions() = flowPrefs.getBoolean(Keys.showLibrarySearchSuggestions, false)
+
+    fun lastLibrarySuggestion() = flowPrefs.getLong("last_library_suggestion", 0L)
+
     fun numberOfBackups() = flowPrefs.getInt(Keys.numberOfBackups, 1)
 
     fun backupInterval() = flowPrefs.getInt(Keys.backupInterval, 0)

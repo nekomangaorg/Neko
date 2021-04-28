@@ -69,7 +69,7 @@ fun limitAndOffset(endless: Boolean, isResuming: Boolean, offset: Int): String {
     return when {
         isResuming && endless && offset > 0 -> "LIMIT $offset"
         endless -> "LIMIT ${RecentsPresenter.ENDLESS_LIMIT}\nOFFSET $offset"
-        else -> "LIMIT 25"
+        else -> "LIMIT ${RecentsPresenter.SHORT_LIMIT}"
     }
 }
 
