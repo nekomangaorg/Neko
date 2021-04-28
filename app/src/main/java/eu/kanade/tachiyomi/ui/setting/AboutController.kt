@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
+import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
@@ -166,6 +167,7 @@ class AboutController : SettingsController() {
 
                     // Create confirmation window
                     withContext(Dispatchers.Main) {
+                        UpdaterNotifier.releasePageUrl = result.release.releaseLink
                         NewUpdateDialogController(body, url).showDialog(router)
                     }
                 }
@@ -202,7 +204,7 @@ class AboutController : SettingsController() {
                 .negativeButton(R.string.ignore)
         }
 
-        private companion object {
+        companion object {
             const val BODY_KEY = "NewUpdateDialogController.body"
             const val URL_KEY = "NewUpdateDialogController.key"
         }

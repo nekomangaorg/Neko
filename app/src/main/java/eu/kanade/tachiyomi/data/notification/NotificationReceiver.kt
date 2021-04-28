@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -278,6 +279,8 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
 
+        private const val ACTION_CANCEL_UPDATE_DOWNLOAD = "$ID.$NAME.CANCEL_UPDATE_DOWNLOAD"
+
         // Called to mark as read
         private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
 
@@ -468,6 +471,27 @@ class NotificationReceiver : BroadcastReceiver() {
                 newIntent,
                 PendingIntent
                     .FLAG_UPDATE_CURRENT
+            )
+        }
+
+        /**
+         * Returns [PendingIntent] that opens the manga details controller.
+         *
+         * @param context context of application
+         * @param manga manga of chapter
+         */
+        internal fun openUpdatePendingActivity(context: Context, notes: String, downloadLink: String):
+            PendingIntent {
+            val newIntent =
+                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra(AboutController.NewUpdateDialogController.BODY_KEY, notes)
+                    .putExtra(AboutController.NewUpdateDialogController.URL_KEY, downloadLink)
+            return PendingIntent.getActivity(
+                context,
+                downloadLink.hashCode(),
+                newIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
 

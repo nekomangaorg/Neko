@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
+import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -497,6 +498,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
+                            UpdaterNotifier.releasePageUrl = result.release.releaseLink
                             AboutController.NewUpdateDialogController(body, url).showDialog(router)
                         }
                     }
@@ -569,6 +571,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
+            }
+            SHORTCUT_UPDATE_NOTES -> {
+                val extras = intent.extras ?: return false
+                if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
+                if (router.backstack.lastOrNull()?.controller() !is AboutController.NewUpdateDialogController) {
+                    AboutController.NewUpdateDialogController(extras).showDialog(router)
+                }
             }
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
@@ -882,6 +891,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
+        const val SHORTCUT_UPDATE_NOTES = "eu.kanade.tachiyomi.SHOW_UPDATE_NOTES"
         const val SHORTCUT_SOURCE = "eu.kanade.tachiyomi.SHOW_SOURCE"
         const val SHORTCUT_READER_SETTINGS = "eu.kanade.tachiyomi.READER_SETTINGS"
         const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
