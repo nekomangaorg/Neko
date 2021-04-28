@@ -254,10 +254,9 @@ class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    /* Method called when user wants to stop a restore
+    /** Method called when user wants to stop a restore
      *
      * @param context context of application
-     * @param notificationId id of notification
      */
     private fun cancelRestoreUpdate(context: Context) {
         BackupRestoreService.stop(context)
