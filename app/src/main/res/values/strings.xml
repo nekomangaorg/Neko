@@ -370,7 +370,6 @@
     <string name="volume_keys">Volume keys</string>
     <string name="invert_volume_keys">Invert volume keys</string>
     <string name="tapping">Tapping</string>
-    <string name="long_tap_dialog">Long tap dialog</string>
     <string name="background_color">Background color</string>
     <string name="white">White</string>
     <string name="black">Black</string>
@@ -432,6 +431,10 @@
     <string name="automatic_can_still_switch">While using automatic page layout, you can still switch between layouts while reading without overriding this setting</string>
     <string name="automatic_orientation">Automatic (based on orientation)</string>
     <string name="webtoon_cannot_change">Cannot change reading mode from webtoon. Edit the series type first to change.</string>
+    <string name="actions">Actions</string>
+    <string name="show_on_long_press">Show on long press</string>
+    <string name="save_pages_separately">Save pages in separate folders</string>
+    <string name="create_folders_by_manga_title">Creates folders according to manga title</string>
     <plurals name="pages_plural">
         <item quantity="one">%1$d page</item>
         <item quantity="other">%1$d pages</item>
@@ -801,8 +804,6 @@
     <string name="ask_on_chapters_page">Delete during global updates, ask on chapters page</string>
     <string name="always_keep">Always keep</string>
     <string name="always_delete">Always delete</string>
-    <string name="save_pages_separately">Save pages in separate folders</string>
-    <string name="create_folders_by_manga_title">Creates folders according to manga title</string>
 
     <!-- Time -->
     <string name="manual">Manual</string>

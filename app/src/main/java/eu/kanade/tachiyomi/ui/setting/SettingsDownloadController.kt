@@ -54,12 +54,6 @@ class SettingsDownloadController : SettingsController() {
             titleRes = R.string.only_download_over_wifi
             defaultValue = true
         }
-        switchPreference {
-            key = Keys.folderPerManga
-            titleRes = R.string.save_pages_separately
-            summaryRes = R.string.create_folders_by_manga_title
-            defaultValue = false
-        }
         preferenceCategory {
             titleRes = R.string.remove_after_read
 
