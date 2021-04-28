@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -79,12 +78,8 @@ class MangaShortcutManager(
                                     else Icon.createWithResource(context, R.drawable.ic_book_24dp)
                                 )
                                 .setIntent(
-                                    Intent(
-                                        context,
-                                        SearchActivity::class.java
-                                    ).setAction(MainActivity.SHORTCUT_MANGA)
+                                    SearchActivity.openMangaIntent(context, item.id, true)
                                         .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                                        .putExtra(MangaDetailsController.MANGA_EXTRA, item.id)
                                 )
                                 .build()
                         }

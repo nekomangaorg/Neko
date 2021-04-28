@@ -107,7 +107,7 @@ class SearchActivity : MainActivity() {
                     router.replaceTopController(GlobalSearchController(query, filter).withFadeTransaction())
                 }
             }
-            SHORTCUT_MANGA -> {
+            SHORTCUT_MANGA, SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailsController(extras))
@@ -136,13 +136,13 @@ class SearchActivity : MainActivity() {
     }
 
     companion object {
-        fun openMangaIntent(context: Context, id: Long) = Intent(
+        fun openMangaIntent(context: Context, id: Long?, canReturnToMain: Boolean = false) = Intent(
             context,
             SearchActivity::class
                 .java
         )
             .apply {
-                action = SHORTCUT_MANGA
+                action = if (canReturnToMain) SHORTCUT_MANGA_BACK else SHORTCUT_MANGA
                 putExtra(MangaDetailsController.MANGA_EXTRA, id)
             }
 
