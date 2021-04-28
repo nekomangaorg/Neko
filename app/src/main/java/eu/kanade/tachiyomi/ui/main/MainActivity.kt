@@ -153,7 +153,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding = MainActivityBinding.inflate(layoutInflater)
 
         setContentView(binding.root)
-        setFloatingToolbar(this !is SearchActivity)
 
         drawerArrow = DrawerArrowDrawable(this)
         drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
@@ -349,6 +348,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.cardToolbar.setIncognitoMode(it)
             }
         setExtensionsBadge()
+        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller()))
     }
 
     open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
