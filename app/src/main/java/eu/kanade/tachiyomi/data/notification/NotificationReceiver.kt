@@ -480,10 +480,11 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that opens the manga details controller.
+         * Returns [PendingIntent] that opens release notes for the next update.
          *
          * @param context context of application
-         * @param manga manga of chapter
+         * @param notes notes of the release
+         * @param downloadLink download link to the apk
          */
         internal fun openUpdatePendingActivity(context: Context, notes: String, downloadLink: String):
             PendingIntent {
