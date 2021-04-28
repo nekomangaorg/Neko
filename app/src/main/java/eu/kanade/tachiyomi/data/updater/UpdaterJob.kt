@@ -47,9 +47,9 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
                 .build()
 
             val request = PeriodicWorkRequestBuilder<UpdaterJob>(
-                1,
+                2,
                 TimeUnit.DAYS,
-                1,
+                3,
                 TimeUnit.HOURS
             )
                 .addTag(TAG)
