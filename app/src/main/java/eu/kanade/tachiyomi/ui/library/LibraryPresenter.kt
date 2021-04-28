@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -80,7 +81,7 @@ class LibraryPresenter(
     val showAllCategories
         get() = preferences.showAllCategories().get()
 
-    val libraryIsGrouped
+    private val libraryIsGrouped
         get() = groupType != UNGROUPED
 
     /** Save the current list to speed up loading later */
@@ -181,7 +182,7 @@ class LibraryPresenter(
                 it.order == preferences.lastUsedCategory().getOrDefault()
             }?.id ?: 0
         }
-        withContext(Dispatchers.Main) {
+        withUIContext {
             view.onNextLibraryUpdate(
                 if (!showAll) sectionedLibraryItems[currentCategory]
                     ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
@@ -209,7 +210,8 @@ class LibraryPresenter(
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        val filtersOff = filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
+        val filtersOff =
+            filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
         return items.filter f@{ item ->
             if (item.manga.status == -1) {
                 val subItems = sectionedLibraryItems[item.manga.category]
@@ -606,7 +608,12 @@ class LibraryPresenter(
                 }
                 BY_SOURCE -> {
                     val source = sourceManager.getOrStub(manga.source)
-                    listOf(LibraryItem(manga, makeOrGetHeader("${source.name}$sourceSplitter${source.id}")))
+                    listOf(
+                        LibraryItem(
+                            manga,
+                            makeOrGetHeader("${source.name}$sourceSplitter${source.id}")
+                        )
+                    )
                 }
                 else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))
             }
@@ -639,7 +646,8 @@ class LibraryPresenter(
         }
         headers.forEach { category ->
             val catId = category.id ?: return@forEach
-            val headerItem = tagItems[if (category.sourceId != null) "${category.name}$sourceSplitter${category.sourceId}" else category.name]
+            val headerItem =
+                tagItems[if (category.sourceId != null) "${category.name}$sourceSplitter${category.sourceId}" else category.name]
             if (category.isHidden) {
                 val mangaToRemove = items.filter { it.header.catId == catId }
                 val mergedTitle = mangaToRemove.joinToString("-") {
@@ -931,7 +939,10 @@ class LibraryPresenter(
     }
 
     private fun getDynamicCategoryName(category: Category): String =
-        groupType.toString() + dynamicCategorySplitter + (category.sourceId?.toString() ?: category.name)
+        groupType.toString() + dynamicCategorySplitter + (
+            category.sourceId?.toString()
+                ?: category.name
+            )
 
     fun toggleAllCategoryVisibility() {
         if (groupType == BY_DEFAULT) {
@@ -943,9 +954,17 @@ class LibraryPresenter(
             }
         } else {
             if (allCategoriesExpanded()) {
-                preferences.collapsedDynamicCategories() += categories.map { getDynamicCategoryName(it) }
+                preferences.collapsedDynamicCategories() += categories.map {
+                    getDynamicCategoryName(
+                        it
+                    )
+                }
             } else {
-                preferences.collapsedDynamicCategories() -= categories.map { getDynamicCategoryName(it) }
+                preferences.collapsedDynamicCategories() -= categories.map {
+                    getDynamicCategoryName(
+                        it
+                    )
+                }
             }
         }
         getLibrary()
