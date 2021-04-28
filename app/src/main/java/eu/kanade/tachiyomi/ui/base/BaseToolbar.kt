@@ -18,7 +18,6 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
     protected val titleTextAppeance: Int
 
     var incognito = false
-    var hasDropdown: Boolean? = null
     init {
         val a = context.obtainStyledAttributes(
             attrs,
@@ -42,20 +41,7 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
         toolbarTitle.isVisible = true
         toolbarTitle.text = title
         super.setTitle(null)
-        if (navigationIcon is DrawerArrowDrawable) {
-            hideDropdown()
-        }
         setIncognitoMode(incognito)
-    }
-
-    fun hideDropdown() {
-        hasDropdown = null
-        setIcons()
-    }
-
-    fun showDropdown(down: Boolean = true) {
-        hasDropdown = down
-        setIcons()
     }
 
     fun setIncognitoMode(enabled: Boolean) {
@@ -76,7 +62,6 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
     private fun getIncogRes(): Int {
         return when {
             incognito -> R.drawable.ic_incognito_circle_24dp
-            hasDropdown != null -> R.drawable.ic_blank_24dp
             else -> 0
         }
     }
@@ -84,8 +69,6 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
     @DrawableRes
     private fun getDropdownRes(): Int {
         return when {
-            hasDropdown == true -> R.drawable.ic_arrow_drop_down_24dp
-            hasDropdown == false -> R.drawable.ic_arrow_drop_up_24dp
             incognito && navigationIcon !is DrawerArrowDrawable -> R.drawable.ic_blank_28dp
             else -> 0
         }

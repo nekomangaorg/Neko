@@ -856,7 +856,6 @@ class LibraryController(
             binding.recyclerCover.isClickable = false
             binding.recyclerCover.isFocusable = false
             singleCategory = presenter.categories.size <= 1
-            showDropdown()
 
             if (preferences.showLibrarySearchSuggestions().get()) {
                 activityBinding?.cardToolbar?.setOnLongClickListener {
@@ -880,15 +879,7 @@ class LibraryController(
             if (binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
                 binding.filterBottomSheet.filterBottomSheet.isInvisible = true
             }
-            activityBinding?.toolbar?.hideDropdown()
             activityBinding?.cardToolbar?.setOnLongClickListener(null)
-        }
-    }
-
-    override fun onChangeEnded(handler: ControllerChangeHandler, type: ControllerChangeType) {
-        super.onChangeEnded(handler, type)
-        if (!type.isEnter) {
-            activityBinding?.toolbar?.hideDropdown()
         }
     }
 
@@ -931,7 +922,6 @@ class LibraryController(
         }
         adapter.setItems(mangaMap)
         singleCategory = presenter.categories.size <= 1
-        showDropdown()
         binding.progress.isVisible = false
         if (!freshStart) {
             justStarted = false
@@ -972,16 +962,6 @@ class LibraryController(
             }
             setSubtitle()
             showMiniBar()
-        }
-    }
-
-    private fun showDropdown() {
-        if (onRoot) {
-            if (!singleCategory) {
-                activityBinding?.toolbar?.showDropdown()
-            } else {
-                activityBinding?.toolbar?.hideDropdown()
-            }
         }
     }
 
@@ -1032,7 +1012,6 @@ class LibraryController(
         binding.recyclerCover.animate().translationY(translateY).start()
         binding.recyclerCover.animate().alpha(if (show) 0.75f else 0f).start()
         binding.libraryGridRecycler.recycler.suppressLayout(show)
-        activityBinding?.toolbar?.showDropdown(!show)
         binding.swipeRefresh.isEnabled = !show
         setSubtitle()
         if (show) {
