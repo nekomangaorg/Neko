@@ -7,7 +7,6 @@ import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.RecyclerWithScrollerBinding
-import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 
 class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -22,24 +21,12 @@ class RecyclerWithScrollerView @JvmOverloads constructor(context: Context, attrs
         binding.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (sheet.isOnView(this@RecyclerWithScrollerView) &&
-                    (
-                        newState == RecyclerView.SCROLL_STATE_IDLE ||
-                            newState == RecyclerView.SCROLL_STATE_SETTLING
-                        )
+                if (newState == RecyclerView.SCROLL_STATE_IDLE ||
+                    newState == RecyclerView.SCROLL_STATE_SETTLING
                 ) {
                     sheet.sheetBehavior?.isDraggable = true
-                }
-            }
-
-            override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                super.onScrolled(recyclerView, dx, dy)
-                if (sheet.isOnView(this@RecyclerWithScrollerView) &&
-                    sheet.sheetBehavior.isExpanded() &&
-                    recyclerView.canScrollVertically(-1) &&
-                    recyclerView.scrollState != RecyclerView.SCROLL_STATE_SETTLING
-                ) {
-                    sheet.sheetBehavior?.isDraggable = false
+                } else {
+                    sheet.sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
                 }
             }
         })
