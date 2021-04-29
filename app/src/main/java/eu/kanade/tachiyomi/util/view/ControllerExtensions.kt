@@ -322,6 +322,10 @@ fun Controller.scrollViewWith(
         }
     )
     elevateFunc(recycler.canScrollVertically(-1))
+
+    recycler.post {
+        elevateFunc(recycler.canScrollVertically(-1))
+    }
     recycler.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {

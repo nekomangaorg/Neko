@@ -191,6 +191,7 @@ class RecentsController(bundle: Bundle? = null) :
             binding.shadow2.alpha = if (isCollapsed) 0.25f else 0f
             binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
             binding.fakeAppBar.alpha = if (isExpanded) 1f else 0f
+            updateTitleAndMenu()
         }
 
         if (presenter.recentItems.isNotEmpty()) {
