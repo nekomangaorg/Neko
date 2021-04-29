@@ -806,6 +806,7 @@
     <string name="ask_on_chapters_page">Delete during global updates, ask on chapters page</string>
     <string name="always_keep">Always keep</string>
     <string name="always_delete">Always delete</string>
+    <string name="automatic_removal">Automatic removal</string>
 
     <!-- Time -->
     <string name="manual">Manual</string>

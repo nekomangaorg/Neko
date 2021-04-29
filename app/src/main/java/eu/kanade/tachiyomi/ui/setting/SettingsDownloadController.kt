@@ -99,6 +99,8 @@ class SettingsDownloadController : SettingsController() {
                 preferences.downloadNew().asImmediateFlowIn(viewScope) { isVisible = it }
             }
             preferenceCategory {
+                titleRes = R.string.automatic_removal
+
                 intListPreference(activity) {
                     key = Keys.deleteRemovedChapters
                     titleRes = R.string.delete_removed_chapters
