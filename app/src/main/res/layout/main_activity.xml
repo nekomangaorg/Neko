@@ -78,6 +78,7 @@
                     app:contentInsetEndWithActions="0dp"
                     app:contentInsetStart="0dp"
                     app:contentInsetEnd="0dp"
+                    android:background="@drawable/rect_ripple"
                     app:navigationIconTint="@color/text_color_secondary"
                     app:navigationIcon="@drawable/ic_search_24dp"
                     app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
