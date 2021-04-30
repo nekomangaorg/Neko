@@ -26,6 +26,7 @@ class CategoryRecyclerView @JvmOverloads constructor(
 
     init {
         fastAdapter = FastAdapter.with(itemAdapter)
+        fastAdapter.setHasStableIds(true)
         layoutManager = manager
         adapter = fastAdapter
     }

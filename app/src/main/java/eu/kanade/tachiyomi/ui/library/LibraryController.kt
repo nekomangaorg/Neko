@@ -1015,7 +1015,9 @@ class LibraryController(
         binding.swipeRefresh.isEnabled = !show
         setSubtitle()
         if (show) {
-            binding.categoryRecycler.scrollToCategory(activeCategory)
+            binding.categoryRecycler.post {
+                binding.categoryRecycler.scrollToCategory(activeCategory)
+            }
             binding.fastScroller.hideScrollbar()
             activityBinding?.appBar?.y = 0f
             elevateAppBar(false)
