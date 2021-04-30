@@ -24,9 +24,7 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.serializers.ApiChapterSerializer
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
-import eu.kanade.tachiyomi.source.online.handlers.serializers.IsLoggedInSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
@@ -51,6 +49,7 @@ open class MangaDex() : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
+    // chapter url where we get the token, last request time
     private val tokenTracker = hashMapOf<String, Long>()
 
     private fun clientBuilder(): OkHttpClient = clientBuilder(preferences.r18()!!.toInt())
@@ -158,13 +157,7 @@ open class MangaDex() : HttpSource() {
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        val imageServer = preferences.imageServer().takeIf { it in SERVER_PREF_ENTRY_VALUES }
-            ?: SERVER_PREF_ENTRY_VALUES.first()
-        val dataSaver = when (preferences.dataSaver()) {
-            true -> "1"
-            false -> "0"
-        }
-        return PageHandler(clientBuilder(), headers, imageServer, dataSaver).fetchPageList(chapter)
+        return PageHandler(clientBuilder(), headers, preferences.dataSaver()).fetchPageList(chapter)
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
@@ -203,35 +196,27 @@ open class MangaDex() : HttpSource() {
     }
 
     open fun imageRequest(page: Page): Request {
-        val url = when {
-            // Legacy
-            page.url.isEmpty() -> page.imageUrl!!
-            // Some images are hosted elsewhere
-            !page.url.startsWith("http") -> baseUrl + page.url.substringBefore(",") + page.imageUrl
-            // New chapters on MD servers
-            page.url.startsWith(MdUtil.imageUrl) -> page.url.substringBefore(",") + page.imageUrl
-            // MD@Home token handling
-            else -> {
-                val tokenLifespan = 5 * 60 * 1000
-                val data = page.url.split(",")
-                var tokenedServer = data[0]
-                if (Date().time - data[2].toLong() > tokenLifespan) {
+        val data = page.url.split(",")
+        val mdAtHomeServerUrl =
+            when (Date().time - data[2].toLong() > MdUtil.mdAtHomeTokenLifespan) {
+                false -> data[0]
+                true -> {
                     val tokenRequestUrl = data[1]
-                    val cacheControl = if (Date().time - (tokenTracker[tokenRequestUrl] ?: 0) > tokenLifespan) {
-                        tokenTracker[tokenRequestUrl] = Date().time
-                        CacheControl.FORCE_NETWORK
-                    } else {
-                        CacheControl.FORCE_CACHE
-                    }
-                    val jsonData = client.newCall(GET(tokenRequestUrl, headers, cacheControl)).execute().body!!.string()
-                    val networkApiChapter = MdUtil.jsonParser.decodeFromString(ApiChapterSerializer.serializer(), jsonData)
-                    tokenedServer = networkApiChapter.data.server
-                    XLog.d("new MD@Home token %s", tokenedServer)
+                    val cacheControl =
+                        if (Date().time - (
+                                tokenTracker[tokenRequestUrl]
+                                    ?: 0
+                                ) > MdUtil.mdAtHomeTokenLifespan
+                        ) {
+                            tokenTracker[tokenRequestUrl] = Date().time
+                            CacheControl.FORCE_NETWORK
+                        } else {
+                            CacheControl.FORCE_CACHE
+                        }
+                    MdUtil.atHomeUrlHostUrl(tokenRequestUrl, client)
                 }
-                tokenedServer + page.imageUrl
             }
-        }
-        return GET(url, headers)
+        return GET(mdAtHomeServerUrl + page.imageUrl, headers)
     }
 
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {

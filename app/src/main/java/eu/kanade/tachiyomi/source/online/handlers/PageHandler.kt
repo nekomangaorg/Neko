@@ -11,7 +11,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 
-class PageHandler(val client: OkHttpClient, val headers: Headers, private val imageServer: String, val dataSaver: String?) {
+class PageHandler(val client: OkHttpClient, val headers: Headers, private val dataSaver: Boolean) {
 
     fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         if (chapter.scanlator.equals("MangaPlus")) {
@@ -25,12 +25,12 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val im
         return client.newCall(pageListRequest(chapter))
             .asObservableSuccess()
             .map { response ->
-                ApiChapterParser().pageListParse(response)
+                val host = MdUtil.atHomeUrlHostUrl("${MdUtil.atHomeUrl}${chapter.mangadex_chapter_id}", client)
+                ApiChapterParser().pageListParse(response, host, dataSaver)
             }
     }
 
     private fun pageListRequest(chapter: SChapter): Request {
-        val chpUrl = chapter.url.replace(MdUtil.oldApiChapter, MdUtil.newApiChapter).substringBefore(MdUtil.apiChapterSuffix)
-        return GET("${MdUtil.apiUrl}${chpUrl}${MdUtil.apiChapterSuffix}&server=$imageServer&saver=$dataSaver", headers, CacheControl.FORCE_NETWORK)
+        return GET("${MdUtil.chapterUrl}${chapter.mangadex_chapter_id}", headers, CacheControl.FORCE_NETWORK)
     }
 }

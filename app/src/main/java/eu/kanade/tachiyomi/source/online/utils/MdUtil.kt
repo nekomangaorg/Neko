@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
 import kotlinx.serialization.json.Json
+import okhttp3.OkHttpClient
 import org.jsoup.parser.Parser
 import kotlin.math.floor
 
@@ -17,10 +20,11 @@ class MdUtil {
         const val apiUrlCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
         const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
         const val apiManga = "/v2/manga/"
+        const val atHomeUrl = "$apiUrl/at-home/server"
+        const val chapterUrl = "$apiUrl/chapter/"
         const val includeChapters = "?include=chapters"
         const val oldApiChapter = "/api/chapter/"
         const val newApiChapter = "/v2/chapter/"
-        const val apiChapterSuffix = "?mark_read=0"
         const val groupSearchUrl = "$baseUrl/groups/0/1/"
         const val followsAllApi = "/v2/user/me/followed-manga"
         const val isLoggedInApi = "/v2/user/me"
@@ -29,6 +33,8 @@ class MdUtil {
         const val reportUrl = "https://api.mangadex.network/report"
         const val imageUrl = "$baseUrl/data"
         const val apiLogin = "/auth/login"
+
+        const val mdAtHomeTokenLifespan = 10 * 60 * 1000
 
         val jsonParser =
             Json {
@@ -169,7 +175,7 @@ class MdUtil {
             }
         }
 
-        fun getChapterId(url: String) = url.substringBeforeLast(apiChapterSuffix).substringAfterLast("/")
+        fun getChapterId(url: String) = url.substringAfterLast("/")
 
         // creates the manga url from the browse for the api
         fun modifyMangaUrl(url: String): String =
@@ -246,6 +252,12 @@ class MdUtil {
                 return allChapters.size.toString()
             }
             return null
+        }
+
+        fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient): String {
+            val atHomeRequest = GET(requestUrl)
+            val atHomeResponse = client.newCall(atHomeRequest).execute()
+            return jsonParser.decodeFromString(AtHomeResponse.serializer(), atHomeResponse.body!!.toString()).baseUrl
         }
     }
 }
