@@ -3,8 +3,8 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
-import coil.api.clear
-import coil.request.LoadRequest
+import coil.clear
+import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -49,9 +49,9 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
             binding.coverThumbnail.clear()
         } else {
             manga.id ?: return
-            val request = LoadRequest.Builder(view.context).data(manga)
+            val request = ImageRequest.Builder(view.context).data(manga)
                 .target(CoverViewTarget(binding.coverThumbnail)).build()
-            Coil.imageLoader(view.context).execute(request)
+            Coil.imageLoader(view.context).enqueue(request)
         }
     }
 }

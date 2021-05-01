@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Environment
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.GetRequest
+import coil.request.ImageRequest
 import coil.request.Parameters
 import coil.request.SuccessResult
 import eu.kanade.tachiyomi.R
@@ -354,7 +354,7 @@ class MangaDetailsPresenter(
 
                 launchIO {
                     val request =
-                        GetRequest.Builder(preferences.context).data(manga)
+                        ImageRequest.Builder(preferences.context).data(manga)
                             .memoryCachePolicy(CachePolicy.DISABLED)
                             .parameters(
                                 Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true)

@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.migration
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
-import coil.api.clear
-import coil.api.loadAny
+import coil.clear
+import coil.loadAny
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding

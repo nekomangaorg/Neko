@@ -6,7 +6,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.Coil
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -136,9 +136,9 @@ class MigrationProcessHolder(
         (root.layoutParams as ConstraintLayout.LayoutParams).verticalBias = 1f
         progress.isVisible = false
 
-        val request = LoadRequest.Builder(view.context).data(manga)
+        val request = ImageRequest.Builder(view.context).data(manga)
             .target(CoverViewTarget(coverThumbnail, progress)).build()
-        Coil.imageLoader(view.context).execute(request)
+        Coil.imageLoader(view.context).enqueue(request)
 
         compactTitle.isVisible = true
         gradient.isVisible = true

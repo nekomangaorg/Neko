@@ -41,7 +41,8 @@ import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
 import androidx.transition.TransitionSet
 import coil.Coil
-import coil.request.LoadRequest
+import coil.imageLoader
+import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
@@ -325,7 +326,7 @@ class MangaDetailsController :
     fun setPaletteColor() {
         val view = view ?: return
 
-        val request = LoadRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
+        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
             .target(
                 onSuccess = { drawable ->
                     val bitmap = (drawable as BitmapDrawable).bitmap
@@ -358,7 +359,7 @@ class MangaDetailsController :
                     }
                 }
             ).build()
-        Coil.imageLoader(view.context).execute(request)
+        view.context.imageLoader.enqueue(request)
     }
 
     /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
@@ -856,7 +857,7 @@ class MangaDetailsController :
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val request = LoadRequest.Builder(activity!!).data(manga).target(
+            val request = ImageRequest.Builder(activity!!).data(manga).target(
                 onError = {
                     shareManga()
                 },
@@ -864,7 +865,7 @@ class MangaDetailsController :
                     presenter.shareManga((it as BitmapDrawable).bitmap)
                 }
             ).build()
-            Coil.imageLoader(activity!!).execute(request)
+            Coil.imageLoader(activity!!).enqueue(request)
         } else {
             shareManga()
         }

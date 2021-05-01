@@ -2,7 +2,8 @@ package eu.kanade.tachiyomi.data.cache
 
 import android.content.Context
 import android.text.format.Formatter
-import coil.Coil
+import coil.imageLoader
+import coil.memory.MemoryCache
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -174,7 +175,7 @@ class CoverCache(val context: Context) {
     fun setCustomCoverToCache(manga: Manga, inputStream: InputStream) {
         getCustomCoverFile(manga).outputStream().use {
             inputStream.copyTo(it)
-            Coil.imageLoader(context).invalidate(manga.key())
+            context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
         }
     }
 
@@ -188,7 +189,7 @@ class CoverCache(val context: Context) {
         val result = getCustomCoverFile(manga).let {
             it.exists() && it.delete()
         }
-        Coil.imageLoader(context).invalidate(manga.key())
+        context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
         return result
     }
 
@@ -213,7 +214,7 @@ class CoverCache(val context: Context) {
     fun deleteFromCache(name: String?) {
         if (name.isNullOrEmpty()) return
         val file = getCoverFile(MangaImpl().apply { thumbnail_url = name })
-        Coil.imageLoader(context).invalidate(file.name)
+        context.imageLoader.memoryCache.remove(MemoryCache.Key(file.name))
         if (file.exists()) file.delete()
     }
 
@@ -234,7 +235,7 @@ class CoverCache(val context: Context) {
         val file = getCoverFile(manga)
         if (deleteCustom) deleteCustomCover(manga)
         if (file.exists()) {
-            Coil.imageLoader(context).invalidate(file.name)
+            context.imageLoader.memoryCache.remove(MemoryCache.Key(file.name))
             file.delete()
         }
     }

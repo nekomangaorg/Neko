@@ -5,8 +5,9 @@ import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
-import coil.api.clear
-import coil.request.LoadRequest
+import coil.clear
+import coil.imageLoader
+import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -60,10 +61,10 @@ class BrowseSourceGridHolder(
         if (manga.thumbnail_url == null) {
             binding.coverThumbnail.clear()
         } else {
-            val id = manga.id ?: return
-            val request = LoadRequest.Builder(view.context).data(manga)
+            manga.id ?: return
+            val request = ImageRequest.Builder(view.context).data(manga)
                 .target(CoverViewTarget(binding.coverThumbnail, binding.progress)).build()
-            Coil.imageLoader(view.context).execute(request)
+            Coil.imageLoader(view.context).enqueue(request)
         }
     }
 }

@@ -197,10 +197,10 @@ dependencies {
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
     // Image library
-    val coilVersion = "0.10.1"
-    implementation("io.coil-kt:coil:${Versions.COIL}")
-    implementation("io.coil-kt:coil-gif:${Versions.COIL}")
-    implementation("io.coil-kt:coil-svg:${Versions.COIL}")
+    val coilVersion = "1.2.1"
+    implementation("io.coil-kt:coil:$coilVersion")
+    implementation("io.coil-kt:coil-gif:$coilVersion")
+    implementation("io.coil-kt:coil-svg:$coilVersion")
 
     // Logging
     implementation("com.jakewharton.timber:timber:${Versions.TIMBER}")

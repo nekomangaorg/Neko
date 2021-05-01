@@ -8,7 +8,7 @@ import android.os.IBinder
 import android.os.PowerManager
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import coil.request.Parameters
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -453,12 +453,12 @@ class LibraryUpdateService(
                                 coverCache.deleteFromCache(thumbnailUrl)
                                 // load new covers in background
                                 val request =
-                                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                                    ImageRequest.Builder(this@LibraryUpdateService).data(manga)
                                         .memoryCachePolicy(CachePolicy.DISABLED).build()
                                 Coil.imageLoader(this@LibraryUpdateService).execute(request)
                             } else {
                                 val request =
-                                    LoadRequest.Builder(this@LibraryUpdateService).data(manga)
+                                    ImageRequest.Builder(this@LibraryUpdateService).data(manga)
                                         .memoryCachePolicy(CachePolicy.DISABLED)
                                         .parameters(Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true).build())
                                         .build()

@@ -4,8 +4,8 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.view.View
 import androidx.core.content.ContextCompat
-import coil.api.clear
-import coil.api.load
+import coil.clear
+import coil.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.extension.model.InstallStep

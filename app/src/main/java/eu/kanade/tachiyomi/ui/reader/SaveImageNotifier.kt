@@ -7,7 +7,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
-import coil.request.LoadRequest
+import coil.request.ImageRequest
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -38,7 +38,7 @@ class SaveImageNotifier(private val context: Context) {
      * @param file image file containing downloaded page image.
      */
     fun onComplete(file: File) {
-        val request = LoadRequest.Builder(context).memoryCachePolicy(CachePolicy.DISABLED).diskCachePolicy(CachePolicy.DISABLED)
+        val request = ImageRequest.Builder(context).memoryCachePolicy(CachePolicy.DISABLED).diskCachePolicy(CachePolicy.DISABLED)
             .data(file)
             .size(720, 1280)
             .target(
@@ -51,7 +51,7 @@ class SaveImageNotifier(private val context: Context) {
                     }
                 }
             ).build()
-        Coil.imageLoader(context).execute(request)
+        Coil.imageLoader(context).enqueue(request)
     }
 
     private fun showCompleteNotification(file: File, image: Bitmap) {
@@ -63,9 +63,7 @@ class SaveImageNotifier(private val context: Context) {
             setAutoCancel(true)
             color = ContextCompat.getColor(context, R.color.colorAccent)
             // Clear old actions if they exist
-            if (mActions.isNotEmpty()) {
-                mActions.clear()
-            }
+            clearActions()
 
             setContentIntent(NotificationHandler.openImagePendingActivity(context, file))
             // Share action

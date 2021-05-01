@@ -4,7 +4,7 @@ import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
 import androidx.core.view.isVisible
-import coil.api.loadAny
+import coil.loadAny
 import coil.request.Parameters
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
