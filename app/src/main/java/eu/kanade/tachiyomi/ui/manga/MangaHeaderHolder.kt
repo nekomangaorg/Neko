@@ -12,11 +12,9 @@ import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.loadAny
 import coil.request.CachePolicy
-import coil.request.Parameters
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
@@ -329,7 +327,8 @@ class MangaHeaderHolder(
             builder = {
                 placeholder(drawable)
                 error(drawable)
-                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+                if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
+                diskCachePolicy(CachePolicy.READ_ONLY)
             }
         )
         binding.backdrop.loadAny(
@@ -337,7 +336,8 @@ class MangaHeaderHolder(
             builder = {
                 placeholder(drawable)
                 error(drawable)
-                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+                if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
+                diskCachePolicy(CachePolicy.READ_ONLY)
             }
         )
     }

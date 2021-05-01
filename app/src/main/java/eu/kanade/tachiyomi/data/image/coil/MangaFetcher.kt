@@ -85,22 +85,24 @@ class MangaFetcher : Fetcher<Manga> {
             shouldFetchRemotely
         )
 
-        val tmpFile = File(coverFile.absolutePath + "_tmp")
-        body.source().use { input ->
-            tmpFile.sink().buffer().use { output ->
-                output.writeAll(input)
-            }
-        }
-
-        if (response.isSuccessful || !coverFile.exists()) {
-            if (coverFile.exists()) {
-                coverFile.delete()
+        if (options.diskCachePolicy.writeEnabled) {
+            val tmpFile = File(coverFile.absolutePath + "_tmp")
+            body.source().use { input ->
+                tmpFile.sink().buffer().use { output ->
+                    output.writeAll(input)
+                }
             }
 
-            tmpFile.renameTo(coverFile)
-        }
-        if (manga.favorite) {
-            coverCache.deleteCachedCovers()
+            if (response.isSuccessful || !coverFile.exists()) {
+                if (coverFile.exists()) {
+                    coverFile.delete()
+                }
+
+                tmpFile.renameTo(coverFile)
+            }
+            if (manga.favorite) {
+                coverCache.deleteCachedCovers()
+            }
         }
         return fileLoader(coverFile)
     }
