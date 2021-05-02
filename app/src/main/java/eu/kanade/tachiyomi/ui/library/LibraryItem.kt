@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -36,6 +35,7 @@ class LibraryItem(
     var downloadCount = -1
     var unreadType = 2
 
+    private val sourceManager: SourceManager by injectLazy()
     private val uniformSize: Boolean
         get() = preferences.uniformGrid().get()
 
@@ -160,16 +160,18 @@ class LibraryItem(
             } else containsGenre(constraint, manga.genre?.split(", "))
     }
 
-    @SuppressLint("DefaultLocale")
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
         return if (tag.startsWith("-")) {
             genres?.find {
-                it.trim().equals(tag.substringAfter("-"), ignoreCase = true)
+                val realTag = tag.substringAfter("-")
+                it.trim().equals(realTag, ignoreCase = true) ||
+                    manga.seriesType(preferences.context, sourceManager).equals(realTag, true)
             } == null
         } else {
             genres?.find {
-                it.trim().equals(tag, ignoreCase = true)
+                it.trim().equals(tag, ignoreCase = true) ||
+                    manga.seriesType(preferences.context, sourceManager).equals(tag, true)
             } != null
         }
     }

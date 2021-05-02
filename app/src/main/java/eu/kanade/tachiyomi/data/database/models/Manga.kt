@@ -54,9 +54,9 @@ interface Manga : SManga {
 
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
-    fun seriesType(context: Context): String {
+    fun seriesType(context: Context, sourceManager: SourceManager? = null): String {
         return context.getString(
-            when (seriesType()) {
+            when (seriesType(sourceManager = sourceManager)) {
                 TYPE_WEBTOON -> R.string.webtoon
                 TYPE_MANHWA -> R.string.manhwa
                 TYPE_MANHUA -> R.string.manhua
@@ -79,8 +79,8 @@ interface Manga : SManga {
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */
-    fun seriesType(useOriginalTags: Boolean = false, customTags: String? = null): Int {
-        val sourceName = Injekt.get<SourceManager>().getOrStub(source).name
+    fun seriesType(useOriginalTags: Boolean = false, customTags: String? = null, sourceManager: SourceManager? = null): Int {
+        val sourceName by lazy { (sourceManager ?: Injekt.get()).getOrStub(source).name }
         val tags = customTags ?: if (useOriginalTags) originalGenre else genre
         val currentTags = tags?.split(",")?.map { it.trim().toLowerCase(Locale.US) } ?: emptyList()
         return if (currentTags.any { tag -> isMangaTag(tag) }) {

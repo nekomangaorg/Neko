@@ -286,9 +286,9 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                (filterMangaType != item.manga.seriesType(sourceManager = sourceManager) && filterMangaType != Manga.TYPE_WEBTOON)
             } else {
-                    filterMangaType != item.manga.seriesType()
+                    filterMangaType != item.manga.seriesType(sourceManager = sourceManager)
                 }
             ) return false
         }
