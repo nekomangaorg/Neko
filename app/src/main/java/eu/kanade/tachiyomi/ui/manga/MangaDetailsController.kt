@@ -284,7 +284,7 @@ class MangaDetailsController :
         if (isColor == toolbarIsColored) return
         toolbarIsColored = isColor
         val isCurrentController =
-            router?.backstack?.lastOrNull()?.controller() == this@MangaDetailsController
+            router?.backstack?.lastOrNull()?.controller == this@MangaDetailsController
         if (isCurrentController) setTitle()
         if (actionMode != null) {
             activityBinding?.toolbar?.setBackgroundColor(Color.TRANSPARENT)
@@ -421,7 +421,7 @@ class MangaDetailsController :
         }
         // fetch cover again in case the user set a new cover while reading
         setPaletteColor()
-        val isCurrentController = router?.backstack?.lastOrNull()?.controller() ==
+        val isCurrentController = router?.backstack?.lastOrNull()?.controller ==
             this
         if (isCurrentController) {
             setStatusBarAndToolbar()
@@ -434,7 +434,7 @@ class MangaDetailsController :
             setActionBar(true)
             setStatusBarAndToolbar()
         } else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
-            if (router.backstack.lastOrNull()?.controller() is DialogController) {
+            if (router.backstack.lastOrNull()?.controller is DialogController) {
                 return
             }
             if (type == ControllerChangeType.POP_EXIT) {
@@ -447,9 +447,9 @@ class MangaDetailsController :
                 R.attr.colorSecondary
             ) ?: Color.BLACK
             if (router.backstackSize > 0 &&
-                router.backstack.last().controller() !is MangaDetailsController
+                router.backstack.last().controller !is MangaDetailsController
             ) {
-                if (router.backstack.last().controller() !is FloatingSearchInterface) {
+                if (router.backstack.last().controller !is FloatingSearchInterface) {
                     activityBinding?.appBar?.setBackgroundColor(colorSecondary)
                 }
                 activityBinding?.toolbar?.setBackgroundColor(colorSecondary)
@@ -1064,7 +1064,7 @@ class MangaDetailsController :
     }
 
     override fun tagClicked(text: String) {
-        val firstController = router.backstack.first()?.controller()
+        val firstController = router.backstack.first()?.controller
         if (firstController is LibraryController && router.backstack.size == 2) {
             router.handleBack()
             firstController.search(text)

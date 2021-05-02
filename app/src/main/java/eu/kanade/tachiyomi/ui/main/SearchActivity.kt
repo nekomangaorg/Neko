@@ -28,8 +28,8 @@ class SearchActivity : MainActivity() {
         binding.cardToolbar.navigationIcon = drawerArrow
         binding.toolbar.setNavigationOnClickListener { popToRoot() }
         binding.cardToolbar.setNavigationOnClickListener { popToRoot() }
-        (router.backstack.lastOrNull()?.controller() as? BaseController<*>)?.setTitle()
-        (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
+        (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
+        (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
     }
 
     override fun onBackPressed() {

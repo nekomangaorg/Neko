@@ -110,7 +110,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val downloadManager: DownloadManager by injectLazy()
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val hideBottomNav
-        get() = router.backstackSize > 1 && router.backstack[1].controller() !is DialogController
+        get() = router.backstackSize > 1 && router.backstack[1].controller !is DialogController
 
     private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
@@ -190,7 +190,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.bottomNav.selectedItemId = id
                 binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? BottomSheetController
+                        router.backstack.firstOrNull()?.controller as? BottomSheetController
                     controller?.showSheet()
                 }
                 true
@@ -198,7 +198,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         binding.bottomNav.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
-            val currentController = router.backstack.lastOrNull()?.controller()
+            val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
                     continueSwitchingTabs = true
@@ -271,14 +271,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller()
+            val rootSearchController = router.backstack.lastOrNull()?.controller
             if (rootSearchController is RootSearchInterface) {
                 rootSearchController.expandSearch()
             } else onBackPressed()
         }
 
         binding.cardToolbar.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller()
+            val rootSearchController = router.backstack.lastOrNull()?.controller
             if (rootSearchController is RootSearchInterface) {
                 rootSearchController.expandSearch()
             } else onBackPressed()
@@ -322,11 +322,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
         )
 
-        syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
+        syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
 
         binding.toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
-        (router.backstack.lastOrNull()?.controller() as? BaseController<*>)?.setTitle()
-        (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
+        (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
+        (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
 
         if (savedInstanceState == null) {
             // Show changelog if needed
@@ -348,7 +348,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.cardToolbar.setIncognitoMode(it)
             }
         setExtensionsBadge()
-        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller()))
+        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller))
     }
 
     open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
@@ -367,7 +367,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
         )
         currentToolbar?.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller()
+            val rootSearchController = router.backstack.lastOrNull()?.controller
             if (rootSearchController is RootSearchInterface) {
                 rootSearchController.expandSearch()
             } else onBackPressed()
@@ -549,7 +549,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
                 binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? RecentsController
+                        router.backstack.firstOrNull()?.controller as? RecentsController
                     controller?.tempJumpTo(
                         when (intent.action) {
                             SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
@@ -567,7 +567,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
                 binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? BrowseController
+                        router.backstack.firstOrNull()?.controller as? BrowseController
                     controller?.showSheet()
                 }
             }
@@ -579,7 +579,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             SHORTCUT_UPDATE_NOTES -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
-                if (router.backstack.lastOrNull()?.controller() !is AboutController.NewUpdateDialogController) {
+                if (router.backstack.lastOrNull()?.controller !is AboutController.NewUpdateDialogController) {
                     AboutController.NewUpdateDialogController(extras).showDialog(router)
                 }
             }
@@ -593,7 +593,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 router.popToRoot()
                 binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? RecentsController
+                        router.backstack.firstOrNull()?.controller as? RecentsController
                     controller?.showSheet()
                 }
             }
@@ -614,7 +614,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onBackPressed() {
-        val sheetController = router.backstack.last().controller() as? BottomSheetController
+        val sheetController = router.backstack.last().controller as? BottomSheetController
         if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
@@ -874,7 +874,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     diffY <= 0
                 ) {
                     val bottomSheetController =
-                        router.backstack.lastOrNull()?.controller() as? BottomSheetController
+                        router.backstack.lastOrNull()?.controller as? BottomSheetController
                     bottomSheetController?.showSheet()
                 }
                 result = true

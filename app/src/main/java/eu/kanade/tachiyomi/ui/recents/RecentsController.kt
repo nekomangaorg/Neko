@@ -642,7 +642,7 @@ class RecentsController(bundle: Bundle? = null) :
             }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
-            if (router.backstack.lastOrNull()?.controller() !is DialogController) {
+            if (router.backstack.lastOrNull()?.controller !is DialogController) {
                 (activity as? MainActivity)?.showTabBar(false)
             }
             snack?.dismiss()

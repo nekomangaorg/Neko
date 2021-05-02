@@ -227,11 +227,9 @@ dependencies {
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
 
     // Conductor
-    implementation("com.bluelinelabs:conductor:2.1.5")
-    implementation("com.bluelinelabs:conductor-support:2.1.5") {
-        exclude("group", "com.android.support")
-    }
-    implementation("com.github.tachiyomiorg:conductor-support-preference:2.0.0")
+    val conductorVersion = "3.0.0"
+    implementation("com.bluelinelabs:conductor:$conductorVersion")
+    implementation("com.github.jays2kings:conductor-support-preference:3.0.0")
 
     // RxBindings
     implementation("com.jakewharton.rxbinding:rxbinding-kotlin:${Versions.RX_BINDING}")

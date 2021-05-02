@@ -49,7 +49,7 @@ fun Controller.setOnQueryTextChangeListener(
         object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!onlyOnSubmit && router.backstack.lastOrNull()
-                    ?.controller() == this@setOnQueryTextChangeListener
+                    ?.controller == this@setOnQueryTextChangeListener
                 ) {
                     return f(newText)
                 }
@@ -57,7 +57,7 @@ fun Controller.setOnQueryTextChangeListener(
             }
 
             override fun onQueryTextSubmit(query: String?): Boolean {
-                if (router.backstack.lastOrNull()?.controller() == this@setOnQueryTextChangeListener) {
+                if (router.backstack.lastOrNull()?.controller == this@setOnQueryTextChangeListener) {
                     if (hideKbOnSubmit) {
                         val imm =
                             activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
@@ -147,7 +147,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
-                    ?.controller() == this@liftAppbarWith && activity != null
+                    ?.controller == this@liftAppbarWith && activity != null
                 ) {
                     val notAtTop = recycler.canScrollVertically(-1)
                     if (notAtTop != elevate) elevateFunc(notAtTop)
@@ -286,7 +286,7 @@ fun Controller.scrollViewWith(
                     if (!customPadding && lastY == 0f && (
                         (
                             this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
-                                ?.controller() is MangaDetailsController
+                                ?.controller is MangaDetailsController
                             ) || includeTabView
                         )
                     ) {
@@ -332,7 +332,7 @@ fun Controller.scrollViewWith(
                 super.onScrolled(recyclerView, dx, dy)
                 if (recyclerView.tag == MaterialFastScroll.noUpdate) return
                 if (router?.backstack?.lastOrNull()
-                    ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
+                    ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                     activity != null && activityBinding!!.appBar.height > 0 &&
                     recycler.translationY == 0f
                 ) {
@@ -396,7 +396,7 @@ fun Controller.scrollViewWith(
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
                     if (router?.backstack?.lastOrNull()
-                        ?.controller() == this@scrollViewWith && statusBarHeight > -1 &&
+                        ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                         activity != null && activityBinding!!.appBar.height > 0 &&
                         recycler.translationY == 0f
                     ) {

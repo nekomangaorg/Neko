@@ -218,7 +218,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
 //        val searchEventsObservable = searchView.queryTextChangeEvents()
 //            .skip(1)
-//            .filter { router.backstack.lastOrNull()?.controller() == this@BrowseSourceController }
+//            .filter { router.backstack.lastOrNull()?.controller == this@BrowseSourceController }
 //            .share()
 //        val writingObservable = searchEventsObservable
 //            .filter { !it.isSubmitted }
@@ -239,7 +239,7 @@ open class BrowseSourceController(bundle: Bundle) :
         searchItem.fixExpand(
             onExpand = { invalidateMenuOnExpand() },
             onCollapse = {
-                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller() is GlobalSearchController) {
+                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is GlobalSearchController) {
                     router.popController(this)
                 } else {
                     searchWithQuery("")

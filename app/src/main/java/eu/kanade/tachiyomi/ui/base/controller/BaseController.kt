@@ -11,7 +11,6 @@ import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import com.bluelinelabs.conductor.RestoreViewOnCreateController
 import eu.kanade.tachiyomi.util.view.removeQueryListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -19,7 +18,7 @@ import kotlinx.coroutines.cancel
 import timber.log.Timber
 
 abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
-    RestoreViewOnCreateController(bundle) {
+    Controller(bundle) {
 
     lateinit var binding: VB
     lateinit var viewScope: CoroutineScope
@@ -73,7 +72,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     }
 
     val onRoot: Boolean
-        get() = router.backstack.lastOrNull()?.controller() == this
+        get() = router.backstack.lastOrNull()?.controller == this
 
     open fun getTitle(): String? {
         return null
@@ -93,7 +92,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             parentController = parentController.parentController
         }
 
-        if (router.backstack.lastOrNull()?.controller() == this) {
+        if (router.backstack.lastOrNull()?.controller == this) {
             (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
         }
     }

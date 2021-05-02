@@ -175,7 +175,7 @@ class SettingsSourcesController : SettingsController() {
             searchView.clearFocus()
         }
 
-        searchView.queryTextChanges().filter { router.backstack.lastOrNull()?.controller() == this }
+        searchView.queryTextChanges().filter { router.backstack.lastOrNull()?.controller == this }
             .subscribeUntilDestroy {
                 query = it.toString()
                 drawSources()
