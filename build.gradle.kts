@@ -9,7 +9,6 @@ allprojects {
         mavenCentral()
         maven { setUrl("https://jitpack.io") }
         maven { setUrl("https://plugins.gradle.org/m2/") }
-        jcenter()
     }
 }
 
