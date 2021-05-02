@@ -23,6 +23,7 @@ Features of Tachiyomi include:
 Plus some new features in this fork such as:
 * New Manga details screens
 * Combine 2 pages into a single one
+* Floating searchbar to easily start a search
 * New Recents page: Providing quick access to newly added manga, new chapters, and to continue where you left on in a series
 * Android 10 edge to edge support (and a translucent nav bar for older versions): no more small ugly bar for the gesture navigation
 * Smart background based on manga page: For those that like having a white background to match the content, this will automatically set the background to match for moments such as a flashback section of a manga

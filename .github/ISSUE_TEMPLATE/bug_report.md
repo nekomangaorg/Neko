@@ -11,11 +11,11 @@ assignees: ''
 
 I acknowledge that:
 
-- I have updated to the latest version of the app (latest J2K is v1.0.15)
+- I have updated to the latest version of the app (latest J2K is v1.0.16)
 - I have checked that my bug has been reported or fixed in the issues page
-- I will only report bugs exclusive to this fork. I have checked that is not an issue on the main tachiyomi version (https://github.com/inorichi/tachiyomi)
+- I will only report bugs exclusive to this fork. I have checked that is not an issue on the main tachiyomi version (https://github.com/tachiyomiorg/tachiyomi)
 - I have updated all extensions
-- If this is an issue with an extension/source, that I should be opening an issue in https://github.com/inorichi/tachiyomi-extensions
+- If this is an issue with an extension/source, that I should be opening an issue in https://github.com/tachiyomiorg/tachiyomi-extensions
 
 **DELETE THIS SECTION IF YOU HAVE READ AND ACKNOWLEDGED IT**
 
