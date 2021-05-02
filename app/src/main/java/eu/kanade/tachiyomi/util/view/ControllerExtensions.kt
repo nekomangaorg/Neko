@@ -225,11 +225,7 @@ fun Controller.scrollViewWith(
             liftOnScroll.invoke(el)
         } else {
             elevationAnim?.cancel()
-            val floatingBar =
-                !(
-                    activityBinding?.toolbar?.isVisible == true ||
-                        (activityBinding?.tabsFrameLayout?.isVisible == true && includeTabView)
-                    )
+            val floatingBar = (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
                 activityBinding?.appBar?.elevation = 0f
                 return@f
@@ -244,12 +240,7 @@ fun Controller.scrollViewWith(
             elevationAnim?.start()
         }
     }
-    val floatingBar =
-        !(
-            activityBinding?.toolbar?.isVisible == true ||
-                (activityBinding?.tabsFrameLayout?.isVisible == true && includeTabView)
-            )
-    if (floatingBar) {
+    if ((this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView) {
         activityBinding?.appBar?.elevation = 0f
     }
     addLifecycleListener(
