@@ -193,9 +193,6 @@ open class GlobalSearchController(
             customTitle = view.context?.getString(R.string.loading)
             setTitle()
         }
-        binding.recycler.post {
-            binding.recycler.scrollToPosition(0)
-        }
     }
 
     override fun onDestroyView(view: View) {
