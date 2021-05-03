@@ -78,7 +78,7 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
         init {
             binding.image.isVisible = false
             binding.editButton.isVisible = false
-            binding.editText.isEnabled = false
+            binding.editText.isVisible = false
             setDragHandleView(binding.reorder)
         }
 
