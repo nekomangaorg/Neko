@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bottom_sheet_rounded_background"
-    android:backgroundTint="?android:attr/colorBackground"
+    android:backgroundTint="?colorPrimaryVariant"
     android:orientation="vertical"
     app:behavior_peekHeight="48sp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">

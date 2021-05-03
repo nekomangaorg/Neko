@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
+import android.content.res.ColorStateList
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,6 +11,7 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.widget.SearchView
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -40,7 +42,9 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.spToPx
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -191,6 +195,15 @@ class RecentsController(bundle: Bundle? = null) :
             binding.shadow2.alpha = if (isCollapsed) 0.25f else 0f
             binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
             binding.fakeAppBar.alpha = if (isExpanded) 1f else 0f
+            binding.downloadBottomSheet.dlRecycler.alpha = isExpanded.toInt().toFloat()
+            binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
+                ColorUtils.blendARGB(
+                    view.context.getResourceColor(R.attr.colorPrimaryVariant),
+                    view.context.getResourceColor(android.R.attr.colorBackground),
+                    isExpanded.toInt().toFloat()
+                )
+            )
+            binding.downloadBottomSheet.root.backgroundTintList = binding.downloadBottomSheet.sheetLayout.backgroundTintList
             updateTitleAndMenu()
         }
 
@@ -224,6 +237,15 @@ class RecentsController(bundle: Bundle? = null) :
                     ).coerceIn(0f, 15f)
                     binding.fakeAppBar.alpha = max(0f, (progress - cap) / (1f - cap))
                     binding.downloadBottomSheet.sheetLayout.alpha = 1 - max(0f, progress / cap)
+                    binding.downloadBottomSheet.dlRecycler.alpha = progress * 10
+                    binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
+                        ColorUtils.blendARGB(
+                            view.context.getResourceColor(R.attr.colorPrimaryVariant),
+                            view.context.getResourceColor(android.R.attr.colorBackground),
+                            (progress * 2f).coerceIn(0f, 1f)
+                        )
+                    )
+                    binding.downloadBottomSheet.root.backgroundTintList = binding.downloadBottomSheet.sheetLayout.backgroundTintList
                     activityBinding?.appBar?.y = max(
                         activityBinding!!.appBar.y,
                         -headerHeight * (1 - progress)
