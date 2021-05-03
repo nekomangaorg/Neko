@@ -100,6 +100,7 @@ fun CharSequence.tintText(@ColorInt color: Int): Spanned {
 
 fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {
     val wordToSpan: Spannable = SpannableString(this)
+    if (highlight.isBlank()) return wordToSpan
     indexesOf(highlight).forEach {
         wordToSpan.setSpan(BackgroundColorSpan(color), it, it + highlight.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     }

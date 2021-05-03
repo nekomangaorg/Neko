@@ -7,6 +7,7 @@ import coil.clear
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
+import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
@@ -61,14 +62,25 @@ class LibraryListHolder(
         binding.title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
 
         // Update the binding.title of the manga.
-        binding.title.text = item.manga.title
+        binding.title.text = item.manga.title.highlightText(item.filter, color)
         setUnreadBadge(binding.unreadDownloadBadge.badgeView, item)
 
-        binding.subtitle.text = item.manga.author?.trim()
+        val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
+            item.manga.author?.trim() ?: ""
+        } else {
+            listOfNotNull(
+                item.manga.author?.trim()?.takeIf { it.isNotBlank() },
+                item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
+            ).joinToString(", ")
+        }
+
+        binding.subtitle.text = authorArtist.highlightText(item.filter, color)
+        binding.title.maxLines = 2
         binding.title.post {
-            if (binding.title.text == item.manga.title) {
-                binding.subtitle.isVisible = binding.title.lineCount == 1 && !item.manga.author.isNullOrBlank()
-            }
+            val hasAuthorInFilter =
+                item.filter.isNotBlank() && authorArtist.contains(item.filter, true)
+            binding.subtitle.isVisible = binding.title.lineCount <= 1 || hasAuthorInFilter
+            binding.title.maxLines = if (hasAuthorInFilter) 1 else 2
         }
 
         // Update the cover.

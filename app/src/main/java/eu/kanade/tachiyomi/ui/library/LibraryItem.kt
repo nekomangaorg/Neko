@@ -33,6 +33,7 @@ class LibraryItem(
 
     var downloadCount = -1
     var unreadType = 2
+    var filter = ""
 
     private val sourceManager: SourceManager by injectLazy()
     private val uniformSize: Boolean
@@ -142,6 +143,7 @@ class LibraryItem(
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
+        filter = constraint
         if (manga.isBlank() && manga.title.isBlank()) {
             return constraint.isEmpty()
         }

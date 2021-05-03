@@ -1,10 +1,12 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
+import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
@@ -17,6 +19,8 @@ abstract class LibraryHolder(
     view: View,
     val adapter: LibraryCategoryAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
+
+    protected val color = ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorAccent), 75)
 
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this

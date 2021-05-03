@@ -11,6 +11,7 @@ import coil.size.Scale
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
+import eu.kanade.tachiyomi.util.lang.highlightText
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -55,10 +56,25 @@ class LibraryGridHolder(
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
         binding.constraintLayout.isVisible = !item.manga.isBlank()
-        binding.title.text = item.manga.title
-        binding.subtitle.text = item.manga.author?.trim()
+        binding.title.text = item.manga.title.highlightText(item.filter, color)
+        val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
+            item.manga.author?.trim() ?: ""
+        } else {
+            listOfNotNull(
+                item.manga.author?.trim()?.takeIf { it.isNotBlank() },
+                item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
+            ).joinToString(", ")
+        }
+        binding.subtitle.text = authorArtist.highlightText(item.filter, color)
 
-        binding.compactTitle.text = binding.title.text
+        binding.compactTitle.text = binding.title.text?.toString()?.highlightText(item.filter, color)
+
+        binding.title.post {
+            val hasAuthorInFilter =
+                item.filter.isNotBlank() && authorArtist.contains(item.filter, true)
+            binding.subtitle.isVisible = binding.title.lineCount <= 1 || hasAuthorInFilter
+            binding.title.maxLines = if (hasAuthorInFilter) 1 else 2
+        }
 
         setUnreadBadge(binding.unreadDownloadBadge.badgeView, item)
         setReadingButton(item)
