@@ -20,6 +20,10 @@ class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
         }
     )
 
+    override fun getTitle(): String {
+        return presenter.source.name
+    }
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         binding.fab.isVisible = false
@@ -28,6 +32,8 @@ class LatestUpdatesController(bundle: Bundle) : BrowseSourceController(bundle) {
     override fun createPresenter(): BrowseSourcePresenter {
         return LatestUpdatesPresenter(args.getLong(SOURCE_ID_KEY))
     }
+
+    override fun showFloatingBar() = false
 
     override fun onPrepareOptionsMenu(menu: Menu) {
         super.onPrepareOptionsMenu(menu)
