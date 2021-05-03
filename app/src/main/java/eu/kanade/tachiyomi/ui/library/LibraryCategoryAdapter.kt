@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import eu.kanade.tachiyomi.util.system.withDefContext
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
@@ -112,6 +113,17 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
             updateDataSet(mangas)
         } else {
             updateDataSet(mangas.filter { it.filter(s) })
+        }
+        isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
+    }
+
+    suspend fun performFilterAsync() {
+        val s = getFilter(String::class.java)
+        if (s.isNullOrBlank()) {
+            updateDataSet(mangas)
+        } else {
+            val filteredManga = withDefContext { mangas.filter { it.filter(s) } }
+            updateDataSet(filteredManga)
         }
         isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
     }

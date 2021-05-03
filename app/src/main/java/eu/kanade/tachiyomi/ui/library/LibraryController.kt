@@ -1111,7 +1111,9 @@ class LibraryController(
             adapter.removeAllScrollableHeaders()
         }
         adapter.setFilter(query)
-        adapter.performFilter()
+        viewScope.launchUI {
+            adapter.performFilterAsync()
+        }
         return true
     }
 
