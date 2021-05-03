@@ -441,7 +441,7 @@
     <string name="confirm_category_deletion">Burahin Ang kategorya\?</string>
     <string name="categories_in_global_update">Lahat ng kategorya sa panglahatang update</string>
     <string name="categories_on_manual">Kategoryang I-uupdate Kung I-rerefresh ng isa-isa</string>
-    <string name="top_category">Pinaka-taas na kategorya</string>
+    <string name="top_category">Pinaka-taas na kategorya (%1$s)</string>
     <string name="category_is_empty">Walang laman Ang kategorya</string>
     <string name="new_category">Bagong kategorya</string>
     <string name="create_new_category">Gumawa ng bagong kategorya</string>
