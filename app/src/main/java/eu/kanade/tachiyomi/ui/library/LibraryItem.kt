@@ -15,7 +15,6 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -43,7 +42,7 @@ class LibraryItem(
         get() = preferences.libraryLayout().get()
 
     val hideReadingButton: Boolean
-        get() = preferences.hideStartReadingButton().getOrDefault()
+        get() = preferences.hideStartReadingButton().get()
 
     override fun getLayoutRes(): Int {
         return if (libraryLayout == 0 || manga.isBlank()) {

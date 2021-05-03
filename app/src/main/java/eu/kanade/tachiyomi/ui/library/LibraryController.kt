@@ -832,8 +832,7 @@ class LibraryController(
         listOf(
             preferences.libraryLayout(),
             preferences.uniformGrid(),
-            preferences.gridSize(),
-            preferences.unreadBadgeType()
+            preferences.gridSize()
         ).forEach {
             it.asFlow()
                 .drop(1)
@@ -842,6 +841,12 @@ class LibraryController(
                 }
                 .launchIn(viewScope)
         }
+        preferences.hideStartReadingButton().asFlow()
+            .drop(1)
+            .onEach {
+                adapter.notifyDataSetChanged()
+            }
+            .launchIn(viewScope)
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
@@ -1081,7 +1086,7 @@ class LibraryController(
         destroyActionModeIfNeeded()
     }
 
-    fun reattachAdapter() {
+    private fun reattachAdapter() {
         libraryLayout = preferences.libraryLayout().get()
         setRecyclerLayout()
         val position =
