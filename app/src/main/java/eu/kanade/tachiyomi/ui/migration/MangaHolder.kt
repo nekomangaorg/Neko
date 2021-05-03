@@ -3,9 +3,9 @@ package eu.kanade.tachiyomi.ui.migration
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
 import coil.clear
-import coil.loadAny
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 
@@ -22,6 +22,6 @@ class MangaHolder(
 
         // Update the cover.
         binding.coverThumbnail.clear()
-        binding.coverThumbnail.loadAny(item.manga)
+        binding.coverThumbnail.loadManga(item.manga)
     }
 }

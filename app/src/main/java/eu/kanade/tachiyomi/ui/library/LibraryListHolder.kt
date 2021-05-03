@@ -5,7 +5,7 @@ import android.view.ViewGroup
 import androidx.core.view.isVisible
 import coil.clear
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -88,7 +88,7 @@ class LibraryListHolder(
             binding.coverThumbnail.clear()
         } else {
             item.manga.id ?: return
-            binding.coverThumbnail.loadLibraryManga(item.manga)
+            binding.coverThumbnail.loadManga(item.manga)
         }
     }
 

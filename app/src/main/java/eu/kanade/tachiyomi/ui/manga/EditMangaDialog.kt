@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
+import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.EditMangaDialogBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
@@ -68,7 +69,7 @@ class EditMangaDialog : DialogController {
     }
 
     fun onViewCreated() {
-        binding.mangaCover.loadAny(manga)
+        binding.mangaCover.loadManga(manga)
         val isLocal = manga.isLocal()
 
         if (isLocal) {
@@ -152,6 +153,7 @@ class EditMangaDialog : DialogController {
                     parameters(Parameters.Builder().set(MangaFetcher.realCover, true).build())
                 }
             )
+            customCoverUri = null
             willResetCover = true
         }
     }

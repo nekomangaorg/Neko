@@ -9,7 +9,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -138,7 +138,7 @@ class RecentMangaHolder(
             )
         }
         if ((itemView.context as? Activity)?.isDestroyed != true) {
-            binding.coverThumbnail.loadLibraryManga(item.mch.manga)
+            binding.coverThumbnail.loadManga(item.mch.manga)
         }
         if (!item.mch.manga.isLocal()) {
             notifyStatus(

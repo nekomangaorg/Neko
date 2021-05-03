@@ -10,11 +10,11 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import coil.loadAny
 import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
@@ -322,7 +322,7 @@ class MangaHeaderHolder(
     fun updateCover(manga: Manga) {
         if (!manga.initialized) return
         val drawable = adapter.controller.binding.mangaCoverFull.drawable
-        binding.mangaCover.loadAny(
+        binding.mangaCover.loadManga(
             manga,
             builder = {
                 placeholder(drawable)
@@ -331,7 +331,7 @@ class MangaHeaderHolder(
                 diskCachePolicy(CachePolicy.READ_ONLY)
             }
         )
-        binding.backdrop.loadAny(
+        binding.backdrop.loadManga(
             manga,
             builder = {
                 placeholder(drawable)

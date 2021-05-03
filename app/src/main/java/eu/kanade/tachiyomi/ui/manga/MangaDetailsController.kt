@@ -326,7 +326,7 @@ class MangaDetailsController :
     fun setPaletteColor() {
         val view = view ?: return
 
-        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
+        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false).memoryCacheKey(presenter.manga.key())
             .target(
                 onSuccess = { drawable ->
                     val bitmap = (drawable as BitmapDrawable).bitmap

@@ -9,7 +9,7 @@ import coil.clear
 import coil.size.Precision
 import coil.size.Scale
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 
@@ -95,7 +95,7 @@ class LibraryGridHolder(
 
     private fun setCover(manga: Manga) {
         if ((adapter.recyclerView.context as? Activity)?.isDestroyed == true) return
-        binding.coverThumbnail.loadLibraryManga(manga) {
+        binding.coverThumbnail.loadManga(manga) {
             if (!fixedSize) {
                 precision(Precision.INEXACT)
                 scale(Scale.FIT)
