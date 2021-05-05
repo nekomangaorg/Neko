@@ -196,9 +196,9 @@ class SettingsSiteController :
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!
 
-            val options = MdLang.values().map { Pair(it.dexLang, it.name) }
+            val options = MdLang.values().map { Pair(it.lang, it.name) }
             val initialLangs = preferences!!.langsToShow().get().split(",")
-                .map { lang -> options.indexOfFirst { it.first.equals(lang) } }.toIntArray()
+                .map { lang -> options.indexOfFirst { it.first == lang } }.toIntArray()
 
             return MaterialDialog(activity)
                 .title(R.string.show_languages)

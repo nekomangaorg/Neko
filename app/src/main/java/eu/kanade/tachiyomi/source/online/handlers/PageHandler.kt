@@ -25,7 +25,7 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val da
         return client.newCall(pageListRequest(chapter))
             .asObservableSuccess()
             .map { response ->
-                val host = MdUtil.atHomeUrlHostUrl("${MdUtil.atHomeUrl}${chapter.mangadex_chapter_id}", client)
+                val host = MdUtil.atHomeUrlHostUrl("${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}", client)
                 ApiChapterParser().pageListParse(response, host, dataSaver)
             }
     }

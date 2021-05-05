@@ -125,7 +125,7 @@ object PreferenceKeys {
 
     const val lang = "app_language"
 
-    const val langToShow = "mangadex_languages"
+    const val langToShow = "mangadex_languages_new"
 
     const val dateFormat = "app_date_format"
 
@@ -186,6 +186,10 @@ object PreferenceKeys {
     const val createLegacyBackup = "create_legacy_backup"
 
     const val useCacheSource = "use_cache_source"
+
+    const val sessionToken = "mangadex_session_token"
+
+    const val refreshToken = "mangadex_refresh_token"
 
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

@@ -151,7 +151,7 @@ open class MangaDexCache() : MangaDex() {
         return Observable.just(emptyList())
     }
 
-    override suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
+    override suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         throw Exception("Cache source cannot convert chapter id to manga id")
     }
 

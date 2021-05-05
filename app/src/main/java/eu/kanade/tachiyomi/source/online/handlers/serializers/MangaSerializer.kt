@@ -14,7 +14,7 @@ data class MangaListResponse(
 data class MangaResponse(
     val result: String,
     val data: NetworkManga,
-    val relationships: List<MangaRelationships>
+    val relationships: List<Relationships>
 )
 
 @Serializable
@@ -43,9 +43,14 @@ data class TagsSerializer(
 )
 
 @Serializable
-data class MangaRelationships(
+data class Relationships(
     val id: String,
     val type: String,
+)
+
+@Serializable
+data class AuthorResponseList(
+    val results: List<AuthorResponse>,
 )
 
 @Serializable
@@ -63,4 +68,9 @@ data class NetworkAuthor(
 @Serializable
 data class AuthorAttributes(
     val name: String,
+)
+
+@Serializable
+data class UpdateReadingStatus(
+    val id: String?
 )

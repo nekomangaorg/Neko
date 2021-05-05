@@ -229,7 +229,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lang() = prefs.getString(Keys.lang, "")
 
-    fun langsToShow() = flowPrefs.getString(Keys.langToShow, "gb")
+    fun langsToShow() = flowPrefs.getString(Keys.langToShow, "en")
 
     fun defaultCategory() = prefs.getInt(Keys.defaultCategory, -1)
 
@@ -340,4 +340,27 @@ class PreferencesHelper(val context: Context) {
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
 
     fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
+
+    fun sessionToken() = prefs.getString(Keys.sessionToken, "")
+
+    fun setSessionToken(session: String) {
+        prefs.edit()
+            .putString(Keys.sessionToken, session)
+            .apply()
+    }
+
+    fun refreshToken() = prefs.getString(Keys.refreshToken, "")
+
+    fun setRefreshToken(refresh: String) {
+        prefs.edit()
+            .putString(Keys.refreshToken, refresh)
+            .apply()
+    }
+
+    fun setTokens(refresh: String, session: String) {
+        prefs.edit()
+            .putString(Keys.sessionToken, session)
+            .putString(Keys.refreshToken, refresh)
+            .apply()
+    }
 }

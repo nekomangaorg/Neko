@@ -20,9 +20,9 @@ class ApiChapterParser {
 
         val hash = networkApiChapter.data.attributes.hash
         val pageArray = if (dataSaver) {
-            networkApiChapter.data.attributes.dataSaver.map { "/data-saver/$hash$it" }
+            networkApiChapter.data.attributes.dataSaver.map { "/data-saver/$hash/$it" }
         } else {
-            networkApiChapter.data.attributes.data.map { "/data/$hash$it" }
+            networkApiChapter.data.attributes.data.map { "/data/$hash/$it" }
         }
         val now = Date().time
         pageArray.forEach { imgUrl ->

@@ -6,6 +6,7 @@ import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
 import okhttp3.HttpUrl.Companion.toHttpUrl
@@ -30,7 +31,7 @@ class NetworkHelper(val context: Context) {
     val cookieManager = AndroidCookieJar()
 
     private val bucket = TokenBuckets.builder().withCapacity(2)
-        .withFixedIntervalRefillStrategy(2, 1, TimeUnit.SECONDS).build()
+        .withFixedIntervalRefillStrategy(4, 1, TimeUnit.SECONDS).build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
@@ -73,7 +74,7 @@ class NetworkHelper(val context: Context) {
                                 Gson().fromJson(message, Any::class.java)
                                 XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace().json(message)
                             } catch (ex: Exception) {
-                                XLog.tag("||NEKO-NETWORK").nb().disableStackTrace().d(message)
+                                XLog.tag("||NEKO-NETWORK").disableBorder().disableStackTrace().d(message)
                             }
                         }
                     }
@@ -83,7 +84,7 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+        return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).authenticator(TokenAuthenticator(MangaDexLoginHelper(nonRateLimitedClient, preferences))).build()
     }
 
     fun buildCloudFlareClient(): OkHttpClient {
