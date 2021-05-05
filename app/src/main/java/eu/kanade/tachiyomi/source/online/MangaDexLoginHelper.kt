@@ -29,7 +29,7 @@ import okhttp3.RequestBody.Companion.toRequestBody
 class MangaDexLoginHelper(val client: OkHttpClient, val preferences: PreferencesHelper) {
     suspend fun isAuthenticated(authHeaders: Headers): Boolean {
         val response = client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
-        val body = MdUtil.jsonParser.decodeFromString(CheckTokenResponse.serializer(), response.body!!.toString())
+        val body = MdUtil.jsonParser.decodeFromString(CheckTokenResponse.serializer(), response.body!!.string())
         return body.isAuthenticated
     }
 
@@ -48,7 +48,7 @@ class MangaDexLoginHelper(val client: OkHttpClient, val preferences: Preferences
             )
         ).await()
         val refresh = runCatching {
-            val jsonResponse = MdUtil.jsonParser.decodeFromString(LoginResponse.serializer(), postResult.body!!.toString())
+            val jsonResponse = MdUtil.jsonParser.decodeFromString(LoginResponse.serializer(), postResult.body!!.string())
             preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
         }
         return refresh.isSuccess
@@ -74,7 +74,7 @@ class MangaDexLoginHelper(val client: OkHttpClient, val preferences: Preferences
 
             //if it fails to parse then login failed
             val refresh = runCatching {
-                MdUtil.jsonParser.decodeFromString(LoginResponse.serializer(), postResult.body!!.toString())
+                MdUtil.jsonParser.decodeFromString(LoginResponse.serializer(), postResult.body!!.string())
             }
             return@withContext postResult.code == 200 && refresh.isSuccess
         }

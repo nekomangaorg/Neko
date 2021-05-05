@@ -38,7 +38,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         return client.newCall(followsListRequest(0))
             .asObservable()
             .map { response ->
-                val mangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.toString())
+                val mangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
                 val results = mangaListResponse.results
 
                 var hasMoreResults = mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
@@ -186,7 +186,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     suspend fun fetchAllFollows(): List<SManga> {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(followsListRequest(0)).await()
-            val mangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.toString())
+            val mangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
             val results = mangaListResponse.results
 
             var hasMoreResults = mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
