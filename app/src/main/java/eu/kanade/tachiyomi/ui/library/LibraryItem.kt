@@ -181,6 +181,8 @@ class LibraryItem(
     }
 
     override fun hashCode(): Int {
-        return (manga.id!! + (manga.category shl 50).toLong()).hashCode() // !!.hashCode()
+        var result = manga.id!!.hashCode()
+        result = 31 * result + (header?.hashCode() ?: 0)
+        return result
     }
 }
