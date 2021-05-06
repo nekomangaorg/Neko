@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -412,12 +413,15 @@ class ReaderPresenter(
         Timber.d("Loading ${chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
+        val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
         activeChapterSubscription = getLoadObservable(loader, ReaderChapter(chapter))
             .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
             .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
             .subscribeFirst(
                 { view, _ ->
-                    view.moveToPageIndex(0)
+                    scope.launchUI {
+                        view.moveToPageIndex(lastPage, false)
+                    }
                     view.refreshChapters()
                 },
                 { _, _ ->

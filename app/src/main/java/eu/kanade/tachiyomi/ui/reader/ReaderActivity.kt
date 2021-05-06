@@ -1026,11 +1026,11 @@ class ReaderActivity :
      * Moves the viewer to the given page [index]. It does nothing if the viewer is null or the
      * page is not found.
      */
-    fun moveToPageIndex(index: Int) {
+    fun moveToPageIndex(index: Int, animated: Boolean = true) {
         val viewer = viewer ?: return
         val currentChapter = presenter.getCurrentChapter() ?: return
         val page = currentChapter.pages?.getOrNull(index) ?: return
-        viewer.moveToPage(page)
+        viewer.moveToPage(page, animated)
     }
 
     fun refreshChapters() {

@@ -236,7 +236,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
     /**
      * Tells this viewer to move to the given [page].
      */
-    override fun moveToPage(page: ReaderPage) {
+    override fun moveToPage(page: ReaderPage, animated: Boolean) {
         Timber.d("moveToPage")
         val position = adapter.items.indexOf(page)
         if (position != -1) {
