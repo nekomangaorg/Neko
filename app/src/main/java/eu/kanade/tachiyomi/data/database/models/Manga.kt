@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -190,7 +189,7 @@ interface Manga : SManga {
     }
 
     fun key(): String {
-        return DiskUtil.hashKeyForDisk(thumbnail_url.orEmpty())
+        return "manga-id-$id"
     }
 
     // Used to display the chapter's title one way or another

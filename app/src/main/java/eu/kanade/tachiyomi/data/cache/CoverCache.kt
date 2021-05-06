@@ -71,7 +71,7 @@ class CoverCache(val context: Context) {
             val db = Injekt.get<DatabaseHelper>()
             var deletedSize = 0L
             val urls = db.getLibraryMangas().executeOnIO().mapNotNull {
-                it.thumbnail_url?.let { url -> return@mapNotNull it.key() }
+                it.thumbnail_url?.let { url -> return@mapNotNull DiskUtil.hashKeyForDisk(url) }
                 null
             }
             val files = cacheDir.listFiles()?.iterator() ?: return@launch
@@ -200,15 +200,12 @@ class CoverCache(val context: Context) {
      * @return cover image.
      */
     fun getCoverFile(manga: Manga): File {
+        val hashKey = DiskUtil.hashKeyForDisk((manga.thumbnail_url.orEmpty()))
         return if (manga.favorite) {
-            File(cacheDir, manga.key())
+            File(cacheDir, hashKey)
         } else {
-            getOnlineCoverFile(manga)
+            File(onlineCoverDirectory, hashKey)
         }
-    }
-
-    fun getOnlineCoverFile(manga: Manga): File {
-        return File(onlineCoverDirectory, manga.key())
     }
 
     fun deleteFromCache(name: String?) {
