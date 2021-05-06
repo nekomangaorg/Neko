@@ -133,6 +133,7 @@ class RecentsController(bundle: Bundle? = null) :
         super.onViewCreated(view)
         // Initialize adapter
         adapter = RecentMangaAdapter(this)
+        adapter.setPreferenceFlows()
         binding.recycler.adapter = adapter
         binding.recycler.layoutManager = LinearLayoutManager(view.context)
         binding.recycler.setHasFixedSize(true)

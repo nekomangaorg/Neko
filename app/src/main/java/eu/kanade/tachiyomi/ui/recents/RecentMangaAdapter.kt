@@ -38,6 +38,9 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
 
     init {
         setDisplayHeadersAtStartUp(true)
+    }
+
+    fun setPreferenceFlows() {
         preferences.showRecentsDownloads().register { showDownloads = it }
         preferences.showRecentsRemHistory().register { showRemoveHistory = it }
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
