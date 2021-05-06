@@ -2,9 +2,12 @@ package eu.kanade.tachiyomi.ui.base
 
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import android.util.TypedValue
+import android.view.View
 import android.widget.ImageView
+import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
@@ -25,5 +28,13 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
 
         val clearButton = findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
         clearButton?.imageTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.actionBarTintColor))
+
+        val searchPlateView = findViewById<View>(androidx.appcompat.R.id.search_plate)
+        searchPlateView?.setBackgroundColor(Color.TRANSPARENT)
+
+        setIconifiedByDefault(false)
+
+        val searchMagIconImageView = findViewById<ImageView>(androidx.appcompat.R.id.search_mag_icon)
+        searchMagIconImageView?.layoutParams = LinearLayout.LayoutParams(0, 0)
     }
 }
