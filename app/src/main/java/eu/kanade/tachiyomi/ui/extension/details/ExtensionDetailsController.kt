@@ -185,7 +185,7 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         val prefs = mutableListOf<Preference>()
         val block: (@DSL SwitchPreferenceCompat).() -> Unit = {
-            key = source.getPreferenceKey()
+            key = source.getPreferenceKey() + "_enabled"
             title = when {
                 isMultiSource && !isMultiLangSingleSource -> source.toString()
                 else -> LocaleHelper.getSourceDisplayName(source.lang, context)

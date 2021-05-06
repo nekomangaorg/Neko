@@ -53,12 +53,17 @@ class SourceItem(val source: CatalogueSource, header: LangItem? = null, val isPi
 
     override fun equals(other: Any?): Boolean {
         if (other is SourceItem) {
-            return source.id == other.source.id && header?.code == other.header?.code
+            return source.id == other.source.id &&
+                header?.code == other.header?.code &&
+                isPinned == other.isPinned
         }
         return false
     }
 
     override fun hashCode(): Int {
-        return source.id.hashCode() + (header?.code?.hashCode() ?: 0).toInt()
+        var result = source.id.hashCode()
+        result = 31 * result + (header?.hashCode() ?: 0)
+        result = 31 * result + isPinned.hashCode()
+        return result
     }
 }
