@@ -50,7 +50,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val statuses = mutableListOf<String>()
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }
-            item.scanlator?.isNotBlank()?.let { statuses.add(item.scanlator ?: "") }
+            item.scanlator?.takeIf { it.isNotBlank() }?.let { statuses.add(item.scanlator ?: "") }
 
             if (item.isCurrent) {
                 binding.chapterTitle.setTypeface(null, Typeface.BOLD_ITALIC)
