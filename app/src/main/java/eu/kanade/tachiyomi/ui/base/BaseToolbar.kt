@@ -15,7 +15,7 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
     protected lateinit var toolbarTitle: TextView
     private val defStyleRes = com.google.android.material.R.style.Widget_MaterialComponents_Toolbar
 
-    protected val titleTextAppeance: Int
+    protected val titleTextAppearance: Int
 
     var incognito = false
     init {
@@ -25,7 +25,7 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
             0,
             defStyleRes
         )
-        titleTextAppeance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0)
+        titleTextAppearance = a.getResourceId(R.styleable.Toolbar_titleTextAppearance, 0)
         a.recycle()
     }
 

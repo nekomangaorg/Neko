@@ -38,7 +38,7 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
     override fun onFinishInflate() {
         super.onFinishInflate()
         toolbarTitle = findViewById<MaterialTextView>(R.id.card_title)
-        toolbarTitle.setTextAppearance(titleTextAppeance)
+        toolbarTitle.setTextAppearance(titleTextAppearance)
         toolbarTitle.setTextColor(actionColorAlpha)
 
         toolbarsubTitle = findViewById<MaterialTextView>(R.id.card_subtitle)

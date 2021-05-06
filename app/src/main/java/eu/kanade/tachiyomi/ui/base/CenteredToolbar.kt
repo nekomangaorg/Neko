@@ -19,7 +19,7 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
     override fun onFinishInflate() {
         super.onFinishInflate()
         toolbarTitle = findViewById<MaterialTextView>(R.id.toolbar_title)
-        toolbarTitle.setTextAppearance(titleTextAppeance)
+        toolbarTitle.setTextAppearance(titleTextAppearance)
         toolbarTitle.setTextColor(context.getResourceColor(R.attr.actionBarTintColor))
         collapseIcon = context.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
             setTint(context.getResourceColor(R.attr.actionBarTintColor))
