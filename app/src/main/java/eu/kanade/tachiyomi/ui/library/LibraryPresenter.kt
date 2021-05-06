@@ -173,12 +173,10 @@ class LibraryPresenter(
     fun restoreLibrary() {
         val items = libraryItems
         val show = showAllCategories || !libraryIsGrouped || categories.size == 1
-        if (!show) {
-            sectionedLibraryItems = items.groupBy { it.header.category.id!! }.toMutableMap()
-            if (currentCategory == -1) currentCategory = categories.find {
-                it.order == preferences.lastUsedCategory().getOrDefault()
-            }?.id ?: 0
-        }
+        sectionedLibraryItems = items.groupBy { it.header.category.id!! }.toMutableMap()
+        if (!show && currentCategory == -1) currentCategory = categories.find {
+            it.order == preferences.lastUsedCategory().getOrDefault()
+        }?.id ?: 0
         view.onNextLibraryUpdate(
             if (!show) sectionedLibraryItems[currentCategory]
                 ?: sectionedLibraryItems[categories.first().id] ?: blankItem()
@@ -196,12 +194,10 @@ class LibraryPresenter(
         libraryItems = items
         val showAll = showAllCategories || !libraryIsGrouped ||
             categories.size <= 1
-        if (!showAll) {
-            sectionedLibraryItems = items.groupBy { it.header.category.id ?: 0 }.toMutableMap()
-            if (currentCategory == -1) currentCategory = categories.find {
-                it.order == preferences.lastUsedCategory().getOrDefault()
-            }?.id ?: 0
-        }
+        sectionedLibraryItems = items.groupBy { it.header.category.id ?: 0 }.toMutableMap()
+        if (!showAll && currentCategory == -1) currentCategory = categories.find {
+            it.order == preferences.lastUsedCategory().getOrDefault()
+        }?.id ?: 0
         withUIContext {
             view.onNextLibraryUpdate(
                 if (!showAll) sectionedLibraryItems[currentCategory]
