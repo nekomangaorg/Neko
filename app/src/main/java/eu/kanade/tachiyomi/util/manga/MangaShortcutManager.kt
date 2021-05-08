@@ -38,6 +38,11 @@ class MangaShortcutManager(
     val context: Context = preferences.context
     fun updateShortcuts() {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.N_MR1) {
+            if (!preferences.appShortcuts()) {
+                val shortcutManager = context.getSystemService(ShortcutManager::class.java)
+                shortcutManager.removeAllDynamicShortcuts()
+                return
+            }
             GlobalScope.launchIO {
                 val shortcutManager = context.getSystemService(ShortcutManager::class.java)
 

@@ -78,6 +78,13 @@ class SettingsGeneralController : SettingsController() {
         }
 
         switchPreference {
+            key = Keys.showMangaAppShortcuts
+            titleRes = R.string.app_shortcuts
+            summaryRes = R.string.show_recent_in_shortcuts
+            defaultValue = true
+        }
+
+        switchPreference {
             key = Keys.automaticUpdates
             titleRes = R.string.check_for_updates
             summaryRes = R.string.auto_check_for_app_versions

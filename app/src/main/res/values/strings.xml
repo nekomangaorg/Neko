@@ -611,6 +611,8 @@
     <string name="auto_check_for_app_versions">Automatically check for new app versions</string>
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
+    <string name="app_shortcuts">App shortcuts</string>
+    <string name="show_recent_in_shortcuts">Show recent sources and series in app shortcuts</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>

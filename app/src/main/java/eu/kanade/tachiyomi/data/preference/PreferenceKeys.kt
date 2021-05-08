@@ -204,6 +204,8 @@ object PreferenceKeys {
 
     const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
+    const val showMangaAppShortcuts = "show_manga_app_shortcuts"
+
     const val createLegacyBackup = "create_legacy_backup"
 
     const val dohProvider = "doh_provider"
