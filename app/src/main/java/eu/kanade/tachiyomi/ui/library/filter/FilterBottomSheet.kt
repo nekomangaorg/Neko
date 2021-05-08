@@ -319,7 +319,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 val unreadP = preferences.filterUnread().getOrDefault()
                 if (unreadP <= 2) {
                     unread.state = unreadP - 1
-                } else if (unreadP > 3) {
+                } else if (unreadP >= 3) {
                     unreadProgress.state = unreadP - 3
                 }
                 tracked?.setState(preferences.filterTracked())
