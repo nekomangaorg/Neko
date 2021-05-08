@@ -280,8 +280,6 @@ class PreferencesHelper(val context: Context) {
 
     fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
 
-    fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
-
     fun automaticExtUpdates() = rxPrefs.getBoolean(Keys.automaticExtUpdates, true)
 
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())

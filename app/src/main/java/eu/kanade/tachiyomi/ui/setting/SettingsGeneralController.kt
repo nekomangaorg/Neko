@@ -7,7 +7,6 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
-import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
@@ -82,27 +81,6 @@ class SettingsGeneralController : SettingsController() {
             titleRes = R.string.app_shortcuts
             summaryRes = R.string.show_recent_in_shortcuts
             defaultValue = true
-        }
-
-        switchPreference {
-            key = Keys.automaticUpdates
-            titleRes = R.string.check_for_updates
-            summaryRes = R.string.auto_check_for_app_versions
-            defaultValue = true
-
-            if (isUpdaterEnabled) {
-                onChange { newValue ->
-                    val checked = newValue as Boolean
-                    if (checked) {
-                        UpdaterJob.setupTask()
-                    } else {
-                        UpdaterJob.cancelTask()
-                    }
-                    true
-                }
-            } else {
-                isVisible = false
-            }
         }
 
         preferenceCategory {

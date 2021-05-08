@@ -33,7 +33,7 @@ object Migrations {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
 
             if (oldVersion == 0) {
-                if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
+                if (BuildConfig.INCLUDE_UPDATER) {
                     UpdaterJob.setupTask()
                 }
                 ExtensionUpdateJob.setupTask()
@@ -43,7 +43,7 @@ object Migrations {
 
             if (oldVersion < 14) {
                 // Restore jobs after upgrading to evernote's job scheduler.
-                if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
+                if (BuildConfig.INCLUDE_UPDATER) {
                     UpdaterJob.setupTask()
                 }
                 LibraryUpdateJob.setupTask()
@@ -80,7 +80,7 @@ object Migrations {
             if (oldVersion < 62) {
                 LibraryPresenter.updateDB()
                 // Restore jobs after migrating from Evernote's job scheduler to WorkManager.
-                if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
+                if (BuildConfig.INCLUDE_UPDATER) {
                     UpdaterJob.setupTask()
                 }
                 LibraryUpdateJob.setupTask()
@@ -114,6 +114,12 @@ object Migrations {
             if (oldVersion < 73) {
                 // Reset rotation to Free after replacing Lock
                 preferences.rotation().set(1)
+            }
+            if (oldVersion < 74) {
+                // Turn on auto updates for all users
+                if (BuildConfig.INCLUDE_UPDATER) {
+                    UpdaterJob.setupTask()
+                }
             }
             return true
         }
