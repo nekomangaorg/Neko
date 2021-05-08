@@ -53,7 +53,6 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
             notifyDownloadedPages()
         }
 
-        binding.downloadMenu.isVisible = flexibleAdapterPosition != 0 || flexibleAdapterPosition != adapter.itemCount - 1
         binding.downloadMenu.setVectorCompat(
             R.drawable.ic_more_vert_24dp,
             view.context

@@ -763,6 +763,7 @@
     <string name="download_queue">Download queue</string>
     <string name="downloading_">Downloading: %1$s</string>
     <string name="cancel_all">Cancel all</string>
+    <string name="cancel_all_for_series">Cancel all for this series</string>
     <string name="downloaded">Downloaded</string>
     <string name="not_downloaded">Not downloaded</string>
     <string name="downloading">Downloading</string>
