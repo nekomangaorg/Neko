@@ -573,10 +573,12 @@ class MangaDetailsPresenter(
     }
 
     fun confirmDeletion() {
-        coverCache.deleteFromCache(manga)
-        downloadManager.deleteManga(manga, source)
-        customMangaManager.saveMangaInfo(CustomMangaManager.MangaJson(manga.id!!))
-        asyncUpdateMangaAndChapters(true)
+        scope.launchIO {
+            coverCache.deleteFromCache(manga)
+            customMangaManager.saveMangaInfo(CustomMangaManager.MangaJson(manga.id!!))
+            downloadManager.deleteManga(manga, source)
+            asyncUpdateMangaAndChapters(true)
+        }
     }
 
     fun setFavorite(favorite: Boolean) {
