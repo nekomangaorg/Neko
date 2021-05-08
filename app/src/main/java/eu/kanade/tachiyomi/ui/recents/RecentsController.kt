@@ -4,6 +4,7 @@ import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.os.Bundle
+import android.os.Handler
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -30,6 +31,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -325,6 +328,27 @@ class RecentsController(bundle: Bundle? = null) :
         binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
         binding.swipeRefresh.setOnRefreshListener {
             if (!LibraryUpdateService.isRunning()) {
+                snack?.dismiss()
+                snack = view.snack(R.string.updating_library) {
+                    anchorView = binding.downloadBottomSheet.root
+                    setAction(R.string.cancel) {
+                        LibraryUpdateService.stop(context)
+                        Handler().post {
+                            NotificationReceiver.dismissNotification(
+                                context,
+                                Notifications.ID_LIBRARY_PROGRESS
+                            )
+                        }
+                    }
+                    addCallback(
+                        object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
+                            override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
+                                super.onDismissed(transientBottomBar, event)
+                                binding.swipeRefresh.isRefreshing = LibraryUpdateService.isRunning()
+                            }
+                        }
+                    )
+                }
                 LibraryUpdateService.start(view.context)
             }
         }
