@@ -257,6 +257,7 @@ open class BrowseSourceController(bundle: Bundle) :
             }
             setIcon(icon)
         }
+        hideItemsIfExpanded(searchItem, menu)
     }
 
     override fun onPrepareOptionsMenu(menu: Menu) {

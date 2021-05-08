@@ -619,6 +619,7 @@ class RecentsController(bundle: Bundle? = null) :
                 true
             }
             searchItem.fixExpandInvalidate()
+            hideItemsIfExpanded(searchItem, menu)
         }
     }
 

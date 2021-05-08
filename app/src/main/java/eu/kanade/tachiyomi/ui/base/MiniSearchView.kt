@@ -6,6 +6,7 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.util.TypedValue
 import android.view.View
+import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.appcompat.widget.SearchView
@@ -36,5 +37,15 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
 
         val searchMagIconImageView = findViewById<ImageView>(androidx.appcompat.R.id.search_mag_icon)
         searchMagIconImageView?.layoutParams = LinearLayout.LayoutParams(0, 0)
+    }
+
+    override fun onActionViewExpanded() {
+        super.onActionViewExpanded()
+        layoutParams?.let {
+            val params = it
+            params.width = ViewGroup.LayoutParams.MATCH_PARENT
+            layoutParams = params
+        }
+        requestLayout()
     }
 }

@@ -1510,6 +1510,7 @@ class LibraryController(
             searchItem.expandActionView()
             searchView.setQuery(query, true)
             searchView.clearFocus()
+            search(query)
         }
 
         setOnQueryTextChangeListener(searchView) {
@@ -1534,6 +1535,7 @@ class LibraryController(
                 true
             }
         )
+        hideItemsIfExpanded(searchItem, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

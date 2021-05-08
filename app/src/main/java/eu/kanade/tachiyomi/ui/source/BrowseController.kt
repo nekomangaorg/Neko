@@ -488,11 +488,13 @@ class BrowseController :
             // Change hint to show global search.
             searchView.queryHint = view?.context?.getString(R.string.global_search)
 
+            searchItem.fixExpandInvalidate()
             // Create query listener which opens the global search view.
             setOnQueryTextChangeListener(searchView, true) {
                 if (!it.isNullOrBlank()) performGlobalSearch(it)
                 true
             }
+            hideItemsIfExpanded(searchItem, menu)
         }
     }
 
