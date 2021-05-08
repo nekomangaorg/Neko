@@ -77,6 +77,7 @@ internal class DownloadNotifier(private val context: Context) {
                 clearActions()
                 // Open download manager when clicked
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+                color = ContextCompat.getColor(context, R.color.colorAccent)
                 isDownloading = true
                 // Pause action
                 addAction(
@@ -127,6 +128,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setAutoCancel(false)
                 clearActions()
                 // Open download manager when clicked
+                color = ContextCompat.getColor(context, R.color.colorAccent)
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
@@ -162,6 +164,7 @@ internal class DownloadNotifier(private val context: Context) {
             setSmallIcon(R.drawable.ic_pause_24dp)
             setAutoCancel(false)
             setProgress(0, 0, false)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             clearActions()
             // Open download manager when clicked
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
@@ -195,6 +198,7 @@ internal class DownloadNotifier(private val context: Context) {
         with(notification) {
             setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setAutoCancel(true)
             clearActions()
