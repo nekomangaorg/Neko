@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
+import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -85,6 +86,14 @@ class DownloadBottomSheet @JvmOverloads constructor(
                 sheetBehavior?.collapse()
             }
         }
+        binding.downloadFab.setOnClickListener {
+            if (!isRunning) {
+                DownloadService.start(context)
+            } else {
+                DownloadService.stop(context)
+                presenter.pauseDownloads()
+            }
+        }
         update()
         setInformationView()
         if (!controller.hasQueue()) {
@@ -96,6 +105,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
     fun update() {
         presenter.getItems()
         onQueueStatusChange(!presenter.downloadManager.isPaused())
+        binding.downloadFab.isVisible = presenter.downloadQueue.isNotEmpty()
     }
 
     private fun updateDLTitle() {
@@ -115,6 +125,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
     private fun onQueueStatusChange(running: Boolean) {
         val oldRunning = isRunning
         isRunning = running
+        binding.downloadFab.isVisible = presenter.downloadQueue.isNotEmpty()
         if (oldRunning != running) {
             activity?.invalidateOptionsMenu()
 
@@ -180,11 +191,8 @@ class DownloadBottomSheet @JvmOverloads constructor(
     }
 
     fun prepareMenu(menu: Menu) {
-        // Set start button visibility.
-        menu.findItem(R.id.start_queue)?.isVisible = !isRunning && !presenter.downloadQueue.isEmpty()
-
-        // Set pause button visibility.
-        menu.findItem(R.id.pause_queue)?.isVisible = isRunning && !presenter.downloadQueue.isEmpty()
+        binding.downloadFab.text = context.getString(if (isRunning) R.string.pause else R.string.resume)
+        binding.downloadFab.setIconResource(if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp)
 
         // Set clear button visibility.
         menu.findItem(R.id.clear_queue)?.isVisible = !presenter.downloadQueue.isEmpty()
@@ -196,11 +204,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
     fun onOptionsItemSelected(item: MenuItem): Boolean {
         val context = activity ?: return false
         when (item.itemId) {
-            R.id.start_queue -> DownloadService.start(context)
-            R.id.pause_queue -> {
-                DownloadService.stop(context)
-                presenter.pauseDownloads()
-            }
             R.id.clear_queue -> {
                 DownloadService.stop(context)
                 presenter.clearQueue()

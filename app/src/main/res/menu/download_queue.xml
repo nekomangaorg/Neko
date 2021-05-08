@@ -2,18 +2,6 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
       xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:title="@string/start"
-          android:id="@+id/start_queue"
-          android:icon="@drawable/ic_play_arrow_24dp"
-          android:visible="false"
-          app:showAsAction="ifRoom"/>
-
-    <item android:title="@string/pause"
-          android:id="@+id/pause_queue"
-          android:icon="@drawable/ic_pause_24dp"
-          android:visible="false"
-          app:showAsAction="ifRoom"/>
-
     <item
         android:id="@+id/reorder"
         android:title="@string/reorder"

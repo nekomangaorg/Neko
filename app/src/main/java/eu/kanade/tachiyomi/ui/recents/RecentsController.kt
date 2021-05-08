@@ -162,9 +162,6 @@ class RecentsController(bundle: Bundle? = null) :
                 binding.recycler.updatePaddingRelative(
                     bottom = activityBinding?.bottomNav?.height ?: 0
                 )
-                binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
-                    bottom = activityBinding?.bottomNav?.height ?: 0
-                )
                 binding.recentsEmptyView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = headerHeight
                     bottomMargin = activityBinding?.bottomNav?.height ?: 0
@@ -303,6 +300,13 @@ class RecentsController(bundle: Bundle? = null) :
                         }
                     }
 
+                    if (presenter.downloadManager.hasQueue()) {
+                        if (state == BottomSheetBehavior.STATE_EXPANDED) {
+                            binding.downloadBottomSheet.downloadFab.show()
+                        } else {
+                            binding.downloadBottomSheet.downloadFab.hide()
+                        }
+                    }
                     if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
                         binding.shadow2.alpha =
                             if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
@@ -352,6 +356,13 @@ class RecentsController(bundle: Bundle? = null) :
         binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight = 48.spToPx + padding
         binding.downloadBottomSheet.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = -pad.toInt()
+        }
+        binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
+            bottom = max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) +
+                binding.downloadBottomSheet.downloadFab.height + 20.dpToPx
+        )
+        binding.downloadBottomSheet.downloadFab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) + 16.dpToPx
         }
     }
 
