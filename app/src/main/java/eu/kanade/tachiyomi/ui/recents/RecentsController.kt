@@ -333,8 +333,10 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     fun updateTitleAndMenu() {
-        (activity as? MainActivity)?.setFloatingToolbar(!showingDownloads, true)
-        setTitle()
+        if (router.backstack.lastOrNull()?.controller == this) {
+            (activity as? MainActivity)?.setFloatingToolbar(!showingDownloads, true)
+            setTitle()
+        }
     }
 
     private fun setBottomPadding() {

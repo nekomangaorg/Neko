@@ -229,9 +229,11 @@ class BrowseController :
     }
 
     fun updateTitleAndMenu() {
-        (activity as? MainActivity)?.setFloatingToolbar(!showingExtensions)
-        activity?.invalidateOptionsMenu()
-        setTitle()
+        if (router.backstack.lastOrNull()?.controller == this) {
+            (activity as? MainActivity)?.setFloatingToolbar(!showingExtensions)
+            activity?.invalidateOptionsMenu()
+            setTitle()
+        }
     }
 
     fun setBottomSheetTabs(progress: Float) {
