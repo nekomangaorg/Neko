@@ -881,8 +881,10 @@
     <string name="mark_all_as_unread">Mark all as unread</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_as_unread">Mark as unread</string>
-    <string name="mark_previous_as_read">Mark previous as read</string>
-    <string name="mark_previous_as_unread">Mark previous as unread</string>
+    <string name="mark_range_as_read">Mark a range of chapters as read</string>
+    <string name="mark_range_as_unread">Mark a range of chapters as unread</string>
+    <string name="mark_previous_as_read">Mark previous chapters as read</string>
+    <string name="mark_previous_as_unread">Mark previous chapters as unread</string>
     <string name="menu">menu</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>

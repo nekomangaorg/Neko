@@ -30,8 +30,6 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.DrawableCompat.setTint
-import androidx.core.view.iterator
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -67,6 +65,7 @@ import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -167,7 +166,8 @@ class MangaDetailsController :
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     private var trackingBottomSheet: TrackingBottomSheet? = null
-    private var startingDLChapterPos: Int? = null
+    private var startingRangeChapterPos: Int? = null
+    private var rangeMode: RangeMode? = null
     private var editMangaDialog: EditMangaDialog? = null
     var refreshTracker: Int? = null
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
@@ -574,16 +574,16 @@ class MangaDetailsController :
         val chapterItem = (adapter?.getItem(position) as? ChapterItem) ?: return false
         val chapter = chapterItem.chapter
         if (actionMode != null) {
-            if (startingDLChapterPos == null) {
+            if (startingRangeChapterPos == null) {
                 adapter?.addSelection(position)
                 (binding.recycler.findViewHolderForAdapterPosition(position) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
                 (binding.recycler.findViewHolderForAdapterPosition(position) as? ChapterHolder)
                     ?.notifyStatus(Download.CHECKED, false, 0)
-                startingDLChapterPos = position
+                startingRangeChapterPos = position
                 actionMode?.invalidate()
             } else {
-                val startingPosition = startingDLChapterPos ?: return false
+                val startingPosition = startingRangeChapterPos ?: return false
                 var chapterList = listOf<ChapterItem>()
                 when {
                     startingPosition > position ->
@@ -591,12 +591,17 @@ class MangaDetailsController :
                     startingPosition <= position ->
                         chapterList = presenter.chapters.subList(startingPosition - 1, position)
                 }
-                downloadChapters(chapterList)
+                when (rangeMode) {
+                    RangeMode.Download -> downloadChapters(chapterList)
+                    RangeMode.Read -> markAsRead(chapterList)
+                    RangeMode.Unread -> markAsUnread(chapterList)
+                }
                 presenter.fetchChapters(false)
                 adapter?.removeSelection(startingPosition)
                 (binding.recycler.findViewHolderForAdapterPosition(startingPosition) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
-                startingDLChapterPos = null
+                startingRangeChapterPos = null
+                rangeMode = null
                 destroyActionModeIfNeeded()
             }
             return false
@@ -609,24 +614,56 @@ class MangaDetailsController :
     override fun onItemLongClick(position: Int) {
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
-        val itemView = getHolder(item)?.itemView ?: return
-        val popup = PopupMenu(itemView.context, itemView)
-        chapterPopupMenu = position to popup
-
-        // Inflate our menu resource into the PopupMenu's Menu
-        popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
-
-        popup.setOnMenuItemClickListener { menuItem ->
-            when (menuItem.itemId) {
-                R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
-                R.id.action_mark_previous_as_unread -> markPreviousAs(item, false)
+//        val itemView = getHolder(item)?.itemView ?: return
+        val items = listOf(
+            MaterialMenuSheet.MenuSheetItem(
+                0,
+                R.drawable.ic_eye_down_24dp,
+                R.string.mark_previous_as_read
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                1,
+                R.drawable.ic_eye_off_down_24dp,
+                R.string.mark_previous_as_unread
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                2,
+                R.drawable.ic_eye_range_24dp,
+                R.string.mark_range_as_read
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                3,
+                R.drawable.ic_eye_off_range_24dp,
+                R.string.mark_range_as_unread
+            )
+        )
+        val menuSheet = MaterialMenuSheet(activity!!, items, item.name) { _, itemPos ->
+            when (itemPos) {
+                0 -> markPreviousAs(item, true)
+                1 -> markPreviousAs(item, false)
+                2 -> startReadRange(position, RangeMode.Read)
+                3 -> startReadRange(position, RangeMode.Unread)
             }
-            chapterPopupMenu = null
             true
         }
-
-        // Finally show the PopupMenu
-        popup.show()
+        menuSheet.show()
+//        val popup = PopupMenu(itemView.context, itemView)
+//        chapterPopupMenu = position to popup
+//
+//        // Inflate our menu resource into the PopupMenu's Menu
+//        popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
+//
+//        popup.setOnMenuItemClickListener { menuItem ->
+//            when (menuItem.itemId) {
+//                R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
+//                R.id.action_mark_previous_as_unread -> markPreviousAs(item, false)
+//            }
+//            chapterPopupMenu = null
+//            true
+//        }
+//
+//        // Finally show the PopupMenu
+//        popup.show()
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -1018,6 +1055,13 @@ class MangaDetailsController :
 
     override fun startDownloadRange(position: Int) {
         if (actionMode == null) createActionModeIfNeeded()
+        rangeMode = RangeMode.Download
+        onItemClick(null, position)
+    }
+
+    private fun startReadRange(position: Int, mode: RangeMode) {
+        if (actionMode == null) createActionModeIfNeeded()
+        rangeMode = mode
         onItemClick(null, position)
     }
 
@@ -1243,7 +1287,7 @@ class MangaDetailsController :
 
     override fun onPrepareActionMode(mode: ActionMode?, menu: Menu?): Boolean {
         mode?.title = view?.context?.getString(
-            if (startingDLChapterPos == null) {
+            if (startingRangeChapterPos == null) {
                 R.string.select_starting_chapter
             } else R.string.select_ending_chapter
         )
@@ -1253,15 +1297,16 @@ class MangaDetailsController :
     override fun onDestroyActionMode(mode: ActionMode?) {
         actionMode = null
         setStatusBarAndToolbar()
-        if (startingDLChapterPos != null) {
-            val item = adapter?.getItem(startingDLChapterPos!!) as? ChapterItem
-            (binding.recycler.findViewHolderForAdapterPosition(startingDLChapterPos!!) as? ChapterHolder)?.notifyStatus(
+        if (startingRangeChapterPos != null && rangeMode == RangeMode.Download) {
+            val item = adapter?.getItem(startingRangeChapterPos!!) as? ChapterItem
+            (binding.recycler.findViewHolderForAdapterPosition(startingRangeChapterPos!!) as? ChapterHolder)?.notifyStatus(
                 item?.status ?: Download.NOT_DOWNLOADED,
                 false,
                 0
             )
         }
-        startingDLChapterPos = null
+        rangeMode = null
+        startingRangeChapterPos = null
         adapter?.mode = SelectableAdapter.Mode.IDLE
         adapter?.clearSelection()
         return
@@ -1473,5 +1518,11 @@ class MangaDetailsController :
 
         const val FROM_CATALOGUE_EXTRA = "from_catalogue"
         const val MANGA_EXTRA = "manga"
+
+        private enum class RangeMode {
+            Download,
+            Read,
+            Unread
+        }
     }
 }
