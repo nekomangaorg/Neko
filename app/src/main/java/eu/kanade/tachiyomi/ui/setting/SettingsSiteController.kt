@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
@@ -77,31 +76,33 @@ class SettingsSiteController :
             }
         }
 
-        listPreference(activity) {
-            key = PreferenceKeys.showR18
-            titleRes = R.string.show_r18_title
+
+        multiSelectListPreferenceMat(activity) {
+            key = PreferenceKeys.contentRating
+            titleRes = R.string.content_rating_title
+            customSummaryRes = R.string.content_rating_summary
             entriesRes = arrayOf(
-                R.string.show_r18_no,
-                R.string.show_r18_all,
-                R.string.show_r18_show
+                R.string.content_rating_safe,
+                R.string.content_rating_suggestive,
+                R.string.content_rating_erotica,
+                R.string.content_rating_pornographic,
             )
-            entryValues = listOf("0", "1", "2")
-            summary = "%s"
+            entryValues = listOf(
+                "safe", "suggestive", "erotica", "pornographic"
+            )
+
+            defSet = setOf("safe", "suggestive")
+            
+            defaultValue = listOf("safe", "suggestive")
         }
 
+
         switchPreference {
-            key = PreferenceKeys.showR18Filter
-            titleRes = R.string.show_r18_filter_in_search
+            key = PreferenceKeys.showContentRatingFilter
+            titleRes = R.string.show_content_rating_filter_in_search
             defaultValue = true
         }
 
-        listPreference(activity) {
-            key = PreferenceKeys.imageServer
-            titleRes = R.string.image_server
-            entries = MangaDex.SERVER_PREF_ENTRIES
-            entryValues = MangaDex.SERVER_PREF_ENTRY_VALUES
-            summary = "%s"
-        }
 
         switchPreference {
             key = PreferenceKeys.dataSaver
@@ -109,18 +110,18 @@ class SettingsSiteController :
             defaultValue = false
         }
 
-        switchPreference {
-            key = PreferenceKeys.lowQualityCovers
-            titleRes = R.string.low_quality_covers
-            defaultValue = false
-        }
+        /* switchPreference {
+             key = PreferenceKeys.lowQualityCovers
+             titleRes = R.string.low_quality_covers
+             defaultValue = false
+         }*/
 
-        switchPreference {
-            key = PreferenceKeys.forceLatestCovers
-            titleRes = R.string.use_latest_cover
-            summaryRes = R.string.use_latest_cover_summary
-            defaultValue = false
-        }
+        /*   switchPreference {
+               key = PreferenceKeys.forceLatestCovers
+               titleRes = R.string.use_latest_cover
+               summaryRes = R.string.use_latest_cover_summary
+               defaultValue = false
+           }*/
 
         preference {
             titleRes = R.string.sync_follows_to_library

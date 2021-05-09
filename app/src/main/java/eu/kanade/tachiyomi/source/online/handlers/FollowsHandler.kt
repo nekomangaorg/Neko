@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.GetReadingStatus
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.UpdateReadingStatus
@@ -71,14 +72,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      *
      */
 
-    private fun followStatusParse(response: Response): Track {
+    private fun followStatusParse(response: Response, mangaId: String): Track {
 
-        val mangaResponse = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), response.body!!.string())
-        val followStatus = FollowStatus.fromDex(mangaResponse.data.attributes.readingStatus)
+        val mangaResponse = MdUtil.jsonParser.decodeFromString(GetReadingStatus.serializer(), response.body!!.string())
+        val followStatus = FollowStatus.fromDex(mangaResponse.status)
         val track = Track.create(TrackManager.MDLIST)
         track.status = followStatus.int
-        track.tracking_url = baseUrl + "/manga/" + mangaResponse.data.id
-        track.title = mangaResponse.data.attributes.title["en"]!!
+        track.tracking_url = "$baseUrl/manga/$mangaId"
 
 /* if (follow.chapter.isNotBlank()) {
                 track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()
@@ -116,7 +116,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
 
             val postResult = client.newCall(
                 POST(
-                    MdUtil.updateReadingStatusUrl(mangaId),
+                    MdUtil.getReadingStatusUrl(mangaId),
                     MdUtil.getAuthHeaders(headers, preferences),
                     jsonString.toRequestBody("application/json".toMediaType())
                 )
@@ -205,13 +205,14 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
 
     suspend fun fetchTrackingInfo(url: String): Track {
         return withContext(Dispatchers.IO) {
+            val mangaId = getMangaId(url)
             val request = GET(
-                "${MdUtil.mangaUrl}/" + getMangaId(url),
+                MdUtil.getReadingStatusUrl(mangaId),
                 MdUtil.getAuthHeaders(headers, preferences),
                 CacheControl.FORCE_NETWORK
             )
-            val response = client.newCall(request).execute()
-            val track = followStatusParse(response)
+            val response = client.newCall(request).await()
+            val track = followStatusParse(response, mangaId)
 
             track
         }

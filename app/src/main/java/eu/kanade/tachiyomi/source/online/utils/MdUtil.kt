@@ -21,7 +21,7 @@ class MdUtil {
     companion object {
         const val cdnUrl = "https://mangadex.org" // "https://s0.mangadex.org"
         const val baseUrl = "https://mangadex.org"
-        const val apiUrl = "https://api.lyrebird.moe"
+        const val apiUrl = "https://api.mangadex.org"
         const val apiUrlCdnCache = "https://cdn.statically.io/gh/goldbattle/MangadexRecomendations/master/output/api/"
         const val apiUrlCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
         const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
@@ -37,7 +37,7 @@ class MdUtil {
         const val randomMangaUrl = "$apiUrl/manga/random"
         const val mangaUrl = "$apiUrl/manga"
         const val userFollows = "$apiUrl/user/follows/manga"
-        fun updateReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
+        fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
         fun mangaFeedUrl(id: String, offset: Int, language: List<String>): String {
             return "$mangaUrl/$id/feed".toHttpUrl().newBuilder().apply {
@@ -72,6 +72,11 @@ class MdUtil {
 
         private const
         val scanlatorSeparator = " & "
+
+        const val contentRatingSafe = "safe"
+        const val contentRatingSuggestive = "suggestive"
+        const val contentRatingErotica = "erotica"
+        const val contentRatingPornographic = "pornographic"
 
         val validOneShotFinalChapters = listOf("0", "1")
 

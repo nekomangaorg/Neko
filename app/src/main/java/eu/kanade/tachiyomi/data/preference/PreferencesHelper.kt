@@ -11,7 +11,6 @@ import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.online.MangaDex
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -321,10 +320,6 @@ class PreferencesHelper(val context: Context) {
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 
-    fun r18() = prefs.getString(Keys.showR18, "0")
-
-    fun imageServer() = prefs.getString(Keys.imageServer, MangaDex.SERVER_PREF_ENTRY_VALUES.first())
-
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 
     fun forceLatestCovers() = prefs.getBoolean(Keys.forceLatestCovers, false)
@@ -333,13 +328,15 @@ class PreferencesHelper(val context: Context) {
 
     fun markChaptersReadFromMDList() = prefs.getBoolean(Keys.markChaptersFromMDList, false)
 
-    fun showR18Filter(): Boolean = prefs.getBoolean(Keys.showR18Filter, true)
+    fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 
     fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
 
     fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
+
+    fun contentRatingSelections(): MutableSet<String> = prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")
 

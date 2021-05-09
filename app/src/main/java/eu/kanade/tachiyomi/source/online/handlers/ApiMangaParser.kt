@@ -7,12 +7,12 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.AuthorResponseList
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import java.util.Date
+import java.util.Locale
 import kotlin.math.floor
 
 class ApiMangaParser(val client: OkHttpClient, private val filterHandler: FilterHandler) {
@@ -30,7 +30,7 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
             val networkApiManga = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), jsonData)
             val networkManga = networkApiManga.data.attributes
             manga.title = MdUtil.cleanString(networkManga.title["en"]!!)
-            manga.follow_status = FollowStatus.fromDex(networkManga.readingStatus)
+
             manga.thumbnail_url =
                 if (coverUrls.isNotEmpty()) {
                     coverUrls.last()
@@ -41,7 +41,7 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
 
             manga.description = MdUtil.cleanDescription(networkManga.description["en"]!!)
 
-            val authorIds = networkApiManga.relationships.filter { it.type.equals("author", true) }.distinct()
+            val authorIds = networkApiManga.relationships.filter { it.type == "author" || it.type == "artist" }.distinct()
 
             val authors = runCatching {
                 val ids = authorIds.joinToString("&ids[]=", "?ids[]=")
@@ -53,7 +53,6 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
 
             manga.author = MdUtil.cleanString(authors.joinToString())
             manga.artist = null
-            // manga.artist = MdUtil.cleanString(networkManga.artist.joinToString())
             manga.lang_flag = networkManga.originalLanguage
             val lastChapter = networkManga.lastChapter.toFloatOrNull()
             lastChapter?.let {
@@ -92,9 +91,15 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
 
             val tags = filterHandler.getTags()
 
-            val genres = nonGenres + networkManga.tags.mapNotNull { it.id }.map { dexTag -> tags.firstOrNull { it.name.equals(dexTag, true) } }
+            val genres = (
+                listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
+                    + networkManga.tags.map { it.id }
+                    .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
+                    .map { tag -> tag?.name }
+                    + listOf(
+                    "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
+                ))
                 .filterNotNull()
-
 
             manga.genre = genres.joinToString(", ")
 

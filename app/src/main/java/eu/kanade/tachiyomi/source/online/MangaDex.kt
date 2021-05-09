@@ -237,16 +237,4 @@ open class MangaDex : HttpSource() {
     override fun getFilterList(): FilterList {
         return filterHandler.getMDFilterList()
     }
-
-    companion object {
-
-        // This number matches to the cookie
-        private const val NO_R18 = 0
-        private const val ALL = 1
-        private const val ONLY_R18 = 2
-        private const val REMEMBER_ME = "mangadex_rememberme_token"
-
-        val SERVER_PREF_ENTRIES = listOf("Automatic", "NA/EU 1", "NA/EU 2")
-        val SERVER_PREF_ENTRY_VALUES = listOf("0", "na", "na2")
-    }
 }

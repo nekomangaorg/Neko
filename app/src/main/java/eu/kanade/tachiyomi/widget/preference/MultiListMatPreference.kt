@@ -22,11 +22,15 @@ class MultiListMatPreference @JvmOverloads constructor(
     var allSelectionRes: Int? = null
     var customSummaryRes: Int
         get() = 0
-        set(value) { customSummary = context.getString(value) }
+        set(value) {
+            customSummary = context.getString(value)
+        }
+
+    var defSet: Set<String> = emptySet()
 
     override fun getSummary(): CharSequence {
         if (customSummary != null) return customSummary!!
-        return prefs.getStringSet(key, emptySet<String>()).getOrDefault().mapNotNull {
+        return prefs.getStringSet(key, defSet).getOrDefault().mapNotNull {
             if (entryValues.indexOf(it) == -1) null
             else entryValues.indexOf(it) + if (allSelectionRes != null) 1 else 0
         }.toIntArray().joinToString(",") {
@@ -36,7 +40,7 @@ class MultiListMatPreference @JvmOverloads constructor(
 
     @SuppressLint("CheckResult")
     override fun MaterialDialog.setItems() {
-        val set = prefs.getStringSet(key, emptySet()).getOrDefault()
+        val set = prefs.getStringSet(key, defSet).getOrDefault()
         var default = set.mapNotNull {
             if (entryValues.indexOf(it) == -1) null
             else entryValues.indexOf(it) + if (allSelectionRes != null) 1 else 0
@@ -44,14 +48,14 @@ class MultiListMatPreference @JvmOverloads constructor(
             .toIntArray()
         if (allSelectionRes != null && default.isEmpty()) default = intArrayOf(0)
         val items = if (allSelectionRes != null)
-        (listOf(context.getString(allSelectionRes!!)) + entries) else entries
+            (listOf(context.getString(allSelectionRes!!)) + entries) else entries
         positiveButton(android.R.string.ok) {
             val pos = mutableListOf<Int>()
             for (i in items.indices)
                 if (!(allSelectionRes != null && i == 0) && isItemChecked(i)) pos.add(i)
             var value = pos.map {
                 entryValues[it - if (allSelectionRes != null) 1 else 0]
-            }?.toSet() ?: emptySet()
+            }?.toSet()
             if (allSelectionRes != null && isItemChecked(0)) value = emptySet()
             prefs.getStringSet(key, emptySet()).set(value)
             callChangeListener(value)

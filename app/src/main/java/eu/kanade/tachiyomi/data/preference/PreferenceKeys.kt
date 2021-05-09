@@ -165,10 +165,8 @@ object PreferenceKeys {
 
     const val similarOnlyOverWifi = "pref_simular_only_over_wifi_key"
 
-    const val showR18 = "show_r18"
-
-    const val imageServer = "image_server"
-
+    const val contentRating = "content_rating_options"
+    
     const val lowQualityCovers = "low_quality_covers"
 
     const val dataSaver = "data_saver_bool"
@@ -179,7 +177,7 @@ object PreferenceKeys {
 
     const val markChaptersFromMDList = "mdlist_mark_read"
 
-    const val showR18Filter = "show_R18_filter"
+    const val showContentRatingFilter = "show_R18_filter"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 

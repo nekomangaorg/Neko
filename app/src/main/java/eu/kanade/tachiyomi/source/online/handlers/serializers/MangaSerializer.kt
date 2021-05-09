@@ -34,7 +34,6 @@ data class NetworkMangaAttributes(
     val status: String?,
     val year: Int?,
     val tags: List<TagsSerializer>,
-    val readingStatus: String? = null,
 )
 
 @Serializable
@@ -68,6 +67,11 @@ data class NetworkAuthor(
 @Serializable
 data class AuthorAttributes(
     val name: String,
+)
+
+@Serializable
+data class GetReadingStatus(
+    val status: String?
 )
 
 @Serializable

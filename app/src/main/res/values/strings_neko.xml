@@ -116,11 +116,12 @@
 
     <!-- Site Settings -->
     <string name="site_specific_settings">MangaDex settings</string>
-    <string name="image_server">Choose image server</string>
-    <string name="show_r18_title">Default R18+ setting</string>
-    <string name="show_r18_show">show only R18+</string>
-    <string name="show_r18_no">Show No R18+</string>
-    <string name="show_r18_all">Show all</string>
+    <string name="content_rating_title">Content Ratings</string>
+    <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
+    <string name="content_rating_safe">Safe (No sexual themes)</string>
+    <string name="content_rating_suggestive">Suggestive (Manga usually tagged Ecchi)</string>
+    <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
+    <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
     <string name="show_languages">Choose languages to show</string>
     <string name="data_saver">Data Saver (Compressed Chapter Images)</string>
     <string name="data_saver_disabled">Disabled</string>
@@ -138,7 +139,7 @@
     <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
     <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
     <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
-    <string name="show_r18_filter_in_search">Show R18 filter in search</string>
+    <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
     <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
     <string name="use_cache_source">Use cached manga api source</string>

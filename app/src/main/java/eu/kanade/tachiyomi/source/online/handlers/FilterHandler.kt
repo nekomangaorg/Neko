@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.HttpUrl
 import java.util.Locale
 
@@ -20,8 +21,16 @@ class FilterHandler(private val preferencesHelper: PreferencesHelper) {
             TagExclusionMode()
         ).toMutableList()
 
-        if (preferencesHelper.showR18Filter()) {
-            filters.add(2, ContentRatingList(getContentRating()))
+        if (preferencesHelper.showContentRatingFilter()) {
+            val set = preferencesHelper.contentRatingSelections()
+            val contentRating = listOf(
+                ContentRating("Safe").apply { state = set.contains(MdUtil.contentRatingSafe) },
+                ContentRating("Suggestive").apply { state = set.contains(MdUtil.contentRatingSuggestive) },
+                ContentRating("Erotica").apply { state = set.contains(MdUtil.contentRatingErotica) },
+                ContentRating("Pornographic").apply { state = set.contains(MdUtil.contentRatingPornographic) },
+            )
+
+            filters.add(2, ContentRatingList(contentRating))
         }
 
         return FilterList(list = filters.toList())
@@ -53,13 +62,6 @@ class FilterHandler(private val preferencesHelper: PreferencesHelper) {
     private class ContentRating(name: String) : Filter.CheckBox(name)
     private class ContentRatingList(contentRating: List<ContentRating>) :
         Filter.Group<ContentRating>("Content Rating", contentRating)
-
-    private fun getContentRating() = listOf(
-        ContentRating("Safe"),
-        ContentRating("Suggestive"),
-        ContentRating("Erotica"),
-        ContentRating("Pornographic")
-    )
 
     private class OriginalLanguage(name: String, val isoCode: String) : Filter.CheckBox(name)
     private class OriginalLanguageList(originalLanguage: List<OriginalLanguage>) :
@@ -251,9 +253,6 @@ class FilterHandler(private val preferencesHelper: PreferencesHelper) {
                         )
                     }
                 }
-            }
-            if (preferencesHelper.showR18Filter().not()) {
-                addQueryParameter("contentRating[]", "safe")
             }
         }
 
