@@ -232,7 +232,7 @@ class CoverCache(val context: Context) {
         val file = getCoverFile(manga)
         if (deleteCustom) deleteCustomCover(manga)
         if (file.exists()) {
-            context.imageLoader.memoryCache.remove(MemoryCache.Key(file.name))
+            context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
             file.delete()
         }
     }

@@ -5,6 +5,8 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.Environment
 import coil.Coil
+import coil.imageLoader
+import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.request.Parameters
@@ -370,6 +372,7 @@ class MangaDetailsPresenter(
                             .build()
 
                     if (Coil.imageLoader(preferences.context).execute(request) is SuccessResult) {
+                        preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
                         withContext(Dispatchers.Main) {
                             controller.setPaletteColor()
                         }
