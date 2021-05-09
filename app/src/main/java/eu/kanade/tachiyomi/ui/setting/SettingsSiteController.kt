@@ -92,7 +92,7 @@ class SettingsSiteController :
             )
 
             defSet = setOf("safe", "suggestive")
-            
+
             defaultValue = listOf("safe", "suggestive")
         }
 
@@ -100,6 +100,13 @@ class SettingsSiteController :
         switchPreference {
             key = PreferenceKeys.showContentRatingFilter
             titleRes = R.string.show_content_rating_filter_in_search
+            defaultValue = true
+        }
+
+        switchPreference {
+            key = PreferenceKeys.enablePort443Only
+            titleRes = R.string.use_port_443_title
+            summaryRes = R.string.use_port_443_summary
             defaultValue = true
         }
 

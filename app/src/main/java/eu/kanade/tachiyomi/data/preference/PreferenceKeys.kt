@@ -166,7 +166,7 @@ object PreferenceKeys {
     const val similarOnlyOverWifi = "pref_simular_only_over_wifi_key"
 
     const val contentRating = "content_rating_options"
-    
+
     const val lowQualityCovers = "low_quality_covers"
 
     const val dataSaver = "data_saver_bool"
@@ -178,6 +178,8 @@ object PreferenceKeys {
     const val markChaptersFromMDList = "mdlist_mark_read"
 
     const val showContentRatingFilter = "show_R18_filter"
+    
+    const val enablePort443Only = "use_port_443_only_for_image_server"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 

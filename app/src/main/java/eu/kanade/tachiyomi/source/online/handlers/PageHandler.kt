@@ -11,7 +11,7 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import rx.Observable
 
-class PageHandler(val client: OkHttpClient, val headers: Headers, private val dataSaver: Boolean) {
+class PageHandler(val client: OkHttpClient, val headers: Headers, private val dataSaver: Boolean, private val usePort443Only: Boolean) {
 
     fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         if (chapter.scanlator.equals("MangaPlus")) {
@@ -22,10 +22,17 @@ class PageHandler(val client: OkHttpClient, val headers: Headers, private val da
                     MangaPlusHandler(client).fetchPageList(chapterId)
                 }
         }
+
+        val atHomeRequestUrl = if (usePort443Only) {
+            "${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}?forcePort443=true"
+        } else {
+            "${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}"
+        }
+
         return client.newCall(pageListRequest(chapter))
             .asObservableSuccess()
             .map { response ->
-                val host = MdUtil.atHomeUrlHostUrl("${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}", client)
+                val host = MdUtil.atHomeUrlHostUrl(atHomeRequestUrl, client)
                 ApiChapterParser().pageListParse(response, host, dataSaver)
             }
     }
