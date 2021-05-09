@@ -331,7 +331,12 @@ class RecentsController(bundle: Bundle? = null) :
             if (!LibraryUpdateService.isRunning()) {
                 snack?.dismiss()
                 snack = view.snack(R.string.updating_library) {
-                    anchorView = binding.downloadBottomSheet.root
+                    anchorView =
+                        if (binding.downloadBottomSheet.root.sheetBehavior.isCollapsed()) {
+                            binding.downloadBottomSheet.root
+                        } else {
+                            activityBinding?.bottomNav ?: binding.downloadBottomSheet.root
+                        }
                     setAction(R.string.cancel) {
                         LibraryUpdateService.stop(context)
                         Handler().post {
