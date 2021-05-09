@@ -733,7 +733,7 @@ class MangaDetailsPresenter(
             val directory = File(
                 Environment.getExternalStorageDirectory().absolutePath +
                     File.separator + Environment.DIRECTORY_PICTURES +
-                    File.separator + "Tachiyomi"
+                    File.separator + preferences.context.getString(R.string.app_name)
             )
             saveCover(directory)
             true
