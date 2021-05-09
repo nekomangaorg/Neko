@@ -4,7 +4,6 @@ import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.util.system.toast
@@ -40,7 +39,6 @@ object Migrations {
             if (oldVersion < 53) {
                 LibraryUpdateJob.setupTask()
                 BackupCreatorJob.setupTask()
-                SimilarUpdateJob.setupTask(true)
             }
             if (oldVersion < 95 && oldVersion != 0) {
                 // Force MAL log out due to login flow change

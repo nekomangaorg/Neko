@@ -128,6 +128,17 @@ class AboutController : SettingsController() {
             }
 
             preference {
+                titleRes = R.string.similar_credit_title
+                val url = "https://github.com/similar-manga/similar"
+                summary = context.resources.getString(R.string.similar_credit_message, url)
+                onClick {
+                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+                    startActivity(intent)
+                }
+                isIconSpaceReserved = true
+            }
+
+            preference {
                 titleRes = R.string.open_source_licenses
 
                 onClick {

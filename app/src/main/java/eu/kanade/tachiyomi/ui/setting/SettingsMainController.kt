@@ -58,11 +58,6 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconDrawable = context.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_chart_histogram)
-            titleRes = R.string.similar
-            onClick { navigateTo(SettingsSimilarController()) }
-        }
-        preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_backup)
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }

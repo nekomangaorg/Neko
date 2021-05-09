@@ -190,7 +190,6 @@ class MangaHeaderHolder(
         }
 
         with(similar_button) {
-            visibleIf(presenter.similarEnabled())
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_account_tree))
         }
 
