@@ -373,17 +373,24 @@ class ReaderPresenter(
             val id = db.insertManga(manga).executeOnIO().insertedId()
             manga.id = id ?: manga.id
             chapter.manga_id = manga.id
-            val chapterId = db.insertChapter(chapter).executeOnIO().insertedId() ?: return
-            if (chapters.isNotEmpty()) {
-                syncChaptersWithSource(
-                    db,
-                    chapters,
-                    manga,
-                    delegatedSource.delegate!!
-                )
-            }
-            withContext(Dispatchers.Main) {
-                init(manga, chapterId)
+            val matchingChapterId = db.getChapters(manga).executeOnIO().find { it.url == chapter.url }?.id
+            if (matchingChapterId != null) {
+                withContext(Dispatchers.Main) {
+                    this@ReaderPresenter.init(manga, matchingChapterId)
+                }
+            } else {
+                val chapterId = db.insertChapter(chapter).executeOnIO().insertedId() ?: return
+                if (chapters.isNotEmpty()) {
+                    syncChaptersWithSource(
+                        db,
+                        chapters,
+                        manga,
+                        delegatedSource.delegate!!
+                    )
+                }
+                withContext(Dispatchers.Main) {
+                    init(manga, chapterId)
+                }
             }
         } else error(preferences.context.getString(R.string.unknown_error))
     }
