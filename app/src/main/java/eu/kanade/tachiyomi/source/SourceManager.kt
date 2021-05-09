@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.DelegatedHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.all.MangaDex
-import eu.kanade.tachiyomi.source.online.english.FoolSlide
 import eu.kanade.tachiyomi.source.online.english.KireiCake
 import eu.kanade.tachiyomi.source.online.english.MangaPlus
 import rx.Observable
@@ -24,11 +23,6 @@ open class SourceManager(private val context: Context) {
             "reader.kireicake.com",
             5509224355268673176,
             KireiCake()
-        ),
-        DelegatedSource(
-            "jaiminisbox.com",
-            9064882169246918586,
-            FoolSlide("jaiminis", "/reader")
         ),
         DelegatedSource(
             "mangadex.org",
