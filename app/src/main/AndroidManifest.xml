@@ -78,11 +78,6 @@
                     android:scheme="https" />
 
                 <data
-                    android:host="jaiminisbox.com"
-                    android:pathPattern="/reader/read/..*/..*/..*/..*"
-                    android:scheme="https" />
-
-                <data
                     android:host="mangadex.org"
                     android:pathPattern="/chapter/..*"
                     android:scheme="https" />
