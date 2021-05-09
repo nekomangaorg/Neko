@@ -46,6 +46,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -97,8 +98,14 @@ class MangaDetailsPresenter(
         private set
 
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
+    var tabletChapterHeaderItem: MangaHeaderItem? = null
 
     fun onCreate() {
+        headerItem.isTablet = controller.isTablet
+        if (controller.isTablet) {
+            tabletChapterHeaderItem = MangaHeaderItem(manga, false)
+            tabletChapterHeaderItem?.isChapterHeader = true
+        }
         isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)

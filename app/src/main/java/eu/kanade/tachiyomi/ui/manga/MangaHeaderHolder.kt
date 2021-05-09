@@ -15,6 +15,7 @@ import com.google.android.material.button.MaterialButton
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
@@ -28,81 +29,110 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 class MangaHeaderHolder(
     private val view: View,
     private val adapter: MangaDetailsAdapter,
-    startExpanded: Boolean
+    startExpanded: Boolean,
+    isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
 
-    val binding = MangaHeaderItemBinding.bind(view)
+    val binding: MangaHeaderItemBinding? = try {
+        MangaHeaderItemBinding.bind(view)
+    } catch (e: Exception) {
+        null
+    }
+    private val chapterBinding: ChapterHeaderItemBinding? = try {
+        ChapterHeaderItemBinding.bind(view)
+    } catch (e: Exception) {
+        null
+    }
 
     private var showReadingButton = true
     private var showMoreButton = true
     var hadSelection = false
 
     init {
-        binding.chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
-        binding.startReadingButton.setOnClickListener { adapter.delegate.readNextChapter() }
-        binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.delegate.topCoverHeight()
-        }
-        binding.moreButton.setOnClickListener { expandDesc() }
-        binding.mangaSummary.setOnClickListener {
-            if (binding.moreButton.isVisible) {
-                expandDesc()
-            } else if (!hadSelection) {
-                collapseDesc()
-            } else {
-                hadSelection = false
+
+        if (binding == null) {
+            with(chapterBinding) {
+                this ?: return@with
+                chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
             }
         }
-        binding.mangaSummary.setOnLongClickListener {
-            if (binding.mangaSummary.isTextSelectable && !adapter.recyclerView.canScrollVertically(-1)) {
-                (adapter.delegate as MangaDetailsController).binding.swipeRefresh.isEnabled = false
+        with(binding) {
+            this ?: return@with
+            chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
+            startReadingButton.setOnClickListener { adapter.delegate.readNextChapter() }
+            topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                height = adapter.delegate.topCoverHeight()
             }
-            false
-        }
-        binding.mangaSummary.setOnTouchListener { _, event ->
-            if (event.action == MotionEvent.ACTION_DOWN) {
-                view.requestFocus()
+            moreButton.setOnClickListener { expandDesc() }
+            mangaSummary.setOnClickListener {
+                if (moreButton.isVisible) {
+                    expandDesc()
+                } else if (!hadSelection) {
+                    collapseDesc()
+                } else {
+                    hadSelection = false
+                }
             }
-            if (event.actionMasked == MotionEvent.ACTION_UP) {
-                hadSelection = binding.mangaSummary.hasSelection()
-                (adapter.delegate as MangaDetailsController).binding.swipeRefresh.isEnabled =
-                    true
+            mangaSummary.setOnLongClickListener {
+                if (mangaSummary.isTextSelectable && !adapter.recyclerView.canScrollVertically(
+                        -1
+                    )
+                ) {
+                    (adapter.delegate as MangaDetailsController).binding.swipeRefresh.isEnabled =
+                        false
+                }
+                false
             }
-            false
+            mangaSummary.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    view.requestFocus()
+                }
+                if (event.actionMasked == MotionEvent.ACTION_UP) {
+                    hadSelection = mangaSummary.hasSelection()
+                    (adapter.delegate as MangaDetailsController).binding.swipeRefresh.isEnabled =
+                        true
+                }
+                false
+            }
+            if (!itemView.resources.isLTR) {
+                moreBgGradient.rotation = 180f
+            }
+            lessButton.setOnClickListener { collapseDesc() }
+            mangaGenresTags.setOnTagClickListener {
+                adapter.delegate.tagClicked(it)
+            }
+            webviewButton.setOnClickListener { adapter.delegate.openInWebView() }
+            shareButton.setOnClickListener { adapter.delegate.prepareToShareManga() }
+            favoriteButton.setOnClickListener {
+                adapter.delegate.favoriteManga(false)
+            }
+            title.setOnClickListener {
+                title.text?.let { adapter.delegate.globalSearch(it.toString()) }
+            }
+            title.setOnLongClickListener {
+                adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
+                true
+            }
+            mangaAuthor.setOnClickListener {
+                mangaAuthor.text?.let { adapter.delegate.globalSearch(it.toString()) }
+            }
+            mangaAuthor.setOnLongClickListener {
+                adapter.delegate.copyToClipboard(
+                    mangaAuthor.text.toString(),
+                    R.string.author
+                )
+                true
+            }
+            mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
+            trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
+            if (startExpanded) expandDesc()
+            else collapseDesc()
+            if (isTablet) chapterLayout.isVisible = false
         }
-        if (!itemView.resources.isLTR) {
-            binding.moreBgGradient.rotation = 180f
-        }
-        binding.lessButton.setOnClickListener { collapseDesc() }
-        binding.mangaGenresTags.setOnTagClickListener {
-            adapter.delegate.tagClicked(it)
-        }
-        binding.webviewButton.setOnClickListener { adapter.delegate.openInWebView() }
-        binding.shareButton.setOnClickListener { adapter.delegate.prepareToShareManga() }
-        binding.favoriteButton.setOnClickListener {
-            adapter.delegate.favoriteManga(false)
-        }
-        binding.title.setOnClickListener {
-            binding.title.text?.let { adapter.delegate.globalSearch(it.toString()) }
-        }
-        binding.title.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(binding.title.text.toString(), R.string.title)
-            true
-        }
-        binding.mangaAuthor.setOnClickListener {
-            binding.mangaAuthor.text?.let { adapter.delegate.globalSearch(it.toString()) }
-        }
-        binding.mangaAuthor.setOnLongClickListener {
-            adapter.delegate.copyToClipboard(binding.mangaAuthor.text.toString(), R.string.author)
-            true
-        }
-        binding.mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(binding.coverCard) }
-        binding.trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
-        if (startExpanded) expandDesc()
-        else collapseDesc()
     }
 
     private fun expandDesc() {
+        binding ?: return
         if (binding.moreButton.visibility == View.VISIBLE) {
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
@@ -110,10 +140,12 @@ class MangaHeaderHolder(
             binding.lessButton.isVisible = true
             binding.moreButtonGroup.isVisible = false
             binding.title.maxLines = Integer.MAX_VALUE
+            binding.mangaSummary.requestFocus()
         }
     }
 
     private fun collapseDesc() {
+        binding ?: return
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
@@ -129,13 +161,29 @@ class MangaHeaderHolder(
     fun bindChapters() {
         val presenter = adapter.delegate.mangaPresenter()
         val count = presenter.chapters.size
-        binding.chaptersTitle.text = itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
-        binding.filtersText.text = presenter.currentFilters()
+        if (binding != null) {
+            binding.chaptersTitle.text =
+                itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+            binding.filtersText.text = presenter.currentFilters()
+        } else if (chapterBinding != null) {
+            chapterBinding.chaptersTitle.text =
+                itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+            chapterBinding.filtersText.text = presenter.currentFilters()
+        }
     }
 
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.delegate.mangaPresenter()
+        if (binding == null) {
+            if (chapterBinding != null) {
+                val count = presenter.chapters.size
+                chapterBinding.chaptersTitle.text =
+                    itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+                chapterBinding.filtersText.text = presenter.currentFilters()
+            }
+            return
+        }
         binding.title.text = manga.title
 
         if (manga.genre.isNullOrBlank().not()) binding.mangaGenresTags.setTags(
@@ -281,16 +329,20 @@ class MangaHeaderHolder(
     }
 
     fun setTopHeight(newHeight: Int) {
+        binding ?: return
+        if (newHeight == binding.topView.height) return
         binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = newHeight
         }
     }
 
     fun setBackDrop(color: Int) {
+        binding ?: return
         binding.trueBackdrop.setBackgroundColor(color)
     }
 
     fun updateTracking() {
+        binding ?: return
         val presenter = adapter.delegate.mangaPresenter()
         val tracked = presenter.isTracked()
         with(binding.trackButton) {
@@ -309,6 +361,7 @@ class MangaHeaderHolder(
     }
 
     fun collapse() {
+        binding ?: return
         binding.subItemGroup.isVisible = false
         binding.startReadingButton.isVisible = false
         if (binding.moreButton.isVisible || binding.moreButton.isInvisible) {
@@ -320,6 +373,7 @@ class MangaHeaderHolder(
     }
 
     fun updateCover(manga: Manga) {
+        binding ?: return
         if (!manga.initialized) return
         val drawable = adapter.controller.binding.mangaCoverFull.drawable
         binding.mangaCover.loadManga(
@@ -343,6 +397,7 @@ class MangaHeaderHolder(
     }
 
     fun expand() {
+        binding ?: return
         binding.subItemGroup.isVisible = true
         if (!showMoreButton) binding.moreButtonGroup.isVisible = false
         else {

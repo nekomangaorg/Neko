@@ -13,6 +13,7 @@ class MangaHeaderItem(val manga: Manga, var startExpanded: Boolean) :
 
     var isChapterHeader = false
     var isLocked = false
+    var isTablet = false
 
     override fun getLayoutRes(): Int {
         return if (isChapterHeader) R.layout.chapter_header_item else R.layout.manga_header_item
@@ -27,7 +28,7 @@ class MangaHeaderItem(val manga: Manga, var startExpanded: Boolean) :
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): MangaHeaderHolder {
-        return MangaHeaderHolder(view, adapter as MangaDetailsAdapter, startExpanded)
+        return MangaHeaderHolder(view, adapter as MangaDetailsAdapter, startExpanded, isTablet)
     }
 
     override fun bindViewHolder(

@@ -11,6 +11,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
@@ -30,6 +31,7 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -95,15 +97,18 @@ import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isOnline
+import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -172,6 +177,10 @@ class MangaDetailsController :
     var refreshTracker: Int? = null
     var chapterPopupMenu: Pair<Int, PopupMenu>? = null
 
+    // Tablet Layout
+    var isTablet = false
+    private var tabletAdapter: MangaDetailsAdapter? = null
+
     private var query = ""
     private var adapter: MangaDetailsAdapter? = null
 
@@ -195,6 +204,7 @@ class MangaDetailsController :
         coverColor = null
         fullCoverActive = false
 
+        setTabletMode(view)
         setRecycler(view)
         setPaletteColor()
         adapter?.fastScroller = binding.fastScroller
@@ -206,6 +216,21 @@ class MangaDetailsController :
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         binding.swipeRefresh.setOnRefreshListener { presenter.refreshAll() }
         requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
+    }
+
+    /** Check if device is tablet, and use a second recycler to hold the details header if so */
+    private fun setTabletMode(view: View) {
+        isTablet = view.context.isTablet() &&
+            view.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        binding.tabletOverlay.isVisible = isTablet
+        binding.tabletRecycler.isVisible = isTablet
+        binding.tabletDivider.isVisible = isTablet
+        if (isTablet) {
+            binding.recycler.updateLayoutParams<ViewGroup.LayoutParams> { width = 0 }
+            tabletAdapter = MangaDetailsAdapter(this)
+            binding.tabletRecycler.adapter = tabletAdapter
+            binding.tabletRecycler.layoutManager = LinearLayoutManager(view.context)
+        }
     }
 
     override fun onDestroyView(view: View) {
@@ -236,26 +261,37 @@ class MangaDetailsController :
         binding.swipeRefresh.setDistanceToTriggerSync(70.dpToPx)
         activityBinding!!.appBar.elevation = 0f
 
-        scrollViewWith(
-            binding.recycler,
-            padBottom = true,
-            customPadding = true,
-            afterInsets = { insets ->
+        if (isTablet) {
+            val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
+            headerHeight = tHeight + (activityBinding?.root?.rootWindowInsets?.systemWindowInsetTop ?: 0)
+            binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
+            binding.recycler.doOnApplyWindowInsets { _, insets, _ ->
                 setInsets(insets, appbarHeight, offset)
-            },
-            liftOnScroll = {
-                colorToolbar(it)
             }
-        )
+        } else {
+            scrollViewWith(
+                binding.recycler,
+                padBottom = true,
+                customPadding = true,
+                afterInsets = { insets ->
+                    setInsets(insets, appbarHeight, offset)
+                },
+                liftOnScroll = {
+                    colorToolbar(it)
+                }
+            )
+        }
 
         binding.recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
-                    val atTop = !recyclerView.canScrollVertically(-1)
-                    val tY = getHeader()?.binding?.backdrop?.translationY ?: 0f
-                    getHeader()?.binding?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
-                    if (atTop) getHeader()?.binding?.backdrop?.translationY = 0f
+                    if (!isTablet) {
+                        val atTop = !recyclerView.canScrollVertically(-1)
+                        val tY = getHeader()?.binding?.backdrop?.translationY ?: 0f
+                        getHeader()?.binding?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
+                        if (atTop) getHeader()?.binding?.backdrop?.translationY = 0f
+                    }
                 }
 
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
@@ -268,9 +304,15 @@ class MangaDetailsController :
 
     private fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
         binding.recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-        headerHeight = appbarHeight + insets.systemWindowInsetTop
+        binding.tabletRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+        val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
+        headerHeight = tHeight + insets.systemWindowInsetTop
         binding.swipeRefresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
-        // 1dp extra to line up chapter header and manga header
+        if (isTablet) {
+            binding.tabletOverlay.updateLayoutParams<ViewGroup.LayoutParams> { height = headerHeight }
+            // 4dp extra to line up chapter header and manga header
+            binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
+        }
         getHeader()?.setTopHeight(headerHeight)
         binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = headerHeight
@@ -280,8 +322,8 @@ class MangaDetailsController :
     }
 
     /** Set the toolbar to fully transparent or colored and translucent */
-    fun colorToolbar(isColor: Boolean, animate: Boolean = true) {
-        if (isColor == toolbarIsColored) return
+    private fun colorToolbar(isColor: Boolean, animate: Boolean = true) {
+        if (isColor == toolbarIsColored || (isTablet && isColor)) return
         toolbarIsColored = isColor
         val isCurrentController =
             router?.backstack?.lastOrNull()?.controller == this@MangaDetailsController
@@ -538,12 +580,14 @@ class MangaDetailsController :
     }
 
     private fun getHeader(): MangaHeaderHolder? {
-        return binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        return if (isTablet) binding.tabletRecycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        else binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
     fun updateHeader() {
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         adapter?.setChapters(presenter.chapters)
+        tabletAdapter?.notifyDataSetChanged()
         addMangaHeader()
         activity?.invalidateOptionsMenu()
     }
@@ -555,6 +599,7 @@ class MangaDetailsController :
             launchUI { binding.swipeRefresh.isRefreshing = true }
             presenter.fetchChaptersFromSource()
         }
+        tabletAdapter?.notifyDataSetChanged()
         adapter?.setChapters(chapters)
         addMangaHeader()
         colorToolbar(binding.recycler.canScrollVertically(-1))
@@ -562,7 +607,12 @@ class MangaDetailsController :
     }
 
     private fun addMangaHeader() {
-        if (adapter?.scrollableHeaders?.isEmpty() == true) {
+        if (tabletAdapter?.scrollableHeaders?.isEmpty() == true) {
+            tabletAdapter?.removeAllScrollableHeaders()
+            tabletAdapter?.addScrollableHeader(presenter.headerItem)
+            adapter?.removeAllScrollableHeaders()
+            adapter?.addScrollableHeader(presenter.tabletChapterHeaderItem!!)
+        } else if (!isTablet && adapter?.scrollableHeaders?.isEmpty() == true) {
             adapter?.removeAllScrollableHeaders()
             adapter?.addScrollableHeader(presenter.headerItem)
         }
@@ -819,8 +869,10 @@ class MangaDetailsController :
 
         setOnQueryTextChangeListener(searchView) {
             query = it ?: ""
-            if (query.isNotEmpty()) getHeader()?.collapse()
-            else getHeader()?.expand()
+            if (!isTablet) {
+                if (query.isNotEmpty()) getHeader()?.collapse()
+                else getHeader()?.expand()
+            }
 
             adapter?.setFilter(query)
             adapter?.performFilter()

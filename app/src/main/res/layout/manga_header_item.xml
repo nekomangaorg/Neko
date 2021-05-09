@@ -356,6 +356,7 @@
         android:tooltipText="@string/sort_and_filter"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/start_reading_button">
 
         <com.google.android.material.textview.MaterialTextView
