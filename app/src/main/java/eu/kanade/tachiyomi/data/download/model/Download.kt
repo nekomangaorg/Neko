@@ -18,7 +18,7 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
     var downloadedImages: Int = 0
 
     @Volatile @Transient
-    var status: Int = 0
+    var status: State = State.default
         set(status) {
             field = status
             statusSubject?.onNext(this)
@@ -49,12 +49,17 @@ class Download(val source: HttpSource, val manga: Manga, val chapter: Chapter) {
         statusCallback = f
     }
 
-    companion object {
-        const val CHECKED = -1
-        const val NOT_DOWNLOADED = 0
-        const val QUEUE = 1
-        const val DOWNLOADING = 2
-        const val DOWNLOADED = 3
-        const val ERROR = 4
+    enum class State {
+        CHECKED,
+        NOT_DOWNLOADED,
+        QUEUE,
+        DOWNLOADING,
+        DOWNLOADED,
+        ERROR
+        ;
+
+        companion object {
+            val default = NOT_DOWNLOADED
+        }
     }
 }

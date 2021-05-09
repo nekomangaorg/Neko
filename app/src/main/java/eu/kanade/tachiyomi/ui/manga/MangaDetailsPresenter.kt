@@ -162,10 +162,10 @@ class MangaDetailsPresenter(
     private fun setDownloadedChapters(chapters: List<ChapterItem>) {
         for (chapter in chapters) {
             if (downloadManager.isChapterDownloaded(chapter, manga)) {
-                chapter.status = Download.DOWNLOADED
+                chapter.status = Download.State.DOWNLOADED
             } else if (downloadManager.hasQueue()) {
                 chapter.status = downloadManager.queue.find { it.chapter.id == chapter.id }
-                    ?.status ?: 0
+                    ?.status ?: Download.State.default
             }
         }
     }
@@ -267,7 +267,7 @@ class MangaDetailsPresenter(
     fun hasDownloads(): Boolean = allChapters.any { it.isDownloaded }
 
     fun getUnreadChaptersSorted() =
-        allChapters.filter { !it.read && it.status == Download.NOT_DOWNLOADED }.distinctBy { it.name }
+        allChapters.filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }.distinctBy { it.name }
             .sortedByDescending { it.source_order }
 
     fun startDownloadingNow(chapter: Chapter) {
@@ -289,7 +289,7 @@ class MangaDetailsPresenter(
     fun deleteChapter(chapter: ChapterItem) {
         downloadManager.deleteChapters(listOf(chapter), manga, source)
         this.chapters.find { it.id == chapter.id }?.apply {
-            status = Download.QUEUE
+            status = Download.State.QUEUE
             download = null
         }
 
@@ -310,7 +310,7 @@ class MangaDetailsPresenter(
         }
         chapters.forEach { chapter ->
             this.chapters.find { it.id == chapter.id }?.apply {
-                status = Download.QUEUE
+                status = Download.State.QUEUE
                 download = null
             }
         }

@@ -91,7 +91,7 @@ class ChapterHolder(
         binding.chapterScanlator.text = statuses.joinToString(" • ")
 
         val status = when {
-            adapter.isSelected(flexibleAdapterPosition) -> Download.CHECKED
+            adapter.isSelected(flexibleAdapterPosition) -> Download.State.CHECKED
             else -> item.status
         }
 
@@ -149,7 +149,7 @@ class ChapterHolder(
         if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
-    fun notifyStatus(status: Int, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
+    fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
         if (locked) {
             isVisible = false
             return

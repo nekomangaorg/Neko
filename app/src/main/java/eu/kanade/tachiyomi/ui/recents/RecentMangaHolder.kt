@@ -142,7 +142,7 @@ class RecentMangaHolder(
         }
         if (!item.mch.manga.isLocal()) {
             notifyStatus(
-                if (adapter.isSelected(flexibleAdapterPosition)) Download.CHECKED else item.status,
+                if (adapter.isSelected(flexibleAdapterPosition)) Download.State.CHECKED else item.status,
                 item.progress,
                 item.chapter.read
             )
@@ -160,7 +160,7 @@ class RecentMangaHolder(
         return item.mch.history.id != null
     }
 
-    fun notifyStatus(status: Int, progress: Int, isRead: Boolean, animated: Boolean = false) {
+    fun notifyStatus(status: Download.State, progress: Int, isRead: Boolean, animated: Boolean = false) {
         binding.downloadButton.downloadButton.setDownloadStatus(status, progress, animated)
         val isChapterRead =
             if (adapter.showDownloads == RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded) isRead else false
@@ -168,7 +168,7 @@ class RecentMangaHolder(
             when (adapter.showDownloads) {
                 RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
                 RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded ->
-                    status !in Download.CHECKED..Download.NOT_DOWNLOADED || !isChapterRead
+                    status !in Download.State.CHECKED..Download.State.NOT_DOWNLOADED || !isChapterRead
                 else -> binding.downloadButton.downloadButton.isVisible
             }
     }

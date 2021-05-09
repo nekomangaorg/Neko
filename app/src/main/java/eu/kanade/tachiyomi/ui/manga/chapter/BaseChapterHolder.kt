@@ -19,7 +19,7 @@ open class BaseChapterHolder(
         val chapter = adapter.getItem(flexibleAdapterPosition) as? BaseChapterItem<*, *> ?: return
         val downloadButton = itemView.findViewById<View>(R.id.download_button) ?: return
 
-        if (chapter.status == Download.NOT_DOWNLOADED || chapter.status == Download.ERROR) {
+        if (chapter.status == Download.State.NOT_DOWNLOADED || chapter.status == Download.State.ERROR) {
             adapter.baseDelegate.downloadChapter(flexibleAdapterPosition)
         } else {
             downloadButton.post {
@@ -29,10 +29,10 @@ open class BaseChapterHolder(
                 // Inflate our menu resource into the PopupMenu's Menu
                 popup.menuInflater.inflate(R.menu.chapter_download, popup.menu)
 
-                popup.menu.findItem(R.id.action_start).isVisible = chapter.status == Download.QUEUE
+                popup.menu.findItem(R.id.action_start).isVisible = chapter.status == Download.State.QUEUE
 
                 // Hide download and show delete if the chapter is downloaded
-                if (chapter.status != Download.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = downloadButton.context.getString(
+                if (chapter.status != Download.State.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = downloadButton.context.getString(
                     R.string.cancel
                 )
 

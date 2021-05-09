@@ -629,7 +629,7 @@ class MangaDetailsController :
                 (binding.recycler.findViewHolderForAdapterPosition(position) as? BaseFlexibleViewHolder)
                     ?.toggleActivation()
                 (binding.recycler.findViewHolderForAdapterPosition(position) as? ChapterHolder)
-                    ?.notifyStatus(Download.CHECKED, false, 0)
+                    ?.notifyStatus(Download.State.CHECKED, false, 0)
                 startingRangeChapterPos = position
                 actionMode?.invalidate()
             } else {
@@ -1148,10 +1148,10 @@ class MangaDetailsController :
             onItemClick(null, position)
             return
         }
-        if (chapter.status != Download.NOT_DOWNLOADED && chapter.status != Download.ERROR) {
+        if (chapter.status != Download.State.NOT_DOWNLOADED && chapter.status != Download.State.ERROR) {
             presenter.deleteChapter(chapter)
         } else {
-            if (chapter.status == Download.ERROR) {
+            if (chapter.status == Download.State.ERROR) {
                 DownloadService.start(view.context)
             } else {
                 downloadChapters(listOf(chapter))
@@ -1352,7 +1352,7 @@ class MangaDetailsController :
         if (startingRangeChapterPos != null && rangeMode == RangeMode.Download) {
             val item = adapter?.getItem(startingRangeChapterPos!!) as? ChapterItem
             (binding.recycler.findViewHolderForAdapterPosition(startingRangeChapterPos!!) as? ChapterHolder)?.notifyStatus(
-                item?.status ?: Download.NOT_DOWNLOADED,
+                item?.status ?: Download.State.NOT_DOWNLOADED,
                 false,
                 0
             )

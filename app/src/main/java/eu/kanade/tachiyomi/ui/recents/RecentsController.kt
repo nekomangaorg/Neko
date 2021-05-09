@@ -523,10 +523,10 @@ class RecentsController(bundle: Bundle? = null) :
         val item = adapter.getItem(position) as? RecentMangaItem ?: return
         val chapter = item.chapter
         val manga = item.mch.manga
-        if (item.status != Download.NOT_DOWNLOADED && item.status != Download.ERROR) {
+        if (item.status != Download.State.NOT_DOWNLOADED && item.status != Download.State.ERROR) {
             presenter.deleteChapter(chapter, manga)
         } else {
-            if (item.status == Download.ERROR) DownloadService.start(view.context)
+            if (item.status == Download.State.ERROR) DownloadService.start(view.context)
             else presenter.downloadChapter(manga, chapter)
         }
     }

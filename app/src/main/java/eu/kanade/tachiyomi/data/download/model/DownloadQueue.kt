@@ -24,7 +24,7 @@ class DownloadQueue(
         downloads.forEach { download ->
             download.setStatusSubject(statusSubject)
             download.setStatusCallback(::setPagesFor)
-            download.status = Download.QUEUE
+            download.status = Download.State.QUEUE
         }
         queue.addAll(downloads)
         store.addAll(downloads)
@@ -36,8 +36,8 @@ class DownloadQueue(
         store.remove(download)
         download.setStatusSubject(null)
         download.setStatusCallback(null)
-        if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE) {
-            download.status = Download.NOT_DOWNLOADED
+        if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
+            download.status = Download.State.NOT_DOWNLOADED
         }
         downloadListeners.forEach { it.updateDownload(download) }
         if (removed) {
@@ -65,8 +65,8 @@ class DownloadQueue(
         queue.forEach { download ->
             download.setStatusSubject(null)
             download.setStatusCallback(null)
-            if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE) {
-                download.status = Download.NOT_DOWNLOADED
+            if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
+                download.status = Download.State.NOT_DOWNLOADED
             }
             downloadListeners.forEach { it.updateDownload(download) }
         }
@@ -76,7 +76,7 @@ class DownloadQueue(
     }
 
     private fun setPagesFor(download: Download) {
-        if (download.status == Download.DOWNLOADING) {
+        if (download.status == Download.State.DOWNLOADING) {
             if (download.pages != null) {
                 for (page in download.pages!!)
                     page.setStatusCallback {
@@ -84,9 +84,9 @@ class DownloadQueue(
                     }
             }
             callListeners(download)
-        } else if (download.status == Download.DOWNLOADED || download.status == Download.ERROR) {
+        } else if (download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR) {
             setPagesSubject(download.pages, null)
-            if (download.status == Download.ERROR) {
+            if (download.status == Download.State.ERROR) {
                 callListeners(download)
             }
         } else {

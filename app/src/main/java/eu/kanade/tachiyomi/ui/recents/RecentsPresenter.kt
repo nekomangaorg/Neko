@@ -353,10 +353,10 @@ class RecentsPresenter(
     private fun setDownloadedChapters(chapters: List<RecentMangaItem>) {
         for (item in chapters.filter { it.chapter.id != null }) {
             if (downloadManager.isChapterDownloaded(item.chapter, item.mch.manga)) {
-                item.status = Download.DOWNLOADED
+                item.status = Download.State.DOWNLOADED
             } else if (downloadManager.hasQueue()) {
                 item.status = downloadManager.queue.find { it.chapter.id == item.chapter.id }
-                    ?.status ?: 0
+                    ?.status ?: Download.State.default
             }
         }
     }
@@ -405,7 +405,7 @@ class RecentsPresenter(
         if (update) {
             val item = recentItems.find { it.chapter.id == chapter.id } ?: return
             item.apply {
-                status = Download.NOT_DOWNLOADED
+                status = Download.State.NOT_DOWNLOADED
                 download = null
             }
 
