@@ -28,12 +28,12 @@ import androidx.preference.SwitchPreferenceCompat
 import androidx.recyclerview.widget.ConcatAdapter
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.EmptyPreferenceDataStore
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.SharedPreferencesDataStore
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.databinding.ExtensionDetailControllerBinding
+import eu.kanade.tachiyomi.extension.model.Extension
 import eu.kanade.tachiyomi.source.ConfigurableSource
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.getPreferenceKey
@@ -94,7 +94,10 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
 
         val themedContext by lazy { getPreferenceThemeContext() }
         val manager = PreferenceManager(themedContext)
-        manager.preferenceDataStore = EmptyPreferenceDataStore()
+        val dataStore = SharedPreferencesDataStore(
+            context.getSharedPreferences(extension.getPreferenceKey(), Context.MODE_PRIVATE)
+        )
+        manager.preferenceDataStore = dataStore
         manager.onDisplayPreferenceDialogListener = this
         val screen = manager.createPreferenceScreen(themedContext)
         preferenceScreen = screen
@@ -178,11 +181,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private fun addPreferencesForSource(screen: PreferenceScreen, source: Source, isMultiSource: Boolean, isMultiLangSingleSource: Boolean) {
         val context = screen.context
 
-        // TODO
-        val dataStore = SharedPreferencesDataStore(
-            context.getSharedPreferences("source_${source.id}", Context.MODE_PRIVATE)
-        )
-
         val prefs = mutableListOf<Preference>()
         val block: (@DSL SwitchPreferenceCompat).() -> Unit = {
             key = source.getPreferenceKey() + "_enabled"
@@ -236,7 +234,6 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
             while (newScreen.preferenceCount != 0) {
                 val pref = newScreen.getPreference(0)
                 pref.isIconSpaceReserved = true
-                pref.preferenceDataStore = dataStore
                 pref.fragment = "source_${source.id}"
                 pref.order = Int.MAX_VALUE
                 pref.isVisible = source.isEnabled()
@@ -308,6 +305,8 @@ class ExtensionDetailsController(bundle: Bundle? = null) :
     private fun Source.isLangEnabled(langs: Set<String>? = null): Boolean {
         return (lang in langs ?: preferences.enabledLanguages().get())
     }
+
+    private fun Extension.getPreferenceKey(): String = "extension_$pkgName"
 
     @Suppress("UNCHECKED_CAST")
     override fun <T : Preference> findPreference(key: CharSequence): T? {
