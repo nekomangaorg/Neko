@@ -181,7 +181,7 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
             .map {
                 mapChapter(it, groupMap)
             }.filter {
-                it.date_upload <= now && "MangaPlus" != it.scanlator
+                it.date_upload <= now
             }.toList()
     }
 

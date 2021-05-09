@@ -139,7 +139,7 @@ open class BrowseSourceController(bundle: Bundle) :
         if (presenter.source.isLogged().not()) {
             view.snack("You must be logged it.  please login")
         }
-        if(preferences.useCacheSource()){
+        if (preferences.useCacheSource()) {
             view.snack("Browsing Cached Source")
         }
         if (bundle?.getBoolean(APPLY_INSET) == true) {
@@ -663,7 +663,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-            .map { it.queryText().toString() }.filter { it != SearchHandler.PREFIX_GROUP_SEARCH && it != SearchHandler.PREFIX_ID_SEARCH }
+            .map { it.queryText().toString() }.filter { it != SearchHandler.PREFIX_ID_SEARCH }
             .subscribeUntilDestroy { searchWithQuery(it) }
     }
 

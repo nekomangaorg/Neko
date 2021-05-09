@@ -46,6 +46,9 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
         if (response.isSuccessful.not()) {
             throw Exception("Error getting search manga http code: ${response.code}")
         }
+        if (response.code == 204) {
+            return MangasPage(emptyList(), false)
+        }
 
         val mlResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total

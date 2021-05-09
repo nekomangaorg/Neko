@@ -112,7 +112,7 @@ open class MangaDex : HttpSource() {
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return PageHandler(network.client, headers, preferences.dataSaver()).fetchPageList(chapter)
+        return PageHandler(network.client, headers, preferences.dataSaver(), preferences.usePort443Only()).fetchPageList(chapter)
     }
 
     override fun fetchImage(page: Page): Observable<Response> {

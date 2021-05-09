@@ -88,6 +88,11 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val filterHan
         return client.newCall(mangaFeedRequest(manga, 0, langs))
             .asObservableSuccess()
             .map { response ->
+
+                if (response.code == 204) {
+                    return@map emptyList()
+                }
+                
                 val chapterListResponse = MdUtil.jsonParser.decodeFromString(ChapterListResponse.serializer(), response.body!!.string())
                 val results = chapterListResponse.results
 
@@ -117,9 +122,12 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val filterHan
     suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(mangaFeedRequest(manga, 0, langs)).await()
-            if (response.code != 200) {
+            if (response.isSuccessful.not()) {
                 XLog.e("error", response.body!!.string())
-                throw Exception("error returned from MangaDex")
+                throw Exception("error returned from MangaDex.  Http code : ${response.code}")
+            }
+            if (response.code == 204) {
+                return@withContext emptyList()
             }
             val chapterListResponse = MdUtil.jsonParser.decodeFromString(ChapterListResponse.serializer(), response.body!!.string())
             val results = chapterListResponse.results

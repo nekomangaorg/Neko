@@ -45,6 +45,10 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
             throw Exception("Error getting search manga http code: ${response.code}")
         }
 
+        if (response.code == 204) {
+            return MangasPage(emptyList(), false)
+        }
+
         val mlResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
         val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences) }
@@ -73,13 +77,8 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
         return GET(MdUtil.mangaUrl + "/" + id, headers, CacheControl.FORCE_NETWORK)
     }
 
-    private fun searchMangaByGroupRequest(group: String): Request {
-        return GET(MdUtil.groupSearchUrl + group, headers, CacheControl.FORCE_NETWORK)
-    }
-
     companion object {
         const val PREFIX_ID_SEARCH = "id:"
-        const val PREFIX_GROUP_SEARCH = "group:"
         val WHITESPACE_REGEX = "\\s".toRegex()
     }
 }
