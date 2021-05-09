@@ -7,6 +7,8 @@ import eu.kanade.tachiyomi.data.database.models.HistoryImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.download.DownloadService
+import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
@@ -37,7 +39,7 @@ class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get()
-) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener {
+) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener, DownloadServiceListener {
 
     private var recentsJob: Job? = null
     var recentItems = listOf<RecentMangaItem>()
@@ -75,6 +77,7 @@ class RecentsPresenter(
     override fun onCreate() {
         super.onCreate()
         downloadManager.addListener(this)
+        DownloadService.addListener(this)
         LibraryUpdateService.setListener(this)
         if (lastRecents != null) {
             if (recentItems.isEmpty()) {
@@ -329,6 +332,7 @@ class RecentsPresenter(
         super.onDestroy()
         downloadManager.removeListener(this)
         LibraryUpdateService.removeListener(this)
+        DownloadService.removeListener(this)
         lastRecents = recentItems
     }
 
@@ -367,6 +371,15 @@ class RecentsPresenter(
             setDownloadedChapters(recentItems)
             withContext(Dispatchers.Main) {
                 controller?.showLists(recentItems, true)
+                controller?.updateDownloadStatus()
+            }
+        }
+    }
+
+    override fun downloadStatusChanged(downloading: Boolean) {
+        presenterScope.launch {
+            withContext(Dispatchers.Main) {
+                controller?.updateDownloadStatus()
             }
         }
     }

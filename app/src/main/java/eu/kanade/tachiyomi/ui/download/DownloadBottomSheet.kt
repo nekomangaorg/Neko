@@ -6,6 +6,7 @@ import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
+import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
@@ -87,12 +88,13 @@ class DownloadBottomSheet @JvmOverloads constructor(
             }
         }
         binding.downloadFab.setOnClickListener {
-            if (!isRunning) {
+            if (controller.presenter.downloadManager.isPaused()) {
                 DownloadService.start(context)
             } else {
                 DownloadService.stop(context)
                 presenter.pauseDownloads()
             }
+            updateFab()
         }
         update()
         setInformationView()
@@ -105,7 +107,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
     fun update() {
         presenter.getItems()
         onQueueStatusChange(!presenter.downloadManager.isPaused())
-        binding.downloadFab.isVisible = presenter.downloadQueue.isNotEmpty()
+        binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
     }
 
     private fun updateDLTitle() {
@@ -125,7 +127,8 @@ class DownloadBottomSheet @JvmOverloads constructor(
     private fun onQueueStatusChange(running: Boolean) {
         val oldRunning = isRunning
         isRunning = running
-        binding.downloadFab.isVisible = presenter.downloadQueue.isNotEmpty()
+        binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
+        updateFab()
         if (oldRunning != running) {
             activity?.invalidateOptionsMenu()
 
@@ -191,14 +194,17 @@ class DownloadBottomSheet @JvmOverloads constructor(
     }
 
     fun prepareMenu(menu: Menu) {
-        binding.downloadFab.text = context.getString(if (isRunning) R.string.pause else R.string.resume)
-        binding.downloadFab.setIconResource(if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp)
-
+        updateFab()
         // Set clear button visibility.
         menu.findItem(R.id.clear_queue)?.isVisible = !presenter.downloadQueue.isEmpty()
 
         // Set reorder button visibility.
         menu.findItem(R.id.reorder)?.isVisible = !presenter.downloadQueue.isEmpty()
+    }
+
+    private fun updateFab() {
+        binding.downloadFab.text = context.getString(if (isRunning) R.string.pause else R.string.resume)
+        binding.downloadFab.setIconResource(if (isRunning) R.drawable.ic_pause_24dp else R.drawable.ic_play_arrow_24dp)
     }
 
     fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -263,6 +269,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         val adapter = adapter ?: return
         val downloads = (0 until adapter.itemCount).mapNotNull { adapter.getItem(it)?.download }
         presenter.reorder(downloads)
+        controller.updateChapterDownload(download, false)
     }
 
     /**

@@ -304,6 +304,7 @@ class RecentsController(bundle: Bundle? = null) :
                     }
 
                     if (presenter.downloadManager.hasQueue()) {
+                        binding.downloadBottomSheet.downloadFab.alpha = 1f
                         if (state == BottomSheetBehavior.STATE_EXPANDED) {
                             binding.downloadBottomSheet.downloadFab.show()
                         } else {
@@ -488,14 +489,20 @@ class RecentsController(bundle: Bundle? = null) :
         }
     }
 
-    fun updateChapterDownload(download: Download) {
+    fun updateChapterDownload(download: Download, updateDLSheet: Boolean = true) {
         if (view == null) return
-        binding.downloadBottomSheet.dlBottomSheet.update()
-        binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
-        binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
+        if (updateDLSheet) {
+            binding.downloadBottomSheet.dlBottomSheet.update()
+            binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
+            binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
+        }
         val id = download.chapter.id ?: return
         val holder = binding.recycler.findViewHolderForItemId(id) as? RecentMangaHolder ?: return
         holder.notifyStatus(download.status, download.progress, download.chapter.read, true)
+    }
+
+    fun updateDownloadStatus() {
+        binding.downloadBottomSheet.dlBottomSheet.update()
     }
 
     private fun refreshItem(chapterId: Long) {
