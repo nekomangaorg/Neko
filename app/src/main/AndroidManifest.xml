@@ -86,6 +86,17 @@
                     android:host="mangaplus.shueisha.co.jp"
                     android:pathPattern="/viewer/..*"
                     android:scheme="https" />
+
+                <data
+                    android:host="cubari.moe"
+                    android:pathPattern="/read/imgur/..*"
+                    android:scheme="https" />
+
+                <!-- Only link to a chapter if the gist contains a chapter number -->
+                <data
+                    android:host="cubari.moe"
+                    android:pathPattern="/read/gist/..*/..*"
+                    android:scheme="https" />
             </intent-filter>
 
             <intent-filter>

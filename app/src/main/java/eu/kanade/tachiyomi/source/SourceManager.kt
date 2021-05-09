@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.DelegatedHttpSource
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.all.Cubari
 import eu.kanade.tachiyomi.source.online.all.MangaDex
 import eu.kanade.tachiyomi.source.online.english.KireiCake
 import eu.kanade.tachiyomi.source.online.english.MangaPlus
@@ -33,6 +34,11 @@ open class SourceManager(private val context: Context) {
             "mangaplus.shueisha.co.jp",
             1998944621602463790,
             MangaPlus()
+        ),
+        DelegatedSource(
+            "cubari.moe",
+            6338219619148105941,
+            Cubari()
         )
     ).associateBy { it.sourceId }
 
