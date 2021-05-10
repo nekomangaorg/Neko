@@ -472,10 +472,10 @@ class MangaDetailsController :
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
-        if (type == ControllerChangeType.PUSH_ENTER || type == ControllerChangeType.POP_ENTER) {
+        if (type.isEnter) {
             setActionBar(true)
             setStatusBarAndToolbar()
-        } else if (type == ControllerChangeType.PUSH_EXIT || type == ControllerChangeType.POP_EXIT) {
+        } else {
             if (router.backstack.lastOrNull()?.controller is DialogController) {
                 return
             }
@@ -485,6 +485,7 @@ class MangaDetailsController :
             }
             colorAnimator?.cancel()
 
+            getHeader()?.unbind()
             val colorSecondary = activity?.getResourceColor(
                 R.attr.colorSecondary
             ) ?: Color.BLACK

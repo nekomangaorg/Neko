@@ -312,6 +312,11 @@ class MangaHeaderHolder(
         updateCover(manga)
     }
 
+    fun unbind() {
+        binding?.mangaSummary?.setTextIsSelectable(false)
+        binding?.mangaSummary?.clearFocus()
+    }
+
     private fun MaterialButton.checked(checked: Boolean) {
         if (checked) {
             backgroundTintList = ColorStateList.valueOf(
