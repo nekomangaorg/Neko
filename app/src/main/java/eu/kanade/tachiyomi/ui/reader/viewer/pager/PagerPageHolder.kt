@@ -408,6 +408,11 @@ class PagerPageHolder(
                     openStream?.close()
                 } catch (e: Exception) {}
             }
+            .doOnError {
+                try {
+                    openStream?.close()
+                } catch (e: Exception) {}
+            }
             .subscribe({}, {})
     }
 
