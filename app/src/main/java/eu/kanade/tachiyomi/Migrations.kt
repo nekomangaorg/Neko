@@ -30,13 +30,11 @@ object Migrations {
         val oldVersion = preferences.lastVersionCode().getOrDefault()
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
-
             if (oldVersion < 38) {
                 if (preferences.automaticUpdates()) {
                     UpdaterJob.setupTask()
                 }
             }
-
             if (oldVersion < 39) {
                 // Restore jobs after migrating from Evernote's job scheduler to WorkManager.
                 if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
@@ -53,7 +51,6 @@ object Migrations {
                 trackManager.myAnimeList.logout()
                 context.toast(R.string.myanimelist_relogin)
             }
-
             if (oldVersion < 113 && oldVersion != 0) {
                 // Force MAL log out due to login flow change
                 // v67: switched from scraping to WebView
@@ -64,11 +61,12 @@ object Migrations {
                     context.toast(R.string.myanimelist_relogin)
                 }
             }
-
+            if(oldVersion < 114 && oldVersion != 0) {
+                // Force migrate all manga to the new V5 ids
+                V5MigrationJob.doWorkNow()
+            }
             return true
         }
-        // temp testing...
-        V5MigrationJob.doWorkNow()
         return false
     }
 }

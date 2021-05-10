@@ -31,8 +31,6 @@ import uy.kohesive.injekt.injectLazy
 
 class V5MigrationNotifier(private val context: Context) {
 
-    private val preferences: PreferencesHelper by injectLazy()
-
     /**
      * Pending intent of action that cancels the library update
      */
