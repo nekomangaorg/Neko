@@ -660,7 +660,16 @@ class PagerPageHolder(
             return imageStream
         }
         val imageBytes = imageStream.readBytes()
-        val imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        val imageBitmap = try {
+            BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+        } catch (e: Exception) {
+            imageStream2.close()
+            imageStream.close()
+            page.fullPage = true
+            skipExtra = true
+            Timber.e("Cannot combine pages ${e.message}")
+            return imageBytes.inputStream()
+        }
         scope?.launchUI { progressBar.setProgress(96) }
         val height = imageBitmap.height
         val width = imageBitmap.width
@@ -674,7 +683,17 @@ class PagerPageHolder(
         }
 
         val imageBytes2 = imageStream2.readBytes()
-        val imageBitmap2 = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
+        val imageBitmap2 = try {
+            BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
+        } catch (e: Exception) {
+            imageStream2.close()
+            imageStream.close()
+            extraPage?.fullPage = true
+            skipExtra = true
+            page.isolatedPage = true
+            Timber.e("Cannot combine pages ${e.message}")
+            return imageBytes.inputStream()
+        }
         scope?.launchUI { progressBar.setProgress(97) }
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
