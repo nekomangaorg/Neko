@@ -65,6 +65,13 @@ object Notifications {
     const val ID_CRASH_LOGS = -601
 
     /**
+     * Notification channel for migration.
+     */
+    const val CHANNEL_V5_MIGRATION = "v5_migration_channel"
+    const val ID_V5_MIGRATION_PROGRESS = -901
+    const val ID_V5_MIGRATION_ERROR = -902
+
+    /**
      * Creates the notification channels introduced in Android Oreo.
      *
      * @param context The application context.
@@ -135,6 +142,13 @@ object Notifications {
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 group = GROUP_BACKUP_RESTORE
+                setShowBadge(false)
+                setSound(null, null)
+            },
+            NotificationChannel(
+                    CHANNEL_V5_MIGRATION, context.getString(R.string.v5_migration_service),
+                    NotificationManager.IMPORTANCE_HIGH
+            ).apply {
                 setShowBadge(false)
                 setSound(null, null)
             },

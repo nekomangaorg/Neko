@@ -6,51 +6,32 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.widget.Toast
-import coil.Coil
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
-import eu.kanade.tachiyomi.data.database.models.scanlatorList
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.model.isMerged
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.manga.track.TrackItem
-import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isServiceRunning
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import eu.kanade.tachiyomi.v5.db.V5DbQueries
-import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.ceil
 
 /**
  * This class will perform migration of old mangas ids to the new v5 mangadex.
@@ -65,7 +46,6 @@ class V5MigrationService(
      * Wake lock that will be held until the service is destroyed.
      */
     private lateinit var wakeLock: PowerManager.WakeLock
-
     private lateinit var notifier: V5MigrationNotifier
 
     private var job: Job? = null
@@ -74,21 +54,18 @@ class V5MigrationService(
     private val failedUpdatesMangas = mutableMapOf<Manga, String?>()
     private val failedUpdatesChapters = mutableMapOf<Chapter, String?>()
 
-    val count = AtomicInteger(0)
-    val jobCount = AtomicInteger(0)
-
     /**
      * Method called when the service is created. It injects dagger dependencies and acquire
      * the wake lock.
      */
     override fun onCreate() {
         super.onCreate()
+        startForeground(Notifications.ID_V5_MIGRATION_PROGRESS, notifier.progressNotificationBuilder.build())
         notifier = V5MigrationNotifier(this)
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
                 PowerManager.PARTIAL_WAKE_LOCK, "V5MigrationService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
-        startForeground(Notifications.ID_UPDATER, notifier.progressNotificationBuilder.build())
     }
 
     /**
@@ -102,9 +79,7 @@ class V5MigrationService(
     /**
      * This method needs to be implemented, but it's not used/needed.
      */
-    override fun onBind(intent: Intent): IBinder? {
-        return null
-    }
+    override fun onBind(intent: Intent) = null
 
     /**
      * Method called when the service receives an intent.
@@ -127,6 +102,8 @@ class V5MigrationService(
             updateMangas()
             // update chapters
             //updateChapters()
+            // Done
+            finishUpdates()
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 
@@ -140,6 +117,7 @@ class V5MigrationService(
      */
     private fun updateMangas() {
 
+        XLog.e("here 9")
         val db = Injekt.get<DatabaseHelper>()
         val dbV5 = Injekt.get<V5DbHelper>()
         val mangas = db.getMangas().executeAsBlocking()
@@ -170,8 +148,10 @@ class V5MigrationService(
 
     }
 
-    private fun finishUpdates(isDexUp: Boolean = true) {
-        if (jobCount.get() != 0) return
+    /**
+     * Finall function called when we have finished / requested to stop the update
+     */
+    private fun finishUpdates() {
         if (failedUpdatesMangas.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(failedUpdatesMangas, failedUpdatesChapters)
             notifier.showUpdateErrorNotification(
@@ -183,25 +163,13 @@ class V5MigrationService(
         notifier.cancelProgressNotification()
     }
 
-
-    /**
-     * Shows the notification containing the currently updating manga and the progress.
-     *
-     * @param manga the manga that's being updated.
-     * @param current the current progress.
-     * @param total the total progress.
-     */
-    private fun showProgressNotification(manga: SManga, current: Int, total: Int) {
-        notifier.showProgressNotification(manga, current, total)
-    }
-
     /**
      * Writes basic file of update errors to cache dir.
      */
     private fun writeErrorFile(errors1: Map<Manga, String?>, errors2: Map<Chapter, String?>): File {
         try {
             if (errors1.isNotEmpty() || errors2.isNotEmpty()) {
-                val destFile = File(externalCacheDir, "neko_update_errors.txt")
+                val destFile = File(externalCacheDir, "neko_v5_migration_errors.txt")
                 destFile.bufferedWriter().use { out ->
                     errors1.forEach { (manga, error) ->
                         out.write("${manga.title}: $error\n")
@@ -219,8 +187,6 @@ class V5MigrationService(
     }
 
     companion object {
-
-        private var instance: V5MigrationService? = null
 
         /**
          * Returns the status of the service.
@@ -244,6 +210,7 @@ class V5MigrationService(
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.startService(intent)
                 } else {
+                    XLog.e("startForegroundService called!")
                     context.startForegroundService(intent)
                 }
             }
@@ -255,10 +222,8 @@ class V5MigrationService(
          * @param context the application context.
          */
         fun stop(context: Context) {
-            instance?.job?.cancel()
             GlobalScope.launch {
-                instance?.jobCount?.set(0)
-                instance?.finishUpdates()
+                context.getSystemService(V5MigrationService::class.java)?.finishUpdates()
             }
             context.stopService(Intent(context, V5MigrationService::class.java))
         }

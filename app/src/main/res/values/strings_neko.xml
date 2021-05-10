@@ -148,5 +148,9 @@
     <string name="channel_crash_logs">Crash logs</string>
     <string name="open_log">Open log</string>
 
+    <!-- v5 migration -->
+    <string name="v5_migration_service">V5 Migration</string>
+    <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.</string>
+
 
 </resources>

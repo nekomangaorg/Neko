@@ -65,15 +65,10 @@ object Migrations {
                 }
             }
 
-
-
             return true
         }
-
-
-        // Temp testing
-        V5MigrationJob.setupTask()
-
+        // temp testing...
+        V5MigrationJob.doWorkNow()
         return false
     }
 }

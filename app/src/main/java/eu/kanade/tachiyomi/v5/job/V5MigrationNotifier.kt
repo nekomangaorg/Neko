@@ -27,11 +27,7 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import okhttp3.internal.toImmutableMap
 import uy.kohesive.injekt.injectLazy
-import java.util.ArrayList
 
 class V5MigrationNotifier(private val context: Context) {
 
@@ -41,7 +37,7 @@ class V5MigrationNotifier(private val context: Context) {
      * Pending intent of action that cancels the library update
      */
     private val cancelIntent by lazy {
-        NotificationReceiver.cancelLibraryUpdatePendingBroadcast(context)
+        NotificationReceiver.cancelV5MigrationUpdatePendingBroadcast(context)
     }
 
     /**
@@ -55,7 +51,7 @@ class V5MigrationNotifier(private val context: Context) {
      * Cached progress notification to avoid creating a lot.
      */
     val progressNotificationBuilder by lazy {
-        context.notificationBuilder(Notifications.CHANNEL_LIBRARY) {
+        context.notificationBuilder(Notifications.CHANNEL_V5_MIGRATION) {
             setContentTitle(context.getString(R.string.app_name))
             setSmallIcon(R.drawable.ic_refresh_24dp)
             setLargeIcon(notificationBitmap)
@@ -76,7 +72,7 @@ class V5MigrationNotifier(private val context: Context) {
     fun showProgressNotification(manga: SManga, current: Int, total: Int) {
         val title = manga.title
         context.notificationManager.notify(
-                Notifications.ID_UPDATER,
+                Notifications.ID_V5_MIGRATION_PROGRESS,
                 progressNotificationBuilder
                         .setContentTitle(title)
                         .setProgress(total, current, false)
@@ -94,7 +90,7 @@ class V5MigrationNotifier(private val context: Context) {
     fun showProgressNotification(chapter: SChapter, current: Int, total: Int) {
         val title = chapter.chapter_title
         context.notificationManager.notify(
-                Notifications.ID_UPDATER,
+                Notifications.ID_V5_MIGRATION_PROGRESS,
                 progressNotificationBuilder
                         .setContentTitle(title)
                         .setProgress(total, current, false)
@@ -113,8 +109,8 @@ class V5MigrationNotifier(private val context: Context) {
             return
         }
         context.notificationManager.notify(
-                Notifications.ID_LIBRARY_ERROR,
-                context.notificationBuilder(Notifications.CHANNEL_LIBRARY) {
+                Notifications.ID_V5_MIGRATION_ERROR,
+                context.notificationBuilder(Notifications.CHANNEL_V5_MIGRATION) {
                     setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
                     addAction(
                             R.drawable.nnf_ic_file_folder,
@@ -137,7 +133,7 @@ class V5MigrationNotifier(private val context: Context) {
      * Cancels the progress notification.
      */
     fun cancelProgressNotification() {
-        context.notificationManager.cancel(Notifications.ID_LIBRARY_PROGRESS)
+        context.notificationManager.cancel(Notifications.ID_V5_MIGRATION_PROGRESS)
     }
 
     /**

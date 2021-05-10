@@ -17,7 +17,7 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
     companion object {
         private const val TAG = "V5Migration"
 
-        fun setupTask() {
+        fun doWorkNow() {
             WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<V5MigrationJob>().build())
         }
 

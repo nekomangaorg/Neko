@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 
 class SettingsMainController : SettingsController() {
 
@@ -25,6 +26,15 @@ class SettingsMainController : SettingsController() {
         titleRes = R.string.settings
 
         val size = 18
+
+        preference {
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_warning)
+            titleRes = R.string.v5_migration_service
+            summary = context.resources.getString(R.string.v5_migration_desc)
+            onClick {
+                V5MigrationJob.doWorkNow()
+            }
+        }
 
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_tune)
