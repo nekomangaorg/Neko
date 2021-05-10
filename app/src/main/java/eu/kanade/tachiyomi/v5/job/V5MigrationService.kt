@@ -131,7 +131,6 @@ class V5MigrationService(
             var mangaDeleted = false
             if(numeric) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.db, oldMangaId)
-                XLog.e("GOLDBATTLE: migrated $oldMangaId to $newMangaId (manga)")
                 if (newMangaId != "") {
                     manga.url = "/manga/${newMangaId}/"
                     db.insertManga(manga).executeAsBlocking()
@@ -165,7 +164,6 @@ class V5MigrationService(
                     // We skip chapters which have already been converted (non-numeric ids)
                     if(numeric) {
                         val newChapterId = V5DbQueries.getNewChapterId(dbV5.db, oldChapterId)
-                        XLog.e("GOLDBATTLE: migrated $oldChapterId to $newChapterId (chapter)")
                         if (newChapterId != "") {
                             chapter.mangadex_chapter_id = newChapterId
                             chapter.url = MdUtil.chapterSuffix + newChapterId
