@@ -857,8 +857,6 @@ class MangaDetailsPresenter(
     fun isTracked(): Boolean =
         loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
 
-    fun similarEnabled(): Boolean = preferences.similarEnabled().get()
-
     // Tracking
     private fun setTrackItems() {
         trackList = loggedServices.map { service ->
@@ -1066,7 +1064,7 @@ class MangaDetailsPresenter(
     }
 
     fun similarToolTip() {
-        if (similarEnabled() && !preferences.shownSimilarTutorial().get()) {
+        if (!preferences.shownSimilarTutorial().get()) {
             scope.launch {
                 withContext(Dispatchers.IO) {
                     delay(1500)
