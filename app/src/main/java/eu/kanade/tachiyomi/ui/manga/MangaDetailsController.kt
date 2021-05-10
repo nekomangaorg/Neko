@@ -664,16 +664,16 @@ class MangaDetailsController :
     override fun onItemLongClick(position: Int) {
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
-//        val itemView = getHolder(item)?.itemView ?: return
+        val descending = presenter.sortDescending()
         val items = listOf(
             MaterialMenuSheet.MenuSheetItem(
                 0,
-                R.drawable.ic_eye_down_24dp,
+                if (descending) R.drawable.ic_eye_down_24dp else R.drawable.ic_eye_up_24dp,
                 R.string.mark_previous_as_read
             ),
             MaterialMenuSheet.MenuSheetItem(
                 1,
-                R.drawable.ic_eye_off_down_24dp,
+                if (descending) R.drawable.ic_eye_off_down_24dp else R.drawable.ic_eye_off_up_24dp,
                 R.string.mark_previous_as_unread
             ),
             MaterialMenuSheet.MenuSheetItem(
