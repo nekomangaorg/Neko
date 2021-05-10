@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.GetReadingStatus
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaStatusListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.UpdateReadingStatus
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -19,6 +20,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -39,18 +41,30 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         return client.newCall(followsListRequest(0))
             .asObservable()
             .map { response ->
-                val mangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
+                val mangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
                 val results = mangaListResponse.results
 
                 var hasMoreResults = mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
 
+                var offset = mangaListResponse.offset
+                val limit = mangaListResponse.limit
+
                 while (hasMoreResults) {
-                    val offset = mangaListResponse.offset + mangaListResponse.limit
+                    offset += limit
                     val newResponse = client.newCall(followsListRequest(offset)).execute()
-                    val newMangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), newResponse.body!!.toString())
-                    hasMoreResults = newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
+                    if (newResponse.code != 200) {
+                        hasMoreResults = false
+                    } else {
+                        val newMangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(newResponse.body!!.string())
+                        hasMoreResults = newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
+                    }
                 }
-                followsParseMangaPage(results)
+                val readingStatusResponse = client.newCall(readingStatusRequest()).execute()
+
+                val readingStatusMap = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string()).statuses
+
+
+                followsParseMangaPage(results, readingStatusMap)
             }
     }
 
@@ -58,11 +72,13 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      * Parse follows api to manga page
      * used when multiple follows
      */
-    private fun followsParseMangaPage(response: List<MangaResponse>): MangasPage {
+    private fun followsParseMangaPage(response: List<MangaResponse>, readingStatusMap: Map<String, String?>): MangasPage {
 
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
         val result = response.map {
-            MdUtil.createMangaEntry(it, preferences)
+            MdUtil.createMangaEntry(it, preferences).apply {
+                this.follow_status = FollowStatus.fromDex(readingStatusMap[it.data.id])
+            }
         }.sortedWith(comparator)
 
         return MangasPage(result, false)
@@ -92,13 +108,17 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      *
      */
     private fun followsListRequest(offset: Int): Request {
-        val tempUrl = MdUtil.userFollows.toHttpUrlOrNull()!!.newBuilder()
+        val tempUrl = MdUtil.userFollowsUrl.toHttpUrlOrNull()!!.newBuilder()
 
         tempUrl.apply {
-            addQueryParameter("limit", MdUtil.mangaLimit.toString())
+            addQueryParameter("limit", "100")
             addQueryParameter("offset", offset.toString())
         }
         return GET(tempUrl.build().toString(), MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
+    }
+
+    private fun readingStatusRequest(): Request {
+        return GET(MdUtil.readingStatusesUrl, MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -186,20 +206,29 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
     suspend fun fetchAllFollows(): List<SManga> {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(followsListRequest(0)).await()
-            val mangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
-            val results = mangaListResponse.results
+            val mangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
+            val results = mangaListResponse.results.toMutableList()
 
             var hasMoreResults = mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
+            var offset = mangaListResponse.offset
+            val limit = mangaListResponse.limit
 
             while (hasMoreResults) {
-                val offset = mangaListResponse.offset + mangaListResponse.limit
+                offset += limit
                 val newResponse = client.newCall(followsListRequest(offset)).await()
-                val newMangaListResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), newResponse.body!!.toString())
-                hasMoreResults = newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
+                if (newResponse.code != 200) {
+                    hasMoreResults = false
+                } else {
+                    val newMangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(newResponse.body!!.toString())
+                    results.addAll(newMangaListResponse.results)
+                    hasMoreResults = newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
+                }
             }
 
+            val readingStatusResponse = client.newCall(readingStatusRequest()).await()
+            val readingStatusMap = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.toString()).statuses
 
-            followsParseMangaPage(results).mangas
+            followsParseMangaPage(results, readingStatusMap).manga
         }
     }
 

@@ -19,7 +19,7 @@ class SimilarPager(val manga: Manga, val source: Source) : Pager() {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                if (it.mangas.isNotEmpty()) {
+                if (it.manga.isNotEmpty()) {
                     onPageReceived(it)
                 } else {
                     throw NoResultsException()

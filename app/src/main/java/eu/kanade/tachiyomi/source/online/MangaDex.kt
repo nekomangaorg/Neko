@@ -25,7 +25,9 @@ import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.MediaType.Companion.toMediaType
@@ -46,11 +48,13 @@ open class MangaDex : HttpSource() {
 
     private val loginHelper = MangaDexLoginHelper(network.client, preferences)
 
+    var scope = CoroutineScope(Job() + Dispatchers.Default)
+
     // chapter url where we get the token, last request time
     private val tokenTracker = hashMapOf<String, Long>()
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        return FollowsHandler(network.client, headers, preferences).updateFollowStatus(mangaID, followStatus)
+        return FollowsHandler(network.authClient, headers, preferences).updateFollowStatus(mangaID, followStatus)
     }
 
     open fun fetchRandomMangaId(): Observable<String> {
@@ -74,7 +78,7 @@ open class MangaDex : HttpSource() {
     }
 
     override fun fetchFollows(): Observable<MangasPage> {
-        return FollowsHandler(network.client, headers, preferences).fetchFollows()
+        return FollowsHandler(network.authClient, headers, preferences).fetchFollows()
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
@@ -175,22 +179,22 @@ open class MangaDex : HttpSource() {
     }
 
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
-        return FollowsHandler(network.client, headers, preferences).fetchAllFollows()
+        return FollowsHandler(network.authClient, headers, preferences).fetchAllFollows()
     }
 
     open suspend fun updateReadingProgress(track: Track): Boolean {
-        return FollowsHandler(network.client, headers, preferences).updateReadingProgress(track)
+        return FollowsHandler(network.authClient, headers, preferences).updateReadingProgress(track)
     }
 
     open suspend fun updateRating(track: Track): Boolean {
-        return FollowsHandler(network.client, headers, preferences).updateRating(track)
+        return FollowsHandler(network.authClient, headers, preferences).updateRating(track)
     }
 
     override suspend fun fetchTrackingInfo(url: String): Track {
         if (!isLogged()) {
             throw Exception("Not Logged in to MangaDex")
         }
-        return FollowsHandler(network.client, headers, preferences).fetchTrackingInfo(url)
+        return FollowsHandler(network.authClient, headers, preferences).fetchTrackingInfo(url)
     }
 
     override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
@@ -198,7 +202,8 @@ open class MangaDex : HttpSource() {
     }
 
     override fun isLogged(): Boolean {
-        return preferences.sourcePassword(this) != null
+        return preferences.sourcePassword(this).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not()
+            && preferences.refreshToken().isNullOrBlank().not()
     }
 
     override suspend fun login(
@@ -219,16 +224,13 @@ open class MangaDex : HttpSource() {
 
     override suspend fun logout(): Logout {
         return withContext(Dispatchers.IO) {
-
-            val catch = runCatching {
-                val result = network.client.newCall(
-                    POST(
-                        MdUtil.logoutUrl,
-                        MdUtil.getAuthHeaders(headers, preferences)
-                    )
-                ).await()
-            }
-            return@withContext Logout(false, "Unknown error")
+            network.client.newCall(
+                POST(
+                    MdUtil.logoutUrl,
+                    MdUtil.getAuthHeaders(headers, preferences)
+                )
+            ).await()
+            return@withContext Logout(true)
         }
     }
 

@@ -15,11 +15,11 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
     override fun authenticate(route: Route?, response: Response): Request? {
         XLog.i("Detected Auth error ${response.code} on ${response.request.url}")
         val token = refreshToken(loginHelper)
-        if (token.isEmpty()) {
-            return null
-            throw Exception("Unable to authenticate request, please re login")
+        return if (token.isEmpty()) {
+            null
+        } else {
+            response.request.newBuilder().header("Authorization", token).build()
         }
-        return response.request.newBuilder().header("Authorization", token).build()
     }
 
     @Synchronized

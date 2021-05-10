@@ -27,8 +27,8 @@ data class NetworkMangaAttributes(
     val description: Map<String, String>,
     val links: Map<String, String>?,
     val originalLanguage: String,
-    val lastVolume: Int?,
-    val lastChapter: String,
+    val lastVolume: String?,
+    val lastChapter: String?,
     val contentRating: String?,
     val publicationDemographic: String?,
     val status: String?,
@@ -77,4 +77,9 @@ data class GetReadingStatus(
 @Serializable
 data class UpdateReadingStatus(
     val id: String?
+)
+
+@Serializable
+data class MangaStatusListResponse(
+    val statuses: Map<String, String?>
 )

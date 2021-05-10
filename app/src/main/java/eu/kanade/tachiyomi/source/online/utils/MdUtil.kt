@@ -36,20 +36,22 @@ class MdUtil {
         const val authorUrl = "$apiUrl/author"
         const val randomMangaUrl = "$apiUrl/manga/random"
         const val mangaUrl = "$apiUrl/manga"
-        const val userFollows = "$apiUrl/user/follows/manga"
+        const val userFollowsUrl = "$apiUrl/user/follows/manga"
+        const val readingStatusesUrl = "$apiUrl/manga/status"
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
         fun mangaFeedUrl(id: String, offset: Int, language: List<String>): String {
             return "$mangaUrl/$id/feed".toHttpUrl().newBuilder().apply {
                 addQueryParameter("limit", "500")
                 addQueryParameter("offset", offset.toString())
+                addQueryParameter("order[volume]", "desc")
+                addQueryParameter("order[chapter]", "desc")
                 language.forEach {
                     addQueryParameter("locales[]", it)
                 }
             }.build().toString()
         }
 
-        const val groupSearchUrl = "$baseUrl/groups/0/1/"
         const val apiCovers = "/covers"
         const val reportUrl = "https://api.mangadex.network/report"
 

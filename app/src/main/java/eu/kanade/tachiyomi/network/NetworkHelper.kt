@@ -31,7 +31,7 @@ class NetworkHelper(val context: Context) {
     val cookieManager = AndroidCookieJar()
 
     private val bucket = TokenBuckets.builder().withCapacity(2)
-        .withFixedIntervalRefillStrategy(4, 1, TimeUnit.SECONDS).build()
+        .withFixedIntervalRefillStrategy(5, 1, TimeUnit.SECONDS).build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
@@ -84,7 +84,11 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedClient(): OkHttpClient {
-        return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).authenticator(TokenAuthenticator(MangaDexLoginHelper(nonRateLimitedClient, preferences))).build()
+        return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+    }
+
+    private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
+        return buildRateLimitedClient().newBuilder().authenticator(TokenAuthenticator(MangaDexLoginHelper(client, preferences))).build()
     }
 
     fun buildCloudFlareClient(): OkHttpClient {
@@ -99,4 +103,6 @@ class NetworkHelper(val context: Context) {
     val cloudFlareClient = buildCloudFlareClient()
 
     val client = buildRateLimitedClient()
+
+    val authClient = buildRateLimitedAuthenticatedClient()
 }

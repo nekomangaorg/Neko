@@ -54,7 +54,7 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
             manga.author = MdUtil.cleanString(authors.joinToString())
             manga.artist = null
             manga.lang_flag = networkManga.originalLanguage
-            val lastChapter = networkManga.lastChapter.toFloatOrNull()
+            val lastChapter = networkManga.lastChapter?.toFloatOrNull()
             lastChapter?.let {
                 manga.last_chapter_number = floor(it).toInt()
             }

@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.RefreshTokenReques
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaType
@@ -27,9 +28,10 @@ import okhttp3.RequestBody.Companion.toRequestBody
  */
 
 class MangaDexLoginHelper(val client: OkHttpClient, val preferences: PreferencesHelper) {
+
     suspend fun isAuthenticated(authHeaders: Headers): Boolean {
         val response = client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
-        val body = MdUtil.jsonParser.decodeFromString(CheckTokenResponse.serializer(), response.body!!.string())
+        val body = MdUtil.jsonParser.decodeFromString<CheckTokenResponse>(response.body!!.string())
         return body.isAuthenticated
     }
 
@@ -66,17 +68,20 @@ class MangaDexLoginHelper(val client: OkHttpClient, val preferences: Preferences
 
             val postResult = client.newCall(
                 POST(
-                    MdUtil.loginUrl,
-                    Headers.Builder().build(),
-                    jsonString.toRequestBody("application/json".toMediaType())
+                    url = MdUtil.loginUrl,
+                    body = jsonString.toRequestBody("application/json".toMediaType())
                 )
             ).await()
 
-            //if it fails to parse then login failed
-            val refresh = runCatching {
-                MdUtil.jsonParser.decodeFromString(LoginResponse.serializer(), postResult.body!!.string())
+            if (postResult.code == 200) {
+
+                val loginResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
+                preferences.setRefreshToken(loginResponse.token.refresh)
+                preferences.setSessionToken(loginResponse.token.session)
+                preferences.setSourceCredentials(MangaDex(), username, password)
+                return@withContext true
             }
-            return@withContext postResult.code == 200 && refresh.isSuccess
+            return@withContext false
         }
     }
 

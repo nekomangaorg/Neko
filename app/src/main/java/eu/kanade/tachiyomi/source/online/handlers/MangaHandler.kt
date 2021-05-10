@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.GroupListResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.OkHttpClient
@@ -92,16 +93,20 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val filterHan
                 if (response.code == 204) {
                     return@map emptyList()
                 }
-                
+
                 val chapterListResponse = MdUtil.jsonParser.decodeFromString(ChapterListResponse.serializer(), response.body!!.string())
-                val results = chapterListResponse.results
+                val results = chapterListResponse.results.toMutableList()
 
                 var hasMoreResults = chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
 
+                var offset = chapterListResponse.offset
+                val limit = chapterListResponse.limit
+
                 while (hasMoreResults) {
-                    val offset = chapterListResponse.offset + chapterListResponse.limit
+                    offset += limit
                     val newResponse = client.newCall(mangaFeedRequest(manga, offset, langs)).execute()
-                    val newChapterListResponse = MdUtil.jsonParser.decodeFromString(ChapterListResponse.serializer(), newResponse.body!!.string())
+                    val newChapterListResponse = MdUtil.jsonParser.decodeFromString<ChapterListResponse>(newResponse.body!!.string())
+                    results.addAll(newChapterListResponse.results)
                     hasMoreResults = newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
                 }
                 val groupIds = results.map { chapter -> chapter.relationships }.flatten().filter { it.type == "scanlation_group" }.map { it.id }.distinct()
@@ -130,15 +135,23 @@ class MangaHandler(val client: OkHttpClient, val headers: Headers, val filterHan
                 return@withContext emptyList()
             }
             val chapterListResponse = MdUtil.jsonParser.decodeFromString(ChapterListResponse.serializer(), response.body!!.string())
-            val results = chapterListResponse.results
+            val results = chapterListResponse.results.toMutableList()
 
             var hasMoreResults = chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
 
+            var offset = chapterListResponse.offset
+            val limit = chapterListResponse.limit
+
             while (hasMoreResults) {
-                val offset = chapterListResponse.offset + chapterListResponse.limit
+                offset += limit
                 val newResponse = client.newCall(mangaFeedRequest(manga, offset, langs)).await()
-                val newChapterListResponse = MdUtil.jsonParser.decodeFromString(ChapterListResponse.serializer(), newResponse.body!!.string())
-                hasMoreResults = newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
+                if (newResponse.code != 200) {
+                    hasMoreResults = false
+                } else {
+                    val newChapterListResponse = MdUtil.jsonParser.decodeFromString<ChapterListResponse>(newResponse.body!!.string())
+                    results.addAll(newChapterListResponse.results)
+                    hasMoreResults = newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
+                }
             }
 
             val groupMap = getGroupMap(results)
