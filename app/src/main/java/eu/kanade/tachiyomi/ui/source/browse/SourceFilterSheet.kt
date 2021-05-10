@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
+import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -13,6 +14,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.SourceFilterSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
@@ -39,20 +41,40 @@ class SourceFilterSheet(val activity: Activity) :
         sheetBehavior.peekHeight = 450.dpToPx
         sheetBehavior.collapse()
 
-        binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                    val fullHeight = activity.window.decorView.height
-                    val insets = activity.window.decorView.rootWindowInsets
-                    matchConstraintMaxHeight =
-                        fullHeight - (insets?.systemWindowInsetTop ?: 0) -
-                        binding.titleLayout.height - 75.dpToPx
+        binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
+                OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    activity.window.decorView.rootWindowInsets?.let {
+                        setCardViewMax(it)
+                    }
+                    if (binding.titleLayout.height > 0) {
+                        binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    }
                 }
-                if (binding.titleLayout.height > 0) {
-                    binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                }
+            })
+
+        binding.cardView.doOnApplyWindowInsets { _, insets, _ ->
+            binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                val fullHeight = activity.window.decorView.height
+                matchConstraintMaxHeight =
+                    fullHeight - insets.systemWindowInsetTop -
+                    binding.titleLayout.height - 75.dpToPx
             }
-        })
+        }
+
+        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val array = context.obtainStyledAttributes(attrsArray)
+        val headerHeight = array.getDimensionPixelSize(0, 0)
+        array.recycle()
+        binding.root.doOnApplyWindowInsets { _, insets, _ ->
+            binding.titleLayout.updatePaddingRelative(
+                bottom = insets.systemWindowInsetBottom
+            )
+            binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                height = headerHeight + binding.titleLayout.paddingBottom
+            }
+            setCardViewMax(insets)
+        }
 
         (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
             override fun onGlobalLayout() {
@@ -83,6 +105,17 @@ class SourceFilterSheet(val activity: Activity) :
                 }
             }
         )
+    }
+
+    fun setCardViewMax(insets: WindowInsets) {
+        val fullHeight = activity.window.decorView.height
+        val newHeight = fullHeight - insets.systemWindowInsetTop -
+            binding.titleLayout.height - 75.dpToPx
+        if ((binding.cardView.layoutParams as ConstraintLayout.LayoutParams).matchConstraintMaxHeight != newHeight) {
+            binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                matchConstraintMaxHeight = newHeight
+            }
+        }
     }
 
     override fun onStart() {
