@@ -130,11 +130,14 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE.toFloat()
         track.status = DEFAULT_STATUS
-        updateNewTrackInfo(track)
+        updateNewTrackInfo(track, PLANNING)
         return api.addLibManga(track)
     }
 
-    override suspend fun update(track: Track): Track {
+    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
+        if (setToReadStatus && track.status == PLANNING && track.last_chapter_read != 0) {
+            track.status = READING
+        }
         if (track.status == READING && track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
         }

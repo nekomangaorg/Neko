@@ -860,7 +860,7 @@ class ReaderPresenter(
                     if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
                         try {
                             track.last_chapter_read = chapterRead
-                            service.update(track)
+                            service.update(track, true)
                             db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
                             Timber.e(e)

@@ -54,7 +54,7 @@ abstract class TrackService(val id: Int) {
 
     abstract suspend fun add(track: Track): Track
 
-    abstract suspend fun update(track: Track): Track
+    abstract suspend fun update(track: Track, setToReadStatus: Boolean = false): Track
 
     abstract suspend fun bind(track: Track): Track
 
@@ -84,7 +84,7 @@ abstract class TrackService(val id: Int) {
     }
 }
 
-suspend fun TrackService.updateNewTrackInfo(track: Track) {
+suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
     val allRead = db.getManga(track.manga_id).executeOnIO()?.status == SManga.COMPLETED &&
         db.getChapters(track.manga_id).executeOnIO().all { it.read }
     if (supportsReadingDates) {
@@ -92,6 +92,9 @@ suspend fun TrackService.updateNewTrackInfo(track: Track) {
         track.finished_reading_date = getCompletedDate(track, allRead)
     }
     track.last_chapter_read = getLastChapterRead(track)
+    if (track.last_chapter_read == 0) {
+        track.status = planningStatus
+    }
     if (allRead) {
         track.status = completedStatus()
     }
@@ -99,7 +102,7 @@ suspend fun TrackService.updateNewTrackInfo(track: Track) {
 
 suspend fun TrackService.getStartDate(track: Track): Long {
     if (db.getChapters(track.manga_id).executeOnIO().any { it.read }) {
-        val chapters = db.getHistoryByMangaId(track.manga_id).executeOnIO()
+        val chapters = db.getHistoryByMangaId(track.manga_id).executeOnIO().filter { it.last_read > 0 }
         val date = chapters.minOfOrNull { it.last_read } ?: return 0L
         return if (date <= 0L) 0L else date
     }
