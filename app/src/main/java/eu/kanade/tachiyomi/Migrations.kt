@@ -1,12 +1,19 @@
 package eu.kanade.tachiyomi
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
+import eu.kanade.tachiyomi.v5.job.V5MigrationJob
+import eu.kanade.tachiyomi.v5.job.V5MigrationService
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -58,8 +65,15 @@ object Migrations {
                 }
             }
 
+
+
             return true
         }
+
+
+        // Temp testing
+        V5MigrationJob.setupTask()
+
         return false
     }
 }

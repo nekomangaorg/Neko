@@ -48,13 +48,6 @@ object Notifications {
     /**
      * Notification channel and ids used for backup and restore.
      */
-    const val CHANNEL_SIMILAR = "similar_channel"
-    const val ID_SIMILAR_PROGRESS = -401
-    const val ID_SIMILAR_COMPLETE = -402
-
-    /**
-     * Notification channel and ids used for backup and restore.
-     */
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
     const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
     const val ID_BACKUP_PROGRESS = -501
@@ -144,13 +137,6 @@ object Notifications {
                 group = GROUP_BACKUP_RESTORE
                 setShowBadge(false)
                 setSound(null, null)
-            },
-            NotificationChannel(
-                CHANNEL_SIMILAR,
-                context.getString(R.string.similar),
-                NotificationManager.IMPORTANCE_LOW
-            ).apply {
-                setShowBadge(false)
             },
             NotificationChannel(
                 CHANNEL_CRASH_LOGS,
