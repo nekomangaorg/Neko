@@ -198,7 +198,8 @@ fun Controller.scrollViewWith(
     var fakeBottomNavView: View? = null
     if (!customPadding) {
         recycler.updatePaddingRelative(
-            top = (toolbarHeight ?: 0) + appBarHeight
+            top = (activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0) +
+                appBarHeight
         )
     }
     recycler.doOnApplyWindowInsets { view, insets, _ ->
