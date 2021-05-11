@@ -27,7 +27,7 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
-    private val view: View,
+    view: View,
     private val adapter: MangaDetailsAdapter,
     startExpanded: Boolean,
     isTablet: Boolean = false
@@ -201,8 +201,7 @@ class MangaHeaderHolder(
             else manga.description?.trim()
 
         binding.mangaSummary.post {
-            binding.mangaSummary
-            if (binding.subItemGroup.visibility != View.GONE) {
+            if (binding.subItemGroup.isVisible) {
                 if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
                     binding.mangaSummary.setTextIsSelectable(true)
                     binding.moreButtonGroup.isVisible = false
@@ -312,9 +311,10 @@ class MangaHeaderHolder(
         updateCover(manga)
     }
 
-    fun unbind() {
-        binding?.mangaSummary?.setTextIsSelectable(false)
-        binding?.mangaSummary?.clearFocus()
+    fun clearDescFocus() {
+        binding ?: return
+        binding.mangaSummary.setTextIsSelectable(false)
+        binding.mangaSummary.clearFocus()
     }
 
     private fun MaterialButton.checked(checked: Boolean) {

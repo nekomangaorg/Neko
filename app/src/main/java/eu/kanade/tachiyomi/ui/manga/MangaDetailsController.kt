@@ -485,7 +485,7 @@ class MangaDetailsController :
             }
             colorAnimator?.cancel()
 
-            getHeader()?.unbind()
+            getHeader()?.clearDescFocus()
             val colorSecondary = activity?.getResourceColor(
                 R.attr.colorSecondary
             ) ?: Color.BLACK
@@ -510,6 +510,9 @@ class MangaDetailsController :
         super.onChangeEnded(changeHandler, type)
         if (type == ControllerChangeType.PUSH_ENTER) {
             binding.swipeRefresh.isRefreshing = presenter.isLoading
+        }
+        if (!type.isEnter) {
+            activityBinding?.root?.clearFocus()
         }
     }
 
