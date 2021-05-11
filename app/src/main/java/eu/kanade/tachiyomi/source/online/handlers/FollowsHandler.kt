@@ -42,7 +42,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
             .asObservable()
             .map { response ->
                 val mangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
-                val results = mangaListResponse.results
+                val results = mangaListResponse.results.toMutableList()
 
                 var hasMoreResults = mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
 
@@ -57,11 +57,17 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                     } else {
                         val newMangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(newResponse.body!!.string())
                         hasMoreResults = newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
+                        results.addAll(newMangaListResponse.results)
                     }
                 }
-                val readingStatusResponse = client.newCall(readingStatusRequest()).execute()
-
-                val readingStatusMap = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string()).statuses
+                val readingStatusMap = results.map { it.data.id }.chunked(100).map {
+                    val readingStatusResponse = client.newCall(readingStatusRequest(it)).execute()
+                    val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
+                    json.statuses
+                }.fold(mutableMapOf<String, String?>()) { acc, curr ->
+                    curr.forEach { entry -> acc.putIfAbsent(entry.key, entry.value) }
+                    acc
+                }
 
 
                 followsParseMangaPage(results, readingStatusMap)
@@ -117,8 +123,8 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         return GET(tempUrl.build().toString(), MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
-    private fun readingStatusRequest(): Request {
-        return GET(MdUtil.readingStatusesUrl, MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
+    private fun readingStatusRequest(ids: List<String>): Request {
+        return GET(MdUtil.readingStatusesUrl + ids.joinToString("&ids[]=", "?ids[]="), MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -225,8 +231,15 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                 }
             }
 
-            val readingStatusResponse = client.newCall(readingStatusRequest()).await()
-            val readingStatusMap = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.toString()).statuses
+            val readingStatusMap = results.map { it.data.id }.chunked(100).map {
+                val readingStatusResponse = client.newCall(readingStatusRequest(it)).execute()
+                val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
+                json.statuses
+            }.fold(mutableMapOf<String, String?>()) { acc, curr ->
+                curr.forEach { entry -> acc.putIfAbsent(entry.key, entry.value) }
+                acc
+            }
+
 
             followsParseMangaPage(results, readingStatusMap).manga
         }
