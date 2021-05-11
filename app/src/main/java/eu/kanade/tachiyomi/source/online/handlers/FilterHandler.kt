@@ -5,9 +5,12 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import okhttp3.HttpUrl
+import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
-class FilterHandler(private val preferencesHelper: PreferencesHelper) {
+class FilterHandler() {
+
+    val preferencesHelper: PreferencesHelper by injectLazy()
 
     internal fun getMDFilterList(): FilterList {
 

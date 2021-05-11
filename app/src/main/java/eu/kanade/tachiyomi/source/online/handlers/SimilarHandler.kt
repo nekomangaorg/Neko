@@ -7,11 +7,17 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import rx.Observable
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 
-class SimilarHandler(val preferences: PreferencesHelper) {
+class SimilarHandler {
+
+    val preferences: PreferencesHelper by injectLazy()
+    val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * fetch our similar mangas
@@ -35,7 +41,7 @@ class SimilarHandler(val preferences: PreferencesHelper) {
                 initialized = false
                 title = similarMangaTitles[index]
                 url = "/manga/$similarId/"
-                thumbnail_url = if(cacheResponse) null else MdUtil.formThumbUrl(url, lowQualityCovers)
+                thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, similarId) ?: MdUtil.imageUrlCacheNotFound
             }
         }
 

@@ -7,8 +7,10 @@ import com.google.gson.Gson
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -23,6 +25,8 @@ import java.util.concurrent.TimeUnit
 class NetworkHelper(val context: Context) {
 
     private val preferences: PreferencesHelper by injectLazy()
+
+    private val mangaDexLoginHelper: MangaDexLoginHelper by injectLazy()
 
     private val cacheDir = File(context.cacheDir, "network_cache")
 
@@ -88,7 +92,7 @@ class NetworkHelper(val context: Context) {
     }
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
-        return buildRateLimitedClient().newBuilder().authenticator(TokenAuthenticator(MangaDexLoginHelper(client, preferences))).build()
+        return buildRateLimitedClient().newBuilder().authenticator(TokenAuthenticator(mangaDexLoginHelper)).build()
     }
 
     fun buildCloudFlareClient(): OkHttpClient {
@@ -105,4 +109,9 @@ class NetworkHelper(val context: Context) {
     val client = buildRateLimitedClient()
 
     val authClient = buildRateLimitedAuthenticatedClient()
+
+    val headers = Headers.Builder().apply {
+        add("User-Agent", "Neko " + System.getProperty("http.agent"))
+        add("Referer", MdUtil.baseUrl)
+    }.build()
 }

@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
@@ -36,9 +35,9 @@ import kotlin.random.Random
 
 open class MangaDexCache() : MangaDex() {
 
-    private val preferences: PreferencesHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     private val downloadManager: DownloadManager by injectLazy()
+    private val similarHandler: SimilarHandler by injectLazy()
 
     // Max request of 30 per second, per domain we query
     private val bucket = TokenBuckets.builder().withCapacity(30)
@@ -188,7 +187,7 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
-        return SimilarHandler(preferences).fetchSimilar(manga)
+        return similarHandler.fetchSimilar(manga)
     }
 
     override fun isLogged(): Boolean {

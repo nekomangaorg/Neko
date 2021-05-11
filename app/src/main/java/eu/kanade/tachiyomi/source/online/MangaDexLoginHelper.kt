@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CheckTokenResponse
@@ -16,8 +17,8 @@ import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.RequestBody.Companion.toRequestBody
+import uy.kohesive.injekt.injectLazy
 
 /*
  * Copyright (C) 2020 The Neko Manga Open Source Project
@@ -27,10 +28,13 @@ import okhttp3.RequestBody.Companion.toRequestBody
  * file, You can obtain one at http://mozilla.org/MPL/2.0/.
  */
 
-class MangaDexLoginHelper(val client: OkHttpClient, val preferences: PreferencesHelper) {
+class MangaDexLoginHelper {
+
+    val network: NetworkHelper by injectLazy()
+    val preferences: PreferencesHelper by injectLazy()
 
     suspend fun isAuthenticated(authHeaders: Headers): Boolean {
-        val response = client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
+        val response = network.client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
         val body = MdUtil.jsonParser.decodeFromString<CheckTokenResponse>(response.body!!.string())
         return body.isAuthenticated
     }
@@ -42,7 +46,7 @@ class MangaDexLoginHelper(val client: OkHttpClient, val preferences: Preferences
         }
         val result = RefreshTokenRequest(refreshToken)
         val jsonString = MdUtil.jsonParser.encodeToString(RefreshTokenRequest.serializer(), result)
-        val postResult = client.newCall(
+        val postResult = network.client.newCall(
             POST(
                 MdUtil.refreshTokenUrl,
                 authHeaders,
@@ -50,7 +54,7 @@ class MangaDexLoginHelper(val client: OkHttpClient, val preferences: Preferences
             )
         ).await()
         val refresh = runCatching {
-            val jsonResponse = MdUtil.jsonParser.decodeFromString(LoginResponse.serializer(), postResult.body!!.string())
+            val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
             preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
         }
         return refresh.isSuccess
@@ -66,7 +70,7 @@ class MangaDexLoginHelper(val client: OkHttpClient, val preferences: Preferences
 
             val jsonString = MdUtil.jsonParser.encodeToString(LoginRequest.serializer(), loginRequest)
 
-            val postResult = client.newCall(
+            val postResult = network.client.newCall(
                 POST(
                     url = MdUtil.loginUrl,
                     body = jsonString.toRequestBody("application/json".toMediaType())

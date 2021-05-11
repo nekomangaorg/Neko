@@ -2,14 +2,14 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import okhttp3.CacheControl
-import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
@@ -18,12 +18,14 @@ import uy.kohesive.injekt.injectLazy
 /**
  * Returns the latest manga from the updates url since it actually respects the users settings
  */
-class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
+class PopularHandler {
 
     private val preferences: PreferencesHelper by injectLazy()
+    private val network: NetworkHelper by injectLazy()
+    private val v5DbHelper: V5DbHelper by injectLazy()
 
     fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        return client.newCall(popularMangaRequest(page))
+        return network.client.newCall(popularMangaRequest(page))
             .asObservableSuccess()
             .map { response ->
                 popularMangaParse(response)
@@ -39,7 +41,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
             addQueryParameter("offset", (MdUtil.getMangaListOffset(page)))
         }
 
-        return GET(tempUrl.build().toString(), headers, CacheControl.FORCE_NETWORK)
+        return GET(tempUrl.build().toString(), network.headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun popularMangaParse(response: Response): MangasPage {
@@ -52,7 +54,7 @@ class PopularHandler(val client: OkHttpClient, private val headers: Headers) {
 
         val mlResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
-        val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences) }
+        val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences, v5DbHelper) }
         return MangasPage(mangaList, hasMoreResults)
     }
 }

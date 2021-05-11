@@ -4,6 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.await
@@ -18,27 +19,31 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
-import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import rx.Observable
+import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
-class FollowsHandler(val client: OkHttpClient, val headers: Headers, val preferences: PreferencesHelper) {
+class FollowsHandler {
+
+    val preferences: PreferencesHelper by injectLazy()
+    val network: NetworkHelper by injectLazy()
+    val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * fetch all follows
      */
     fun fetchFollows(): Observable<MangasPage> {
-        return client.newCall(followsListRequest(0))
+        return network.authClient.newCall(followsListRequest(0))
             .asObservable()
             .map { response ->
                 val mangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
@@ -51,7 +56,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
 
                 while (hasMoreResults) {
                     offset += limit
-                    val newResponse = client.newCall(followsListRequest(offset)).execute()
+                    val newResponse = network.authClient.newCall(followsListRequest(offset)).execute()
                     if (newResponse.code != 200) {
                         hasMoreResults = false
                     } else {
@@ -61,7 +66,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                     }
                 }
                 val readingStatusMap = results.map { it.data.id }.chunked(100).map {
-                    val readingStatusResponse = client.newCall(readingStatusRequest(it)).execute()
+                    val readingStatusResponse = network.authClient.newCall(readingStatusRequest(it)).execute()
                     val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
                     json.statuses
                 }.fold(mutableMapOf<String, String?>()) { acc, curr ->
@@ -82,7 +87,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
 
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
         val result = response.map {
-            MdUtil.createMangaEntry(it, preferences).apply {
+            MdUtil.createMangaEntry(it, preferences, v5DbHelper).apply {
                 this.follow_status = FollowStatus.fromDex(readingStatusMap[it.data.id])
             }
         }.sortedWith(comparator)
@@ -120,11 +125,11 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
             addQueryParameter("limit", "100")
             addQueryParameter("offset", offset.toString())
         }
-        return GET(tempUrl.build().toString(), MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
+        return GET(tempUrl.build().toString(), MdUtil.getAuthHeaders(network.headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
     private fun readingStatusRequest(ids: List<String>): Request {
-        return GET(MdUtil.readingStatusesUrl + ids.joinToString("&ids[]=", "?ids[]="), MdUtil.getAuthHeaders(headers, preferences), CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.readingStatusesUrl + ids.joinToString("&ids[]=", "?ids[]="), MdUtil.getAuthHeaders(network.headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -140,10 +145,10 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
 
             val jsonString = MdUtil.jsonParser.encodeToString(UpdateReadingStatus.serializer(), UpdateReadingStatus(status))
 
-            val postResult = client.newCall(
+            val postResult = network.authClient.newCall(
                 POST(
                     MdUtil.getReadingStatusUrl(mangaId),
-                    MdUtil.getAuthHeaders(headers, preferences),
+                    MdUtil.getAuthHeaders(network.headers, preferences),
                     jsonString.toRequestBody("application/json".toMediaType())
                 )
             ).await()
@@ -160,7 +165,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
                 .add("chapter", track.last_chapter_read.toString())
             XLog.d("chapter to update %s", track.last_chapter_read.toString())
             val result = runCatching {
-                client.newCall(
+                network.authClient.newCall(
                     POST(
                         "$baseUrl/ajax/actions.ajax.php?function=edit_progress&id=$mangaID",
                         headers,
@@ -185,7 +190,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
         /*return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)
             val result = runCatching {
-                client.newCall(
+                network.authClient.newCall(
                     GET(
                         "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
                         headers
@@ -211,7 +216,7 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
      */
     suspend fun fetchAllFollows(): List<SManga> {
         return withContext(Dispatchers.IO) {
-            val response = client.newCall(followsListRequest(0)).await()
+            val response = network.authClient.newCall(followsListRequest(0)).await()
             val mangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
             val results = mangaListResponse.results.toMutableList()
 
@@ -221,18 +226,18 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
 
             while (hasMoreResults) {
                 offset += limit
-                val newResponse = client.newCall(followsListRequest(offset)).await()
+                val newResponse = network.authClient.newCall(followsListRequest(offset)).await()
                 if (newResponse.code != 200) {
                     hasMoreResults = false
                 } else {
-                    val newMangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(newResponse.body!!.toString())
+                    val newMangaListResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(newResponse.body!!.string())
                     results.addAll(newMangaListResponse.results)
                     hasMoreResults = newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
                 }
             }
 
             val readingStatusMap = results.map { it.data.id }.chunked(100).map {
-                val readingStatusResponse = client.newCall(readingStatusRequest(it)).execute()
+                val readingStatusResponse = network.authClient.newCall(readingStatusRequest(it)).execute()
                 val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
                 json.statuses
             }.fold(mutableMapOf<String, String?>()) { acc, curr ->
@@ -250,10 +255,10 @@ class FollowsHandler(val client: OkHttpClient, val headers: Headers, val prefere
             val mangaId = getMangaId(url)
             val request = GET(
                 MdUtil.getReadingStatusUrl(mangaId),
-                MdUtil.getAuthHeaders(headers, preferences),
+                MdUtil.getAuthHeaders(network.headers, preferences),
                 CacheControl.FORCE_NETWORK
             )
-            val response = client.newCall(request).await()
+            val response = network.authClient.newCall(request).await()
             val track = followStatusParse(response, mangaId)
 
             track

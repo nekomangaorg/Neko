@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.AuthorResponseList
@@ -9,35 +10,31 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import okhttp3.OkHttpClient
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
+import kotlinx.serialization.decodeFromString
 import okhttp3.Response
+import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.Locale
 import kotlin.math.floor
 
-class ApiMangaParser(val client: OkHttpClient, private val filterHandler: FilterHandler) {
-
-    fun mangaDetailsParse(response: Response, coverUrls: List<String>): SManga {
-        return mangaDetailsParse(response.body!!.string(), coverUrls)
-    }
+class ApiMangaParser {
+    val network: NetworkHelper by injectLazy()
+    val filterHandler: FilterHandler by injectLazy()
+    val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * Parse the manga details json into manga object
      */
-    fun mangaDetailsParse(jsonData: String, coverUrls: List<String>): SManga {
+    fun mangaDetailsParse(jsonData: String): SManga {
         try {
             val manga = SManga.create()
             val networkApiManga = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), jsonData)
             val networkManga = networkApiManga.data.attributes
             manga.title = MdUtil.cleanString(networkManga.title["en"]!!)
 
-            manga.thumbnail_url =
-                if (coverUrls.isNotEmpty()) {
-                    coverUrls.last()
-                } else {
-                    ""
-                    // networkManga.mainCover
-                }
+            manga.thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, networkApiManga.data.id) ?: MdUtil.imageUrlCacheNotFound
 
             manga.description = MdUtil.cleanDescription(networkManga.description["en"]!!)
 
@@ -45,13 +42,13 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
 
             val authors = runCatching {
                 val ids = authorIds.joinToString("&ids[]=", "?ids[]=")
-                val response = client.newCall(GET("${MdUtil.authorUrl}$ids")).execute()
-                val json = MdUtil.jsonParser.decodeFromString(AuthorResponseList.serializer(), response.body!!.string())
-                json.results.map { MdUtil.cleanString(it.data.attributes.name) }
+                val response = network.client.newCall(GET("${MdUtil.authorUrl}$ids")).execute()
+                val json = MdUtil.jsonParser.decodeFromString<AuthorResponseList>(response.body!!.string())
+                json.results.map { MdUtil.cleanString(it.data.attributes.name) }.filter { it.isNotEmpty() }
             }.getOrNull() ?: emptyList()
 
 
-            manga.author = MdUtil.cleanString(authors.joinToString())
+            manga.author = authors.joinToString()
             manga.artist = null
             manga.lang_flag = networkManga.originalLanguage
             val lastChapter = networkManga.lastChapter?.toFloatOrNull()
@@ -170,7 +167,7 @@ class ApiMangaParser(val client: OkHttpClient, private val filterHandler: Filter
      * Parse for the random manga id from the [MdUtil.randMangaPage] response.
      */
     fun randomMangaIdParse(response: Response): String {
-        val manga = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), response.body!!.toString())
+        val manga = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), response.body!!.string())
         return manga.data.id
     }
 

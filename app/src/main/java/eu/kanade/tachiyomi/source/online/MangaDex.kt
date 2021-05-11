@@ -25,10 +25,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.MediaType.Companion.toMediaType
@@ -37,8 +34,6 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import kotlin.collections.set
@@ -47,27 +42,35 @@ open class MangaDex : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
 
-    private val v5DbHelper: V5DbHelper = Injekt.get()
+    private val filterHandler: FilterHandler by injectLazy()
 
-    private val filterHandler = FilterHandler(preferences)
+    private val followsHandler: FollowsHandler by injectLazy()
 
-    private val loginHelper = MangaDexLoginHelper(network.client, preferences)
+    private val mangaHandler: MangaHandler by injectLazy()
 
-    var scope = CoroutineScope(Job() + Dispatchers.Default)
+    private val popularHandler: PopularHandler by injectLazy()
+
+    private val searchHandler: SearchHandler by injectLazy()
+
+    private val pageHandler: PageHandler by injectLazy()
+
+    private val similarHandler: SimilarHandler by injectLazy()
+
+    private val loginHelper: MangaDexLoginHelper by injectLazy()
 
     // chapter url where we get the token, last request time
     private val tokenTracker = hashMapOf<String, Long>()
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        return FollowsHandler(network.authClient, headers, preferences).updateFollowStatus(mangaID, followStatus)
+        return followsHandler.updateFollowStatus(mangaID, followStatus)
     }
 
     open fun fetchRandomMangaId(): Observable<String> {
-        return MangaHandler(network.client, headers, filterHandler, getLangsToShow()).fetchRandomMangaId()
+        return mangaHandler.fetchRandomMangaId()
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-        return PopularHandler(network.client, headers).fetchPopularManga(page)
+        return popularHandler.fetchPopularManga(page)
     }
 
     override fun fetchSearchManga(
@@ -75,7 +78,7 @@ open class MangaDex : HttpSource() {
         query: String,
         filters: FilterList
     ): Observable<MangasPage> {
-        return SearchHandler(network.client, headers, getLangsToShow(), filterHandler).fetchSearchManga(
+        return searchHandler.fetchSearchManga(
             page,
             query,
             filters
@@ -83,45 +86,35 @@ open class MangaDex : HttpSource() {
     }
 
     override fun fetchFollows(): Observable<MangasPage> {
-        return FollowsHandler(network.authClient, headers, preferences).fetchFollows()
+        return followsHandler.fetchFollows()
     }
 
     override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return MangaHandler(network.client, headers, filterHandler, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetailsObservable(
-            manga
-        )
+        return mangaHandler.fetchMangaDetailsObservable(manga)
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
-        return MangaHandler(network.client, headers, filterHandler, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaDetails(manga)
+        return mangaHandler.fetchMangaDetails(manga)
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        val pair = MangaHandler(network.client, headers, filterHandler, getLangsToShow(), preferences.forceLatestCovers()).fetchMangaAndChapterDetails(
-            manga
-        )
-        return pair
+        return mangaHandler.fetchMangaAndChapterDetails(manga)
     }
 
     override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
-        return MangaHandler(
-            network.client,
-            headers,
-            filterHandler,
-            getLangsToShow(),
-        ).fetchChapterListObservable(manga)
+        return mangaHandler.fetchChapterListObservable(manga)
     }
 
     open suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
-        return MangaHandler(network.client, headers, filterHandler, getLangsToShow()).getMangaIdFromChapterId(urlChapterId)
+        return mangaHandler.getMangaIdFromChapterId(urlChapterId)
     }
 
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
-        return MangaHandler(network.client, headers, filterHandler, getLangsToShow()).fetchChapterList(manga)
+        return mangaHandler.fetchChapterList(manga)
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return PageHandler(network.client, headers, preferences.dataSaver(), preferences.usePort443Only()).fetchPageList(chapter)
+        return pageHandler.fetchPageList(chapter)
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
@@ -177,33 +170,33 @@ open class MangaDex : HttpSource() {
                         } else {
                             CacheControl.FORCE_CACHE
                         }
-                    MdUtil.atHomeUrlHostUrl(tokenRequestUrl, client)
+                    MdUtil.atHomeUrlHostUrl(tokenRequestUrl, client, cacheControl)
                 }
             }
         return GET(mdAtHomeServerUrl + page.imageUrl, headers)
     }
 
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
-        return FollowsHandler(network.authClient, headers, preferences).fetchAllFollows()
+        return followsHandler.fetchAllFollows()
     }
 
     open suspend fun updateReadingProgress(track: Track): Boolean {
-        return FollowsHandler(network.authClient, headers, preferences).updateReadingProgress(track)
+        return followsHandler.updateReadingProgress(track)
     }
 
     open suspend fun updateRating(track: Track): Boolean {
-        return FollowsHandler(network.authClient, headers, preferences).updateRating(track)
+        return followsHandler.updateRating(track)
     }
 
     override suspend fun fetchTrackingInfo(url: String): Track {
         if (!isLogged()) {
             throw Exception("Not Logged in to MangaDex")
         }
-        return FollowsHandler(network.authClient, headers, preferences).fetchTrackingInfo(url)
+        return followsHandler.fetchTrackingInfo(url)
     }
 
     override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
-        return SimilarHandler(preferences).fetchSimilar(manga)
+        return similarHandler.fetchSimilar(manga)
     }
 
     override fun isLogged(): Boolean {
@@ -238,8 +231,6 @@ open class MangaDex : HttpSource() {
             return@withContext Logout(true)
         }
     }
-
-    fun getLangsToShow() = preferences.langsToShow().get().split(",")
 
     override fun getFilterList(): FilterList {
         return filterHandler.getMDFilterList()

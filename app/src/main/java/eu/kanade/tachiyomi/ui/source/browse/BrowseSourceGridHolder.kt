@@ -9,7 +9,6 @@ import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.potentialAltThumbnail
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.ui.library.LibraryCategoryAdapter
 import eu.kanade.tachiyomi.util.view.gone
@@ -65,9 +64,9 @@ class BrowseSourceGridHolder(
         if (manga.thumbnail_url == null) {
             cover_thumbnail.clear()
         } else {
-            val id = manga.id ?: return
+            manga.id ?: return
             val request = ImageRequest.Builder(view.context).data(manga)
-                .target(CoverViewTarget(cover_thumbnail, progress, manga.potentialAltThumbnail())).build()
+                .target(CoverViewTarget(cover_thumbnail, progress /* manga.potentialAltThumbnail()*/)).build()
             Coil.imageLoader(view.context).enqueue(request)
         }
     }

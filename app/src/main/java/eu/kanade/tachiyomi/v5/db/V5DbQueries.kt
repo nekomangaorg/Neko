@@ -6,18 +6,18 @@ class V5DbQueries {
 
     companion object {
 
-        fun getAltCover(db: SQLiteDatabase, id: String): String {
+        fun getAltCover(db: SQLiteDatabase, id: String): String? {
             if (!db.isOpen) {
-                return ""
+                return null
             }
-            val queryString = "SELECT cover_url FROM cover WHERE id = ? LIMIT 1"
+            val queryString = "SELECT cover_url FROM covers WHERE id = ? LIMIT 1"
             val whereArgs = arrayOf(id)
             val cursor = db.rawQuery(queryString, whereArgs) ?: return ""
             if (cursor.moveToFirst()) {
                 return cursor.getString(0)
             }
             cursor.close()
-            return ""
+            return null
         }
 
         fun getNewMangaId(db: SQLiteDatabase, id: String): String {

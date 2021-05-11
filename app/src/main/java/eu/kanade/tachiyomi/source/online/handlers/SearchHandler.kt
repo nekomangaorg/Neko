@@ -2,37 +2,41 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
-import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
-class SearchHandler(val client: OkHttpClient, private val headers: Headers, val langs: List<String>, val filterHandler: FilterHandler) {
-
+class SearchHandler {
+    private val network: NetworkHelper by injectLazy()
+    private val filterHandler: FilterHandler by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
+    private val apiMangaParser: ApiMangaParser by injectLazy()
+    private val v5DbHelper: V5DbHelper by injectLazy()
 
     fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
 
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
             val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
-            client.newCall(searchMangaByIdRequest(realQuery))
+            network.client.newCall(searchMangaByIdRequest(realQuery))
                 .asObservableSuccess()
                 .map { response ->
-                    val details = ApiMangaParser(client, filterHandler).mangaDetailsParse(response, emptyList())
+                    val details = apiMangaParser.mangaDetailsParse(response.body!!.string())
                     details.url = "/manga/$realQuery/"
                     MangasPage(listOf(details), false)
                 }
         } else {
-            client.newCall(searchMangaRequest(page, query, filters))
+            network.client.newCall(searchMangaRequest(page, query, filters))
                 .asObservableSuccess()
                 .map { response ->
                     searchMangaParse(response)
@@ -49,9 +53,9 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
             return MangasPage(emptyList(), false)
         }
 
-        val mlResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
+        val mlResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
-        val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences) }
+        val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences, v5DbHelper) }
         return MangasPage(mangaList, hasMoreResults)
     }
 
@@ -70,11 +74,11 @@ class SearchHandler(val client: OkHttpClient, private val headers: Headers, val 
 
         val finalUrl = filterHandler.addFiltersToUrl(tempUrl, filters)
 
-        return GET(finalUrl, headers, CacheControl.FORCE_NETWORK)
+        return GET(finalUrl, network.headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun searchMangaByIdRequest(id: String): Request {
-        return GET(MdUtil.mangaUrl + "/" + id, headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.mangaUrl + "/" + id, network.headers, CacheControl.FORCE_NETWORK)
     }
 
     companion object {

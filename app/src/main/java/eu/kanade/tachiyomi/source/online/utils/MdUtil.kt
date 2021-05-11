@@ -6,7 +6,11 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.CacheControl
 import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
@@ -277,10 +281,10 @@ class MdUtil {
             return null
         }
 
-        fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient): String {
-            val atHomeRequest = GET(requestUrl)
+        fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient, cacheControl: CacheControl): String {
+            val atHomeRequest = GET(requestUrl, cache = cacheControl)
             val atHomeResponse = client.newCall(atHomeRequest).execute()
-            return jsonParser.decodeFromString(AtHomeResponse.serializer(), atHomeResponse.body!!.string()).baseUrl
+            return jsonParser.decodeFromString<AtHomeResponse>(atHomeResponse.body!!.string()).baseUrl
         }
 
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
@@ -289,13 +293,16 @@ class MdUtil {
         fun parseDate(dateAsString: String): Long =
             dateFormatter.parse(dateAsString)?.time ?: 0
 
-        fun createMangaEntry(json: MangaResponse, preferences: PreferencesHelper): SManga {
+        fun createMangaEntry(json: MangaResponse, preferences: PreferencesHelper, v5DbHelper: V5DbHelper): SManga {
             return SManga.create().apply {
                 url = "/manga/" + json.data.id
                 title = cleanString(json.data.attributes.title["en"]!!)
-                thumbnail_url = formThumbUrl(url, preferences.lowQualityCovers())
+                thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, json.data.id) ?: imageUrlCacheNotFound
+                //thumbnail_url = formThumbUrl(url, preferences.lowQualityCovers())
             }
         }
+
+        fun getLangsToShow(preferences: PreferencesHelper) = preferences.langsToShow().get().split(",")
 
         fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) = headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}").build()
     }
