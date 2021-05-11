@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -36,6 +37,8 @@ import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import rx.Observable
 import timber.log.Timber
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import kotlin.collections.set
@@ -43,6 +46,8 @@ import kotlin.collections.set
 open class MangaDex : HttpSource() {
 
     private val preferences: PreferencesHelper by injectLazy()
+
+    private val v5DbHelper: V5DbHelper = Injekt.get()
 
     private val filterHandler = FilterHandler(preferences)
 

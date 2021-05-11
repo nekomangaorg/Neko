@@ -2,10 +2,23 @@ package eu.kanade.tachiyomi.v5.db
 
 import android.database.sqlite.SQLiteDatabase
 
-
 class V5DbQueries {
 
     companion object {
+
+        fun getAltCover(db: SQLiteDatabase, id: String): String {
+            if (!db.isOpen) {
+                return ""
+            }
+            val queryString = "SELECT cover_url FROM cover WHERE id = ? LIMIT 1"
+            val whereArgs = arrayOf(id)
+            val cursor = db.rawQuery(queryString, whereArgs) ?: return ""
+            if (cursor.moveToFirst()) {
+                return cursor.getString(0)
+            }
+            cursor.close()
+            return ""
+        }
 
         fun getNewMangaId(db: SQLiteDatabase, id: String): String {
             if (!db.isOpen) {
@@ -34,8 +47,6 @@ class V5DbQueries {
             cursor.close()
             return ""
         }
-
     }
-
 }
 

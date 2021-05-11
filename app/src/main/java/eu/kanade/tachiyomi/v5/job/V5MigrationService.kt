@@ -30,9 +30,9 @@ import java.util.concurrent.TimeUnit
  * This class will perform migration of old mangas ids to the new v5 mangadex.
  */
 class V5MigrationService(
-        val db: DatabaseHelper = Injekt.get(),
-        val dbV5: V5DbHelper = Injekt.get(),
-        val preferences: PreferencesHelper = Injekt.get()
+    val db: DatabaseHelper = Injekt.get(),
+    val dbV5: V5DbHelper = Injekt.get(),
+    val preferences: PreferencesHelper = Injekt.get()
 ) : Service() {
 
     /**
@@ -57,7 +57,7 @@ class V5MigrationService(
         notifier = V5MigrationNotifier(this)
         startForeground(Notifications.ID_V5_MIGRATION_PROGRESS, notifier.progressNotificationBuilder.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "V5MigrationService:WakeLock"
+            PowerManager.PARTIAL_WAKE_LOCK, "V5MigrationService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
     }
@@ -101,7 +101,6 @@ class V5MigrationService(
         return START_REDELIVER_INTENT
     }
 
-
     /**
      * This will migrate the mangas in the library to the new ids
      */
@@ -129,14 +128,14 @@ class V5MigrationService(
             // Get the new id for this manga
             // We skip mangas which have already been converted (non-numeric ids)
             var mangaDeleted = false
-            if(numeric) {
-                val newMangaId = V5DbQueries.getNewMangaId(dbV5.db, oldMangaId)
+            if (numeric) {
+                val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId != "") {
                     manga.url = "/manga/${newMangaId}/"
                     db.insertManga(manga).executeAsBlocking()
                 } else {
                     failedUpdatesMangas[manga] = "unable to find new manga id"
-                    failedUpdatesErrors.add(manga.title+": unable to find new manga id")
+                    failedUpdatesErrors.add(manga.title + ": unable to find new manga id")
                     db.deleteManga(manga).executeAsBlocking()
                     mangaDeleted = true
                 }
@@ -145,7 +144,7 @@ class V5MigrationService(
             // Now loop through the chapters for this manga and update them
             val chapters = db.getChapters(manga).executeAsBlocking()
             val chapterErrors = mutableListOf<String>()
-            if(!mangaDeleted) {
+            if (!mangaDeleted) {
                 chapters.forEach { chapter ->
                     // Return if job was canceled
                     if (job?.isCancelled == true) {
@@ -162,23 +161,25 @@ class V5MigrationService(
                     }
                     // Get the new id for this chapter
                     // We skip chapters which have already been converted (non-numeric ids)
-                    if(numeric) {
-                        val newChapterId = V5DbQueries.getNewChapterId(dbV5.db, oldChapterId)
+                    if (numeric) {
+                        val newChapterId = V5DbQueries.getNewChapterId(dbV5.idDb, oldChapterId)
                         if (newChapterId != "") {
                             chapter.mangadex_chapter_id = newChapterId
                             chapter.url = MdUtil.chapterSuffix + newChapterId
                             db.insertChapter(chapter).executeAsBlocking()
                         } else {
                             failedUpdatesChapters[chapter] = "unable to find new chapter V5 id"
-                            chapterErrors.add("\t- unable to find new chapter id for " +
-                                    "vol ${chapter.vol} - ${chapter.chapter_number} - ${chapter.name}")
+                            chapterErrors.add(
+                                "\t- unable to find new chapter id for " +
+                                    "vol ${chapter.vol} - ${chapter.chapter_number} - ${chapter.name}"
+                            )
                             db.deleteChapter(chapter).executeAsBlocking()
                         }
                     }
                 }
                 // Append chapter errors if we have them
-                if(chapterErrors.size > 0) {
-                    failedUpdatesErrors.add(manga.title+": has chapter conversion errors")
+                if (chapterErrors.size > 0) {
+                    failedUpdatesErrors.add(manga.title + ": has chapter conversion errors")
                     chapterErrors.forEach {
                         failedUpdatesErrors.add(it)
                     }
@@ -200,9 +201,9 @@ class V5MigrationService(
         if (failedUpdatesMangas.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(failedUpdatesErrors)
             notifier.showUpdateErrorNotification(
-                    failedUpdatesMangas.map { it.key.title }
-                            + failedUpdatesChapters.map { it.key.chapter_title },
-                    errorFile.getUriCompat(this)
+                failedUpdatesMangas.map { it.key.title }
+                    + failedUpdatesChapters.map { it.key.chapter_title },
+                errorFile.getUriCompat(this)
             )
         }
         notifier.cancelProgressNotification()
@@ -268,7 +269,6 @@ class V5MigrationService(
             }
             context.stopService(Intent(context, V5MigrationService::class.java))
         }
-
     }
 }
 
