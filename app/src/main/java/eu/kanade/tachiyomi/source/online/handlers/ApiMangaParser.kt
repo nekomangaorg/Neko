@@ -38,13 +38,13 @@ class ApiMangaParser {
 
             manga.description = MdUtil.cleanDescription(networkManga.description["en"]!!)
 
-            val authorIds = networkApiManga.relationships.filter { it.type == "author" || it.type == "artist" }.distinct()
+            val authorIds = networkApiManga.relationships.filter { it.type == "author" || it.type == "artist" }.map { it.id }.distinct()
 
             val authors = runCatching {
                 val ids = authorIds.joinToString("&ids[]=", "?ids[]=")
                 val response = network.client.newCall(GET("${MdUtil.authorUrl}$ids")).execute()
                 val json = MdUtil.jsonParser.decodeFromString<AuthorResponseList>(response.body!!.string())
-                json.results.map { MdUtil.cleanString(it.data.attributes.name) }.filter { it.isNotEmpty() }
+                json.results.map { MdUtil.cleanString(it.data.attributes.name) }
             }.getOrNull() ?: emptyList()
 
 
