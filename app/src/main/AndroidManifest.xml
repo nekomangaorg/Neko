@@ -201,7 +201,7 @@
             android:exported="false" />
 
         <service
-            android:name=".data.similar.SimilarUpdateService"
+            android:name=".v5.job.V5MigrationService"
             android:exported="false" />
 
     </application>

@@ -159,12 +159,6 @@ object PreferenceKeys {
 
     const val enableDoh = "enable_doh"
 
-    const val similarEnabled = "pref_related_show_tab_key"
-
-    const val similarUpdateInterval = "related_update_interval"
-
-    const val similarOnlyOverWifi = "pref_simular_only_over_wifi_key"
-
     const val contentRating = "content_rating_options"
 
     const val lowQualityCovers = "low_quality_covers"
@@ -185,7 +179,7 @@ object PreferenceKeys {
 
     const val createLegacyBackup = "create_legacy_backup"
 
-    const val useCacheSource = "use_cache_source"
+    const val useCacheSource = "use_cache_source_new"
 
     const val sessionToken = "mangadex_session_token"
 

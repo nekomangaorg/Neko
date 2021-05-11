@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.similar.SimilarUpdateJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -60,6 +59,7 @@ class SettingsSiteController :
             }
         }
 
+        /*
         switchPreference {
             key = PreferenceKeys.useCacheSource
             titleRes = R.string.use_cache_source
@@ -75,7 +75,7 @@ class SettingsSiteController :
                 }
             }
         }
-
+        */
 
         multiSelectListPreferenceMat(activity) {
             key = PreferenceKeys.contentRating

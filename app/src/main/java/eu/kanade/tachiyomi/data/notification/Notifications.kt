@@ -48,13 +48,6 @@ object Notifications {
     /**
      * Notification channel and ids used for backup and restore.
      */
-    const val CHANNEL_SIMILAR = "similar_channel"
-    const val ID_SIMILAR_PROGRESS = -401
-    const val ID_SIMILAR_COMPLETE = -402
-
-    /**
-     * Notification channel and ids used for backup and restore.
-     */
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
     const val CHANNEL_BACKUP_RESTORE_PROGRESS = "backup_restore_progress_channel"
     const val ID_BACKUP_PROGRESS = -501
@@ -70,6 +63,13 @@ object Notifications {
      */
     const val CHANNEL_CRASH_LOGS = "crash_logs_channel"
     const val ID_CRASH_LOGS = -601
+
+    /**
+     * Notification channel for migration.
+     */
+    const val CHANNEL_V5_MIGRATION = "v5_migration_channel"
+    const val ID_V5_MIGRATION_PROGRESS = -901
+    const val ID_V5_MIGRATION_ERROR = -902
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -146,11 +146,11 @@ object Notifications {
                 setSound(null, null)
             },
             NotificationChannel(
-                CHANNEL_SIMILAR,
-                context.getString(R.string.similar),
-                NotificationManager.IMPORTANCE_LOW
+                    CHANNEL_V5_MIGRATION, context.getString(R.string.v5_migration_service),
+                    NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setShowBadge(false)
+                setSound(null, null)
             },
             NotificationChannel(
                 CHANNEL_CRASH_LOGS,

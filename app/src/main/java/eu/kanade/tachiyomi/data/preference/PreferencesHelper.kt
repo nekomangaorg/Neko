@@ -310,14 +310,6 @@ class PreferencesHelper(val context: Context) {
 
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
-    fun similarEnabled() = flowPrefs.getBoolean(Keys.similarEnabled, false)
-
-    fun shownSimilarAskDialog() = flowPrefs.getBoolean("shown_similar_ask_dialog", false)
-
-    fun similarOnlyOverWifi() = prefs.getBoolean(Keys.similarOnlyOverWifi, true)
-
-    fun similarUpdateInterval() = rxPrefs.getInteger(Keys.similarUpdateInterval, 3)
-
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
