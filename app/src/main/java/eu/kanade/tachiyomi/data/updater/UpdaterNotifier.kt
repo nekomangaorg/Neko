@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationManager
 
 /**
@@ -152,7 +153,9 @@ internal class UpdaterNotifier(private val context: Context) {
             )
             addReleasePageAction()
         }
-        notificationBuilder.show()
+        launchUI {
+            notificationBuilder.show()
+        }
     }
 
     /**
