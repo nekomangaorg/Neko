@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -400,8 +401,9 @@ class RecentsPresenter(
      */
     fun deleteChapter(chapter: Chapter, manga: Manga, update: Boolean = true) {
         val source = Injekt.get<SourceManager>().getOrStub(manga.source)
-        downloadManager.deleteChapters(listOf(chapter), manga, source)
-
+        launchIO {
+            downloadManager.deleteChapters(listOf(chapter), manga, source)
+        }
         if (update) {
             val item = recentItems.find { it.chapter.id == chapter.id } ?: return
             item.apply {

@@ -303,7 +303,7 @@ class MangaDetailsPresenter(
      * @param chapters the list of chapters to delete.
      */
     fun deleteChapters(chapters: List<ChapterItem>, update: Boolean = true, isEverything: Boolean = false) {
-        scope.launchIO {
+        launchIO {
             if (isEverything) {
                 downloadManager.deleteManga(manga, source)
             } else {
@@ -583,7 +583,7 @@ class MangaDetailsPresenter(
     }
 
     fun confirmDeletion() {
-        scope.launchIO {
+        launchIO {
             coverCache.deleteFromCache(manga)
             customMangaManager.saveMangaInfo(CustomMangaManager.MangaJson(manga.id!!))
             downloadManager.deleteManga(manga, source)

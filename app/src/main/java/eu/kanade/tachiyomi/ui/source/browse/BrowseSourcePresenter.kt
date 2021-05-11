@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.ui.source.filter.TextItem
 import eu.kanade.tachiyomi.ui.source.filter.TextSectionItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
+import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -294,9 +295,11 @@ open class BrowseSourcePresenter(
     }
 
     fun confirmDeletion(manga: Manga) {
-        coverCache.deleteFromCache(manga)
-        val downloadManager: DownloadManager = Injekt.get()
-        downloadManager.deleteManga(manga, source)
+        launchIO {
+            coverCache.deleteFromCache(manga)
+            val downloadManager: DownloadManager = Injekt.get()
+            downloadManager.deleteManga(manga, source)
+        }
     }
 
     /**

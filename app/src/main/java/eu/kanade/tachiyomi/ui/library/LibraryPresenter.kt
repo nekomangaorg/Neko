@@ -796,7 +796,7 @@ class LibraryPresenter(
 
     /** Remove manga from the library and delete the downloads */
     fun confirmDeletion(mangas: List<Manga>) {
-        presenterScope.launch {
+        launchIO {
             val mangaToDelete = mangas.distinctBy { it.id }
             mangaToDelete.forEach { manga ->
                 coverCache.deleteFromCache(manga)
