@@ -22,3 +22,4 @@
 *.woff binary
 *.pyc binary
 *.swp binary
+*.db binary
