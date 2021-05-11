@@ -201,15 +201,15 @@ class MangaHeaderHolder(
             else manga.description?.trim()
 
         binding.mangaSummary.post {
-            if (binding.subItemGroup.isVisible) {
-                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
-                    binding.mangaSummary.setTextIsSelectable(true)
-                    binding.moreButtonGroup.isVisible = false
-                    showMoreButton = binding.lessButton.isVisible
-                } else {
-                    binding.moreButtonGroup.isVisible = true
-                }
-            }
+//            if (binding.subItemGroup.isVisible) {
+//                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
+//                    binding.mangaSummary.setTextIsSelectable(true)
+//                    binding.moreButtonGroup.isVisible = false
+//                    showMoreButton = binding.lessButton.isVisible
+//                } else {
+//                    binding.moreButtonGroup.isVisible = true
+//                }
+//            }
             if (adapter.hasFilter()) collapse()
             else expand()
         }
