@@ -353,8 +353,8 @@ class ReaderPresenter(
                     true
                 } else {
                     val httpSource = sourceManager.getOrStub(source) as? HttpSource
-                    val host = delegatedSource.domainName
-                    httpSource?.baseUrl?.contains(host) == true
+                    val domainName = delegatedSource.domainName
+                    httpSource?.baseUrl?.contains(domainName) == true
                 }
             }
             if (dbChapter?.manga_id != null) {
@@ -379,13 +379,20 @@ class ReaderPresenter(
                     this@ReaderPresenter.init(manga, matchingChapterId)
                 }
             } else {
-                val chapterId = db.insertChapter(chapter).executeOnIO().insertedId() ?: return
+                val chapterId: Long
                 if (chapters.isNotEmpty()) {
-                    syncChaptersWithSource(
+                    val newChapters = syncChaptersWithSource(
                         db,
                         chapters,
                         manga,
                         delegatedSource.delegate!!
+                    ).first
+                    chapterId = newChapters.find { it.url == chapter.url }?.id
+                        ?: error(preferences.context.getString(R.string.chapter_not_found))
+                } else {
+                    chapter.date_fetch = Date().time
+                    chapterId = db.insertChapter(chapter).executeOnIO().insertedId() ?: error(
+                        preferences.context.getString(R.string.unknown_error)
                     )
                 }
                 withContext(Dispatchers.Main) {
