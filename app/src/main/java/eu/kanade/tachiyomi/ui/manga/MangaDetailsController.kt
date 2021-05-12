@@ -1042,6 +1042,7 @@ class MangaDetailsController :
             R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
             R.id.download_custom -> {
                 createActionModeIfNeeded()
+                rangeMode = RangeMode.Download
                 return
             }
             R.id.download_unread -> presenter.allChapters.filter { !it.read }
@@ -1110,13 +1111,13 @@ class MangaDetailsController :
     }
 
     override fun startDownloadRange(position: Int) {
-        if (actionMode == null) createActionModeIfNeeded()
+        createActionModeIfNeeded()
         rangeMode = RangeMode.Download
         onItemClick(null, position)
     }
 
     private fun startReadRange(position: Int, mode: RangeMode) {
-        if (actionMode == null) createActionModeIfNeeded()
+        createActionModeIfNeeded()
         rangeMode = mode
         onItemClick(null, position)
     }
