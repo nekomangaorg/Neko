@@ -110,6 +110,9 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
+            if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {
+                mangas.forEach { it.filter = "" }
+            }
             updateDataSet(mangas)
         } else {
             updateDataSet(mangas.filter { it.filter(s) })
@@ -120,6 +123,9 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     suspend fun performFilterAsync() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
+            if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {
+                mangas.forEach { it.filter = "" }
+            }
             updateDataSet(mangas)
         } else {
             val filteredManga = withDefContext { mangas.filter { it.filter(s) } }
