@@ -20,6 +20,7 @@ import uy.kohesive.injekt.injectLazy
  */
 class PopularHandler {
 
+    private val filterHandler: FilterHandler by injectLazy()
     private val preferences: PreferencesHelper by injectLazy()
     private val network: NetworkHelper by injectLazy()
     private val v5DbHelper: V5DbHelper by injectLazy()
@@ -40,8 +41,9 @@ class PopularHandler {
             addQueryParameter("limit", MdUtil.mangaLimit.toString())
             addQueryParameter("offset", (MdUtil.getMangaListOffset(page)))
         }
+        val finalUrl = filterHandler.addFiltersToUrl(tempUrl, filterHandler.getMDFilterList())
 
-        return GET(tempUrl.build().toString(), network.headers, CacheControl.FORCE_NETWORK)
+        return GET(finalUrl, network.headers, CacheControl.FORCE_NETWORK)
     }
 
     private fun popularMangaParse(response: Response): MangasPage {

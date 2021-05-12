@@ -209,8 +209,8 @@ open class MangaDexCache() : MangaDex() {
     private fun apiRequest(manga: SManga, useOtherUrl: Boolean = true): Request {
         val mangaId = MdUtil.getMangaId(manga.url).toLong()
         val url = when {
-            useOtherUrl -> MdUtil.apiUrlCache
-            else -> MdUtil.apiUrlCdnCache
+            useOtherUrl -> MdUtil.similarCache
+            else -> MdUtil.similarCacheCdn
         }
         return GET(url + mangaId.toString().padStart(5, '0') + ".json", headers, CacheControl.FORCE_NETWORK)
     }
