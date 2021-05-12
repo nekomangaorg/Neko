@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.SimilarMangaRespon
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import eu.kanade.tachiyomi.v5.db.V5DbQueries
+import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Request
 import okhttp3.Response
@@ -26,14 +27,14 @@ class SimilarHandler {
      */
     fun fetchSimilar(manga: Manga): Observable<MangasPage> {
         return network.client.newCall(similarMangaRequest(manga))
-                .asObservableSuccess()
-                .map { response ->
-                    similarMangaParse(manga, response)
-                }
+            .asObservableSuccess()
+            .map { response ->
+                similarMangaParse(manga, response)
+            }
     }
 
     private fun similarMangaRequest(manga: Manga): Request {
-        val tempUrl = MdUtil.similarBaseApi+MdUtil.getMangaId(manga.url)+".json"
+        val tempUrl = MdUtil.similarBaseApi + MdUtil.getMangaId(manga.url) + ".json"
         return GET(tempUrl, network.headers, CacheControl.FORCE_NETWORK)
     }
 
@@ -46,7 +47,7 @@ class SimilarHandler {
         }
         // TODO: also filter based on the content rating here?
         // TODO: also append here the related manga?
-        val mlResponse = MdUtil.jsonParser.decodeFromString(SimilarMangaResponse.serializer(), response.body!!.string())
+        val mlResponse = MdUtil.jsonParser.decodeFromString<SimilarMangaResponse>(response.body!!.string())
         val mangaList = mlResponse.matches.map {
             SManga.create().apply {
                 url = "/manga/" + it.id
@@ -56,6 +57,4 @@ class SimilarHandler {
         }
         return MangasPage(mangaList, false)
     }
-
-
 }

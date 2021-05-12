@@ -8,6 +8,7 @@ import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
@@ -43,10 +44,15 @@ class PreferencesHelper(val context: Context) {
     private val rxPrefs = RxSharedPreferences.create(prefs)
     private val flowPrefs = FlowSharedPreferences(prefs)
 
+    private val defaultFolder = context.getString(R.string.neko_app_name) + when (BuildConfig.DEBUG) {
+        true -> "_DEBUG"
+        false -> ""
+    }
+
     private val defaultDownloadsDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.neko_app_name),
+                defaultFolder,
             "downloads"
         )
     )
