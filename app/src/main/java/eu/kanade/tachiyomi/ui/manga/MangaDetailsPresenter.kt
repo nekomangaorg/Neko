@@ -661,7 +661,7 @@ class MangaDetailsPresenter(
             LocalSource(downloadManager.context).updateMangaInfo(manga)
             db.updateMangaInfo(manga).executeAsBlocking()
         } else {
-            var genre = if (!tags.isNullOrEmpty() && tags.joinToString(", ") != manga.genre) {
+            var genre = if (!tags.isNullOrEmpty() && tags.joinToString(", ") != manga.originalGenre) {
                 tags.map { it.capitalize() }.toTypedArray()
             } else {
                 null
