@@ -53,6 +53,8 @@ class SettingsAdvancedController : SettingsController() {
 
     private val coverCache: CoverCache by injectLazy()
 
+    private val downloadMangager: DownloadManager by injectLazy()
+
     @SuppressLint("BatteryLife")
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.advanced
@@ -79,6 +81,13 @@ class SettingsAdvancedController : SettingsController() {
 
         preferenceCategory {
             titleRes = R.string.data_management
+
+            preference {
+                titleRes = R.string.force_download_cache_refresh
+                summaryRes = R.string.force_download_cache_refresh_summary
+                onClick { downloadMangager.refreshCache() }
+            }
+
             preference {
                 key = CLEAR_CACHE_KEY
                 titleRes = R.string.clear_chapter_cache
@@ -158,6 +167,7 @@ class SettingsAdvancedController : SettingsController() {
 
                 onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
             }
+
         }
 
         intListPreference(activity) {

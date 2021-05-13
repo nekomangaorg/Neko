@@ -129,6 +129,9 @@
     <string name="log_level">"Log level"</string>
     <string name="log_level_summary">Changing this can impact app performance. Force-restart app after changing. Log file is stored at /Neko/logs.</string>
 
+    <string name="force_download_cache_refresh">Refresh the download cache</string>
+    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use after you migrated to v5 or if you copied downloads outside of this app</string>
+
 
     <!-- Login dialog -->
     <string name="two_factor">2FA Code</string>

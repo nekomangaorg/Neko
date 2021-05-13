@@ -10,7 +10,6 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.download.DownloadCache
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -35,7 +34,6 @@ class V5MigrationService(
     val db: DatabaseHelper = Injekt.get(),
     val dbV5: V5DbHelper = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
-    val cache: DownloadCache = Injekt.get(),
 ) : Service() {
 
     /**
@@ -129,7 +127,7 @@ class V5MigrationService(
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId != "") {
-                    manga.url = "/manga/${newMangaId}/"
+                    manga.url = "/manga/${newMangaId}"
                     db.insertManga(manga).executeAsBlocking()
                 } else {
                     failedUpdatesMangas[manga] = "unable to find new manga id"
@@ -178,7 +176,6 @@ class V5MigrationService(
                 }
             }
         }
-        cache.forceRenewCache()
     }
 
     /**
