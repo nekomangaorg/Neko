@@ -34,6 +34,10 @@ class MangaDexLoginHelper {
     val preferences: PreferencesHelper by injectLazy()
 
     suspend fun isAuthenticated(authHeaders: Headers): Boolean {
+        if (preferences.wasTokenRefreshedRecently()) {
+            XLog.i("Token was refreshed recently dont hit dex to check")
+            return true
+        }
         val response = network.client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
         val body = MdUtil.jsonParser.decodeFromString<CheckTokenResponse>(response.body!!.string())
         return body.isAuthenticated
@@ -53,11 +57,11 @@ class MangaDexLoginHelper {
                 jsonString.toRequestBody("application/json".toMediaType())
             )
         ).await()
-        val refresh = runCatching {
-            val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
-            preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
-        }
-        return refresh.isSuccess
+
+        val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
+        preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
+
+        return jsonResponse.result == "ok"
     }
 
     suspend fun login(

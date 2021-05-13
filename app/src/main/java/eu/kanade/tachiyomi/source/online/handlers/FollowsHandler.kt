@@ -65,17 +65,10 @@ class FollowsHandler {
                         results.addAll(newMangaListResponse.results)
                     }
                 }
-                val readingStatusMap = results.map { it.data.id }.chunked(100).map {
-                    val readingStatusResponse = network.authClient.newCall(readingStatusRequest(it)).execute()
-                    val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
-                    json.statuses
-                }.fold(mutableMapOf<String, String?>()) { acc, curr ->
-                    curr.forEach { entry -> acc.putIfAbsent(entry.key, entry.value) }
-                    acc
-                }
+                val readingStatusResponse = network.authClient.newCall(readingStatusRequest()).execute()
+                val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
 
-
-                followsParseMangaPage(results, readingStatusMap)
+                followsParseMangaPage(results, json.statuses)
             }
     }
 
@@ -128,8 +121,8 @@ class FollowsHandler {
         return GET(tempUrl.build().toString(), MdUtil.getAuthHeaders(network.headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
-    private fun readingStatusRequest(ids: List<String>): Request {
-        return GET(MdUtil.readingStatusesUrl + ids.joinToString("&ids[]=", "?ids[]="), MdUtil.getAuthHeaders(network.headers, preferences), CacheControl.FORCE_NETWORK)
+    private fun readingStatusRequest(): Request {
+        return GET(MdUtil.readingStatusesUrl, MdUtil.getAuthHeaders(network.headers, preferences), CacheControl.FORCE_NETWORK)
     }
 
     /**
@@ -236,17 +229,10 @@ class FollowsHandler {
                 }
             }
 
-            val readingStatusMap = results.map { it.data.id }.chunked(100).map {
-                val readingStatusResponse = network.authClient.newCall(readingStatusRequest(it)).execute()
-                val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
-                json.statuses
-            }.fold(mutableMapOf<String, String?>()) { acc, curr ->
-                curr.forEach { entry -> acc.putIfAbsent(entry.key, entry.value) }
-                acc
-            }
+            val readingStatusResponse = network.authClient.newCall(readingStatusRequest()).execute()
+            val json = MdUtil.jsonParser.decodeFromString<MangaStatusListResponse>(readingStatusResponse.body!!.string())
 
-
-            followsParseMangaPage(results, readingStatusMap).manga
+            followsParseMangaPage(results, json.statuses).manga
         }
     }
 

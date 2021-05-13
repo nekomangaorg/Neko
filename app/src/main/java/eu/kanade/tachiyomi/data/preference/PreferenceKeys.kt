@@ -172,7 +172,7 @@ object PreferenceKeys {
     const val markChaptersFromMDList = "mdlist_mark_read"
 
     const val showContentRatingFilter = "show_R18_filter"
-    
+
     const val enablePort443Only = "use_port_443_only_for_image_server"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
@@ -184,6 +184,8 @@ object PreferenceKeys {
     const val sessionToken = "mangadex_session_token"
 
     const val refreshToken = "mangadex_refresh_token"
+
+    const val lastRefreshTokenTime = "mangadex_refresh_token_time"
 
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 
