@@ -259,8 +259,15 @@ dependencies {
 
 // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api-markers
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+    kotlinOptions.freeCompilerArgs += listOf(
+        "-Xopt-in=kotlin.Experimental",
+        "-Xopt-in=kotlin.RequiresOptIn",
+        "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
+        "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+        "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
+        "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+    )
 }
 
 tasks.preBuild {
