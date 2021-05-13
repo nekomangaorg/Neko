@@ -209,7 +209,7 @@ class ApiMangaParser {
         // Build chapter name
 
         if (attributes.volume != null) {
-            chapterName.add("Vol. ${attributes.volume}")
+            chapterName.add("Vol.${attributes.volume}")
             chapter.vol = attributes.volume.toString()
         }
 
