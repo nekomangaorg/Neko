@@ -38,6 +38,8 @@ object ChapterTable {
 
     const val COL_MANGADEX_CHAPTER_ID = "mangadex_chapter_id"
 
+    const val COL_OLD_MANGADEX_CHAPTER_ID = "old_mangadex_chapter_id"
+
     const val COL_LANGUAGE = "language"
 
     val createTableQuery: String
@@ -60,6 +62,7 @@ object ChapterTable {
             $COL_DATE_FETCH LONG NOT NULL,
             $COL_DATE_UPLOAD LONG NOT NULL,
             $COL_MANGADEX_CHAPTER_ID String TEXT,
+            $COL_OLD_MANGADEX_CHAPTER_ID String TEXT,
             $COL_LANGUAGE String TEXT,
             FOREIGN KEY($COL_MANGA_ID) REFERENCES ${MangaTable.TABLE} (${MangaTable.COL_ID})
             ON DELETE CASCADE
@@ -86,6 +89,9 @@ object ChapterTable {
 
     val addMangaDexChapterId: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_MANGADEX_CHAPTER_ID TEXT DEFAULT ''"
+
+    val addOldMangaDexChapterId: String
+        get() = "ALTER TABLE $TABLE ADD COLUMN $COL_OLD_MANGADEX_CHAPTER_ID TEXT "
 
     val addLanguage: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_LANGUAGE TEXT DEFAULT ''"

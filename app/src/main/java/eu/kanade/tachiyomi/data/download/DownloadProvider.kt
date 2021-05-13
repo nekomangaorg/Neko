@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.injectLazy
 
@@ -112,14 +113,18 @@ class DownloadProvider(private val context: Context) {
         val mangaDir = findMangaDir(manga, source) ?: return emptyList()
 
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
+        val oldIdHashSet = chapters.mapNotNull { it.old_mangadex_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
                 val mangadexId = fileName.substringAfterLast(" - ", "")
-                if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
+                //legacy dex id
+                if (mangadexId.isNotEmpty() && mangadexId.isUUID()) {
                     return@filter idHashSet.contains(mangadexId)
+                } else if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
+                    return@filter oldIdHashSet.contains(mangadexId)
                 } else {
                     if (scanalatorNameHashSet.contains(fileName)) {
                         return@filter true

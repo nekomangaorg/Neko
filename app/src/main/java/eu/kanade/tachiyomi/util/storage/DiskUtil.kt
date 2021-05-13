@@ -99,8 +99,8 @@ object DiskUtil {
             }
         }
         // Even though vfat allows 255 UCS-2 chars, we might eventually write to
-        // ext4 through a FUSE layer, so use that limit minus 15 reserved characters.
-        return sb.toString().take(240)
+        // ext4 through a FUSE layer, so use that limit minus 37(uuid + -) reserved characters.
+        return sb.toString().take(218)
     }
 
     /**
