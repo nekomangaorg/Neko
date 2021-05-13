@@ -85,7 +85,7 @@ object DiskUtil {
      * replacing any invalid characters with "_". This method doesn't allow hidden files (starting
      * with a dot), but you can manually add it later.
      */
-    fun buildValidFilename(origName: String): String {
+    fun buildValidFilename(origName: String, suffix: String = ""): String {
         val name = origName.trim('.', ' ')
         if (name.isNullOrEmpty()) {
             return "(invalid)"
@@ -98,9 +98,13 @@ object DiskUtil {
                 sb.append('_')
             }
         }
-        // Even though vfat allows 255 UCS-2 chars, we might eventually write to
-        // ext4 through a FUSE layer, so use that limit minus 37(uuid + -) reserved characters.
-        return sb.toString().take(218)
+        if (suffix.isNotEmpty()) {
+            return sb.toString().take(240 - suffix.length) + suffix
+        } else {
+            // Even though vfat allows 255 UCS-2 chars, we might eventually write to
+            // ext4 through a FUSE layer, so use that limit minus  reserved characters.
+            return sb.toString().take(240)
+        }
     }
 
     /**
