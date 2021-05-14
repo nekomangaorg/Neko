@@ -19,6 +19,7 @@ import okhttp3.Headers
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.RequestBody.Companion.toRequestBody
 import uy.kohesive.injekt.injectLazy
+import java.util.concurrent.TimeUnit
 
 /*
  * Copyright (C) 2020 The Neko Manga Open Source Project
@@ -34,10 +35,13 @@ class MangaDexLoginHelper {
     val preferences: PreferencesHelper by injectLazy()
 
     suspend fun isAuthenticated(authHeaders: Headers): Boolean {
-        if (preferences.wasTokenRefreshedRecently()) {
+        val lastRefreshTime = preferences.lastRefreshTime()
+        XLog.i("last refresh time $lastRefreshTime")
+        if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
             XLog.i("Token was refreshed recently dont hit dex to check")
             return true
         }
+        XLog.i("token was not refreshed recently hit dex auth check")
         val response = network.client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
         val body = MdUtil.jsonParser.decodeFromString<CheckTokenResponse>(response.body!!.string())
         return body.isAuthenticated
@@ -46,6 +50,7 @@ class MangaDexLoginHelper {
     suspend fun refreshToken(authHeaders: Headers): Boolean {
         val refreshToken = preferences.refreshToken()
         if (refreshToken.isNullOrEmpty()) {
+            XLog.i("refresh token is null can't refresh token")
             return false
         }
         val result = RefreshTokenRequest(refreshToken)
@@ -60,7 +65,7 @@ class MangaDexLoginHelper {
 
         val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
         preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
-
+        XLog.i("refreshing token sug")
         return jsonResponse.result == "ok"
     }
 

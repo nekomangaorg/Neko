@@ -16,7 +16,6 @@ import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Locale
-import java.util.concurrent.TimeUnit
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 fun <T> Preference<T>.getOrDefault(): T = get() ?: defaultValue()!!
@@ -363,8 +362,7 @@ class PreferencesHelper(val context: Context) {
             .apply()
     }
 
-    fun wasTokenRefreshedRecently(): Boolean {
-        val refreshTime = prefs.getLong(Keys.lastRefreshTokenTime, 0)
-        return ((System.currentTimeMillis() - TimeUnit.MINUTES.toMillis(15)) > refreshTime)
+    fun lastRefreshTime(): Long {
+        return prefs.getLong(Keys.lastRefreshTokenTime, 0)
     }
 }
