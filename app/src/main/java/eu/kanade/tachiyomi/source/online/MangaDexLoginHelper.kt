@@ -37,6 +37,7 @@ class MangaDexLoginHelper {
     suspend fun isAuthenticated(authHeaders: Headers): Boolean {
         val lastRefreshTime = preferences.lastRefreshTime()
         XLog.i("last refresh time $lastRefreshTime")
+        XLog.i("current time ${System.currentTimeMillis()}")
         if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
             XLog.i("Token was refreshed recently dont hit dex to check")
             return true
