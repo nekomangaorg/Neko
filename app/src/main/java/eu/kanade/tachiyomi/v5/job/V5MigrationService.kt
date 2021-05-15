@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -34,6 +35,7 @@ class V5MigrationService(
     val db: DatabaseHelper = Injekt.get(),
     val dbV5: V5DbHelper = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
+    val trackManager: TrackManager = Injekt.get(),
 ) : Service() {
 
     /**
@@ -126,11 +128,16 @@ class V5MigrationService(
             var mangaErroredOut = false
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
-                if (newMangaId != "") {
-                    manga.url = "/manga/${newMangaId}"
+                if (newMangaId.isNotBlank()) {
+                    manga.url = "/title/${newMangaId}"
                     manga.initialized = false
                     manga.thumbnail_url = null
                     db.insertManga(manga).executeAsBlocking()
+                    val tracks = db.getTracks(manga).executeAsBlocking()
+                    tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
+                        it.tracking_url = MdUtil.baseUrl + manga.url
+                        db.insertTrack(it).executeAsBlocking()
+                    }
                 } else {
                     failedUpdatesMangas[manga] = "unable to find new manga id"
                     failedUpdatesErrors.add(manga.title + ": unable to find new manga id")

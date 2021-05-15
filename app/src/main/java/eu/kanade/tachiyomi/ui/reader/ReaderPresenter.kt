@@ -324,7 +324,7 @@ class ReaderPresenter(
         }
         val mangaDex = sourceManager.getMangadex()
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
-        val url = "/manga/$mangaId/"
+        val url = "/title/$mangaId/"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
         val tempManga = dbManga ?: (
             MangaImpl().apply {

@@ -297,7 +297,7 @@ class MdUtil {
 
         fun createMangaEntry(json: MangaResponse, preferences: PreferencesHelper, v5DbHelper: V5DbHelper): SManga {
             return SManga.create().apply {
-                url = "/manga/" + json.data.id
+                url = "/title/" + json.data.id
                 title = cleanString(json.data.attributes.title["en"]!!)
                 thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, json.data.id) ?: imageUrlCacheNotFound
                 //thumbnail_url = formThumbUrl(url, preferences.lowQualityCovers())

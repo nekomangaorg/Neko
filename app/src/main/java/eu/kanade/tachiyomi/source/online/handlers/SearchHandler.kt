@@ -32,7 +32,7 @@ class SearchHandler {
                 .asObservableSuccess()
                 .map { response ->
                     val details = apiMangaParser.mangaDetailsParse(response.body!!.string())
-                    details.url = "/manga/$realQuery/"
+                    details.url = "/title/$realQuery/"
                     MangasPage(listOf(details), false)
                 }
         } else {

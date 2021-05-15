@@ -94,11 +94,11 @@ class FollowsHandler {
 
     private fun followStatusParse(response: Response, mangaId: String): Track {
 
-        val mangaResponse = MdUtil.jsonParser.decodeFromString(GetReadingStatus.serializer(), response.body!!.string())
+        val mangaResponse = MdUtil.jsonParser.decodeFromString<GetReadingStatus>(response.body!!.string())
         val followStatus = FollowStatus.fromDex(mangaResponse.status)
         val track = Track.create(TrackManager.MDLIST)
         track.status = followStatus.int
-        track.tracking_url = "$baseUrl/manga/$mangaId"
+        track.tracking_url = "$baseUrl/title/$mangaId"
 
 /* if (follow.chapter.isNotBlank()) {
                 track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()

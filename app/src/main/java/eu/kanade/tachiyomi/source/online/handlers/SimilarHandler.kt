@@ -6,16 +6,12 @@ import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.SimilarMangaResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.lang.awaitSingle
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import eu.kanade.tachiyomi.v5.db.V5DbQueries
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Request
@@ -34,7 +30,7 @@ class SimilarHandler {
      */
     fun fetchSimilarObserable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
-        if(mangaDb != null && !refresh) {
+        if (mangaDb != null && !refresh) {
             return Observable.just(similarStringToMangasPage(manga, mangaDb.data))
         }
         return network.client.newCall(similarMangaRequest(manga))
@@ -69,18 +65,17 @@ class SimilarHandler {
         return mangaPages
     }
 
-    private fun similarStringToMangasPage(manga: Manga, data : String): MangasPage {
+    private fun similarStringToMangasPage(manga: Manga, data: String): MangasPage {
         // TODO: also filter based on the content rating here?
         // TODO: also append here the related manga?
         val mlResponse = MdUtil.jsonParser.decodeFromString<SimilarMangaResponse>(data)
         val mangaList = mlResponse.matches.map {
             SManga.create().apply {
-                url = "/manga/" + it.id
+                url = "/title/" + it.id
                 title = MdUtil.cleanString(it.title["en"]!!)
                 thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, it.id) ?: MdUtil.imageUrlCacheNotFound
             }
         }
         return MangasPage(mangaList, false)
     }
-
 }

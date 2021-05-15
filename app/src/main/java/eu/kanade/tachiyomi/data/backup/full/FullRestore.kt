@@ -116,10 +116,10 @@ class FullRestore(val context: Context, val job: Job?) {
             // If it is an old pre-V5 manga try to find the new id
             val oldMangaId = MdUtil.getMangaId(manga.url)
             val isNumericId = oldMangaId.isDigitsOnly()
-            if(isNumericId) {
+            if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
-                if (newMangaId != "") {
-                    manga.url = "/manga/${newMangaId}"
+                if (newMangaId.isNotBlank()) {
+                    manga.url = "/title/${newMangaId}"
                 }
             }
 
