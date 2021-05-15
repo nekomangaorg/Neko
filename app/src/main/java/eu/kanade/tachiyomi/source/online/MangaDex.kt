@@ -122,7 +122,7 @@ open class MangaDex : HttpSource() {
 
     override fun fetchImage(page: Page): Observable<Response> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
-            return nonRateLimitedClient.newCall(GET(page.imageUrl!!, headers))
+            return mangaPlusHandler.client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
         } else {
             return nonRateLimitedClient.newCallWithProgress(imageRequest(page), page).asObservable().doOnNext { response ->
