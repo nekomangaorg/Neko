@@ -76,7 +76,7 @@ data class GetReadingStatus(
 
 @Serializable
 data class UpdateReadingStatus(
-    val id: String?
+    val status: String?
 )
 
 @Serializable
