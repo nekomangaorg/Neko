@@ -67,4 +67,12 @@ interface CachedMangaQueries : DbProvider {
                 .build()
         )
         .prepare()
+
+    fun optimizeCachedManga() = db.inTransaction {
+        val query = RawQuery.builder()
+            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS}(${CachedMangaTable.TABLE_FTS}) VALUES('optimize');")
+        db.lowLevel().executeSQL(
+            query.build()
+        )
+    }
 }
