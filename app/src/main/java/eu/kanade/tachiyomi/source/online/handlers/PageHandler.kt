@@ -16,6 +16,7 @@ class PageHandler {
 
     val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
+    val mangaPlusHandler: MangaPlusHandler by injectLazy()
 
     fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
         if (chapter.scanlator.equals("MangaPlus")) {
@@ -23,7 +24,7 @@ class PageHandler {
                 .asObservableSuccess()
                 .map { response ->
                     val chapterId = ApiChapterParser().externalParse(response)
-                    MangaPlusHandler(network.client).fetchPageList(chapterId)
+                    mangaPlusHandler.fetchPageList(chapterId)
                 }
         }
 

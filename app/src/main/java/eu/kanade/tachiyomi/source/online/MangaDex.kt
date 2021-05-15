@@ -59,6 +59,8 @@ open class MangaDex : HttpSource() {
 
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 
+    private val mangaPlusHandler: MangaPlusHandler by injectLazy()
+
     // chapter url where we get the token, last request time
     private val tokenTracker = hashMapOf<String, Long>()
 
@@ -120,7 +122,7 @@ open class MangaDex : HttpSource() {
 
     override fun fetchImage(page: Page): Observable<Response> {
         if (page.imageUrl!!.contains("mangaplus", true)) {
-            return MangaPlusHandler(nonRateLimitedClient).client.newCall(GET(page.imageUrl!!, headers))
+            return nonRateLimitedClient.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
         } else {
             return nonRateLimitedClient.newCallWithProgress(imageRequest(page), page).asObservable().doOnNext { response ->

@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
+import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
@@ -80,6 +81,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(SimilarHandler())
 
         addSingleton(MangaDexLoginHelper())
+
+        addSingleton(MangaPlusHandler())
 
         // Asynchronously init expensive components for a faster cold start
 

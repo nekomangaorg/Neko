@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import MangaPlusSerializer
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import kotlinx.serialization.protobuf.ProtoBuf
 import okhttp3.Headers
@@ -11,9 +12,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
+import uy.kohesive.injekt.injectLazy
 import java.util.UUID
 
-class MangaPlusHandler(private val currentClient: OkHttpClient) {
+class MangaPlusHandler() {
+    val networkHelper: NetworkHelper by injectLazy()
     val baseUrl = "https://jumpg-webapi.tokyo-cdn.com/api"
     val headers = Headers.Builder()
         .add("Origin", WEB_URL)
@@ -21,7 +24,7 @@ class MangaPlusHandler(private val currentClient: OkHttpClient) {
         .add("User-Agent", USER_AGENT)
         .add("SESSION-TOKEN", UUID.randomUUID().toString()).build()
 
-    val client: OkHttpClient = currentClient.newBuilder()
+    val client: OkHttpClient = networkHelper.nonRateLimitedClient.newBuilder()
         .addInterceptor { imageIntercept(it) }
         .build()
 
