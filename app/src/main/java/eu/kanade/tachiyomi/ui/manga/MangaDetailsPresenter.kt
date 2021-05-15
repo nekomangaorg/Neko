@@ -43,6 +43,8 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -69,6 +71,7 @@ class MangaDetailsPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
+    val v5DbHelper: V5DbHelper = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get()
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
@@ -468,9 +471,16 @@ class MangaDetailsPresenter(
                     }
                 }
 
+                // First if no image, try to get one from our V5 database
                 // If we don't have an image we can try to use the merge source image fallback
-                if (networkManga.thumbnail_url == null && manga.merge_manga_image_url != null) {
-                    manga.thumbnail_url = manga.merge_manga_image_url
+                if (networkManga.thumbnail_url == null) {
+                    val cover = V5DbQueries.getAltCover(v5DbHelper.dbCovers,
+                        MdUtil.getMangaId(networkManga.url))
+                    if(cover != null) {
+                        manga.thumbnail_url = cover
+                    } else if(manga.merge_manga_image_url != null) {
+                        manga.thumbnail_url = manga.merge_manga_image_url
+                    }
                 }
                 db.insertManga(manga).executeOnIO()
             }

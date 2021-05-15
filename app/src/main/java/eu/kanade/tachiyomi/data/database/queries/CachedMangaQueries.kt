@@ -13,14 +13,27 @@ interface CachedMangaQueries : DbProvider {
 
     fun insertCachedManga2(cachedManga: List<CachedManga>) = db.inTransaction {
         val query = RawQuery.builder()
-            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS} (${CachedMangaTable.COL_MANGA_ID}, ${CachedMangaTable.COL_MANGA_TITLE}) VALUES (?, ?);")
+            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
+                    "(${CachedMangaTable.COL_MANGA_TITLE}, ${CachedMangaTable.COL_MANGA_UUID}," +
+                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);")
 
         cachedManga.forEach {
             db.lowLevel().executeSQL(
-                query.args(it.mangaId, it.title)
+                query.args(it.title, it.uuid, it.rating)
                     .build()
             )
         }
+    }
+
+    fun insertCachedManga2Single(cachedManga: CachedManga) = db.inTransaction {
+        val query = RawQuery.builder()
+            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
+                    "(${CachedMangaTable.COL_MANGA_TITLE}, ${CachedMangaTable.COL_MANGA_UUID}," +
+                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);")
+        db.lowLevel().executeSQL(
+            query.args(cachedManga.title, cachedManga.uuid, cachedManga.rating)
+                .build()
+        )
     }
 
     fun getCachedMangaCount() = db.get().numberOfResults().withQuery(

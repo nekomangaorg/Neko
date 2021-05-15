@@ -8,16 +8,7 @@ import eu.kanade.tachiyomi.data.database.tables.SimilarTable
 
 interface SimilarQueries : DbProvider {
 
-    fun getAllSimilar() = db.get()
-        .listOfObjects(MangaSimilar::class.java)
-        .withQuery(
-            Query.builder()
-                .table(SimilarTable.TABLE)
-                .build()
-        )
-        .prepare()
-
-    fun getSimilar(manga_id: Long) = db.get()
+    fun getSimilar(manga_id: String) = db.get()
         .`object`(MangaSimilar::class.java)
         .withQuery(
             Query.builder()
@@ -29,8 +20,6 @@ interface SimilarQueries : DbProvider {
         .prepare()
 
     fun insertSimilar(similar: MangaSimilar) = db.put().`object`(similar).prepare()
-
-    fun insertSimilar(similarList: List<MangaSimilar>) = db.put().objects(similarList).prepare()
 
     fun deleteAllSimilar() = db.delete()
         .byQuery(

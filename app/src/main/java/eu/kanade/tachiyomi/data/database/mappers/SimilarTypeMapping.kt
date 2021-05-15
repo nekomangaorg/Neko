@@ -13,8 +13,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.MangaSimilarImpl
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_ID
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_ID
-import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_SIMILAR_MATCHED_IDS
-import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_SIMILAR_MATCHED_TITLES
+import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_DATA
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable.TABLE
 
 class SimilarTypeMapping : SQLiteTypeMapping<MangaSimilar>(
@@ -35,11 +34,10 @@ class SimilarPutResolver : DefaultPutResolver<MangaSimilar>() {
         .whereArgs(obj.id)
         .build()
 
-    override fun mapToContentValues(obj: MangaSimilar) = ContentValues(4).apply {
+    override fun mapToContentValues(obj: MangaSimilar) = ContentValues(3).apply {
         put(COL_ID, obj.id)
         put(COL_MANGA_ID, obj.manga_id)
-        put(COL_MANGA_SIMILAR_MATCHED_IDS, obj.matched_ids)
-        put(COL_MANGA_SIMILAR_MATCHED_TITLES, obj.matched_titles)
+        put(COL_MANGA_DATA, obj.data)
     }
 }
 
@@ -47,9 +45,8 @@ class SimilarGetResolver : DefaultGetResolver<MangaSimilar>() {
 
     override fun mapFromCursor(cursor: Cursor): MangaSimilar = MangaSimilarImpl().apply {
         id = cursor.getLong(cursor.getColumnIndex(COL_ID))
-        manga_id = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID))
-        matched_ids = cursor.getString(cursor.getColumnIndex(COL_MANGA_SIMILAR_MATCHED_IDS))
-        matched_titles = cursor.getString(cursor.getColumnIndex(COL_MANGA_SIMILAR_MATCHED_TITLES))
+        manga_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_ID))
+        data = cursor.getString(cursor.getColumnIndex(COL_MANGA_DATA))
     }
 }
 

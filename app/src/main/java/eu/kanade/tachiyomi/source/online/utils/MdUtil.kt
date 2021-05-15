@@ -54,8 +54,8 @@ class MdUtil {
             }.build().toString()
         }
 
-        const val similarCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
-        const val similarCacheCdn = "https://cdn.statically.io/gh/goldbattle/MangadexRecomendations/master/output/api/"
+        const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
+        const val similarCacheMangas = "https://api.similarmanga.com/manga/"
         const val similarBaseApi = "https://api.similarmanga.com/similar/"
 
         const val apiCovers = "/covers"

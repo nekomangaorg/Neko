@@ -195,8 +195,8 @@ open class MangaDex : HttpSource() {
         return followsHandler.fetchTrackingInfo(url)
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
-        return similarHandler.fetchSimilar(manga)
+    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
+        return similarHandler.fetchSimilarObserable(manga, refresh)
     }
 
     override fun isLogged(): Boolean {

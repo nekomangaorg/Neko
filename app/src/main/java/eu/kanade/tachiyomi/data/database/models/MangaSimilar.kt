@@ -13,19 +13,18 @@ interface MangaSimilar : Serializable {
     var id: Long?
 
     /**
-     * Id of matching manga
+     * Mangadex id of manga
      */
-    var manga_id: Long?
+    var manga_id: String
 
     /**
-     * JSONArray.toString() list of ids for this manga
-     * Example: [3467, 5907, 21052, 2141, 6139, 5602, 3999]
+     * JSONArray.toString() of our similar manga object
      */
-    var matched_ids: String
+    var data: String
 
-    /**
-     * JSONArray.toString() list of titles for this manga
-     * Example: [Title1, Title2, ..., Title10]
-     */
-    var matched_titles: String
+    companion object {
+        fun create(): MangaSimilarImpl {
+            return MangaSimilarImpl()
+        }
+    }
 }
