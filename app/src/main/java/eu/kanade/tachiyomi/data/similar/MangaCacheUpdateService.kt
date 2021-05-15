@@ -166,6 +166,7 @@ class MangaCacheUpdateService(
             }
 
         }
+        db.optimizeCachedManga()
         showProgressNotification(totalManga, totalManga)
         XLog.i("CACHE: Inserted cached manga: ${db.getCachedMangaCount()}")
 

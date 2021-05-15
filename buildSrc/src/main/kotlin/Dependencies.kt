@@ -18,6 +18,7 @@ object Libs {
         const val recyclerView = "androidx.recyclerview:recyclerview:${Versions.androidRecyclerView}"
         const val workManager = "androidx.work:work-runtime:${Versions.androidWorkManager}"
         const val workManagerKtx = "androidx.work:work-runtime-ktx:${Versions.androidWorkManager}"
+        const val dataBinding = "com.android.databinding:compiler:${Versions.dataBinding}"
     }
 
     object Database {
@@ -173,6 +174,7 @@ object Versions {
     const val androidRecyclerView = "1.1.0"
     const val androidSqlite = "2.1.0"
     const val androidWorkManager = "2.4.0"
+    const val dataBinding = "3.1.4"
     const val assertJ = "3.12.2"
     const val changelog = "2.1.0"
     const val chucker = "3.2.0"
