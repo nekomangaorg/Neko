@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.encodeToString
 import okhttp3.CacheControl
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
@@ -125,11 +126,13 @@ open class MangaDex : HttpSource() {
             return nonRateLimitedClient.newCallWithProgress(imageRequest(page), page).asObservable().doOnNext { response ->
 
                 val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
+                val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
+                val cache = response.header("X-Cache", "") == "HIT"
                 val result = ImageReportResult(
-                    page.imageUrl!!, response.isSuccessful, byteSize
+                    page.imageUrl!!, response.isSuccessful, byteSize, cache, duration
                 )
 
-                val jsonString = MdUtil.jsonParser.encodeToString(ImageReportResult.serializer(), result)
+                val jsonString = MdUtil.jsonParser.encodeToString(result)
 
                 val postResult = network.client.newCall(
                     POST(

@@ -140,7 +140,7 @@ class V5MigrationService(
                     }
                 } else {
                     failedUpdatesMangas[manga] = "unable to find new manga id"
-                    failedUpdatesErrors.add(manga.title + ": unable to find new manga id")
+                    failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed it")
                     mangaErroredOut = true
                 }
             }
