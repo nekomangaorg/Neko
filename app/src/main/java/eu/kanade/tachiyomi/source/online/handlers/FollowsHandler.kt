@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
 import okhttp3.CacheControl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.MediaType.Companion.toMediaType
@@ -136,16 +138,21 @@ class FollowsHandler {
                 false -> followStatus.name.toLowerCase(Locale.US)
             }
 
-            val jsonString = MdUtil.jsonParser.encodeToString(UpdateReadingStatus.serializer(), UpdateReadingStatus(status))
+            val jsonString = MdUtil.jsonParser.encodeToString(UpdateReadingStatus(status))
 
-            val postResult = network.authClient.newCall(
-                POST(
-                    MdUtil.getReadingStatusUrl(mangaId),
-                    MdUtil.getAuthHeaders(network.headers, preferences),
-                    jsonString.toRequestBody("application/json".toMediaType())
-                )
-            ).await()
-            postResult.isSuccessful
+            try {
+                val postResult = network.authClient.newCall(
+                    POST(
+                        MdUtil.getReadingStatusUrl(mangaId),
+                        MdUtil.getAuthHeaders(network.headers, preferences),
+                        jsonString.toRequestBody("application/json".toMediaType())
+                    )
+                ).await()
+                postResult.isSuccessful
+            } catch (e: Exception) {
+                XLog.e("error posting", e)
+                false
+            }
         }
     }
 
