@@ -85,6 +85,13 @@
         For more information and to view the source code:\n%s
     </string>
 
+    <!-- Cache Source -->
+    <string name="cache">Cache Source</string>
+    <string name="cache_loading_progress_start">Downloading data file…</string>
+    <string name="cache_loading_percent">Updating cache manga (%1$d / %2$d updated)</string>
+    <string name="cache_loading_complete">Updating cache manga complete!</string>
+    <string name="cache_loading_complete_error">Error trying to load/process cache manga</string>
+
     <!-- Reader Settings -->
     <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
 
@@ -120,8 +127,8 @@
 
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
     <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
-    <string name="use_cache_source">Use cached manga api source</string>
-    <string name="use_cache_source_dialog">This will download  1.5MB file.  You only need to download it once.  If you already downloaded just dismiss this dialog.</string>
+    <string name="use_cache_source">Use cached manga api source and search</string>
+    <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
 
     <!-- Advanced Settings -->

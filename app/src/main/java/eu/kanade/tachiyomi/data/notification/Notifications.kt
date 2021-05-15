@@ -46,6 +46,13 @@ object Notifications {
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
 
     /**
+     * Notification channel and ids used for cache searching.
+     */
+    const val CHANNEL_CACHE = "cache_channel"
+    const val ID_CACHE_PROGRESS = -401
+    const val ID_CACHE_COMPLETE = -402
+
+    /**
      * Notification channel and ids used for backup and restore.
      */
     private const val GROUP_BACKUP_RESTORE = "group_backup_restore"
@@ -151,6 +158,13 @@ object Notifications {
             ).apply {
                 setShowBadge(false)
                 setSound(null, null)
+            },
+            NotificationChannel(
+                CHANNEL_CACHE,
+                context.getString(R.string.cache),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
             },
             NotificationChannel(
                 CHANNEL_CRASH_LOGS,

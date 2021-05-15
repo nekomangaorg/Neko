@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.similar.MangaCacheUpdateService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -72,6 +73,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
+            ACTION_CANCEL_CACHE_UPDATE -> cancelCacheUpdate(context)
             ACTION_CANCEL_V5_MIGRATION -> cancelV5Migration(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Share backup file
@@ -199,6 +201,17 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     /**
+     * Method called when user wants to stop a cache manga update
+     *
+     * @param context context of application
+     * @param notificationId id of notification
+     */
+    private fun cancelCacheUpdate(context: Context) {
+        MangaCacheUpdateService.stop(context)
+        Handler().post { dismissNotification(context, Notifications.ID_CACHE_PROGRESS) }
+    }
+
+    /**
      * Method called when user wants to stop a library update
      *
      * @param context context of application
@@ -255,6 +268,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
+
+        // Called to cancel cache update.
+        private const val ACTION_CANCEL_CACHE_UPDATE = "$ID.$NAME.CANCEL_CACHE_UPDATE"
 
         // Called to cancel library v5 migration update.
         private const val ACTION_CANCEL_V5_MIGRATION = "$ID.$NAME.CANCEL_V5_MIGRATION"
@@ -530,6 +546,18 @@ class NotificationReceiver : BroadcastReceiver() {
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
 
+        /**
+         * Returns [PendingIntent] that starts a service which stops the cache update
+         *
+         * @param context context of application
+         * @return [PendingIntent]
+         */
+        internal fun cancelCacheUpdatePendingBroadcast(context: Context): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_CANCEL_CACHE_UPDATE
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
 
         /**
          * Returns [PendingIntent] that starts a service which stops the library update
