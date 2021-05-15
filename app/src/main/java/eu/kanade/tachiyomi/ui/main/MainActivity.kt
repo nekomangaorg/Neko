@@ -289,10 +289,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             // Show changelog or similar manga enabling on install prompt
             // NOTE: we show the similar manga dialog first so it is behind the changelog
             if (Migrations.upgrade(preferences)) {
-                if (!preferences.similarEnabled().get() && !preferences.shownSimilarAskDialog().get()) {
-                    EnableSimilarDialogController().showDialog(router)
-                    preferences.shownSimilarAskDialog().set(true)
-                }
                 if (!BuildConfig.DEBUG) ChangelogDialogController().showDialog(router)
             }
         }

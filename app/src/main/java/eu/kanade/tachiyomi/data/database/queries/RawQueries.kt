@@ -243,7 +243,7 @@ fun searchCachedMangaQuery(query: String, page: Int, limit: Int): String {
     val queryCleaned = regex.replace(query, "")
     return """
       SELECT * FROM ${CachedMangaTable.TABLE_FTS}
-      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH "$queryCleaned"
+      WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH '$queryCleaned'
       LIMIT ${limit+1} OFFSET ${page*limit}
     """
 }

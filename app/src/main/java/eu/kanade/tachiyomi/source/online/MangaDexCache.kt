@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.CachedManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -16,10 +17,14 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
+import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
@@ -31,14 +36,18 @@ import org.isomorphism.util.TokenBuckets
 import org.json.JSONObject
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
+import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
 open class MangaDexCache() : MangaDex() {
 
-    private val preferences: PreferencesHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
+    private val v5DbHelper: V5DbHelper by injectLazy()
     private val downloadManager: DownloadManager by injectLazy()
+    private val similarHandler: SimilarHandler by injectLazy()
+    private val filterHandler: FilterHandler by injectLazy()
+    val preferences: PreferencesHelper by injectLazy()
 
     // Max request of 30 per second, per domain we query
     private val bucket = TokenBuckets.builder().withCapacity(30)
@@ -48,8 +57,6 @@ open class MangaDexCache() : MangaDex() {
         it.proceed(it.request())
     }
     private val clientLessRateLimits = network.nonRateLimitedClient.newBuilder().addInterceptor(rateLimitInterceptor).build()
-    private val clientAnilist = clientLessRateLimits.newBuilder().build()
-    private val clientMyAnimeList = clientLessRateLimits.newBuilder().build()
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         throw Exception("Cache source cannot update follow status")
@@ -69,16 +76,27 @@ open class MangaDexCache() : MangaDex() {
 
         // Next lets query the next set of manga from the database
         // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
+        // NOTE: we will also filter out manga that are not in our content rating list the user wants!
+        // NOTE: (small hack of using the *rating* field to store the content rating....)
         val limit = 10
         return db.getCachedMangaRange(page - 1, limit).asRxObservable().flatMapIterable { it }
             .map { cacheManga ->
                 SManga.create().apply {
-                    initialized = false
-                    url = "/manga/${cacheManga.mangaId}/"
+                    url = "/manga/${cacheManga.uuid}/"
                     title = MdUtil.cleanString(cacheManga.title)
-                    thumbnail_url = null
+                    thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, cacheManga.uuid) ?: MdUtil.imageUrlCacheNotFound
+                    rating = cacheManga.rating
                 }
-            }.toList().map { MangasPage(it.take(limit), it.size > limit) }
+            }.toList().map {
+                val haveMore = (it.size > limit)
+                val mangasClean = it.take(limit).filter { manga ->
+                    manga.rating in preferences.contentRatingSelections()
+                }
+                mangasClean.forEach {  manga ->
+                    manga.rating = null
+                }
+                MangasPage(mangasClean, haveMore)
+            }
     }
 
     override fun fetchSearchManga(
@@ -96,16 +114,27 @@ open class MangaDexCache() : MangaDex() {
 
         // Next lets query the next set of manga from the database
         // NOTE: page id starts from 1, and we request 1 extra entry to see if there is still more
+        // NOTE: we will also filter out manga that are not in our content rating list the user wants!
+        // NOTE: (small hack of using the *rating* field to store the content rating....)
         val limit = 10
         return db.searchCachedManga(query, page - 1, limit).asRxObservable().flatMapIterable { it }
             .map { cacheManga ->
                 SManga.create().apply {
-                    initialized = false
-                    url = "/manga/${cacheManga.mangaId}/"
+                    url = "/manga/${cacheManga.uuid}/"
                     title = MdUtil.cleanString(cacheManga.title)
-                    thumbnail_url = null
+                    thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, cacheManga.uuid) ?: MdUtil.imageUrlCacheNotFound
+                    rating = cacheManga.rating
                 }
-            }.toList().map { MangasPage(it.take(limit), it.size > limit) }
+            }.toList().map {
+                val haveMore = (it.size > limit)
+                val mangasClean = it.take(limit).filter { manga ->
+                    manga.rating in preferences.contentRatingSelections()
+                }
+                mangasClean.forEach {  manga ->
+                    manga.rating = null
+                }
+                MangasPage(mangasClean, haveMore)
+            }
     }
 
     override fun fetchFollows(): Observable<MangasPage> {
@@ -116,17 +145,14 @@ open class MangaDexCache() : MangaDex() {
         return clientLessRateLimits.newCall(apiRequest(manga))
             .asObservableSuccess()
             .map { response ->
-                parseMangaCacheApi(response.body!!.string())
+                parseMangaCacheApi(response)
             }
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             var response = clientLessRateLimits.newCall(apiRequest(manga)).execute()
-            if (!response.isSuccessful) {
-                response = clientLessRateLimits.newCall(apiRequest(manga, true)).execute()
-            }
-            parseMangaCacheApi(response.body!!.string())
+            parseMangaCacheApi(response)
         }
     }
 
@@ -151,7 +177,7 @@ open class MangaDexCache() : MangaDex() {
         return Observable.just(emptyList())
     }
 
-    override suspend fun getMangaIdFromChapterId(urlChapterId: String): Int {
+    override suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         throw Exception("Cache source cannot convert chapter id to manga id")
     }
 
@@ -187,8 +213,8 @@ open class MangaDexCache() : MangaDex() {
         return Track.create(TrackManager.MDLIST)
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
-        return SimilarHandler(preferences).fetchSimilar(manga)
+    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
+        return similarHandler.fetchSimilarObserable(manga, refresh)
     }
 
     override fun isLogged(): Boolean {
@@ -207,56 +233,62 @@ open class MangaDexCache() : MangaDex() {
         return FilterList(emptyList())
     }
 
-    private fun apiRequest(manga: SManga, useOtherUrl: Boolean = true): Request {
-        val mangaId = MdUtil.getMangaId(manga.url).toLong()
-        val url = when {
-            useOtherUrl -> MdUtil.apiUrlCache
-            else -> MdUtil.apiUrlCdnCache
-        }
-        return GET(url + mangaId.toString().padStart(5, '0') + ".json", headers, CacheControl.FORCE_NETWORK)
+    private fun apiRequest(manga: SManga): Request {
+        val mangaId = MdUtil.getMangaId(manga.url)
+        return GET(MdUtil.similarCacheMangas + mangaId + ".json", headers, CacheControl.FORCE_NETWORK)
     }
 
-    private fun parseMangaCacheApi(jsonData: String): SManga {
+    private fun parseMangaCacheApi(response: Response): SManga {
+
+        // Error check http response
+        if (response.code == 404) {
+            throw Exception("Manga has not been cached...")
+        }
+        if (response.isSuccessful.not() || response.code != 200) {
+            throw Exception("Error getting cache manga http code: ${response.code}")
+        }
+
         try {
+            // Else lets try to parse the response body
             // Serialize the api response
+            val jsonData = response.body!!.string()
             val mangaReturn = SManga.create()
             val networkApiManga = MdUtil.jsonParser.decodeFromString(CacheApiMangaSerializer.serializer(), jsonData)
-            mangaReturn.url = "/manga/${networkApiManga.id}"
+            mangaReturn.url = "/manga/${networkApiManga.data.id}"
             // Convert from the api format
-            mangaReturn.title = MdUtil.cleanString(networkApiManga.title)
-            mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.description)
-            mangaReturn.rating = networkApiManga.rating.toString()
+            mangaReturn.title = MdUtil.cleanString(networkApiManga.data.attributes.title["en"]!!)
+            mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.data.attributes.description["en"]!!)
+            //mangaReturn.rating = networkApiManga.toString()
+            mangaReturn.thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, networkApiManga.data.id) ?: MdUtil.imageUrlCacheNotFound
 
             // Get the external tracking ids for this manga
-            networkApiManga.external["al"].let {
-                mangaReturn.anilist_id = it
+            val networkManga = networkApiManga.data.attributes
+            networkManga.links?.let {
+                it["al"]?.let { mangaReturn.anilist_id = it }
+                it["kt"]?.let { mangaReturn.kitsu_id = it }
+                it["mal"]?.let { mangaReturn.my_anime_list_id = it }
+                it["mu"]?.let { mangaReturn.manga_updates_id = it }
+                it["ap"]?.let { mangaReturn.anime_planet_id = it }
             }
-            networkApiManga.external["kt"].let {
-                mangaReturn.kitsu_id = it
+            mangaReturn.status = when(networkManga.status) {
+                "ongoing" -> SManga.ONGOING
+                "completed" -> SManga.PUBLICATION_COMPLETE
+                "cancelled" -> SManga.CANCELLED
+                "hiatus" -> SManga.HIATUS
+                else -> SManga.UNKNOWN
             }
-            networkApiManga.external["mal"].let {
-                mangaReturn.my_anime_list_id = it
-            }
-            networkApiManga.external["mu"].let {
-                mangaReturn.manga_updates_id = it
-            }
-            networkApiManga.external["ap"].let {
-                mangaReturn.anime_planet_id = it
-            }
-            mangaReturn.status = SManga.UNKNOWN
 
             // List the labels for this manga
-            val genres = networkApiManga.demographic.toMutableList()
-            genres += networkApiManga.content
-            genres += networkApiManga.format
-            genres += networkApiManga.genre
-            genres += networkApiManga.theme
-            if (networkApiManga.is_r18) {
-                genres.add("Hentai")
-            }
+            val tags = filterHandler.getTags()
+            val genres = (
+                    listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
+                            + networkManga.tags?.map { it.id }
+                        ?.map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
+                        ?.map { tag -> tag?.name }
+                            + listOf("Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
+                    ))
+                .filterNotNull()
             mangaReturn.genre = genres.joinToString(", ")
-
-            mangaReturn.thumbnail_url = getThumbnail(mangaReturn.anilist_id, mangaReturn.my_anime_list_id)
 
             return mangaReturn
         } catch (e: Exception) {
@@ -265,46 +297,4 @@ open class MangaDexCache() : MangaDex() {
         }
     }
 
-    fun getThumbnail(anilist_id: String?, my_anime_list_id: String?): String {
-        // Query graph ql endpoint for our image
-        // https://stackoverflow.com/a/58923947
-        if (anilist_id != null) {
-            val query = "{\n" +
-                "  Media(id: ${anilist_id}, type: MANGA) {\n" +
-                "    coverImage {\n" +
-                "      extraLarge\n" +
-                "      large\n" +
-                "    }\n" +
-                "  }\n" +
-                "}\n"
-            val json = JSONObject()
-            json.put("query", query)
-            val requestBody = json.toString().toRequestBody(null)
-            val request = Request.Builder().url("https://graphql.anilist.co").post(requestBody)
-                .addHeader("content-type", "application/json").build()
-            val response = clientAnilist.newCall(request).execute()
-            if (response.isSuccessful && response.code == 200) {
-                val data = JSONObject(response.body!!.string())
-                return data.getJSONObject("data")
-                    .getJSONObject("Media")
-                    .getJSONObject("coverImage")
-                    .getString("extraLarge")
-            }
-        }
-
-        // Query MAL api for an image
-        // https://jikan.docs.apiary.io/#reference/0/manga
-        if (my_anime_list_id != null) {
-            val request = GET("https://api.jikan.moe/v3/manga/${my_anime_list_id}/pictures", headers, CacheControl.FORCE_NETWORK)
-            val response = clientMyAnimeList.newCall(request).execute()
-            if (response.isSuccessful && response.code == 200) {
-                val data = JSONObject(response.body!!.string())
-                val pictures = data.getJSONArray("pictures")
-                if (pictures.length() > 0) {
-                    return pictures.getJSONObject(pictures.length() - 1).getString("large")
-                }
-            }
-        }
-        return MdUtil.imageUrlCacheNotFound
-    }
 }

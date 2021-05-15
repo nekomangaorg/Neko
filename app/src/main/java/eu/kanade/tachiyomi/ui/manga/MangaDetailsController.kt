@@ -567,9 +567,9 @@ class MangaDetailsController :
 
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
-        if (!item.chapter.isMergedChapter()) {
-            popup.menu.findItem(R.id.action_view_comments).isVisible = true
-        }
+        //if (!item.chapter.isMergedChapter()) {
+        //    popup.menu.findItem(R.id.action_view_comments).isVisible = true
+        //}
 
         popup.setOnMenuItemClickListener { menuItem ->
             when (menuItem.itemId) {

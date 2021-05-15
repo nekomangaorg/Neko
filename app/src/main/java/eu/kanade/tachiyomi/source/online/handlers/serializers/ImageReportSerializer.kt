@@ -6,5 +6,7 @@ import kotlinx.serialization.Serializable
 data class ImageReportResult(
     val url: String,
     val success: Boolean,
-    val bytes: Int?
+    val bytes: Int?,
+    val cache: Boolean,
+    val duration: Long,
 )

@@ -8,10 +8,10 @@ import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.online.MangaDex
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
@@ -44,10 +44,15 @@ class PreferencesHelper(val context: Context) {
     private val rxPrefs = RxSharedPreferences.create(prefs)
     private val flowPrefs = FlowSharedPreferences(prefs)
 
+    private val defaultFolder = context.getString(R.string.neko_app_name) + when (BuildConfig.DEBUG) {
+        true -> "_DEBUG"
+        false -> ""
+    }
+
     private val defaultDownloadsDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.neko_app_name),
+                defaultFolder,
             "downloads"
         )
     )
@@ -55,7 +60,7 @@ class PreferencesHelper(val context: Context) {
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.neko_app_name),
+                defaultFolder,
             "backup"
         )
     )
@@ -229,7 +234,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lang() = prefs.getString(Keys.lang, "")
 
-    fun langsToShow() = flowPrefs.getString(Keys.langToShow, "gb")
+    fun langsToShow() = flowPrefs.getString(Keys.langToShow, "en")
 
     fun defaultCategory() = prefs.getInt(Keys.defaultCategory, -1)
 
@@ -311,21 +316,11 @@ class PreferencesHelper(val context: Context) {
 
     fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
-    fun similarEnabled() = flowPrefs.getBoolean(Keys.similarEnabled, false)
-
-    fun shownSimilarAskDialog() = flowPrefs.getBoolean("shown_similar_ask_dialog", false)
-
-    fun similarOnlyOverWifi() = prefs.getBoolean(Keys.similarOnlyOverWifi, true)
-
-    fun similarUpdateInterval() = rxPrefs.getInteger(Keys.similarUpdateInterval, 3)
-
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 
-    fun r18() = prefs.getString(Keys.showR18, "0")
-
-    fun imageServer() = prefs.getString(Keys.imageServer, MangaDex.SERVER_PREF_ENTRY_VALUES.first())
-
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
+
+    fun usePort443Only() = prefs.getBoolean(Keys.enablePort443Only, false)
 
     fun forceLatestCovers() = prefs.getBoolean(Keys.forceLatestCovers, false)
 
@@ -333,11 +328,41 @@ class PreferencesHelper(val context: Context) {
 
     fun markChaptersReadFromMDList() = prefs.getBoolean(Keys.markChaptersFromMDList, false)
 
-    fun showR18Filter(): Boolean = prefs.getBoolean(Keys.showR18Filter, true)
+    fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 
     fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
 
     fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
+
+    fun contentRatingSelections(): MutableSet<String> = prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
+
+    fun sessionToken() = prefs.getString(Keys.sessionToken, "")
+
+    fun setSessionToken(session: String) {
+        prefs.edit()
+            .putString(Keys.sessionToken, session)
+            .apply()
+    }
+
+    fun refreshToken() = prefs.getString(Keys.refreshToken, "")
+
+    fun setRefreshToken(refresh: String) {
+        prefs.edit()
+            .putString(Keys.refreshToken, refresh)
+            .apply()
+    }
+
+    fun setTokens(refresh: String, session: String) {
+        prefs.edit()
+            .putString(Keys.sessionToken, session)
+            .putString(Keys.refreshToken, refresh)
+            .putLong(Keys.lastRefreshTokenTime, System.currentTimeMillis())
+            .apply()
+    }
+
+    fun lastRefreshTime(): Long {
+        return prefs.getLong(Keys.lastRefreshTokenTime, 0)
+    }
 }

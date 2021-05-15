@@ -46,11 +46,11 @@ object Notifications {
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
 
     /**
-     * Notification channel and ids used for backup and restore.
+     * Notification channel and ids used for cache searching.
      */
-    const val CHANNEL_SIMILAR = "similar_channel"
-    const val ID_SIMILAR_PROGRESS = -401
-    const val ID_SIMILAR_COMPLETE = -402
+    const val CHANNEL_CACHE = "cache_channel"
+    const val ID_CACHE_PROGRESS = -401
+    const val ID_CACHE_COMPLETE = -402
 
     /**
      * Notification channel and ids used for backup and restore.
@@ -70,6 +70,13 @@ object Notifications {
      */
     const val CHANNEL_CRASH_LOGS = "crash_logs_channel"
     const val ID_CRASH_LOGS = -601
+
+    /**
+     * Notification channel for migration.
+     */
+    const val CHANNEL_V5_MIGRATION = "v5_migration_channel"
+    const val ID_V5_MIGRATION_PROGRESS = -901
+    const val ID_V5_MIGRATION_ERROR = -902
 
     /**
      * Creates the notification channels introduced in Android Oreo.
@@ -146,8 +153,15 @@ object Notifications {
                 setSound(null, null)
             },
             NotificationChannel(
-                CHANNEL_SIMILAR,
-                context.getString(R.string.similar),
+                    CHANNEL_V5_MIGRATION, context.getString(R.string.v5_migration_service),
+                    NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                setShowBadge(false)
+                setSound(null, null)
+            },
+            NotificationChannel(
+                CHANNEL_CACHE,
+                context.getString(R.string.cache),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)

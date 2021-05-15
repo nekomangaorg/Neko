@@ -6,22 +6,30 @@
     android:id="@+id/source_layout"
     android:layout_height="match_parent">
 
-    <FrameLayout
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical"
-        android:id="@+id/catalogue_view"
-        tools:context="eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController">
+        android:layout_height="match_parent">
 
-        <ProgressBar
-            android:id="@+id/progress"
-            style="?android:attr/progressBarStyleLarge"
-            android:layout_width="wrap_content"
+        <FrameLayout
+            android:id="@+id/catalogue_view"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_gravity="center_vertical|center_horizontal"
-            android:visibility="gone" />
+            android:orientation="vertical"
+            tools:context="eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController">
 
-    </FrameLayout>
+            <ProgressBar
+                android:id="@+id/progress"
+                style="?android:attr/progressBarStyleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_gravity="center_vertical|center_horizontal"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab"

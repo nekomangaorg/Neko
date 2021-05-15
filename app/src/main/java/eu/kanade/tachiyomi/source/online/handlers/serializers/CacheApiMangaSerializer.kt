@@ -4,37 +4,50 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class CacheApiMangaSerializer(
-    val id: Long,
-    val title: String,
-    val url: String,
-    val description: String,
-    val is_r18: Boolean,
-    val rating: Float,
-    val demographic: List<String>,
-    val content: List<String>,
-    val format: List<String>,
-    val genre: List<String>,
-    val theme: List<String>,
-    val languages: List<String>,
-    val related: List<CacheRelatedSerializer>,
-    val external: MutableMap<String,String>,
-    val last_updated: String,
-    val matches: List<CacheSimilarMatchesSerializer>,
+    val result : String,
+    val data : CacheApiData,
+    val relationships : List<CacheApiRelationships>
 )
 
 @Serializable
-data class CacheRelatedSerializer(
-    val id: Long,
-    val title: String,
-    val type: String,
-    val r18: Boolean,
+data class CacheApiRelationships (
+    val id : String,
+    val type : String
 )
 
 @Serializable
-data class CacheSimilarMatchesSerializer(
-    val id: Long,
-    val title: String,
-    val score: Float,
-    val r18: Boolean,
-    val languages: List<String>,
+data class CacheApiData (
+    val id : String,
+    val type : String,
+    val attributes : CacheApiDataAttributes
 )
+
+@Serializable
+data class CacheApiDataAttributes(
+    val title : Map<String, String>,
+    val description : Map<String, String>,
+    val links : Map<String, String>? = null,
+    val originalLanguage : String? = null,
+    val lastChapter : String? = null,
+    val publicationDemographic : String? = null,
+    val status : String? = null,
+    val contentRating : String? = null,
+    val tags : List<CacheApiTags>? = null,
+    val version : Int,
+    val createdAt : String,
+    val updatedAt : String
+)
+
+@Serializable
+data class CacheApiTags (
+    val id : String,
+    val type : String,
+    val attributes : CacheApiTagAttributes
+)
+
+@Serializable
+data class CacheApiTagAttributes (
+    val name : Map<String, String>,
+    val version : Int,
+)
+

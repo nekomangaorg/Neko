@@ -10,8 +10,9 @@ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.CachedManga
-import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_TITLE
+import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_UUID
+import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_RATING
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.TABLE_FTS
 
 class CacheMangaTypeMapping : SQLiteTypeMapping<CachedManga>(
@@ -28,21 +29,23 @@ class CacheMangaPutResolver : DefaultPutResolver<CachedManga>() {
 
     override fun mapToUpdateQuery(obj: CachedManga) = UpdateQuery.builder()
         .table(TABLE_FTS)
-        .where("$COL_MANGA_ID = ?")
-        .whereArgs(obj.mangaId)
+        .where("$COL_MANGA_UUID = ?")
+        .whereArgs(obj.uuid)
         .build()
 
-    override fun mapToContentValues(obj: CachedManga) = ContentValues(2).apply {
-        put(COL_MANGA_ID, obj.mangaId)
+    override fun mapToContentValues(obj: CachedManga) = ContentValues(3).apply {
         put(COL_MANGA_TITLE, obj.title)
+        put(COL_MANGA_UUID, obj.uuid)
+        put(COL_MANGA_RATING, obj.rating)
     }
 }
 
 class CacheMangaGetResolver : DefaultGetResolver<CachedManga>() {
 
     override fun mapFromCursor(cursor: Cursor): CachedManga = CachedManga(
-        mangaId = cursor.getLong(cursor.getColumnIndex(COL_MANGA_ID)),
-        title = cursor.getString(cursor.getColumnIndex(COL_MANGA_TITLE))
+        title = cursor.getString(cursor.getColumnIndex(COL_MANGA_TITLE)),
+        uuid = cursor.getString(cursor.getColumnIndex(COL_MANGA_UUID)),
+        rating = cursor.getString(cursor.getColumnIndex(COL_MANGA_RATING))
     )
 }
 
@@ -50,7 +53,7 @@ class CacheMangaDeleteResolver : DefaultDeleteResolver<CachedManga>() {
 
     override fun mapToDeleteQuery(obj: CachedManga) = DeleteQuery.builder()
         .table(TABLE_FTS)
-        .where("$COL_MANGA_ID = ?")
-        .whereArgs(obj.mangaId)
+        .where("$COL_MANGA_UUID = ?")
+        .whereArgs(obj.uuid)
         .build()
 }

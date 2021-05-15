@@ -6,8 +6,11 @@ import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
+import okhttp3.Headers
 import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -23,6 +26,8 @@ class NetworkHelper(val context: Context) {
 
     private val preferences: PreferencesHelper by injectLazy()
 
+    private val mangaDexLoginHelper: MangaDexLoginHelper by injectLazy()
+
     private val cacheDir = File(context.cacheDir, "network_cache")
 
     private val cacheSize = 5L * 1024 * 1024 // 5 MiB
@@ -30,7 +35,7 @@ class NetworkHelper(val context: Context) {
     val cookieManager = AndroidCookieJar()
 
     private val bucket = TokenBuckets.builder().withCapacity(2)
-        .withFixedIntervalRefillStrategy(2, 1, TimeUnit.SECONDS).build()
+        .withFixedIntervalRefillStrategy(5, 1, TimeUnit.SECONDS).build()
 
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
@@ -73,7 +78,7 @@ class NetworkHelper(val context: Context) {
                                 Gson().fromJson(message, Any::class.java)
                                 XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace().json(message)
                             } catch (ex: Exception) {
-                                XLog.tag("||NEKO-NETWORK").nb().disableStackTrace().d(message)
+                                XLog.tag("||NEKO-NETWORK").disableBorder().disableStackTrace().d(message)
                             }
                         }
                     }
@@ -84,6 +89,10 @@ class NetworkHelper(val context: Context) {
 
     private fun buildRateLimitedClient(): OkHttpClient {
         return nonRateLimitedClient.newBuilder().addNetworkInterceptor(rateLimitInterceptor).build()
+    }
+
+    private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
+        return buildRateLimitedClient().newBuilder().authenticator(TokenAuthenticator(mangaDexLoginHelper)).build()
     }
 
     fun buildCloudFlareClient(): OkHttpClient {
@@ -98,4 +107,11 @@ class NetworkHelper(val context: Context) {
     val cloudFlareClient = buildCloudFlareClient()
 
     val client = buildRateLimitedClient()
+
+    val authClient = buildRateLimitedAuthenticatedClient()
+
+    val headers = Headers.Builder().apply {
+        add("User-Agent", "Neko " + System.getProperty("http.agent"))
+        add("Referer", MdUtil.baseUrl)
+    }.build()
 }

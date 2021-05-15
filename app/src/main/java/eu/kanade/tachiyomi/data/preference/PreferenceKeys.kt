@@ -125,7 +125,7 @@ object PreferenceKeys {
 
     const val lang = "app_language"
 
-    const val langToShow = "mangadex_languages"
+    const val langToShow = "mangadex_languages_new"
 
     const val dateFormat = "app_date_format"
 
@@ -159,15 +159,7 @@ object PreferenceKeys {
 
     const val enableDoh = "enable_doh"
 
-    const val similarEnabled = "pref_related_show_tab_key"
-
-    const val similarUpdateInterval = "related_update_interval"
-
-    const val similarOnlyOverWifi = "pref_simular_only_over_wifi_key"
-
-    const val showR18 = "show_r18"
-
-    const val imageServer = "image_server"
+    const val contentRating = "content_rating_options"
 
     const val lowQualityCovers = "low_quality_covers"
 
@@ -179,13 +171,21 @@ object PreferenceKeys {
 
     const val markChaptersFromMDList = "mdlist_mark_read"
 
-    const val showR18Filter = "show_R18_filter"
+    const val showContentRatingFilter = "show_R18_filter"
+
+    const val enablePort443Only = "use_port_443_only_for_image_server"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 
     const val createLegacyBackup = "create_legacy_backup"
 
-    const val useCacheSource = "use_cache_source"
+    const val useCacheSource = "use_cache_source_new"
+
+    const val sessionToken = "mangadex_session_token"
+
+    const val refreshToken = "mangadex_refresh_token"
+
+    const val lastRefreshTokenTime = "mangadex_refresh_token_time"
 
     fun sourceUsername(sourceId: Long) = "pref_source_username_$sourceId"
 

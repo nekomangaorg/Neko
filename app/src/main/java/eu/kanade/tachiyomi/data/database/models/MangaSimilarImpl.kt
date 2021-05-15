@@ -4,11 +4,9 @@ class MangaSimilarImpl : MangaSimilar {
 
     override var id: Long? = null
 
-    override var manga_id: Long? = null
+    override lateinit var manga_id: String
 
-    override lateinit var matched_ids: String
-
-    override lateinit var matched_titles: String
+    override lateinit var data: String
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -18,8 +16,7 @@ class MangaSimilarImpl : MangaSimilar {
 
         if (id != other.id) return false
         if (manga_id != other.manga_id) return false
-        if (matched_ids != other.matched_ids) return false
-        return matched_titles != other.matched_titles
+        return data != other.data
     }
 
     override fun hashCode(): Int {

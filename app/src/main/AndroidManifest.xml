@@ -185,6 +185,10 @@
             android:exported="false" />
 
         <service
+            android:name=".data.similar.MangaCacheUpdateService"
+            android:exported="false" />
+
+        <service
             android:name=".data.download.DownloadService"
             android:exported="false" />
 
@@ -201,7 +205,7 @@
             android:exported="false" />
 
         <service
-            android:name=".data.similar.SimilarUpdateService"
+            android:name=".v5.job.V5MigrationService"
             android:exported="false" />
 
     </application>

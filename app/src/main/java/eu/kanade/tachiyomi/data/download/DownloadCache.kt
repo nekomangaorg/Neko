@@ -80,7 +80,11 @@ class DownloadCache(
 
         val fileNames = mangaFiles[manga.id]?.first?.toHashSet() ?: return false
         val mangadexIds = mangaFiles[manga.id]?.second?.toHashSet() ?: return false
+
         if (!chapter.isMergedChapter() && chapter.mangadex_chapter_id.isNotEmpty() && chapter.mangadex_chapter_id in mangadexIds) {
+            return true
+        }
+        if (!chapter.isMergedChapter() && chapter.old_mangadex_id != null && chapter.old_mangadex_id in mangadexIds) {
             return true
         }
         val validChapterDirNames = provider.getValidChapterDirNames(chapter)
@@ -134,6 +138,11 @@ class DownloadCache(
             renew()
             lastRenew = System.currentTimeMillis()
         }
+    }
+
+    fun forceRenewCache() {
+        renew()
+        lastRenew = System.currentTimeMillis()
     }
 
     /**

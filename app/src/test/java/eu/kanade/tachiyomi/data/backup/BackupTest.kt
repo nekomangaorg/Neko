@@ -411,7 +411,7 @@ class BackupTest {
         val manga = MangaImpl()
         manga.source = 1
         manga.title = title
-        manga.url = "/manga/$title"
+        manga.url = "/title/$title"
         manga.favorite = true
         return manga
     }

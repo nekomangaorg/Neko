@@ -312,7 +312,7 @@ class ReaderPresenter(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdUtil.oldApiChapter + urlChapterId).executeOnIO()
+        val dbChapter = db.getChapter(MdUtil.chapterSuffix + urlChapterId).executeOnIO()
         if (dbChapter?.manga_id != null) {
             val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {
@@ -324,7 +324,7 @@ class ReaderPresenter(
         }
         val mangaDex = sourceManager.getMangadex()
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
-        val url = "/manga/$mangaId/"
+        val url = "/title/$mangaId/"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
         val tempManga = dbManga ?: (
             MangaImpl().apply {
@@ -345,7 +345,7 @@ class ReaderPresenter(
 
         if (chapters.isNotEmpty()) {
             val (newChapters, _) = syncChaptersWithSource(db, chapters, manga)
-            val currentChapter = newChapters.find { it.url == MdUtil.oldApiChapter + urlChapterId }
+            val currentChapter = newChapters.find { it.url == MdUtil.chapterSuffix + urlChapterId }
             if (currentChapter?.id != null) {
                 withContext(Dispatchers.Main) {
                     init(manga, currentChapter.id!!)

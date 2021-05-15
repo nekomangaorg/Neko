@@ -21,7 +21,7 @@ open class BrowseSourcePager(val source: Source, val query: String, val filters:
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                if (it.mangas.isNotEmpty()) {
+                if (it.manga.isNotEmpty()) {
                     onPageReceived(it)
                 } else {
                     throw NoResultsException()

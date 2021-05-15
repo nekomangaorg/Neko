@@ -1,9 +1,23 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.CacheControl
+import okhttp3.Headers
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import org.jsoup.parser.Parser
+import java.text.SimpleDateFormat
+import java.util.Locale
+import java.util.TimeZone
 import kotlin.math.floor
 
 class MdUtil {
@@ -11,24 +25,49 @@ class MdUtil {
     companion object {
         const val cdnUrl = "https://mangadex.org" // "https://s0.mangadex.org"
         const val baseUrl = "https://mangadex.org"
-        const val randMangaPage = "/manga/"
-        const val apiUrl = "http://api.mangadex.org.dev.mdcloud.moe"
-        const val apiUrlCdnCache = "https://cdn.statically.io/gh/goldbattle/MangadexRecomendations/master/output/api/"
-        const val apiUrlCache = "https://raw.githubusercontent.com/goldbattle/MangadexRecomendations/master/output/api/"
+        const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-        const val apiManga = "/v2/manga/"
-        const val includeChapters = "?include=chapters"
-        const val oldApiChapter = "/api/chapter/"
-        const val newApiChapter = "/v2/chapter/"
-        const val apiChapterSuffix = "?mark_read=0"
-        const val groupSearchUrl = "$baseUrl/groups/0/1/"
-        const val followsAllApi = "/v2/user/me/followed-manga"
-        const val isLoggedInApi = "/v2/user/me"
-        const val followsMangaApi = "/v2/user/me/manga/"
+        const val atHomeUrl = "$apiUrl/at-home/server"
+        const val chapterUrl = "$apiUrl/chapter/"
+        const val chapterSuffix = "/chapter/"
+        const val checkTokenUrl = "$apiUrl/auth/check"
+        const val refreshTokenUrl = "$apiUrl/auth/refresh"
+        const val loginUrl = "$apiUrl/auth/login"
+        const val logoutUrl = "$apiUrl/auth/logout"
+        const val groupUrl = "$apiUrl/group"
+        const val authorUrl = "$apiUrl/author"
+        const val randomMangaUrl = "$apiUrl/manga/random"
+        const val mangaUrl = "$apiUrl/manga"
+        const val userFollowsUrl = "$apiUrl/user/follows/manga"
+        const val readingStatusesUrl = "$apiUrl/manga/status"
+        fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
+
+        fun mangaFeedUrl(id: String, offset: Int, language: List<String>): String {
+            return "$mangaUrl/$id/feed".toHttpUrl().newBuilder().apply {
+                addQueryParameter("limit", "500")
+                addQueryParameter("offset", offset.toString())
+                addQueryParameter("order[volume]", "desc")
+                addQueryParameter("order[chapter]", "desc")
+                language.forEach {
+                    addQueryParameter("locales[]", it)
+                }
+            }.build().toString()
+        }
+
+        const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
+        const val similarCacheMangas = "https://api.similarmanga.com/manga/"
+        const val similarBaseApi = "https://api.similarmanga.com/similar/"
+
         const val apiCovers = "/covers"
         const val reportUrl = "https://api.mangadex.network/report"
-        const val imageUrl = "$baseUrl/data"
-        const val apiLogin = "/auth/login"
+
+        const val mdAtHomeTokenLifespan = 10 * 60 * 1000
+        const val mangaLimit = 40
+
+        /**
+         * Get the manga offset pages are 1 based, so subtract 1
+         */
+        fun getMangaListOffset(page: Int): String = (mangaLimit * (page - 1)).toString()
 
         val jsonParser =
             Json {
@@ -41,6 +80,11 @@ class MdUtil {
 
         private const
         val scanlatorSeparator = " & "
+
+        const val contentRatingSafe = "safe"
+        const val contentRatingSuggestive = "suggestive"
+        const val contentRatingErotica = "erotica"
+        const val contentRatingPornographic = "pornographic"
 
         val validOneShotFinalChapters = listOf("0", "1")
 
@@ -160,20 +204,11 @@ class MdUtil {
 
         // Get the ID from the manga url
         fun getMangaId(url: String): String {
-            val lastSection = url.trimEnd('/').substringAfterLast("/")
-            return if (lastSection.toIntOrNull() != null) {
-                lastSection
-            } else {
-                // this occurs if person has manga from before that had the id/name/
-                url.trimEnd('/').substringBeforeLast("/").substringAfterLast("/")
-            }
+            val id = url.trimEnd('/').substringAfterLast("/")
+            return id
         }
 
-        fun getChapterId(url: String) = url.substringBeforeLast(apiChapterSuffix).substringAfterLast("/")
-
-        // creates the manga url from the browse for the api
-        fun modifyMangaUrl(url: String): String =
-            url.replace("/title/", "/manga/").substringBeforeLast("/") + "/"
+        fun getChapterId(url: String) = url.substringAfterLast("/")
 
         fun cleanString(string: String): String {
             var cleanedString = string
@@ -247,5 +282,30 @@ class MdUtil {
             }
             return null
         }
+
+        fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient, cacheControl: CacheControl): String {
+            val atHomeRequest = GET(requestUrl, cache = cacheControl)
+            val atHomeResponse = client.newCall(atHomeRequest).execute()
+            return jsonParser.decodeFromString<AtHomeResponse>(atHomeResponse.body!!.string()).baseUrl
+        }
+
+        val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
+            .apply { timeZone = TimeZone.getTimeZone("UTC") }
+
+        fun parseDate(dateAsString: String): Long =
+            dateFormatter.parse(dateAsString)?.time ?: 0
+
+        fun createMangaEntry(json: MangaResponse, preferences: PreferencesHelper, v5DbHelper: V5DbHelper): SManga {
+            return SManga.create().apply {
+                url = "/title/" + json.data.id
+                title = cleanString(json.data.attributes.title["en"]!!)
+                thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, json.data.id) ?: imageUrlCacheNotFound
+                //thumbnail_url = formThumbUrl(url, preferences.lowQualityCovers())
+            }
+        }
+
+        fun getLangsToShow(preferences: PreferencesHelper) = preferences.langsToShow().get().split(",")
+
+        fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) = headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}").build()
     }
 }

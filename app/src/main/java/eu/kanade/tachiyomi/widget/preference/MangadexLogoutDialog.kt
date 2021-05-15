@@ -34,6 +34,8 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
                     if (loggedOut.loggedOut) {
                         preferences.setSourceCredentials(source, "", "")
+                        preferences.setSessionToken("")
+                        preferences.setRefreshToken("")
                         activity?.toast(R.string.successfully_logged_out)
                         (targetController as? Listener)?.siteLogoutDialogClosed(source)
                     } else {

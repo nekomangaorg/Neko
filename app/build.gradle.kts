@@ -49,6 +49,11 @@ android {
             abiFilters("armeabi-v7a", "arm64-v8a", "x86")
         }
     }
+
+    dataBinding {
+        isEnabled = true
+    }
+
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -99,6 +104,9 @@ dependencies {
     implementation(Libs.Android.coreKtx)
     implementation(Libs.Android.constraintLayout)
     implementation(Libs.Android.multiDex)
+
+    // Databinding for autocomplete search
+    kapt(Libs.Android.dataBinding)
 
     implementation(Libs.Google.firebaseAnayltics)
     implementation(Libs.Google.firebaseCrashltyics)
@@ -259,8 +267,15 @@ dependencies {
 
 // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api-markers
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-    kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlinx.serialization.ExperimentalSerializationApi"
+    kotlinOptions.freeCompilerArgs += listOf(
+        "-Xopt-in=kotlin.Experimental",
+        "-Xopt-in=kotlin.RequiresOptIn",
+        "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
+        "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+        "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+        "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
+        "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+    )
 }
 
 tasks.preBuild {

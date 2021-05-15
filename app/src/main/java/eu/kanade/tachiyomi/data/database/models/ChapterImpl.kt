@@ -38,6 +38,8 @@ class ChapterImpl : Chapter {
 
     override var mangadex_chapter_id: String = ""
 
+    override var old_mangadex_id: String? = null
+    
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other == null || javaClass != other.javaClass) return false

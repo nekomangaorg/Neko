@@ -11,7 +11,18 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
+import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
+import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
+import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
+import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
+import eu.kanade.tachiyomi.source.online.handlers.PageHandler
+import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
+import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -50,6 +61,28 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
+
+        addSingletonFactory { V5DbHelper(app.applicationContext) }
+
+        addSingleton(FilterHandler())
+
+        addSingleton(FollowsHandler())
+
+        addSingleton(MangaHandler())
+
+        addSingleton(ApiMangaParser())
+
+        addSingleton(PopularHandler())
+
+        addSingleton(SearchHandler())
+
+        addSingleton(PageHandler())
+
+        addSingleton(SimilarHandler())
+
+        addSingleton(MangaDexLoginHelper())
+
+        addSingleton(MangaPlusHandler())
 
         // Asynchronously init expensive components for a faster cold start
 

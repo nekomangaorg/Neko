@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.4">
+        <changelogtext>See github lets be real, double the changelog makes no sense</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.3">
         <changelogtext>Added ability to use a cache for when MangaDex is down</changelogtext>
         <changelogtext>Please see github release for more info</changelogtext>

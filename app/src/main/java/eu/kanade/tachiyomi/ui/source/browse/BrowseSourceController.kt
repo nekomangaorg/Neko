@@ -1,13 +1,23 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import android.app.SearchManager
+import android.database.Cursor
+import android.database.MatrixCursor
 import android.os.Bundle
+import android.os.Handler
+import android.provider.BaseColumns
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.inputmethod.InputMethodManager
+import android.widget.AutoCompleteTextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
+import androidx.cursoradapter.widget.CursorAdapter
+import androidx.cursoradapter.widget.SimpleCursorAdapter
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,11 +26,14 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.Filter
@@ -40,6 +53,7 @@ import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -48,12 +62,16 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
 import kotlinx.android.synthetic.main.browse_source_controller.*
+import kotlinx.android.synthetic.main.browse_source_controller.empty_view
+import kotlinx.android.synthetic.main.browse_source_controller.progress
+import kotlinx.android.synthetic.main.browse_source_controller.swipe_refresh
+import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import rx.Observable
 import rx.Subscription
-import rx.android.schedulers.AndroidSchedulers
 import uy.kohesive.injekt.injectLazy
-import java.util.concurrent.TimeUnit
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -93,6 +111,11 @@ open class BrowseSourceController(bundle: Bundle) :
     private val preferences: PreferencesHelper by injectLazy()
 
     /**
+     * Database used for autocomplete
+     */
+    private val db: DatabaseHelper by injectLazy()
+
+    /**
      * Adapter containing the list of manga from the catalogue.
      */
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
@@ -117,6 +140,12 @@ open class BrowseSourceController(bundle: Bundle) :
      */
     private var progressItem: ProgressItem? = null
 
+    /**
+     * Our query mangadex which will query at a slow rate
+     */
+    private var canRun: Boolean = true
+    private var handler: Handler = Handler()
+
     init {
         setHasOptionsMenu(true)
     }
@@ -139,7 +168,7 @@ open class BrowseSourceController(bundle: Bundle) :
         if (presenter.source.isLogged().not()) {
             view.snack("You must be logged it.  please login")
         }
-        if(preferences.useCacheSource()){
+        if (preferences.useCacheSource()) {
             view.snack("Browsing Cached Source")
         }
         if (bundle?.getBoolean(APPLY_INSET) == true) {
@@ -149,6 +178,11 @@ open class BrowseSourceController(bundle: Bundle) :
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
+
+        // Disable refresh by default
+        swipe_refresh.setStyle()
+        swipe_refresh.isRefreshing = false
+        swipe_refresh.isEnabled = false
 
         fab.visibleIf(presenter.sourceFilters.isNotEmpty() && preferences.useCacheSource().not())
         fab.setOnClickListener { showFilters() }
@@ -253,6 +287,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 activity!!.getString(R.string.show_library_manga)
             }
         }
+
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -638,10 +673,22 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun expandSearch() {
+
         // Initialize search menu
         val searchItem = activity?.toolbar?.menu?.findItem(R.id.action_search)!!
         val searchView = searchItem.actionView as SearchView
 
+        // Autocomplete searching cursor
+        // https://github.com/korydondzila/kotlin-search
+        searchView.queryHint = activity!!.getString(R.string.search)
+        val autoCompleteTextView = searchView.findViewById<AutoCompleteTextView>(R.id.search_src_text)
+        autoCompleteTextView.threshold = 1
+        val from = arrayOf(SearchManager.SUGGEST_COLUMN_TEXT_1)
+        val to = intArrayOf(R.id.item_label)
+        val cursorAdapter = SimpleCursorAdapter(activity!!, R.layout.search_item, null, from, to, CursorAdapter.FLAG_AUTO_REQUERY)
+        searchView.suggestionsAdapter = cursorAdapter
+
+        // Create our subscribers for this search menu
         val query = presenter.query
         if (!query.isBlank()) {
             searchItem.expandActionView()
@@ -657,14 +704,59 @@ open class BrowseSourceController(bundle: Bundle) :
             .share()
         val writingObservable = searchEventsObservable
             .filter { !it.isSubmitted }
-            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
         val submitObservable = searchEventsObservable
             .filter { it.isSubmitted }
 
         searchViewSubscription?.unsubscribe()
         searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-            .map { it.queryText().toString() }.filter { it != SearchHandler.PREFIX_GROUP_SEARCH && it != SearchHandler.PREFIX_ID_SEARCH }
-            .subscribeUntilDestroy { searchWithQuery(it) }
+            .filter { it.queryText().toString() != SearchHandler.PREFIX_ID_SEARCH }
+            .subscribeUntilDestroy {
+
+                // Update our cursor for our autocomplete
+                val cursor = MatrixCursor(arrayOf(BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1))
+                if(!it.isSubmitted) {
+                    try {
+                        val matches = db.searchCachedManga(it.queryText().toString(), 0, 10).executeAsBlocking()
+                        val matchesClean = matches.filter { manga ->
+                            manga.rating in preferences.contentRatingSelections()
+                        }
+                        matchesClean.take(3).forEachIndexed { index, suggestion ->
+                            cursor.addRow(arrayOf(index, suggestion.title))
+                        }
+                    } catch (e: Exception) {
+                        XLog.e(e)
+                    }
+                }
+                cursorAdapter.changeCursor(cursor)
+
+                // Actually search mangadex for the result with debounce
+                // https://stackoverflow.com/a/34994785/7718197
+                if (canRun || it.isSubmitted) {
+                    canRun = false
+                    handler.postDelayed({
+                        canRun = true
+                        searchWithQuery(it.queryText().toString())
+                    }, 1250)
+                }
+
+            }
+
+        // Callback if the user presses one of auto complete items
+        // This should fill in the query text and then submit the form
+        searchView.setOnSuggestionListener(object: SearchView.OnSuggestionListener {
+            override fun onSuggestionSelect(position: Int): Boolean {
+                return false
+            }
+            override fun onSuggestionClick(position: Int): Boolean {
+                val inputMethodManager = activity!!.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE) as InputMethodManager
+                inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
+                val cursor = searchView.suggestionsAdapter.getItem(position) as Cursor
+                val selection = cursor.getString(cursor.getColumnIndex(SearchManager.SUGGEST_COLUMN_TEXT_1))
+                searchView.setQuery(selection, true)
+                return true
+            }
+        })
+
     }
 
     protected companion object {

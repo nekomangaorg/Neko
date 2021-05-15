@@ -72,8 +72,9 @@ abstract class HttpSource : Source {
      * Headers builder for request.
      */
     protected fun headersBuilder() = Headers.Builder().apply {
-        add("User-Agent", "Tachiyomi " + System.getProperty("http.agent"))
+        add("User-Agent", "Neko " + System.getProperty("http.agent"))
         add("X-Requested-With", "XMLHttpRequest")
+        add("Content-Type", "application/json")
         add("Referer", MdUtil.baseUrl)
     }
 

@@ -74,41 +74,23 @@
     <!-- Similar -->
     <string name="similar">Similar manga</string>
     <string name="similar_settings">Similar Manga Settings</string>
-    <string name="similar_screen">Show similar manga</string>
-    <string name="similar_manually_update">Pull latest database</string>
-    <string name="similar_manually_toast">Starting manual update</string>
-    <string name="similar_manually_update_message">
-        Download the latest similar manga database.
-        This is around 9MB in size and is updated daily.
-    </string>
-    <string name="similar_from_file">Load database from file</string>
-    <string name="similar_from_file_message">
-        Load a local JSON file from disk.
-        Use this if the network download isn\'t working.
-    </string>
-    <string name="similar_update_fequency">Similar update frequency</string>
-    <string name="similar_loading_percent">Updating similar manga (%1$d / %2$d updated)</string>
-    <string name="similar_loading_complete">Updating similar manga complete</string>
-    <string name="similar_loading_complete_error">Error trying to load/process similar manga</string>
-    <string name="similar_loading_progress_start">Downloading data file…</string>
     <string name="similar_screen_summary_message">
         This is a feature where one can get manga recommendations.
         This is a recommendation system outside of MangaDex, and works by matching by genres,
         demographics, content type, themes, and then using term frequency–inverse document frequency (tf–idf) to get the
         similarity of two manga\'s descriptions. When enabled this file will download immediately!! The file is about 9 MB in size.
     </string>
-    <string name="similar_credit_title">Credits</string>
+    <string name="similar_credit_title">Similar Manga Credits</string>
     <string name="similar_credit_message">
         For more information and to view the source code:\n%s
     </string>
-    <string name="similar_ask_to_enable_title">Enable Similar Manga?</string>
-    <string name="similar_ask_to_enable">
-        Would you like to enable similar manga recommendations?
-        This will download approximately 9 MB of data if enabled right now.
-        You can always enable it in the Settings / Similar manga menu.
-    </string>
-    <string name="similar_ask_to_enable_yes">Enable</string>
-    <string name="similar_ask_to_enable_no">Skip</string>
+
+    <!-- Cache Source -->
+    <string name="cache">Cache Source</string>
+    <string name="cache_loading_progress_start">Downloading data file…</string>
+    <string name="cache_loading_percent">Updating cache manga (%1$d / %2$d updated)</string>
+    <string name="cache_loading_complete">Updating cache manga complete!</string>
+    <string name="cache_loading_complete_error">Error trying to load/process cache manga</string>
 
     <!-- Reader Settings -->
     <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
@@ -116,11 +98,12 @@
 
     <!-- Site Settings -->
     <string name="site_specific_settings">MangaDex settings</string>
-    <string name="image_server">Choose image server</string>
-    <string name="show_r18_title">Default R18+ setting</string>
-    <string name="show_r18_show">show only R18+</string>
-    <string name="show_r18_no">Show No R18+</string>
-    <string name="show_r18_all">Show all</string>
+    <string name="content_rating_title">Content Ratings</string>
+    <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
+    <string name="content_rating_safe">Safe (No sexual themes)</string>
+    <string name="content_rating_suggestive">Suggestive (Manga usually tagged Ecchi)</string>
+    <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
+    <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
     <string name="show_languages">Choose languages to show</string>
     <string name="data_saver">Data Saver (Compressed Chapter Images)</string>
     <string name="data_saver_disabled">Disabled</string>
@@ -138,17 +121,23 @@
     <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
     <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
     <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
-    <string name="show_r18_filter_in_search">Show R18 filter in search</string>
+    <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
+    <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
+    <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
+
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
     <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
-    <string name="use_cache_source">Use cached manga api source</string>
-    <string name="use_cache_source_dialog">This will download  1.5MB file.  You only need to download it once.  If you already downloaded just dismiss this dialog.</string>
+    <string name="use_cache_source">Use cached manga api source and search</string>
+    <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>
     <string name="log_level">"Log level"</string>
     <string name="log_level_summary">Changing this can impact app performance. Force-restart app after changing. Log file is stored at /Neko/logs.</string>
+
+    <string name="force_download_cache_refresh">Refresh the download cache</string>
+    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use after you migrated to v5 or if you copied downloads outside of this app</string>
 
 
     <!-- Login dialog -->
@@ -168,6 +157,10 @@
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="channel_crash_logs">Crash logs</string>
     <string name="open_log">Open log</string>
+
+    <!-- v5 migration -->
+    <string name="v5_migration_service">V5 Migration</string>
+    <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.</string>
 
 
 </resources>

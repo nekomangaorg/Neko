@@ -22,6 +22,7 @@ import android.widget.SeekBar
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -386,11 +387,11 @@ class ReaderActivity :
             }
         }
 
-        comment_button.setImageDrawable(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment, size = 22))
-
-        comment_button.setOnClickListener {
-            openComments()
-        }
+        //comment_button.setImageDrawable(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_comment, size = 22))
+        //comment_button.setOnClickListener {
+        //    openComments()
+        //}
+        comment_button.isVisible = false
 
         chapters_button.setOnClickListener {
             if (chapters_bottom_sheet.sheetBehavior?.isExpanded() == true) {
