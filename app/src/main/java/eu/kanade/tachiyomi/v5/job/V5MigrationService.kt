@@ -128,6 +128,8 @@ class V5MigrationService(
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId != "") {
                     manga.url = "/manga/${newMangaId}"
+                    manga.initialized = false
+                    manga.thumbnail_url = null
                     db.insertManga(manga).executeAsBlocking()
                 } else {
                     failedUpdatesMangas[manga] = "unable to find new manga id"
