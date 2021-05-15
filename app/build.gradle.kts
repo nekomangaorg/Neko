@@ -49,6 +49,11 @@ android {
             abiFilters("armeabi-v7a", "arm64-v8a", "x86")
         }
     }
+
+    dataBinding {
+        isEnabled = true
+    }
+
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
@@ -99,6 +104,9 @@ dependencies {
     implementation(Libs.Android.coreKtx)
     implementation(Libs.Android.constraintLayout)
     implementation(Libs.Android.multiDex)
+
+    // Databinding for autocomplete search
+    kapt(Libs.Android.dataBinding)
 
     implementation(Libs.Google.firebaseAnayltics)
     implementation(Libs.Google.firebaseCrashltyics)
