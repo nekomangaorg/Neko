@@ -3,13 +3,7 @@
     <changelogversion
         changeDate=""
         versionName="v2.4">
-        <changelogtext>Change: Chapter Languages will need to reselected</changelogtext>
-        <changelogtext>Fix:</changelogtext>
-        <changelogtext>Fix:</changelogtext>
-        <changelogtext>Fix:</changelogtext>
-        <changelogtext>Fix:</changelogtext>
-        <changelogtext>Fix:</changelogtext>
-        <changelogtext>Fix: Merge button missing when using cached source and manga has no missing chapter</changelogtext>
+        <changelogtext>See github lets be real, double the changelog makes no sense</changelogtext>
     </changelogversion>
     <changelogversion
         changeDate=""
