@@ -40,6 +40,7 @@ import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
 import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.visible
@@ -48,6 +49,10 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
 import kotlinx.android.synthetic.main.browse_source_controller.*
+import kotlinx.android.synthetic.main.browse_source_controller.empty_view
+import kotlinx.android.synthetic.main.browse_source_controller.progress
+import kotlinx.android.synthetic.main.browse_source_controller.swipe_refresh
+import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
 import rx.Observable
 import rx.Subscription
@@ -149,6 +154,11 @@ open class BrowseSourceController(bundle: Bundle) :
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
+
+        // Disable refresh by default
+        swipe_refresh.setStyle()
+        swipe_refresh.isRefreshing = false
+        swipe_refresh.isEnabled = false
 
         fab.visibleIf(presenter.sourceFilters.isNotEmpty() && preferences.useCacheSource().not())
         fab.setOnClickListener { showFilters() }

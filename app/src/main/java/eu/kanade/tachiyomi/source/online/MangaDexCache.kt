@@ -186,8 +186,8 @@ open class MangaDexCache() : MangaDex() {
         return Track.create(TrackManager.MDLIST)
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
-        return similarHandler.fetchSimilar(manga)
+    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
+        return similarHandler.fetchSimilarObserable(manga, refresh)
     }
 
     override fun isLogged(): Boolean {

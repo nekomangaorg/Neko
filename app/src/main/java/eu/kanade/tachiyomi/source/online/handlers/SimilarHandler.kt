@@ -6,12 +6,16 @@ import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
+import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.SimilarMangaResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.lang.awaitSingle
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import eu.kanade.tachiyomi.v5.db.V5DbQueries
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.Request
@@ -28,9 +32,9 @@ class SimilarHandler {
     /**
      * fetch our similar mangas
      */
-    fun fetchSimilar(manga: Manga): Observable<MangasPage> {
+    fun fetchSimilarObserable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
-        if(mangaDb != null) {
+        if(mangaDb != null && !refresh) {
             return Observable.just(similarStringToMangasPage(manga, mangaDb.data))
         }
         return network.client.newCall(similarMangaRequest(manga))

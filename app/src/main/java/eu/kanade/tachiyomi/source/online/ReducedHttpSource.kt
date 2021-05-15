@@ -89,7 +89,7 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga): Observable<MangasPage> {
+    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
         TODO("Not yet implemented")
     }
 
