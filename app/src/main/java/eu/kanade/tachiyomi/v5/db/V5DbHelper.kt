@@ -16,7 +16,7 @@ class V5DbHelper(context: Context) {
 
     val idDb: SQLiteDatabase by lazy { openDatabase(context, "mangadex.db") }
 
-    val dbCovers: SQLiteDatabase by lazy { openDatabase(context, "cover.db") }
+    val dbCovers: SQLiteDatabase by lazy { openDatabase(context, "covers.db") }
 
     fun openDatabase(context: Context, dbPath: String): SQLiteDatabase {
         val dbFile: File = context.getDatabasePath(dbPath)

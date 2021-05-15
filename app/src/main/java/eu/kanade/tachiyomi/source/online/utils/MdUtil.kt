@@ -62,7 +62,7 @@ class MdUtil {
         const val reportUrl = "https://api.mangadex.network/report"
 
         const val mdAtHomeTokenLifespan = 10 * 60 * 1000
-        const val mangaLimit = 25
+        const val mangaLimit = 40
 
         /**
          * Get the manga offset pages are 1 based, so subtract 1
