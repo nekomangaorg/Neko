@@ -26,14 +26,12 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.model.Filter
@@ -67,8 +65,6 @@ import kotlinx.android.synthetic.main.browse_source_controller.progress
 import kotlinx.android.synthetic.main.browse_source_controller.swipe_refresh
 import kotlinx.android.synthetic.main.library_list_controller.*
 import kotlinx.android.synthetic.main.main_activity.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import rx.Observable
 import rx.Subscription
 import uy.kohesive.injekt.injectLazy
@@ -287,7 +283,6 @@ open class BrowseSourceController(bundle: Bundle) :
                 activity!!.getString(R.string.show_library_manga)
             }
         }
-
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -405,7 +400,7 @@ open class BrowseSourceController(bundle: Bundle) :
         showProgressBar()
         adapter?.clear()
 
-        presenter.restartPager(newQuery)
+        presenter.restartPager(newQuery, presenter.sourceFilters)
     }
 
     fun goDirectlyForDeepLink(manga: Manga) {
@@ -714,7 +709,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
                 // Update our cursor for our autocomplete
                 val cursor = MatrixCursor(arrayOf(BaseColumns._ID, SearchManager.SUGGEST_COLUMN_TEXT_1))
-                if(!it.isSubmitted) {
+                if (!it.isSubmitted) {
                     try {
                         val matches = db.searchCachedManga(it.queryText().toString(), 0, 10).executeAsBlocking()
                         val matchesClean = matches.filter { manga ->
@@ -743,10 +738,11 @@ open class BrowseSourceController(bundle: Bundle) :
 
         // Callback if the user presses one of auto complete items
         // This should fill in the query text and then submit the form
-        searchView.setOnSuggestionListener(object: SearchView.OnSuggestionListener {
+        searchView.setOnSuggestionListener(object : SearchView.OnSuggestionListener {
             override fun onSuggestionSelect(position: Int): Boolean {
                 return false
             }
+
             override fun onSuggestionClick(position: Int): Boolean {
                 val inputMethodManager = activity!!.getSystemService(AppCompatActivity.INPUT_METHOD_SERVICE) as InputMethodManager
                 inputMethodManager.hideSoftInputFromWindow(view?.windowToken, 0)
@@ -756,7 +752,6 @@ open class BrowseSourceController(bundle: Bundle) :
                 return true
             }
         })
-
     }
 
     protected companion object {
