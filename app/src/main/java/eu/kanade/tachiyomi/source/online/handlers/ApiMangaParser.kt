@@ -33,8 +33,7 @@ class ApiMangaParser {
             val networkApiManga = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), jsonData)
             val networkManga = networkApiManga.data.attributes
             manga.title = MdUtil.cleanString(networkManga.title["en"]!!)
-
-            manga.thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, networkApiManga.data.id) ?: MdUtil.imageUrlCacheNotFound
+            manga.thumbnail_url = MdUtil.coverApi.replace("{uuid}", networkApiManga.data.id)
 
             manga.description = MdUtil.cleanDescription(networkManga.description["en"]!!)
 

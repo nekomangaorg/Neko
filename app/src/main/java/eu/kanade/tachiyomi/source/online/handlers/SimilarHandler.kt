@@ -73,7 +73,7 @@ class SimilarHandler {
             SManga.create().apply {
                 url = "/title/" + it.id
                 title = MdUtil.cleanString(it.title["en"]!!)
-                thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, it.id) ?: MdUtil.imageUrlCacheNotFound
+                thumbnail_url = MdUtil.coverApi.replace("{uuid}", it.id)
             }
         }
         return MangasPage(mangaList, false)
