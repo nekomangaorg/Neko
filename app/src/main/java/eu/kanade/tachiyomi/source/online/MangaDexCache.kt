@@ -84,7 +84,7 @@ open class MangaDexCache() : MangaDex() {
                 SManga.create().apply {
                     url = "/manga/${cacheManga.uuid}/"
                     title = MdUtil.cleanString(cacheManga.title)
-                    thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, cacheManga.uuid) ?: MdUtil.imageUrlCacheNotFound
+                    thumbnail_url = MdUtil.coverApi.replace("{uuid}", cacheManga.uuid)
                     rating = cacheManga.rating
                 }
             }.toList().map {
@@ -122,7 +122,7 @@ open class MangaDexCache() : MangaDex() {
                 SManga.create().apply {
                     url = "/manga/${cacheManga.uuid}/"
                     title = MdUtil.cleanString(cacheManga.title)
-                    thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, cacheManga.uuid) ?: MdUtil.imageUrlCacheNotFound
+                    thumbnail_url = MdUtil.coverApi.replace("{uuid}", cacheManga.uuid)
                     rating = cacheManga.rating
                 }
             }.toList().map {
@@ -259,7 +259,7 @@ open class MangaDexCache() : MangaDex() {
             mangaReturn.title = MdUtil.cleanString(networkApiManga.data.attributes.title["en"]!!)
             mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.data.attributes.description["en"]!!)
             //mangaReturn.rating = networkApiManga.toString()
-            mangaReturn.thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, networkApiManga.data.id) ?: MdUtil.imageUrlCacheNotFound
+            mangaReturn.thumbnail_url = MdUtil.coverApi.replace("{uuid}", networkApiManga.data.id)
 
             // Get the external tracking ids for this manga
             val networkManga = networkApiManga.data.attributes

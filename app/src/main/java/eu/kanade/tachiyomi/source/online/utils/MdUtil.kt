@@ -54,6 +54,7 @@ class MdUtil {
             }.build().toString()
         }
 
+        const val coverApi = "https://coverapi.orell.dev/api/v1/mdaltimage/manga/{uuid}/cover"
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
         const val similarCacheMangas = "https://api.similarmanga.com/manga/"
         const val similarBaseApi = "https://api.similarmanga.com/similar/"
@@ -299,7 +300,7 @@ class MdUtil {
             return SManga.create().apply {
                 url = "/title/" + json.data.id
                 title = cleanString(json.data.attributes.title["en"]!!)
-                thumbnail_url = V5DbQueries.getAltCover(v5DbHelper.dbCovers, json.data.id) ?: imageUrlCacheNotFound
+                thumbnail_url = MdUtil.coverApi.replace("{uuid}", json.data.id)
                 //thumbnail_url = formThumbUrl(url, preferences.lowQualityCovers())
             }
         }

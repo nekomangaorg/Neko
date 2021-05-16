@@ -474,13 +474,7 @@ class MangaDetailsPresenter(
                 // First if no image, try to get one from our V5 database
                 // If we don't have an image we can try to use the merge source image fallback
                 if (networkManga.thumbnail_url == null) {
-                    val cover = V5DbQueries.getAltCover(v5DbHelper.dbCovers,
-                        MdUtil.getMangaId(networkManga.url))
-                    if(cover != null) {
-                        manga.thumbnail_url = cover
-                    } else if(manga.merge_manga_image_url != null) {
-                        manga.thumbnail_url = manga.merge_manga_image_url
-                    }
+                    manga.thumbnail_url = MdUtil.coverApi.replace("{uuid}", MdUtil.getMangaId(networkManga.url))
                 }
                 db.insertManga(manga).executeOnIO()
             }
