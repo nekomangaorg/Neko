@@ -203,7 +203,7 @@ class SettingsSiteController :
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val activity = activity!!
 
-            val options = MdLang.values().map { Pair(it.lang, it.name) }
+            val options = MdLang.values().map { Pair(it.lang, it.prettyPrint) }
             val initialLangs = preferences!!.langsToShow().get().split(",")
                 .map { lang -> options.indexOfFirst { it.first == lang } }.toIntArray()
 

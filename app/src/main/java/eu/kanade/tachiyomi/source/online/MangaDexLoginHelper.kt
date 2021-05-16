@@ -66,7 +66,7 @@ class MangaDexLoginHelper {
 
         val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
         preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
-        XLog.i("refreshing token sug")
+        XLog.i("refreshing token")
         return jsonResponse.result == "ok"
     }
 

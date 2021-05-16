@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.serialization.decodeFromString
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
@@ -79,22 +78,23 @@ class ApiMangaParser {
             manga.status = tempStatus
             //}
 
-            // things that will go with the genre tags but aren't actually genre
-            val nonGenres = listOf(
-                networkManga.publicationDemographic,
-                networkManga.contentRating,
-            )
-
             val tags = filterHandler.getTags()
+
+            val tempContentRating = networkManga.contentRating?.capitalize(Locale.US)
+
+            val contentRating = if (tempContentRating == null || tempContentRating == "Safe") {
+                null
+            } else {
+                "Content rating: " + tempContentRating.capitalize(Locale.US)
+            }
 
             val genres = (
                 listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
                     + networkManga.tags.map { it.id }
                     .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
                     .map { tag -> tag?.name }
-                    + listOf(
-                    "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
-                ))
+                    + listOf(contentRating)
+                )
                 .filterNotNull()
 
             manga.genre = genres.joinToString(", ")
