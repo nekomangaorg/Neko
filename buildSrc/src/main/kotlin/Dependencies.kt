@@ -165,7 +165,7 @@ object Versions {
     const val androidCardView = "1.0.0"
     const val androidConstraintLayout = "1.1.3"
     const val androidCoreKtx = "1.3.1"
-    const val androidGradlePlugin = "4.0.1"
+    const val androidGradlePlugin = "4.2.0"
     const val androidLifecycle = "2.2.0"
     const val androidMaterial = "1.1.0"
     const val androidMultiDex = "2.0.1"

@@ -1,6 +1,6 @@
 object Configs {
     const val applicationId = "tachiyomi.mangadex"
-    const val buildToolsVersion = "29.0.3"
+    const val buildToolsVersion = "30.0.2"
     const val compileSdkVersion = 29
     const val minSdkVersion = 24
     const val targetSdkVersion = 29
