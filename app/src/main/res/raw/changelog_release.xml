@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.4.1">
+        <changelogtext>minor bug fixes, and locale fix</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.4">
         <changelogtext>See github lets be real, double the changelog makes no sense</changelogtext>
     </changelogversion>
