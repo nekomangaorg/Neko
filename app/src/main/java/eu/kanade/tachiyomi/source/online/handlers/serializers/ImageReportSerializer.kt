@@ -7,6 +7,6 @@ data class ImageReportResult(
     val url: String,
     val success: Boolean,
     val bytes: Int?,
-    val cache: Boolean,
+    val cached: Boolean,
     val duration: Long,
 )
