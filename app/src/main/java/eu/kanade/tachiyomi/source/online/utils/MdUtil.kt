@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
@@ -49,7 +48,7 @@ class MdUtil {
                 addQueryParameter("order[volume]", "desc")
                 addQueryParameter("order[chapter]", "desc")
                 language.forEach {
-                    addQueryParameter("locales[]", it)
+                    addQueryParameter("translatedLanguage[]", it)
                 }
             }.build().toString()
         }
