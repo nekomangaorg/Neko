@@ -7,8 +7,8 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -248,22 +248,19 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.pageLayout
                 title = context.getString(R.string.page_layout).addBetaTag(context)
                 dialogTitleRes = R.string.page_layout
-                entriesRes = arrayOf(
-                    R.string.single_page,
-                    R.string.double_pages,
-                    R.string.automatic_orientation
-                )
-                entryRange = 0..2
-                defaultValue = 2
+                val enumConstants = PageLayout.values()
+                entriesRes = enumConstants.map { it.fullStringRes }.toTypedArray()
+                entryValues = enumConstants.map { it.value }
+                defaultValue = PageLayout.AUTOMATIC.value
             }
             infoPreference(R.string.automatic_can_still_switch).apply {
-                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC }
+                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC.value }
             }
             switchPreference {
                 key = Keys.invertDoublePages
                 titleRes = R.string.invert_double_pages
                 defaultValue = false
-                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE }
+                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
             }
         }
         preferenceCategory {

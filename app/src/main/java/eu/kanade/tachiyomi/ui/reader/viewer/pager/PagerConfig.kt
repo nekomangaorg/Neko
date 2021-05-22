@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
@@ -45,7 +46,7 @@ class PagerConfig(
 
     var shiftDoublePage = false
 
-    var doublePages = preferences.pageLayout().get() == PageLayout.DOUBLE_PAGES
+    var doublePages = preferences.pageLayout().get() == PageLayout.DOUBLE_PAGES.value
         set(value) {
             field = value
             if (!value) {
@@ -55,7 +56,7 @@ class PagerConfig(
 
     var invertDoublePages = false
 
-    var autoDoublePages = preferences.pageLayout().get() == PageLayout.AUTOMATIC
+    var autoDoublePages = preferences.pageLayout().get() == PageLayout.AUTOMATIC.value
 
     init {
         preferences.pageTransitions()
@@ -101,18 +102,18 @@ class PagerConfig(
             .asFlow()
             .drop(1)
             .onEach {
-                autoDoublePages = it == PageLayout.AUTOMATIC
+                autoDoublePages = it == PageLayout.AUTOMATIC.value
                 if (!autoDoublePages) {
-                    doublePages = it == PageLayout.DOUBLE_PAGES
+                    doublePages = it == PageLayout.DOUBLE_PAGES.value
                 }
                 reloadChapterListener?.invoke(doublePages)
             }
             .launchIn(scope)
         preferences.pageLayout()
             .register({
-                autoDoublePages = it == PageLayout.AUTOMATIC
+                autoDoublePages = it == PageLayout.AUTOMATIC.value
                 if (!autoDoublePages) {
-                    doublePages = it == PageLayout.DOUBLE_PAGES
+                    doublePages = it == PageLayout.DOUBLE_PAGES.value
                 }
             })
 
@@ -181,10 +182,4 @@ class PagerConfig(
         const val CUTOUT_START_EXTENDED = 1
         const val CUTOUT_IGNORE = 2
     }
-}
-
-object PageLayout {
-    const val SINGLE_PAGE = 0
-    const val DOUBLE_PAGES = 1
-    const val AUTOMATIC = 2
 }

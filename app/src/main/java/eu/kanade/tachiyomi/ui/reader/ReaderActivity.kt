@@ -58,12 +58,12 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.settings.TabbedReaderSettingsSheet
 import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.L2RPagerViewer
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.R2LPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
@@ -362,8 +362,8 @@ class ReaderActivity :
     }
 
     fun setBottomNavButtons(pageLayout: Int) {
-        val isDoublePage = pageLayout == PageLayout.DOUBLE_PAGES ||
-            (pageLayout == PageLayout.AUTOMATIC && (viewer as? PagerViewer)?.config?.doublePages ?: false)
+        val isDoublePage = pageLayout == PageLayout.DOUBLE_PAGES.value ||
+            (pageLayout == PageLayout.AUTOMATIC.value && (viewer as? PagerViewer)?.config?.doublePages ?: false)
         binding.chaptersSheet.doublePage.setImageDrawable(
             ContextCompat.getDrawable(
                 this,
@@ -580,7 +580,7 @@ class ReaderActivity :
 
         with(binding.chaptersSheet) {
             doublePage.setOnClickListener {
-                if (preferences.pageLayout().get() == PageLayout.AUTOMATIC) {
+                if (preferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
                     (viewer as? PagerViewer)?.config?.let { config ->
                         config.doublePages = !config.doublePages
                         reloadChapters(config.doublePages, true)
@@ -899,7 +899,7 @@ class ReaderActivity :
         }
 
         if (newViewer is PagerViewer) {
-            if (preferences.pageLayout().get() == PageLayout.AUTOMATIC) {
+            if (preferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
                 setDoublePageMode(newViewer)
             }
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
