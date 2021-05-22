@@ -52,14 +52,13 @@ class MdUtil {
             }.build().toString()
         }
 
-        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/manga/$mangaId/cover?ids[]=$coverId"
+        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/cover/?manga=$mangaId&ids[]=$coverId"
 
         const val coverApi = "https://coverapi.orell.dev/api/v1/mdaltimage/manga/{uuid}/cover"
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
         const val similarCacheMangas = "https://api.similarmanga.com/manga/"
         const val similarBaseApi = "https://api.similarmanga.com/similar/"
 
-        const val apiCovers = "/covers"
         const val reportUrl = "https://api.mangadex.network/report"
 
         const val mdAtHomeTokenLifespan = 10 * 60 * 1000
