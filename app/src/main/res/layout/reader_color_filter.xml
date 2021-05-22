@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/filter_bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -43,7 +42,7 @@
             android:text="@string/use_custom_color_filter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/swipe_down"/>
+            app:layout_constraintTop_toBottomOf="@id/swipe_down" />
 
         <!-- Red filter -->
 
@@ -240,3 +239,4 @@
             app:layout_constraintTop_toTopOf="@id/brightness_seekbar" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
+</eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView>

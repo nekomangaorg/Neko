@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter
 plugins {
     id(Plugins.androidApplication)
     kotlin(Plugins.kotlinAndroid)
-    kotlin(Plugins.kotlinExtensions)
     kotlin(Plugins.kapt)
+    id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
     id(Plugins.aboutLibraries)
     id(Plugins.firebaseCrashlytics)
@@ -88,6 +88,9 @@ android {
 
 dependencies {
     // Modified dependencies
+    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43")
+    // Source models and interfaces from Tachiyomi 1.x
+    implementation("tachiyomi.sourceapi:source-api:1.1")
     implementation(Libs.UI.subsamplingScaleImageView)
     // Android support library
     implementation(Libs.Android.appCompat)
@@ -263,21 +266,23 @@ dependencies {
     implementation(Libs.Util.aboutLibraries)
 }
 
-// See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api-markers
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += listOf(
-        "-Xopt-in=kotlin.Experimental",
-        "-Xopt-in=kotlin.RequiresOptIn",
-        "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
-        "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
-        "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
-        "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
-    )
-}
+tasks {
+    // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api(-markers)
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.freeCompilerArgs += listOf(
+            "-Xopt-in=kotlin.Experimental",
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
+            "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+        )
+    }
 
-tasks.preBuild {
-    dependsOn(tasks.ktlintFormat)
+    preBuild {
+        // dependsOn(formatKotlin)
+    }
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {

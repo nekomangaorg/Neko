@@ -25,11 +25,12 @@ object Plugins {
     const val firebaseCrashlytics = "com.google.firebase.crashlytics"
     const val googleServices = "com.google.gms.google-services"
     const val kapt = "kapt"
+    const val kotlinParcelize = "kotlin-parcelize"
     const val kotlinAndroid = "android"
-    const val kotlinExtensions = "android.extensions"
     const val kotlinSerialization = "org.jetbrains.kotlin.plugin.serialization"
+    const val jetbrainsKotlin = "org.jetbrains.kotlin.android"
     val gradleVersions = PluginClass("com.github.ben-manes.versions", Versions.gradleVersions)
-    val ktLint = PluginClass("org.jlleitschuh.gradle.ktlint", Versions.ktlint)
+    val kotlinter = PluginClass("org.jmailen.kotlinter", Versions.kotlinter)
 }
 
 data class PluginClass(val name: String, val version: String)

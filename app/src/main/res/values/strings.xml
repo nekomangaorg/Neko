@@ -842,8 +842,6 @@
     <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="mark_all_as_unread">Mark all as unread</string>
-    <string name="mark_as_read">Mark as read</string>
-    <string name="mark_as_unread">Mark as unread</string>
     <string name="mark_range_as_read">Mark a range of chapters as read</string>
     <string name="mark_range_as_unread">Mark a range of chapters as unread</string>
     <string name="mark_previous_as_read">Mark previous chapters as read</string>
@@ -899,4 +897,163 @@
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
     <string name="wifi">Wi-Fi</string>
+
+
+    <!--NEKO -->
+    <string name="system_default_dark">System Default (White + Dark)</string>
+
+    <!-- Backup -->
+    <string name="restore_completed_successful">%1$s/%2$s Manga restored</string>
+    <string name="restore_completed_errors">%1$s errors were found</string>
+    <string name="restore_skipped">%1$s/%2$s manga were skipped because they were not MangaDex</string>
+    <plurals name="restore_categories">
+        <item quantity="one">%d category restored</item>
+        <item quantity="other">%d categories restored</item>
+    </plurals>
+
+
+    <!-- Status -->
+    <string name="hiatus">Hiatus</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="publication_complete">Publication Complete</string>
+
+    <!-- Library Filter -->
+    <string name="no_missing_chp">No missing chapters</string>
+    <string name="has_missing_chp">Missing chapters</string>
+    <string name="not_merged">Not merged</string>
+    <string name="merged">Merged</string>
+
+
+    <!-- Library Sort -->
+    <string name="rating">Site rating</string>
+
+    <!--Browse -->
+    <string name="random_manga">Random</string>
+    <string name="apply">Apply</string>
+
+
+    <!-- Manga Details-->
+    <string name="open_external">Open external links</string>
+    <string name="view_comments">View comments</string>
+    <string name="comments_unavailable">"Comments not available for merged chapters"</string>
+    <string name="merge_other">Merge another source to fill potential missing chapters</string>
+    <string name="start_reading_">Start reading %1$s</string>
+    <string name="continue_reading_">Continue reading %1$s</string>
+    <string name="tap_to_show_similar_manga">Tap here to show similar manga</string>
+    <string name="filter_groups">Filter Scanlator Groups</string>
+    <string name="filter_groups_title">Scanlator groups to show</string>
+    <string name="scanlator_groups">Scanlator groups</string>
+    <string name="reset_group_filter">Reset to all</string>
+
+    <string name="mdlist">MDList</string>
+
+    <string name="missing_chapters">%1$s missing chapters</string>
+
+    <string name="using_cached_source_cant_open">Using cached source, can\'t open this chapter</string>
+
+    <!-- Reader -->
+    <string name="try_similar">Don\'t forget to try looking for \nSimilar Manga. Click the </string>
+    <string name="try_similar_after_click">icon on the manga info screen</string>
+
+
+    <!-- Follows -->
+    <string name="follows">My follows</string>
+    <string name="add_to_follows">Add to MangaDex follows</string>
+    <string name="follows_status">Follows Sstatus</string>
+    <string name="follows_unfollowed">Unfollowed</string>
+    <string name="follows_reading">Reading</string>
+    <string name="follows_completed">Completed</string>
+    <string name="follows_on_hold">On Hold</string>
+    <string name="follows_plan_to_read">Plan To Read</string>
+    <string name="follows_dropped">Dropped</string>
+    <string name="follows_re_reading">Re Reading</string>
+
+    <!-- Similar -->
+    <string name="similar">Similar manga</string>
+    <string name="similar_settings">Similar Manga Settings</string>
+    <string name="similar_screen_summary_message">
+        This is a feature where one can get manga recommendations.
+        This is a recommendation system outside of MangaDex, and works by matching by genres,
+        demographics, content type, themes, and then using term frequency–inverse document frequency (tf–idf) to get the
+        similarity of two manga\'s descriptions. When enabled this file will download immediately!! The file is about 9 MB in size.
+    </string>
+    <string name="similar_credit_title">Similar Manga Credits</string>
+    <string name="similar_credit_message">
+        For more information and to view the source code:\n%s
+    </string>
+
+    <!-- Cache Source -->
+    <string name="cache">Cache Source</string>
+    <string name="cache_loading_progress_start">Downloading data file…</string>
+    <string name="cache_loading_percent">Updating cache manga (%1$d / %2$d updated)</string>
+    <string name="cache_loading_complete">Updating cache manga complete!</string>
+    <string name="cache_loading_complete_error">Error trying to load/process cache manga</string>
+
+    <!-- Reader Settings -->
+    <string name="skip_hidden_chapters">Skip chapters hidden by filters</string>
+
+
+    <!-- Site Settings -->
+    <string name="site_specific_settings">MangaDex settings</string>
+    <string name="content_rating_title">Content Ratings</string>
+    <string name="content_rating_summary">Choose which ratings to show in results. Choosing none is the same as choosing all.</string>
+    <string name="content_rating_safe">Safe (No sexual themes)</string>
+    <string name="content_rating_suggestive">Suggestive (Manga usually tagged Ecchi)</string>
+    <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
+    <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
+    <string name="show_languages">Choose languages to show</string>
+    <string name="data_saver">Data Saver (Compressed Chapter Images)</string>
+    <string name="data_saver_disabled">Disabled</string>
+    <string name="data_saver_enabled">Enabled</string>
+    <string name="sync_follows_to_library">Sync MangaDex manga to Neko</string>
+    <string name="sync_follows_to_library_summary">Pulls reading/rereading/planned to read manga from MangaDex into your Neko library if they are not already added.</string>
+    <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
+    <string name="push_favorites_to_mangadex">Sync Neko manga to MangaDex</string>
+    <string name="push_favorites_to_mangadex_summary">Sync any non MdList tracked manga to MangaDex as reading.</string>
+    <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>
+    <string name="use_new_api_server">Use the new api cache server</string>
+    <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
+    <string name="low_quality_covers">Use low quality thumbnails</string>
+    <string name="use_latest_cover">Use latest uploaded cover</string>
+    <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
+    <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
+    <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
+    <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
+    <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
+    <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
+
+    <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
+    <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
+    <string name="use_cache_source">Use cached manga api source and search</string>
+    <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
+
+
+    <!-- Advanced Settings -->
+    <string name="clear_image_cache">Clear image cover cache</string>
+    <string name="log_level">"Log level"</string>
+    <string name="log_level_summary">Changing this can impact app performance. Force-restart app after changing. Log file is stored at /Neko/logs.</string>
+
+    <string name="force_download_cache_refresh">Refresh the download cache</string>
+    <string name="force_download_cache_refresh_summary">This will force the download cache to recalculate.  Use after you migrated to v5 or if you copied downloads outside of this app</string>
+
+
+    <!-- Login dialog -->
+    <string name="two_factor">2FA Code</string>
+    <string name="fields_cannot_be_blank">Fields cannot be blank</string>
+    <string name="myanimelist_creds_missing">MAL login credentials not found</string>
+
+    <!-- S Pen actions -->
+    <string name="spen_previous_page">Previous page</string>
+    <string name="spen_next_page">Next page</string>
+    <string name="spen_next_chapter">Next chapter</string>
+    <string name="spen_previous_chapter">Previous chapter</string>
+
+
+    <string name="pref_dump_crash_logs">Dump crash logs</string>
+    <string name="pref_dump_crash_logs_summary">Saves error logs to a file for sharing with the developers</string>
+    <string name="channel_crash_logs">Crash logs</string>
+
+    <!-- v5 migration -->
+    <string name="v5_migration_service">V5 Migration</string>
+    <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.</string>
 </resources>

@@ -84,7 +84,7 @@ class PreferencesHelper(val context: Context) {
     private val rxPrefs = RxSharedPreferences.create(prefs)
     private val flowPrefs = FlowSharedPreferences(prefs)
 
-    private val defaultFolder = context.getString(R.string.neko_app_name) + when (BuildConfig.DEBUG) {
+    private val defaultFolder = context.getString(R.string.app_name) + when (BuildConfig.DEBUG) {
         true -> "_DEBUG"
         false -> ""
     }
@@ -170,7 +170,7 @@ class PreferencesHelper(val context: Context) {
     fun readWithVolumeKeys() = flowPrefs.getBoolean(Keys.readWithVolumeKeys, false)
 
     fun readWithVolumeKeysInverted() = flowPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
-=======
+    =======
     fun cropBorders() = flowPrefs.getBoolean(Keys.cropBorders, false)
 
     fun cropBordersWebtoon() = flowPrefs.getBoolean(Keys.cropBordersWebtoon, false)
@@ -447,7 +447,7 @@ class PreferencesHelper(val context: Context) {
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 
-        fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
+    fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 

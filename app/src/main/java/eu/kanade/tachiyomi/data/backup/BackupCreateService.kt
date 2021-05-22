@@ -38,7 +38,7 @@ class BackupCreateService : Service() {
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(context: Context): Boolean =
-                context.isServiceRunning(BackupCreateService::class.java)
+            context.isServiceRunning(BackupCreateService::class.java)
 
         /**
          * Make a backup from library
@@ -74,7 +74,8 @@ class BackupCreateService : Service() {
         startForeground(Notifications.ID_BACKUP_PROGRESS, notifier.showBackupProgress().build())
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-                PowerManager.PARTIAL_WAKE_LOCK, "${javaClass.name}:WakeLock"
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "${javaClass.name}:WakeLock"
         )
         wakeLock.acquire()
     }

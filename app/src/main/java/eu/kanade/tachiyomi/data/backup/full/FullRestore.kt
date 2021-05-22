@@ -52,7 +52,6 @@ class FullRestore(val context: Context, val job: Job?) {
     internal val trackManager: TrackManager by injectLazy()
 
     suspend fun restoreBackup(uri: Uri) {
-
         backupManager = FullBackupManager(context)
 
         val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use { it.readByteArray() }
@@ -119,7 +118,7 @@ class FullRestore(val context: Context, val job: Job?) {
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId.isNotBlank()) {
-                    manga.url = "/title/${newMangaId}"
+                    manga.url = "/title/$newMangaId"
                 }
             }
 

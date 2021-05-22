@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import tachiyomi.source.model.MangaInfo
-import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -84,7 +83,6 @@ interface Manga : SManga {
             ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
     }
 
-
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */
@@ -109,18 +107,18 @@ interface Manga : SManga {
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true
-        )
+        ) {
             ReaderActivity.WEBTOON
-        else if (currentTags?.any
+        } else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true
-        )
+        ) {
             ReaderActivity.LEFT_TO_RIGHT
-        else 0
+        } else 0
     }
-    
+
     fun key(): String {
         return "manga-id-$id"
     }

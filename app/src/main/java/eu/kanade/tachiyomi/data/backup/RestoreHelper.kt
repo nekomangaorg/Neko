@@ -29,7 +29,7 @@ class RestoreHelper(val context: Context) {
      */
     val progressNotification by lazy {
         NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS)
-            .setContentTitle(context.getString(R.string.neko_app_name))
+            .setContentTitle(context.getString(R.string.app_name))
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setOngoing(true)
             .setOnlyAlertOnce(true)
@@ -61,7 +61,8 @@ class RestoreHelper(val context: Context) {
                 .setContentTitle(title.chop(30))
                 .setContentText(
                     context.getString(
-                        R.string.restoring_progress, current,
+                        R.string.restoring_progress,
+                        current,
                         total
                     )
                 )
@@ -120,7 +121,8 @@ class RestoreHelper(val context: Context) {
 
         content.add(
             context.getString(
-                R.string.restore_completed_errors, errors.size.toString()
+                R.string.restore_completed_errors,
+                errors.size.toString()
             )
         )
 
@@ -139,8 +141,9 @@ class RestoreHelper(val context: Context) {
             val trackingErrorsString = trackingErrors.distinct().joinToString("\n")
             content.add(trackingErrorsString)
         }
-        if (cancelled > 0)
+        if (cancelled > 0) {
             content.add(context.getString(R.string.restore_content_skipped, cancelled))
+        }
 
         val restoreString = content.joinToString("\n")
 

@@ -447,8 +447,9 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         // Return if fetch is needed
-        if (dbChapters.isEmpty() || dbChapters.size < chapters.size)
+        if (dbChapters.isEmpty() || dbChapters.size < chapters.size) {
             return false
+        }
 
         for (chapter in chapters) {
             val pos = dbChapters.indexOf(chapter)

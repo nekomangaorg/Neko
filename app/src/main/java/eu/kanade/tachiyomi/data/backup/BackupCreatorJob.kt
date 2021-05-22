@@ -40,13 +40,13 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
             val interval = prefInterval ?: preferences.backupInterval().get()
             if (interval > 0) {
                 val request = PeriodicWorkRequestBuilder<BackupCreatorJob>(
-                        interval.toLong(),
-                        TimeUnit.HOURS,
-                        10,
-                        TimeUnit.MINUTES
+                    interval.toLong(),
+                    TimeUnit.HOURS,
+                    10,
+                    TimeUnit.MINUTES
                 )
-                        .addTag(TAG)
-                        .build()
+                    .addTag(TAG)
+                    .build()
 
                 WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {

@@ -98,7 +98,6 @@ class LegacyRestore(val context: Context, val job: Job?) {
         val mangasJson = json.get(Backup.MANGAS).asJsonArray
 
         val mangdexManga = mangasJson.filter {
-
             val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(Backup.MANGA))
             val isMangaDex = backupManager.sourceManager.isMangadex(manga.source)
             if (!isMangaDex) {
@@ -173,7 +172,7 @@ class LegacyRestore(val context: Context, val job: Job?) {
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId != "") {
-                    manga.url = "/title/${newMangaId}"
+                    manga.url = "/title/$newMangaId"
                 }
             }
 

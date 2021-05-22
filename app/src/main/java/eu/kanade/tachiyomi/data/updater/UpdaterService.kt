@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -23,12 +24,10 @@ import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 import okhttp3.Call
 import okhttp3.internal.http2.ErrorCode
 import okhttp3.internal.http2.StreamResetException
-import com.elvishew.xlog.XLog
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 
@@ -172,7 +171,7 @@ class UpdaterService : Service() {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun start(context: Context, url: String, title: String = context.getString(R.string.neko_app_name)) {
+        fun start(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
             if (!isRunning(context)) {
                 val intent = Intent(context, UpdaterService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
