@@ -51,7 +51,7 @@ class IntListMatPreference @JvmOverloads constructor(
                     prefs.getInt(key, defValue).set(value)
                 }
                 callChangeListener(value)
-                this@IntListMatPreference.summary = this@IntListMatPreference.summary
+                notifyChanged()
                 dismiss()
             }
         }
