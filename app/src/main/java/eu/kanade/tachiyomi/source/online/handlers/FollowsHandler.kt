@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.GetReadingStatus
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
@@ -82,7 +83,18 @@ class FollowsHandler {
 
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
         val result = response.map {
-            MdUtil.createMangaEntry(it, preferences, v5DbHelper).apply {
+            var coverUrl = MdUtil.coverApi.replace("{uuid}", it.data.id)
+            val coverUrlId = it.relationships.firstOrNull { it.type == "cover_art" }?.id
+            if (coverUrlId != null) {
+                runCatching {
+                    val response = network.client.newCall(GET(MdUtil.coverUrl(it.data.id, coverUrlId))).execute()
+                    val json = MdUtil.jsonParser.decodeFromString<CoverListResponse>(response.body!!.string())
+                    json.results.firstOrNull()?.data?.attributes?.fileName?.let { fileName ->
+                        coverUrl = "${MdUtil.cdnUrl}/covers/${it.data.id}/$fileName"
+                    }
+                }
+            }
+            MdUtil.createMangaEntry(it, coverUrl).apply {
                 this.follow_status = FollowStatus.fromDex(readingStatusMap[it.data.id])
             }
         }.sortedWith(comparator)

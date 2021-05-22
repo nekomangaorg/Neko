@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
@@ -22,7 +21,7 @@ import kotlin.math.floor
 class MdUtil {
 
     companion object {
-        const val cdnUrl = "https://mangadex.org" // "https://s0.mangadex.org"
+        const val cdnUrl = "https://uploads.mangadex.org"
         const val baseUrl = "https://mangadex.org"
         const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
@@ -52,6 +51,8 @@ class MdUtil {
                 }
             }.build().toString()
         }
+
+        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/manga/$mangaId/cover?ids[]=$coverId"
 
         const val coverApi = "https://coverapi.orell.dev/api/v1/mdaltimage/manga/{uuid}/cover"
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
@@ -295,12 +296,11 @@ class MdUtil {
         fun parseDate(dateAsString: String): Long =
             dateFormatter.parse(dateAsString)?.time ?: 0
 
-        fun createMangaEntry(json: MangaResponse, preferences: PreferencesHelper, v5DbHelper: V5DbHelper): SManga {
+        fun createMangaEntry(json: MangaResponse, coverUrl: String): SManga {
             return SManga.create().apply {
                 url = "/title/" + json.data.id
                 title = cleanString(json.data.attributes.title["en"]!!)
-                thumbnail_url = MdUtil.coverApi.replace("{uuid}", json.data.id)
-                //thumbnail_url = formThumbUrl(url, preferences.lowQualityCovers())
+                thumbnail_url = coverUrl
             }
         }
 
