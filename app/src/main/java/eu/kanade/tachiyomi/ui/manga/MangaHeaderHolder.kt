@@ -8,17 +8,33 @@ import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.drawable.toBitmap
 import coil.Coil
+import coil.loadAny
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.IIcon
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import com.mikepenz.iconics.utils.colorInt
+import com.mikepenz.iconics.utils.contourColorInt
+import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawable
+import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.view.gone
+import eu.kanade.tachiyomi.util.view.isVisible
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.visInvisIf
+import eu.kanade.tachiyomi.util.view.visible
+import eu.kanade.tachiyomi.util.view.visibleIf
 import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
 import java.util.Locale
@@ -258,7 +274,8 @@ class MangaHeaderHolder(
 
         manga_lang_flag.visibility = View.VISIBLE
         when (manga.lang_flag?.toLowerCase(Locale.US)) {
-            "zh" || "zh-hk" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
+            "zh-hk" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
+            "zh" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
             "ko" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
             "ja" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
             else -> manga_lang_flag.visibility = View.GONE
