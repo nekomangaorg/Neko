@@ -14,6 +14,8 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
     Authenticator {
     override fun authenticate(route: Route?, response: Response): Request? {
         XLog.i("Detected Auth error ${response.code} on ${response.request.url}")
+        XLog.i("header session key:  ${response.request.header("Authorization")}")
+
         val token = refreshToken(loginHelper)
         return if (token.isEmpty()) {
             null
