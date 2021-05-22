@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.model
 
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import tachiyomi.source.model.MangaInfo
 import java.io.Serializable
 
 interface SManga : Serializable {
@@ -39,6 +40,9 @@ interface SManga : Serializable {
     val originalGenre: String?
         get() = (this as? MangaImpl)?.ogGenre ?: genre
 
+    val originalStatus: Int
+        get() = (this as? MangaImpl)?.ogStatus ?: status
+
     var follow_status: FollowStatus?
 
     var lang_flag: String?
@@ -66,48 +70,61 @@ interface SManga : Serializable {
     var last_chapter_number: Int?
 
     fun copyFrom(other: SManga) {
-
-        if (other.author != null)
+        if (other.author != null) {
             author = other.originalAuthor
+        }
 
-        if (other.artist != null)
+        if (other.artist != null) {
             artist = other.originalArtist
+        }
 
-        if (other.description != null)
+        if (other.description != null) {
             description = other.originalDescription
+        }
 
-        if (other.genre != null)
+        if (other.genre != null) {
             genre = other.originalGenre
+        }
 
-        if (other.thumbnail_url != null)
+        if (other.thumbnail_url != null) {
             thumbnail_url = other.thumbnail_url
+        }
 
-        if (other.lang_flag != null)
+
+        if (other.lang_flag != null){
             lang_flag = other.lang_flag
+            }
 
-        if (other.follow_status != null)
+        if (other.follow_status != null){
             follow_status = other.follow_status
+            }
 
-        if (other.anilist_id != null)
+        if (other.anilist_id != null){
             anilist_id = other.anilist_id
-
-        if (other.kitsu_id != null)
+            }
+        if (other.kitsu_id != null){
             kitsu_id = other.kitsu_id
+            }
 
-        if (other.my_anime_list_id != null)
+        if (other.my_anime_list_id != null){
             my_anime_list_id = other.my_anime_list_id
+            }
 
-        if (other.anime_planet_id != null)
+        if (other.anime_planet_id != null){
             anime_planet_id = other.anime_planet_id
+            }
 
-        if (other.manga_updates_id != null)
+        if (other.manga_updates_id != null){
             manga_updates_id = other.manga_updates_id
+            }
 
-        if (other.rating != null)
+        if (other.rating != null){
             rating = other.rating
+            }
 
-        if (other.users != null)
+        if (other.users != null){
             users = other.users
+            }
 
         if (other.last_chapter_number != null) {
             last_chapter_number = other.last_chapter_number
@@ -117,8 +134,9 @@ interface SManga : Serializable {
 
         status = other.status
 
-        if (!initialized)
+        if (!initialized) {
             initialized = other.initialized
+        }
     }
 
     companion object {
@@ -133,6 +151,33 @@ interface SManga : Serializable {
         fun create(): SManga {
             return MangaImpl()
         }
+    }
+}
+
+fun SManga.toMangaInfo(): MangaInfo {
+    return MangaInfo(
+        key = this.url,
+        title = this.title,
+        artist = this.artist ?: "",
+        author = this.author ?: "",
+        description = this.description ?: "",
+        genres = this.genre?.split(", ") ?: emptyList(),
+        status = this.status,
+        cover = this.thumbnail_url ?: ""
+    )
+}
+
+fun MangaInfo.toSManga(): SManga {
+    val mangaInfo = this
+    return SManga.create().apply {
+        url = mangaInfo.key
+        title = mangaInfo.title
+        artist = mangaInfo.artist
+        author = mangaInfo.author
+        description = mangaInfo.description
+        genre = mangaInfo.genres.joinToString(", ")
+        status = mangaInfo.status
+        thumbnail_url = mangaInfo.cover
     }
 }
 

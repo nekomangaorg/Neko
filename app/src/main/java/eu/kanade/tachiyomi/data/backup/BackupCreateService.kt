@@ -4,9 +4,9 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.full.FullBackupManager
@@ -38,7 +38,7 @@ class BackupCreateService : Service() {
          * @return true if the service is running, false otherwise.
          */
         fun isRunning(context: Context): Boolean =
-            context.isServiceRunning(BackupCreateService::class.java)
+                context.isServiceRunning(BackupCreateService::class.java)
 
         /**
          * Make a backup from library
@@ -54,11 +54,7 @@ class BackupCreateService : Service() {
                     putExtra(BackupConst.EXTRA_FLAGS, flags)
                     putExtra(BackupConst.EXTRA_TYPE, type)
                 }
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                    context.startService(intent)
-                } else {
-                    context.startForegroundService(intent)
-                }
+                ContextCompat.startForegroundService(context, intent)
             }
         }
     }
@@ -78,7 +74,7 @@ class BackupCreateService : Service() {
         startForeground(Notifications.ID_BACKUP_PROGRESS, notifier.showBackupProgress().build())
 
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "${javaClass.name}:WakeLock"
+                PowerManager.PARTIAL_WAKE_LOCK, "${javaClass.name}:WakeLock"
         )
         wakeLock.acquire()
     }

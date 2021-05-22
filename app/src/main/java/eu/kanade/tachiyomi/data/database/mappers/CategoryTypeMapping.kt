@@ -41,9 +41,9 @@ class CategoryPutResolver : DefaultPutResolver<Category>() {
         put(COL_NAME, obj.name)
         put(COL_ORDER, obj.order)
         put(COL_FLAGS, obj.flags)
-        if (obj.mangaSort != null)
+        if (obj.mangaSort != null) {
             put(COL_MANGA_ORDER, obj.mangaSort.toString())
-        else {
+        } else {
             val orderString = obj.mangaOrder.joinToString("/")
             put(COL_MANGA_ORDER, orderString)
         }

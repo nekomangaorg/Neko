@@ -22,7 +22,7 @@ import java.text.DateFormat
 import java.util.Calendar
 
 class SetTrackReadingDatesDialog<T> : DialogController
-    where T : Controller {
+        where T : Controller {
 
     private val item: TrackItem
 

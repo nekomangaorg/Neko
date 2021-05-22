@@ -9,10 +9,13 @@ class MaxHeightScrollView @JvmOverloads constructor(context: Context, attrs: Att
     var maxHeight = -1
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val heightS = if (maxHeight > 0) {
+        var heightS = if (maxHeight > 0) {
             MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST)
         } else {
             heightMeasureSpec
+        }
+        if (maxHeight < height + (rootWindowInsets?.systemWindowInsetBottom ?: 0)) {
+            heightS = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST)
         }
         super.onMeasure(widthMeasureSpec, heightS)
     }

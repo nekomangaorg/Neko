@@ -1,7 +1,8 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.graphics.drawable.Drawable
+import androidx.annotation.StringRes
+import androidx.core.graphics.drawable.DrawableCompat
 import androidx.preference.CheckBoxPreference
 import androidx.preference.DialogPreference
 import androidx.preference.DropDownPreference
@@ -12,6 +13,9 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import androidx.preference.PreferenceScreen
 import androidx.preference.SwitchPreferenceCompat
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import com.mikepenz.iconics.IconicsDrawable
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
@@ -29,6 +33,10 @@ inline fun PreferenceGroup.preference(block: (@DSL Preference).() -> Unit): Pref
     return initThenAdd(Preference(context), block)
 }
 
+inline fun PreferenceGroup.themePreference(block: (@DSL ThemePreference).() -> Unit): ThemePreference {
+    return initThenAdd(ThemePreference(context), block)
+}
+
 inline fun PreferenceGroup.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
     return initThenAdd(SwitchPreferenceCompat(context), block)
 }
@@ -43,8 +51,8 @@ inline fun PreferenceGroup.editTextPreference(block: (@DSL EditTextPreference).(
 
 inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).() -> Unit):
     DropDownPreference {
-        return initThenAdd(DropDownPreference(context), block).also(::initDialog)
-    }
+    return initThenAdd(DropDownPreference(context), block).also(::initDialog)
+}
 
 inline fun PreferenceGroup.listPreference(
     activity: Activity?,
@@ -52,8 +60,8 @@ inline fun PreferenceGroup.listPreference(
     -> Unit
 ):
     ListMatPreference {
-        return initThenAdd(ListMatPreference(activity, context), block)
-    }
+    return initThenAdd(ListMatPreference(activity, context), block)
+}
 
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
@@ -63,8 +71,8 @@ inline fun PreferenceGroup.intListPreference(
     ).() -> Unit
 ):
     IntListMatPreference {
-        return initThenAdd(IntListMatPreference(activity, context), block)
-    }
+    return initThenAdd(IntListMatPreference(activity, context), block)
+}
 
 inline fun PreferenceGroup.multiSelectListPreferenceMat(
     activity: Activity?,
@@ -83,6 +91,22 @@ inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).
             isIconSpaceReserved = false
         },
         block
+    )
+}
+
+inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat).() -> Unit): SwitchPreferenceCompat {
+    return initThenAdd(SwitchPreferenceCompat(context), block)
+}
+
+inline fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
+    return initThenAdd(
+        Preference(context),
+        {
+            iconRes = R.drawable.ic_info_outline_24dp
+            iconTint = context.getResourceColor(android.R.attr.textColorSecondary)
+            summaryRes = infoRes
+            isSelectable = false
+        }
     )
 }
 
@@ -124,21 +148,23 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
 
 var Preference.defaultValue: Any?
     get() = null // set only
-    set(value) {
-        setDefaultValue(value)
-    }
+    set(value) { setDefaultValue(value) }
 
 var Preference.titleRes: Int
     get() = 0 // set only
-    set(value) {
-        setTitle(value)
-    }
+    set(value) { setTitle(value) }
+
+var Preference.iconRes: Int
+    get() = 0 // set only
+    set(value) { icon = VectorDrawableCompat.create(context.resources, value, context.theme) }
 
 var Preference.summaryRes: Int
     get() = 0 // set only
-    set(value) {
-        setSummary(value)
-    }
+    set(value) { setSummary(value) }
+
+var Preference.iconTint: Int
+    get() = 0 // set only
+    set(value) { DrawableCompat.setTint(icon, value) }
 
 var Preference.iconDrawable: Drawable
     get() = IconicsDrawable(context) // set only

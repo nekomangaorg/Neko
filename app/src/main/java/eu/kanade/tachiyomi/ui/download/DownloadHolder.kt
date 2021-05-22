@@ -2,13 +2,13 @@ package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
 import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.download_item.*
 
 /**
  * Class used to hold the data of a download.
@@ -20,9 +20,10 @@ import kotlinx.android.synthetic.main.download_item.*
 class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
+    private val binding = DownloadItemBinding.bind(view)
     init {
-        setDragHandleView(reorder)
-        migration_menu.setOnClickListener { it.post { showPopupMenu(it) } }
+        setDragHandleView(binding.reorder)
+        binding.downloadMenu.setOnClickListener { it.post { showPopupMenu(it) } }
     }
 
     private lateinit var download: Download
@@ -30,30 +31,29 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     /**
      * Binds this holder with the given category.
      *
-     * @param category The category to bind.
+     * @param download The download to bind.
      */
     fun bind(download: Download) {
         this.download = download
         // Update the chapter name.
-        chapter_title.text = download.chapter.name
+        binding.chapterTitle.text = download.chapter.name
 
         // Update the manga title
-        title.text = download.manga.title
+        binding.title.text = download.manga.title
 
         // Update the progress bar and the number of downloaded pages
         val pages = download.pages
         if (pages == null) {
-            download_progress.progress = 0
-            download_progress.max = 1
-            download_progress_text.text = ""
+            binding.downloadProgress.progress = 0
+            binding.downloadProgress.max = 1
+            binding.downloadProgressText.text = ""
         } else {
-            download_progress.max = pages.size * 100
+            binding.downloadProgress.max = pages.size * 100
             notifyProgress()
             notifyDownloadedPages()
         }
 
-        migration_menu.visibleIf(adapterPosition != 0 || adapterPosition != adapter.itemCount - 1)
-        migration_menu.setVectorCompat(
+        binding.downloadMenu.setVectorCompat(
             R.drawable.ic_more_vert_24dp,
             view.context
                 .getResourceColor(android.R.attr.textColorPrimary)
@@ -65,10 +65,10 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
      */
     fun notifyProgress() {
         val pages = download.pages ?: return
-        if (download_progress.max == 1) {
-            download_progress.max = pages.size * 100
+        if (binding.downloadProgress.max == 1) {
+            binding.downloadProgress.max = pages.size * 100
         }
-        download_progress.progress = download.pageProgress
+        binding.downloadProgress.progress = download.pageProgress
     }
 
     /**
@@ -76,7 +76,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
      */
     fun notifyDownloadedPages() {
         val pages = download.pages ?: return
-        download_progress_text.text = "${download.downloadedImages}/${pages.size}"
+        binding.downloadProgressText.text = "${download.downloadedImages}/${pages.size}"
     }
 
     override fun onItemReleased(position: Int) {
@@ -85,7 +85,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     }
 
     private fun showPopupMenu(view: View) {
-        val item = adapter.getItem(adapterPosition) ?: return
+        val item = adapter.getItem(flexibleAdapterPosition) ?: return
 
         // Create a PopupMenu, giving it the clicked view for an anchor
         val popup = PopupMenu(view.context, view)
@@ -93,15 +93,13 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         // Inflate our menu resource into the PopupMenu's Menu
         popup.menuInflater.inflate(R.menu.download_single, popup.menu)
 
-        val download = item.download
-
-        popup.menu.findItem(R.id.move_to_top).isVisible = adapterPosition != 0
-        popup.menu.findItem(R.id.move_to_bottom).isVisible = adapterPosition != adapter
+        popup.menu.findItem(R.id.move_to_top).isVisible = flexibleAdapterPosition != 0
+        popup.menu.findItem(R.id.move_to_bottom).isVisible = flexibleAdapterPosition != adapter
             .itemCount - 1
 
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
-            adapter.downloadItemListener.onMenuItemClick(adapterPosition, menuItem)
+            adapter.downloadItemListener.onMenuItemClick(flexibleAdapterPosition, menuItem)
             true
         }
 
@@ -110,14 +108,14 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     }
 
     override fun getFrontView(): View {
-        return front_view
+        return binding.frontView
     }
 
     override fun getRearRightView(): View {
-        return right_view
+        return binding.rightView
     }
 
     override fun getRearLeftView(): View {
-        return left_view
+        return binding.leftView
     }
 }

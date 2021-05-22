@@ -68,8 +68,8 @@ internal class DownloadNotifier(private val context: Context) {
     /**
      * Clear old actions if they exist.
      */
-    private fun NotificationCompat.Builder.clearActions() {
-        if (mActions.isNotEmpty()) {
+    private fun clearActions() = with(notification) {
+        if (!mActions.isEmpty()) {
             mActions.clear()
         }
     }
@@ -78,8 +78,8 @@ internal class DownloadNotifier(private val context: Context) {
      * Dismiss the downloader's notification. Downloader error notifications use a different id, so
      * those can only be dismissed by the user.
      */
-    fun dismissProgress() {
-        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
+    fun dismiss() {
+        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER)
     }
 
     /**
@@ -117,6 +117,7 @@ internal class DownloadNotifier(private val context: Context) {
                 setAutoCancel(false)
                 clearActions()
                 // Open download manager when clicked
+                color = ContextCompat.getColor(context, R.color.colorAccent)
                 setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
                 isDownloading = true
                 // Pause action
@@ -151,6 +152,7 @@ internal class DownloadNotifier(private val context: Context) {
             setSmallIcon(R.drawable.ic_pause_24dp)
             setAutoCancel(false)
             setProgress(0, 0, false)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             clearActions()
             // Open download manager when clicked
             setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
@@ -182,6 +184,7 @@ internal class DownloadNotifier(private val context: Context) {
         with(errorNotificationBuilder) {
             setContentTitle(context.getString(R.string.downloads))
             setContentText(reason)
+            color = ContextCompat.getColor(context, R.color.colorAccent)
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setAutoCancel(true)
             clearActions()

@@ -6,6 +6,7 @@ import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -50,7 +51,6 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga to query.
      * @param source the source of the manga.
      */
-    @Synchronized
     internal fun getMangaDir(manga: Manga, source: Source): UniFile {
         try {
             return downloadsDir.createDirectory(getSourceDirName(source))
@@ -67,7 +67,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun findSourceDir(source: Source): UniFile? {
-        return downloadsDir.findFile(getSourceDirName(source))
+        return downloadsDir.findFile(getSourceDirName(source), true)
     }
 
     /**
@@ -78,7 +78,7 @@ class DownloadProvider(private val context: Context) {
      */
     fun findMangaDir(manga: Manga, source: Source): UniFile? {
         val sourceDir = findSourceDir(source)
-        return sourceDir?.findFile(getMangaDirName(manga))
+        return sourceDir?.findFile(getMangaDirName(manga), true)
     }
 
     /**

@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@android:color/transparent"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <View
+        android:id="@+id/touch_outside"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"/>
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/overflow_card_view"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="24dp"
+        android:layout_marginEnd="14dp"
+        android:background="?android:attr/colorBackground"
+        app:cardBackgroundColor="?android:attr/colorBackground"
+        app:cardCornerRadius="12dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintWidth_min="250dp"
+        app:layout_constrainedWidth="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/overflow_menu_layout"
+            android:background="@android:color/transparent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:focusable="true"
+            android:orientation="vertical"
+            android:paddingTop="6dp"
+            android:paddingBottom="6dp">
+
+            <eu.kanade.tachiyomi.widget.MenuSheetItemView
+                android:id="@+id/incognito_mode_item"
+                android:layout_width="0dp"
+                app:layout_constraintWidth_min="wrap"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/divider"
+                android:text="@string/incognito_mode"
+                app:icon="@drawable/ic_glasses_24dp"
+                tools:text="Turn on Incognito mode" />
+
+            <View
+                android:id="@+id/divider"
+                android:layout_width="0dp"
+                app:layout_constraintTop_toBottomOf="@id/incognito_mode_item"
+                app:layout_constraintBottom_toTopOf="@id/settings_item"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:layout_height="1dp"
+                android:background="@color/divider" />
+
+            <eu.kanade.tachiyomi.widget.MenuSheetItemView
+                android:id="@+id/settings_item"
+                android:layout_width="0dp"
+                app:layout_constraintWidth_min="wrap"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/divider"
+                app:layout_constraintBottom_toTopOf="@id/about_item"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/settings"
+                app:icon="@drawable/ic_outline_settings_24dp" />
+
+            <eu.kanade.tachiyomi.widget.MenuSheetItemView
+                android:id="@+id/about_item"
+                android:layout_width="0dp"
+                app:layout_constraintWidth_min="wrap"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/settings_item"
+                app:layout_constraintBottom_toTopOf="@+id/help_item"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                android:text="@string/about"
+                app:icon="@drawable/ic_info_outline_24dp" />
+
+            <eu.kanade.tachiyomi.widget.MenuSheetItemView
+                android:id="@+id/help_item"
+                android:layout_width="0dp"
+                app:layout_constraintWidth_min="wrap"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toBottomOf="@id/about_item"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:text="@string/help"
+                app:icon="@drawable/ic_help_outline_24dp" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.cardview.widget.CardView>
+</androidx.constraintlayout.widget.ConstraintLayout>

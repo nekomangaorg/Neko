@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.app.Dialog
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
@@ -11,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.view.GestureDetector
+import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
@@ -18,13 +20,21 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
+import androidx.annotation.IdRes
+import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
+import androidx.appcompat.widget.Toolbar
+import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
+import com.getkeepsafe.taptargetview.TapTarget
+import com.getkeepsafe.taptargetview.TapTargetView
 import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.elvishew.xlog.XLog
@@ -41,42 +51,46 @@ import eu.kanade.tachiyomi.data.download.DownloadServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
+import eu.kanade.tachiyomi.databinding.MainActivityBinding
+import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.recent_updates.RecentChaptersController
-import eu.kanade.tachiyomi.ui.recently_read.RecentlyReadController
 import eu.kanade.tachiyomi.ui.recents.RecentsController
+import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
+import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
-import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.visibleIf
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
-import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
-import kotlinx.android.synthetic.main.main_activity.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import timber.log.Timber
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -84,8 +98,9 @@ import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
+import kotlin.math.max
 
-open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLoginDialog.Listener {
+open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
 
     protected lateinit var router: Router
 
@@ -95,7 +110,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         private set
     private var searchDrawable: Drawable? = null
     private var dismissDrawable: Drawable? = null
-    private lateinit var gestureDetector: GestureDetectorCompat
+    private var gestureDetector: GestureDetectorCompat? = null
 
     private var snackBar: Snackbar? = null
     private var extraViewForUndo: View? = null
@@ -103,11 +118,15 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
     private var animationSet: AnimatorSet? = null
     private val downloadManager: DownloadManager by injectLazy()
+    private val mangaShortcutManager: MangaShortcutManager by injectLazy()
     private val hideBottomNav
-        get() = router.backstackSize > 1 && router.backstack[1].controller() !is DialogController
+        get() = router.backstackSize > 1 && router.backstack[1].controller !is DialogController
 
     private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
+    var tabAnimation: ValueAnimator? = null
+    var overflowDialog: Dialog? = null
+    var currentToolbar: Toolbar? = null
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -120,6 +139,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         }
         extraViewForUndo = extraViewToCheck
     }
+
+    val toolbarHeight: Int
+        get() = max(binding.toolbar.height, binding.cardFrame.height)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Create a webview before extensions do or else they will break night mode theme
@@ -138,65 +160,65 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             return
         }
         gestureDetector = GestureDetectorCompat(this, GestureListener())
+        binding = MainActivityBinding.inflate(layoutInflater)
 
-        setContentView(R.layout.main_activity)
-
-        setSupportActionBar(toolbar)
+        setContentView(binding.root)
 
         backArrow = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back)
         searchDrawable = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_search)
         dismissDrawable = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_close)
 
         var continueSwitchingTabs = false
-        bottom_nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
+        binding.bottomNav.getItemView(R.id.nav_library)?.setOnLongClickListener {
             if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(this)
-                main_content.snack(R.string.updating_library) {
-                    anchorView = bottom_nav
+                binding.mainContent.snack(R.string.updating_library) {
+                    anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
                         LibraryUpdateService.stop(context)
-                        Handler().post { NotificationReceiver.dismissNotification(context, Notifications.ID_LIBRARY_PROGRESS) }
+                        Handler().post {
+                            NotificationReceiver.dismissNotification(
+                                context,
+                                Notifications.ID_LIBRARY_PROGRESS
+                            )
+                        }
                     }
                 }
             }
             true
         }
         for (id in listOf(R.id.nav_recents, R.id.nav_browse)) {
-            bottom_nav.getItemView(id)?.setOnLongClickListener {
-                bottom_nav.selectedItemId = id
-                bottom_nav.post {
+            binding.bottomNav.getItemView(id)?.setOnLongClickListener {
+                binding.bottomNav.selectedItemId = id
+                binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? BottomSheetController
-                    controller?.toggleSheet()
+                        router.backstack.firstOrNull()?.controller as? BottomSheetController
+                    controller?.showSheet()
                 }
                 true
             }
         }
-        bottom_nav.setOnNavigationItemSelectedListener { item ->
+        binding.bottomNav.setOnNavigationItemSelectedListener { item ->
             val id = item.itemId
-            val currentController = router.backstack.lastOrNull()?.controller()
+            val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                        continueSwitchingTabs = true
-                        this@MainActivity.bottom_nav.selectedItemId = id
-                    }
+                    continueSwitchingTabs = true
+                    this@MainActivity.binding.bottomNav.selectedItemId = id
+                }
                 ) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
             val currentRoot = router.backstack.firstOrNull()
             if (currentRoot?.tag()?.toIntOrNull() != id) {
-                when (id) {
-                    R.id.nav_library -> setRoot(LibraryController(), id)
-                    R.id.nav_recents -> setRoot(RecentsController(), id)
-                    else -> {
-                        if (!source.isLogged() && !preferences.useCacheSource()) {
-                            val dialog = MangadexLoginDialog(source, this)
-                            dialog.showDialog(router)
-                        } else {
-                            setBrowseRoot()
-                        }
-                    }
-                }
+                setRoot(
+                    when (id) {
+                        R.id.nav_library -> LibraryController()
+                        R.id.nav_recents -> RecentsController()
+                        else -> BrowseController()
+                    },
+                    id
+                )
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
                     val controller =
@@ -206,9 +228,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             }
             true
         }
-        val container: ViewGroup = findViewById(R.id.controller_container)
+        val container: ViewGroup = binding.controllerContainer
 
-        val content: ViewGroup = findViewById(R.id.main_content)
+        val content: ViewGroup = binding.mainContent
         DownloadService.addListener(this)
         content.systemUiVisibility =
             View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
@@ -218,6 +240,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
         setNavBarColor(content.rootWindowInsets)
+        binding.bottomView.isVisible = false
         content.doOnApplyWindowInsets { v, insets, _ ->
             setNavBarColor(insets)
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
@@ -228,78 +251,138 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
             v.updatePadding(
-                left = insets.systemWindowInsetLeft, right = insets.systemWindowInsetRight
+                left = insets.systemWindowInsetLeft,
+                right = insets.systemWindowInsetRight
             )
-            appbar.updatePadding(
+            binding.appBar.updatePadding(
                 top = insets.systemWindowInsetTop
             )
-            bottom_nav.updatePadding(bottom = insets.systemWindowInsetBottom)
+            binding.bottomNav.updatePadding(bottom = insets.systemWindowInsetBottom)
+            binding.bottomView.isVisible = insets.systemWindowInsetBottom > 0
+            binding.bottomView.updateLayoutParams<ViewGroup.LayoutParams> {
+                height = insets.systemWindowInsetBottom
+            }
         }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
-                bottom_nav.selectedItemId = R.id.nav_library
+                goToStartingTab()
             }
         }
 
-        toolbar.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller()
+        binding.toolbar.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller
             if (rootSearchController is RootSearchInterface) {
                 rootSearchController.expandSearch()
             } else onBackPressed()
         }
 
-        bottom_nav.visibleIf(!hideBottomNav)
-        bottom_nav.alpha = if (hideBottomNav) 0f else 1f
-        router.addChangeListener(object : ControllerChangeHandler.ControllerChangeListener {
-            override fun onChangeStarted(
-                to: Controller?,
-                from: Controller?,
-                isPush: Boolean,
-                container: ViewGroup,
-                handler: ControllerChangeHandler
-            ) {
+        binding.cardToolbar.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller
+            if (rootSearchController is RootSearchInterface) {
+                rootSearchController.expandSearch()
+            } else onBackPressed()
+        }
 
-                syncActivityViewWithController(to, from, isPush)
-                appbar.y = 0f
-                snackBar?.dismiss()
+        binding.cardToolbar.setOnClickListener {
+            binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        }
+
+        binding.bottomNav.isVisible = !hideBottomNav
+        binding.bottomView.visibility = if (hideBottomNav) View.GONE else binding.bottomView.visibility
+        binding.bottomNav.alpha = if (hideBottomNav) 0f else 1f
+        router.addChangeListener(
+            object : ControllerChangeHandler.ControllerChangeListener {
+                override fun onChangeStarted(
+                    to: Controller?,
+                    from: Controller?,
+                    isPush: Boolean,
+                    container: ViewGroup,
+                    handler: ControllerChangeHandler
+                ) {
+                    syncActivityViewWithController(to, from, isPush)
+                    binding.appBar.y = 0f
+                    if (!isPush || router.backstackSize == 1) {
+                        binding.bottomNav.translationY = 0f
+                    }
+                    snackBar?.dismiss()
+                }
+
+                override fun onChangeCompleted(
+                    to: Controller?,
+                    from: Controller?,
+                    isPush: Boolean,
+                    container: ViewGroup,
+                    handler: ControllerChangeHandler
+                ) {
+                    binding.appBar.y = 0f
+                    binding.bottomNav.translationY = 0f
+                    showDLQueueTutorial()
+                }
             }
+        )
 
-            override fun onChangeCompleted(
-                to: Controller?,
-                from: Controller?,
-                isPush: Boolean,
-                container: ViewGroup,
-                handler: ControllerChangeHandler
-            ) {
-                appbar.y = 0f
-                showDLQueueTutorial()
-            }
-        })
+        syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
 
-        syncActivityViewWithController(router.backstack.lastOrNull()?.controller())
-
-        toolbar.navigationIcon = if (router.backstackSize > 1) backArrow else searchDrawable
-        (router.backstack.lastOrNull()?.controller() as? BaseController)?.setTitle()
-        (router.backstack.lastOrNull()?.controller() as? SettingsController)?.setTitle()
+        binding.toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
+        (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
+        (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
 
         if (savedInstanceState == null) {
-            // Show changelog or similar manga enabling on install prompt
-            // NOTE: we show the similar manga dialog first so it is behind the changelog
+            // Show changelog if needed
             if (Migrations.upgrade(preferences)) {
-                if (!BuildConfig.DEBUG) ChangelogDialogController().showDialog(router)
+                if (!BuildConfig.DEBUG) {
+                    content.post {
+                        whatsNewSheet().show()
+                    }
+                }
             }
+        }
+
+        preferences.incognitoMode()
+            .asImmediateFlowIn(lifecycleScope) {
+                binding.toolbar.setIncognitoMode(it)
+                binding.cardToolbar.setIncognitoMode(it)
+            }
+        setExtensionsBadge()
+        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller))
+    }
+
+    open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
+        val oldTB = currentToolbar
+        currentToolbar = if (show) {
+            binding.cardToolbar
+        } else {
+            binding.toolbar
+        }
+        if (oldTB != currentToolbar) {
+            setSupportActionBar(currentToolbar)
+        }
+        binding.toolbar.isVisible = !show
+        binding.cardFrame.isVisible = show
+        binding.appBar.setBackgroundColor(
+            if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
+        )
+        currentToolbar?.setNavigationOnClickListener {
+            val rootSearchController = router.backstack.lastOrNull()?.controller
+            if (rootSearchController is RootSearchInterface) {
+                rootSearchController.expandSearch()
+            } else onBackPressed()
+        }
+        if (oldTB != currentToolbar) {
+            invalidateOptionsMenu()
         }
     }
 
     fun setDismissIcon(enabled: Boolean) {
-        toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
+        binding.cardToolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
+        binding.toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
     }
 
     fun showNavigationArrow() {
-        toolbar.navigationIcon = backArrow
+        binding.toolbar.navigationIcon = backArrow
     }
 
     private fun setNavBarColor(insets: WindowInsets?) {
@@ -307,9 +390,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
             // basically if in landscape on a phone
             // For lollipop, draw opaque nav bar
-            if (insets.hasSideNavBar())
+            if (insets.hasSideNavBar()) {
                 Color.BLACK
-            else Color.argb(179, 0, 0, 0)
+            } else Color.argb(179, 0, 0, 0)
         }
         // if the android q+ device has gesture nav, transparent nav bar
         // this is here in case some crazy with a notch uses landscape
@@ -323,7 +406,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         // if in portrait with 2/3 button mode, translucent nav bar
         else {
             ColorUtils.setAlphaComponent(
-                getResourceColor(R.attr.colorPrimaryVariant), 179
+                getResourceColor(R.attr.colorPrimaryVariant),
+                179
             )
         }
     }
@@ -336,7 +420,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     override fun onSupportActionModeFinished(mode: androidx.appcompat.view.ActionMode) {
         launchUI {
             val scale = Settings.Global.getFloat(
-                contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f
+                contentResolver,
+                Settings.Global.ANIMATOR_DURATION_SCALE,
+                1.0f
             )
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
@@ -360,7 +446,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         if (router.backstackSize == 1 && this !is SearchActivity &&
             downloadManager.hasQueue() && !preferences.shownDownloadQueueTutorial().get()
         ) {
-            val recentsItem = bottom_nav.getItemView(R.id.nav_recents) ?: return
+            if (!isBindingInitialized) return
+            val recentsItem = binding.bottomNav.getItemView(R.id.nav_recents) ?: return
             preferences.shownDownloadQueueTutorial().set(true)
             TapTargetView.showFor(
                 this,
@@ -368,7 +455,10 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
                     getString(R.string.visit_recents_for_download_queue)
-                ).outerCircleColor(R.color.colorAccent).outerCircleAlpha(0.95f).titleTextSize(20)
+                ).outerCircleColorInt(getResourceColor(R.attr.colorAccent)).outerCircleAlpha(0.95f)
+                    .titleTextSize(
+                        20
+                    )
                     .titleTextColor(android.R.color.white).descriptionTextSize(16)
                     .descriptionTextColor(R.color.md_white_1000_76)
                     .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
@@ -376,7 +466,7 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 object : TapTargetView.Listener() {
                     override fun onTargetClick(view: TapTargetView) {
                         super.onTargetClick(view)
-                        bottom_nav.selectedItemId = R.id.nav_recents
+                        binding.bottomNav.selectedItemId = R.id.nav_recents
                     }
                 }
             )
@@ -386,6 +476,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     override fun onPause() {
         super.onPause()
         snackBar?.dismiss()
+        setStartingTab()
+        mangaShortcutManager.updateShortcuts()
     }
 
     private fun getAppUpdates() {
@@ -402,11 +494,12 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
+                            UpdaterNotifier.releasePageUrl = result.release.releaseLink
                             AboutController.NewUpdateDialogController(body, url).showDialog(router)
                         }
                     }
                 } catch (error: Exception) {
-                    XLog.e(error)
+                    Timber.e(error)
                 }
             }
         }
@@ -421,7 +514,6 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         if (source.isLogged()) {
             setBrowseRoot()
         }
-    }
 
     override fun onNewIntent(intent: Intent) {
         if (!handleIntentAction(intent)) {
@@ -436,30 +528,60 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
     protected open fun handleIntentAction(intent: Intent): Boolean {
         val notificationId = intent.getIntExtra("notificationId", -1)
         if (notificationId > -1) NotificationReceiver.dismissNotification(
-            applicationContext, notificationId, intent.getIntExtra("groupId", 0)
+            applicationContext,
+            notificationId,
+            intent.getIntExtra("groupId", 0)
         )
         when (intent.action) {
-            SHORTCUT_LIBRARY -> bottom_nav.selectedItemId = R.id.nav_library
+            SHORTCUT_LIBRARY -> binding.bottomNav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
-                bottom_nav.selectedItemId = R.id.nav_recents
-                val controller: Controller = when (intent.action) {
-                    SHORTCUT_RECENTLY_UPDATED -> RecentChaptersController()
-                    else -> RecentlyReadController()
+                if (binding.bottomNav.selectedItemId != R.id.nav_recents) {
+                    binding.bottomNav.selectedItemId = R.id.nav_recents
+                } else {
+                    router.popToRoot()
                 }
-                router.pushController(controller.withFadeTransaction())
+                binding.bottomNav.post {
+                    val controller =
+                        router.backstack.firstOrNull()?.controller as? RecentsController
+                    controller?.tempJumpTo(
+                        when (intent.action) {
+                            SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
+                            else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
+                        }
+                    )
+                }
             }
-            SHORTCUT_BROWSE -> bottom_nav.selectedItemId = R.id.nav_browse
+            SHORTCUT_BROWSE -> binding.bottomNav.selectedItemId = R.id.nav_browse
+            SHORTCUT_EXTENSIONS -> {
+                if (binding.bottomNav.selectedItemId != R.id.nav_browse) {
+                    binding.bottomNav.selectedItemId = R.id.nav_browse
+                } else {
+                    router.popToRoot()
+                }
+                binding.bottomNav.post {
+                    val controller =
+                        router.backstack.firstOrNull()?.controller as? BrowseController
+                    controller?.showSheet()
+                }
+            }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) bottom_nav.selectedItemId = R.id.nav_library
+                if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
+            SHORTCUT_UPDATE_NOTES -> {
+                val extras = intent.extras ?: return false
+                if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
+                if (router.backstack.lastOrNull()?.controller !is AboutController.NewUpdateDialogController) {
+                    AboutController.NewUpdateDialogController(extras).showDialog(router)
+                }
+            }
             SHORTCUT_DOWNLOADS -> {
-                bottom_nav.selectedItemId = R.id.nav_recents
+                binding.bottomNav.selectedItemId = R.id.nav_recents
                 router.popToRoot()
-                bottom_nav.post {
+                binding.bottomNav.post {
                     val controller =
-                        router.backstack.firstOrNull()?.controller() as? RecentsController
+                        router.backstack.firstOrNull()?.controller as? RecentsController
                     controller?.showSheet()
                 }
             }
@@ -470,41 +592,102 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
     override fun onDestroy() {
         super.onDestroy()
+        overflowDialog?.dismiss()
+        overflowDialog = null
         DownloadService.removeListener(this)
-        toolbar?.setNavigationOnClickListener(null)
+        if (isBindingInitialized) {
+            binding.toolbar.setNavigationOnClickListener(null)
+            binding.cardToolbar.setNavigationOnClickListener(null)
+        }
     }
 
     override fun onBackPressed() {
-        val sheetController = router.backstack.last().controller() as? BottomSheetController
+        val sheetController = router.backstack.last().controller as? BottomSheetController
         if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
-            SecureActivityDelegate.locked = true
-            super.onBackPressed()
+            if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
+                startingTab() != binding.bottomNav.selectedItemId
+            ) {
+                goToStartingTab()
+            } else {
+                if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
+                    setStartingTab()
+                }
+                SecureActivityDelegate.locked = this !is SearchActivity
+                mangaShortcutManager.updateShortcuts()
+                super.onBackPressed()
+            }
         }
+    }
+
+    private fun setStartingTab() {
+        if (this is SearchActivity) return
+        if (binding.bottomNav.selectedItemId != R.id.nav_browse &&
+            preferences.startingTab().get() >= 0
+        ) {
+            preferences.startingTab().set(
+                when (binding.bottomNav.selectedItemId) {
+                    R.id.nav_library -> 0
+                    else -> 1
+                }
+            )
+        }
+    }
+
+    @IdRes
+    private fun startingTab(): Int {
+        return when (preferences.startingTab().get()) {
+            0, -1 -> R.id.nav_library
+            1, -2 -> R.id.nav_recents
+            -3 -> R.id.nav_browse
+            else -> R.id.nav_library
+        }
+    }
+
+    private fun goToStartingTab() {
+        binding.bottomNav.selectedItemId = startingTab()
     }
 
     private fun setRoot(controller: Controller, id: Int) {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
 
+    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+        val searchItem = menu?.findItem(R.id.action_search)
+        if (currentToolbar == binding.cardToolbar) {
+            searchItem?.isVisible = false
+        }
+        return super.onPrepareOptionsMenu(menu)
+    }
+
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             // Initialize option to open catalogue settings.
-            R.id.action_settings -> {
-                router.pushController(
-                    (RouterTransaction.with(SettingsMainController())).popChangeHandler(
-                        FadeChangeHandler()
-                    ).pushChangeHandler(FadeChangeHandler())
-                )
+            R.id.action_more -> {
+                if (overflowDialog != null) return false
+                val overflowDialog = OverflowDialog(this)
+                this.overflowDialog = overflowDialog
+                overflowDialog.setOnDismissListener {
+                    this.overflowDialog = null
+                }
+                overflowDialog.show()
             }
             else -> return super.onOptionsItemSelected(item)
         }
         return super.onOptionsItemSelected(item)
     }
 
+    fun showSettings() {
+        router.pushController(SettingsMainController().withFadeTransaction())
+    }
+
+    fun showAbout() {
+        router.pushController(AboutController().withFadeTransaction())
+    }
+
     override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
-        gestureDetector.onTouchEvent(ev)
+        gestureDetector?.onTouchEvent(ev)
         if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
@@ -514,10 +697,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
                 extraViewForUndo?.getGlobalVisibleRect(extRect)
                 // This way the snackbar will only be dismissed if
                 // the user clicks outside it.
-                if (canDismissSnackBar && !sRect.contains(
-                        ev.x.toInt(),
-                        ev.y.toInt()
-                    ) && (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
+                if (canDismissSnackBar &&
+                    !sRect.contains(ev.x.toInt(), ev.y.toInt()) &&
+                    (extRect == null || !extRect.contains(ev.x.toInt(), ev.y.toInt()))
                 ) {
                     snackBar?.dismiss()
                     snackBar = null
@@ -531,6 +713,9 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         return super.dispatchTouchEvent(ev)
     }
 
+    protected fun canShowFloatingToolbar(controller: Controller?) =
+        (controller is FloatingSearchInterface && controller.showFloatingBar())
+
     protected open fun syncActivityViewWithController(
         to: Controller?,
         from: Controller? = null,
@@ -539,26 +724,36 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         if (from is DialogController || to is DialogController) {
             return
         }
+        setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         if (onRoot) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-            toolbar.navigationIcon = searchDrawable
+            binding.toolbar.navigationIcon = searchDrawable
+            binding.cardToolbar.navigationIcon = searchDrawable
         } else {
-            showNavigationArrow()
+            //            showNavigationArrow()
+            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+            binding.toolbar.navigationIcon = drawerArrow
+            binding.cardToolbar.navigationIcon = drawerArrow
         }
+        binding.cardToolbar.subtitle = null
+        drawerArrow?.progress = 1f
 
-        bottom_nav.visibility = if (!hideBottomNav) View.VISIBLE else bottom_nav.visibility
+        binding.bottomNav.visibility = if (!hideBottomNav) View.VISIBLE else binding.bottomNav.visibility
         animationSet?.cancel()
         animationSet = AnimatorSet()
         val alphaAnimation = ValueAnimator.ofFloat(
-            bottom_nav.alpha, if (hideBottomNav) 0f else 1f
+            binding.bottomNav.alpha,
+            if (hideBottomNav) 0f else 1f
         )
         alphaAnimation.addUpdateListener { valueAnimator ->
-            bottom_nav.alpha = valueAnimator.animatedValue as Float
+            binding.bottomNav.alpha = valueAnimator.animatedValue as Float
         }
         alphaAnimation.addListener(
             EndAnimatorListener {
-                bottom_nav.visibility = if (hideBottomNav) View.GONE else View.VISIBLE
+                binding.bottomNav.isVisible = !hideBottomNav
+                binding.bottomView.visibility =
+                    if (hideBottomNav) View.GONE else binding.bottomView.visibility
             }
         )
         alphaAnimation.duration = 200
@@ -567,17 +762,83 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         animationSet?.start()
     }
 
+    fun showTabBar(show: Boolean, animate: Boolean = true) {
+        tabAnimation?.cancel()
+        if (animate) {
+            if (show && !binding.tabsFrameLayout.isVisible) {
+                binding.tabsFrameLayout.alpha = 0f
+                binding.tabsFrameLayout.isVisible = true
+            }
+            tabAnimation = ValueAnimator.ofFloat(
+                binding.tabsFrameLayout.alpha,
+                if (show) 1f else 0f
+            )
+            tabAnimation?.addUpdateListener { valueAnimator ->
+                binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
+            }
+            tabAnimation?.addListener(
+                EndAnimatorListener {
+                    binding.tabsFrameLayout.isVisible = show
+                    if (!show) {
+                        binding.mainTabs.clearOnTabSelectedListeners()
+                        binding.mainTabs.removeAllTabs()
+                    }
+                }
+            )
+            tabAnimation?.duration = 200
+            tabAnimation?.start()
+        } else {
+            binding.tabsFrameLayout.isVisible = show
+        }
+        if (show) {
+            binding.appBar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
+        }
+    }
+
     override fun downloadStatusChanged(downloading: Boolean) {
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
-                bottom_nav?.getOrCreateBadge(R.id.nav_recents)
+                binding.bottomNav.getOrCreateBadge(R.id.nav_recents)
                 showDLQueueTutorial()
             } else {
-                bottom_nav?.removeBadge(R.id.nav_recents)
+                binding.bottomNav.removeBadge(R.id.nav_recents)
             }
         }
     }
+
+    private fun whatsNewSheet() = MaterialMenuSheet(
+        this,
+        listOf(
+            MaterialMenuSheet.MenuSheetItem(
+                0,
+                textRes = R.string.whats_new_this_release,
+                drawable = R.drawable.ic_new_releases_24dp
+            ),
+            MaterialMenuSheet.MenuSheetItem(
+                1,
+                textRes = R.string.close,
+                drawable = R.drawable.ic_close_24dp
+            )
+        ),
+        title = getString(R.string.updated_to_, BuildConfig.VERSION_NAME),
+        showDivider = true,
+        selectedId = 0,
+        onMenuItemClicked = { _, item ->
+            if (item == 0) {
+                try {
+                    val intent = Intent(
+                        Intent.ACTION_VIEW,
+                        "https://github.com/jays2kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}".toUri()
+                    )
+                    startActivity(intent)
+                } catch (e: Throwable) {
+                    toast(e.message)
+                }
+            }
+            true
+        }
+    )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
         override fun onDown(e: MotionEvent): Boolean {
@@ -595,13 +856,14 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
             val diffX = e2.x - e1.x
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
-                bottom_nav.getGlobalVisibleRect(sheetRect)
-                if (sheetRect.contains(
-                        e1.x.toInt(), e1.y.toInt()
-                    ) && abs(diffY) > Companion.SWIPE_THRESHOLD && abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD && diffY <= 0
+                binding.bottomNav.getGlobalVisibleRect(sheetRect)
+                if (sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    abs(diffY) > Companion.SWIPE_THRESHOLD &&
+                    abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
+                    diffY <= 0
                 ) {
                     val bottomSheetController =
-                        router.backstack.lastOrNull()?.controller() as? BottomSheetController
+                        router.backstack.lastOrNull()?.controller as? BottomSheetController
                     bottomSheetController?.showSheet()
                 }
                 result = true
@@ -612,8 +874,8 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
 
     companion object {
 
-        const val SWIPE_THRESHOLD = 100
-        const val SWIPE_VELOCITY_THRESHOLD = 100
+        private const val SWIPE_THRESHOLD = 100
+        private const val SWIPE_VELOCITY_THRESHOLD = 100
 
         // Shortcut actions
         const val SHORTCUT_LIBRARY = "eu.kanade.tachiyomi.SHOW_LIBRARY"
@@ -622,6 +884,11 @@ open class MainActivity : BaseActivity(), DownloadServiceListener, MangadexLogin
         const val SHORTCUT_BROWSE = "eu.kanade.tachiyomi.SHOW_BROWSE"
         const val SHORTCUT_DOWNLOADS = "eu.kanade.tachiyomi.SHOW_DOWNLOADS"
         const val SHORTCUT_MANGA = "eu.kanade.tachiyomi.SHOW_MANGA"
+        const val SHORTCUT_MANGA_BACK = "eu.kanade.tachiyomi.SHOW_MANGA_BACK"
+        const val SHORTCUT_UPDATE_NOTES = "eu.kanade.tachiyomi.SHOW_UPDATE_NOTES"
+        const val SHORTCUT_SOURCE = "eu.kanade.tachiyomi.SHOW_SOURCE"
+        const val SHORTCUT_READER_SETTINGS = "eu.kanade.tachiyomi.READER_SETTINGS"
+        const val SHORTCUT_EXTENSIONS = "eu.kanade.tachiyomi.EXTENSIONS"
 
         const val INTENT_SEARCH = "neko.SEARCH"
         const val INTENT_SEARCH_QUERY = "query"
@@ -635,9 +902,22 @@ interface BottomNavBarInterface {
 
 interface RootSearchInterface {
     fun expandSearch() {
-        if (this is Controller) activity?.toolbar?.menu?.findItem(R.id.action_search)
-            ?.expandActionView()
+        if (this is Controller) {
+            val mainActivity = activity as? MainActivity ?: return
+            mainActivity.binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        }
     }
+}
+
+interface FloatingSearchInterface {
+    fun searchTitle(title: String?): String? {
+        if (this is Controller) {
+            return activity?.getString(R.string.search_, title)
+        }
+        return title
+    }
+
+    fun showFloatingBar() = true
 }
 
 interface BottomSheetController {

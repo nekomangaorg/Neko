@@ -3,12 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".CatalogueListActivity">
 
-    <!--Only needed because the navigation search uses this id -->
     <item
         android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_24dp"
         android:title="@string/search"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
-        android:visible="false"
+        app:actionViewClass="eu.kanade.tachiyomi.ui.base.MiniSearchView"
         app:showAsAction="collapseActionView|ifRoom" />
 
     <item

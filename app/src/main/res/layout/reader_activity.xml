@@ -1,7 +1,9 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/reader_layout"
     android:layout_width="match_parent"
+    tools:background="@color/color_button_default"
     android:layout_height="match_parent"
     android:gravity="center">
 
@@ -25,7 +27,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="8dp"
         android:padding="4dp"
         android:textStyle="bold" />
 
@@ -35,31 +36,57 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
+    <eu.kanade.tachiyomi.ui.reader.ReaderNavigationOverlayView
+        android:id="@+id/navigation_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone" />
+
     <FrameLayout
         android:id="@+id/reader_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone">
+        android:visibility="gone" >
 
         <FrameLayout
-            android:id="@+id/appbar"
+            android:id="@+id/app_bar"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="?attr/colorSecondary">
+            android:layout_height="wrap_content">
 
             <androidx.appcompat.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
-                android:background="@android:color/transparent" />
+                app:titleTextColor="?actionBarTintColor"
+                app:subtitleTextColor="@color/tint_color_secondary"
+                android:background="@drawable/reader_toolbar_ripple" />
 
         </FrameLayout>
     </FrameLayout>
 
-    <include layout="@layout/reader_nav" />
+    <View
+        android:id="@+id/touch_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        />
 
-    <include layout="@layout/reader_chapters_sheet" />
+    <FrameLayout
+        android:id="@+id/nav_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:layout_marginEnd="6dp"
+        android:paddingBottom="6dp"
+        app:layout_anchorGravity="top"
+        android:layout_gravity="top"
+        app:layout_anchor="@id/chapters_sheet" >
 
+        <include layout="@layout/reader_nav"
+            android:id="@+id/reader_nav" />
+    </FrameLayout>
+
+    <include layout="@layout/reader_chapters_sheet"
+        android:id="@+id/chapters_sheet"/>
 
     <View
         android:id="@+id/brightness_overlay"

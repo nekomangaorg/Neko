@@ -128,11 +128,11 @@ class PagerTransitionHolder(
 
         textView.text = if (prevChapter != null) {
             SpannableStringBuilder().apply {
-                append(context.getString(R.string.current))
+                append(context.getString(R.string.current_chapter))
                 setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
-                append(context.getString(R.string.previous))
+                append(context.getString(R.string.previous_title))
                 setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${prevChapter.chapter.name}\n\n")
             }
@@ -156,8 +156,7 @@ class PagerTransitionHolder(
             .subscribe { state ->
                 pagesContainer.removeAllViews()
                 when (state) {
-                    is ReaderChapter.State.Wait -> {
-                    }
+                    is ReaderChapter.State.Wait -> {}
                     is ReaderChapter.State.Loading -> setLoading()
                     is ReaderChapter.State.Error -> setError(state.error)
                     is ReaderChapter.State.Loaded -> setLoaded()

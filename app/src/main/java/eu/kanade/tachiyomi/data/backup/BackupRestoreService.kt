@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 /**
- * Restores backup from json file
+ * Restores backup.
  */
 class BackupRestoreService : Service() {
 

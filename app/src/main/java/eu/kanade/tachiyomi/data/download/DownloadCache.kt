@@ -272,6 +272,14 @@ class DownloadCache(
     }
 
     /**
+     * Class to store the files under the root downloads directory.
+     */
+    private class RootDirectory(
+        val dir: UniFile,
+        var files: Map<Long, SourceDirectory> = hashMapOf()
+    )
+
+    /**
      * Class to store the files under a source directory.
      */
     private class SourceDirectory(

@@ -3,10 +3,13 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.view.View
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
+
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -15,17 +18,18 @@ import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
-import kotlinx.android.synthetic.main.chapters_item.*
-import kotlinx.android.synthetic.main.download_button.*
 
 class ChapterHolder(
     view: View,
     private val adapter: MangaDetailsAdapter
 ) : BaseChapterHolder(view, adapter) {
 
+    private val binding = ChaptersItemBinding.bind(view)
+    private var localSource = false
+
     init {
-        download_button.setOnLongClickListener {
-            adapter.delegate.startDownloadRange(adapterPosition)
+        binding.downloadButton.downloadButton.setOnLongClickListener {
+            adapter.delegate.startDownloadRange(flexibleAdapterPosition)
             true
         }
     }
@@ -33,10 +37,12 @@ class ChapterHolder(
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
         val isLocked = item.isLocked
-        if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter().not() && item.isDownloaded.not()) {
-            download_button.gone()
+
+         if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter().not() && item.isDownloaded.not()) {
+            binding.donwloadButton.gone()
         }
-        chapter_title.text = when (manga.displayMode) {
+        
+        binding.chapterTitle.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
                 itemView.context.getString(R.string.chapter_, number)
@@ -44,7 +50,7 @@ class ChapterHolder(
             else -> chapter.name
         }
 
-        ChapterUtil.setTextViewForChapter(chapter_title, item, hideStatus = isLocked)
+        ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 
         val statuses = mutableListOf<String>()
 
@@ -55,51 +61,59 @@ class ChapterHolder(
         if (showPagesLeft && chapter.pages_left > 0) {
             statuses.add(
                 itemView.resources.getQuantityString(
-                    R.plurals.pages_left, chapter.pages_left, chapter.pages_left
+                    R.plurals.pages_left,
+                    chapter.pages_left,
+                    chapter.pages_left
                 )
             )
         } else if (showPagesLeft) {
             statuses.add(
                 itemView.context.getString(
-                    R.string.page_, chapter.last_page_read + 1
+                    R.string.page_,
+                    chapter.last_page_read + 1
                 )
             )
         }
-
-        chapter.scanlator?.isNotBlank()?.let { statuses.add(chapter.scanlator!!) }
-
-        if (chapter.language.isNullOrBlank() || chapter.language.equals("english", true)) {
-            chapter_language.gone()
+ if (chapter.language.isNullOrBlank() || chapter.language.equals("english", true)) {
+            binding.chapterLanguage.gone()
         } else {
-            chapter_language.visible()
-            chapter_language.text = chapter.language
+            binding.chapterLanguage.visible()
+            binding.chapterLanguage.text = chapter.language
             ChapterUtil.setTextViewForChapter(
-                chapter_language, item, showBookmark = false, hideStatus = isLocked
+                binding.chapterLanguage, item, showBookmark = false, hideStatus = isLocked
             )
         }
+        
 
-        if (front_view.translationX == 0f) {
-            read.setImageResource(
+        if (chapter.scanlator?.isNotBlank() == true) {
+            statuses.add(chapter.scanlator!!)
+        }
+
+        if (binding.frontView.translationX == 0f) {
+            binding.read.setImageResource(
                 if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
             )
-            bookmark.setImageResource(
+            binding.bookmark.setImageResource(
                 if (item.bookmark) R.drawable.ic_bookmark_off_24dp else R.drawable.ic_bookmark_24dp
             )
         }
         // this will color the scanlator the same bookmarks
         ChapterUtil.setTextViewForChapter(
-            chapter_scanlator, item, showBookmark = false, hideStatus = isLocked
+            binding.chapterScanlator,
+            item,
+            showBookmark = false,
+            hideStatus = isLocked
         )
-        chapter_scanlator.text = statuses.joinToString(" • ")
+        binding.chapterScanlator.text = statuses.joinToString(" • ")
 
         val status = when {
-            adapter.isSelected(adapterPosition) -> Download.CHECKED
+            adapter.isSelected(flexibleAdapterPosition) -> Download.State.CHECKED
             else -> item.status
         }
 
         notifyStatus(status, item.isLocked, item.progress)
         resetFrontView()
-        if (adapterPosition == 1) {
+        if (flexibleAdapterPosition == 1) {
             if (!adapter.hasShownSwipeTut.get()) showSlideAnimation()
         }
     }
@@ -109,14 +123,14 @@ class ChapterHolder(
         val animatorSet = AnimatorSet()
         val anim1 = slideAnimation(0f, slide)
         anim1.startDelay = 1000
-        anim1.addListener(StartAnimatorListener { left_view.visible() })
+        anim1.addListener(StartAnimatorListener { binding.leftView.isVisible = true })
         val anim2 = slideAnimation(slide, -slide)
         anim2.duration = 600
         anim2.startDelay = 500
         anim2.addUpdateListener {
-            if (left_view.isVisible() && front_view.translationX <= 0) {
-                left_view.gone()
-                right_view.visible()
+            if (binding.leftView.isVisible && binding.frontView.translationX <= 0) {
+                binding.leftView.isVisible = false
+                binding.rightView.isVisible = true
             }
         }
         val anim3 = slideAnimation(-slide, 0f)
@@ -131,31 +145,32 @@ class ChapterHolder(
     }
 
     private fun slideAnimation(from: Float, to: Float): ObjectAnimator {
-        return ObjectAnimator.ofFloat(front_view, View.TRANSLATION_X, from, to)
+        return ObjectAnimator.ofFloat(binding.frontView, View.TRANSLATION_X, from, to)
             .setDuration(300)
     }
 
     override fun getFrontView(): View {
-        return front_view
+        return binding.frontView
     }
 
     override fun getRearRightView(): View {
-        return right_view
+        return binding.rightView
     }
 
     override fun getRearLeftView(): View {
-        return left_view
+        return binding.leftView
     }
 
     private fun resetFrontView() {
-        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+        if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
-    fun notifyStatus(status: Int, locked: Boolean, progress: Int) = with(download_button) {
+    fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
         if (locked) {
-            gone()
+            isVisible = false
             return
         }
-        setDownloadStatus(status, progress)
+        isVisible = !localSource
+        setDownloadStatus(status, progress, animated)
     }
 }

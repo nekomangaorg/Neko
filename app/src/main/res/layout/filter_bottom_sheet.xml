@@ -15,6 +15,17 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
+        <!-- View for dragging the sheet without highlighting everything -->
+        <View
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:clickable="true"
+            android:focusable="true" />
+
         <LinearLayout
             android:id="@+id/sheet_layout"
             android:layout_width="match_parent"
@@ -58,7 +69,7 @@
                         android:focusable="true"
                         android:padding="3dp"
                         android:src="@drawable/ic_close_24dp"
-                        android:tint="@color/gray_button" />
+                        app:tint="@color/gray_button" />
 
                 </LinearLayout>
             </HorizontalScrollView>
@@ -76,6 +87,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="10dp"
+                    android:maxLines="2"
                     android:text="@string/group_library_by"
                     android:textColor="?android:attr/textColorPrimary"
                     app:icon="@drawable/ic_label_outline_24dp"
@@ -86,6 +98,7 @@
                     style="@style/Theme.Widget.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:maxLines="2"
                     android:text="@string/expand_all_categories"
                     android:textColor="?android:attr/textColorPrimary"
                     app:icon="@drawable/ic_expand_more_24dp"
@@ -99,23 +112,12 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/reorder_filters"
-                    style="@style/Theme.Widget.Button.TextButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="10dp"
-                    android:layout_marginEnd="10dp"
-                    android:text="@string/reorder_filters"
-                    android:textColor="?android:attr/textColorPrimary"
-                    app:icon="@drawable/ic_swap_vert_24dp"
-                    app:iconTint="?android:attr/textColorPrimary" />
-
-                <com.google.android.material.button.MaterialButton
                     android:id="@+id/view_options"
                     style="@style/Theme.Widget.Button.TextButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="10dp"
+                    android:maxLines="2"
                     android:text="@string/display_options"
                     android:textColor="?android:attr/textColorPrimary"
                     app:icon="@drawable/ic_tune_24dp"
@@ -132,7 +134,7 @@
             android:alpha="0.25"
             android:contentDescription="@string/drag_handle"
             android:src="@drawable/draggable_pill"
-            android:tint="?android:attr/textColorPrimary"
+            app:tint="?android:attr/textColorPrimary"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

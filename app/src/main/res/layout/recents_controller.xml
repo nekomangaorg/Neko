@@ -6,6 +6,12 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <ProgressBar
+        android:id="@+id/progress"
+        android:layout_width="75dp"
+        android:layout_height="75dp"
+        android:layout_gravity="center" />
+
     <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
         android:id="@+id/swipe_refresh"
         android:layout_width="match_parent"
@@ -28,6 +34,13 @@
         </FrameLayout>
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
+    <eu.kanade.tachiyomi.widget.EmptyView
+        android:id="@+id/recents_empty_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone"/>
+
     <View
         android:id="@+id/shadow"
         android:layout_width="match_parent"
@@ -35,10 +48,21 @@
         android:alpha="0.5"
         android:background="@drawable/shape_gradient_top_shadow"
         android:paddingBottom="10dp"
-        app:layout_anchor="@id/dl_bottom_sheet"
+        app:layout_anchor="@id/download_bottom_sheet"
         app:layout_anchorGravity="top" />
     <!-- Adding bottom sheet after main content -->
-    <include layout="@layout/download_bottom_sheet" />
+    <include layout="@layout/download_bottom_sheet"
+        android:id="@+id/download_bottom_sheet"/>
+
+    <View
+        android:id="@+id/fake_app_bar"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:alpha="0"
+        android:background="?android:attr/colorBackground"
+        android:orientation="vertical"
+        android:elevation="5dp"
+        android:layout_gravity="top|center"/>
 
     <View
         android:id="@+id/shadow2"

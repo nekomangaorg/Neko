@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.network.jsonType
+import eu.kanade.tachiyomi.network.jsonMime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.MediaType
@@ -40,11 +40,17 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "progress" to track.last_chapter_read,
                 "status" to track.toAnilistStatus()
             )
+            createDate(track.started_reading_date)?.let {
+                variables.add("startedAt", it)
+            }
+            createDate(track.finished_reading_date)?.let {
+                variables.add("completedAt", it)
+            }
             val payload = jsonObject(
                 "query" to addToLibraryQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
 
             val netResponse = authClient.newCall(request).await()
@@ -66,19 +72,32 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "listId" to track.library_id,
                 "progress" to track.last_chapter_read,
                 "status" to track.toAnilistStatus(),
-                "score" to track.score.toInt(),
-                "startedAt" to createDate(track.started_reading_date),
-                "completedAt" to createDate(track.finished_reading_date),
-
-                )
+                "score" to track.score.toInt()
+            )
+            createDate(track.started_reading_date)?.let {
+                variables.add("startedAt", it)
+            }
+            createDate(track.finished_reading_date)?.let {
+                variables.add("completedAt", it)
+            }
             val payload = jsonObject(
                 "query" to updateInLibraryQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
-            val response = authClient.newCall(request).await()
-
+            val netResponse = authClient.newCall(request).await()
+            val response = responseToJson(netResponse)
+            try {
+                val media = response["data"]["SaveMediaListEntry"].asJsonObject
+                if (track.started_reading_date == 0L) {
+                    track.started_reading_date = parseDate(media, "startedAt")
+                }
+                if (track.finished_reading_date == 0L) {
+                    track.finished_reading_date = parseDate(media, "completedAt")
+                }
+            } catch (e: Exception) {
+            }
             track
         }
     }
@@ -93,8 +112,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "query" to if (manga.anilist_id != null && !wasPreviouslyTracked) findQuery() else searchQuery(),
                 "variables" to variables
             )
-
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val netResponse = authClient.newCall(request).await()
             val response = responseToJson(netResponse)
@@ -116,7 +134,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 "query" to findLibraryMangaQuery(),
                 "variables" to variables
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val result = authClient.newCall(request).await()
 
@@ -151,7 +169,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     "variables" to variables
                 )
 
-                val body = payload.toString().toRequestBody(MediaType.jsonType())
+                val body = payload.toString().toRequestBody(jsonMime)
                 val request = Request.Builder().url(apiUrl).post(body).build()
                 val result = authClient.newCall(request).await()
                 return@withContext true
@@ -176,7 +194,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val payload = jsonObject(
                 "query" to currentUserQuery()
             )
-            val body = payload.toString().toRequestBody(MediaType.jsonType())
+            val body = payload.toString().toRequestBody(jsonMime)
             val request = Request.Builder().url(apiUrl).post(body).build()
             val netResponse = authClient.newCall(request).await()
 
@@ -223,12 +241,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         }
     }
 
-    private fun createDate(dateValue: Long): JsonObject {
-        if (dateValue == 0L) return jsonObject(
-            "year" to null,
-            "month" to null,
-            "day" to null,
-        )
+    private fun createDate(dateValue: Long): JsonObject? {
+        if (dateValue == 0L) return null
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = dateValue
         return jsonObject(
@@ -260,15 +274,15 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             return baseMangaUrl + mediaId
         }
 
-        fun authUrl() = "${baseUrl}oauth/authorize".toUri().buildUpon()
+        fun authUrl() = "${baseUrl.toUri()}oauth/authorize".toUri().buildUpon()
             .appendQueryParameter("client_id", clientId)
             .appendQueryParameter("response_type", "token")
             .build()!!
 
         fun addToLibraryQuery() =
             """
-            |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus) {
-                |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status) { 
+            |mutation AddManga(${'$'}mangaId: Int, ${'$'}progress: Int, ${'$'}status: MediaListStatus, ${'$'}startedAt: FuzzyDateInput, ${'$'}completedAt: FuzzyDateInput) {
+                |SaveMediaListEntry (mediaId: ${'$'}mangaId, progress: ${'$'}progress, status: ${'$'}status, startedAt: ${'$'}startedAt, completedAt: ${'$'}completedAt) { 
                 |   id 
                 |   status 
                 |} 
@@ -291,6 +305,16 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |id
                     |status
                     |progress
+                    |startedAt {
+                        |year
+                        |month
+                        |day
+                    |}
+                    |completedAt {
+                        |year
+                        |month
+                        |day
+                    |}
                 |}
             |}
             |""".trimMargin()

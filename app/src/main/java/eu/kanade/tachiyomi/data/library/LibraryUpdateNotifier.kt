@@ -13,14 +13,16 @@ import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
+import coil.request.Parameters
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
@@ -90,7 +92,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param errors List of entry titles that failed to update.
      * @param uri Uri for error log file containing all titles that failed.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri?) {
+    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
         if (errors.isEmpty()) {
             return
         }
@@ -101,7 +103,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 if (uri == null) {
                     setContentTitle("502: MangaDex appears to be down")
                 } else {
-                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
+                setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
                     addAction(
                         R.drawable.nnf_ic_file_folder,
                         context.getString(R.string.view_all_errors),
@@ -116,7 +118,11 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                 )
                 setSmallIcon(R.drawable.ic_neko_notification)
-
+                addAction(
+                    R.drawable.nnf_ic_file_folder,
+                    context.getString(R.string.view_all_errors),
+                    NotificationReceiver.openErrorLogPendingActivity(context, uri)
+                )
             }
                 .build()
         )
@@ -139,30 +145,29 @@ class LibraryUpdateNotifier(private val context: Context) {
                 notifications.add(
                     Pair(
                         context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                            setSmallIcon(R.drawable.ic_neko_notification)
+                            setSmallIcon(R.drawable.ic_tachi)
                             try {
                                 val request = ImageRequest.Builder(context).data(manga)
-                                    .networkCachePolicy(CachePolicy.DISABLED)
-                                    .transformations(CircleCropTransformation()).size(width = ICON_SIZE, height = ICON_SIZE)
-                                    .build()
-                                Coil.imageLoader(context)
-                                    .execute(request).drawable?.let { drawable ->
-                                        setLargeIcon((drawable as BitmapDrawable).bitmap)
-                                    }
+                                    .parameters(Parameters.Builder().set(MangaFetcher.onlyCache, true).build())
+                                    .networkCachePolicy(CachePolicy.READ_ONLY)
+                                    .transformations(CircleCropTransformation())
+                                    .size(width = ICON_SIZE, height = ICON_SIZE).build()
+
+                                Coil.imageLoader(context).execute(request).drawable?.let { drawable ->
+                                    setLargeIcon((drawable as BitmapDrawable).bitmap)
+                                }
                             } catch (e: Exception) {
                             }
                             setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                             setContentTitle(manga.title)
                             color = ContextCompat.getColor(context, R.color.colorAccent)
                             val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
-                                "${
-                                    chapterNames.take(MAX_CHAPTERS - 1)
-                                        .joinToString(", ")
-                                }, " + context.resources.getQuantityString(
-                                    R.plurals.notification_and_n_more,
-                                    (chapterNames.size - (MAX_CHAPTERS - 1)),
-                                    (chapterNames.size - (MAX_CHAPTERS - 1))
-                                )
+                                "${chapterNames.take(MAX_CHAPTERS - 1).joinToString(", ")}, " +
+                                    context.resources.getQuantityString(
+                                        R.plurals.notification_and_n_more,
+                                        (chapterNames.size - (MAX_CHAPTERS - 1)),
+                                        (chapterNames.size - (MAX_CHAPTERS - 1))
+                                    )
                             } else chapterNames.joinToString(", ")
                             setContentText(chaptersNames)
                             setStyle(NotificationCompat.BigTextStyle().bigText(chaptersNames))
@@ -170,21 +175,28 @@ class LibraryUpdateNotifier(private val context: Context) {
                             setGroup(Notifications.GROUP_NEW_CHAPTERS)
                             setContentIntent(
                                 NotificationReceiver.openChapterPendingActivity(
-                                    context, manga, chapters.first()
+                                    context,
+                                    manga,
+                                    chapters.first()
                                 )
                             )
                             addAction(
-                                R.drawable.ic_eye_24dp, context.getString(R.string.mark_as_read),
+                                R.drawable.ic_eye_24dp,
+                                context.getString(R.string.mark_as_read),
                                 NotificationReceiver.markAsReadPendingBroadcast(
                                     context,
-                                    manga, chapters, Notifications.ID_NEW_CHAPTERS
+                                    manga,
+                                    chapters,
+                                    Notifications.ID_NEW_CHAPTERS
                                 )
                             )
                             addAction(
-                                R.drawable.ic_book_24dp, context.getString(R.string.view_chapters),
+                                R.drawable.ic_book_24dp,
+                                context.getString(R.string.view_chapters),
                                 NotificationReceiver.openChapterPendingActivity(
                                     context,
-                                    manga, Notifications.ID_NEW_CHAPTERS
+                                    manga,
+                                    Notifications.ID_NEW_CHAPTERS
                                 )
                             )
                             setAutoCancel(true)
@@ -195,7 +207,6 @@ class LibraryUpdateNotifier(private val context: Context) {
             }
 
             NotificationManagerCompat.from(context).apply {
-
                 notify(
                     Notifications.ID_NEW_CHAPTERS,
                     context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
@@ -206,9 +217,9 @@ class LibraryUpdateNotifier(private val context: Context) {
                         if (updates.size > 1) {
                             setContentText(
                                 context.resources.getQuantityString(
-                                    R.plurals
-                                        .for_n_titles,
-                                    updates.size, updates.size
+                                    R.plurals.for_n_titles,
+                                    updates.size,
+                                    updates.size
                                 )
                             )
                             setStyle(
@@ -220,10 +231,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                                     )
                             )
                         } else {
-                            val firstOrNull = updates.keys.firstOrNull()
-                            firstOrNull?.apply {
-                                setContentText(this.title.chop(45))
-                            }
+                            setContentText(updates.keys.first().title.chop(45))
                         }
                         priority = NotificationCompat.PRIORITY_HIGH
                         setGroup(Notifications.GROUP_NEW_CHAPTERS)

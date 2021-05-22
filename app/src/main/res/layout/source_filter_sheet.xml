@@ -1,30 +1,56 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/source_filter_sheet"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:background="@drawable/bottom_sheet_rounded_background"
+    app:layout_constraintVertical_chainStyle="packed"
     android:backgroundTint="?android:attr/colorBackground">
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/recycler"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/card_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_space"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:cardCornerRadius="@dimen/rounded_radius"
+        app:cardElevation="0dp"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/filters_recycler"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="12dp"
+            android:paddingBottom="12dp"
+            android:layout_marginBottom="12dp"
+            android:clipToPadding="false"
+            android:background="@drawable/bottom_sheet_rounded_background"
+            android:backgroundTint="?attr/colorSecondary"
+            app:layout_constraintBottom_toTopOf="@id/title_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.cardview.widget.CardView>
+
+    <Space
+        android:id="@+id/bottom_space"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_marginTop="?attr/actionBarSize"
-        android:layout_marginBottom="?attr/actionBarSize"
-        android:clipToPadding="false" />
+        app:layout_constraintTop_toTopOf="@id/title_layout"
+        android:layout_marginTop="12dp"
+        android:layout_height="0dp"/>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
         android:layout_width="match_parent"
         android:layout_height="?attr/actionBarSize"
         android:layout_gravity="top"
-        android:background="@drawable/bottom_sheet_rounded_background"
-        android:backgroundTint="?attr/colorSecondary"
+        android:background="?attr/colorSecondary"
         android:clickable="true"
-        android:elevation="0dp"
         android:focusable="true"
         android:orientation="horizontal">
 
@@ -32,45 +58,41 @@
             android:id="@+id/reset_btn"
             style="@style/Neko.Button.TextButton"
             android:layout_width="wrap_content"
-            android:textColor="?attr/tabBarIconColor"
-            android:layout_height="match_parent"
-            android:textSize="16sp"
-            android:letterSpacing="0.0"
+            android:layout_height="wrap_content"
             android:text="@string/reset"
             app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/search_btn"
+            app:layout_constraintHorizontal_chainStyle="spread_inside"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <com.google.android.material.textview.MaterialTextView
-            android:id="@+id/toolbar_title"
-            style="@style/Neko.Headline5"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:textColor="?actionBarTintColor"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:text="Title Text" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/search_btn"
-            style="@style/Neko.Button.TextButton"
-            android:textSize="16sp"
+            style="@style/Theme.Widget.Button.Primary"
             android:layout_width="wrap_content"
-            android:textColor="?attr/tabBarIconColor"
-            android:layout_height="match_parent"
-            android:text="@string/apply"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginEnd="16dp"
+            android:text="@string/filter"
+            app:flow_verticalBias="1.0"
+            app:iconTint="?colorAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toEndOf="@id/reset_btn"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_min="150dp" />
 
+        <View
+            android:id="@+id/bottom_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@color/divider"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.constraintlayout.widget.ConstraintLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/footer_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -110,4 +132,4 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

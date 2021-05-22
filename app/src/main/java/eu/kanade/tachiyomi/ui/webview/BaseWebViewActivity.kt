@@ -11,38 +11,42 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
-import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.setDefaultSettings
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.marginBottom
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.webview_activity.*
 
-open class BaseWebViewActivity : BaseActivity() {
+open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
     private var bundle: Bundle? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        delegate.localNightMode = ThemeUtil.nightMode(preferences.theme())
-        setContentView(R.layout.webview_activity)
-        setSupportActionBar(toolbar)
+        binding = WebviewActivityBinding.inflate(layoutInflater)
+        delegate.localNightMode = preferences.nightMode().get()
+        setContentView(binding.root)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        toolbar.setNavigationOnClickListener {
+        binding.toolbar.setNavigationOnClickListener {
             super.onBackPressed()
         }
-        toolbar.navigationIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
+        val tintColor = getResourceColor(R.attr.actionBarTintColor)
+        binding.toolbar.navigationIcon?.setTint(tintColor)
+        binding.toolbar.navigationIcon?.setTint(tintColor)
+        binding.toolbar.overflowIcon?.mutate()
+        binding.toolbar.overflowIcon?.setTint(tintColor)
 
         val container: ViewGroup = findViewById(R.id.web_view_layout)
-        val content: LinearLayout = findViewById(R.id.web_linear_layout)
+        val content: LinearLayout = binding.webLinearLayout
         container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
         content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
@@ -65,8 +69,8 @@ open class BaseWebViewActivity : BaseActivity() {
                 insets.systemWindowInsetBottom
             )
         }
-        swipe_refresh.setStyle()
-        swipe_refresh.setOnRefreshListener {
+        binding.swipeRefresh.setStyle()
+        binding.swipeRefresh.setOnRefreshListener {
             refreshPage()
         }
 
@@ -84,18 +88,9 @@ open class BaseWebViewActivity : BaseActivity() {
                 window.statusBarColor = Color.BLACK
             else window.statusBarColor = getResourceColor(R.attr.colorPrimary)*/
             window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                val colorPrimary = getResourceColor(R.attr.colorPrimaryVariant)
-                if (colorPrimary == Color.WHITE) Color.BLACK
-                else getResourceColor(android.R.attr.colorPrimary)
-            }
-            // if the android q+ device has gesture nav, transparent nav bar
-            else if (v.rootWindowInsets.isBottomTappable()) {
-                getColor(android.R.color.transparent)
+                Color.BLACK
             } else {
-                ColorUtils.setAlphaComponent(
-                    getResourceColor(R.attr.colorPrimaryVariant),
-                    179
-                )
+                getResourceColor(R.attr.colorPrimaryVariant)
             }
             v.setPadding(
                 insets.systemWindowInsetLeft,
@@ -109,41 +104,44 @@ open class BaseWebViewActivity : BaseActivity() {
             insets
         }
 
-        swipe_refresh.isEnabled = false
+        binding.swipeRefresh.isEnabled = false
 
         if (bundle == null) {
-            webview.setDefaultSettings()
+            binding.webview.setDefaultSettings()
 
-            webview.webChromeClient = object : WebChromeClient() {
+            binding.webview.webChromeClient = object : WebChromeClient() {
                 override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                    progressBar.visible()
-                    progressBar.progress = newProgress
-                    if (newProgress == 100)
-                        progressBar.invisible()
+                    binding.progressBar.isVisible = true
+                    binding.progressBar.progress = newProgress
+                    if (newProgress == 100) {
+                        binding.progressBar.isInvisible = true
+                    }
                     super.onProgressChanged(view, newProgress)
                 }
             }
-            val marginB = webview.marginBottom
-            webview.setOnApplyWindowInsetsListener { v, insets ->
+            val marginB = binding.webview.marginBottom
+            binding.swipeRefresh.setOnApplyWindowInsetsListener { v, insets ->
                 val bottomInset = insets.systemWindowInsetBottom
+//                v.updatePaddingRelative(bottom = bottomInset)
                 v.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     bottomMargin = marginB + bottomInset
                 }
                 insets
             }
         } else {
-            webview.restoreState(bundle)
+            binding.webview.restoreState(bundle)
         }
     }
 
     private fun refreshPage() {
-        swipe_refresh.isRefreshing = true
-        webview.reload()
+        binding.swipeRefresh.isRefreshing = true
+        binding.webview.reload()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val lightMode = !isInNightMode()
+        setTheme(getPrefTheme(preferences).styleRes)
         window.statusBarColor = ColorUtils.setAlphaComponent(
             getResourceColor(
                 R.attr
@@ -151,42 +149,61 @@ open class BaseWebViewActivity : BaseActivity() {
             ),
             255
         )
-        toolbar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
-        toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
+        binding.toolbar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
+        binding.toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
             .style.ThemeOverlay_MaterialComponents_Dark
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
-        toolbar.navigationIcon?.setTint(tintColor)
-        toolbar.overflowIcon?.mutate()
-        toolbar.setTitleTextColor(tintColor)
-        toolbar.overflowIcon?.setTint(tintColor)
+        binding.toolbar.navigationIcon?.setTint(tintColor)
+        binding.toolbar.overflowIcon?.mutate()
+        binding.toolbar.setTitleTextColor(tintColor)
+        binding.toolbar.overflowIcon?.setTint(tintColor)
+        binding.swipeRefresh.setStyle()
 
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O)
-            window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
-        else if (window.navigationBarColor != getColor(android.R.color.transparent))
-            window.navigationBarColor = getResourceColor(android.R.attr.colorBackground)
+        window.navigationBarColor =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) getResourceColor(R.attr.colorPrimaryVariant)
+            else Color.BLACK
 
-        web_linear_layout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
+        binding.webLinearLayout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && lightMode) {
-            web_linear_layout.systemUiVisibility = web_linear_layout.systemUiVisibility.or(
-                View
-                    .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-            )
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val lightNav =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    val typedValue = TypedValue()
+                    theme.resolveAttribute(
+                        android.R.attr.windowLightNavigationBar,
+                        typedValue,
+                        true
+                    )
+                    typedValue.data == -1
+                } else {
+                    lightMode
+                }
+            if (lightNav) {
+                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility.or(
+                    View
+                        .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                )
+            } else {
+                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility.rem(
+                    View
+                        .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
+                )
+            }
         }
+
         val typedValue = TypedValue()
         theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
-
-        if (typedValue.data == -1)
+        if (typedValue.data == -1) {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        else
+        } else {
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
+        }
     }
-
     override fun onBackPressed() {
-        if (webview.canGoBack()) webview.goBack()
+        if (binding.webview.canGoBack()) binding.webview.goBack()
         else super.onBackPressed()
     }
 }

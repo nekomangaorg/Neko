@@ -23,19 +23,25 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
 
         // Create the animation (the final radius is zero).
         val anim = ViewAnimationUtils.createCircularReveal(
-            this, centerX, centerY, initialRadius.toFloat(), 0f
+            this,
+            centerX,
+            centerY,
+            initialRadius.toFloat(),
+            0f
         )
 
         // Set duration of animation.
         anim.duration = 500
 
         // make the view invisible when the animation is done
-        anim.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationEnd(animation: Animator) {
-                super.onAnimationEnd(animation)
-                this@RevealAnimationView.visibility = View.INVISIBLE
+        anim.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationEnd(animation: Animator) {
+                    super.onAnimationEnd(animation)
+                    this@RevealAnimationView.visibility = View.INVISIBLE
+                }
             }
-        })
+        )
 
         anim.start()
     }
@@ -56,7 +62,11 @@ class RevealAnimationView @JvmOverloads constructor(context: Context, attrs: Att
 
         // Create animation
         val anim = ViewAnimationUtils.createCircularReveal(
-            this, centerX, centerY, 0f, height.toFloat()
+            this,
+            centerX,
+            centerY,
+            0f,
+            height.toFloat()
         )
 
         // Set duration of animation

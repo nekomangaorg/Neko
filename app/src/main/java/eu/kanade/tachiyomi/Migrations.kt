@@ -4,6 +4,7 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -64,6 +65,19 @@ object Migrations {
             if(oldVersion < 114 && oldVersion != 0) {
                 // Force migrate all manga to the new V5 ids
                 V5MigrationJob.doWorkNow()
+            }
+            if (oldVersion < 115) {
+ // Migrate DNS over HTTPS setting
+                val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+                val wasDohEnabled = prefs.getBoolean("enable_doh", false)
+                if (wasDohEnabled) {
+                    prefs.edit {
+                        putInt(PreferenceKeys.dohProvider, PREF_DOH_CLOUDFLARE)
+                        remove("enable_doh")
+                    }
+                }
+      // Reset rotation to Free after replacing Lock
+                preferences.rotation().set(1)
             }
             return true
         }

@@ -8,13 +8,13 @@
     android:layout_marginEnd="20dp"
     android:layout_marginBottom="6dp"
     app:cardCornerRadius="25dp"
-    app:cardElevation="10dp">
+    app:cardElevation="3dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/category_hopper_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="@color/colorAccent"
+        android:background="?colorAccent"
         android:clickable="true"
         android:focusable="true">
 
@@ -24,10 +24,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
-            android:contentDescription="@string/previous"
+            android:contentDescription="@string/previous_title"
             android:padding="8dp"
             android:src="@drawable/ic_expand_less_24dp"
-            android:tint="@android:color/white"
+            app:tint="?attr/colorOnAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/category_button"
             app:layout_constraintStart_toStartOf="parent"
@@ -41,7 +41,7 @@
             android:contentDescription="@string/categories"
             android:padding="8dp"
             android:src="@drawable/ic_label_outline_24dp"
-            android:tint="@android:color/white"
+            app:tint="?attr/colorOnAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/down_category"
             app:layout_constraintStart_toEndOf="@id/up_category"
@@ -53,10 +53,10 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
-            android:contentDescription="@string/next"
+            android:contentDescription="@string/next_title"
             android:padding="8dp"
             android:src="@drawable/ic_expand_more_24dp"
-            android:tint="@android:color/white"
+            app:tint="?attr/colorOnAccent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/category_button"

@@ -20,8 +20,11 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
 import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
+import java.security.Security
 
 open class App : Application(), LifecycleObserver {
+
+    val preferences: PreferencesHelper by injectLazy()
 
     override fun onCreate() {
         super.onCreate()
@@ -36,12 +39,15 @@ open class App : Application(), LifecycleObserver {
         Iconics.registerFont(CommunityMaterial)
         Iconics.registerFont(MaterialDesignDx)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        // Reset Incognito Mode on relaunch
+        preferences.incognitoMode().set(false)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
+    @Suppress("unused")
     fun onAppBackgrounded() {
         // App in background
-        val preferences: PreferencesHelper by injectLazy()
         if (preferences.lockAfter().getOrDefault() >= 0) {
             SecureActivityDelegate.locked = true
         }

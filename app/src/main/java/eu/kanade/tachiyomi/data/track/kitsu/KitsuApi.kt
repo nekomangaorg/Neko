@@ -1,7 +1,11 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
-import com.elvishew.xlog.XLog
-import com.github.salomonbrys.kotson.*
+import com.github.salomonbrys.kotson.array
+import com.github.salomonbrys.kotson.get
+import com.github.salomonbrys.kotson.int
+import com.github.salomonbrys.kotson.jsonObject
+import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.string
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
@@ -11,12 +15,24 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
+import com.elvishew.xlog.XLog
+import com.github.salomonbrys.kotson.set
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
-import retrofit2.http.*
-
+import retrofit2.http.Body
+import retrofit2.http.DELETE
+import retrofit2.http.Field
+import retrofit2.http.FormUrlEncoded
+import retrofit2.http.GET
+import retrofit2.http.Header
+import retrofit2.http.Headers
+import retrofit2.http.PATCH
+import retrofit2.http.POST
+import retrofit2.http.Path
+import retrofit2.http.Query
+import timber.log.Timber
 
 class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) {
 
@@ -94,14 +110,14 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             rest.deleteLibManga(track.media_id)
             return true
         } catch (e: Exception) {
-            XLog.w(e)
+            Timber.w(e)
         }
         return false
     }
 
     suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         if(manga.kitsu_id !== null && !wasPreviouslyTracked) {
-            val response = client.newCall(GET(apiMangaUrl(manga.kitsu_id!!))).await()
+            val response = client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!))).await()
             val jsonData = response.body!!.string()
             var json = JsonParser.parseString(jsonData).asJsonObject
             json["data"][0]["attributes"]["id"] = json["data"][0]["id"]

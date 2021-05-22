@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.View
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
 import eu.kanade.tachiyomi.R
@@ -12,10 +13,10 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.databinding.TrackSearchDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.util.lang.plusAssign
-import kotlinx.android.synthetic.main.track_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
@@ -24,8 +25,6 @@ import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
 
 class TrackSearchDialog : DialogController {
-
-    private var dialogView: View? = null
 
     private var adapter: TrackSearchAdapter? = null
 
@@ -42,6 +41,7 @@ class TrackSearchDialog : DialogController {
     private var wasPreviouslyTracked: Boolean = false
 
     private lateinit var presenter: MangaDetailsPresenter
+    lateinit var binding: TrackSearchDialogBinding
 
     constructor(target: TrackingBottomSheet, service: TrackService, wasTracked: Boolean) : super(
         Bundle()
@@ -66,33 +66,32 @@ class TrackSearchDialog : DialogController {
             negativeButton(android.R.string.cancel)
         }
 
+        binding = TrackSearchDialogBinding.bind(dialog.getCustomView())
         if (subscriptions.isUnsubscribed) {
             subscriptions = CompositeSubscription()
         }
-
-        dialogView = dialog.view
-        onViewCreated(dialog.view, savedViewState)
+        onViewCreated(savedViewState)
 
         return dialog
     }
 
-    fun onViewCreated(view: View, savedState: Bundle?) {
+    fun onViewCreated(savedState: Bundle?) {
         // Create adapter
-        val adapter = TrackSearchAdapter(view.context)
+        val adapter = TrackSearchAdapter(binding.root.context)
         this.adapter = adapter
-        view.track_search_list.adapter = adapter
+        binding.trackSearchList.adapter = adapter
 
         // Set listeners
         selectedItem = null
 
-        subscriptions += view.track_search_list.itemClicks().subscribe { position ->
+        subscriptions += binding.trackSearchList.itemClicks().subscribe { position ->
             trackItem(position)
         }
 
         // Do an initial search based on the manga's title
         if (savedState == null) {
             val title = presenter.manga.title
-            view.track_search.append(title)
+            binding.trackSearch.append(title)
             search(title)
         }
     }
@@ -107,13 +106,12 @@ class TrackSearchDialog : DialogController {
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
         subscriptions.unsubscribe()
-        dialogView = null
         adapter = null
     }
 
     override fun onAttach(view: View) {
         super.onAttach(view)
-        searchTextSubscription = dialogView!!.track_search.textChanges()
+        searchTextSubscription = binding.trackSearch.textChanges()
             .skip(1)
             .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
             .map { it.toString() }
@@ -127,17 +125,15 @@ class TrackSearchDialog : DialogController {
     }
 
     private fun search(query: String) {
-        val view = dialogView ?: return
-        view.progress.visibility = View.VISIBLE
-        view.track_search_list.visibility = View.INVISIBLE
+        binding.progress.visibility = View.VISIBLE
+        binding.trackSearchList.visibility = View.INVISIBLE
         presenter.trackSearch(query, service, wasPreviouslyTracked)
     }
 
     fun onSearchResults(results: List<TrackSearch>) {
         selectedItem = null
-        val view = dialogView ?: return
-        view.progress.visibility = View.INVISIBLE
-        view.track_search_list.visibility = View.VISIBLE
+        binding.progress.visibility = View.INVISIBLE
+        binding.trackSearchList.visibility = View.VISIBLE
         adapter?.setItems(results)
         if (results.size == 1 && !wasPreviouslyTracked) {
             trackItem(0)
@@ -145,9 +141,8 @@ class TrackSearchDialog : DialogController {
     }
 
     fun onSearchResultsError() {
-        val view = dialogView ?: return
-        view.progress.visibility = View.VISIBLE
-        view.track_search_list.visibility = View.INVISIBLE
+        binding.progress.visibility = View.VISIBLE
+        binding.trackSearchList.visibility = View.INVISIBLE
         adapter?.setItems(emptyList())
     }
 

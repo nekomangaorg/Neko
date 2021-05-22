@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.kitsu
 
 import android.content.Context
 import android.graphics.Color
+import androidx.annotation.StringRes
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
@@ -9,6 +10,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 
@@ -25,6 +28,7 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         const val DEFAULT_SCORE = 0f
     }
 
+    @StringRes
     override fun nameRes() = R.string.kitsu
 
     private val gson: Gson by injectLazy()
@@ -46,6 +50,8 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
+
+    override fun completedStatus(): Int = MyAnimeList.COMPLETED
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
@@ -83,7 +89,10 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return df.format(track.score)
     }
 
-    override suspend fun update(track: Track): Track {
+    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
+        if (setToReadStatus && track.status == PLAN_TO_READ && track.last_chapter_read != 0) {
+            track.status = READING
+        }
         if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
             track.status = COMPLETED
         }

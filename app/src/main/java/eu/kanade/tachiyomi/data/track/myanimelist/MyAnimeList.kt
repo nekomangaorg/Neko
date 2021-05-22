@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -57,6 +58,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
 
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
+    override fun completedStatus(): Int = COMPLETED
+
     override fun getScoreList(): List<String> {
         return IntRange(0, 10).map(Int::toString)
     }
@@ -68,10 +71,14 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     override suspend fun add(track: Track): Track {
         track.status = READING
         track.score = 0F
+        updateNewTrackInfo(track, PLAN_TO_READ)
         return api.updateItem(track)
     }
 
-    override suspend fun update(track: Track): Track {
+    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
+        if (setToReadStatus && track.status == PLAN_TO_READ && track.last_chapter_read != 0) {
+            track.status = READING
+        }
         return api.updateItem(track)
     }
 
@@ -145,7 +152,6 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             null
         }
     }
-
     companion object {
         const val READING = 1
         const val COMPLETED = 2

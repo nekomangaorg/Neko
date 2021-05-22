@@ -59,7 +59,7 @@
         tools:text="English" />
 
     <FrameLayout
-        android:id="@+id/bookmark_layout"
+        android:id="@+id/bookmark_button"
         android:layout_width="50dp"
         android:layout_height="50dp"
         android:layout_marginEnd="12dp"
@@ -77,6 +77,15 @@
             android:layout_height="30dp"
             android:layout_gravity="center"
             android:src="@drawable/ic_bookmark_border_24dp"
-            android:tint="?android:attr/textColorHint" />
+            app:tint="?android:attr/textColorHint" />
+
+        <ProgressBar
+            android:id="@+id/progress"
+            style="?android:attr/progressBarStyleSmall"
+            android:layout_width="30dp"
+            android:layout_height="30dp"
+            android:layout_gravity="center"
+            android:visibility="gone"
+            tools:visibility="visible"/>
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

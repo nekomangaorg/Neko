@@ -21,6 +21,9 @@ data class BackupChapter(
     // chapterNumber is called number is 1.x
     @ProtoNumber(9) var chapterNumber: Float = 0F,
     @ProtoNumber(10) var sourceOrder: Int = 0,
+
+    // J2K specific values
+    @ProtoNumber(800) var pagesLeft: Int = 0,
 ) {
     fun toChapterImpl(): ChapterImpl {
         return ChapterImpl().apply {
@@ -34,6 +37,7 @@ data class BackupChapter(
             date_fetch = this@BackupChapter.dateFetch
             date_upload = this@BackupChapter.dateUpload
             source_order = this@BackupChapter.sourceOrder
+            pages_left = this@BackupChapter.pagesLeft
         }
     }
 
@@ -49,7 +53,8 @@ data class BackupChapter(
                 lastPageRead = chapter.last_page_read,
                 dateFetch = chapter.date_fetch,
                 dateUpload = chapter.date_upload,
-                sourceOrder = chapter.source_order
+                sourceOrder = chapter.source_order,
+                pagesLeft = chapter.pages_left,
             )
         }
     }

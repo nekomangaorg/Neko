@@ -119,10 +119,11 @@ class SwitchPreferenceCategory @JvmOverloads constructor(
 
     override fun onSetInitialValue(restoreValue: Boolean, defaultValue: Any?) {
         setChecked(
-            if (restoreValue)
+            if (restoreValue) {
                 getPersistedBoolean(mChecked)
-            else
+            } else {
                 defaultValue as Boolean
+            }
         )
     }
 }

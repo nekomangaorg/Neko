@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.library
 
 import android.content.Context
+import com.github.salomonbrys.kotson.nullInt
 import com.github.salomonbrys.kotson.nullLong
 import com.github.salomonbrys.kotson.nullString
 import com.github.salomonbrys.kotson.set
@@ -29,7 +30,8 @@ class CustomMangaManager(val context: Context) {
 
         val json = try {
             Gson().fromJson(
-                Scanner(editJson).useDelimiter("\\Z").next(), JsonObject::class.java
+                Scanner(editJson).useDelimiter("\\Z").next(),
+                JsonObject::class.java
             )
         } catch (e: Exception) {
             null
@@ -47,13 +49,14 @@ class CustomMangaManager(val context: Context) {
                 description = mangaObject["description"]?.nullString
                 genre = mangaObject["genre"]?.asJsonArray?.mapNotNull { it.nullString }
                     ?.joinToString(", ")
+                status = mangaObject["status"]?.nullInt ?: 0
             }
             id to manga
         }.toMap().toMutableMap()
     }
 
     fun saveMangaInfo(manga: MangaJson) {
-        if (manga.title == null && manga.author == null && manga.artist == null && manga.description == null && manga.genre == null) {
+        if (manga.title == null && manga.author == null && manga.artist == null && manga.description == null && manga.genre == null && manga.status == null) {
             customMangaMap.remove(manga.id)
         } else {
             customMangaMap[manga.id] = MangaImpl().apply {
@@ -63,6 +66,7 @@ class CustomMangaManager(val context: Context) {
                 artist = manga.artist
                 description = manga.description
                 genre = manga.genre?.joinToString(", ")
+                status = manga.status ?: -1
             }
         }
         saveCustomInfo()
@@ -83,17 +87,24 @@ class CustomMangaManager(val context: Context) {
 
     fun Manga.toJson(): MangaJson {
         return MangaJson(
-            id!!, title, author, artist, description, genre?.split(", ")?.toTypedArray()
+            id!!,
+            title,
+            author,
+            artist,
+            description,
+            genre?.split(", ")?.toTypedArray(),
+            status.takeUnless { it == -1 }
         )
     }
 
     data class MangaJson(
-        val id: Long,
+        var id: Long,
         val title: String? = null,
         val author: String? = null,
         val artist: String? = null,
         val description: String? = null,
-        val genre: Array<String>? = null
+        val genre: Array<String>? = null,
+        val status: Int? = null
     ) {
 
         override fun equals(other: Any?): Boolean {

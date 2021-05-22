@@ -16,7 +16,7 @@
             android:id="@+id/close_right"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:tint="@color/md_white_1000"
+            app:tint="@color/md_white_1000"
             android:layout_gravity="end|center"
             android:contentDescription="@string/cancel"
             android:layout_marginEnd="21dp"
@@ -37,7 +37,7 @@
             android:contentDescription="@string/cancel"
             android:layout_gravity="start|center"
             android:layout_marginStart="21dp"
-            android:tint="@color/md_white_1000"
+            app:tint="@color/md_white_1000"
             android:src="@drawable/ic_close_24dp" />
     </FrameLayout>
 
@@ -56,7 +56,7 @@
             android:layout_gravity="start"
             android:contentDescription="@string/reorder"
             android:scaleType="center"
-            android:tint="?android:attr/textColorPrimary"
+            app:tint="?android:attr/textColorPrimary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -88,7 +88,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:textAppearance="@style/TextAppearance.Regular.Caption"
-            app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            app:layout_constraintEnd_toStartOf="@+id/download_menu"
             android:layout_marginEnd="16dp"
             app:layout_constraintStart_toStartOf="@+id/title"
             app:layout_constraintTop_toBottomOf="@+id/title"
@@ -101,7 +101,7 @@
             android:layout_height="wrap_content"
             android:layout_marginBottom="8dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            app:layout_constraintEnd_toStartOf="@+id/download_menu"
             app:layout_constraintStart_toEndOf="@+id/reorder"
             android:layout_marginEnd="16dp"
             app:layout_constraintTop_toBottomOf="@+id/chapter_title" />
@@ -115,12 +115,12 @@
             android:maxLines="1"
             app:layout_constraintBottom_toBottomOf="@+id/title"
             android:layout_marginEnd="16dp"
-            app:layout_constraintEnd_toStartOf="@+id/migration_menu"
+            app:layout_constraintEnd_toStartOf="@+id/download_menu"
             app:layout_constraintTop_toTopOf="@+id/title"
             tools:text="(0/10)" />
 
         <ImageView
-            android:id="@+id/migration_menu"
+            android:id="@+id/download_menu"
             android:layout_width="44dp"
             android:layout_height="@dimen/material_component_lists_single_line_with_avatar_height"
             android:layout_toEndOf="@id/download_progress_text"

@@ -68,4 +68,8 @@ class DownloadBottomPresenter(val sheet: DownloadBottomSheet) {
     fun cancelDownload(download: Download) {
         downloadManager.deletePendingDownloads(download)
     }
+
+    fun cancelDownloads(downloads: List<Download>) {
+        downloadManager.deletePendingDownloads(*downloads.toTypedArray())
+    }
 }

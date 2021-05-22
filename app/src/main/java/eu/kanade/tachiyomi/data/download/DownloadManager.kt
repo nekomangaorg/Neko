@@ -81,6 +81,10 @@ class DownloadManager(val context: Context) {
         downloader.stop(reason)
     }
 
+    fun setPlaceholder() {
+        downloader.setPlaceholder()
+    }
+
     /**
      * Tells the downloader to pause downloads.
      */
@@ -106,10 +110,11 @@ class DownloadManager(val context: Context) {
         queue.add(0, download)
         reorderQueue(queue)
         if (isPaused()) {
-            if (DownloadService.isRunning(context))
+            if (DownloadService.isRunning(context)) {
                 downloader.start()
-            else
+            } else {
                 DownloadService.start(context)
+            }
         }
     }
 
@@ -229,32 +234,34 @@ class DownloadManager(val context: Context) {
     fun deleteChapters(chapters: List<Chapter>, manga: Manga, source: Source) {
         GlobalScope.launch(Dispatchers.IO) {
             try {
-                val wasPaused = isPaused()
-                if (chapters.isEmpty()) {
-                    DownloadService.stop(context)
-                    downloader.queue.clear()
-                    return@launch
-                }
-                downloader.pause()
-                downloader.queue.remove(chapters)
-                if (!wasPaused && downloader.queue.isNotEmpty()) {
-                    downloader.start()
-                } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
-                    DownloadService.stop(context)
-                } else if (downloader.queue.isEmpty()) {
-                    DownloadService.callListeners(false)
-                    downloader.stop()
-                }
-                queue.remove(chapters)
-                val chapterDirs =
-                    provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
-                        chapters, manga, source
-                    )
-                chapterDirs.forEach { it.delete() }
-                cache.removeChapters(chapters, manga)
-                if (cache.getDownloadCount(manga, true) == 0) { // Delete manga directory if empty
-                    chapterDirs.firstOrNull()?.parentFile?.delete()
-                }
+            val wasPaused = isPaused()
+            if (chapters.isEmpty()) {
+                DownloadService.stop(context)
+                downloader.queue.clear()
+                return@launch
+            }
+            downloader.pause()
+            downloader.queue.remove(chapters)
+            if (!wasPaused && downloader.queue.isNotEmpty()) {
+                downloader.start()
+            } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
+                DownloadService.stop(context)
+            } else if (downloader.queue.isEmpty()) {
+                DownloadService.callListeners(false)
+                downloader.stop()
+            }
+            queue.remove(chapters)
+            val chapterDirs =
+                provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
+                    chapters,
+                    manga,
+                    source
+                )
+            chapterDirs.forEach { it.delete() }
+            cache.removeChapters(chapters, manga)
+            if (cache.getDownloadCount(manga, true) == 0) { // Delete manga directory if empty
+                chapterDirs.firstOrNull()?.parentFile?.delete()
+            }
                 queue.updateListeners()
             } catch (e: Exception) {
                 XLog.e("error deleting chapters", e)
@@ -324,6 +331,7 @@ class DownloadManager(val context: Context) {
         queue.remove(manga)
         provider.findMangaDir(manga, sourceManager.getMangadex())?.delete()
         cache.removeManga(manga)
+        queue.updateListeners()
     }
 
     /**
@@ -354,7 +362,7 @@ class DownloadManager(val context: Context) {
      * @param oldChapter the existing chapter with the old name.
      * @param newChapter the target chapter with the new name.
      */
-    fun renameChapter(manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
+    fun renameChapter(source: Source, manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
         val oldName = provider.getChapterDirName(oldChapter)
         val newName = provider.getChapterDirName(newChapter)
         val mangaDir = provider.getMangaDir(manga, sourceManager.getMangadex())
@@ -370,7 +378,7 @@ class DownloadManager(val context: Context) {
 
     fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
     fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
-    
+
     //forceRefresh the cache
     fun refreshCache() {
         cache.forceRenewCache()

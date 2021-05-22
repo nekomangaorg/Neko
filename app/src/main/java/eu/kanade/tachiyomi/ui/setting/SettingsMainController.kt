@@ -16,7 +16,7 @@ import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 
-class SettingsMainController : SettingsController() {
+class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     init {
         setHasOptionsMenu(true)
@@ -26,6 +26,9 @@ class SettingsMainController : SettingsController() {
         titleRes = R.string.settings
 
         val size = 18
+		val tintColor = context.getResourceColor(R.attr.colorAccent)
+
+        
 
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_warning)
@@ -56,31 +59,31 @@ class SettingsMainController : SettingsController() {
             titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
-        preference {
+     preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_file_download)
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
-
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_sync)
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
-        preference {
+     preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_backup)
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
+            iconRes = R.drawable.ic_security_24dp
+            iconTint = tintColor
+            titleRes = R.string.security
+            onClick { navigateTo(SettingsSecurityController()) }
+        }
+       preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_code)
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
-        }
-        preference {
-            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_info)
-            titleRes = R.string.about
-            onClick { navigateTo(AboutController()) }
         }
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_volunteer_activism)
@@ -90,20 +93,35 @@ class SettingsMainController : SettingsController() {
                 startActivity(intent)
             }
         }
+        this
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
-        menu.findItem(R.id.action_bug_report).isVisible = BuildConfig.DEBUG
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_help -> activity?.openInBrowser(URL_HELP)
-            R.id.action_bug_report -> activity?.openInBrowser(URL_BUG_REPORT)
-            else -> return super.onOptionsItemSelected(item)
-        }
-        return true
+        // Initialize search option.
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.maxWidth = Int.MAX_VALUE
+
+        // Change hint to show global search.
+        searchView.queryHint = applicationContext?.getString(R.string.search_settings)
+
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                    SettingsSearchController.lastSearch = "" // reset saved search query
+                    router.pushController(
+                        RouterTransaction.with(SettingsSearchController())
+                    )
+                    return true
+                }
+
+                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                    return true
+                }
+            }
+        )
     }
 
     private fun navigateTo(controller: Controller) {
@@ -112,6 +130,5 @@ class SettingsMainController : SettingsController() {
 
     private companion object {
         private const val URL_HELP = "https://tachiyomi.org/help/"
-        private const val URL_BUG_REPORT = "https://github.com/CarlosEsco/Neko/issues"
     }
 }

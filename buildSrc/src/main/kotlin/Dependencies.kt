@@ -182,7 +182,7 @@ object Versions {
     const val conductor = "2.1.5"
     const val directionalViewPager = "a844dbca0a"
     const val diskLruCache = "2.0.2"
-    const val fastAdapter = "5.0.0"
+    const val fastAdapter = "5.4.1"
     const val filePicker = "2.5.2"
     const val firebase = "17.5.0"
     const val firebaseCrashlytics = "17.2.1"
@@ -199,7 +199,7 @@ object Versions {
     const val junit = "4.13"
     const val kotlin = "1.4.32"
     const val kotlinCoroutines = "1.3.9"
-    const val kotlinSerialization = "1.0.1"
+    const val kotlinSerialization = "1.1.0"
     const val kotson = "2.5.0"
     const val ktlint = "9.4.0"
     const val loadingButton = "2.2.0"
@@ -209,8 +209,8 @@ object Versions {
     const val moshi = "1.9.3"
     const val nucleus = "3.0.0"
     const val numberSlidingPicker = "1.0.3"
-    const val okhttp = "4.8.1"
-    const val okio = "2.6.0"
+    const val okhttp = "4.9.1"
+    const val okio = "2.10.0"
     const val photoView = "2.3.0"
     const val reactiveNetwork = "0.13.0"
     const val requerySqlite = "3.31.0"
@@ -235,5 +235,7 @@ object Versions {
     const val viewStatePagerAdapter = "1.1.0"
     const val viewToolTip = "1.2.2"
     const val xlog = "1.8.0"
+    const val kotlinter = "3.4.0"
+
 }
 

@@ -1,0 +1,125 @@
+<animated-vector
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:name="vector"
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+            <group
+                android:name="main_group"
+                android:pivotX="12"
+                android:pivotY="12">
+                <path
+                    android:name="check_dl"
+                    android:pathData="M 21 7 L 9 19 L 3.5 13.5 L 4.91 12.09 L 9 16.17 L 19.59 5.59 L 21 7 Z"
+                    android:fillColor="#000"
+                    android:fillAlpha="0"
+                    android:strokeWidth="1"/>
+            </group>
+            <group android:name="start_group">
+                <path
+                    android:name="start_dl"
+                    android:pathData="M 11 4 L 13 4 L 13 4 L 13 16 L 18.5 10.5 L 19.92 11.92 L 12 19.84 L 4.08 11.92 L 5.5 10.5 L 11 16 L 11 4 L 11 4"
+                    android:fillColor="#000000"/>
+                <group
+                    android:name="check_group"
+                    android:translateY="12">
+                    <path
+                        android:name="start_check"
+                        android:pathData="M 19.59 5.59 L 21 7 L 21 7 L 10.479 17.521 L 10.479 17.521 L 9 19 L 9 19 L 3.5 13.5 L 4.91 12.09 L 9 16.17 L 19.325 5.855 L 19.59 5.59"
+                        android:fillColor="#000"
+                        android:fillAlpha="0"
+                        android:strokeWidth="1"/>
+                </group>
+            </group>
+        </vector>
+    </aapt:attr>
+    <target android:name="check_dl">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="pathData"
+                    android:startOffset="1250"
+                    android:duration="450"
+                    android:valueFrom="M 19.59 5.59 L 21 7 L 21 7 L 10.479 17.521 L 10.479 17.521 L 9 19 L 9 19 L 3.5 13.5 L 4.91 12.09 L 9 16.17 L 19.325 5.855 L 19.59 5.59"
+                    android:valueTo="M 11 4 L 13 4 L 13 4 L 13 16 L 18.5 10.5 L 19.92 11.92 L 12 19.84 L 4.08 11.92 L 5.5 10.5 L 11 16 L 11 4 L 11 4"
+                    android:valueType="pathType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:duration="400"
+                    android:valueFrom="0"
+                    android:valueTo="0"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="400"
+                    android:duration="100"
+                    android:valueFrom="1"
+                    android:valueTo="1"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+            </set>
+        </aapt:attr>
+    </target>
+    <target android:name="main_group">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="rotation"
+                android:startOffset="1250"
+                android:duration="450"
+                android:valueFrom="0"
+                android:valueTo="360"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/fast_out_slow_in"/>
+        </aapt:attr>
+    </target>
+    <target android:name="start_group">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="translateY"
+                android:duration="400"
+                android:valueFrom="0"
+                android:valueTo="-12"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/fast_out_slow_in"/>
+        </aapt:attr>
+    </target>
+    <target android:name="start_dl">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="fillAlpha"
+                android:duration="250"
+                android:valueFrom="1"
+                android:valueTo="0"
+                android:valueType="floatType"
+                android:interpolator="@android:interpolator/fast_out_slow_in"/>
+        </aapt:attr>
+    </target>
+    <target android:name="start_check">
+        <aapt:attr name="android:animation">
+            <set>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="150"
+                    android:duration="250"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                <objectAnimator
+                    android:propertyName="fillAlpha"
+                    android:startOffset="400"
+                    android:duration="100"
+                    android:valueFrom="0"
+                    android:valueTo="0"
+                    android:valueType="floatType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

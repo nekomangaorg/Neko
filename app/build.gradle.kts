@@ -56,6 +56,10 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     flavorDimensions("default")
 
     productFlavors {
@@ -68,6 +72,7 @@ android {
     }
 
     lintOptions {
+        disable("MissingTranslation")
         isAbortOnError = false
         isCheckReleaseBuilds = false
     }
@@ -79,9 +84,6 @@ android {
     kotlinOptions {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
-}
-androidExtensions {
-    isExperimental = true
 }
 
 dependencies {

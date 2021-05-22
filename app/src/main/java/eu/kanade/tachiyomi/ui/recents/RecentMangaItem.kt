@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
+import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterItem
 
 class RecentMangaItem(
@@ -16,7 +17,7 @@ class RecentMangaItem(
     chapter: Chapter = ChapterImpl(),
     header: AbstractHeaderItem<*>?
 ) :
-    BaseChapterItem<RecentMangaHolder, AbstractHeaderItem<*>>(chapter, header) {
+    BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
 
     override fun getLayoutRes(): Int {
         return if (mch.manga.id == null) R.layout.recents_footer_item
@@ -26,12 +27,13 @@ class RecentMangaItem(
     override fun createViewHolder(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
-    ): RecentMangaHolder {
-        return RecentMangaHolder(view, adapter as RecentMangaAdapter)
+    ): BaseChapterHolder {
+        return if (mch.manga.id == null) RecentMangaFooterHolder(view, adapter as RecentMangaAdapter)
+        else RecentMangaHolder(view, adapter as RecentMangaAdapter)
     }
 
     override fun isSwipeable(): Boolean {
-        return mch.manga.id != null && !chapter.read
+        return mch.manga.id != null
     }
 
     override fun equals(other: Any?): Boolean {
@@ -51,11 +53,11 @@ class RecentMangaItem(
 
     override fun bindViewHolder(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-        holder: RecentMangaHolder,
+        holder: BaseChapterHolder,
         position: Int,
         payloads: MutableList<Any?>?
     ) {
-        if (mch.manga.id == null) holder.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
-        else holder.bind(this)
+        if (mch.manga.id == null) (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
+        else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)
     }
 }

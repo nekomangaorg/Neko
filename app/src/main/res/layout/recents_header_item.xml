@@ -20,31 +20,4 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
         tools:text="@string/recent_updates" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/action_history"
-        android:visibility="gone"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/ic_history_24dp"
-        android:layout_marginStart="12dp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:text="@string/history"
-        style="@style/Theme.Widget.Button.RoundedOutline" />
-
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/action_update"
-        android:layout_width="wrap_content"
-        android:visibility="gone"
-        android:layout_height="wrap_content"
-        app:icon="@drawable/ic_update_24dp"
-        android:layout_marginEnd="12dp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        android:text="@string/updates"
-        style="@style/Theme.Widget.Button.RoundedOutline" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.ui.manga.chapter.ChapterFilterLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical">
@@ -52,4 +52,4 @@
         android:layout_marginStart="12dp"
         android:layout_marginEnd="12dp"
         android:text="@string/show_bookmarked_chapters" />
-</LinearLayout>
+</eu.kanade.tachiyomi.ui.manga.chapter.ChapterFilterLayout>

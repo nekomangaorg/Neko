@@ -2,25 +2,21 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.isVisible
 import coil.clear
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
+import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.databinding.MangaListItemBinding
+import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.manga_list_item.*
-import kotlinx.android.synthetic.main.manga_list_item.view.*
-import kotlinx.android.synthetic.main.unread_download_badge.*
 
 /**
- * Class used to hold the displayed data of a manga in the library, like the cover or the title.
+ * Class used to hold the displayed data of a manga in the library, like the cover or the binding.title.
  * All the elements from the layout file "item_library_list" are available in this class.
  *
  * @param view the inflated view for this holder.
  * @param adapter the adapter handling this holder.
- * @param listener a listener to react to single tap and long tap events.
  * @constructor creates a new library holder.
  */
 
@@ -29,6 +25,8 @@ class LibraryListHolder(
     adapter: LibraryCategoryAdapter
 ) : LibraryHolder(view, adapter) {
 
+    private val binding = MangaListItemBinding.bind(view)
+
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.
@@ -36,62 +34,73 @@ class LibraryListHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
-
-        title.visible()
-        constraint_layout.minHeight = 56.dpToPx
+        binding.title.isVisible = true
+        binding.constraintLayout.minHeight = 56.dpToPx
         if (item.manga.isBlank()) {
-            constraint_layout.minHeight = 0
-            constraint_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            binding.constraintLayout.minHeight = 0
+            binding.constraintLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 height = ViewGroup.MarginLayoutParams.WRAP_CONTENT
             }
             if (item.manga.status == -1) {
-                title.text = null
-                title.gone()
-            } else
-                title.text = itemView.context.getString(R.string.category_is_empty)
-            title.textAlignment = View.TEXT_ALIGNMENT_CENTER
-            card.gone()
-            badge_view.gone()
-            padding.gone()
-            subtitle.gone()
+                binding.title.text = null
+                binding.title.isVisible = false
+            } else {
+                binding.title.text = itemView.context.getString(R.string.category_is_empty)
+            }
+            binding.title.textAlignment = View.TEXT_ALIGNMENT_CENTER
+            binding.card.isVisible = false
+            binding.unreadDownloadBadge.badgeView.isVisible = false
+            binding.padding.isVisible = false
+            binding.subtitle.isVisible = false
             return
         }
-        constraint_layout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+        binding.constraintLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             height = 52.dpToPx
         }
-        padding.visible()
-        card.visible()
-        title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
+        binding.padding.isVisible = true
+        binding.card.isVisible = true
+        binding.title.textAlignment = View.TEXT_ALIGNMENT_TEXT_START
 
-        // Update the title of the manga.
-        title.text = item.manga.title
-        setUnreadBadge(badge_view, item)
+        // Update the binding.title of the manga.
+        binding.title.text = item.manga.title.highlightText(item.filter, color)
+        setUnreadBadge(binding.unreadDownloadBadge.badgeView, item)
 
-        subtitle.text = item.manga.author?.trim()
-        title.post {
-            if (title.text == item.manga.title) {
-                subtitle.visibleIf(title.lineCount == 1 && !item.manga.author.isNullOrBlank())
-            }
+        val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
+            item.manga.author?.trim() ?: ""
+        } else {
+            listOfNotNull(
+                item.manga.author?.trim()?.takeIf { it.isNotBlank() },
+                item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
+            ).joinToString(", ")
+        }
+
+        binding.subtitle.text = authorArtist.highlightText(item.filter, color)
+        binding.title.maxLines = 2
+        binding.title.post {
+            val hasAuthorInFilter =
+                item.filter.isNotBlank() && authorArtist.contains(item.filter, true)
+            binding.subtitle.isVisible = binding.title.lineCount <= 1 || hasAuthorInFilter
+            binding.title.maxLines = if (hasAuthorInFilter) 1 else 2
         }
 
         // Update the cover.
         if (item.manga.thumbnail_url == null) {
-            cover_thumbnail.clear()
+            binding.coverThumbnail.clear()
         } else {
-            val id = item.manga.id ?: return
-            cover_thumbnail.loadLibraryManga(item.manga)
+            item.manga.id ?: return
+            binding.coverThumbnail.loadManga(item.manga)
         }
     }
 
     override fun onActionStateChanged(position: Int, actionState: Int) {
         super.onActionStateChanged(position, actionState)
         if (actionState == 2) {
-            view.card.isDragged = true
+            binding.card.isDragged = true
         }
     }
 
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
-        view.card.isDragged = false
+        binding.card.isDragged = false
     }
 }

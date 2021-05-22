@@ -10,7 +10,6 @@ import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.backup.full.FullBackupManager
 import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -20,7 +19,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
 
     override fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
-        val uri = preferences.backupsDirectory().getOrDefault().toUri()
+        val uri = preferences.backupsDirectory().get().toUri()
         val flags = BackupCreateService.BACKUP_ALL
         return try {
             FullBackupManager(context).createBackup(uri, flags, true)
@@ -36,16 +35,18 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     companion object {
         private const val TAG = "BackupCreator"
 
-        fun setupTask(prefInterval: Int? = null) {
+        fun setupTask(context: Context, prefInterval: Int? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
-            val interval = prefInterval ?: preferences.backupInterval().getOrDefault()
+            val interval = prefInterval ?: preferences.backupInterval().get()
             if (interval > 0) {
                 val request = PeriodicWorkRequestBuilder<BackupCreatorJob>(
-                    interval.toLong(), TimeUnit.HOURS,
-                    10, TimeUnit.MINUTES
+                        interval.toLong(),
+                        TimeUnit.HOURS,
+                        10,
+                        TimeUnit.MINUTES
                 )
-                    .addTag(TAG)
-                    .build()
+                        .addTag(TAG)
+                        .build()
 
                 WorkManager.getInstance().enqueueUniquePeriodicWork(TAG, ExistingPeriodicWorkPolicy.REPLACE, request)
             } else {

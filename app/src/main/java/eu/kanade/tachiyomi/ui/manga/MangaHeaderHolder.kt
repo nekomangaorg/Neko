@@ -6,6 +6,12 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
+import coil.request.CachePolicy
+import com.google.android.material.button.MaterialButton
 import androidx.core.graphics.drawable.toBitmap
 import coil.Coil
 import coil.loadAny
@@ -19,6 +25,10 @@ import com.mikepenz.iconics.utils.contourColorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
+import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
+import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -26,6 +36,8 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -39,143 +51,199 @@ import kotlinx.android.synthetic.main.manga_details_controller.*
 import kotlinx.android.synthetic.main.manga_header_item.*
 import java.util.Locale
 
+@SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
-    private val view: View,
+    view: View,
     private val adapter: MangaDetailsAdapter,
-    startExpanded: Boolean
+    startExpanded: Boolean,
+    isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
+
+    val binding: MangaHeaderItemBinding? = try {
+        MangaHeaderItemBinding.bind(view)
+    } catch (e: Exception) {
+        null
+    }
+    private val chapterBinding: ChapterHeaderItemBinding? = try {
+        ChapterHeaderItemBinding.bind(view)
+    } catch (e: Exception) {
+        null
+    }
 
     private var showReadingButton = true
     private var showMoreButton = true
+    var hadSelection = false
 
     init {
-        chapter_layout.setOnClickListener { adapter.delegate.showChapterFilter() }
-        if (start_reading_button != null) {
-            start_reading_button.setOnClickListener { adapter.delegate.readNextChapter() }
-            top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+
+        if (binding == null) {
+            with(chapterBinding) {
+                this ?: return@with
+                chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
+            }
+        }
+        with(binding) {
+            this ?: return@with
+            chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
+            startReadingButton.setOnClickListener { adapter.delegate.readNextChapter() }
+            topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = adapter.delegate.topCoverHeight()
             }
-            more_button.setOnClickListener { expandDesc() }
-            manga_summary.setOnClickListener {
-                if (more_button_group.visibility == View.VISIBLE) {
+            moreButton.setOnClickListener { expandDesc() }
+            mangaSummary.setOnClickListener {
+                if (moreButton.isVisible) {
                     expandDesc()
-                } else {
+                } else if (!hadSelection) {
                     collapseDesc()
+                } else {
+                    hadSelection = false
                 }
             }
-            manga_summary.setOnLongClickListener {
-                if (manga_summary.isTextSelectable && !adapter.recyclerView.canScrollVertically(-1)) {
-                    (adapter.delegate as MangaDetailsController).swipe_refresh.isEnabled = false
+            mangaSummary.setOnLongClickListener {
+                if (mangaSummary.isTextSelectable && !adapter.recyclerView.canScrollVertically(
+                        -1
+                    )
+                ) {
+                    (adapter.delegate as MangaDetailsController).binding.swipeRefresh.isEnabled =
+                        false
                 }
                 false
             }
-            manga_summary.setOnTouchListener { _, event ->
-                if (event.action == MotionEvent.ACTION_DOWN) view.requestFocus()
+            mangaSummary.setOnTouchListener { _, event ->
+                if (event.action == MotionEvent.ACTION_DOWN) {
+                    view.requestFocus()
+                }
+                if (event.actionMasked == MotionEvent.ACTION_UP) {
+                    hadSelection = mangaSummary.hasSelection()
+                    (adapter.delegate as MangaDetailsController).binding.swipeRefresh.isEnabled =
+                        true
+                }
                 false
             }
             if (!itemView.resources.isLTR) {
-                more_bg_gradient.rotation = 180f
+                moreBgGradient.rotation = 180f
             }
-            less_button.setOnClickListener { collapseDesc() }
-            manga_genres_tags.setOnTagClickListener {
+            lessButton.setOnClickListener { collapseDesc() }
+            mangaGenresTags.setOnTagClickListener {
                 adapter.delegate.tagClicked(it)
             }
-            webview_button.setOnClickListener { adapter.delegate.showExternalSheet() }
-            similar_button.setOnClickListener { adapter.delegate.openSimilar() }
+            webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
+            similarButton.setOnClickListener { adapter.delegate.openSimilar() }
 
-
-            merge_button.setOnClickListener { adapter.delegate.openMerge() }
-
-            share_button.setOnClickListener { adapter.delegate.prepareToShareManga() }
-            favorite_button.setOnClickListener {
+            shareButton.setOnClickListener { adapter.delegate.prepareToShareManga() }
+            favoriteButton.setOnClickListener {
                 adapter.delegate.favoriteManga(false)
-            }
-            favorite_button.setOnLongClickListener {
-                adapter.delegate.favoriteManga(true)
-                true
             }
 
             title.setOnLongClickListener {
                 adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
                 true
             }
-            manga_author.setOnLongClickListener {
-                adapter.delegate.copyToClipboard(manga_author.text.toString(), R.string.author)
+            /*mangaAuthor.setOnClickListener {
+                mangaAuthor.text?.let { adapter.delegate.globalSearch(it.toString()) }
+            }*/
+            mangaAuthor.setOnLongClickListener {
+                adapter.delegate.copyToClipboard(
+                    mangaAuthor.text.toString(),
+                    R.string.author
+                )
                 true
             }
-            manga_cover.setOnClickListener { adapter.delegate.zoomImageFromThumb(cover_card) }
-            track_button.setOnClickListener { adapter.delegate.showTrackingSheet() }
+            mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
+            trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
             if (startExpanded) expandDesc()
             else collapseDesc()
-        } else {
-            filter_button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                marginEnd = 12.dpToPx
-            }
+            if (isTablet) chapterLayout.isVisible = false
         }
     }
 
     private fun expandDesc() {
-        if (more_button.visibility == View.VISIBLE) {
-            manga_summary.maxLines = Integer.MAX_VALUE
-            manga_summary.setTextIsSelectable(true)
-            manga_genres_tags.visible()
-            less_button.visible()
-            more_button_group.gone()
-            title.maxLines = Integer.MAX_VALUE
+        binding ?: return
+        if (binding.moreButton.visibility == View.VISIBLE) {
+            binding.mangaSummary.maxLines = Integer.MAX_VALUE
+            binding.mangaSummary.setTextIsSelectable(true)
+            binding.mangaGenresTags.isVisible = true
+            binding.lessButton.isVisible = true
+            binding.moreButtonGroup.isVisible = false
+            binding.title.maxLines = Integer.MAX_VALUE
+            binding.mangaSummary.requestFocus()
         }
     }
 
     private fun collapseDesc() {
-        manga_summary.setTextIsSelectable(false)
-        manga_summary.isClickable = true
-        manga_summary.maxLines = 3
-        manga_genres_tags.gone()
-        less_button.gone()
-        more_button_group.visible()
-        title.maxLines = 4
+        binding ?: return
+        binding.mangaSummary.setTextIsSelectable(false)
+        binding.mangaSummary.isClickable = true
+        binding.mangaSummary.maxLines = 3
+        binding.mangaGenresTags.isVisible = false
+        binding.lessButton.isVisible = false
+        binding.moreButtonGroup.isVisible = true
+        binding.title.maxLines = 4
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
+        }
+    }
+
+    fun bindChapters() {
+        val presenter = adapter.delegate.mangaPresenter()
+        val count = presenter.chapters.size
+        if (binding != null) {
+            binding.chaptersTitle.text =
+                itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+            binding.filtersText.text = presenter.currentFilters()
+        } else if (chapterBinding != null) {
+            chapterBinding.chaptersTitle.text =
+                itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+            chapterBinding.filtersText.text = presenter.currentFilters()
         }
     }
 
     @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.delegate.mangaPresenter()
-        title.text = manga.title
+        if (binding == null) {
+            if (chapterBinding != null) {
+                val count = presenter.chapters.size
+                chapterBinding.chaptersTitle.text =
+                    itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+                chapterBinding.filtersText.text = presenter.currentFilters()
+            }
+            return
+        }
+        binding.title.text = manga.title
 
-        if (manga.genre.isNullOrBlank().not()) manga_genres_tags.setTags(
+        if (manga.genre.isNullOrBlank().not()) binding.mangaGenresTags.setTags(
             manga.genre?.split(",")?.map(String::trim)
         )
-        else manga_genres_tags.setTags(emptyList())
-
+        else binding.mangaGenresTags.setTags(emptyList())
 
         if (manga.author == manga.artist || manga.artist.isNullOrBlank()) {
-            manga_author.text = manga.author?.trim()
+            binding.mangaAuthor.text = manga.author?.trim()
         } else {
-            manga_author.text = listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
+            binding.mangaAuthor.text = listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
-
-        manga_summary.text =
+        binding.mangaSummary.text =
             if (manga.description.isNullOrBlank()) itemView.context.getString(R.string.no_description)
             else manga.description?.trim()
 
-        manga_summary.post {
-            if (sub_item_group.visibility != View.GONE) {
-                if ((manga_summary.lineCount < 3 && manga.genre.isNullOrBlank()) || less_button.isVisible()) {
-                    manga_summary.setTextIsSelectable(true)
-                    more_button_group.gone()
-                    showMoreButton = less_button.isVisible()
-                } else {
-                    more_button_group.visible()
-                }
-            }
+        binding.mangaSummary.post {
+//            if (binding.subItemGroup.isVisible) {
+//                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
+//                    binding.mangaSummary.setTextIsSelectable(true)
+//                    binding.moreButtonGroup.isVisible = false
+//                    showMoreButton = binding.lessButton.isVisible
+//                } else {
+//                    binding.moreButtonGroup.isVisible = true
+//                }
+//            }
             if (adapter.hasFilter()) collapse()
             else expand()
         }
-        manga_summary_label.text = itemView.context.getString(
-            R.string.about_this_, manga.mangaType(itemView.context)
+        binding.mangaSummaryLabel.text = itemView.context.getString(
+            R.string.about_this_,
+            manga.seriesType(itemView.context)
         )
-        with(favorite_button) {
+        with(binding.favoriteButton) {
             val icon = when {
                 item.isLocked -> MaterialDesignDx.Icon.gmf_lock
                 item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
@@ -187,15 +255,15 @@ class MangaHeaderHolder(
 
         val tracked = presenter.isTracked() && !item.isLocked
 
-        with(track_button) {
+        with(binding.trackButton) {
             setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_art_track, size = 32))
         }
 
-        with(similar_button) {
+        with(binding.similarButton) {
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_account_tree))
         }
 
-        with(merge_button) {
+        with(binding.mergeButton) {
             visibleIf(manga.status != SManga.COMPLETED || presenter.preferences.useCacheSource())
             val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
             if (presenter.manga.isMerged().not()) {
@@ -207,17 +275,18 @@ class MangaHeaderHolder(
             setImageDrawable(iconics)
         }
 
-        with(webview_button) {
+        with(binding.webviewButton) {
             setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_web))
         }
-        with(share_button) {
+        with(binding.shareButton) {
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_share))
         }
 
-        with(start_reading_button) {
+
+        with(binding.startReadingButton) {
             val nextChapter = presenter.getNextUnreadChapter()
-            visibleIf(presenter.chapters.isNotEmpty() && !item.isLocked && !adapter.hasFilter())
-            showReadingButton = isVisible()
+            isVisible = presenter.chapters.isNotEmpty() && !item.isLocked && !adapter.hasFilter()
+            showReadingButton = isVisible
             isEnabled = (nextChapter != null)
             text = if (nextChapter != null) {
                 val readTxt =
@@ -237,14 +306,14 @@ class MangaHeaderHolder(
         }
 
         val count = presenter.chapters.size
-        chapters_title.text = itemView.resources.getQuantityString(R.plurals.chapters, count, count)
+        binding.chaptersTitle.text = itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
 
-        top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = adapter.delegate.topCoverHeight()
         }
 
-        manga_status.visibleIf(manga.status != 0)
-        manga_status.text = (
+        binding.mangaStatus.isVisible = manga.status != 0
+        binding.mangaStatus.text = (
             itemView.context.getString(
                 when (manga.status) {
                     SManga.ONGOING -> R.string.ongoing
@@ -270,87 +339,114 @@ class MangaHeaderHolder(
 
         manga.genre?.let {
             r18_badge.visibleIf(it.contains("Hentai", true))
-        }
+                }
+            )
+            )
+        binding.mangaSource.text = presenter.source.toString()
 
         manga_lang_flag.visibility = View.VISIBLE
         when (manga.lang_flag?.toLowerCase(Locale.US)) {
             "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
-            "kr" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
-            "jp" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
+            "ko" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
+            "ja" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
             else -> manga_lang_flag.visibility = View.GONE
         }
 
-        filters_text.text = presenter.currentFilters()
+        binding.filtersText.text = presenter.currentFilters()
+
+        if (manga.source == LocalSource.ID) {
+            binding.webviewButton.isVisible = false
+            binding.shareButton.isVisible = false
+        }
 
         if (!manga.initialized) return
         updateCover(manga)
     }
 
+    fun clearDescFocus() {
+        binding ?: return
+        binding.mangaSummary.setTextIsSelectable(false)
+        binding.mangaSummary.clearFocus()
+    }
+
+    private fun MaterialButton.checked(checked: Boolean) {
+        if (checked) {
+            backgroundTintList = ColorStateList.valueOf(
+                ColorUtils.setAlphaComponent(
+                    context.getResourceColor(R.attr.colorAccent),
+                    75
+                )
+            )
+            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+        } else {
+            resetStrokeColor()
+            backgroundTintList =
+                ContextCompat.getColorStateList(context, android.R.color.transparent)
+        }
+    }
+
     fun setTopHeight(newHeight: Int) {
-        top_view.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        binding ?: return
+        if (newHeight == binding.topView.height) return
+        binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = newHeight
         }
     }
 
     fun setBackDrop(color: Int) {
-        true_backdrop.setBackgroundColor(color)
+        binding ?: return
+        binding.trueBackdrop.setBackgroundColor(color)
     }
 
+
     fun collapse() {
-        val shouldHide = more_button.visibility == View.VISIBLE || more_button.visibility == View.INVISIBLE
-        sub_item_group.gone()
-        start_reading_button.gone()
-        more_button_group.visInvisIf(!shouldHide)
-        less_button.visibleIf(shouldHide)
-        manga_genres_tags.visibleIf(shouldHide)
+        binding ?: return
+        binding.subItemGroup.isVisible = false
+        binding.startReadingButton.isVisible = false
+        if (binding.moreButton.isVisible || binding.moreButton.isInvisible) {
+            binding.moreButtonGroup.isInvisible = true
+        } else {
+            binding.lessButton.isVisible = false
+            binding.mangaGenresTags.isVisible = false
+        }
     }
 
     fun updateCover(manga: Manga) {
+        binding ?: return
         if (!manga.initialized) return
-
-        manga_cover.loadAny(
+        val drawable = adapter.controller.binding.mangaCoverFull.drawable
+        binding.mangaCover.loadManga(
             manga,
             builder = {
-                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+                placeholder(drawable)
+                error(drawable)
+                if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
+                diskCachePolicy(CachePolicy.READ_ONLY)
             }
         )
-
-        val request = ImageRequest.Builder(view.context)
-            .data(manga)
-            .allowHardware(false) // Disable hardware bitmaps.
-            .target { drawable ->
-                // Generate the Palette on a background thread.
-                adapter.delegate.generatePalette(drawable.toBitmap())
-            }
-            .build()
-
-        Coil.imageLoader(view.context).enqueue(request)
-
-
-        backdrop.loadAny(
+        binding.backdrop.loadManga(
             manga,
             builder = {
-                if (manga.favorite) networkCachePolicy(CachePolicy.DISABLED)
+                placeholder(drawable)
+                error(drawable)
+                if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
+                diskCachePolicy(CachePolicy.READ_ONLY)
             }
         )
     }
 
     fun expand() {
-        sub_item_group.visible()
-        if (!showMoreButton) more_button_group.gone()
+        binding ?: return
+        binding.subItemGroup.isVisible = true
+        if (!showMoreButton) binding.moreButtonGroup.isVisible = false
         else {
-            if (manga_summary.maxLines != Integer.MAX_VALUE) more_button_group.visible()
+            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.isVisible = true
             else {
-                less_button.visible()
-                manga_genres_tags.visible()
+                binding.lessButton.isVisible = true
+                binding.mangaGenresTags.isVisible = true
             }
         }
-        start_reading_button.visibleIf(showReadingButton)
-    }
-
-    fun showSimilarToolTip(activity: Activity?) {
-        val act = activity ?: return
-        SimilarToolTip(activity, view.context, similar_button)
+        binding.startReadingButton.isVisible = showReadingButton
     }
 
     override fun onLongClick(view: View?): Boolean {

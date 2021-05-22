@@ -121,21 +121,23 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         animatorSet.duration = ANIMATOR_DURATION_TIME.toLong()
         animatorSet.interpolator = DecelerateInterpolator()
         animatorSet.start()
-        animatorSet.addListener(object : Animator.AnimatorListener {
-            override fun onAnimationStart(animation: Animator) {
-            }
+        animatorSet.addListener(
+            object : Animator.AnimatorListener {
+                override fun onAnimationStart(animation: Animator) {
+                }
 
-            override fun onAnimationEnd(animation: Animator) {
-                isZooming = false
-                currentScale = toRate
-            }
+                override fun onAnimationEnd(animation: Animator) {
+                    isZooming = false
+                    currentScale = toRate
+                }
 
-            override fun onAnimationCancel(animation: Animator) {
-            }
+                override fun onAnimationCancel(animation: Animator) {
+                }
 
-            override fun onAnimationRepeat(animation: Animator) {
+                override fun onAnimationRepeat(animation: Animator) {
+                }
             }
-        })
+        )
     }
 
     fun zoomFling(velocityX: Int, velocityY: Int): Boolean {

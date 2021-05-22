@@ -43,7 +43,7 @@ fun syncChaptersWithSource(
             manga_id = manga.id
             source_order = i
         }
-    }
+        }
 
     // Chapters from the source not in db.
     val toAdd = mutableListOf<Chapter>()
@@ -69,6 +69,7 @@ fun syncChaptersWithSource(
             toAdd.add(sourceChapter)
         } else {
 
+        	source.prepareNewChapter(sourceChapter, manga)
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
@@ -91,6 +92,7 @@ fun syncChaptersWithSource(
 
     // Recognize number for new chapters.
     toAdd.forEach {
+        source.prepareNewChapter(it, manga)
         ChapterRecognition.parseChapterNumber(it, manga)
     }
 
@@ -106,33 +108,9 @@ fun syncChaptersWithSource(
         }
     }
 
-    val dupes = dbChapters.groupBy { it.url }.filter { it.value.size > 1 }.map {
-        it.value.firstOrNull { !it.read } ?: it.value.first()
-    }.toMutableList()
-    if (dupes.isNotEmpty()) {
-        dupes.addAll(toDelete)
-        toDelete = dupes.toList()
-    }
-
-    // Fix order in source.
-    db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
-
-    // Return if there's nothing to add, delete or change, avoiding unnecessary db transactions.
+    // Return if there's nothing to add, delete or change, avoid unnecessary db transactions.
     if (toAdd.isEmpty() && toDelete.isEmpty() && toChange.isEmpty()) {
-        val topChapters = dbChapters.sortedByDescending { it.date_upload }.take(4)
-        val newestDate = topChapters.getOrNull(0)?.date_upload ?: 0L
-
-        // Recalculate update rate if unset and enough chapters are present
-        if (manga.next_update == 0L && topChapters.size > 1) {
-            var delta = 0L;
-            for (i in 0 until topChapters.size - 1) {
-                delta += (topChapters[i].date_upload - topChapters[i + 1].date_upload)
-            }
-            delta /= topChapters.size - 1
-            manga.next_update = newestDate + delta
-            db.updateNextUpdated(manga).executeAsBlocking()
-        }
-
+        val newestDate = dbChapters.maxOfOrNull { it.date_upload } ?: 0L
         if (newestDate != 0L && newestDate != manga.last_update) {
             manga.last_update = newestDate
             db.updateLastUpdated(manga).executeAsBlocking()
@@ -180,25 +158,17 @@ fun syncChaptersWithSource(
         if (toChange.isNotEmpty()) {
             db.insertChapters(toChange).executeAsBlocking()
         }
-        val topChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource()).sortedByDescending { it.date_upload }.take(4)
-        // Recalculate next update since chapters were changed
-        if (topChapters.size > 1) {
-            var delta = 0L;
-            for (i in 0 until topChapters.size - 1) {
-                delta += (topChapters[i].date_upload - topChapters[i + 1].date_upload)
-            }
-            delta /= topChapters.size - 1
-            manga.next_update = topChapters[0].date_upload + delta
-            db.updateNextUpdated(manga).executeAsBlocking()
-        }
+
+        // Fix order in source.
+        db.fixChaptersSourceOrder(sourceChapters).executeAsBlocking()
 
         // Set this manga as updated since chapters were changed
-        val newestChapter = topChapters.getOrNull(0)
-        val dateFetch = newestChapter?.date_upload ?: manga.last_update
-        if (dateFetch == 0L) {
-            if (toAdd.isNotEmpty())
+        val newestChapterDate = db.getChapters(manga).executeAsBlocking().maxOfOrNull { it.date_upload } ?: 0L
+        if (newestChapterDate == 0L) {
+            if (toAdd.isNotEmpty()) {
                 manga.last_update = Date().time
-        } else manga.last_update = dateFetch
+            }
+        } else manga.last_update = newestChapterDate
         db.updateLastUpdated(manga).executeAsBlocking()
     }
 

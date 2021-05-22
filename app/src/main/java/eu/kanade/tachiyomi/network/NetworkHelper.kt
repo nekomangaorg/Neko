@@ -28,6 +28,8 @@ class NetworkHelper(val context: Context) {
 
     private val mangaDexLoginHelper: MangaDexLoginHelper by injectLazy()
 
+    private val preferences: PreferencesHelper by injectLazy()
+
     private val cacheDir = File(context.cacheDir, "network_cache")
 
     private val cacheSize = 5L * 1024 * 1024 // 5 MiB
@@ -52,24 +54,9 @@ class NetworkHelper(val context: Context) {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(ChuckerInterceptor(context))
                 }
-                if (preferences.enableDoh()) {
-                    dns(
-                        DnsOverHttps.Builder().client(build())
-                            .url("https://cloudflare-dns.com/dns-query".toHttpUrl())
-                            .bootstrapDnsHosts(
-                                listOf(
-                                    InetAddress.getByName("162.159.36.1"),
-                                    InetAddress.getByName("162.159.46.1"),
-                                    InetAddress.getByName("1.1.1.1"),
-                                    InetAddress.getByName("1.0.0.1"),
-                                    InetAddress.getByName("162.159.132.53"),
-                                    InetAddress.getByName("2606:4700:4700::1111"),
-                                    InetAddress.getByName("2606:4700:4700::1001"),
-                                    InetAddress.getByName("2606:4700:4700::0064"),
-                                    InetAddress.getByName("2606:4700:4700::6400")
-                                )
-                            ).build()
-                    )
+                when (preferences.dohProvider()) {
+                    PREF_DOH_CLOUDFLARE -> dohCloudflare()
+                    PREF_DOH_GOOGLE -> dohGoogle()
                 }
                 if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
                     val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {

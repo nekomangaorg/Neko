@@ -125,12 +125,12 @@ interface MangaQueries : DbProvider {
 
     fun updateMangaInfo(manga: Manga) = db.put()
         .`object`(manga)
-        .withPutResolver(MangaInfoPutResolver())
+        .withPutResolver(MangaTitlePutResolver())
         .prepare()
 
-    fun resetMangaInfo(manga: Manga) = db.put()
+    fun updateMangaInfo(manga: Manga) = db.put()
         .`object`(manga)
-        .withPutResolver(MangaInfoPutResolver(true))
+        .withPutResolver(MangaInfoPutResolver())
         .prepare()
 
     fun deleteManga(manga: Manga) = db.delete().`object`(manga).prepare()
@@ -160,6 +160,16 @@ interface MangaQueries : DbProvider {
         .withQuery(
             RawQuery.builder()
                 .query(getLastReadMangaQuery())
+                .observesTables(MangaTable.TABLE)
+                .build()
+        )
+        .prepare()
+
+    fun getLastFetchedManga() = db.get()
+        .listOfObjects(Manga::class.java)
+        .withQuery(
+            RawQuery.builder()
+                .query(getLastFetchedMangaQuery())
                 .observesTables(MangaTable.TABLE)
                 .build()
         )

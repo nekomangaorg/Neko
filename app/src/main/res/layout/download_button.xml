@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <eu.kanade.tachiyomi.ui.download.DownloadButton xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/download_button"
     android:clickable="true"
     android:focusable="true"
@@ -39,7 +40,7 @@
 
     <ImageView
         android:id="@+id/download_icon"
-        android:tint="?colorAccent"
+        app:tint="?colorAccent"
         android:layout_gravity="center"
         android:layout_width="30dp"
         android:layout_height="30dp"

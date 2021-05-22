@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/layer_full_width" android:end="0dp" android:start="64dp" android:drawable="@drawable/rect_ripple"/>
+    <item android:id="@+id/layer_one_item" android:end="48dp" android:start="64dp" android:drawable="@drawable/rect_ripple" />
+</layer-list>

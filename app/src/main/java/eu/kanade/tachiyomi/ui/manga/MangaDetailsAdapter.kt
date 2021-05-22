@@ -97,7 +97,8 @@ class MangaDetailsAdapter(
     private fun getChapterName(item: ChapterItem): String {
         return if (item.chapter_number > 0) {
             recyclerView.context.getString(
-                R.string.chapter_, decimalFormat.format(item.chapter_number)
+                R.string.chapter_,
+                decimalFormat.format(item.chapter_number)
             )
         } else {
             item.name
@@ -119,12 +120,12 @@ class MangaDetailsAdapter(
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
-        fun openSimilar()
-        fun openMerge()
+        fun openInWebView()
         fun startDownloadRange(position: Int)
         fun readNextChapter()
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
+        fun globalSearch(text: String)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int)
@@ -132,7 +133,10 @@ class MangaDetailsAdapter(
         fun showTrackingSheet()
         fun updateScroll()
         fun setFavButtonPopup(popupView: View)
+
         fun showExternalSheet()
         fun generatePalette(input: Bitmap)
+        fun openSimilar()
+        fun openMerge()
     }
 }

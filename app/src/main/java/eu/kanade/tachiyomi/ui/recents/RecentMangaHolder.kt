@@ -2,97 +2,182 @@ package eu.kanade.tachiyomi.ui.recents
 
 import android.app.Activity
 import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageView
+import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.image.coil.loadLibraryManga
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.image.coil.loadManga
+import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.isLocal
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
-import kotlinx.android.synthetic.main.download_button.*
-import kotlinx.android.synthetic.main.recent_manga_item.*
 
 class RecentMangaHolder(
     view: View,
     val adapter: RecentMangaAdapter
 ) : BaseChapterHolder(view, adapter) {
 
-    init {
-        card_layout?.setOnClickListener { adapter.delegate.onCoverClick(adapterPosition) }
-    }
+    private val binding = RecentMangaItemBinding.bind(view)
 
-    fun bind(recentsType: Int) {
-        when (recentsType) {
-            RecentMangaHeaderItem.CONTINUE_READING -> {
-                title.setText(R.string.view_history)
-            }
-            RecentMangaHeaderItem.NEW_CHAPTERS -> {
-                title.setText(R.string.view_all_updates)
-            }
-        }
+    init {
+        binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
+        binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
     }
 
     fun bind(item: RecentMangaItem) {
-        title.apply {
-            text = item.chapter.name
+        val showDLs = adapter.showDownloads
+        val showRemoveHistory = adapter.showRemoveHistory
+        val showTitleFirst = adapter.showTitleFirst
+        binding.downloadButton.downloadButton.isVisible = when (showDLs) {
+            RecentMangaAdapter.ShowRecentsDLs.None -> false
+            RecentMangaAdapter.ShowRecentsDLs.OnlyUnread, RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded -> !item.chapter.read
+            RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded -> true
+            RecentMangaAdapter.ShowRecentsDLs.All -> true
+        } && !item.mch.manga.isLocal()
+
+        val isUpdates = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES &&
+            !adapter.showUpdatedTime
+        binding.cardLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            height = (if (isUpdates) 40 else 80).dpToPx
+            width = (if (isUpdates) 40 else 60).dpToPx
+        }
+        listOf(binding.title, binding.subtitle).forEach {
+            it.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                if (isUpdates) {
+                    if (it == binding.title) topMargin = 5.dpToPx
+                    endToStart = R.id.button_layout
+                    endToEnd = -1
+                } else {
+                    if (it == binding.title) topMargin = 2.dpToPx
+                    endToStart = -1
+                    endToEnd = R.id.front_view
+                }
+            }
+        }
+        binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
+            if (isUpdates) {
+                topToBottom = -1
+                topToTop = R.id.front_view
+            } else {
+                topToTop = -1
+                topToBottom = R.id.subtitle
+            }
+        }
+        with(binding.coverThumbnail) {
+            adjustViewBounds = !isUpdates
+            scaleType = if (isUpdates) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
+        }
+        listOf(binding.coverThumbnail, binding.card).forEach {
+            it.updateLayoutParams<ViewGroup.LayoutParams> {
+                width = if (isUpdates) {
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                } else {
+                    ViewGroup.LayoutParams.WRAP_CONTENT
+                }
+            }
+        }
+        binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
+        binding.title.apply {
+            text = if (!showTitleFirst) {
+                item.chapter.name
+            } else {
+                item.mch.manga.title
+            }
             ChapterUtil.setTextViewForChapter(this, item)
         }
-        subtitle.apply {
-            text = item.mch.manga.title
+        binding.subtitle.apply {
+            text = if (!showTitleFirst) {
+                item.mch.manga.title
+            } else {
+                item.chapter.name
+            }
             setTextColor(ChapterUtil.readColor(context, item))
         }
-        val notValidNum = item.mch.chapter.chapter_number <= 0
-        body.text = when {
-            item.mch.chapter.id == null -> body.context.getString(
-                R.string.added_, item.mch.manga.date_added.timeSpanFromNow
+        if (binding.frontView.translationX == 0f) {
+            binding.read.setImageResource(
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
             )
-            item.mch.history.id == null -> body.context.getString(
-                R.string.updated_, item.chapter.date_upload.timeSpanFromNow
+        }
+        val notValidNum = item.mch.chapter.chapter_number <= 0
+        binding.body.isVisible = !isUpdates
+        binding.body.text = when {
+            item.mch.chapter.id == null -> binding.body.context.getString(
+                R.string.added_,
+                item.mch.manga.date_added.timeSpanFromNow(itemView.context)
+            )
+            isUpdates -> ""
+            item.mch.history.id == null -> binding.body.context.getString(
+                R.string.updated_,
+                item.chapter.date_upload.timeSpanFromNow(itemView.context)
             )
             item.chapter.id != item.mch.chapter.id ->
-                body.context.getString(
-                    R.string.read_, item.mch.history.last_read.timeSpanFromNow
-                ) + "\n" + body.context.getString(
+                binding.body.context.getString(
+                    R.string.read_,
+                    item.mch.history.last_read.timeSpanFromNow
+                ) + "\n" + binding.body.context.getString(
                     if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
                     if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
                 )
             item.chapter.pages_left > 0 && !item.chapter.read ->
-                body.context.getString(
-                    R.string.read_, item.mch.history.last_read.timeSpanFromNow
+                binding.body.context.getString(
+                    R.string.read_,
+                    item.mch.history.last_read.timeSpanFromNow(itemView.context)
                 ) + "\n" + itemView.resources.getQuantityString(
-                    R.plurals.pages_left, item.chapter.pages_left, item.chapter.pages_left
+                    R.plurals.pages_left,
+                    item.chapter.pages_left,
+                    item.chapter.pages_left
                 )
-            else -> body.context.getString(
-                R.string.read_, item.mch.history.last_read.timeSpanFromNow
+            else -> binding.body.context.getString(
+                R.string.read_,
+                item.mch.history.last_read.timeSpanFromNow(itemView.context)
             )
         }
         if ((itemView.context as? Activity)?.isDestroyed != true) {
-            cover_thumbnail.loadLibraryManga(item.mch.manga)
+            binding.coverThumbnail.loadManga(item.mch.manga)
         }
-        notifyStatus(
-            if (adapter.isSelected(adapterPosition)) Download.CHECKED else item.status,
-            item.progress
-        )
+        if (!item.mch.manga.isLocal()) {
+            notifyStatus(
+                if (adapter.isSelected(flexibleAdapterPosition)) Download.State.CHECKED else item.status,
+                item.progress,
+                item.chapter.read
+            )
+        }
         resetFrontView()
     }
 
     private fun resetFrontView() {
-        if (front_view.translationX != 0f) itemView.post { adapter.notifyItemChanged(adapterPosition) }
+        if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
     override fun onLongClick(view: View?): Boolean {
         super.onLongClick(view)
-        val item = adapter.getItem(adapterPosition) as? RecentMangaItem ?: return false
+        val item = adapter.getItem(flexibleAdapterPosition) as? RecentMangaItem ?: return false
         return item.mch.history.id != null
     }
 
-    fun notifyStatus(status: Int, progress: Int) =
-        download_button.setDownloadStatus(status, progress)
+    fun notifyStatus(status: Download.State, progress: Int, isRead: Boolean, animated: Boolean = false) {
+        binding.downloadButton.downloadButton.setDownloadStatus(status, progress, animated)
+        val isChapterRead =
+            if (adapter.showDownloads == RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded) isRead else false
+        binding.downloadButton.downloadButton.isVisible =
+            when (adapter.showDownloads) {
+                RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
+                RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded ->
+                    status !in Download.State.CHECKED..Download.State.NOT_DOWNLOADED || !isChapterRead
+                else -> binding.downloadButton.downloadButton.isVisible
+            }
+    }
 
     override fun getFrontView(): View {
-        return front_view
+        return binding.frontView
     }
 
     override fun getRearRightView(): View {
-        return right_view
+        return binding.rightView
     }
 }

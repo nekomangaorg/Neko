@@ -15,7 +15,9 @@ import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.getFilePicker
@@ -29,7 +31,7 @@ class SettingsDownloadController : SettingsController() {
 
     private val db: DatabaseHelper by injectLazy()
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.downloads
 
         preference {
@@ -64,8 +66,11 @@ class SettingsDownloadController : SettingsController() {
                 key = Keys.removeAfterReadSlots
                 titleRes = R.string.remove_after_read
                 entriesRes = arrayOf(
-                    R.string.never, R.string.last_read_chapter,
-                    R.string.second_to_last, R.string.third_to_last, R.string.fourth_to_last,
+                    R.string.never,
+                    R.string.last_read_chapter,
+                    R.string.second_to_last,
+                    R.string.third_to_last,
+                    R.string.fourth_to_last,
                     R.string.fifth_to_last
                 )
                 entryRange = -1..4
@@ -74,6 +79,7 @@ class SettingsDownloadController : SettingsController() {
         }
 
         val dbCategories = db.getCategories().executeAsBlocking()
+        val categories = listOf(Category.createDefault(context)) + dbCategories
 
         preferenceCategory {
             titleRes = R.string.download_new_chapters
@@ -86,30 +92,19 @@ class SettingsDownloadController : SettingsController() {
             multiSelectListPreferenceMat(activity) {
                 key = Keys.downloadNewCategories
                 titleRes = R.string.categories_to_include_in_download
-                entries = dbCategories.map { it.name }
-                entryValues = dbCategories.map { it.id.toString() }
+                entries = categories.map { it.name }
+                entryValues = categories.map { it.id.toString() }
                 allSelectionRes = R.string.all
 
-                preferences.downloadNew().asObservable()
-                    .subscribeUntilDestroy { isVisible = it }
-
-                preferences.downloadNewCategories().asObservable()
-                    .subscribeUntilDestroy {
-                        val selectedCategories = it
-                            .mapNotNull { id -> dbCategories.find { it.id == id.toInt() } }
-                            .sortedBy { it.order }
-
-                        customSummary = if (selectedCategories.isEmpty())
-                            resources?.getString(R.string.all)
-                        else
-                            selectedCategories.joinToString { it.name }
-                    }
+                preferences.downloadNew().asImmediateFlowIn(viewScope) { isVisible = it }
             }
             preferenceCategory {
+                titleRes = R.string.automatic_removal
+
                 intListPreference(activity) {
                     key = Keys.deleteRemovedChapters
                     titleRes = R.string.delete_removed_chapters
-                    customSummary = activity?.getString(R.string.delete_downloaded_if_removed_online)
+                    summary = activity?.getString(R.string.delete_downloaded_if_removed_online)
                     entriesRes = arrayOf(
                         R.string.ask_on_chapters_page,
                         R.string.always_keep,
@@ -178,7 +173,7 @@ class SettingsDownloadController : SettingsController() {
 
         private fun getExternalDirs(): List<File> {
             val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + resources?.getString(R.string.neko_app_name) +
+                File.separator + resources?.getString(R.string.app_name) +
                 File.separator + "downloads"
 
             return mutableListOf(File(defaultDir)) +

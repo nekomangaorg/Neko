@@ -4,7 +4,7 @@
     <!--============-->
     <!-- Base Theme -->
     <!--============-->
-    <style name="Theme" />
+    <style name="Theme"/>
 
     <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
@@ -14,10 +14,10 @@
         <item name="colorPrimary">@color/app_color_primary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
-        <item name="colorSecondaryVariant">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/app_color_primary</item>
-        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorPrimaryDark">?colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorAccentText">@color/colorAccentText</item>
+        <item name="colorControlActivated">?colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
@@ -32,6 +32,8 @@
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
         <item name="android:fontFamily">@font/metropolis_regular</item>
         <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="colorOnAccent">@color/md_white_1000</item>
+
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
@@ -39,17 +41,18 @@
         <item name="preferenceTheme">@style/Neko.Preference</item>
 
         <!-- Custom Attributes-->
-        <item name="actionBarTintColor">@color/textColorPrimary</item>
+        <item name="actionBarTintColor">?android:textColorPrimary</item>
         <item name="tabBarIconColor">?colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/status_bar</item>
         <item name="android:navigationBarColor">#B3000000</item>
-        <item name="android:colorEdgeEffect">@color/colorAccent</item>
+        <item name="android:colorEdgeEffect">?colorAccent</item>
+        <item name="tabHighlightBackground">@color/accent_alpha</item>
 
         <!-- Material Dialog colors -->
-        <item name="md_color_title">@color/textColorPrimary</item>
+        <item name="md_color_title">?android:attr/textColorPrimary</item>
         <item name="md_color_content">@color/text_color_secondary</item>
-        <item name="md_color_button_text">@color/colorAccent</item>
+        <item name="md_color_button_text">?colorAccent</item>
         <item name="md_background_color">@color/dialog</item>
         <item name="md_color_widget">@color/colorAccent</item>
         <item name="md_button_casing">literal</item>
@@ -66,13 +69,28 @@
         <item name="colorSecondary">@color/app_color_primary</item>
         <item name="tabBarIconColor">@color/md_white_1000</item>
         <item name="tabBarIconInactive">@color/md_white_1000_50</item>
+        <item name="tabHighlightBackground">@color/md_white_1000_50</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
+    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi"/>
+    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled"/>
+    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled"/>
+    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi"/>
+    <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi">
+        <item name="colorPrimary">@color/primaryDuskDawn</item>
+        <item name="colorAccent">@color/colorAccentDuskDawn</item>
+        <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
+        <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
+        <item name="colorSecondary">@color/backgroundDuskDawn</item>
+        <item name="background">@color/backgroundDuskDawn</item>
+        <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
+        <item name="android:colorBackground">@color/backgroundDuskDawn</item>
+        <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
+    </style>
 
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
 
     <!--===============-->
     <!-- Launch Screen -->
