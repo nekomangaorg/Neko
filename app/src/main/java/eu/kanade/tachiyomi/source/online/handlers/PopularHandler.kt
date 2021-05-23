@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
-import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
@@ -59,17 +58,7 @@ class PopularHandler {
         val mlResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
         val mangaList = mlResponse.results.map {
-            var coverUrl = MdUtil.coverApi.replace("{uuid}", it.data.id)
-            val coverUrlId = it.relationships.firstOrNull { it.type == "cover_art" }?.id
-            if (coverUrlId != null) {
-                runCatching {
-                    val response = network.client.newCall(GET(MdUtil.coverUrl(it.data.id, coverUrlId))).execute()
-                    val json = MdUtil.jsonParser.decodeFromString<CoverListResponse>(response.body!!.string())
-                    json.results.firstOrNull()?.data?.attributes?.fileName?.let { fileName ->
-                        coverUrl = "${MdUtil.cdnUrl}/covers/${it.data.id}/$fileName"
-                    }
-                }
-            }
+            val coverUrl = MdUtil.getTempCover(it)
             MdUtil.createMangaEntry(it, coverUrl)
         }
         return MangasPage(mangaList, hasMoreResults)

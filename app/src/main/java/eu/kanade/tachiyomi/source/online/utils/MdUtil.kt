@@ -52,7 +52,7 @@ class MdUtil {
             }.build().toString()
         }
 
-        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/cover/?manga[]=$mangaId&ids[]=$coverId"
+        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
 
         const val coverApi = "https://coverapi.orell.dev/api/v1/mdaltimage/manga/{uuid}/cover"
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
@@ -306,5 +306,9 @@ class MdUtil {
         fun getLangsToShow(preferences: PreferencesHelper) = preferences.langsToShow().get().split(",")
 
         fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) = headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}").build()
+
+        fun getTempCover(networkApiManga: MangaResponse): String {
+            return coverApi.replace("{uuid}", networkApiManga.data.id)
+        }
     }
 }

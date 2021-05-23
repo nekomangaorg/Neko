@@ -2,6 +2,11 @@
 <changelog bulletedList="true">
     <changelogversion
         changeDate=""
+        versionName="v2.4.2">
+        <changelogtext>minor cover fix</changelogtext>
+    </changelogversion>
+    <changelogversion
+        changeDate=""
         versionName="v2.4.1">
         <changelogtext>minor bug fixes, and locale fix</changelogtext>
     </changelogversion>
