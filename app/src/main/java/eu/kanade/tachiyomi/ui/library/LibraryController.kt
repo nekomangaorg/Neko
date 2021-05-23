@@ -197,6 +197,10 @@ class LibraryController(
         get() = preferences.showCategoryInTitle().get() && presenter.showAllCategories
     private lateinit var elevateAppBar: ((Boolean) -> Unit)
     private var hopperOffset = 0f
+    private val maxHopperOffset: Float
+        get() =
+            if (activityBinding?.bottomNav != null) 55f.dpToPx
+            else (view?.rootWindowInsets?.systemWindowInsetBottom?.toFloat() ?: 0f) + 55f.dpToPx
 
     override fun getTitle(): String? {
         setSubtitle()
@@ -219,9 +223,9 @@ class LibraryController(
             if (!recyclerCover.isClickable && isAnimatingHopper != true) {
                 if (preferences.autohideHopper().get()) {
                     hopperOffset += dy
-                    hopperOffset = hopperOffset.coerceIn(0f, 55f.dpToPx)
+                    hopperOffset = hopperOffset.coerceIn(0f, maxHopperOffset)
                 }
-                if (!preferences.hideBottomNavOnScroll().get()) {
+                if (!preferences.hideBottomNavOnScroll().get() || activityBinding?.bottomNav == null) {
                     updateFilterSheetY()
                 }
                 binding.roundedCategoryHopper.upCategory.alpha = if (isAtTop()) 0.25f else 1f
@@ -288,6 +292,11 @@ class LibraryController(
             binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = -pad.toInt()
             }
+        } else {
+            binding.filterBottomSheet.filterBottomSheet.updatePaddingRelative(
+                bottom = view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+            )
+            updateHopperY()
         }
     }
 
@@ -297,12 +306,17 @@ class LibraryController(
         ) ?: 0
         if (preferences.autohideHopper().get()) {
             // Flow same snap rules as bottom nav
-            val closerToHopperBottom = hopperOffset > 25f.dpToPx
+            val closerToHopperBottom = hopperOffset > maxHopperOffset / 2
             val halfWayBottom = activityBinding?.bottomNav?.height?.toFloat()?.div(2) ?: 0f
             val closerToBottom = (activityBinding?.bottomNav?.translationY ?: 0f) > halfWayBottom
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
-            val closerToEdge = if (preferences.hideBottomNavOnScroll().get()) (closerToBottom && !atTop) else closerToHopperBottom
-            val end = if (closerToEdge) 55f.dpToPx else 0f
+            val closerToEdge =
+                if (preferences.hideBottomNavOnScroll().get() && activityBinding?.bottomNav != null) {
+                    closerToBottom && !atTop
+                } else {
+                    closerToHopperBottom
+                }
+            val end = if (closerToEdge) maxHopperOffset else 0f
             val alphaAnimation = ValueAnimator.ofFloat(hopperOffset, end)
             alphaAnimation.addUpdateListener { valueAnimator ->
                 hopperOffset = valueAnimator.animatedValue as Float
@@ -382,7 +396,7 @@ class LibraryController(
         if (preferences.shownFilterTutorial().get() || !hasExpanded) return
         val activityBinding = activityBinding ?: return
         val activity = activity ?: return
-        val icon = activityBinding.bottomNav.getItemView(R.id.nav_library) ?: return
+        val icon = (activityBinding.bottomNav ?: activityBinding.sideNav)?.getItemView(R.id.nav_library) ?: return
         filterTooltip =
             ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
                 .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
@@ -681,7 +695,7 @@ class LibraryController(
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
         )
         val insetBottom = view.rootWindowInsets?.systemWindowInsetBottom ?: 0
-        if (!preferences.autohideHopper().get()) {
+        if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +

@@ -163,11 +163,11 @@ class RecentsController(bundle: Bundle? = null) :
                     height = it.systemWindowInsetTop + (toolbarHeight ?: appBarHeight)
                 }
                 binding.recycler.updatePaddingRelative(
-                    bottom = activityBinding?.bottomNav?.height ?: 0
+                    bottom = activityBinding?.bottomNav?.height ?: it.systemWindowInsetBottom
                 )
                 binding.recentsEmptyView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = headerHeight
-                    bottomMargin = activityBinding?.bottomNav?.height ?: 0
+                    bottomMargin = activityBinding?.bottomNav?.height ?: it.systemWindowInsetBottom
                 }
             },
             onBottomNavUpdate = {
@@ -182,10 +182,11 @@ class RecentsController(bundle: Bundle? = null) :
             }
         )
 
-        activityBinding?.bottomNav?.post {
-            binding.recycler.updatePaddingRelative(bottom = activityBinding?.bottomNav?.height ?: 0)
+        activityBinding?.root?.post {
+            val height = activityBinding?.bottomNav?.height ?: view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+            binding.recycler.updatePaddingRelative(bottom = height)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
-                bottom = activityBinding?.bottomNav?.height ?: 0
+                bottom = height
             )
             val isExpanded = binding.downloadBottomSheet.root.sheetBehavior.isExpanded()
             activityBinding?.tabsFrameLayout?.isVisible = !isExpanded

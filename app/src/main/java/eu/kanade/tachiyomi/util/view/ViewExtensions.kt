@@ -31,10 +31,10 @@ import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.google.android.material.bottomnavigation.BottomNavigationItemView
-import com.google.android.material.bottomnavigation.BottomNavigationMenuView
-import com.google.android.material.bottomnavigation.BottomNavigationView
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.navigation.NavigationBarItemView
+import com.google.android.material.navigation.NavigationBarMenuView
+import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.tintText
@@ -259,9 +259,9 @@ fun TextView.setTextColorRes(@ColorRes id: Int) {
 }
 
 @SuppressLint("RestrictedApi")
-fun BottomNavigationView.getItemView(@IdRes id: Int): BottomNavigationItemView? {
+fun NavigationBarView.getItemView(@IdRes id: Int): NavigationBarItemView? {
     val order = (menu as MenuBuilder).findItemIndex(id)
-    return (getChildAt(0) as BottomNavigationMenuView).getChildAt(order) as? BottomNavigationItemView
+    return (getChildAt(0) as NavigationBarMenuView).getChildAt(order) as? NavigationBarItemView
 }
 
 fun RecyclerView.smoothScrollToTop() {

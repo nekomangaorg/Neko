@@ -22,17 +22,18 @@ import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
+import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -171,6 +172,9 @@ fun Controller.scrollViewWith(
     var statusBarHeight = -1
     val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
+    activityBinding?.tabsFrameLayout?.elevation = 0f
+    val isTabletWithTabs = recycler.context.isTablet() && includeTabView
+    activityBinding?.tabShadow?.isVisible = isTabletWithTabs
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
@@ -226,17 +230,33 @@ fun Controller.scrollViewWith(
             liftOnScroll.invoke(el)
         } else {
             elevationAnim?.cancel()
-            val floatingBar = (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
+            if (isTabletWithTabs && el) {
+                activityBinding?.tabShadow?.isVisible = true
+            }
+            val floatingBar =
+                (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
-                activityBinding?.appBar?.elevation = 0f
+                if (isTabletWithTabs) {
+                    activityBinding?.tabShadow?.alpha = 0f
+                } else {
+                    activityBinding?.appBar?.elevation = 0f
+                }
                 return@f
             }
             elevationAnim = ValueAnimator.ofFloat(
-                activityBinding?.appBar?.elevation ?: 0f,
+                if (isTabletWithTabs) {
+                    (activityBinding?.tabShadow?.alpha ?: 0f) * 100
+                } else {
+                    activityBinding?.appBar?.elevation ?: 0f
+                },
                 if (el) 15f else 0f
             )
             elevationAnim?.addUpdateListener { valueAnimator ->
-                activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
+                if (isTabletWithTabs) {
+                    activityBinding?.tabShadow?.alpha = valueAnimator.animatedValue as Float / 100
+                } else {
+                    activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
+                }
             }
             elevationAnim?.start()
         }
@@ -254,6 +274,7 @@ fun Controller.scrollViewWith(
                 super.onChangeStart(controller, changeHandler, changeType)
                 isInView = changeType.isEnter
                 if (changeType.isEnter) {
+                    activityBinding?.tabShadow?.isVisible = isTabletWithTabs
                     elevateFunc(elevate)
                     if (fakeToolbarView?.parent != null) {
                         val parent = fakeToolbarView?.parent as? ViewGroup ?: return
@@ -275,6 +296,7 @@ fun Controller.scrollViewWith(
                         }
                     }
                 } else {
+                    activityBinding?.tabShadow?.isVisible = false
                     if (!customPadding && lastY == 0f && (
                         (
                             this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
@@ -318,6 +340,7 @@ fun Controller.scrollViewWith(
     recycler.post {
         elevateFunc(recycler.canScrollVertically(-1))
     }
+    val isTablet = recycler.context.isTablet()
     recycler.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
@@ -336,7 +359,7 @@ fun Controller.scrollViewWith(
                             .setDuration(shortAnimationDuration.toLong())
                             .start()
                         if (router.backstackSize == 1 && isInView) {
-                            activityBinding!!.bottomNav.let {
+                            activityBinding!!.bottomNav?.let {
                                 val animator = it.animate()?.translationY(0f)
                                     ?.setDuration(shortAnimationDuration.toLong())
                                 animator?.setUpdateListener {
@@ -348,36 +371,43 @@ fun Controller.scrollViewWith(
                         lastY = 0f
                         if (elevate) elevateFunc(false)
                     } else {
-                        activityBinding!!.appBar.y -= dy
-                        activityBinding!!.appBar.y = MathUtils.clamp(
-                            activityBinding!!.appBar.y,
-                            -activityBinding!!.appBar.height.toFloat(),
-                            0f
-                        )
-                        val tabBar = activityBinding!!.bottomNav
-                        if (tabBar.isVisible && isInView) {
-                            if (preferences.hideBottomNavOnScroll().get()) {
-                                tabBar.translationY += dy
-                                tabBar.translationY = MathUtils.clamp(
-                                    tabBar.translationY,
-                                    0f,
-                                    tabBar.height.toFloat()
-                                )
-                                updateViewsNearBottom()
-                            } else if (tabBar.translationY != 0f) {
-                                tabBar.translationY = 0f
-                                activityBinding!!.bottomView?.translationY = 0f
-                            }
-                        }
-                        if (!elevate && (
-                            dy == 0 ||
-                                (
-                                    activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
-                                        dy == 0 && activityBinding!!.appBar.y == 0f
-                                    )
+                        if (!isTablet) {
+                            activityBinding!!.appBar.y -= dy
+                            activityBinding!!.appBar.y = MathUtils.clamp(
+                                activityBinding!!.appBar.y,
+                                -activityBinding!!.appBar.height.toFloat(),
+                                0f
                             )
-                        ) {
-                            elevateFunc(true)
+                            activityBinding!!.bottomNav?.let { bottomNav ->
+                                if (bottomNav.isVisible && isInView) {
+                                    if (preferences.hideBottomNavOnScroll().get()) {
+                                        bottomNav.translationY += dy
+                                        bottomNav.translationY = MathUtils.clamp(
+                                            bottomNav.translationY,
+                                            0f,
+                                            bottomNav.height.toFloat()
+                                        )
+                                        updateViewsNearBottom()
+                                    } else if (bottomNav.translationY != 0f) {
+                                        bottomNav.translationY = 0f
+                                        activityBinding!!.bottomView?.translationY = 0f
+                                    }
+                                }
+                            }
+
+                            if (!elevate && (
+                                dy == 0 ||
+                                    (
+                                        activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
+                                            dy == 0 && activityBinding!!.appBar.y == 0f
+                                        )
+                                )
+                            ) {
+                                elevateFunc(true)
+                            }
+                        } else {
+                            val notAtTop = recycler.canScrollVertically(-1)
+                            if (notAtTop != elevate) elevateFunc(notAtTop)
                         }
                         lastY = activityBinding!!.appBar.y
                     }
@@ -387,6 +417,9 @@ fun Controller.scrollViewWith(
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
                 if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    if (isTablet) {
+                        return
+                    }
                     if (router?.backstack?.lastOrNull()
                         ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                         activity != null && activityBinding!!.appBar.height > 0 &&
@@ -397,18 +430,20 @@ fun Controller.scrollViewWith(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
                         val closerToTop = abs(activityBinding!!.appBar.y) > halfWay
-                        val halfWayBottom = activityBinding!!.bottomNav.height.toFloat() / 2
-                        val closerToBottom = activityBinding!!.bottomNav.translationY > halfWayBottom
+                        val halfWayBottom = (activityBinding!!.bottomNav?.height?.toFloat() ?: 0f) / 2
+                        val closerToBottom = activityBinding!!.bottomNav?.translationY ?: 0f > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
                         val closerToEdge =
-                            if (activityBinding!!.bottomNav.isVisible &&
+                            if (activityBinding!!.bottomNav?.isVisible == true &&
                                 preferences.hideBottomNavOnScroll().get()
                             ) closerToBottom else closerToTop
                         lastY =
                             if (closerToEdge && !atTop) (-activityBinding!!.appBar.height.toFloat()) else 0f
                         activityBinding!!.appBar.animate().y(lastY)
                             .setDuration(shortAnimationDuration.toLong()).start()
-                        if (activityBinding!!.bottomNav.isVisible && isInView && preferences.hideBottomNavOnScroll().get()) {
+                        if (activityBinding!!.bottomNav?.isVisible == true &&
+                            isInView && preferences.hideBottomNavOnScroll().get()
+                        ) {
                             activityBinding!!.bottomNav?.let {
                                 val lastBottomY =
                                     if (closerToEdge && !atTop) it.height.toFloat() else 0f
@@ -447,8 +482,8 @@ fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: I
 
 fun Controller.withFadeTransaction(): RouterTransaction {
     return RouterTransaction.with(this)
-        .pushChangeHandler(FadeChangeHandler())
-        .popChangeHandler(FadeChangeHandler())
+        .pushChangeHandler(OneWayFadeChangeHandler())
+        .popChangeHandler(OneWayFadeChangeHandler())
 }
 
 fun Controller.openInBrowser(url: String) {

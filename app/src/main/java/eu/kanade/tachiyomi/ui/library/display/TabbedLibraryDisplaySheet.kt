@@ -25,6 +25,7 @@ open class TabbedLibraryDisplaySheet(val controller: Controller) :
             badgesView.controller = libraryController
             categoryView.controller = libraryController
         }
+        displayView.mainView = controller.view
         binding.menu.isVisible = controller !is SettingsLibraryController
         binding.menu.compatToolTipText = context.getString(R.string.more_library_settings)
         binding.menu.setImageDrawable(

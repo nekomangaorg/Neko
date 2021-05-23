@@ -116,7 +116,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         this.controller = controller
         libraryRecyler = controller.binding.libraryGridRecycler.recycler
         libraryRecyler?.post {
-            bottomBarHeight = controller.activityBinding?.bottomNav?.height ?: 0
+            bottomBarHeight =
+                controller.activityBinding?.bottomNav?.height
+                ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
+                ?: 0
         }
         val shadow2: View = controller.binding.shadow2
         val shadow: View = controller.binding.shadow

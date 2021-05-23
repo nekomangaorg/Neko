@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.library.display
 import android.animation.ValueAnimator
 import android.content.Context
 import android.util.AttributeSet
+import android.view.View
 import android.view.ViewTreeObserver
 import android.widget.SeekBar
 import androidx.core.animation.addListener
@@ -27,6 +28,7 @@ import kotlin.math.roundToInt
 class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     BaseLibraryDisplayView<LibraryDisplayLayoutBinding>(context, attrs) {
 
+    var mainView: View? = null
     override fun inflateBinding() = LibraryDisplayLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
         binding.displayGroup.bindToPreference(preferences.libraryLayout())
@@ -127,7 +129,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
 
     private fun setGridText(progress: Int) {
         with(binding.gridSizeText) {
-            val rows = this@LibraryDisplayView.rowsForValue(progress)
+            val rows = (mainView ?: this@LibraryDisplayView).rowsForValue(progress)
             val titleText = context.getString(R.string.grid_size)
             val subtitleText = context.getString(R.string._per_row, rows)
             text = titleText.withSubtitle(context, subtitleText)
@@ -138,7 +140,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         with(binding.seekBarTextView.root) {
             val value =
                 (progress * (seekBar.width - 12.dpToPx - 2 * seekBar.thumbOffset)) / seekBar.max
-            text = this@LibraryDisplayView.rowsForValue(progress).toString()
+            text = (mainView ?: this@LibraryDisplayView).rowsForValue(progress).toString()
             x = seekBar.x + value + seekBar.thumbOffset / 2 + 5.dpToPx
             y = seekBar.y + binding.gridSizeLayout.y - 6.dpToPx - height
         }

@@ -36,6 +36,7 @@ import com.bluelinelabs.conductor.Router
 import com.elvishew.xlog.XLog
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
+import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
@@ -71,6 +72,7 @@ import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
+import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -170,7 +172,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         )
 
         var continueSwitchingTabs = false
-        binding.bottomNav.getItemView(R.id.nav_library)?.setOnLongClickListener {
+        nav.getItemView(R.id.nav_library)?.setOnLongClickListener {
             if (!LibraryUpdateService.isRunning()) {
                 LibraryUpdateService.start(this)
                 binding.mainContent.snack(R.string.updating_library) {
@@ -189,9 +191,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             true
         }
         for (id in listOf(R.id.nav_recents, R.id.nav_browse)) {
-            binding.bottomNav.getItemView(id)?.setOnLongClickListener {
-                binding.bottomNav.selectedItemId = id
-                binding.bottomNav.post {
+            nav.getItemView(id)?.setOnLongClickListener {
+                nav.selectedItemId = id
+                nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller as? BottomSheetController
                     controller?.showSheet()
@@ -199,36 +201,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 true
             }
         }
-        binding.bottomNav.setOnNavigationItemSelectedListener { item ->
-            val id = item.itemId
-            val currentController = router.backstack.lastOrNull()?.controller
-            if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
-                if (!currentController.canChangeTabs {
-                        continueSwitchingTabs = true
-                        this@MainActivity.binding.bottomNav.selectedItemId = id
-                    }
-                ) return@setOnNavigationItemSelectedListener false
-            }
-            continueSwitchingTabs = false
-            val currentRoot = router.backstack.firstOrNull()
-            if (currentRoot?.tag()?.toIntOrNull() != id) {
-                setRoot(
-                    when (id) {
-                        R.id.nav_library -> LibraryController()
-                        R.id.nav_recents -> RecentsController()
-                        else -> BrowseSourceController()
-                    },
-                    id
-                )
-            } else if (currentRoot.tag()?.toIntOrNull() == id) {
-                if (router.backstackSize == 1) {
-                    val controller =
-                        router.getControllerWithTag(id.toString()) as? BottomSheetController
-                    controller?.toggleSheet()
-                }
-            }
-            true
-        }
+
         val container: ViewGroup = binding.controllerContainer
 
         val content: ViewGroup = binding.mainContent
@@ -241,7 +214,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
         setNavBarColor(content.rootWindowInsets)
-        binding.bottomView.isVisible = false
+        nav.isVisible = false
         content.doOnApplyWindowInsets { v, insets, _ ->
             setNavBarColor(insets)
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
@@ -258,14 +231,59 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.appBar.updatePadding(
                 top = insets.systemWindowInsetTop
             )
-            binding.bottomNav.updatePadding(bottom = insets.systemWindowInsetBottom)
-            binding.bottomView.isVisible = insets.systemWindowInsetBottom > 0
-            binding.bottomView.updateLayoutParams<ViewGroup.LayoutParams> {
+            binding.bottomNav?.updatePadding(bottom = insets.systemWindowInsetBottom)
+            binding.sideNav?.updatePadding(
+                left = insets.systemWindowInsetLeft,
+                right = insets.systemWindowInsetRight
+            )
+            binding.bottomView?.isVisible = insets.systemWindowInsetBottom > 0
+            binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = insets.systemWindowInsetBottom
             }
         }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
+
+        if (router.hasRootController()) {
+            nav.selectedItemId =
+                when (router.backstack.firstOrNull()?.controller) {
+                    is RecentsController -> R.id.nav_recents
+                    is BrowseSourceController -> R.id.nav_browse
+                    else -> R.id.nav_library
+                }
+        }
+
+        nav.setOnItemSelectedListener { item ->
+            val id = item.itemId
+            val currentController = router.backstack.lastOrNull()?.controller
+            if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
+                if (!currentController.canChangeTabs {
+                    continueSwitchingTabs = true
+                    this@MainActivity.nav.selectedItemId = id
+                }
+                ) return@setOnItemSelectedListener false
+            }
+            continueSwitchingTabs = false
+            val currentRoot = router.backstack.firstOrNull()
+            if (currentRoot?.tag()?.toIntOrNull() != id) {
+                setRoot(
+                    when (id) {
+                        R.id.nav_library -> LibraryController()
+                        R.id.nav_recents -> RecentsController()
+                        else -> BrowseController()
+                    },
+                    id
+                )
+            } else if (currentRoot.tag()?.toIntOrNull() == id) {
+                if (router.backstackSize == 1) {
+                    val controller =
+                        router.getControllerWithTag(id.toString()) as? BottomSheetController
+                    controller?.toggleSheet()
+                }
+            }
+            true
+        }
+
         if (!router.hasRootController()) {
             // Set start screen
             if (!handleIntentAction(intent)) {
@@ -291,9 +309,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
         }
 
-        binding.bottomNav.isVisible = !hideBottomNav
-        binding.bottomView.visibility = if (hideBottomNav) View.GONE else binding.bottomView.visibility
-        binding.bottomNav.alpha = if (hideBottomNav) 0f else 1f
+        nav.isVisible = !hideBottomNav
+        binding.bottomView?.visibility = if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
+        nav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(
             object : ControllerChangeHandler.ControllerChangeListener {
                 override fun onChangeStarted(
@@ -306,7 +324,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     syncActivityViewWithController(to, from, isPush)
                     binding.appBar.y = 0f
                     if (!isPush || router.backstackSize == 1) {
-                        binding.bottomNav.translationY = 0f
+                        nav.translationY = 0f
                     }
                     snackBar?.dismiss()
                 }
@@ -319,7 +337,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     handler: ControllerChangeHandler
                 ) {
                     binding.appBar.y = 0f
-                    binding.bottomNav.translationY = 0f
+                    nav.translationY = 0f
                     showDLQueueTutorial()
                 }
             }
@@ -347,10 +365,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.toolbar.setIncognitoMode(it)
                 binding.cardToolbar.setIncognitoMode(it)
             }
-        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller))
+        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
     }
 
-    open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false) {
+    open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false, changeBG: Boolean = true) {
         val oldTB = currentToolbar
         currentToolbar = if (show) {
             binding.cardToolbar
@@ -362,9 +380,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         binding.toolbar.isVisible = !show
         binding.cardFrame.isVisible = show
-        binding.appBar.setBackgroundColor(
-            if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
-        )
+        if (changeBG) {
+            binding.appBar.setBackgroundColor(
+                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
+            )
+        }
         currentToolbar?.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if (rootSearchController is RootSearchInterface) {
@@ -449,7 +469,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             downloadManager.hasQueue() && !preferences.shownDownloadQueueTutorial().get()
         ) {
             if (!isBindingInitialized) return
-            val recentsItem = binding.bottomNav.getItemView(R.id.nav_recents) ?: return
+            val recentsItem = nav.getItemView(R.id.nav_recents) ?: return
             preferences.shownDownloadQueueTutorial().set(true)
             TapTargetView.showFor(
                 this,
@@ -468,7 +488,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 object : TapTargetView.Listener() {
                     override fun onTargetClick(view: TapTargetView) {
                         super.onTargetClick(view)
-                        binding.bottomNav.selectedItemId = R.id.nav_recents
+                        nav.selectedItemId = R.id.nav_recents
                     }
                 }
             )
@@ -521,14 +541,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             intent.getIntExtra("groupId", 0)
         )
         when (intent.action) {
-            SHORTCUT_LIBRARY -> binding.bottomNav.selectedItemId = R.id.nav_library
+            SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
             SHORTCUT_RECENTLY_UPDATED, SHORTCUT_RECENTLY_READ -> {
-                if (binding.bottomNav.selectedItemId != R.id.nav_recents) {
-                    binding.bottomNav.selectedItemId = R.id.nav_recents
+                if (nav.selectedItemId != R.id.nav_recents) {
+                    nav.selectedItemId = R.id.nav_recents
                 } else {
                     router.popToRoot()
                 }
-                binding.bottomNav.post {
+                nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller as? RecentsController
                     controller?.tempJumpTo(
@@ -539,23 +559,28 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     )
                 }
             }
-            SHORTCUT_BROWSE -> binding.bottomNav.selectedItemId = R.id.nav_browse
+            SHORTCUT_BROWSE -> nav.selectedItemId = R.id.nav_browse
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
+                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
                 router.pushController(MangaDetailsController(extras).withFadeTransaction())
             }
             SHORTCUT_UPDATE_NOTES -> {
                 val extras = intent.extras ?: return false
-                if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
+                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
                 if (router.backstack.lastOrNull()?.controller !is AboutController.NewUpdateDialogController) {
                     AboutController.NewUpdateDialogController(extras).showDialog(router)
                 }
             }
+            SHORTCUT_SOURCE -> {
+                val extras = intent.extras ?: return false
+                if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
+                router.pushController(BrowseSourceController(extras).withFadeTransaction())
+            }
             SHORTCUT_DOWNLOADS -> {
-                binding.bottomNav.selectedItemId = R.id.nav_recents
+                nav.selectedItemId = R.id.nav_recents
                 router.popToRoot()
-                binding.bottomNav.post {
+                nav.post {
                     val controller =
                         router.backstack.firstOrNull()?.controller as? RecentsController
                     controller?.showSheet()
@@ -583,7 +608,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             else !router.handleBack()
         ) {
             if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
-                startingTab() != binding.bottomNav.selectedItemId
+                startingTab() != nav.selectedItemId
             ) {
                 goToStartingTab()
             } else {
@@ -597,13 +622,16 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
+    protected val nav: NavigationBarView
+        get() = binding.bottomNav ?: binding.sideNav!!
+
     private fun setStartingTab() {
         if (this is SearchActivity) return
-        if (binding.bottomNav.selectedItemId != R.id.nav_browse &&
+        if (nav.selectedItemId != R.id.nav_browse &&
             preferences.startingTab().get() >= 0
         ) {
             preferences.startingTab().set(
-                when (binding.bottomNav.selectedItemId) {
+                when (nav.selectedItemId) {
                     R.id.nav_library -> 0
                     else -> 1
                 }
@@ -622,7 +650,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun goToStartingTab() {
-        binding.bottomNav.selectedItemId = startingTab()
+        nav.selectedItemId = startingTab()
     }
 
     private fun setRoot(controller: Controller, id: Int) {
@@ -714,27 +742,33 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.cardToolbar.subtitle = null
         drawerArrow?.progress = 1f
 
-        binding.bottomNav.visibility = if (!hideBottomNav) View.VISIBLE else binding.bottomNav.visibility
-        animationSet?.cancel()
-        animationSet = AnimatorSet()
-        val alphaAnimation = ValueAnimator.ofFloat(
-            binding.bottomNav.alpha,
-            if (hideBottomNav) 0f else 1f
-        )
-        alphaAnimation.addUpdateListener { valueAnimator ->
-            binding.bottomNav.alpha = valueAnimator.animatedValue as Float
-        }
-        alphaAnimation.addListener(
-            EndAnimatorListener {
-                binding.bottomNav.isVisible = !hideBottomNav
-                binding.bottomView.visibility =
-                    if (hideBottomNav) View.GONE else binding.bottomView.visibility
+        nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
+        if (isTablet()) {
+            nav.isVisible = !hideBottomNav
+            nav.alpha = 1f
+        } else {
+            animationSet?.cancel()
+            animationSet = AnimatorSet()
+            val alphaAnimation = ValueAnimator.ofFloat(
+                nav.alpha,
+                if (hideBottomNav) 0f else 1f
+            )
+            alphaAnimation.addUpdateListener { valueAnimator ->
+                nav.alpha = valueAnimator.animatedValue as Float
             }
-        )
-        alphaAnimation.duration = 200
-        alphaAnimation.startDelay = 50
-        animationSet?.playTogether(alphaAnimation)
-        animationSet?.start()
+            alphaAnimation.addListener(
+                EndAnimatorListener {
+                    nav.isVisible = !hideBottomNav
+                    binding.bottomView?.visibility =
+                        if (hideBottomNav) View.GONE else binding.bottomView?.visibility
+                            ?: View.GONE
+                }
+            )
+            alphaAnimation.duration = 200
+            alphaAnimation.startDelay = 50
+            animationSet?.playTogether(alphaAnimation)
+            animationSet?.start()
+        }
     }
 
     fun showTabBar(show: Boolean, animate: Boolean = true) {
@@ -774,10 +808,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val hasQueue = downloading || downloadManager.hasQueue()
         launchUI {
             if (hasQueue) {
-                binding.bottomNav.getOrCreateBadge(R.id.nav_recents)
+                nav.getOrCreateBadge(R.id.nav_recents)
                 showDLQueueTutorial()
             } else {
-                binding.bottomNav.removeBadge(R.id.nav_recents)
+                nav.removeBadge(R.id.nav_recents)
             }
         }
     }
@@ -831,7 +865,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val diffX = e2.x - e1.x
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
-                binding.bottomNav.getGlobalVisibleRect(sheetRect)
+                binding.bottomNav?.getGlobalVisibleRect(sheetRect)
                 if (sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
                     abs(diffY) > Companion.SWIPE_THRESHOLD &&
                     abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
