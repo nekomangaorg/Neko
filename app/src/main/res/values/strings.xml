@@ -582,6 +582,7 @@
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
+    <string name="move_side_nav_to_bottom">Move side navigation buttons to bottom</string>
     <string name="app_shortcuts">App shortcuts</string>
     <string name="show_recent_in_shortcuts">Show recent sources and series in app shortcuts</string>
     <string name="follow_system_theme">Follow system theme</string>

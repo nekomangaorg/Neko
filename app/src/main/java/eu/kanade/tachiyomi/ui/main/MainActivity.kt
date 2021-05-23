@@ -12,6 +12,7 @@ import android.os.Bundle
 import android.os.Handler
 import android.provider.Settings
 import android.view.GestureDetector
+import android.view.Gravity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
@@ -364,6 +365,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             .asImmediateFlowIn(lifecycleScope) {
                 binding.toolbar.setIncognitoMode(it)
                 binding.cardToolbar.setIncognitoMode(it)
+            }
+        preferences.showSideNavOnBottom()
+            .asImmediateFlowIn(lifecycleScope) {
+                binding.sideNav?.menuGravity = if (!it) Gravity.TOP else Gravity.BOTTOM
             }
         setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
     }

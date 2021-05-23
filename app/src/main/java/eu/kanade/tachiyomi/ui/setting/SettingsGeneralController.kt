@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.system.isTablet
 import kotlinx.coroutines.flow.launchIn
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
@@ -101,6 +102,13 @@ class SettingsGeneralController : SettingsController() {
                     startActivity(intent)
                 }
             }
+        }
+
+        switchPreference {
+            key = Keys.showSideNavOnBottom
+            titleRes = R.string.move_side_nav_to_bottom
+            defaultValue = false
+            isVisible = activity?.isTablet() == true
         }
 
         switchPreference {
