@@ -189,6 +189,7 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="enableEdgeToEdge">true</item>
     </style>
 
     <style name="OverflowDialogTheme" parent="BottomSheetDialogTheme">
