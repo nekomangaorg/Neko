@@ -55,7 +55,10 @@ class SearchHandler {
 
         val mlResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
-        val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences, v5DbHelper) }
+        val mangaList = mlResponse.results.map {
+            val coverUrl = MdUtil.getTempCover(it)
+            MdUtil.createMangaEntry(it, coverUrl)
+        }
         return MangasPage(mangaList, hasMoreResults)
     }
 

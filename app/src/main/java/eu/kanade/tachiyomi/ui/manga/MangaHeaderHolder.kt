@@ -346,7 +346,8 @@ class MangaHeaderHolder(
 
         manga_lang_flag.visibility = View.VISIBLE
         when (manga.lang_flag?.toLowerCase(Locale.US)) {
-            "cn" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
+            "zh-hk" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
+            "zh" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
             "ko" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
             "ja" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
             else -> manga_lang_flag.visibility = View.GONE

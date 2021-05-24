@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
@@ -176,6 +177,20 @@ class SettingsSiteController :
             summaryRes = R.string.add_favorites_as_planned_to_read_summary
             defaultValue = false
         }
+
+        preference {
+            titleRes = R.string.v5_migration_service
+            summary = context.resources.getString(R.string.v5_migration_desc)
+            onClick {
+                MaterialDialog(activity!!).show {
+                    title(text = "This will start legacy id migration")
+                    positiveButton(android.R.string.ok) { dialog ->
+                        V5MigrationJob.doWorkNow()
+                    }
+                }
+            }
+        }
+
     }
 
     override fun siteLoginDialogClosed(source: Source) {

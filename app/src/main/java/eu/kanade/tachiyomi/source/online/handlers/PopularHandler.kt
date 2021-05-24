@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import okhttp3.Request
@@ -54,9 +55,12 @@ class PopularHandler {
             return MangasPage(emptyList(), false)
         }
 
-        val mlResponse = MdUtil.jsonParser.decodeFromString(MangaListResponse.serializer(), response.body!!.string())
+        val mlResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
-        val mangaList = mlResponse.results.map { MdUtil.createMangaEntry(it, preferences, v5DbHelper) }
+        val mangaList = mlResponse.results.map {
+            val coverUrl = MdUtil.getTempCover(it)
+            MdUtil.createMangaEntry(it, coverUrl)
+        }
         return MangasPage(mangaList, hasMoreResults)
     }
 }
