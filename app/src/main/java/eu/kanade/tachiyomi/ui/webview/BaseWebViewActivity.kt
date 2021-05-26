@@ -129,7 +129,9 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 insets
             }
         } else {
-            binding.webview.restoreState(bundle)
+            bundle?.let {
+                binding.webview.restoreState(it)
+            }
         }
     }
 
