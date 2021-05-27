@@ -4,7 +4,7 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
-import android.widget.SearchView
+import androidx.appcompat.widget.SearchView
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
@@ -68,8 +68,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
-            iconRes = R.drawable.ic_security_24dp
-            iconTint = tintColor
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_security)
             titleRes = R.string.security
             onClick { navigateTo(SettingsSecurityController()) }
         }
@@ -119,9 +118,5 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     private fun navigateTo(controller: Controller) {
         router.pushController(controller.withFadeTransaction())
-    }
-
-    private companion object {
-        private const val URL_HELP = "https://tachiyomi.org/help/"
     }
 }
