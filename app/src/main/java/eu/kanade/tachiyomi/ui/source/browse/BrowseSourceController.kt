@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import android.Manifest
 import android.os.Bundle
 import android.os.Handler
 import android.view.LayoutInflater
@@ -35,6 +36,7 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.inflate
+import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
@@ -142,6 +144,7 @@ open class BrowseSourceController(bundle: Bundle) :
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
         binding.fab.setOnClickListener { showFilters() }
         binding.progress.isVisible = true
+        requestPermissionsSafe(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 301)
     }
 
     override fun onDestroyView(view: View) {
