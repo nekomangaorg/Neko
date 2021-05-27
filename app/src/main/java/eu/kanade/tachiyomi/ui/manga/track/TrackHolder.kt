@@ -49,7 +49,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         if (track != null) {
             binding.trackTitle.text = track.title
             binding.trackTitle.isClickable = item.service.isMdList().not()
-            trackRemove.isVisible = item.service.isMdList().not()
+            binding.trackRemove.isVisible = item.service.isMdList().not()
             with(binding.trackChapters) {
                 text = when {
                     track.total_chapters > 0 && track.last_chapter_read == track.total_chapters -> context.getString(

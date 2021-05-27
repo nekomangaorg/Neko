@@ -21,6 +21,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.SeekBar
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
@@ -34,12 +35,16 @@ import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.snackbar.Snackbar
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.data.preference.toggle
+import eu.kanade.tachiyomi.databinding.ReaderActivityBinding
+import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
@@ -86,8 +91,6 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -421,7 +424,7 @@ class ReaderActivity :
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -432,8 +435,8 @@ class ReaderActivity :
                 } else {
                     ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
                 }
-            webviewButton.isVisible =
-                ReaderBottomButton.WebView.isIn(enabledButtons)
+            commentButton.isVisible =
+                ReaderBottomButton.Comment.isIn(enabledButtons)
             chaptersButton.isVisible =
                 ReaderBottomButton.ViewChapters.isIn(enabledButtons)
             shiftPageButton.isVisible =
@@ -563,7 +566,7 @@ class ReaderActivity :
         binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        toolbar.setNavigationIcon(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back))
+        binding.toolbar.setNavigationIcon(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back))
         binding.toolbar.setNavigationOnClickListener {
             popToMain()
         }
@@ -610,8 +613,8 @@ class ReaderActivity :
                 }
             }
 
-            webviewButton.setOnClickListener {
-                openMangaInBrowser()
+            commentButton.setOnClickListener {
+                openComments()
             }
 
             displayOptions.setOnClickListener {
@@ -1231,10 +1234,12 @@ class ReaderActivity :
         } else {
             getString(R.string.page_, page.number)
         }
-        val text = "${manga.title}: ${getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number)
-        )}, $pageNumber"
+        val text = "${manga.title}: ${
+            getString(
+                R.string.chapter_,
+                decimalFormat.format(chapter.chapter_number)
+            )
+        }, $pageNumber"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -1267,6 +1272,20 @@ class ReaderActivity :
             is ReaderPresenter.SaveImageResult.Error -> {
                 XLog.e(result.error)
             }
+        }
+    }
+
+    fun openComments() {
+        val currentChapter = presenter.getCurrentChapter()
+        currentChapter ?: return
+
+        if (currentChapter.chapter.isMergedChapter()) {
+            toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
+        } else {
+            val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url) + "/comments"
+            val intent =
+                WebViewActivity.newIntent(this, presenter.manga!!.source, url, currentChapter.chapter.name)
+            startActivity(intent)
         }
     }
 
@@ -1348,28 +1367,6 @@ class ReaderActivity :
     }
 
     private fun handleIntentAction(intent: Intent): Boolean {
-        val uri = intent.data ?: return false
-        if (!presenter.canLoadUrl(uri)) {
-            openInBrowser(intent.data!!.toString(), true)
-            finishAfterTransition()
-            return true
-        }
-        setMenuVisibility(visible = false, animate = true)
-        scope.launch(Dispatchers.IO) {
-            try {
-                intentPageNumber = presenter.intentPageNumber(uri)
-                presenter.loadChapterURL(uri)
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    setInitialChapterError(e)
-                }
-            }
-        }
-        return true
-    }
-
-    /**
-      private fun handleIntentAction(intent: Intent): Boolean {
         val pathSegments = intent.data?.pathSegments
         if (pathSegments != null && pathSegments.size > 1) {
             XLog.e(pathSegments[0])
@@ -1382,7 +1379,7 @@ class ReaderActivity :
                 }
             } else if (!id.isNullOrBlank()) {
                 intentPageNumber = secondary?.toIntOrNull()?.minus(1)
-                setMenuVisibility(visible = false, animate = true, force = true)
+                setMenuVisibility(visible = false, animate = true)
                 scope.launch(Dispatchers.IO) {
                     try {
                         presenter.loadChapterURL(id)
@@ -1396,8 +1393,7 @@ class ReaderActivity :
             }
         }
         return false
-        **/
-
+    }
 
     /**
      * Forces the user preferred [orientation] on the activity.

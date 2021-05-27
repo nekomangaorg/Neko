@@ -9,7 +9,6 @@ import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.ui.setting.SettingsAdvancedController
 import eu.kanade.tachiyomi.ui.setting.SettingsBackupController
-import eu.kanade.tachiyomi.ui.setting.SettingsBrowseController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsGeneralController
@@ -31,7 +30,6 @@ object SettingsSearchHelper {
     private val settingControllersList: List<KClass<out SettingsController>> = listOf(
         SettingsAdvancedController::class,
         SettingsBackupController::class,
-        SettingsBrowseController::class,
         SettingsDownloadController::class,
         SettingsGeneralController::class,
         SettingsSecurityController::class,
@@ -102,7 +100,11 @@ object SettingsSearchHelper {
                 // Is an actual preference
                 val title = pref.title.toString()
                 // ListPreferences occasionally run into ArrayIndexOutOfBoundsException issues
-                val summary = try { pref.summary?.toString() ?: "" } catch (e: Throwable) { "" }
+                val summary = try {
+                    pref.summary?.toString() ?: ""
+                } catch (e: Throwable) {
+                    ""
+                }
 
                 prefSearchResultList.add(
                     SettingsSearchResult(

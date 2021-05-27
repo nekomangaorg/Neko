@@ -68,8 +68,8 @@ internal class DownloadNotifier(private val context: Context) {
     /**
      * Clear old actions if they exist.
      */
-    private fun clearActions() = with(notification) {
-        if (!mActions.isEmpty()) {
+    private fun NotificationCompat.Builder.clearActions() {
+        if (mActions.isNotEmpty()) {
             mActions.clear()
         }
     }
@@ -79,7 +79,7 @@ internal class DownloadNotifier(private val context: Context) {
      * those can only be dismissed by the user.
      */
     fun dismiss() {
-        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER)
+        context.notificationManager.cancel(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS)
     }
 
     /**

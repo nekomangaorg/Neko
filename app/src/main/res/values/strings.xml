@@ -903,6 +903,9 @@
     <string name="system_default_dark">System Default (White + Dark)</string>
 
     <!-- Backup -->
+    <string name="group_backup_restore">Backup and restore</string>
+    <string name="backup_restore_progress">Backup restore</string>
+    <string name="backup_restore_complete">Backup restore complete</string>
     <string name="restore_completed_successful">%1$s/%2$s Manga restored</string>
     <string name="restore_completed_errors">%1$s errors were found</string>
     <string name="restore_skipped">%1$s/%2$s manga were skipped because they were not MangaDex</string>
@@ -910,6 +913,8 @@
         <item quantity="one">%d category restored</item>
         <item quantity="other">%d categories restored</item>
     </plurals>
+    <string name="restore_content_skipped">%1$d skipped</string>
+    <string name="restoring_progress">Restoring (%1$d/%2$d)</string>
 
 
     <!-- Status -->
@@ -926,6 +931,8 @@
 
     <!-- Library Sort -->
     <string name="rating">Site rating</string>
+    <string name="next_updated">Next expected update</string>
+
 
     <!--Browse -->
     <string name="random_manga">Random</string>
@@ -1027,6 +1034,8 @@
     <string name="use_cache_source">Use cached manga api source and search</string>
     <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
+    <!-- Backup Settings -->
+    <string name="restore_neko">Data from the backup file will be restored.\n\n If this is a json file it will be an online restore to fetch data,  and carrier costs may apply.  Please log into MangaDex and any trackers before restoring.</string>
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

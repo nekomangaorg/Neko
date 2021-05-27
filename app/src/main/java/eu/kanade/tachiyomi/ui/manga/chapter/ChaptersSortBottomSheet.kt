@@ -5,6 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -23,6 +25,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
     private val presenter = controller.presenter
 
     override fun createBinding(inflater: LayoutInflater) = ChapterSortBottomSheetBinding.inflate(inflater)
+
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
         sheetBehavior.peekHeight = 415.dpToPx + height

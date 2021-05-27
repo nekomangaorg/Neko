@@ -35,7 +35,7 @@ class BackupCreatorJob(private val context: Context, workerParams: WorkerParamet
     companion object {
         private const val TAG = "BackupCreator"
 
-        fun setupTask(context: Context, prefInterval: Int? = null) {
+        fun setupTask(prefInterval: Int? = null) {
             val preferences = Injekt.get<PreferencesHelper>()
             val interval = prefInterval ?: preferences.backupInterval().get()
             if (interval > 0) {

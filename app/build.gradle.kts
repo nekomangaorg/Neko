@@ -88,10 +88,9 @@ android {
 
 dependencies {
     // Modified dependencies
-    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43")
+    implementation(Libs.UI.subsamplingScaleImageView)
     // Source models and interfaces from Tachiyomi 1.x
     implementation("tachiyomi.sourceapi:source-api:1.1")
-    implementation(Libs.UI.subsamplingScaleImageView)
     // Android support library
     implementation(Libs.Android.appCompat)
     implementation(Libs.Android.cardView)
@@ -229,9 +228,6 @@ dependencies {
 
     // Conductor
     implementation(Libs.Navigation.conductor)
-    implementation(Libs.Navigation.conductorSupport) {
-        exclude("group", "com.android.support")
-    }
     implementation(Libs.Navigation.conductorSupportPreferences)
 
     // RxBindings
@@ -250,6 +246,7 @@ dependencies {
     testImplementation(Libs.Test.roboElectricShadowPlayServices)
 
     implementation(Libs.Kotlin.stdLib)
+    implementation(Libs.Kotlin.reflection)
     implementation(Libs.Kotlin.coroutines)
 
     // Text distance

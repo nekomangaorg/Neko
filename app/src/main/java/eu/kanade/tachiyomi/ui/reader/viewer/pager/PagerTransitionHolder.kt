@@ -98,7 +98,7 @@ class PagerTransitionHolder(
         val nextChapter = transition.to
 
         textView.text = if (nextChapter != null) {
-            SpannableStringBuilder().append(context.getString(R.string.finished))
+            SpannableStringBuilder().append(context.getString(R.string.finished_chapter))
                 .bold { append("\n${transition.from.chapter.name}\n\n") }
                 .append(context.getString(R.string.next))
                 .bold { append("\n${nextChapter.chapter.name}\n\n") }
@@ -156,7 +156,8 @@ class PagerTransitionHolder(
             .subscribe { state ->
                 pagesContainer.removeAllViews()
                 when (state) {
-                    is ReaderChapter.State.Wait -> {}
+                    is ReaderChapter.State.Wait -> {
+                    }
                     is ReaderChapter.State.Loading -> setLoading()
                     is ReaderChapter.State.Error -> setError(state.error)
                     is ReaderChapter.State.Loaded -> setLoaded()

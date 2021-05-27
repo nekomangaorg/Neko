@@ -18,11 +18,11 @@ import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.system.notification
@@ -92,7 +92,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param errors List of entry titles that failed to update.
      * @param uri Uri for error log file containing all titles that failed.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
+    fun showUpdateErrorNotification(errors: List<String>, uri: Uri?) {
         if (errors.isEmpty()) {
             return
         }
@@ -103,7 +103,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 if (uri == null) {
                     setContentTitle("502: MangaDex appears to be down")
                 } else {
-                setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
+                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
                     addAction(
                         R.drawable.nnf_ic_file_folder,
                         context.getString(R.string.view_all_errors),
@@ -145,7 +145,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                 notifications.add(
                     Pair(
                         context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                            setSmallIcon(R.drawable.ic_tachi)
+                            setSmallIcon(R.drawable.ic_neko_notification)
                             try {
                                 val request = ImageRequest.Builder(context).data(manga)
                                     .parameters(Parameters.Builder().set(MangaFetcher.onlyCache, true).build())

@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
@@ -65,7 +64,6 @@ class DownloadBottomSheet @JvmOverloads constructor(
         adapter?.isSwipeEnabled = true
         adapter?.fastScroller = binding.fastScroller
         binding.dlRecycler.setHasFixedSize(true)
-        binding.dlRecycler.addItemDecoration(ExtensionDividerItemDecoration(context))
         this.controller = controller
         updateDLTitle()
 
@@ -184,7 +182,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         updateDLTitle()
         setBottomSheet()
         if (presenter.downloadQueue.isEmpty()) {
-            empty_view?.show(
+            binding.emptyView?.show(
                 CommunityMaterial.Icon.cmd_download_off,
                 R.string.nothing_is_downloading
             )

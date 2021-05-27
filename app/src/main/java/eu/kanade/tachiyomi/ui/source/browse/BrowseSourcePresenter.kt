@@ -14,6 +14,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxSectionItem
@@ -42,7 +43,6 @@ import rx.schedulers.Schedulers
 import rx.subjects.PublishSubject
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.Date
 
 /**
  * Presenter of [BrowseSourceController].
@@ -188,17 +188,17 @@ open class BrowseSourcePresenter(
             .map {
                 it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
                     .filter { isDeepLink || isLibraryVisible || !it.manga.favorite }
-            }            .observeOn(AndroidSchedulers.mainThread())
+            }.observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay(
                 { view, (page, mangas) ->
-                 if (isDeepLink) {
+                    if (isDeepLink) {
                         view.goDirectlyForDeepLink(mangas.first().manga)
-                    }else{
-                    view.onAddPage(page, mangas)
+                    } else {
+                        view.onAddPage(page, mangas)
                     }
                 },
                 { _, error ->
-                    Timber.e(error)
+                    XLog.e(error)
                 }
             )
 
@@ -344,7 +344,6 @@ open class BrowseSourcePresenter(
         prefs.browseShowLibrary().set(!isLibraryVisible)
     }
 
-    
     /**
      * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
      */

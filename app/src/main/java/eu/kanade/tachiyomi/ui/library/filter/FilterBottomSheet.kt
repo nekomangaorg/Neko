@@ -68,9 +68,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
     private lateinit var completed: FilterTagGroup
 
-    private var merged: FilterTagGroup? = null
+    private lateinit var merged: FilterTagGroup
 
-    private  var missingChapters: FilterTagGroup? = null
+    private lateinit var missingChapters: FilterTagGroup
 
     private var tracked: FilterTagGroup? = null
 

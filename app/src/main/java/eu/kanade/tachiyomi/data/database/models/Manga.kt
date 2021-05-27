@@ -37,11 +37,6 @@ interface Manga : SManga {
 
     fun isBlank() = id == Long.MIN_VALUE
 
-    fun getGenres(): List<String>? {
-        return genre?.split(", ")?.map { it.trim() }
-    }
-
-    fun isBlank() = id == Long.MIN_VALUE
     fun isHidden() = status == -1
 
     fun setChapterOrder(order: Int) {
@@ -86,7 +81,7 @@ interface Manga : SManga {
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */
-    fun mangaType(): Int {
+    fun seriesType(): Int {
         // lump everything as manga if not manhua or manhwa
         return when (lang_flag) {
             "ko" -> TYPE_MANHWA
@@ -209,7 +204,7 @@ interface Manga : SManga {
     }
 }
 
-fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false
+fun Manga.isLongStrip() = this.genre?.contains("long strip", true) ?: false
 
 fun Manga.potentialAltThumbnail(): String? {
     // ignore null and already small thumbs

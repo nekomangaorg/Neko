@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track.anilist
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
+import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -10,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class Anilist(private val context: Context, id: Int) : TrackService(id) {

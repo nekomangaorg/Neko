@@ -33,15 +33,10 @@ import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.Router
-import com.getkeepsafe.taptargetview.TapTarget
-import com.getkeepsafe.taptargetview.TapTargetView
-import com.bluelinelabs.conductor.RouterTransaction
-import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.elvishew.xlog.XLog
 import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.snackbar.Snackbar
-import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -52,12 +47,12 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
 import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
-import eu.kanade.tachiyomi.extension.api.ExtensionGithubApi
+import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
@@ -70,7 +65,6 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.ui.source.BrowseController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -91,7 +85,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import timber.log.Timber
-import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -106,7 +99,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
 
-    var backArrow: Drawable? = null
+    var drawerArrow: DrawerArrowDrawable? = null
         private set
     private var searchDrawable: Drawable? = null
     private var dismissDrawable: Drawable? = null
@@ -164,9 +157,17 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         setContentView(binding.root)
 
-        backArrow = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back)
-        searchDrawable = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_search)
-        dismissDrawable = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_close)
+        drawerArrow = DrawerArrowDrawable(this)
+        drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
+        binding.toolbar.overflowIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
+        searchDrawable = ContextCompat.getDrawable(
+            this,
+            R.drawable.ic_search_24dp
+        )
+        dismissDrawable = ContextCompat.getDrawable(
+            this,
+            R.drawable.ic_close_24dp
+        )
 
         var continueSwitchingTabs = false
         binding.bottomNav.getItemView(R.id.nav_library)?.setOnLongClickListener {
@@ -203,9 +204,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.binding.bottomNav.selectedItemId = id
-                }
+                        continueSwitchingTabs = true
+                        this@MainActivity.binding.bottomNav.selectedItemId = id
+                    }
                 ) return@setOnNavigationItemSelectedListener false
             }
             continueSwitchingTabs = false
@@ -215,7 +216,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     when (id) {
                         R.id.nav_library -> LibraryController()
                         R.id.nav_recents -> RecentsController()
-                        else -> BrowseController()
+                        else -> BrowseSourceController()
                     },
                     id
                 )
@@ -346,7 +347,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.toolbar.setIncognitoMode(it)
                 binding.cardToolbar.setIncognitoMode(it)
             }
-        setExtensionsBadge()
         setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller))
     }
 
@@ -381,9 +381,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
     }
 
+/*
     fun showNavigationArrow() {
         binding.toolbar.navigationIcon = backArrow
     }
+*/
 
     private fun setNavBarColor(insets: WindowInsets?) {
         if (insets == null) return
@@ -505,16 +507,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
-    /**
-     * Called when login dialog is closed, refreshes the adapter.
-     *
-     * @param source clicked item containing source information.
-     */
-    override fun siteLoginDialogClosed(source: Source) {
-        if (source.isLogged()) {
-            setBrowseRoot()
-        }
-
     override fun onNewIntent(intent: Intent) {
         if (!handleIntentAction(intent)) {
             super.onNewIntent(intent)
@@ -552,18 +544,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
             }
             SHORTCUT_BROWSE -> binding.bottomNav.selectedItemId = R.id.nav_browse
-            SHORTCUT_EXTENSIONS -> {
-                if (binding.bottomNav.selectedItemId != R.id.nav_browse) {
-                    binding.bottomNav.selectedItemId = R.id.nav_browse
-                } else {
-                    router.popToRoot()
-                }
-                binding.bottomNav.post {
-                    val controller =
-                        router.backstack.firstOrNull()?.controller as? BrowseController
-                    controller?.showSheet()
-                }
-            }
             SHORTCUT_MANGA -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) binding.bottomNav.selectedItemId = R.id.nav_library
@@ -731,7 +711,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.toolbar.navigationIcon = searchDrawable
             binding.cardToolbar.navigationIcon = searchDrawable
         } else {
-            //            showNavigationArrow()
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
             binding.toolbar.navigationIcon = drawerArrow
             binding.cardToolbar.navigationIcon = drawerArrow
@@ -829,7 +808,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 try {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        "https://github.com/jays2kings/tachiyomiJ2K/releases/tag/v${BuildConfig.VERSION_NAME}".toUri()
+                        "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}".toUri()
                     )
                     startActivity(intent)
                 } catch (e: Throwable) {

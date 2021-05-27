@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.ShortcutInfo
 import android.content.pm.ShortcutManager
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import coil.Coil
@@ -16,7 +17,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
@@ -50,7 +50,7 @@ class MangaShortcutManager(
                 val recentSources = preferences.lastUsedSources().get().mapNotNull {
                     val splitS = it.split(":")
                     splitS.first().toLongOrNull()?.let { id ->
-                        sourceManager.getOrStub(id) to splitS[1].toLong()
+                        sourceManager.getMangadex() to splitS[1].toLong()
                     }
                 }
                 val recents =
@@ -89,22 +89,17 @@ class MangaShortcutManager(
                                 .build()
                         }
                         is Source -> {
-                            val bitmap = (item.icon() as? BitmapDrawable)?.bitmap
+
+                            val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_tracker_mangadex_logo)
 
                             ShortcutInfo.Builder(context, "Source-${item.id}")
                                 .setShortLabel(item.name)
                                 .setLongLabel(item.name)
                                 .setIcon(
-                                    if (bitmap != null) if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
                                         Icon.createWithAdaptiveBitmap(bitmap.toSquare())
                                     } else {
                                         Icon.createWithBitmap(bitmap)
-                                    }
-                                    else {
-                                        Icon.createWithResource(
-                                            context,
-                                            R.drawable.sc_extensions_48dp
-                                        )
                                     }
                                 )
                                 .setIntent(

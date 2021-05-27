@@ -12,6 +12,7 @@ import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
@@ -170,22 +171,6 @@ class PreferencesHelper(val context: Context) {
     fun readWithVolumeKeys() = flowPrefs.getBoolean(Keys.readWithVolumeKeys, false)
 
     fun readWithVolumeKeysInverted() = flowPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
-    =======
-    fun cropBorders() = flowPrefs.getBoolean(Keys.cropBorders, false)
-
-    fun cropBordersWebtoon() = flowPrefs.getBoolean(Keys.cropBordersWebtoon, false)
-
-    fun webtoonSidePadding() = flowPrefs.getInt(Keys.webtoonSidePadding, 0)
-
-    fun webtoonEnableZoomOut() = flowPrefs.getBoolean(Keys.webtoonEnableZoomOut, false)
-
-    fun readWithTapping() = flowPrefs.getBoolean(Keys.readWithTapping, true)
-
-    fun readWithLongTap() = flowPrefs.getBoolean(Keys.readWithLongTap, true)
-
-    fun readWithVolumeKeys() = flowPrefs.getBoolean(Keys.readWithVolumeKeys, false)
-
-    fun readWithVolumeKeysInverted() = flowPrefs.getBoolean(Keys.readWithVolumeKeysInverted, false)
 
     fun navigationModePager() = flowPrefs.getInt(Keys.navigationModePager, 0)
 
@@ -223,8 +208,6 @@ class PreferencesHelper(val context: Context) {
     fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
 
     fun browseAsList() = flowPrefs.getBoolean(Keys.catalogueAsList, false)
-
-    fun browseAsList() = rxPrefs.getBoolean(Keys.catalogueAsList, false)
 
     fun browseShowLibrary() = rxPrefs.getBoolean(Keys.catalogueShowLibrary, true)
 
@@ -437,10 +420,6 @@ class PreferencesHelper(val context: Context) {
 
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
-    fun showNsfwSource() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
-    fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
-    fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
-
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
     fun appShortcuts() = prefs.getBoolean(Keys.showMangaAppShortcuts, true)
@@ -464,8 +443,6 @@ class PreferencesHelper(val context: Context) {
     fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 
     fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
-
-    fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
 
     fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
 

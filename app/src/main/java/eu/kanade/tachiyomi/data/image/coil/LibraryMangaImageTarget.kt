@@ -3,8 +3,6 @@ package eu.kanade.tachiyomi.data.image.coil
 import android.graphics.BitmapFactory
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
-import coil.Coil
-import coil.ImageLoader
 import coil.ImageLoader
 import coil.imageLoader
 import coil.memory.MemoryCache

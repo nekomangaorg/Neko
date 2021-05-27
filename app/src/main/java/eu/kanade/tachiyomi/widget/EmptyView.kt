@@ -7,15 +7,13 @@ import android.widget.RelativeLayout
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.core.view.isVisible
-import com.mikepenz.iconics.typeface.IIcon
-import eu.kanade.tachiyomi.util.system.iconicsDrawable
-
 import com.google.android.material.button.MaterialButton
+import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.view.setVectorCompat
-import kotlinx.android.synthetic.main.common_view_empty.view.*
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     RelativeLayout(context, attrs) {
@@ -40,14 +38,6 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     /**
      * Show the information view
-     * @param textResource text of information view
-     */
-    fun show(icon: IIcon, @StringRes textResource: Int, actions: List<Action>? = null) {
-        show(icon, context.getString(textResource), actions)
-    }
-
-    /**
-     * Show the information view
      * @param drawable icon of information view
      * @param textResource text of information view
      */
@@ -65,9 +55,9 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                         null
                     ) as MaterialButton
                     ).apply {
-                    setText(it.resId)
-                    setOnClickListener(it.listener)
-                }
+                        setText(it.resId)
+                        setOnClickListener(it.listener)
+                    }
 
                 binding.actionsContainer.addView(button)
             }
@@ -91,7 +81,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      */
 
     fun showMedium(icon: IIcon, message: String, actions: List<Action>? = null) {
-        image_view.setImageDrawable(
+        binding.imageView.setImageDrawable(
             context.iconicsDrawable(
                 icon, color = android.R.attr.textColorHint,
                 size = 48
@@ -101,7 +91,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     fun show(icon: IIcon, message: String, actions: List<Action>? = null) {
-        image_view.setImageDrawable(
+        binding.imageView.setImageDrawable(
             context.iconicsDrawable(
                 icon, color = android.R.attr.textColorHint, size = 128
             )
@@ -110,9 +100,9 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
     }
 
     fun iconicsAfter(message: String, actions: List<Action>? = null) {
-        text_label.text = message
+        binding.textLabel.text = message
 
-        actions_container.removeAllViews()
+        binding.actionsContainer.removeAllViews()
         if (!actions.isNullOrEmpty()) {
             actions.forEach {
                 val button = (
@@ -126,11 +116,10 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                         setOnClickListener(it.listener)
                     }
 
-                actions_container.addView(button)
+                binding.actionsContainer.addView(button)
             }
         }
-
-        this.visible()
+        this.isVisible = true
     }
 
     data class Action(

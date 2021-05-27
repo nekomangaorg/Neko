@@ -1,18 +1,19 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.content.Intent
+import android.os.Build
 import android.os.Bundle
+import android.provider.Settings
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
-import eu.kanade.tachiyomi.util.system.LocaleHelper
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import kotlinx.coroutines.flow.launchIn
-import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -68,6 +69,12 @@ class SettingsGeneralController : SettingsController() {
             entryValues = listOf("", "MM/dd/yy", "dd/MM/yy", "yyyy-MM-dd")
             entries = entryValues.map { value ->
                 if (value == "") {
+                    context.getString(R.string.system_default)
+                } else {
+                    value
+                }
+            }
+            defaultValue = ""
         }
 
         switchPreference {
@@ -111,7 +118,7 @@ class SettingsGeneralController : SettingsController() {
                 titleRes = R.string.app_theme
                 lastScrollPostion = lastThemeX
                 summary = if (preferences.nightMode()
-                    .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                        .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
                     val lightTheme = preferences.lightTheme().get().nameRes
                     val darkTheme = preferences.darkTheme().get().nameRes

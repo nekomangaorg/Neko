@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
 import com.afollestad.materialdialogs.customview.getCustomView
@@ -13,10 +14,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.widget.SimpleTextWatcher
-import kotlinx.android.synthetic.main.pref_account_login.view.*
-import kotlinx.android.synthetic.main.pref_site_login.view.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -63,12 +60,8 @@ abstract class LoginDialogPreference(
                 checkLogin()
             }
 
-            binding.twoFactorCheck?.setOnCheckedChangeListener { _, isChecked ->
-                if (isChecked) {
-                    two_factor_holder.visibility = View.VISIBLE
-                } else {
-                    two_factor_holder.visibility = View.GONE
-                }
+            binding.twoFactorCheck.setOnCheckedChangeListener { _, isChecked ->
+                binding.twoFactorCheck.isVisible = isChecked
             }
 
             setCredentialsOnView(this)

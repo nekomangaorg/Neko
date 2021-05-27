@@ -63,14 +63,15 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
         BaseFlexibleViewHolder(view, adapter, true) {
 
         private val binding = MaterialTextButtonBinding.bind(view)
+
         init {
             binding.button.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 width = MATCH_PARENT
             }
-            binding.button.setOnClickListener {
-                val query = (adapter.getItem(flexibleAdapterPosition) as SearchGlobalItem).string
-                (adapter as? LibraryCategoryAdapter)?.libraryListener?.globalSearch(query)
-            }
+            /* binding.button.setOnClickListener {
+                 val query = (adapter.getItem(flexibleAdapterPosition) as SearchGlobalItem).string
+                 (adapter as? LibraryCategoryAdapter)?.libraryListener?.globalSearch(query)
+             }*/
         }
 
         fun bind(string: String) {

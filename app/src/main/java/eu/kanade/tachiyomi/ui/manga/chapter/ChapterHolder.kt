@@ -7,15 +7,11 @@ import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
-
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.isVisible
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
@@ -38,10 +34,10 @@ class ChapterHolder(
         val chapter = item.chapter
         val isLocked = item.isLocked
 
-         if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter().not() && item.isDownloaded.not()) {
-            binding.donwloadButton.gone()
+        if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter().not() && item.isDownloaded.not()) {
+            binding.downloadButton.root.isVisible = false
         }
-        
+
         binding.chapterTitle.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
@@ -74,16 +70,16 @@ class ChapterHolder(
                 )
             )
         }
- if (chapter.language.isNullOrBlank() || chapter.language.equals("english", true)) {
-            binding.chapterLanguage.gone()
+        if (chapter.language.isNullOrBlank() || chapter.language.equals("english", true)) {
+            binding.chapterLanguage.isVisible = false
         } else {
-            binding.chapterLanguage.visible()
+            binding.chapterLanguage.isVisible = true
             binding.chapterLanguage.text = chapter.language
             ChapterUtil.setTextViewForChapter(
                 binding.chapterLanguage, item, showBookmark = false, hideStatus = isLocked
             )
         }
-        
+
 
         if (chapter.scanlator?.isNotBlank() == true) {
             statuses.add(chapter.scanlator!!)

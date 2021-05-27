@@ -36,10 +36,10 @@ class TabbedReaderSettingsSheet(
         null
     ) as ReaderFilterView
 
-    var showWebview: Boolean = {
+    var showWebview: Boolean = run {
         val mangaViewer = readerActivity.presenter.getMangaViewer()
         mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
-    }()
+    }
 
     override var offset = 0
 

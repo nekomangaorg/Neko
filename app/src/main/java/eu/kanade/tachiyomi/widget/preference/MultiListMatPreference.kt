@@ -4,13 +4,13 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
+import androidx.preference.Preference.SummaryProvider
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.checkItem
 import com.afollestad.materialdialogs.list.isItemChecked
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.afollestad.materialdialogs.list.uncheckItem
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.setting.defaultValue
 
 class MultiListMatPreference @JvmOverloads constructor(
     activity: Activity?,
@@ -36,7 +36,7 @@ class MultiListMatPreference @JvmOverloads constructor(
             notifyChanged()
         }
 
-    private var defValue: Set<String> = emptySet()
+    var defValue: Set<String> = emptySet()
 
     override fun onSetInitialValue(defaultValue: Any?) {
         super.onSetInitialValue(defaultValue)

@@ -1,20 +1,17 @@
 package eu.kanade.tachiyomi
 
-import com.elvishew.xlog.XLog
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import eu.kanade.tachiyomi.v5.job.V5MigrationJob
-import eu.kanade.tachiyomi.v5.job.V5MigrationService
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -62,12 +59,12 @@ object Migrations {
                     context.toast(R.string.myanimelist_relogin)
                 }
             }
-            if(oldVersion < 114 && oldVersion != 0) {
+            if (oldVersion < 114 && oldVersion != 0) {
                 // Force migrate all manga to the new V5 ids
                 V5MigrationJob.doWorkNow()
             }
             if (oldVersion < 115) {
- // Migrate DNS over HTTPS setting
+                // Migrate DNS over HTTPS setting
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val wasDohEnabled = prefs.getBoolean("enable_doh", false)
                 if (wasDohEnabled) {
@@ -76,7 +73,7 @@ object Migrations {
                         remove("enable_doh")
                     }
                 }
-      // Reset rotation to Free after replacing Lock
+                // Reset rotation to Free after replacing Lock
                 preferences.rotation().set(1)
             }
             return true

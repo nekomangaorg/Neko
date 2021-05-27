@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
-import eu.kanade.tachiyomi.source.icon
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -29,6 +28,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     BaseFlexibleViewHolder(view, adapter, true) {
 
     private val binding = LibraryCategoryHeaderItemBinding.bind(view)
+
     init {
         binding.categoryHeaderLayout.setOnClickListener { toggleCategory() }
         binding.updateButton.setOnClickListener { addCategoryToUpdate() }
@@ -81,13 +81,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
         if (category.isAlone && !category.isDynamic) binding.categoryTitle.text = ""
         else binding.categoryTitle.text = category.name
-        if (category.sourceId != null) {
-            val icon = adapter.sourceManager.get(category.sourceId!!)?.icon()
-            icon?.setBounds(0, 0, 32.dpToPx, 32.dpToPx)
-            binding.categoryTitle.setCompoundDrawablesRelative(icon, null, null, null)
-        } else {
-            binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
-        }
+        binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
 
         val isAscending = category.isAscending()
         val sortingMode = category.sortingMode()

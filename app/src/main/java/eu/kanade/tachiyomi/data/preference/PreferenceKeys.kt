@@ -148,6 +148,12 @@ object PreferenceKeys {
 
     const val automaticUpdates = "automatic_updates"
 
+    const val autoHideHopper = "autohide_hopper"
+
+    const val hopperLongPress = "hopper_long_press"
+
+    const val onlySearchPinned = "only_search_pinned"
+
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"
@@ -210,8 +216,6 @@ object PreferenceKeys {
 
     const val dohProvider = "doh_provider"
 
-
-
     const val incognitoMode = "incognito_mode"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
@@ -220,8 +224,7 @@ object PreferenceKeys {
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
 
-
-      const val useCacheSource = "use_cache_source_new"
+    const val useCacheSource = "use_cache_source_new"
 
     const val sessionToken = "mangadex_session_token"
 
@@ -233,7 +236,7 @@ object PreferenceKeys {
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
 
-     const val contentRating = "content_rating_options"
+    const val contentRating = "content_rating_options"
 
     const val lowQualityCovers = "low_quality_covers"
 

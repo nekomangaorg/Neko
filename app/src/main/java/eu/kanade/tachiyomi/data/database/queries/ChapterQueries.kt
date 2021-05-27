@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
-import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterKnownBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterProgressPutResolver
@@ -26,6 +25,17 @@ interface ChapterQueries : DbProvider {
                 .table(ChapterTable.TABLE)
                 .where("${ChapterTable.COL_MANGA_ID} = ?")
                 .whereArgs(mangaId)
+                .build()
+        )
+        .prepare()
+
+    fun getChaptersByMangaId(id: Long) = db.get()
+        .listOfObjects(Chapter::class.java)
+        .withQuery(
+            Query.builder()
+                .table(ChapterTable.TABLE)
+                .where("${ChapterTable.COL_MANGA_ID} = ?")
+                .whereArgs(id)
                 .build()
         )
         .prepare()

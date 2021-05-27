@@ -2,9 +2,9 @@ package eu.kanade.tachiyomi.ui.reader
 
 import android.app.Application
 import android.graphics.BitmapFactory
-import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
+import androidx.annotation.ColorInt
 import com.elvishew.xlog.XLog
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
@@ -14,19 +14,16 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
-import eu.kanade.tachiyomi.data.database.models.isWebtoon
+import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
@@ -36,7 +33,6 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -271,8 +267,7 @@ class ReaderPresenter(
             Notifications.ID_NEW_CHAPTERS
         )
 
-        val source = sourceManager.getMangaDex()
-        loader = ChapterLoader(downloadManager, manga, source)
+        loader = ChapterLoader(downloadManager, manga, sourceManager)
 
         Observable.just(manga).subscribeLatestCache(ReaderActivity::setManga)
         viewerChaptersRelay.subscribeLatestCache(ReaderActivity::setChapters)
@@ -557,8 +552,6 @@ class ReaderPresenter(
         return viewerChaptersRelay.value?.currChapter
     }
 
-    fun getSource() = sourceManager.getOrStub(manga!!.source) as? HttpSource
-
     /**
      * Returns the viewer position used by this manga or the default one.
      */
@@ -579,7 +572,7 @@ class ReaderPresenter(
         val viewer = if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
 
         return when {
-            !manga.isWebtoon() && viewer == ReaderActivity.WEBTOON -> ReaderActivity.VERTICAL_PLUS
+            !manga.isLongStrip() && viewer == ReaderActivity.WEBTOON -> ReaderActivity.VERTICAL_PLUS
             else -> viewer
         }
     }
@@ -822,19 +815,11 @@ class ReaderPresenter(
 
         Observable
             .fromCallable {
-                if (manga.source == LocalSource.ID) {
-                    val context = Injekt.get<Application>()
-                    coverCache.deleteFromCache(manga)
-                    LocalSource.updateCover(context, manga, stream())
-                    R.string.cover_updated
+                if (manga.favorite) {
+                    coverCache.setCustomCoverToCache(manga, stream())
                     SetAsCoverResult.Success
                 } else {
-                    if (manga.favorite) {
-                        coverCache.setCustomCoverToCache(manga, stream())
-                        SetAsCoverResult.Success
-                    } else {
-                        SetAsCoverResult.AddToLibraryFirst
-                    }
+                    SetAsCoverResult.AddToLibraryFirst
                 }
             }
             .subscribeOn(Schedulers.io())
@@ -918,40 +903,5 @@ class ReaderPresenter(
             .onErrorComplete()
             .subscribeOn(Schedulers.io())
             .subscribe()
-    }
-
-    /**
-     * Called from the activity to load and set the next chapter as active.
-     */
-    fun loadNextChapter() {
-        val nextChapter = viewerChaptersRelay.value?.nextChapter ?: return
-        loadAdjacent(nextChapter)
-    }
-
-    /**
-     * Called from the activity to load and set the previous chapter as active.
-     */
-    fun loadPreviousChapter() {
-        val prevChapter = viewerChaptersRelay.value?.prevChapter ?: return
-        loadAdjacent(prevChapter)
-    }
-
-    private fun loadAdjacent(chapter: ReaderChapter) {
-        val loader = loader ?: return
-
-        XLog.d("Loading adjacent ${chapter.chapter.url}")
-
-        activeChapterSubscription?.unsubscribe()
-        activeChapterSubscription = getLoadObservable(loader, chapter)
-            .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
-            .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
-            .subscribeFirst(
-                { view, _ ->
-                    view.moveToPageIndex(0)
-                },
-                { _, _ ->
-                    // Ignore onError event, viewers handle that state
-                }
-            )
     }
 }

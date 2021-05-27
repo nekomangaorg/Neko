@@ -159,17 +159,14 @@ class LibraryItem(
 
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
-        val seriesType by lazy { manga.seriesType(preferences.context, sourceManager) }
-        return if (tag.startsWith("-")) {
-            val realTag = tag.substringAfter("-")
+        return if (tag.startsWith("-"))
             genres?.find {
-                it.trim().equals(realTag, ignoreCase = true) || seriesType.equals(realTag, true)
+                it.trim().equals(tag.substringAfter("-"), ignoreCase = true)
             } == null
-        } else {
+        else
             genres?.find {
-                it.trim().equals(tag, ignoreCase = true) || seriesType.equals(tag, true)
+                it.trim().equals(tag, ignoreCase = true)
             } != null
-        }
     }
 
     override fun equals(other: Any?): Boolean {

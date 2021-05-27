@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.similar.MangaCacheUpdateService
+import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -498,7 +499,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-                Chapter
+            Chapter
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
@@ -540,19 +541,19 @@ class NotificationReceiver : BroadcastReceiver() {
          */
         internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int):
             PendingIntent {
-                val newIntent =
-                    Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
-                        .putExtra("notificationId", manga.id.hashCode())
-                        .putExtra("groupId", groupId)
-                return PendingIntent.getActivity(
+            val newIntent =
+                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
+                    .putExtra("notificationId", manga.id.hashCode())
+                    .putExtra("groupId", groupId)
+            return PendingIntent.getActivity(
                 context,
                 manga.id.hashCode(),
                 newIntent,
                 PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            )
+        }
 
         /**
          * Returns [PendingIntent] that opens the error log file in an external viewer
@@ -561,7 +562,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param uri uri of error log file
          * @return [PendingIntent]
          */
-        internal fun openErrorLogPendingActivity(context: Context, uri: Uri): PendingIntent {
+        internal fun openErrorLogPendingActivity(context: Context, uri: Uri?): PendingIntent {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
                 setDataAndType(uri, "text/plain")
@@ -569,7 +570,6 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             return PendingIntent.getActivity(context, 0, intent, 0)
         }
-
 
         /**Returns the PendingIntent that will open the error log in an external text viewer
          *
@@ -593,7 +593,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapters:
-                Array<Chapter>,
+            Array<Chapter>,
             groupId: Int
         ):
             PendingIntent {

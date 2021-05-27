@@ -66,10 +66,23 @@
                     android:text="@string/oldest_first" />
             </RadioGroup>
 
-            <include layout="@layout/chapter_filter_layout"
+            <include
+                layout="@layout/chapter_filter_layout"
                 android:id="@+id/chapter_filter_layout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/filter_groups_button"
+                style="@style/Neko.Button.RoundedOutline"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:layout_marginStart="12dp"
+                android:background="@color/background"
+                android:layout_marginEnd="12dp"
+                android:textAlignment="center"
+                android:text="@string/filter_groups" />
 
             <com.google.android.material.textview.MaterialTextView
                 style="@style/Neko.Body1.Medium"

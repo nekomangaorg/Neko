@@ -1,81 +1,39 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import android.app.SearchManager
-import android.database.Cursor
-import android.database.MatrixCursor
 import android.os.Bundle
 import android.os.Handler
-import android.provider.BaseColumns
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import android.widget.AutoCompleteTextView
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.SearchView
-import androidx.cursoradapter.widget.CursorAdapter
-import androidx.cursoradapter.widget.SimpleCursorAdapter
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.elvishew.xlog.XLog
-import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.jakewharton.rxbinding.support.v7.widget.queryTextChangeEvents
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.BrowseSourceControllerBinding
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
-import eu.kanade.tachiyomi.ui.follows.FollowsController
-import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
-import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-<<<<<<< HEAD
-=======
-import eu.kanade.tachiyomi.ui.source.BrowseController
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
->>>>>>> j2kmaster
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
-<<<<<<< HEAD
-import eu.kanade.tachiyomi.util.view.applyWindowInsetsForRootController
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.scrollViewWith
-import eu.kanade.tachiyomi.util.view.setStyle
-import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import eu.kanade.tachiyomi.widget.EmptyView
-import kotlinx.android.synthetic.main.browse_source_controller.*
-import kotlinx.android.synthetic.main.browse_source_controller.empty_view
-import kotlinx.android.synthetic.main.browse_source_controller.progress
-import kotlinx.android.synthetic.main.browse_source_controller.swipe_refresh
-import kotlinx.android.synthetic.main.library_list_controller.*
-import kotlinx.android.synthetic.main.main_activity.*
-import rx.Observable
-import rx.Subscription
-=======
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -84,8 +42,6 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
-import timber.log.Timber
->>>>>>> j2kmaster
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -164,11 +120,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-<<<<<<< HEAD
         return BrowseSourcePresenter(args.getString(SEARCH_QUERY_KEY) ?: "", args.getBoolean(DEEP_LINK))
-=======
-        return BrowseSourcePresenter(args.getLong(SOURCE_ID_KEY), args.getString(SEARCH_QUERY_KEY))
->>>>>>> j2kmaster
     }
 
     override fun createBinding(inflater: LayoutInflater) = BrowseSourceControllerBinding.inflate(inflater)
@@ -181,9 +133,6 @@ open class BrowseSourceController(bundle: Bundle) :
         }
         if (preferences.useCacheSource()) {
             view.snack("Browsing Cached Source")
-        }
-        if (bundle?.getBoolean(APPLY_INSET) == true) {
-            view.applyWindowInsetsForRootController(activity!!.bottom_nav)
         }
 
         // Initialize adapter, scroll listener and recycler views
@@ -303,7 +252,7 @@ open class BrowseSourceController(bundle: Bundle) :
         searchItem.fixExpand(
             onExpand = { invalidateMenuOnExpand() },
             onCollapse = {
-                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is GlobalSearchController) {
+                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is BrowseSourceController) {
                     router.popController(this)
                 } else {
                     searchWithQuery("")
@@ -322,16 +271,6 @@ open class BrowseSourceController(bundle: Bundle) :
             setIcon(icon)
         }
         hideItemsIfExpanded(searchItem, menu)
-    }
-
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-
-        val isHttpSource = presenter.source is HttpSource
-        menu.findItem(R.id.action_open_in_web_view).isVisible = isHttpSource
-
-        val isLocalSource = presenter.source is LocalSource
-        menu.findItem(R.id.action_local_source_help).isVisible = isLocalSource
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -399,7 +338,7 @@ open class BrowseSourceController(bundle: Bundle) :
             adapter?.clear()
             presenter.setSourceFilter(FilterList())
         }
-
+/*
         sheet.onRandomClicked = {
             sheet.dismiss()
             showProgressBar()
@@ -411,7 +350,7 @@ open class BrowseSourceController(bundle: Bundle) :
             sheet.dismiss()
             adapter?.clear()
             router.pushController(FollowsController().withFadeTransaction())
-        }
+        }*/
         sheet.show()
     }
 
@@ -502,13 +441,13 @@ open class BrowseSourceController(bundle: Bundle) :
             actions += EmptyView.Action(R.string.retry, retryAction)
             actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
 
-            empty_view.show(
+            binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_compass_off,
                 message,
                 actions
             )
         } else {
-            snack = source_layout?.snack(message, Snackbar.LENGTH_INDEFINITE) {
+            snack = binding.sourceLayout.snack(message, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.retry, retryAction)
             }
         }
@@ -662,10 +601,10 @@ open class BrowseSourceController(bundle: Bundle) :
 
     companion object {
         const val SOURCE_ID_KEY = "sourceId"
-                const val APPLY_INSET = "applyInset"
+        const val APPLY_INSET = "applyInset"
         const val DEEP_LINK = "deepLink"
         const val FOLLOWS = "follows"
-                const val MANGA_ID = "mangaId"
+        const val MANGA_ID = "mangaId"
 
         const val SEARCH_QUERY_KEY = "searchQuery"
         const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"

@@ -17,13 +17,13 @@ import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.text.bold
 import androidx.core.text.inSpans
+import androidx.core.view.isVisible
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
-import eu.kanade.tachiyomi.util.view.visibleIf
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 
@@ -100,7 +100,7 @@ class WebtoonTransitionHolder(
         val nextChapter = transition.to
 
         textView.text = if (nextChapter != null) {
-            SpannableStringBuilder().append(context.getString(R.string.finished))
+            SpannableStringBuilder().append(context.getString(R.string.finished_chapter))
                 .bold { append("\n${transition.from.chapter.name}\n\n") }
                 .append(context.getString(R.string.next))
                 .bold { append("\n${nextChapter.chapter.name}\n\n") }
@@ -159,7 +159,8 @@ class WebtoonTransitionHolder(
             .subscribe { state ->
                 pagesContainer.removeAllViews()
                 when (state) {
-                    is ReaderChapter.State.Wait -> {}
+                    is ReaderChapter.State.Wait -> {
+                    }
                     is ReaderChapter.State.Loading -> setLoading()
                     is ReaderChapter.State.Error -> setError(state.error, transition)
                     is ReaderChapter.State.Loaded -> setLoaded()

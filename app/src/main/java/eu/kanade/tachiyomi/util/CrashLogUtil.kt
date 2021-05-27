@@ -15,12 +15,12 @@ import java.io.IOException
 class CrashLogUtil(private val context: Context) {
 
     private val notificationBuilder = context.notificationBuilder(Notifications.CHANNEL_CRASH_LOGS) {
-        setSmallIcon(R.drawable.ic_tachi)
+        setSmallIcon(R.drawable.ic_neko_notification)
     }
 
     fun dumpLogs() {
         try {
-            val file = context.createFileInCacheDir("tachiyomi_crash_logs.txt")
+            val file = context.createFileInCacheDir("neko_crash_logs.txt")
             Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
 
             showNotification(file.getUriCompat(context))

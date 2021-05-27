@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
+import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.source.online.MergeSource
 import tachiyomi.source.model.ChapterInfo
 import java.io.Serializable
@@ -64,7 +65,6 @@ interface SChapter : Serializable {
 }
 
 fun SChapter.isMergedChapter() = this.scanlator?.equals(MergeSource.name) ?: false
-
 
 fun SChapter.toChapterInfo(): ChapterInfo {
     return ChapterInfo(

@@ -23,7 +23,6 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

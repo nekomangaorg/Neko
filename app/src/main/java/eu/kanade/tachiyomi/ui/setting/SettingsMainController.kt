@@ -4,15 +4,18 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import android.widget.SearchView
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.RouterTransaction
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SettingsMainController : SettingsController(), FloatingSearchInterface {
@@ -25,9 +28,9 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         titleRes = R.string.settings
 
         val size = 18
-		val tintColor = context.getResourceColor(R.attr.colorAccent)
+        val tintColor = context.getResourceColor(R.attr.colorAccent)
 
-        
+
 
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_tune)
@@ -49,7 +52,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
-     preference {
+        preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_file_download)
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
@@ -59,7 +62,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
-     preference {
+        preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_backup)
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }
@@ -70,7 +73,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.security
             onClick { navigateTo(SettingsSecurityController()) }
         }
-       preference {
+        preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_code)
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }

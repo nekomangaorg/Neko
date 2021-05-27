@@ -5,13 +5,11 @@ import android.net.Uri
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.toMangaInfo
 import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.toSChapter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import uy.kohesive.injekt.injectLazy
 
@@ -42,9 +40,8 @@ abstract class AbstractBackupManager(protected val context: Context) {
      * @return Updated manga chapters.
      */
     internal suspend fun restoreChapters(source: Source, manga: Manga, chapters: List<Chapter>): Pair<List<Chapter>, List<Chapter>> {
-        val fetchedChapters = source.getChapterList(manga.toMangaInfo())
-            .map { it.toSChapter() }
-        val syncedChapters = syncChaptersWithSource(databaseHelper, fetchedChapters, manga, source)
+        val fetchedChapters = source.fetchChapterList(manga)
+        val syncedChapters = syncChaptersWithSource(databaseHelper, fetchedChapters, manga)
         if (syncedChapters.first.isNotEmpty()) {
             chapters.forEach { it.manga_id = manga.id }
             updateChapters(chapters)

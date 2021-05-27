@@ -21,9 +21,7 @@ import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreateService
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
-import eu.kanade.tachiyomi.data.backup.full.FullBackupRestoreValidator
 import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
-import eu.kanade.tachiyomi.data.backup.legacy.LegacyBackupRestoreValidator
 import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -107,7 +105,7 @@ class SettingsBackupController : SettingsController() {
                     // Always cancel the previous task, it seems that sometimes they are not updated
 
                     val interval = newValue as Int
-                    BackupCreatorJob.setupTask(context, interval)
+                    BackupCreatorJob.setupTask(interval)
                     true
                 }
             }
@@ -316,36 +314,17 @@ class SettingsBackupController : SettingsController() {
             val activity = activity!!
             val uri: Uri = args.getParcelable(KEY_URI)!!
             val type: Int = args.getInt(KEY_TYPE)
+            val isOnline: Boolean = args.getBoolean(KEY_MODE, true)
 
             return try {
-                var message = if (type == BackupConst.BACKUP_TYPE_FULL) {
-                    activity.getString(R.string.restore_content_full)
-                } else {
-                    activity.getString(R.string.restore_content)
-                }
-
-                val validator = if (type == BackupConst.BACKUP_TYPE_FULL) {
-                    FullBackupRestoreValidator()
-                } else {
-                    LegacyBackupRestoreValidator()
-                }
-
-                val results = validator.validate(activity, uri)
-                if (results.missingSources.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${results.missingSources.joinToString("\n") { "- $it" }}"
-                }
-                if (results.missingTrackers.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${results.missingTrackers.joinToString("\n") { "- $it" }}"
-                }
-
-                return MaterialDialog(activity)
+                MaterialDialog(activity)
                     .title(R.string.restore_backup)
-                    .message(text = message)
+                    .message(R.string.restore_neko)
                     .positiveButton(R.string.restore) {
                         val context = applicationContext
                         if (context != null) {
                             activity.toast(R.string.restoring_backup)
-                            BackupRestoreService.start(context, uri, type)
+                            BackupRestoreService.start(context, uri, type, isOnline)
                         }
                     }
             } catch (e: Exception) {
@@ -359,6 +338,7 @@ class SettingsBackupController : SettingsController() {
         private companion object {
             const val KEY_URI = "RestoreBackupDialog.uri"
             const val KEY_TYPE = "RestoreBackupDialog.type"
+            const val KEY_MODE = "RestoreBackupDialog.mode"
         }
     }
 

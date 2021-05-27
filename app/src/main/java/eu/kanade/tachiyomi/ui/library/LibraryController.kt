@@ -55,14 +55,12 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
@@ -74,9 +72,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.migration.manga.design.PreMigrationController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
@@ -398,7 +394,7 @@ class LibraryController(
     }
 
     private fun showGroupOptions() {
-        val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_SOURCE, BY_STATUS)
+        val groupItems = mutableListOf(BY_DEFAULT, BY_TAG, BY_STATUS)
         if (presenter.isLoggedIntoTracking) {
             groupItems.add(BY_TRACK_STATUS)
         }
@@ -695,7 +691,7 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                binding.libraryGridRecycler.recycler.translationY
+                    binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
@@ -735,8 +731,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -922,7 +918,7 @@ class LibraryController(
         } else {
             binding.emptyView.show(
                 CommunityMaterial.Icon2.cmd_heart_off,
-                if (filter_bottom_sheet.hasActiveFilters()) R.string.no_matches_for_filters
+                if (binding.filterBottomSheet.filterBottomSheet.hasActiveFilters()) R.string.no_matches_for_filters
                 else R.string.library_is_empty_add_from_browse
             )
         }
@@ -1249,10 +1245,6 @@ class LibraryController(
         lastClickPosition = position
     }
 
-    override fun globalSearch(query: String) {
-        router.pushController(GlobalSearchController(query).withFadeTransaction())
-    }
-
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.bindingAdapterPosition ?: return
         binding.swipeRefresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_DRAG
@@ -1288,9 +1280,9 @@ class LibraryController(
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
         if ((
-            adapter.getItem(fromPosition) is LibraryItem &&
-                adapter.getItem(fromPosition) is LibraryItem
-            ) ||
+                adapter.getItem(fromPosition) is LibraryItem &&
+                    adapter.getItem(fromPosition) is LibraryItem
+                ) ||
             adapter.getItem(fromPosition) == null
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
@@ -1597,7 +1589,7 @@ class LibraryController(
         val shareItem = menu.findItem(R.id.action_share)
         val categoryItem = menu.findItem(R.id.action_move_to_category)
         categoryItem.isVisible = presenter.categories.size > 1
-        shareItem.isVisible = migrationItem.isVisible
+        shareItem.isVisible = true
         if (count == 0) destroyActionModeIfNeeded()
         else mode.title = resources?.getString(R.string.selected_, count)
         return false

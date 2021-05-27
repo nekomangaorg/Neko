@@ -34,7 +34,6 @@ import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.system.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -199,13 +198,6 @@ class SettingsAdvancedController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.library
             preference {
-                key = "refresh_lib_meta"
-                titleRes = R.string.refresh_library_metadata
-                summaryRes = R.string.updates_covers_genres_desc
-
-                onClick { LibraryUpdateService.start(context, target = Target.DETAILS) }
-            }
-            preference {
                 key = "refresh_teacking_meta"
                 titleRes = R.string.refresh_tracking_metadata
                 summaryRes = R.string.updates_tracking_details
@@ -213,12 +205,11 @@ class SettingsAdvancedController : SettingsController() {
                 onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
             }
         }
-    }
-
-          intListPreference(activity) {
+        intListPreference(activity)
+        {
             key = PreferenceKeys.logLevel
             titleRes = R.string.log_level
-            customSummary = context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
+            summary = context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${it.name.toLowerCase().capitalize()} (${it.description})"
             }
@@ -234,7 +225,7 @@ class SettingsAdvancedController : SettingsController() {
                 logFolder.deleteRecursively()
             }
         }
-
+    }
 
     class CleanupDownloadsDialogController() : DialogController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {

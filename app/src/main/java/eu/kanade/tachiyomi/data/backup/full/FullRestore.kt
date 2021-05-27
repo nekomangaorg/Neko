@@ -63,6 +63,7 @@ class FullRestore(val context: Context, val job: Job?) {
         skippedTitles = partitionedList.second.map { it.title }
         totalAmount = backup.backupManga.size
         skippedAmount = totalAmount - dexManga.size
+        restoreAmount = dexManga.size
         trackingErrors.clear()
         errors.clear()
         cancelled = 0

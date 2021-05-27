@@ -1,22 +1,12 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
-import android.app.Activity
 import android.view.MotionEvent
 import android.view.View
-import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.content.ContextCompat
-import androidx.core.graphics.ColorUtils
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.request.CachePolicy
-import com.google.android.material.button.MaterialButton
-import androidx.core.graphics.drawable.toBitmap
-import coil.Coil
-import coil.loadAny
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -28,27 +18,17 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.contextCompatColor
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.isVisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visInvisIf
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.manga_details_controller.*
-import kotlinx.android.synthetic.main.manga_header_item.*
+
 import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
@@ -264,7 +244,7 @@ class MangaHeaderHolder(
         }
 
         with(binding.mergeButton) {
-            visibleIf(manga.status != SManga.COMPLETED || presenter.preferences.useCacheSource())
+            isVisible = (manga.status != SManga.COMPLETED || presenter.preferences.useCacheSource())
             val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
             if (presenter.manga.isMerged().not()) {
                 iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
@@ -327,38 +307,31 @@ class MangaHeaderHolder(
             )
             )
 
-        manga_rating.visibleIf(manga.rating != null)
-        manga_rating.text = "  " + manga.rating
+        binding.mangaRating.isVisible = manga.rating != null
+        binding.mangaRating.text = "  " + manga.rating
 
-        manga_users.visibleIf(manga.users != null)
-        manga_users.text = "  " + manga.users
+        binding.mangaUsers.isVisible = manga.users != null
+        binding.mangaUsers.text = "  " + manga.users
 
-        manga_missing_chapters.visibleIf(manga.missing_chapters != null)
+        binding.mangaMissingChapters.isVisible = manga.missing_chapters != null
 
-        manga_missing_chapters.text = itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
+        binding.mangaMissingChapters.text = itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
 
         manga.genre?.let {
-            r18_badge.visibleIf(it.contains("Hentai", true))
-                }
-            )
-            )
-        binding.mangaSource.text = presenter.source.toString()
+            binding.r18Badge.isVisible = (it.contains("pornographic", true))
+        }
 
-        manga_lang_flag.visibility = View.VISIBLE
+        binding.mangaLangFlag.visibility = View.VISIBLE
         when (manga.lang_flag?.toLowerCase(Locale.US)) {
-            "zh-hk" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
-            "zh" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_china)
-            "ko" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_korea)
-            "ja" -> manga_lang_flag.setImageResource(R.drawable.ic_flag_japan)
-            else -> manga_lang_flag.visibility = View.GONE
+            "zh-hk" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_china)
+            "zh" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_china)
+            "ko" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_korea)
+            "ja" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_japan)
+            else -> binding.mangaLangFlag.visibility = View.GONE
         }
 
         binding.filtersText.text = presenter.currentFilters()
 
-        if (manga.source == LocalSource.ID) {
-            binding.webviewButton.isVisible = false
-            binding.shareButton.isVisible = false
-        }
 
         if (!manga.initialized) return
         updateCover(manga)
@@ -368,22 +341,6 @@ class MangaHeaderHolder(
         binding ?: return
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.clearFocus()
-    }
-
-    private fun MaterialButton.checked(checked: Boolean) {
-        if (checked) {
-            backgroundTintList = ColorStateList.valueOf(
-                ColorUtils.setAlphaComponent(
-                    context.getResourceColor(R.attr.colorAccent),
-                    75
-                )
-            )
-            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
-        } else {
-            resetStrokeColor()
-            backgroundTintList =
-                ContextCompat.getColorStateList(context, android.R.color.transparent)
-        }
     }
 
     fun setTopHeight(newHeight: Int) {
@@ -399,6 +356,8 @@ class MangaHeaderHolder(
         binding.trueBackdrop.setBackgroundColor(color)
     }
 
+    fun updateTracking() {
+    }
 
     fun collapse() {
         binding ?: return

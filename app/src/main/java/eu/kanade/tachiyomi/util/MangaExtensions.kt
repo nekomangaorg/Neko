@@ -10,12 +10,9 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.LocalSource
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.util.view.snack
 import java.util.Date
-
-fun Manga.isLocal() = source == LocalSource.ID
 
 fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
     if (!favorite) return false

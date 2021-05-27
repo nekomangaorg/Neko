@@ -4,10 +4,12 @@ import android.graphics.drawable.Drawable
 import android.view.View
 import android.widget.ImageView
 import androidx.core.view.isVisible
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
+import coil.Coil
+import coil.request.CachePolicy
+import coil.request.ImageRequest
 import coil.target.ImageViewTarget
-import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.util.system.getResourceColor
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 
 class CoverViewTarget(
     view: ImageView,
@@ -18,19 +20,6 @@ class CoverViewTarget(
 
     override fun onError(error: Drawable?) {
         progress?.isVisible = false
-        view.scaleType = ImageView.ScaleType.CENTER
-        val vector = VectorDrawableCompat.create(
-            view.context.resources,
-            R.drawable.ic_broken_image_24dp,
-            null
-        )
-        vector?.setTint(view.context.getResourceColor(android.R.attr.textColorSecondary))
-        view.setImageDrawable(vector)
-    }
-
-    override fun onStart(placeholder: Drawable?) {
-        progress?.isVisible = true
-        progress?.gone()
         if (errorUrl == null) {
             view.scaleType = ImageView.ScaleType.CENTER
             view.setImageDrawable(view.context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_broken_image, color = android.R.attr.textColorSecondary))
@@ -41,6 +30,11 @@ class CoverViewTarget(
         }
     }
 
+    override fun onStart(placeholder: Drawable?) {
+        progress?.isVisible = true
+        view.scaleType = scaleType
+        super.onStart(placeholder)
+    }
 
     override fun onSuccess(result: Drawable) {
         progress?.isVisible = false

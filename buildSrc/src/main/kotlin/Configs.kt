@@ -10,7 +10,7 @@ object Configs {
 }
 
 object LegacyPluginClassPath {
-    const val aboutLibraries = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:${Versions.aboutLibraries}"
+    const val aboutLibraries = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:8.8.6"
     const val androidGradlePlugin = "com.android.tools.build:gradle:${Versions.androidGradlePlugin}"
     const val googleServices = "com.google.gms:google-services:${Versions.googleServices}"
     const val kotlinExtensions = "org.jetbrains.kotlin:kotlin-android-extensions:${Versions.kotlin}"

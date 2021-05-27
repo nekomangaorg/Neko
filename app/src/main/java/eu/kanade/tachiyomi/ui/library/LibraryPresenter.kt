@@ -23,21 +23,12 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
-import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_SOURCE
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TRACK_STATUS
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.UNGROUPED
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
-import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
-import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_EXCLUDE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
@@ -46,10 +37,9 @@ import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.view.snack
-import kotlinx.coroutines.CoroutineScope
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
+import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -86,11 +76,6 @@ class LibraryPresenter(
         get() = loggedServices.isNotEmpty()
 
     private val source by lazy { Injekt.get<SourceManager>().getMangadex() }
-
-    var groupType = preferences.groupLibraryBy().get()
-
-    val isLoggedIntoTracking
-        get() = loggedServices.isNotEmpty()
 
     /** Current categories of the library. */
     var categories: List<Category> = emptyList()
@@ -251,7 +236,6 @@ class LibraryPresenter(
 
         val filterMissingChapters = preferences.filterMissingChapters().getOrDefault()
 
-
         val filtersOff =
             filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0 && filterMangaType == 0 &&
                 filterMerged == 0 && filterMissingChapters == 0
@@ -315,9 +299,9 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                    (filterMangaType != item.manga.mangaType() && filterMangaType != Manga.TYPE_WEBTOON)
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
                 } else {
-                    filterMangaType != item.manga.mangaType()
+                    filterMangaType != item.manga.seriesType()
                 }
             ) return false
         }
@@ -438,7 +422,7 @@ class LibraryPresenter(
                                 i1.manga.unread == i2.manga.unread -> 0
                                 i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
                                 i2.manga.unread == 0 -> if (category.isAscending()) -1 else 1
-                            else -> i2.manga.unread.compareTo(i1.manga.unread)
+                                else -> i2.manga.unread.compareTo(i1.manga.unread)
                             }
                             LibrarySort.LastRead -> {
                                 val manga1LastRead =
@@ -578,9 +562,9 @@ class LibraryPresenter(
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
                     if (catId > 0 && !categorySet.contains(catId) && (
-                        catId !in categoriesHidden ||
-                            !showAll
-                        )
+                            catId !in categoriesHidden ||
+                                !showAll
+                            )
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
@@ -683,11 +667,6 @@ class LibraryPresenter(
                 preferences.librarySortingAscending().getOrDefault()
             ).apply {
                 id = item.value.catId
-                if (name.contains(sourceSplitter)) {
-                    val split = name.split(sourceSplitter)
-                    name = split.first()
-                    sourceId = split.last().toLongOrNull()
-                }
                 isHidden = getDynamicCategoryName(this) in hiddenDynamics
             }
         }.sortedBy {
@@ -703,7 +682,7 @@ class LibraryPresenter(
         headers.forEach { category ->
             val catId = category.id ?: return@forEach
             val headerItem =
-                tagItems[if (category.sourceId != null) "${category.name}$sourceSplitter${category.sourceId}" else category.name]
+                tagItems[category.name]
             if (category.isHidden) {
                 val mangaToRemove = items.filter { it.header.catId == catId }
                 val mergedTitle = mangaToRemove.joinToString("-") {
@@ -993,11 +972,7 @@ class LibraryPresenter(
         getLibrary()
     }
 
-    private fun getDynamicCategoryName(category: Category): String =
-        groupType.toString() + dynamicCategorySplitter + (
-            category.sourceId?.toString()
-                ?: category.name
-            )
+    private fun getDynamicCategoryName(category: Category): String = groupType.toString()
 
     fun toggleAllCategoryVisibility() {
         if (groupType == BY_DEFAULT) {
@@ -1071,7 +1046,7 @@ class LibraryPresenter(
 
     /** sync selected manga to mangadex follows */
     fun syncMangaToDex(mangaList: List<Manga>) {
-        scope.launch {
+        presenterScope.launch {
             withContext(Dispatchers.IO) {
                 val isDexUp = source.checkIfUp()
 

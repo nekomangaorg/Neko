@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.RecentMangaItemBinding
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 
@@ -38,7 +37,7 @@ class RecentMangaHolder(
             RecentMangaAdapter.ShowRecentsDLs.OnlyUnread, RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded -> !item.chapter.read
             RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded -> true
             RecentMangaAdapter.ShowRecentsDLs.All -> true
-        } && !item.mch.manga.isLocal()
+        }
 
         val isUpdates = adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES &&
             !adapter.showUpdatedTime
@@ -140,13 +139,7 @@ class RecentMangaHolder(
         if ((itemView.context as? Activity)?.isDestroyed != true) {
             binding.coverThumbnail.loadManga(item.mch.manga)
         }
-        if (!item.mch.manga.isLocal()) {
-            notifyStatus(
-                if (adapter.isSelected(flexibleAdapterPosition)) Download.State.CHECKED else item.status,
-                item.progress,
-                item.chapter.read
-            )
-        }
+        
         resetFrontView()
     }
 

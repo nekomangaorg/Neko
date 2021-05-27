@@ -16,13 +16,9 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
-import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.categories_item.*
 
 /**
  * Holder used to display category items.
@@ -33,6 +29,7 @@ import kotlinx.android.synthetic.main.categories_item.*
 class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleViewHolder(view, adapter) {
 
     private val binding = CategoriesItemBinding.bind(view)
+
     init {
         binding.editButton.setOnClickListener {
             submitChanges()
@@ -112,7 +109,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     private fun submitChanges() {
         if (binding.editText.visibility == View.VISIBLE) {
             if (adapter.categoryItemListener
-                .onCategoryRename(flexibleAdapterPosition, binding.editText.text.toString())
+                    .onCategoryRename(flexibleAdapterPosition, binding.editText.text.toString())
             ) {
                 isEditing(false)
                 if (!createCategory) {

@@ -11,15 +11,12 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
 import okhttp3.Headers
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.dnsoverhttps.DnsOverHttps
 import okhttp3.logging.HttpLoggingInterceptor
 import org.isomorphism.util.TokenBuckets
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 class NetworkHelper(val context: Context) {
@@ -27,8 +24,6 @@ class NetworkHelper(val context: Context) {
     private val preferences: PreferencesHelper by injectLazy()
 
     private val mangaDexLoginHelper: MangaDexLoginHelper by injectLazy()
-
-    private val preferences: PreferencesHelper by injectLazy()
 
     private val cacheDir = File(context.cacheDir, "network_cache")
 

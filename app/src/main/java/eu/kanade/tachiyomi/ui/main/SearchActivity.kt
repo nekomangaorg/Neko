@@ -11,6 +11,7 @@ import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -18,7 +19,6 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SearchActivity : MainActivity() {
@@ -112,7 +112,7 @@ class SearchActivity : MainActivity() {
                     }
                 }
             }
-            SHORTCUT_MANGA , SHORTCUT_MANGA_BACK-> {
+            SHORTCUT_MANGA, SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailsController(extras))

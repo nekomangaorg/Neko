@@ -20,14 +20,14 @@
         android:layout_marginTop="12dp"
         android:ellipsize="end"
         android:maxLines="1"
-        app:layout_constraintBottom_toTopOf="@id/chapter_scanlator"
-        app:layout_constraintEnd_toStartOf="@id/bookmark_layout"
+        app:layout_constraintBottom_toTopOf="@id/chapter_subtitle"
+        app:layout_constraintEnd_toStartOf="@id/bookmark_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Chapter 123 - The Real One" />
 
     <TextView
-        android:id="@+id/chapter_scanlator"
+        android:id="@+id/chapter_subtitle"
         style="@style/Neko.Condensed"
         android:textColor="@color/text_color_secondary"
         android:layout_width="0dp"
@@ -36,7 +36,7 @@
         android:ellipsize="end"
         android:maxLines="1"
         app:layout_constraintBottom_toTopOf="@+id/chapter_language"
-        app:layout_constraintEnd_toStartOf="@id/bookmark_layout"
+        app:layout_constraintEnd_toStartOf="@id/bookmark_button"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chapter_title"
         tools:text="3 days ago • On page 45 • Scanlator" />
@@ -53,9 +53,9 @@
         android:ellipsize="end"
         android:maxLines="1"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/bookmark_layout"
+        app:layout_constraintEnd_toStartOf="@id/bookmark_button"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/chapter_scanlator"
+        app:layout_constraintTop_toBottomOf="@+id/chapter_subtitle"
         tools:text="English" />
 
     <FrameLayout
@@ -86,6 +86,6 @@
             android:layout_height="30dp"
             android:layout_gravity="center"
             android:visibility="gone"
-            tools:visibility="visible"/>
+            tools:visibility="visible" />
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

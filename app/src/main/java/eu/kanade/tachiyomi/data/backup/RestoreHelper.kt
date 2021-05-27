@@ -21,7 +21,7 @@ class RestoreHelper(val context: Context) {
      * Pending intent of action that cancels the library update
      */
     val cancelIntent by lazy {
-        NotificationReceiver.cancelRestorePendingBroadcast(context)
+        NotificationReceiver.cancelRestorePendingBroadcast(context, Notifications.ID_RESTORE_PROGRESS)
     }
 
     /**
@@ -154,7 +154,7 @@ class RestoreHelper(val context: Context) {
             .setSmallIcon(R.drawable.ic_neko_notification)
             .setColor(ContextCompat.getColor(context, R.color.neko_green_darker))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
-        if (errors.size > 0 && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
+        if (errors.isNotEmpty() && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(

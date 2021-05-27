@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import android.graphics.Bitmap
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -120,12 +119,10 @@ class MangaDetailsAdapter(
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
-        fun openInWebView()
         fun startDownloadRange(position: Int)
         fun readNextChapter()
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
-        fun globalSearch(text: String)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int)
@@ -135,7 +132,6 @@ class MangaDetailsAdapter(
         fun setFavButtonPopup(popupView: View)
 
         fun showExternalSheet()
-        fun generatePalette(input: Bitmap)
         fun openSimilar()
         fun openMerge()
     }

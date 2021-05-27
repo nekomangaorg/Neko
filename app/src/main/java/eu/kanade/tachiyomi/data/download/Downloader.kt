@@ -207,9 +207,8 @@ class Downloader(
         subscriptions.clear()
 
         subscriptions += downloadsRelay.concatMapIterable { it }
-                .flatMap({ downloadChapter(it).subscribeOn(Schedulers.io()) }, 2)
-                .onBackpressureLatest()
-                .subscribe({ completeDownload(it)
+            .onBackpressureBuffer()
+            .flatMap({ downloadChapter(it).subscribeOn(Schedulers.io()) }, 2)
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
                 {
@@ -301,7 +300,6 @@ class Downloader(
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
         val pagesToDownload = if (download.source is MergeSource) 3 else 10
 
-
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object
             download.source.fetchPageList(download.chapter).doOnNext { pages ->
@@ -316,15 +314,17 @@ class Downloader(
         }
 
         pageListObservable
-                .doOnNext { _ ->
+            .doOnNext { _ ->
                 // Delete all temporary (unfinished) files
-                    tmpDir.listFiles()
-                            ?.filter { it.name!!.endsWith(".tmp") }
-                            ?.forEach { it.delete() }
+                tmpDir.listFiles()
+                    ?.filter { it.name!!.endsWith(".tmp") }
+                    ?.forEach { it.delete() }
 
                 download.downloadedImages = 0
                 download.status = Download.State.DOWNLOADING
             }
+            // Get all the URLs to the source images, fetch pages if necessary
+            .flatMap { Observable.from(it) }
             // Start downloading images, consider we can have downloaded images already
             // Concurrently do 5 pages at a time
             .flatMap({ page -> getOrDownloadImage(page, download, tmpDir) }, pagesToDownload)
@@ -336,6 +336,7 @@ class Downloader(
             .doOnNext { ensureSuccessfulDownload(download, mangaDir, tmpDir, chapterDirname) }
             // If the page list threw, it will resume here
             .onErrorReturn { error ->
+                XLog.e(error)
                 download.status = Download.State.ERROR
                 notifier.onError(error.message, download.chapter.name)
                 download
@@ -383,8 +384,8 @@ class Downloader(
                 page.progress = 100
                 download.downloadedImages++
                 page.status = Page.READY
-                }
-                .map { page }
+            }
+            .map { page }
             // Mark this page as error and allow to download the remaining
             .onErrorReturn {
                 page.progress = 0
@@ -436,7 +437,7 @@ class Downloader(
         page.status = Page.DOWNLOAD_IMAGE
         page.progress = 0
         return source.fetchImage(page)
-                .map { response ->
+            .map { response ->
                 val file = tmpDir.createFile("$filename.tmp")
                 try {
                     response.body!!.source().saveTo(file.openOutputStream())
@@ -463,7 +464,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-            // Else guess from the uri.
+        // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime
@@ -515,10 +516,6 @@ class Downloader(
         if (areAllDownloadsFinished()) {
             DownloadService.stop(context)
         }
-    }
-
-    fun setPlaceholder() {
-        notifier.setPlaceholder(queue.firstOrNull())
     }
 
     /**

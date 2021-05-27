@@ -13,17 +13,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
-import eu.kanade.tachiyomi.data.updater.UpdaterService
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
-import eu.kanade.tachiyomi.util.lang.toTimestampString
-import eu.kanade.tachiyomi.util.system.isOnline
-import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -34,7 +23,6 @@ import eu.kanade.tachiyomi.util.view.openInBrowser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.ParseException
@@ -153,7 +141,7 @@ class AboutController : SettingsController() {
 
                 onClick {
                     LibsBuilder().withFields(R.string::class.java.fields)
-                            .start(activity!!)
+                        .start(activity!!)
                 }
             }
         }
@@ -219,7 +207,7 @@ class AboutController : SettingsController() {
                 .negativeButton(R.string.ignore)
         }
 
-       private companion object {
+        companion object {
             const val BODY_KEY = "NewUpdateDialogController.body"
             const val URL_KEY = "NewUpdateDialogController.key"
         }

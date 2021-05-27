@@ -102,10 +102,10 @@ class LibraryUpdateService(
 
     // List containing categories that get included in downloads.
     private val categoriesToDownload =
-        preferences.downloadNewCategories().getOrDefault().map(String::toInt)
+        preferences.downloadNewCategories().get().map(String::toInt)
 
     // Boolean to determine if user wants to automatically download new chapters.
-    private val downloadNew: Boolean = preferences.downloadNew().getOrDefault()
+    private val downloadNew: Boolean = preferences.downloadNew().get()
 
     // Boolean to determine if DownloadManager has downloads
     private var hasDownloads = false
@@ -180,7 +180,7 @@ class LibraryUpdateService(
             db.getLibraryMangas().executeAsBlocking().filter { it.category == categoryId }
         } else {
             val categoriesToUpdate =
-                preferences.libraryUpdateCategories().getOrDefault().map(String::toInt)
+                preferences.libraryUpdateCategories().get().map(String::toInt)
             if (categoriesToUpdate.isNotEmpty()) {
                 categoryIds.addAll(categoriesToUpdate)
                 db.getLibraryMangas().executeAsBlocking()
@@ -789,12 +789,15 @@ class LibraryUpdateService(
         }
 
         fun removeListener(listener: LibraryServiceListener) {
-            if (this.listener == listener)
-                this.listener = null
+            if (this.listener == listener) this.listener = null
+        }
+
+        fun callListener(manga: Manga) {
+            listener?.onUpdateManga(manga)
         }
     }
 }
 
 interface LibraryServiceListener {
-    fun onUpdateManga(manga: LibraryManga)
+    fun onUpdateManga(manga: Manga? = null)
 }

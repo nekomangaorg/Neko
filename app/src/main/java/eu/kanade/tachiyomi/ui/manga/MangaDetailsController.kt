@@ -43,13 +43,7 @@ import androidx.transition.TransitionSet
 import coil.Coil
 import coil.imageLoader
 import coil.request.ImageRequest
-import coil.Coil
-import coil.loadAny
-import coil.request.CachePolicy
-import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
-import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
@@ -58,8 +52,6 @@ import com.bluelinelabs.conductor.ControllerChangeType
 import com.elvishew.xlog.XLog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
-import com.mikepenz.iconics.IconicsDrawable
-import com.mikepenz.iconics.utils.colorInt
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -72,20 +64,14 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
-import eu.kanade.tachiyomi.source.LocalSource
-import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
-import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.ui.library.AddToLibraryCategoriesDialog
-import eu.kanade.tachiyomi.ui.library.ChangeMangaCategoriesDialog
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
@@ -99,14 +85,10 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.source.BrowseController
-import eu.kanade.tachiyomi.ui.source.global_search.GlobalSearchController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
-import eu.kanade.tachiyomi.util.isLocal
 import eu.kanade.tachiyomi.util.moveCategories
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -116,8 +98,6 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.isTablet
-import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -132,7 +112,6 @@ import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -159,10 +138,6 @@ class MangaDetailsController :
         }
     ) {
         this.manga = manga
-        if (manga != null) {
-            source = Injekt.get<SourceManager>().getOrStub(manga.source)
-        }
-    ) {
         presenter = MangaDetailsPresenter(this, manga)
     }
 
@@ -181,7 +156,6 @@ class MangaDetailsController :
     }
 
     private var manga: Manga? = null
-    private var source: Source? = null
     var colorAnimator: ValueAnimator? = null
     val presenter: MangaDetailsPresenter
     var coverColor: Int? = null
@@ -764,7 +738,7 @@ class MangaDetailsController :
         }
     }
 
-    private fun markPreviousAs(chapter: ChapterItem, read: Boolean) {
+    fun markPreviousAs(chapter: ChapterItem, read: Boolean) {
         val adapter = adapter ?: return
         val chapters = if (presenter.sortDescending()) adapter.items.reversed() else adapter.items
         val chapterPos = chapters.indexOf(chapter)
@@ -816,7 +790,7 @@ class MangaDetailsController :
                 object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
-                    if (!undoing && !read && presenter.preferences.removeAfterMarkedAsRead() && item.chapter.bookmark.not()) {
+                        if (!undoing && !read && presenter.preferences.removeAfterMarkedAsRead() && item.chapter.bookmark.not()) {
                             presenter.deleteChapters(listOf(item))
                         }
                     }
@@ -830,11 +804,11 @@ class MangaDetailsController :
         presenter.bookmarkChapters(chapters, bookmarked)
     }
 
-    private fun markAsRead(chapters: List<ChapterItem>) {
+    fun markAsRead(chapters: List<ChapterItem>) {
         presenter.markChaptersRead(chapters, true)
     }
 
-    private fun markAsUnread(chapters: List<ChapterItem>) {
+    fun markAsUnread(chapters: List<ChapterItem>) {
         presenter.markChaptersRead(chapters, false)
     }
 
@@ -865,24 +839,19 @@ class MangaDetailsController :
                 setTint(view?.context?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE)
             }
         inflater.inflate(R.menu.manga_details, menu)
-        val editItem = menu.findItem(R.id.action_edit)
-        editItem.isVisible = presenter.manga.favorite && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch &&
-            !presenter.manga.isLocal()
+        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_unread).isVisible =
             presenter.anyRead() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
-            presenter.hasDownloads() && !presenter.isLockedFromSearch &&
-            !presenter.manga.isLocal()
+            presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
 
         val iconPrimary = view?.context?.getResourceColor(android.R.attr.textColorPrimary)
             ?: Color.BLACK
         menu.findItem(R.id.action_download).icon?.mutate()?.setTint(iconPrimary)
-        editItem.icon?.mutate()?.setTint(iconPrimary)
 
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
@@ -994,41 +963,41 @@ class MangaDetailsController :
         }
     }
 
-        override fun openSimilar() {
-            router.pushController(SimilarController(presenter.manga, presenter.source).withFadeTransaction())
-        }
+    override fun openSimilar() {
+        router.pushController(SimilarController(presenter.manga, presenter.source).withFadeTransaction())
+    }
 
-        override fun openMerge() {
-            val context = view?.context ?: return
-            if (presenter.manga.isMerged()) {
-                val items = listOf("Open merged source in WebView", "Remove merged Manga")
-                MaterialDialog(context).show {
-                    listItemsSingleChoice(items = items) { _, index, _ ->
-                        if (index == 0) {
-                            openInWebView(presenter.sourceManager.getMergeSource().baseUrl + presenter.manga.merge_manga_url!!)
-                        } else {
-                            presenter.removeMerged()
-                        }
+    override fun openMerge() {
+        val context = view?.context ?: return
+        if (presenter.manga.isMerged()) {
+            val items = listOf("Open merged source in WebView", "Remove merged Manga")
+            MaterialDialog(context).show {
+                listItemsSingleChoice(items = items) { _, index, _ ->
+                    if (index == 0) {
+                        openInWebView(presenter.sourceManager.getMergeSource().baseUrl + presenter.manga.merge_manga_url!!)
+                    } else {
+                        presenter.removeMerged()
                     }
-                    positiveButton(android.R.string.yes)
                 }
-            } else {
-                mergeSearchDialog = MergeSearchDialog(this)
-                mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
+                positiveButton(android.R.string.yes)
             }
+        } else {
+            mergeSearchDialog = MergeSearchDialog(this)
+            mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
         }
+    }
 
-        fun openInWebView(url: String) {
-            externalBottomSheet?.dismiss()
-            if (isNotOnline()) return
-            val activity = activity ?: return
-            val intent = WebViewActivity.newIntent(
-                activity.applicationContext, presenter.source.id, url,
-                presenter.manga
-                    .title
-            )
-            startActivity(intent)
-        }
+    fun openInWebView(url: String) {
+        externalBottomSheet?.dismiss()
+        if (isNotOnline()) return
+        val activity = activity ?: return
+        val intent = WebViewActivity.newIntent(
+            activity.applicationContext, presenter.source.id, url,
+            presenter.manga
+                .title
+        )
+        startActivity(intent)
+    }
 
     private fun massDeleteChapters(choice: Int) {
         val chaptersToDelete = when (choice) {
@@ -1110,12 +1079,12 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.seriesType
-            (view.context).toLowerCase(Locale.ROOT)
+                (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
-            snack == null ||
-                snack?.getText() != text
-            )
+                snack == null ||
+                    snack?.getText() != text
+                )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
@@ -1194,11 +1163,6 @@ class MangaDetailsController :
             router.handleBack()
             firstController.search(text)
         }
-    }
-
-    override fun globalSearch(text: String) {
-        if (isNotOnline()) return
-        router.pushController(GlobalSearchController(text).withFadeTransaction())
     }
 
     override fun showChapterFilter() {
@@ -1307,12 +1271,13 @@ class MangaDetailsController :
         trackingBottomSheet?.show()
     }
 
-        override fun showExternalSheet() {
-            if (isLocked()) return
-            externalBottomSheet =
-                ExternalBottomSheet(this)
-            externalBottomSheet?.show()
-        }
+    override fun showExternalSheet() {
+        if (isLocked()) return
+        externalBottomSheet =
+            ExternalBottomSheet(this)
+        externalBottomSheet?.show()
+    }
+
     //endregion
 
     //region Tracking methods
@@ -1325,16 +1290,17 @@ class MangaDetailsController :
     }
 
     fun refreshTracker() {
-        getHeader()?.updateTracking()
+        //getHeader()?.updateTracking()
     }
-        fun onMergeSearchResults(results: List<SManga>) {
-            mergeSearchDialog?.onSearchResults(results)
-        }
 
-        fun onMergeSearchError(error: Exception) {
-            XLog.e(error)
-            mergeSearchDialog?.onSearchResultsError()
-        }
+    fun onMergeSearchResults(results: List<SManga>) {
+        mergeSearchDialog?.onSearchResults(results)
+    }
+
+    fun onMergeSearchError(error: Exception) {
+        XLog.e(error)
+        mergeSearchDialog?.onSearchResultsError()
+    }
 
     fun trackRefreshDone() {
         trackingBottomSheet?.onRefreshDone()
@@ -1431,23 +1397,6 @@ class MangaDetailsController :
             )
         } else {
             activity?.toast(R.string.must_be_in_library_to_edit)
-        }
-    }
-
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
-        if (requestCode == 101) {
-            if (data == null || resultCode != Activity.RESULT_OK) return
-            val activity = activity ?: return
-            try {
-                val uri = data.data ?: return
-                if (editMangaDialog != null) editMangaDialog?.updateCover(uri)
-                else {
-                    presenter.editCoverWithStream(uri)
-                }
-            } catch (error: IOException) {
-                activity.toast(R.string.failed_to_update_cover)
-                Timber.e(error)
-            }
         }
     }
 

@@ -11,8 +11,8 @@ import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.RestoreHelper
-import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.DHistory
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
+import eu.kanade.tachiyomi.data.backup.legacy.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
