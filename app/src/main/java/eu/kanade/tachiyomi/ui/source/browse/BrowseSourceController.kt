@@ -270,6 +270,14 @@ open class BrowseSourceController(bundle: Bundle) :
             }
             setIcon(icon)
         }
+        menu.findItem(R.id.action_toggle_have_already).apply {
+            val icon = if (preferences.browseShowLibrary().get()) {
+                R.drawable.ic_eye_off_24dp
+            } else {
+                R.drawable.ic_eye_24dp
+            }
+            setIcon(icon)
+        }
         hideItemsIfExpanded(searchItem, menu)
     }
 
@@ -277,8 +285,8 @@ open class BrowseSourceController(bundle: Bundle) :
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_display_mode -> swapDisplayMode()
-            R.id.action_open_in_web_view -> openInWebView()
-            R.id.action_open_merged_source_in_web_view -> openInWebView(false)
+            /*   R.id.action_open_in_web_view -> openInWebView()
+               R.id.action_open_merged_source_in_web_view -> openInWebView(false)*/
 
             else -> return super.onOptionsItemSelected(item)
         }

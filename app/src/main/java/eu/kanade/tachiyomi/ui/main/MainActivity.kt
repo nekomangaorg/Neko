@@ -513,10 +513,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
     }
 
-    fun setBrowseRoot() {
-        setRoot(BrowseSourceController(), R.id.nav_browse)
-    }
-
     protected open fun handleIntentAction(intent: Intent): Boolean {
         val notificationId = intent.getIntExtra("notificationId", -1)
         if (notificationId > -1) NotificationReceiver.dismissNotification(

@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.data.database.queries
 
-import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable
+import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable as Category
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable as Chapter
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable as History
@@ -235,6 +235,12 @@ fun getAllRecentsType(
 		Null as pages_left,
 		Null as chapter_number,
 		Null as source_order,
+        Null as vol,
+        Null as chapter_txt,
+        Null as chapter_title,
+        Null as mangadex_chapter_id,
+        Null as old_mangadex_chapter_id,
+        Null as language,
 		Null as history_id, 
         Null as history_chapter_id, 
         ${Manga.TABLE}.${Manga.COL_DATE_ADDED} as history_last_read, 
@@ -315,6 +321,6 @@ fun searchCachedMangaQuery(query: String, page: Int, limit: Int): String {
     return """
       SELECT * FROM ${CachedMangaTable.TABLE_FTS}
       WHERE ${CachedMangaTable.COL_MANGA_TITLE} MATCH '$queryCleaned'
-      LIMIT ${limit+1} OFFSET ${page*limit}
+      LIMIT ${limit + 1} OFFSET ${page * limit}
     """
 }

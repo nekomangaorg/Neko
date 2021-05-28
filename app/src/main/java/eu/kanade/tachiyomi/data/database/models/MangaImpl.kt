@@ -52,7 +52,11 @@ open class MangaImpl : Manga {
             ogGenre = value
         }
 
-    override var status: Int = 0
+    override var status: Int
+        get() = if (favorite) customMangaManager.getManga(this)?.status ?: ogStatus else ogStatus
+        set(value) {
+            ogStatus = value
+        }
 
     override var thumbnail_url: String? = null
 

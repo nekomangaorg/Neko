@@ -209,7 +209,7 @@ class PreferencesHelper(val context: Context) {
 
     fun browseAsList() = flowPrefs.getBoolean(Keys.catalogueAsList, false)
 
-    fun browseShowLibrary() = rxPrefs.getBoolean(Keys.catalogueShowLibrary, true)
+    fun browseShowLibrary() = flowPrefs.getBoolean(Keys.catalogueShowLibrary, true)
 
     fun enabledLanguages() = flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
