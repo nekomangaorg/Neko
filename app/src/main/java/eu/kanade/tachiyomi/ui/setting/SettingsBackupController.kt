@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.app.Dialog
 import android.content.ActivityNotFoundException
@@ -27,7 +26,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.getFilePicker
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
+import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -41,7 +40,7 @@ class SettingsBackupController : SettingsController() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 500)
+        requestFilePermissionsSafe(500)
     }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {

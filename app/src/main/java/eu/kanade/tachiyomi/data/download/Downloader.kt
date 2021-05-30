@@ -1,7 +1,12 @@
 package eu.kanade.tachiyomi.data.download
 
 import android.content.Context
+import android.content.Intent
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import android.webkit.MimeTypeMap
+import androidx.core.net.toUri
 import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import com.jakewharton.rxrelay.BehaviorRelay
@@ -295,7 +300,21 @@ class Downloader(
             notifier.onError(context.getString(R.string.couldnt_download_low_space), download.chapter.name)
             return@defer Observable.just(download)
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+            !Environment.isExternalStorageManager()
+        ) {
+            val intent = Intent(
+                Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                "package:${context.packageName}".toUri()
+            )
 
+            notifier.onError(
+                context.getString(R.string.external_storage_download_notice),
+                download.chapter.name,
+                intent
+            )
+            return@defer Observable.just(download)
+        }
         val chapterDirname = provider.getChapterDirName(download.chapter)
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
         val pagesToDownload = if (download.source is MergeSource) 3 else 10

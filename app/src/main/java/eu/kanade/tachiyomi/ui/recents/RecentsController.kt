@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.recents
 
-import android.Manifest.permission.WRITE_EXTERNAL_STORAGE
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.os.Bundle
@@ -52,7 +51,7 @@ import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
+import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -364,7 +363,7 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
-        requestPermissionsSafe(arrayOf(WRITE_EXTERNAL_STORAGE), 301)
+        requestFilePermissionsSafe(301)
     }
 
     fun updateTitleAndMenu() {

@@ -2,6 +2,10 @@
 <resources>
     <string name="app_name" translatable="false">Neko</string>
 
+    <string name="all_files_permission_required">File permissions required</string>
+    <string name="external_storage_permission_notice">Neko requires access to all files in Android 11 to download chapters, create automatic backups, and read local manga. \n\nOn the next screen, enable \"Allow access to manage all files.\"</string>
+    <string name="external_storage_download_notice">Neko requires access to all files to download chapters. Tap here, then enable \"Allow access to manage all files.\"</string>
+
     <!--Models-->
 
     <!-- Manga Type -->

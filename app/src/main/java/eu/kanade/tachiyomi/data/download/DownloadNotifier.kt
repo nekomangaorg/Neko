@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.data.download
 
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.graphics.BitmapFactory
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
@@ -130,7 +132,10 @@ internal class DownloadNotifier(private val context: Context) {
 
             val title = download.manga.title.chop(15)
             val quotedTitle = Pattern.quote(title)
-            val chapter = download.chapter.name.replaceFirst("$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE), "")
+            val chapter = download.chapter.name.replaceFirst(
+                "$quotedTitle[\\s]*[-]*[\\s]*".toRegex(RegexOption.IGNORE_CASE),
+                ""
+            )
             setContentTitle("$title - $chapter".chop(30))
             setContentText(
                 context.getString(R.string.downloading_progress)
@@ -204,17 +209,36 @@ internal class DownloadNotifier(private val context: Context) {
      * @param error string containing error information.
      * @param chapter string containing chapter title.
      */
-    fun onError(error: String? = null, chapter: String? = null) {
+    fun onError(
+        error: String? = null,
+        chapter: String? = null,
+        customIntent: Intent? = null
+    ) {
         // Create notification
         with(errorNotificationBuilder) {
             setContentTitle(chapter ?: context.getString(R.string.download_error))
             setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
-            setStyle(NotificationCompat.BigTextStyle().bigText(error ?: context.getString(R.string.could_not_download_unexpected_error)))
+            setStyle(
+                NotificationCompat.BigTextStyle().bigText(
+                    error ?: context.getString(R.string.could_not_download_unexpected_error)
+                )
+            )
             setSmallIcon(android.R.drawable.stat_sys_warning)
             setCategory(NotificationCompat.CATEGORY_ERROR)
             clearActions()
             setAutoCancel(true)
-            setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            if (customIntent != null) {
+                setContentIntent(
+                    PendingIntent.getActivity(
+                        context,
+                        0,
+                        customIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                    )
+                )
+            } else {
+                setContentIntent(NotificationHandler.openDownloadManagerPendingActivity(context))
+            }
             color = ContextCompat.getColor(context, R.color.colorAccent)
             setProgress(0, 0, false)
             show(Notifications.ID_DOWNLOAD_CHAPTER_ERROR)

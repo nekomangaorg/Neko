@@ -493,6 +493,42 @@ fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: I
     }
 }
 
+fun Controller.requestFilePermissionsSafe(requestCode: Int) {
+    val activity = activity ?: return
+    val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+    permissions.forEach { permission ->
+        if (ContextCompat.checkSelfPermission(
+                activity,
+                permission
+            ) != PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(permission), requestCode)
+        }
+    }
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        !Environment.isExternalStorageManager()
+    ) {
+        MaterialDialog(activity)
+            .title(R.string.all_files_permission_required)
+            .message(R.string.external_storage_permission_notice)
+            .cancelOnTouchOutside(false)
+            .positiveButton(android.R.string.ok) {
+                val intent = Intent(
+                    Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
+                    "package:${activity.packageName}".toUri()
+                )
+                try {
+                    activity.startActivity(intent)
+                } catch (_: Exception) {
+                    val intent2 = Intent(Settings.ACTION_MANAGE_ALL_FILES_ACCESS_PERMISSION)
+                    activity.startActivity(intent2)
+                }
+            }
+            .negativeButton(android.R.string.cancel)
+            .show()
+    }
+}
+
 fun Controller.withFadeTransaction(): RouterTransaction {
     return RouterTransaction.with(this)
         .pushChangeHandler(OneWayFadeChangeHandler())
