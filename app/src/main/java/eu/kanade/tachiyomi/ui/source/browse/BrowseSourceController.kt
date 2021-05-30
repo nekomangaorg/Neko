@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.Manifest
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.view.LayoutInflater
 import android.view.Menu
 import android.view.MenuInflater
@@ -21,7 +20,6 @@ import com.mikepenz.iconics.typeface.library.community.material.CommunityMateria
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.BrowseSourceControllerBinding
@@ -85,11 +83,6 @@ open class BrowseSourceController(bundle: Bundle) :
     private val preferences: PreferencesHelper by injectLazy()
 
     /**
-     * Database used for autocomplete
-     */
-    private val db: DatabaseHelper by injectLazy()
-
-    /**
      * Adapter containing the list of manga from the catalogue.
      */
     private var adapter: FlexibleAdapter<IFlexible<*>>? = null
@@ -109,12 +102,6 @@ open class BrowseSourceController(bundle: Bundle) :
      */
     private var progressItem: ProgressItem? = null
 
-    /**
-     * Our query mangadex which will query at a slow rate
-     */
-    private var canRun: Boolean = true
-    private var handler: Handler = Handler()
-
     init {
         setHasOptionsMenu(true)
     }
@@ -132,9 +119,6 @@ open class BrowseSourceController(bundle: Bundle) :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
 
-        if (presenter.source.isLogged().not()) {
-            view.snack("You must be logged it.  please login")
-        }
         if (preferences.useCacheSource()) {
             view.snack("Browsing Cached Source")
         }
@@ -144,6 +128,7 @@ open class BrowseSourceController(bundle: Bundle) :
         setupRecycler(view)
 
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
+       
         binding.fab.setOnClickListener { showFilters() }
         binding.progress.isVisible = true
         requestPermissionsSafe(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 301)
@@ -202,6 +187,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
             }
         )
+
         binding.fab.applyBottomAnimatedInsets(16.dpToPx)
 
         recycler.addOnScrollListener(
