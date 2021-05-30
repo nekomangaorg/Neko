@@ -1,8 +1,8 @@
 object Configs {
     const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 29
+    const val compileSdkVersion = 30
     const val minSdkVersion = 24
-    const val targetSdkVersion = 29
+    const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     const val versionCode = 115
     const val versionName = "2.4.2"
