@@ -29,7 +29,6 @@ fun runCommand(command: String): String {
 
 android {
     compileSdkVersion(Configs.compileSdkVersion)
-    buildToolsVersion(Configs.buildToolsVersion)
 
     defaultConfig {
         minSdkVersion(Configs.minSdkVersion)
