@@ -1,9 +1,13 @@
 package eu.kanade.tachiyomi.util.view
 
+import android.Manifest
 import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Environment
+import android.provider.Settings
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -18,6 +22,7 @@ import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -35,7 +40,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.toast
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
 import kotlin.random.Random
@@ -50,7 +54,7 @@ fun Controller.setOnQueryTextChangeListener(
         object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!onlyOnSubmit && router.backstack.lastOrNull()
-                    ?.controller == this@setOnQueryTextChangeListener
+                        ?.controller == this@setOnQueryTextChangeListener
                 ) {
                     return f(newText)
                 }
@@ -104,12 +108,21 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         recycler.updatePaddingRelative(
             top = activityBinding!!.toolbar.y.toInt() + appBarHeight
         )
+        recycler.applyBottomAnimatedInsets(setPadding = true)
         recycler.doOnApplyWindowInsets { view, insets, _ ->
             val headerHeight = insets.systemWindowInsetTop + appBarHeight
             view.updatePaddingRelative(
-                top = headerHeight,
-                bottom = insets.systemWindowInsetBottom
+                top = headerHeight
             )
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                view.updatePaddingRelative(
+                    bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                        insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+                    } else {
+                        insets.systemWindowInsetBottom
+                    }
+                )
+            }
         }
     } else {
         view?.applyWindowInsetsForController()
@@ -148,7 +161,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
-                    ?.controller == this@liftAppbarWith && activity != null
+                        ?.controller == this@liftAppbarWith && activity != null
                 ) {
                     val notAtTop = recycler.canScrollVertically(-1)
                     if (notAtTop != elevate) elevateFunc(notAtTop)
@@ -298,11 +311,11 @@ fun Controller.scrollViewWith(
                 } else {
                     activityBinding?.tabShadow?.isVisible = false
                     if (!customPadding && lastY == 0f && (
-                        (
-                            this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
-                                ?.controller is MangaDetailsController
-                            ) || includeTabView
-                        )
+                            (
+                                this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
+                                    ?.controller is MangaDetailsController
+                                ) || includeTabView
+                            )
                     ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val v = View(activity)
@@ -347,7 +360,7 @@ fun Controller.scrollViewWith(
                 super.onScrolled(recyclerView, dx, dy)
                 if (recyclerView.tag == MaterialFastScroll.noUpdate) return
                 if (router?.backstack?.lastOrNull()
-                    ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
+                        ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                     activity != null && activityBinding!!.appBar.height > 0 &&
                     recycler.translationY == 0f
                 ) {
@@ -396,12 +409,12 @@ fun Controller.scrollViewWith(
                             }
 
                             if (!elevate && (
-                                dy == 0 ||
-                                    (
-                                        activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
-                                            dy == 0 && activityBinding!!.appBar.y == 0f
-                                        )
-                                )
+                                    dy == 0 ||
+                                        (
+                                            activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
+                                                dy == 0 && activityBinding!!.appBar.y == 0f
+                                            )
+                                    )
                             ) {
                                 elevateFunc(true)
                             }
@@ -421,7 +434,7 @@ fun Controller.scrollViewWith(
                         return
                     }
                     if (router?.backstack?.lastOrNull()
-                        ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
+                            ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                         activity != null && activityBinding!!.appBar.height > 0 &&
                         recycler.translationY == 0f
                     ) {

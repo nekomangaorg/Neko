@@ -58,7 +58,7 @@ class CategoryController(bundle: Bundle? = null) :
      */
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        liftAppbarWith(binding.recycler)
+        liftAppbarWith(binding.recycler, true)
 
         adapter = CategoryAdapter(this@CategoryController)
         binding.recycler.layoutManager = LinearLayoutManager(view.context)

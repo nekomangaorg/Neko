@@ -215,6 +215,28 @@ class LibraryController(
         )
     }
 
+    val cb = object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+        override fun onStart(
+            animation: WindowInsetsAnimationCompat,
+            bounds: WindowInsetsAnimationCompat.BoundsCompat
+        ): WindowInsetsAnimationCompat.BoundsCompat {
+            updateHopperY()
+            return bounds
+        }
+
+        override fun onProgress(
+            insets: WindowInsetsCompat,
+            runningAnimations: List<WindowInsetsAnimationCompat>
+        ): WindowInsetsCompat {
+            updateHopperY(insets.toWindowInsets())
+            return insets
+        }
+
+        override fun onEnd(animation: WindowInsetsAnimationCompat) {
+            updateHopperY()
+        }
+    }
+
     private var scrollListener = object : RecyclerView.OnScrollListener() {
         override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
             super.onScrolled(recyclerView, dx, dy)
@@ -533,6 +555,8 @@ class LibraryController(
         }
         setSwipeRefresh()
 
+        ViewCompat.setWindowInsetsAnimationCallback(view, cb)
+
         if (selectedMangas.isNotEmpty()) {
             createActionModeIfNeeded()
         }
@@ -688,15 +712,20 @@ class LibraryController(
         }
     }
 
-    fun updateHopperY() {
+    fun updateHopperY(windowInsets: WindowInsets? = null) {
         val view = view ?: return
+        val insets = windowInsets ?: view.rootWindowInsets
         val listOfYs = mutableListOf(
             binding.filterBottomSheet.filterBottomSheet.y,
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
         )
-        val insetBottom = view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+        val insetBottom = insets?.systemWindowInsetBottom ?: 0
         if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
             listOfYs.add(view.height - (insetBottom).toFloat())
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
+            val insetKey = insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+            listOfYs.add(view.height - (insetKey).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +
             (listOfYs.minOrNull() ?: binding.filterBottomSheet.filterBottomSheet.y) +

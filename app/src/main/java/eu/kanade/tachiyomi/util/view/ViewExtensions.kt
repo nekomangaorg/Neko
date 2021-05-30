@@ -25,6 +25,8 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -121,6 +123,62 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     }
 }
 
+fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = false) {
+    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
+    val setInsets: ((WindowInsets) -> Unit) = { insets ->
+        val bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime()).bottom
+        } else {
+            insets.systemWindowInsetBottom
+        }
+        if (setPadding) {
+            updatePaddingRelative(bottom = bottomMargin + bottom)
+        } else {
+            updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                this.bottomMargin = bottom + bottomMargin
+            }
+        }
+    }
+    var handleInsets = true
+    doOnApplyWindowInsets { _, insets, _ ->
+        if (handleInsets) {
+            setInsets(insets)
+        }
+    }
+
+    ViewCompat.setWindowInsetsAnimationCallback(
+        this,
+        object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
+            override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+                handleInsets = false
+                super.onPrepare(animation)
+            }
+
+            override fun onStart(
+                animation: WindowInsetsAnimationCompat,
+                bounds: WindowInsetsAnimationCompat.BoundsCompat
+            ): WindowInsetsAnimationCompat.BoundsCompat {
+                handleInsets = false
+                rootWindowInsets?.let { insets -> setInsets(insets) }
+                return super.onStart(animation, bounds)
+            }
+
+            override fun onProgress(
+                insets: WindowInsetsCompat,
+                runningAnimations: List<WindowInsetsAnimationCompat>
+            ): WindowInsetsCompat {
+                insets.toWindowInsets()?.let { setInsets(it) }
+                return insets
+            }
+
+            override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                handleInsets = true
+                rootWindowInsets?.let { insets -> setInsets(insets) }
+            }
+        }
+    )
+}
+
 object ControllerViewWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.updateLayoutParams<FrameLayout.LayoutParams> {
@@ -149,6 +207,16 @@ fun View.doOnApplyWindowInsets(f: (View, WindowInsets, ViewPaddingState) -> Unit
     // Create a snapshot of the view's padding state
     val paddingState = createStateForView(this)
     setOnApplyWindowInsetsListener { v, insets ->
+        f(v, insets, paddingState)
+        insets
+    }
+    requestApplyInsetsWhenAttached()
+}
+
+fun View.doOnApplyWindowInsetsCompat(f: (View, WindowInsetsCompat, ViewPaddingState) -> Unit) {
+    // Create a snapshot of the view's padding state
+    val paddingState = createStateForView(this)
+    ViewCompat.setOnApplyWindowInsetsListener(this) { v, insets ->
         f(v, insets, paddingState)
         insets
     }
