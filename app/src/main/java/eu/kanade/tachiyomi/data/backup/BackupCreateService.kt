@@ -110,8 +110,8 @@ class BackupCreateService : Service() {
             val backupType = intent.getIntExtra(BackupConst.EXTRA_TYPE, BackupConst.BACKUP_TYPE_LEGACY)
 
             val backupFileUri = when (backupType) {
-                BackupConst.BACKUP_TYPE_FULL -> FullBackupManager(this).createBackup(uri, backupFlags, false)?.toUri()
-                else -> LegacyBackupManager(this).createBackup(uri, backupFlags, false)?.toUri()
+                BackupConst.BACKUP_TYPE_FULL -> FullBackupManager(this).createBackup(uri!!, backupFlags, false).toUri()
+                else -> LegacyBackupManager(this).createBackup(uri!!, backupFlags, false)?.toUri()
             }
 
             val unifile = UniFile.fromUri(this, backupFileUri)
