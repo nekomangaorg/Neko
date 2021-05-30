@@ -74,8 +74,8 @@ object Libs {
         const val flowPreferences = "com.github.tfcporciuncula:flow-preferences:1.3.4"
         const val stdLib = "org.jetbrains.kotlin:kotlin-stdlib:${Versions.kotlin}"
         const val reflection = "org.jetbrains.kotlin:kotlin-reflect:${Versions.kotlin}"
-        val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.1.0"
-        const val serializationProtobuf = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.1.0"
+        val serialization = "org.jetbrains.kotlinx:kotlinx-serialization-json:1.2.1"
+        const val serializationProtobuf = "org.jetbrains.kotlinx:kotlinx-serialization-protobuf:1.2.1"
     }
 
     object Navigation {
@@ -175,7 +175,7 @@ object Versions {
     const val googleServices = "4.3.3"
     const val gradleVersions = "0.29.0"
     const val junit = "4.13"
-    const val kotlin = "1.4.32"
+    const val kotlin = "1.5.10"
     const val loadingButton = "2.2.0"
     const val mockito = "1.10.19"
     const val moshi = "1.9.3"
@@ -188,6 +188,6 @@ object Versions {
     //const val unifile = "e9ee588"
     const val viewToolTip = "1.2.2"
     const val xlog = "1.8.0"
-    const val kotlinter = "3.4.0"
+    const val kotlinter = "3.4.4"
 }
 

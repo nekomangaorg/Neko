@@ -291,7 +291,7 @@ fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
             )
             .build()
         if (forceBrowser) {
-            val packages = getCustomTabsPackages().maxBy { it.preferredOrder }
+            val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
             val processName = packages?.activityInfo?.processName ?: return false
             intent.intent.`package` = processName
         }
