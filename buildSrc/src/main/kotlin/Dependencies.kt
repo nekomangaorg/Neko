@@ -11,7 +11,7 @@ object Libs {
         const val lifecycleCommonJava8 = "androidx.lifecycle:lifecycle-common-java8:2.2.0"
         const val lifecycleExtensions = "androidx.lifecycle:lifecycle-extensions:2.2.0"
         const val lifecycleRuntimeKtx = "androidx.lifecycle:lifecycle-runtime-ktx:2.2.0"
-        const val material = "com.google.android.material:material:1.3.0"
+        const val material = "com.google.android.material:material:1.4.0-beta01"
         const val multiDex = "androidx.multidex:multidex:2.0.1"
         const val palette = "androidx.palette:palette:1.0.0"
         const val preference = "androidx.preference:preference:${Versions.androidPreferences}"
