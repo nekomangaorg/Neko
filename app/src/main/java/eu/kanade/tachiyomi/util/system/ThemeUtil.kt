@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatDelegate
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 
 object ThemeUtil {
@@ -18,23 +17,17 @@ object ThemeUtil {
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         )
-        preferences.lightTheme().set(
-            when (theme) {
-                1 -> Themes.LIGHT_BLUE
-                else -> Themes.PURE_WHITE
-            }
-        )
+        preferences.lightTheme().set(Themes.PURE_WHITE)
         preferences.darkTheme().set(
             when (theme) {
                 3 -> Themes.AMOLED
-                4 -> Themes.DARK_BLUE
                 else -> Themes.DARK
             }
         )
     }
 
     fun isColoredTheme(theme: Themes): Boolean {
-        return theme.styleRes == R.style.Theme_Tachiyomi_AllBlue
+        return return false
     }
 
     fun isPitchBlack(context: Context, theme: Themes): Boolean {

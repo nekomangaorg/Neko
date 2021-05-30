@@ -13,6 +13,11 @@ import kotlin.math.roundToInt
 enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
     PURE_WHITE(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_NO, R.string.white_theme),
     DARK(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_YES, R.string.dark),
+    AMOLED(
+        R.style.Theme_Tachiyomi_Amoled,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.amoled_black
+    ),
     SPRING(
         R.style.Theme_Tachiyomi_MidnightDusk,
         AppCompatDelegate.MODE_NIGHT_NO,
@@ -28,11 +33,6 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.flat_lime
     ),
-    AMOLED(
-        R.style.Theme_Tachiyomi_Amoled,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.amoled_black
-    ),
     BLACK_N_RED(
         R.style.Theme_Tachiyomi_BlackAndRed,
         AppCompatDelegate.MODE_NIGHT_YES,
@@ -42,16 +42,6 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         R.style.Theme_Tachiyomi_HotPink,
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.hot_pink
-    ),
-    LIGHT_BLUE(
-        R.style.Theme_Tachiyomi_AllBlue,
-        AppCompatDelegate.MODE_NIGHT_NO,
-        R.string.light_blue
-    ),
-    DARK_BLUE(
-        R.style.Theme_Tachiyomi_AllBlue,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.dark_blue
     );
 
     fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
@@ -131,6 +121,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
             R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
             R.style.Theme_Tachiyomi_FlatLime -> "#202125"
+            R.style.Theme_Tachiyomi -> "#292929"
             else -> "#1C1C1D"
         }
     )
@@ -140,6 +131,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     val lightAccent: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
+            R.style.Theme_Tachiyomi -> "#101820"
             else -> "#2979FF"
         }
     )
@@ -152,6 +144,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
             R.style.Theme_Tachiyomi_BlackAndRed -> "#AA2200"
             R.style.Theme_Tachiyomi_HotPink -> "#FF3399"
             R.style.Theme_Tachiyomi_FlatLime -> "#4AF88A"
+            R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi -> "#20aa5e"
             else -> "#3399FF"
         }
     )
@@ -159,21 +152,18 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     /** Complies with colorSecondary */
     @ColorInt
     val lightAppBar: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
         else -> lightBackground
     }
 
     /** Complies with colorSecondary (probably night) */
     @ColorInt
     val darkAppBar: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#54759E")
         else -> darkBackground
     }
 
     /** Complies with actionBarTintColor */
     @ColorInt
     val lightAppBarText: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#FFFFFF")
         R.style.Theme_Tachiyomi_MidnightDusk -> Color.parseColor("#DE4c0d4b")
         else -> lightPrimaryText
     }
@@ -181,7 +171,6 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     /** Complies with actionBarTintColor (probably night) */
     @ColorInt
     val darkAppBarText: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#FFFFFF")
         else -> darkPrimaryText
     }
 
@@ -189,7 +178,6 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val lightBottomBar: Int = Color.parseColor(
         when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#efe3f3"
             else -> "#FFFFFF"
         }
@@ -199,8 +187,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val darkBottomBar: Int = Color.parseColor(
         when (styleRes) {
-            R.style.Theme_Tachiyomi_AllBlue -> "#54759E"
             R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
+            R.style.Theme_Tachiyomi -> "#292929"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
             R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"
             else -> "#212121"
@@ -210,28 +198,24 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     /** Complies with tabBarIconInactive */
     @ColorInt
     val lightInactiveTab: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#80FFFFFF")
         else -> Color.parseColor("#C2424242")
     }
 
     /** Complies with tabBarIconInactive (probably night) */
     @ColorInt
     val darkInactiveTab: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> Color.parseColor("#80FFFFFF")
         else -> Color.parseColor("#C2FFFFFF")
     }
 
     /** Complies with tabBarIconColor */
     @ColorInt
     val lightActiveTab: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> lightAppBarText
         else -> lightAccent
     }
 
     /** Complies with tabBarIconColor (probably night) */
     @ColorInt
     val darkActiveTab: Int = when (styleRes) {
-        R.style.Theme_Tachiyomi_AllBlue -> darkAppBarText
         else -> darkAccent
     }
 
