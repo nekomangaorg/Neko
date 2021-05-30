@@ -7,7 +7,6 @@ import com.google.android.material.card.MaterialCardView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.UnreadDownloadBadgeBinding
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -28,7 +27,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         val unreadBadgeBackground = if (showTotalChapters) {
             context.contextCompatColor(R.color.total_badge)
-        } else context.getResourceColor(R.attr.colorAccent)
+        } else context.getResourceColor(R.attr.unreadBadgeColor)
 
 
         with(binding.unreadText) {
@@ -42,7 +41,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 when {
                     unread == -1 && !showTotalChapters -> unreadBadgeBackground
                     showTotalChapters -> context.contextCompatColor(R.color.total_badge_text)
-                    else -> context.getResourceColor(R.attr.colorOnAccent)
+                    else -> context.getResourceColor(R.attr.colorOnUnreadBadge)
                 }
             )
             setBackgroundColor(unreadBadgeBackground)
@@ -59,13 +58,8 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             } else {
                 downloads.toString()
             }
-            if (ImageUtil.isDarkish(context.getResourceColor(R.attr.colorOnAccent))) {
-                setTextColor(context.getColor(R.color.download_badge_light_text))
-                setBackgroundColor(context.getColor(R.color.download_badge_light))
-            } else {
-                setTextColor(context.getColor(R.color.download_badge_text))
-                setBackgroundColor(context.getColor(R.color.download_badge))
-            }
+            setTextColor(context.getResourceColor(R.attr.colorOnDownloadBadge))
+            setBackgroundColor(context.getResourceColor(R.attr.downloadBadgeColor))
         }
 
         // Show the badge card if unread or downloads exists
@@ -98,22 +92,23 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
     fun setStatus(status: FollowStatus, inLibrary: Boolean) {
         this.isVisible = true
+        with(binding) {
+            unreadAngle.isVisible = inLibrary
+            downloadText.isVisible = inLibrary
+            downloadText.text = resources.getText(R.string.in_library)
 
-        binding.unreadAngle.isVisible = inLibrary
-        binding.downloadText.isVisible = inLibrary
-        binding.downloadText.text = resources.getText(R.string.in_library)
-
-        binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
-        binding.unreadText.isVisible = true
-        val statusText = when (status) {
-            FollowStatus.READING -> R.string.follows_reading
-            FollowStatus.UNFOLLOWED -> R.string.follows_unfollowed
-            FollowStatus.COMPLETED -> R.string.follows_completed
-            FollowStatus.ON_HOLD -> R.string.follows_on_hold
-            FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
-            FollowStatus.DROPPED -> R.string.follows_dropped
-            FollowStatus.RE_READING -> R.string.follows_re_reading
+            unreadText.updatePaddingRelative(start = 5.dpToPx)
+            unreadText.isVisible = true
+            val statusText = when (status) {
+                FollowStatus.READING -> R.string.follows_reading
+                FollowStatus.UNFOLLOWED -> R.string.follows_unfollowed
+                FollowStatus.COMPLETED -> R.string.follows_completed
+                FollowStatus.ON_HOLD -> R.string.follows_on_hold
+                FollowStatus.PLAN_TO_READ -> R.string.follows_plan_to_read
+                FollowStatus.DROPPED -> R.string.follows_dropped
+                FollowStatus.RE_READING -> R.string.follows_re_reading
+            }
+            unreadText.text = resources.getText(statusText)
         }
-        binding.unreadText.text = resources.getText(statusText)
     }
 }

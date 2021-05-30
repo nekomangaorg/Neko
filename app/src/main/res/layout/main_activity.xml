@@ -58,7 +58,7 @@
         <FrameLayout
             android:id="@+id/card_frame"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize" >
+            android:layout_height="?attr/actionBarSize">
 
             <androidx.cardview.widget.CardView
                 android:id="@+id/card_view"
@@ -69,7 +69,7 @@
                 android:layout_marginStart="14dp"
                 android:layout_marginEnd="14dp"
                 app:cardCornerRadius="8dp"
-                android:layout_height="match_parent" >
+                android:layout_height="match_parent">
 
                 <eu.kanade.tachiyomi.ui.base.FloatingToolbar
                     android:id="@+id/card_toolbar"
@@ -85,7 +85,7 @@
                     app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Caption"
                     app:collapseIcon="@drawable/ic_arrow_back_24dp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent" >
+                    android:layout_height="match_parent">
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -102,13 +102,14 @@
                             android:layout_marginEnd="6dp"
                             android:layout_marginStart="0dp"
                             android:contentDescription="@string/incognito_mode"
-                            android:src="@drawable/ic_incognito_circle_24dp"/>
+                            android:src="@drawable/ic_incognito_circle_24dp" />
 
                         <LinearLayout
                             android:layout_width="wrap_content"
                             android:layout_height="match_parent"
                             android:gravity="start|center"
                             android:orientation="vertical">
+
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/card_title"
                                 style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
@@ -118,7 +119,7 @@
                                 android:layout_gravity="center"
                                 android:maxLines="1"
                                 android:textColor="?actionBarTintColor"
-                    android:fontFamily="@font/metropolis_medium"
+                                android:fontFamily="@font/metropolis_medium"
                                 android:textSize="20sp"
                                 tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
                                 tools:drawableStart="@drawable/ic_blank_24dp"
@@ -148,6 +149,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             tools:ignore="KeyboardInaccessibleWidget">
+
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/main_tabs"
                 style="@style/Theme.Widget.Tabs.Highlight"
@@ -159,7 +161,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:tabGravity="fill"/>
+                app:tabGravity="fill" />
         </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
 

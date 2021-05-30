@@ -34,6 +34,11 @@
         <item name="fontFamily">@font/metropolis_regular</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
 
+        <item name="unreadBadgeColor">@color/md_white_1000</item>
+        <item name="colorOnUnreadBadge">@color/md_black_1000</item>
+        <item name="downloadBadgeColor">@color/md_black_1000</item>
+        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
+
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
@@ -64,15 +69,27 @@
 
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
+    //has normal badges
+
+    <style name="Theme.Tachiyomi.Standard" parent="Theme.Tachiyomi">
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+    </style>
+
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
 
-    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled" />
+    <style name="Theme.Tachiyomi.Amoled.Standard" parent="Theme.Tachiyomi.Amoled">
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+    </style>
 
-    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled" />
+    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled.Standard" />
 
-    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi" />
+    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled.Standard" />
 
-    <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi">
+    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard" />
+
+    <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi.Standard">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
         <item name="colorAccentText">@color/colorAccentDuskDawnText</item>

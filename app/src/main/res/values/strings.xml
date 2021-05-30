@@ -562,16 +562,15 @@
 
     <!-- General settings -->
     <string name="app_theme">App theme</string>
-    <string name="light_blue">Light Blue</string>
-    <string name="dark">Dark</string>
-    <string name="amoled_black">Black \'n\' Green</string>
+    <string name="dark">Neko 2x Dark</string>
+    <string name="amoled_black">Neko 2x Black</string>
     <string name="dark_blue">Dark Blue</string>
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>
     <string name="black_and_red">Black \'n\' Red</string>
     <string name="hot_pink">Hot Pink</string>
     <string name="flat_lime">Flat Lime</string>
-    <string name="white_theme">Pure White</string>
+    <string name="white_theme">Neko 2X Pure</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Recents)</string>
     <string name="language">Language</string>

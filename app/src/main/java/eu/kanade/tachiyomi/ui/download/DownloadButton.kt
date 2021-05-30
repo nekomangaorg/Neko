@@ -35,7 +35,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
     private val downloadedColor = ColorUtils.blendARGB(
         context.getResourceColor(R.attr.colorAccent),
         context.getResourceColor(android.R.attr.textColorPrimary),
-        0.3f
+        0f
     )
     private val downloadedTextColor = context.getResourceColor(android.R.attr.textColorPrimaryInverse)
     private val errorColor = ContextCompat.getColor(
