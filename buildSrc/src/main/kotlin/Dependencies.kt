@@ -161,7 +161,7 @@ object Libs {
 }
 
 object Versions {
-    const val androidGradlePlugin = "4.2.0"
+    const val androidGradlePlugin = "4.2.1"
     const val androidPreferences = "1.1.1"
     const val androidWorkManager = "2.4.0"
     const val dataBinding = "3.1.4"
