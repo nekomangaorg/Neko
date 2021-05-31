@@ -6,7 +6,9 @@ import android.view.View
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -29,8 +31,9 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
-            customView(R.layout.pref_site_login, scrollable = false)
+            customView(R.layout.pref_account_login, scrollable = false)
         }
+        binding = PrefAccountLoginBinding.bind(dialog.getCustomView())
 
         onViewCreated(dialog.view)
 

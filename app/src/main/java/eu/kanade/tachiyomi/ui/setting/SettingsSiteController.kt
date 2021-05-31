@@ -48,8 +48,10 @@ class SettingsSiteController :
                     dialog.showDialog(router)
                 }
             }
+            this.isIconSpaceReserved = false
         }
 
+        addPreference(sourcePreference)
 
         preference {
             titleRes = R.string.show_languages

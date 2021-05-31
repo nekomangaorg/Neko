@@ -30,10 +30,13 @@ class SiteLoginPreference @JvmOverloads constructor(
         holder.itemView.setOnClickListener {
             onLoginClick()
         }
-        val color = if (source.isLogged())
-            ContextCompat.getColor(context, R.color.material_green_500)
-        else
-            ContextCompat.getColor(context, R.color.material_blue_grey_300)
+
+        val color = when (source.isLogged()) {
+            true -> ContextCompat.getColor(context, R.color.gold)
+            false -> ContextCompat.getColor(context, R.color.material_on_surface_disabled)
+
+        }
+
 
         (holder.findViewById(R.id.image_view) as? ImageView)?.let { imageView ->
             imageView.setImageDrawable(
