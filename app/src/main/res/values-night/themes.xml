@@ -5,6 +5,7 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="colorSecondaryVariant">@color/colorPrimary</item>
+        <item name="colorAccentText">@color/neko_green</item>
         <item name="unreadBadgeColor">@color/neko_green</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
 
@@ -16,7 +17,7 @@
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
         <item name="unreadBadgeColor">@color/neko_green_darker</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
-
+        <item name="colorAccentText">@color/neko_green_darker</item>
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorSecondaryVariant">@color/colorAmoledPrimary</item>

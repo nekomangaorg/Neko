@@ -16,7 +16,7 @@
         <item name="colorSecondary">@color/background</item>
         <item name="colorPrimaryDark">?colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorAccentText">@color/colorAccentText</item>
+        <item name="colorAccentText">@color/colorAccent</item>
         <item name="colorControlActivated">?colorAccent</item>
         <item name="android:textColorPrimary">@color/textColorPrimary</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
