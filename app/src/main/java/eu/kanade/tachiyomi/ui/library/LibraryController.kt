@@ -170,7 +170,6 @@ class LibraryController(
     override var presenter = LibraryPresenter(this)
 
     private var observeLater: Boolean = false
-    var searchItem = SearchGlobalItem()
 
     var snack: Snackbar? = null
     var displaySheet: TabbedLibraryDisplaySheet? = null
@@ -492,7 +491,7 @@ class LibraryController(
                 override fun getSpanSize(position: Int): Int {
                     if (libraryLayout == 0) return 1
                     val item = this@LibraryController.adapter.getItem(position)
-                    return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
+                    return if (item is LibraryHeaderItem || (item is LibraryItem && item.manga.isBlank())) {
                         binding.libraryGridRecycler.recycler.manager.spanCount
                     } else {
                         1
@@ -1150,17 +1149,7 @@ class LibraryController(
             binding.libraryGridRecycler.recycler.scrollToPosition(0)
         }
         this.query = query ?: ""
-        if (this.query.isNotBlank() && adapter.scrollableHeaders.isEmpty()) {
-            searchItem.string = this.query
-            adapter.addScrollableHeader(searchItem)
-        } else if (this.query.isNotBlank()) {
-            searchItem.string = this.query
-            (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(
-                this.query
-            )
-        } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
-            adapter.removeAllScrollableHeaders()
-        }
+        
         adapter.setFilter(query)
         viewScope.launchUI {
             adapter.performFilterAsync()
