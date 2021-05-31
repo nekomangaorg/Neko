@@ -978,6 +978,7 @@ class MangaDetailsController :
                         presenter.removeMerged()
                     }
                 }
+                negativeButton()
                 positiveButton(android.R.string.yes)
             }
         } else {

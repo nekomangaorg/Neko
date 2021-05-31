@@ -10,9 +10,6 @@ import coil.request.CachePolicy
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.contourColorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
@@ -22,13 +19,10 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.system.contextCompatColor
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-
 import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
@@ -109,6 +103,8 @@ class MangaHeaderHolder(
             }
             webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
             similarButton.setOnClickListener { adapter.delegate.openSimilar() }
+            mergeButton.setOnClickListener { adapter.delegate.openMerge() }
+
 
             shareButton.setOnClickListener { adapter.delegate.prepareToShareManga() }
             favoriteButton.setOnClickListener {
@@ -245,12 +241,9 @@ class MangaHeaderHolder(
 
         with(binding.mergeButton) {
             isVisible = (manga.status != SManga.COMPLETED || presenter.preferences.useCacheSource())
-            val iconics = context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_merge_type)
-            if (presenter.manga.isMerged().not()) {
-                iconics.colorInt = context.contextCompatColor(android.R.color.transparent)
-                iconics.contourColorInt = context.getResourceColor(R.attr.colorAccent)
-                iconics.contourWidthPx = 6
-                iconics.sizeDp = 28
+            val iconics = when (manga.isMerged()) {
+                true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_bold)
+                false -> context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_source_merge)
             }
             setImageDrawable(iconics)
         }

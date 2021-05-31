@@ -270,7 +270,7 @@
                 android:layout_marginEnd="6dp"
                 android:padding="5dp"
                 android:tooltipText="@string/similar"
-                app:iiv_icon="gmf_account_tree"
+                app:iiv_icon="cmd_source_merge"
                 tools:background="@color/md_black_1000"
                 tools:visibility="visible" />
 
