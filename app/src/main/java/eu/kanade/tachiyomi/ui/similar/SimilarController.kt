@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.similar
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.core.view.isVisible
 import com.google.android.material.snackbar.Snackbar
@@ -41,6 +42,7 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         binding.fab.isVisible = false
+
         /* swipe_refresh.isEnabled = true
          swipe_refresh.isRefreshing = similarPresenter.isRefreshing
          swipe_refresh.setProgressViewOffset(false, 0.dpToPx, 120.dpToPx)
@@ -49,10 +51,7 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
          }*/
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.action_search).isVisible = false
-        // menu.findItem(R.id.action_open_in_web_view).isVisible = false
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
     }
 
     fun showUserMessage(message: String) {

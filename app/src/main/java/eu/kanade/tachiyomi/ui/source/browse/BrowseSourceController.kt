@@ -128,7 +128,7 @@ open class BrowseSourceController(bundle: Bundle) :
         setupRecycler(view)
 
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
-       
+
         binding.fab.setOnClickListener { showFilters() }
         binding.progress.isVisible = true
         requestPermissionsSafe(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 301)
