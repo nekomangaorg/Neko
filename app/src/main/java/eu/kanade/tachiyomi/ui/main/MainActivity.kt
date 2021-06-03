@@ -381,9 +381,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.toolbar.setIncognitoMode(it)
                 binding.cardToolbar.setIncognitoMode(it)
             }
-        preferences.showSideNavOnBottom()
+        preferences.sideNavIconAlignment()
             .asImmediateFlowIn(lifecycleScope) {
-                binding.sideNav?.menuGravity = if (!it) Gravity.TOP else Gravity.BOTTOM
+                binding.sideNav?.menuGravity = when (it) {
+                    1 -> Gravity.CENTER
+                    2 -> Gravity.BOTTOM
+                    else -> Gravity.TOP
+                }
             }
         setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller),
             changeBG = false)

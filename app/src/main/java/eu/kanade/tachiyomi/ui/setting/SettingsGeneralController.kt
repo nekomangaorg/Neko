@@ -104,10 +104,16 @@ class SettingsGeneralController : SettingsController() {
             }
         }
 
-        switchPreference {
-            key = Keys.showSideNavOnBottom
-            titleRes = R.string.move_side_nav_to_bottom
-            defaultValue = false
+        intListPreference(activity) {
+            key = Keys.sideNavIconAlignment
+            titleRes = R.string.side_nav_icon_alignment
+            entriesRes = arrayOf(
+                R.string.top,
+                R.string.center,
+                R.string.bottom,
+            )
+            entryRange = 0..2
+            defaultValue = 0
             isVisible = activity?.isTablet() == true
         }
 

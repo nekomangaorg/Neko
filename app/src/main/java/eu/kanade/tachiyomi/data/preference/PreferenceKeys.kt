@@ -210,7 +210,7 @@ object PreferenceKeys {
 
     const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
-    const val showSideNavOnBottom = "show_side_nav_on_bottom"
+    const val sideNavIconAlignment = "pref_side_nav_icon_alignment"
 
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val showSourcesInShortcuts = "show_sources_shortcuts"

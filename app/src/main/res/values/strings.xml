@@ -588,7 +588,7 @@
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
-    <string name="move_side_nav_to_bottom">Move side navigation buttons to bottom</string>
+    <string name="side_nav_icon_alignment">Side navigation icon alignment</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
