@@ -325,9 +325,7 @@ class PreferencesHelper(val context: Context) {
     fun forceLatestCovers() = prefs.getBoolean(Keys.forceLatestCovers, false)
 
     fun logLevel() = prefs.getInt(Keys.logLevel, 0)
-
-    fun markChaptersReadFromMDList() = prefs.getBoolean(Keys.markChaptersFromMDList, false)
-
+    
     fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 
     fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)

@@ -168,9 +168,7 @@ object PreferenceKeys {
     const val forceLatestCovers = "latest_cover_bool"
 
     const val logLevel = "log_level"
-
-    const val markChaptersFromMDList = "mdlist_mark_read"
-
+    
     const val showContentRatingFilter = "show_R18_filter"
 
     const val enablePort443Only = "use_port_443_only_for_image_server"
