@@ -117,7 +117,7 @@ open class MangaDex : HttpSource() {
     }
 
     override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return pageHandler.fetchPageList(chapter)
+        return pageHandler.fetchPageList(chapter, isLogged())
     }
 
     override fun fetchImage(page: Page): Observable<Response> {
@@ -158,6 +158,13 @@ open class MangaDex : HttpSource() {
     }
 
     open fun imageRequest(page: Page): Request {
+
+        val atHomeHeaders = if (isLogged()) {
+            MdUtil.getAuthHeaders(headers, preferences)
+        } else {
+            network.headers
+        }
+
         val data = page.url.split(",")
         val mdAtHomeServerUrl =
             when (Date().time - data[2].toLong() > MdUtil.mdAtHomeTokenLifespan) {
@@ -175,7 +182,7 @@ open class MangaDex : HttpSource() {
                         } else {
                             CacheControl.FORCE_CACHE
                         }
-                    MdUtil.atHomeUrlHostUrl(tokenRequestUrl, client, cacheControl)
+                    MdUtil.atHomeUrlHostUrl(tokenRequestUrl, client, atHomeHeaders, cacheControl)
                 }
             }
         return GET(mdAtHomeServerUrl + page.imageUrl, headers)

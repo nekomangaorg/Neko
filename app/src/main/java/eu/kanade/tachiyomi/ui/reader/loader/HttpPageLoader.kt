@@ -41,7 +41,7 @@ class HttpPageLoader(
     private val subscriptions = CompositeSubscription()
 
     private val preferences by injectLazy<PreferencesHelper>()
-    private val preloadSize = 20
+    private val preloadSize = 30
 
     init {
         subscriptions += Observable.defer { Observable.just(queue.take().page) }
