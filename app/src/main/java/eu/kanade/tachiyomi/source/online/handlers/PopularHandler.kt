@@ -1,13 +1,11 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -22,9 +20,7 @@ import uy.kohesive.injekt.injectLazy
 class PopularHandler {
 
     private val filterHandler: FilterHandler by injectLazy()
-    private val preferences: PreferencesHelper by injectLazy()
     private val network: NetworkHelper by injectLazy()
-    private val v5DbHelper: V5DbHelper by injectLazy()
 
     fun fetchPopularManga(page: Int): Observable<MangasPage> {
         return network.client.newCall(popularMangaRequest(page))
@@ -57,8 +53,11 @@ class PopularHandler {
 
         val mlResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
+
+        val coverMap = MdUtil.getCoversFromMangaList(mlResponse.results, network.client)
+
         val mangaList = mlResponse.results.map {
-            val coverUrl = MdUtil.getTempCover(it)
+            val coverUrl = coverMap[it.data.id]
             MdUtil.createMangaEntry(it, coverUrl)
         }
         return MangasPage(mangaList, hasMoreResults)

@@ -44,7 +44,6 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -470,12 +469,7 @@ class MangaDetailsPresenter(
                         }
                     }
                 }
-
-                // First if no image, try to get one from our V5 database
-                // If we don't have an image we can try to use the merge source image fallback
-                if (networkManga.thumbnail_url == null) {
-                    manga.thumbnail_url = MdUtil.coverApi.replace("{uuid}", MdUtil.getMangaId(networkManga.url))
-                }
+                
                 db.insertManga(manga).executeOnIO()
             }
             fetchExternalLinks()

@@ -81,8 +81,11 @@ class FollowsHandler {
     private fun followsParseMangaPage(response: List<MangaResponse>, readingStatusMap: Map<String, String?>): MangasPage {
 
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
+
+        val coverMap = MdUtil.getCoversFromMangaList(response, network.client)
+
         val result = response.map {
-            val coverUrl = MdUtil.getTempCover(it)
+            val coverUrl = coverMap[it.data.id]
             MdUtil.createMangaEntry(it, coverUrl).apply {
                 this.follow_status = FollowStatus.fromDex(readingStatusMap[it.data.id])
             }

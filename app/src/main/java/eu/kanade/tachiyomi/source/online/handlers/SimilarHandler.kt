@@ -8,12 +8,12 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangasPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.SimilarMangaResponse
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
+import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Request
 import okhttp3.Response
 import rx.Observable
@@ -23,7 +23,6 @@ class SimilarHandler {
 
     private val network: NetworkHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
-    private val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * fetch our similar mangas
@@ -69,11 +68,34 @@ class SimilarHandler {
         // TODO: also filter based on the content rating here?
         // TODO: also append here the related manga?
         val mlResponse = MdUtil.jsonParser.decodeFromString<SimilarMangaResponse>(data)
+
+        val ids = mlResponse.matches.map {
+            it.id
+        }
+
+        val coverUrl = MdUtil.coverUrl.toHttpUrl().newBuilder().apply {
+            ids.forEach { mangaId ->
+                addQueryParameter("manga[]", mangaId)
+            }
+            addQueryParameter("limit", ids.size.toString())
+        }.build().toString()
+        val response = network.client.newCall(GET(coverUrl)).execute()
+        val coverList = MdUtil.jsonParser.decodeFromString<CoverListResponse>(response.body!!.string())
+
+        val unique = coverList.results.distinctBy { it.relationships[0].id }
+
+        val coverMap = unique.map { coverResponse ->
+            val fileName = coverResponse.data.attributes.fileName
+            val mangaId = coverResponse.relationships.first { it.type.equals("manga", true) }.id
+            val thumbnailUrl = "${MdUtil.cdnUrl}/covers/$mangaId/$fileName"
+            Pair(mangaId, thumbnailUrl)
+        }.toMap()
+
         val mangaList = mlResponse.matches.map {
             SManga.create().apply {
                 url = "/title/" + it.id
                 title = MdUtil.cleanString(it.title["en"]!!)
-                thumbnail_url = MdUtil.coverApi.replace("{uuid}", it.id)
+                thumbnail_url = coverMap[it.id]
             }
         }
         return MangasPage(mangaList, false)
