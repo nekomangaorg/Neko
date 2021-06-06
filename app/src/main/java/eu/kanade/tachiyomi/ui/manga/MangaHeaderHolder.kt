@@ -242,7 +242,7 @@ class MangaHeaderHolder(
         with(binding.mergeButton) {
             isVisible = (manga.status != SManga.COMPLETED || presenter.preferences.useCacheSource())
             val iconics = when (manga.isMerged()) {
-                true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_bold)
+                true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_decagram)
                 false -> context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_source_merge)
             }
             setImageDrawable(iconics)

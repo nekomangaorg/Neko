@@ -34,6 +34,8 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
@@ -130,6 +132,8 @@ open class BrowseSourceController(bundle: Bundle) :
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
 
         binding.fab.setOnClickListener { showFilters() }
+
+        updateFab()
         binding.progress.isVisible = true
         requestPermissionsSafe(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 301)
     }
@@ -599,6 +603,10 @@ open class BrowseSourceController(bundle: Bundle) :
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             (activity as? MainActivity)?.setUndoSnackBar(snack)
         }
+    }
+
+    fun updateFab() {
+        binding.fab.y = -(activityBinding!!.bottomNav!!.height.pxToDp.toFloat() + 25f.dpToPx)
     }
 
     companion object {
