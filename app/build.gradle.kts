@@ -128,6 +128,9 @@ dependencies {
     implementation(Libs.Network.okhttpLoggingInterceptor)
     implementation(Libs.IO.okio)
 
+    // TLS 1.3 support for Android < 10
+    implementation("org.conscrypt:conscrypt-android:2.5.2")
+
     // Chucker
     debugImplementation(Libs.Network.chucker)
     releaseImplementation(Libs.Network.chuckerNoOp)
