@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi
 
 import android.app.Application
 import android.content.Context
+import android.os.Build
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
