@@ -42,6 +42,10 @@
         <item name="android:letterSpacing">-.023</item>
     </style>
 
+    <style name="Neko.Headline6.Lower" parent="Neko.Headline6">
+        <item name="textAllCaps">false</item>
+    </style>
+
     <style name="Neko.Subtitle1" parent="TextAppearance.MaterialComponents.Subtitle1">
         <item name="fontFamily">@font/metropolis_medium</item>
         <item name="android:textColor">?android:attr/textColorSecondary</item>

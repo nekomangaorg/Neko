@@ -18,6 +18,10 @@
 
     <style name="Neko.Button" parent="Theme.Widget.Button"></style>
 
+    <style name="Neko.Button.Primary" parent="Theme.Widget.Button.Primary">
+        <item name="fontFamily">@font/metropolis_medium</item>
+    </style>
+
     <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
         <item name="fontFamily">@font/metropolis_medium</item>
     </style>

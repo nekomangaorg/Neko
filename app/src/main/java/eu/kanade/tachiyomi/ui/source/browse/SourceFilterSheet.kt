@@ -13,8 +13,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.SourceFilterSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
@@ -34,31 +34,29 @@ class SourceFilterSheet(val activity: Activity) :
     override var recyclerView: RecyclerView? = binding.filtersRecycler
 
     override fun createBinding(inflater: LayoutInflater) = SourceFilterSheetBinding.inflate(inflater)
+
     init {
         binding.searchBtn.setOnClickListener { dismiss() }
         binding.resetBtn.setOnClickListener { onResetClicked() }
 
-        sheetBehavior.peekHeight = 450.dpToPx
-        sheetBehavior.collapse()
-
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
-                OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    activity.window.decorView.rootWindowInsets?.let {
-                        setCardViewMax(it)
-                    }
-                    if (binding.titleLayout.height > 0) {
-                        binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    }
+            OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                activity.window.decorView.rootWindowInsets?.let {
+                    setCardViewMax(it)
                 }
-            })
+                if (binding.titleLayout.height > 0) {
+                    binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            }
+        })
 
         binding.cardView.doOnApplyWindowInsets { _, insets, _ ->
             binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
                 matchConstraintMaxHeight =
                     fullHeight - insets.systemWindowInsetTop -
-                    binding.titleLayout.height - 75.dpToPx
+                        binding.titleLayout.height - 75.dpToPx
             }
         }
 
@@ -71,7 +69,7 @@ class SourceFilterSheet(val activity: Activity) :
                 bottom = insets.systemWindowInsetBottom
             )
             binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                height = headerHeight + binding.titleLayout.paddingBottom
+                height = headerHeight + headerHeight + binding.titleLayout.paddingBottom
             }
             setCardViewMax(insets)
         }
@@ -120,7 +118,8 @@ class SourceFilterSheet(val activity: Activity) :
 
     override fun onStart() {
         super.onStart()
-        sheetBehavior.collapse()
+        sheetBehavior.expand()
+        sheetBehavior.skipCollapsed = true
         updateBottomButtons()
         binding.root.post {
             updateBottomButtons()
@@ -137,7 +136,7 @@ class SourceFilterSheet(val activity: Activity) :
         )
 
         binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = headerHeight + binding.titleLayout.paddingBottom
+            height = headerHeight + headerHeight + binding.titleLayout.paddingBottom
         }
         array.recycle()
     }
