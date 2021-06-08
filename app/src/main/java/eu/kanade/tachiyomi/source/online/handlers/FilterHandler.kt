@@ -166,7 +166,7 @@ class FilterHandler() {
         Filter.Select<String>("Excluded tags mode", arrayOf("And", "Or"), 1)
 
     val sortableList = listOf(
-        Pair("Default (Asc/Desc doesn't matter)", ""),
+        Pair("Number of follows", ""),
         Pair("Created at", "createdAt"),
         Pair("Updated at", "updatedAt"),
     )
