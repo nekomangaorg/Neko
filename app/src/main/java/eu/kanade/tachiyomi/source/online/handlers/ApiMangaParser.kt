@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.serializers.AuthorResponseList
 import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverListResponse
 import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -35,18 +34,9 @@ class ApiMangaParser {
             manga.url = "/title/" + networkApiManga.data.id
             manga.title = MdUtil.cleanString(networkManga.title["en"]!!)
 
-            var coverUrl = MdUtil.coverApi.replace("{uuid}", networkApiManga.data.id)
-            val coverUrlId = networkApiManga.relationships.firstOrNull { it.type == "cover_art" }?.id
-            if (coverUrlId != null) {
-                runCatching {
-                    val response = network.client.newCall(GET(MdUtil.coverUrl(networkApiManga.data.id, coverUrlId))).execute()
-                    val json = MdUtil.jsonParser.decodeFromString<CoverListResponse>(response.body!!.string())
-                    json.results.firstOrNull()?.data?.attributes?.fileName?.let { fileName ->
-                        coverUrl = "${MdUtil.cdnUrl}/covers/${networkApiManga.data.id}/$fileName"
-                    }
-                }
-            }
-            manga.thumbnail_url = coverUrl
+            val coverId = networkApiManga.relationships.firstOrNull { it.type.equals("cover_art", true) }?.id
+
+            manga.thumbnail_url = MdUtil.getCoverUrl(networkApiManga.data.id, coverId, network.client)
 
             manga.description = MdUtil.cleanDescription(networkManga.description["en"]!!)
 

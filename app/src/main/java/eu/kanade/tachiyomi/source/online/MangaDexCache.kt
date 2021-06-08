@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.CachedManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
@@ -17,26 +16,22 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
 import okhttp3.Interceptor
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.isomorphism.util.TokenBuckets
-import org.json.JSONObject
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.util.*
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 import kotlin.random.Random
 
@@ -84,7 +79,7 @@ open class MangaDexCache() : MangaDex() {
                 SManga.create().apply {
                     url = "/manga/${cacheManga.uuid}/"
                     title = MdUtil.cleanString(cacheManga.title)
-                    thumbnail_url = MdUtil.coverApi.replace("{uuid}", cacheManga.uuid)
+                    thumbnail_url = MdUtil.imageUrlCacheNotFound
                     rating = cacheManga.rating
                 }
             }.toList().map {
@@ -92,7 +87,7 @@ open class MangaDexCache() : MangaDex() {
                 val mangasClean = it.take(limit).filter { manga ->
                     manga.rating in preferences.contentRatingSelections()
                 }
-                mangasClean.forEach {  manga ->
+                mangasClean.forEach { manga ->
                     manga.rating = null
                 }
                 MangasPage(mangasClean, haveMore)
@@ -122,7 +117,7 @@ open class MangaDexCache() : MangaDex() {
                 SManga.create().apply {
                     url = "/manga/${cacheManga.uuid}/"
                     title = MdUtil.cleanString(cacheManga.title)
-                    thumbnail_url = MdUtil.coverApi.replace("{uuid}", cacheManga.uuid)
+                    thumbnail_url = MdUtil.imageUrlCacheNotFound
                     rating = cacheManga.rating
                 }
             }.toList().map {
@@ -130,7 +125,7 @@ open class MangaDexCache() : MangaDex() {
                 val mangasClean = it.take(limit).filter { manga ->
                     manga.rating in preferences.contentRatingSelections()
                 }
-                mangasClean.forEach {  manga ->
+                mangasClean.forEach { manga ->
                     manga.rating = null
                 }
                 MangasPage(mangasClean, haveMore)
@@ -259,7 +254,7 @@ open class MangaDexCache() : MangaDex() {
             mangaReturn.title = MdUtil.cleanString(networkApiManga.data.attributes.title["en"]!!)
             mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.data.attributes.description["en"]!!)
             //mangaReturn.rating = networkApiManga.toString()
-            mangaReturn.thumbnail_url = MdUtil.coverApi.replace("{uuid}", networkApiManga.data.id)
+            mangaReturn.thumbnail_url = MdUtil.imageUrlCacheNotFound
 
             // Get the external tracking ids for this manga
             val networkManga = networkApiManga.data.attributes
@@ -270,7 +265,7 @@ open class MangaDexCache() : MangaDex() {
                 it["mu"]?.let { mangaReturn.manga_updates_id = it }
                 it["ap"]?.let { mangaReturn.anime_planet_id = it }
             }
-            mangaReturn.status = when(networkManga.status) {
+            mangaReturn.status = when (networkManga.status) {
                 "ongoing" -> SManga.ONGOING
                 "completed" -> SManga.PUBLICATION_COMPLETE
                 "cancelled" -> SManga.CANCELLED
@@ -281,12 +276,13 @@ open class MangaDexCache() : MangaDex() {
             // List the labels for this manga
             val tags = filterHandler.getTags()
             val genres = (
-                    listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
-                            + networkManga.tags?.map { it.id }
-                        ?.map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
-                        ?.map { tag -> tag?.name }
-                            + listOf("Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
-                    ))
+                listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
+                    + networkManga.tags?.map { it.id }
+                    ?.map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
+                    ?.map { tag -> tag?.name }
+                    + listOf(
+                    "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
+                ))
                 .filterNotNull()
             mangaReturn.genre = genres.joinToString(", ")
 
@@ -296,5 +292,4 @@ open class MangaDexCache() : MangaDex() {
             throw e
         }
     }
-
 }

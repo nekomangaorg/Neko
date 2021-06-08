@@ -70,7 +70,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.Date
-import kotlin.math.ceil
 
 class MangaDetailsPresenter(
     private val controller: MangaDetailsController,
@@ -905,15 +904,15 @@ class MangaDetailsPresenter(
                                     }
                                 }
 
-                                if (preferences.markChaptersReadFromMDList() && trackItem.status == FollowStatus.READING.int) {
-                                    chapters.firstOrNull { ceil(it.chapter_number.toDouble()).toInt() == trackItem.last_chapter_read && !it.chapter.read && it.chapter_number.toInt() != 0 }
-                                        ?.let {
-                                            scope.launch(Dispatchers.Main) {
-                                                controller.markAsRead(listOf(it))
-                                                controller.markPreviousAs(it, true)
-                                            }
-                                        }
-                                }
+                                /*  if (preferences.markChaptersReadFromMDList() && trackItem.status == FollowStatus.READING.int) {
+                                      chapters.firstOrNull { ceil(it.chapter_number.toDouble()).toInt() == trackItem.last_chapter_read && !it.chapter.read && it.chapter_number.toInt() != 0 }
+                                          ?.let {
+                                              scope.launch(Dispatchers.Main) {
+                                                  controller.markAsRead(listOf(it))
+                                                  controller.markPreviousAs(it, true)
+                                              }
+                                          }
+                                  }*/
 
                                 if (trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {
                                     trackItem.total_chapters = manga.last_chapter_number!!

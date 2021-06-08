@@ -18,7 +18,7 @@ class PageHandler {
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
 
-    fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
+    fun fetchPageList(chapter: SChapter, isLogged: Boolean): Observable<List<Page>> {
         if (chapter.scanlator.equals("MangaPlus")) {
             return network.client.newCall(pageListRequest(chapter))
                 .asObservableSuccess()
@@ -34,10 +34,16 @@ class PageHandler {
             "${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}"
         }
 
-        return network.client.newCall(pageListRequest(chapter))
+        val (client, headers) = if (isLogged) {
+            Pair(network.authClient, MdUtil.getAuthHeaders(network.headers, preferences))
+        } else {
+            Pair(network.client, network.headers)
+        }
+
+        return client.newCall(pageListRequest(chapter))
             .asObservableSuccess()
             .map { response ->
-                val host = MdUtil.atHomeUrlHostUrl(atHomeRequestUrl, network.client, CacheControl.FORCE_NETWORK)
+                val host = MdUtil.atHomeUrlHostUrl(atHomeRequestUrl, client, headers, CacheControl.FORCE_NETWORK)
                 ApiChapterParser().pageListParse(response, host, preferences.dataSaver())
             }
     }
