@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.follows
 
 import android.os.Bundle
 import android.view.Menu
+import android.view.MenuInflater
 import android.view.View
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
@@ -33,9 +34,6 @@ class FollowsController(bundle: Bundle) : BrowseSourceController(bundle) {
         binding.fab.isVisible = false
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu) {
-        super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.action_search).isVisible = false
-        // menu.findItem(R.id.action_open_in_web_view).isVisible = false
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
     }
 }
