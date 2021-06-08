@@ -31,6 +31,10 @@ class SourceFilterSheet(val activity: Activity) :
 
     var onResetClicked = {}
 
+    var onRandomClicked = {}
+
+    var onFollowsClicked = {}
+
     override var recyclerView: RecyclerView? = binding.filtersRecycler
 
     override fun createBinding(inflater: LayoutInflater) = SourceFilterSheetBinding.inflate(inflater)
@@ -38,6 +42,8 @@ class SourceFilterSheet(val activity: Activity) :
     init {
         binding.searchBtn.setOnClickListener { dismiss() }
         binding.resetBtn.setOnClickListener { onResetClicked() }
+        binding.randomMangaBtn.setOnClickListener { onRandomClicked() }
+        binding.followsBtn.setOnClickListener { onFollowsClicked() }
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
             OnGlobalLayoutListener {

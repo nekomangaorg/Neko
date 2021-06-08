@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
+import eu.kanade.tachiyomi.ui.follows.FollowsController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -344,7 +345,7 @@ open class BrowseSourceController(bundle: Bundle) :
             adapter?.clear()
             presenter.setSourceFilter(FilterList())
         }
-/*
+
         sheet.onRandomClicked = {
             sheet.dismiss()
             showProgressBar()
@@ -356,7 +357,7 @@ open class BrowseSourceController(bundle: Bundle) :
             sheet.dismiss()
             adapter?.clear()
             router.pushController(FollowsController().withFadeTransaction())
-        }*/
+        }
         sheet.show()
     }
 
