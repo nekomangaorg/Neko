@@ -42,20 +42,19 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         binding.fab.isVisible = false
-
-        /* swipe_refresh.isEnabled = true
-         swipe_refresh.isRefreshing = similarPresenter.isRefreshing
-         swipe_refresh.setProgressViewOffset(false, 0.dpToPx, 120.dpToPx)
-         swipe_refresh.setOnRefreshListener {
-             similarPresenter.refreshSimilarManga()
-         }*/
+        binding.swipeRefresh.isEnabled = true
+        binding.swipeRefresh.isRefreshing = similarPresenter.isRefreshing
+        //binding.swipeRefresh.setProgressViewOffset(false, 0.dpToPx, 120.dpToPx)
+        binding.swipeRefresh.setOnRefreshListener {
+            similarPresenter.refreshSimilarManga()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
     }
 
     fun showUserMessage(message: String) {
-        //swipe_refresh?.isRefreshing = similarPresenter.isRefreshing
+        binding.swipeRefresh.isRefreshing = similarPresenter.isRefreshing
         view?.snack(message, Snackbar.LENGTH_LONG)
     }
 

@@ -133,6 +133,7 @@ open class BrowseSourceController(bundle: Bundle) :
         binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
 
         binding.fab.setOnClickListener { showFilters() }
+        binding.swipeRefresh.isEnabled = false
 
         updateFab()
         binding.progress.isVisible = true
