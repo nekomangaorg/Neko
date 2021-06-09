@@ -14,6 +14,7 @@
         <item name="colorPrimary">@color/app_color_primary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
+        <item name="colorSecondaryVariant">?attr/colorPrimaryVariant</item>
         <item name="colorPrimaryDark">?colorPrimary</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="colorAccentText">@color/colorAccent</item>
