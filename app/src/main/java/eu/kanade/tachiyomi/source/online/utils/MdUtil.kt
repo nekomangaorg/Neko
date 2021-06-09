@@ -244,14 +244,6 @@ class MdUtil {
             return cleanString(newDescription)
         }
 
-        fun getImageUrl(attr: String): String {
-            // Some images are hosted elsewhere
-            if (attr.startsWith("http")) {
-                return attr
-            }
-            return baseUrl + attr
-        }
-
         fun getScanlators(scanlators: String): List<String> {
             if (scanlators.isBlank()) return emptyList()
             return scanlators.split(scanlatorSeparator).distinct()
@@ -285,7 +277,7 @@ class MdUtil {
             }
             return null
         }
-
+        
         fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient, headers: Headers, cacheControl: CacheControl): String {
             val atHomeRequest = GET(requestUrl, headers, cache = cacheControl)
             val atHomeResponse = client.newCall(atHomeRequest).execute()
