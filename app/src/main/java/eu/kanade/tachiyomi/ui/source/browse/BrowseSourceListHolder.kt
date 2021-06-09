@@ -7,9 +7,7 @@ import coil.clear
 import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 
@@ -34,12 +32,7 @@ class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IF
      */
     override fun onSetValues(manga: Manga) {
         binding.title.text = manga.title
-        with(binding.subtitle) {
-            visibility = if (manga.favorite) View.VISIBLE else View.GONE
-            text = view.resources.getString(R.string.in_library)
-            setTextColor(view.context.getResourceColor(android.R.attr.colorAccent))
-        }
-
+        binding.inLibraryBadge.badge.visibility = if (manga.favorite) View.VISIBLE else View.GONE
         setImage(manga)
     }
 

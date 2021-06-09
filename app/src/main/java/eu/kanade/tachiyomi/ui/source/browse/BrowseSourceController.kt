@@ -284,6 +284,7 @@ open class BrowseSourceController(bundle: Bundle) :
         when (item.itemId) {
             R.id.action_search -> expandActionViewFromInteraction = true
             R.id.action_display_mode -> swapDisplayMode()
+            R.id.action_toggle_have_already -> swapLibraryVisibility()
             /*   R.id.action_open_in_web_view -> openInWebView()
                R.id.action_open_merged_source_in_web_view -> openInWebView(false)*/
 
@@ -523,6 +524,14 @@ open class BrowseSourceController(bundle: Bundle) :
             }
             presenter.initializeMangas(mangas)
         }
+    }
+
+    /**
+     * Toggle if our library is already seen
+     */
+    fun swapLibraryVisibility() {
+        presenter.swapLibraryVisibility()
+        activity?.invalidateOptionsMenu()
     }
 
     /**

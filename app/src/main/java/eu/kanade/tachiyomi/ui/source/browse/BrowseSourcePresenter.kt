@@ -142,6 +142,10 @@ open class BrowseSourcePresenter(
             .onEach { setDisplayMode(it) }
             .launchIn(scope)
 
+        prefs.browseShowLibrary().asFlow()
+            .onEach { setShowLibrary(it) }
+            .launchIn(scope)
+
         restartPager()
     }
 
