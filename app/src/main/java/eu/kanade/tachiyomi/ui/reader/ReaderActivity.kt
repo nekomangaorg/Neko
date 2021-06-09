@@ -435,7 +435,10 @@ class ReaderActivity :
                 } else {
                     ReaderBottomButton.CropBordersWebtoon.isIn(enabledButtons)
                 }
-            commentButton.isVisible =
+            webviewButton.isVisible =
+                ReaderBottomButton.WebView.isIn(enabledButtons)
+
+            commentsButton.isVisible =
                 ReaderBottomButton.Comment.isIn(enabledButtons)
             chaptersButton.isVisible =
                 ReaderBottomButton.ViewChapters.isIn(enabledButtons)
@@ -613,8 +616,12 @@ class ReaderActivity :
                 }
             }
 
-            commentButton.setOnClickListener {
-                openComments()
+            webviewButton.setOnClickListener {
+                openWebView(false)
+            }
+
+            commentsButton.setOnClickListener {
+                openWebView(true)
             }
 
             displayOptions.setOnClickListener {
@@ -1275,14 +1282,21 @@ class ReaderActivity :
         }
     }
 
-    fun openComments() {
+    fun openWebView(isComments: Boolean) {
         val currentChapter = presenter.getCurrentChapter()
         currentChapter ?: return
 
-        if (currentChapter.chapter.isMergedChapter()) {
+        if (isComments && currentChapter.chapter.isMergedChapter()) {
             toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
         } else {
-            val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url) + "/comments"
+            if (isComments) {
+                toast(R.string.comments_unavailable_dex, duration = Toast.LENGTH_SHORT)
+            }
+            var url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url)
+            if (isComments) {
+                url += "/comments"
+            }
+
             val intent =
                 WebViewActivity.newIntent(this, presenter.manga!!.source, url, currentChapter.chapter.name)
             startActivity(intent)

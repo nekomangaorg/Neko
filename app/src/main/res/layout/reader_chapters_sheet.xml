@@ -40,7 +40,7 @@
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
             android:tooltipText="@string/view_chapters"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/webview_button"
+            app:layout_constraintEnd_toStartOf="@id/comments_button"
             app:layout_constraintHorizontal_chainStyle="spread"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -48,7 +48,24 @@
             app:tint="?actionBarTintColor" />
 
         <ImageButton
-            android:id="@+id/comment_button"
+            android:id="@+id/comments_button"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="?selectableItemBackgroundBorderless"
+            android:contentDescription="@string/open_in_webview"
+            android:padding="@dimen/material_layout_keylines_screen_edge_margin"
+            android:tooltipText="@string/view_comments"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/webview_button"
+            app:layout_constraintHorizontal_chainStyle="spread"
+            app:layout_constraintStart_toEndOf="@id/chapters_button"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintWidth_max="wrap"
+            app:srcCompat="@drawable/ic_view_comments_24p"
+            app:tint="?actionBarTintColor" />
+
+        <ImageButton
+            android:id="@+id/webview_button"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="?selectableItemBackgroundBorderless"
@@ -58,7 +75,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/reading_mode"
             app:layout_constraintHorizontal_chainStyle="spread"
-            app:layout_constraintStart_toEndOf="@id/chapters_button"
+            app:layout_constraintStart_toEndOf="@id/comments_button"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintWidth_max="wrap"
             app:srcCompat="@drawable/ic_open_in_webview_24dp"

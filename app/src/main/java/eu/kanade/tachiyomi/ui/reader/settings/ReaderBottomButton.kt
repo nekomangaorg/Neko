@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.R
 
 enum class ReaderBottomButton(val value: String, @StringRes val stringRes: Int) {
     ViewChapters("vc", R.string.view_chapters),
+    WebView("wb", R.string.open_in_webview),
     Comment("com", R.string.view_comments),
     ReadingMode("rm", R.string.reading_mode),
     Rotation("rot", R.string.rotation),
@@ -21,7 +22,7 @@ enum class ReaderBottomButton(val value: String, @StringRes val stringRes: Int) 
             ViewChapters,
             Comment,
             PageLayout,
-            CropBordersWebtoon
+            ShiftDoublePage,
         ).map { it.value }.toSet()
     }
 }
