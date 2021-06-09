@@ -21,7 +21,6 @@ enum class ReaderBottomButton(val value: String, @StringRes val stringRes: Int) 
         val BUTTONS_DEFAULTS = setOf(
             ViewChapters,
             Comment,
-            PageLayout,
             ShiftDoublePage,
         ).map { it.value }.toSet()
     }

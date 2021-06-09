@@ -1286,12 +1286,14 @@ class ReaderActivity :
         val currentChapter = presenter.getCurrentChapter()
         currentChapter ?: return
 
-        if (isComments && currentChapter.chapter.isMergedChapter()) {
-            toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
-        } else {
-            if (isComments) {
+        if (isComments) {
+            if (currentChapter.chapter.isMergedChapter()) {
+                toast(R.string.comments_unavailable, duration = Toast.LENGTH_SHORT)
+            } else {
                 toast(R.string.comments_unavailable_dex, duration = Toast.LENGTH_SHORT)
             }
+        } else {
+
             var url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url)
             if (isComments) {
                 url += "/comments"
