@@ -229,21 +229,6 @@ open class BrowseSourceController(bundle: Bundle) :
             searchView.clearFocus()
         }
 
-//        val searchEventsObservable = searchView.queryTextChangeEvents()
-//            .skip(1)
-//            .filter { router.backstack.lastOrNull()?.controller == this@BrowseSourceController }
-//            .share()
-//        val writingObservable = searchEventsObservable
-//            .filter { !it.isSubmitted }
-//            .debounce(1250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
-//        val submitObservable = searchEventsObservable
-//            .filter { it.isSubmitted }
-//
-//        searchViewSubscription?.unsubscribe()
-//        searchViewSubscription = Observable.merge(writingObservable, submitObservable)
-//            .map { it.queryText().toString() }
-//            .subscribeUntilDestroy { searchWithQuery(it) }
-
         setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
             searchWithQuery(it ?: "")
             true
@@ -252,11 +237,7 @@ open class BrowseSourceController(bundle: Bundle) :
         searchItem.fixExpand(
             onExpand = { invalidateMenuOnExpand() },
             onCollapse = {
-                if (router.backstackSize >= 2 && router.backstack[router.backstackSize - 2].controller is BrowseSourceController) {
-                    router.popController(this)
-                } else {
-                    searchWithQuery("")
-                }
+                searchWithQuery("")
                 true
             }
         )
