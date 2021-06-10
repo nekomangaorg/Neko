@@ -13,6 +13,8 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 
 /**
@@ -42,9 +44,10 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         binding.fab.isVisible = false
+        binding.swipeRefresh.setStyle()
+
+        binding.swipeRefresh.setProgressViewOffset(false, 20.dpToPx, binding.swipeRefresh.progressViewEndOffset + 25.dpToPx)
         binding.swipeRefresh.isEnabled = true
-        binding.swipeRefresh.isRefreshing = similarPresenter.isRefreshing
-        //binding.swipeRefresh.setProgressViewOffset(false, 0.dpToPx, 120.dpToPx)
         binding.swipeRefresh.setOnRefreshListener {
             similarPresenter.refreshSimilarManga()
         }
@@ -54,7 +57,7 @@ class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
     }
 
     fun showUserMessage(message: String) {
-        binding.swipeRefresh.isRefreshing = similarPresenter.isRefreshing
+        binding.swipeRefresh.isRefreshing = false
         view?.snack(message, Snackbar.LENGTH_LONG)
     }
 
