@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="45sp"
+    android:layout_height="45sp"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:textAppearance="@style/TextAppearance.MaterialComponents.Body1"
+    tools:text="1"
+    android:elevation="6dp"
+    android:textAlignment="center"
+    android:paddingTop="8dp"
+    android:textColor="?colorOnAccent"
+    android:backgroundTint="?colorAccent"
+    android:background="@drawable/ic_rounded_tooltip_24dp" />

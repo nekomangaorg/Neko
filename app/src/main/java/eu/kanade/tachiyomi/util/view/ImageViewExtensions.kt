@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.util.view
 
 import android.widget.ImageView
 import androidx.annotation.DrawableRes
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 
 /**
@@ -16,4 +17,14 @@ fun ImageView.setVectorCompat(@DrawableRes drawable: Int, tint: Int? = null) {
         vector?.setTint(tint)
     }
     setImageDrawable(vector)
+}
+
+fun ImageView.setAnimVectorCompat(@DrawableRes drawable: Int, tint: Int? = null) {
+    val vector = AnimatedVectorDrawableCompat.create(context, drawable)
+    if (tint != null) {
+        vector?.mutate()
+        vector?.setTint(tint)
+    }
+    setImageDrawable(vector)
+    vector?.start()
 }

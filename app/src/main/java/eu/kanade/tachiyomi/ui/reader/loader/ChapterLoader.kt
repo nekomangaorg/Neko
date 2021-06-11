@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.source.SourceManager
@@ -33,10 +34,10 @@ class ChapterLoader(
         return Observable.just(chapter)
             .doOnNext { chapter.state = ReaderChapter.State.Loading }
             .observeOn(Schedulers.io())
-            .flatMap {
+            .flatMap { readerChapter ->
                 XLog.d("Loading pages for ${chapter.chapter.name}")
 
-                val loader = getPageLoader(it)
+                val loader = getPageLoader(readerChapter)
                 chapter.pageLoader = loader
 
                 loader.getPages().take(1).doOnNext { pages ->
@@ -46,7 +47,7 @@ class ChapterLoader(
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { pages ->
                 if (pages.isEmpty()) {
-                    throw Exception("Page list is empty")
+                    throw Exception(downloadManager.context.getString(R.string.no_pages_found))
                 }
 
                 chapter.state = ReaderChapter.State.Loaded(pages)

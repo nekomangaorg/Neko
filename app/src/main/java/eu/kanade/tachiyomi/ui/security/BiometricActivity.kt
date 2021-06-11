@@ -3,19 +3,21 @@ package eu.kanade.tachiyomi.ui.security
 import android.os.Bundle
 import androidx.biometric.BiometricPrompt
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import java.util.Date
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
-class BiometricActivity : BaseActivity() {
+class BiometricActivity : BaseActivity<MainActivityBinding>() {
     private val executor: ExecutorService = Executors.newSingleThreadExecutor()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val fromSearch = intent.getBooleanExtra("fromSearch", false)
         val biometricPrompt = BiometricPrompt(
-            this, executor,
+            this,
+            executor,
             object : BiometricPrompt
             .AuthenticationCallback() {
 

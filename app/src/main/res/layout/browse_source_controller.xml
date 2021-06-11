@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/source_layout"
+    android:layout_width="match_parent"
     android:layout_height="match_parent">
 
 
@@ -28,24 +28,23 @@
                 android:visibility="gone" />
 
         </FrameLayout>
-
     </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
 
     <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
         android:id="@+id/fab"
         style="@style/Theme.Widget.FAB"
         android:text="@string/filter"
-        app:icon="@drawable/ic_filter_list_24dp"/>
+        app:icon="@drawable/ic_filter_list_24dp" />
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone"
         android:gravity="center"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        tools:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

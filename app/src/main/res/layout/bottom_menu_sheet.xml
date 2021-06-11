@@ -2,30 +2,24 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/source_filter_sheet"
+    android:id="@+id/menu_sheet_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:background="@drawable/bottom_sheet_rounded_background"
     app:layout_constraintVertical_chainStyle="packed"
     android:backgroundTint="?android:attr/colorBackground">
 
-    <eu.kanade.tachiyomi.ui.base.MaxHeightScrollView
-        android:id="@+id/menu_scroll_view"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/menu_sheet_recycler"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:scrollbars="vertical"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
+        android:clipToPadding="false"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constrainedHeight="true"
         app:layout_constraintTop_toBottomOf="@id/title_layout">
 
-        <LinearLayout
-            android:id="@+id/menu_layout"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </eu.kanade.tachiyomi.ui.base.MaxHeightScrollView>
+    </androidx.recyclerview.widget.RecyclerView>
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
@@ -38,7 +32,7 @@
         android:elevation="0dp"
         android:focusable="true"
         android:orientation="horizontal"
-        app:layout_constraintBottom_toTopOf="@id/menu_scroll_view"
+        app:layout_constraintBottom_toTopOf="@id/menu_sheet_recycler"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
@@ -58,5 +52,15 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:text="Title Text" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:background="@color/divider"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

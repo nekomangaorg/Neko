@@ -60,7 +60,8 @@ class V5MigrationService(
         notifier = V5MigrationNotifier(this)
         startForeground(Notifications.ID_V5_MIGRATION_PROGRESS, notifier.progressNotificationBuilder.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "V5MigrationService:WakeLock"
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "V5MigrationService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
     }
@@ -129,7 +130,7 @@ class V5MigrationService(
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId.isNotBlank()) {
-                    manga.url = "/title/${newMangaId}"
+                    manga.url = "/title/$newMangaId"
                     manga.initialized = false
                     manga.thumbnail_url = null
                     db.insertManga(manga).executeAsBlocking()
@@ -194,8 +195,8 @@ class V5MigrationService(
         if (failedUpdatesMangas.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(failedUpdatesErrors)
             notifier.showUpdateErrorNotification(
-                failedUpdatesMangas.map { it.key.title }
-                    + failedUpdatesChapters.map { it.key.chapter_title },
+                failedUpdatesMangas.map { it.key.title } +
+                    failedUpdatesChapters.map { it.key.chapter_title },
                 errorFile.getUriCompat(this)
             )
         }
@@ -264,4 +265,3 @@ class V5MigrationService(
         }
     }
 }
-

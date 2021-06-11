@@ -54,6 +54,6 @@ class LibraryHeaderItem(
     }
 
     override fun hashCode(): Int {
-        return -(category.id!!)
+        return (category.id ?: 0L).hashCode()
     }
 }

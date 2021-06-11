@@ -7,6 +7,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -17,11 +18,16 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.storage.saveTo
+import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import com.elvishew.xlog.XLog
+import okhttp3.Call
+import okhttp3.internal.http2.ErrorCode
+import okhttp3.internal.http2.StreamResetException
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 
@@ -36,16 +42,17 @@ class UpdaterService : Service() {
 
     private lateinit var notifier: UpdaterNotifier
 
+    private var runningJob: Job? = null
+
+    private var runningCall: Call? = null
+
     override fun onCreate() {
         super.onCreate()
         notifier = UpdaterNotifier(this)
 
-        startForeground(Notifications.ID_UPDATER, notifier.onDownloadStarted(getString(R.string.neko_app_name)).build())
+        startForeground(Notifications.ID_UPDATER, notifier.onDownloadStarted(getString(R.string.app_name)).build())
 
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "${javaClass.name}:WakeLock"
-        )
-        wakeLock.acquire()
+        wakeLock = acquireWakeLock(javaClass.name)
     }
 
     /**
@@ -56,14 +63,20 @@ class UpdaterService : Service() {
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         if (intent == null) return START_NOT_STICKY
 
-        val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return START_NOT_STICKY
-        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.neko_app_name)
+        val handler = CoroutineExceptionHandler { _, exception ->
+            XLog.e(exception)
+            stopSelf(startId)
+        }
 
-        GlobalScope.launch(Dispatchers.IO) {
+        val url = intent.getStringExtra(EXTRA_DOWNLOAD_URL) ?: return START_NOT_STICKY
+        val title = intent.getStringExtra(EXTRA_DOWNLOAD_TITLE) ?: getString(R.string.app_name)
+
+        runningJob = GlobalScope.launch(handler) {
             downloadApk(title, url)
         }
 
-        stopSelf(startId)
+        runningJob?.invokeOnCompletion { stopSelf(startId) }
+
         return START_NOT_STICKY
     }
 
@@ -78,6 +91,8 @@ class UpdaterService : Service() {
     }
 
     private fun destroyJob() {
+        runningJob?.cancel()
+        runningCall?.cancel()
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
@@ -112,7 +127,8 @@ class UpdaterService : Service() {
 
         try {
             // Download the new update.
-            val response = network.client.newCallWithProgress(GET(url), progressListener).await()
+            val call = network.client.newCallWithProgress(GET(url), progressListener)
+            val response = call.await()
 
             // File where the apk will be saved.
             val apkFile = File(externalCacheDir, "update.apk")
@@ -126,7 +142,13 @@ class UpdaterService : Service() {
             notifier.onDownloadFinished(apkFile.getUriCompat(this))
         } catch (error: Exception) {
             XLog.e(error)
-            notifier.onDownloadError(url)
+            if (error is CancellationException ||
+                (error is StreamResetException && error.errorCode == ErrorCode.CANCEL)
+            ) {
+                notifier.cancel()
+            } else {
+                notifier.onDownloadError(url)
+            }
         }
     }
 
@@ -149,7 +171,7 @@ class UpdaterService : Service() {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun start(context: Context, url: String, title: String = context.getString(R.string.neko_app_name)) {
+        fun start(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
             if (!isRunning(context)) {
                 val intent = Intent(context, UpdaterService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
@@ -161,6 +183,15 @@ class UpdaterService : Service() {
                     context.startForegroundService(intent)
                 }
             }
+        }
+
+        /**
+         * Stops the service.
+         *
+         * @param context the application context.
+         */
+        fun stop(context: Context) {
+            context.stopService(Intent(context, UpdaterService::class.java))
         }
 
         /**

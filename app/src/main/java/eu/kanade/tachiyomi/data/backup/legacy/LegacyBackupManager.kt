@@ -21,19 +21,19 @@ import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_HIST
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_HISTORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_TRACK
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_TRACK_MASK
-import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.Backup.CATEGORIES
-import eu.kanade.tachiyomi.data.backup.models.Backup.CHAPTERS
-import eu.kanade.tachiyomi.data.backup.models.Backup.CURRENT_VERSION
-import eu.kanade.tachiyomi.data.backup.models.Backup.HISTORY
-import eu.kanade.tachiyomi.data.backup.models.Backup.MANGA
-import eu.kanade.tachiyomi.data.backup.models.Backup.TRACK
-import eu.kanade.tachiyomi.data.backup.models.DHistory
-import eu.kanade.tachiyomi.data.backup.serializer.CategoryTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.ChapterTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.HistoryTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.MangaTypeAdapter
-import eu.kanade.tachiyomi.data.backup.serializer.TrackTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.CATEGORIES
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.CHAPTERS
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.CURRENT_VERSION
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.HISTORY
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.MANGA
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup.TRACK
+import eu.kanade.tachiyomi.data.backup.legacy.models.DHistory
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.CategoryTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.ChapterTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.HistoryTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.MangaTypeAdapter
+import eu.kanade.tachiyomi.data.backup.legacy.serializer.TrackTypeAdapter
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.CategoryImpl
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -45,7 +45,6 @@ import eu.kanade.tachiyomi.data.database.models.MangaImpl
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -447,8 +446,9 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
         val dbChapters = databaseHelper.getChapters(manga).executeAsBlocking()
 
         // Return if fetch is needed
-        if (dbChapters.isEmpty() || dbChapters.size < chapters.size)
+        if (dbChapters.isEmpty() || dbChapters.size < chapters.size) {
             return false
+        }
 
         for (chapter in chapters) {
             val pos = dbChapters.indexOf(chapter)
@@ -495,5 +495,5 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
      *
      * @return number of backups selected by user
      */
-    fun numberOfBackups(): Int = preferences.numberOfBackups().getOrDefault()
+    fun numberOfBackups(): Int = preferences.numberOfBackups().get()
 }

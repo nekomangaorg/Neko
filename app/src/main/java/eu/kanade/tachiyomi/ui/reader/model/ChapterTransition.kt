@@ -17,8 +17,9 @@ sealed class ChapterTransition {
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (other !is ChapterTransition) return false
-        if (from == other.from && to == other.to) return true
-        if (from == other.to && to == other.from) return true
+        if (from == other.from && to == other.to && to != null) return true
+        if (from == other.to && to == other.from && to != null) return true
+        if (to == other.to && to == null && from == other.from && other::class == this::class) return true
         return false
     }
 

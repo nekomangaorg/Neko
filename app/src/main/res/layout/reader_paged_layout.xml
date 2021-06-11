@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eu.kanade.tachiyomi.ui.reader.settings.ReaderPagedView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/filter_bottom_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bottom_sheet_rounded_background"
+    android:clipToPadding="false">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingStart="@dimen/material_component_dialogs_padding_around_content_area"
+        android:orientation="vertical"
+        android:paddingTop="0dp"
+        android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area">
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/pager_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/nav_layout"
+            android:entries="@array/reader_nav" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/pager_invert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/invert_tapping"
+            android:entries="@array/invert_tapping_mode" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/scale_type"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/scale_type"
+            android:entries="@array/image_scale_type" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/page_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/page_layout"
+            android:entries="@array/page_layouts" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/extend_past_cutout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/cutout_area_behavior"
+            android:entries="@array/cutout_behavior" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/zoom_start"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/zoom_start_position"
+            android:entries="@array/zoom_start" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/invert_double_pages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/invert_double_pages"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/crop_borders"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/crop_borders"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/page_transitions"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="0dp"
+            android:text="@string/animate_page_transitions"
+            android:textColor="?android:attr/textColorPrimary" />
+
+        <!-- Webtoon Prefs -->
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/webtoon_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/nav_layout"
+            android:entries="@array/reader_nav" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/webtoon_invert"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/invert_tapping"
+            android:entries="@array/invert_tapping_mode" />
+
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/webtoon_side_padding"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/pref_webtoon_side_padding"
+            android:entries="@array/webtoon_side_padding" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/crop_borders_webtoon"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/crop_borders"
+            android:textColor="?android:attr/textColorPrimary"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/webtoon_enable_zoom_out"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/enable_zoom_out"
+            android:textColor="?android:attr/textColorPrimary"
+            app:layout_constraintTop_toBottomOf="@id/webtoon_side_padding" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/pager_prefs_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="scale_type,zoom_start,crop_borders,page_transitions"
+            tools:visibility="visible" />
+
+        <androidx.constraintlayout.widget.Group
+            android:id="@+id/webtoon_prefs_group"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="gone"
+            app:constraint_referenced_ids="crop_borders_webtoon,webtoon_side_padding,webtoon_enable_zoom_out" />
+
+    </LinearLayout>
+</eu.kanade.tachiyomi.ui.reader.settings.ReaderPagedView>

@@ -4,18 +4,21 @@ import android.content.Intent
 import android.view.Menu
 import android.view.MenuInflater
 import android.view.MenuItem
+import androidx.appcompat.widget.SearchView
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
+import com.bluelinelabs.conductor.RouterTransaction
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
+import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
-import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
-class SettingsMainController : SettingsController() {
+class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     init {
         setHasOptionsMenu(true)
@@ -25,7 +28,8 @@ class SettingsMainController : SettingsController() {
         titleRes = R.string.settings
 
         val size = 18
-        
+        val tintColor = context.getResourceColor(R.attr.colorAccent)
+
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_tune)
             titleRes = R.string.general
@@ -51,7 +55,6 @@ class SettingsMainController : SettingsController() {
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
-
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_sync)
             titleRes = R.string.tracking
@@ -63,14 +66,14 @@ class SettingsMainController : SettingsController() {
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_security)
+            titleRes = R.string.security
+            onClick { navigateTo(SettingsSecurityController()) }
+        }
+        preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_code)
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
-        }
-        preference {
-            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_info)
-            titleRes = R.string.about
-            onClick { navigateTo(AboutController()) }
         }
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_volunteer_activism)
@@ -80,28 +83,38 @@ class SettingsMainController : SettingsController() {
                 startActivity(intent)
             }
         }
+        this
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.settings_main, menu)
-        menu.findItem(R.id.action_bug_report).isVisible = BuildConfig.DEBUG
-    }
 
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        when (item.itemId) {
-            R.id.action_help -> activity?.openInBrowser(URL_HELP)
-            R.id.action_bug_report -> activity?.openInBrowser(URL_BUG_REPORT)
-            else -> return super.onOptionsItemSelected(item)
-        }
-        return true
+        // Initialize search option.
+        val searchItem = menu.findItem(R.id.action_search)
+        val searchView = searchItem.actionView as SearchView
+        searchView.maxWidth = Int.MAX_VALUE
+
+        // Change hint to show global search.
+        searchView.queryHint = applicationContext?.getString(R.string.search_settings)
+
+        searchItem.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                    SettingsSearchController.lastSearch = "" // reset saved search query
+                    router.pushController(
+                        RouterTransaction.with(SettingsSearchController())
+                    )
+                    return true
+                }
+
+                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                    return true
+                }
+            }
+        )
     }
 
     private fun navigateTo(controller: Controller) {
         router.pushController(controller.withFadeTransaction())
-    }
-
-    private companion object {
-        private const val URL_HELP = "https://tachiyomi.org/help/"
-        private const val URL_BUG_REPORT = "https://github.com/CarlosEsco/Neko/issues"
     }
 }

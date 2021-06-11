@@ -2,17 +2,40 @@
 <resources>
 
     <declare-styleable name="MinMaxNumberPicker">
-        <attr name="min" format="integer"/>
-        <attr name="max" format="integer"/>
+        <attr name="min" format="integer" />
+        <attr name="max" format="integer" />
     </declare-styleable>
 
     <declare-styleable name="NegativeSeekBar">
-        <attr name="min_seek" format="integer"/>
-        <attr name="max_seek" format="integer"/>
+        <attr name="min_seek" format="integer" />
+        <attr name="max_seek" format="integer" />
     </declare-styleable>
 
-    <attr name="actionBarTintColor" format="color"/>
-    <attr name="readerBackground" format="color"/>
-    <attr name="tabBarIconColor" format="reference|integer"/>
-    <attr name="tabBarIconInactive" format="reference|integer"/>
+    <attr name="unreadBadgeColor" format="color" />
+    <attr name="colorOnUnreadBadge" format="color" />
+    <attr name="downloadBadgeColor" format="color" />
+    <attr name="colorOnDownloadBadge" format="color" />
+    <attr name="actionBarTintColor" format="color" />
+    <attr name="readerBackground" format="color" />
+    <attr name="colorAccentText" format="color" />
+    <attr name="colorOnAccent" format="color" />
+    <attr name="tabBarIconColor" format="reference|integer" />
+    <attr name="tabBarIconInactive" format="reference|integer" />
+    <attr name="tabHighlightBackground" format="color" />
+
+    <declare-styleable name="MaterialSpinnerView">
+        <attr name="title" format="reference|string" />
+        <attr name="android:entries" />
+        <attr name="android:maxLines" />
+        <attr name="summary" format="reference|string" />
+    </declare-styleable>
+
+    <declare-styleable name="MenuSheetItemView">
+        <attr name="android:text" />
+        <attr name="android:maxLines" />
+        <attr name="icon" format="reference" />
+        <attr name="endIcon" format="reference" />
+    </declare-styleable>
+
+    <bool name="isTablet">false</bool>
 </resources>

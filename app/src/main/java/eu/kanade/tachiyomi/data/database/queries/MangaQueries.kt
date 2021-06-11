@@ -6,7 +6,15 @@ import com.pushtorefresh.storio.sqlite.queries.RawQuery
 import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.resolvers.*
+import eu.kanade.tachiyomi.data.database.resolvers.LibraryMangaGetResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaDateAddedPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaFavoritePutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaFlagsPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaLastUpdatedPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaNextUpdatedPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaScanlatorFilterFlagsPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaTitlePutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.MangaViewerPutResolver
 import eu.kanade.tachiyomi.data.database.tables.CategoryTable
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
@@ -94,9 +102,9 @@ interface MangaQueries : DbProvider {
         .prepare()
 
     fun updateNextUpdated(manga: Manga) = db.put()
-            .`object`(manga)
-            .withPutResolver(MangaNextUpdatedPutResolver())
-            .prepare()
+        .`object`(manga)
+        .withPutResolver(MangaNextUpdatedPutResolver())
+        .prepare()
 
     fun updateLastUpdated(manga: Manga) = db.put()
         .`object`(manga)
@@ -125,12 +133,7 @@ interface MangaQueries : DbProvider {
 
     fun updateMangaInfo(manga: Manga) = db.put()
         .`object`(manga)
-        .withPutResolver(MangaInfoPutResolver())
-        .prepare()
-
-    fun resetMangaInfo(manga: Manga) = db.put()
-        .`object`(manga)
-        .withPutResolver(MangaInfoPutResolver(true))
+        .withPutResolver(MangaTitlePutResolver())
         .prepare()
 
     fun deleteManga(manga: Manga) = db.delete().`object`(manga).prepare()
@@ -160,6 +163,16 @@ interface MangaQueries : DbProvider {
         .withQuery(
             RawQuery.builder()
                 .query(getLastReadMangaQuery())
+                .observesTables(MangaTable.TABLE)
+                .build()
+        )
+        .prepare()
+
+    fun getLastFetchedManga() = db.get()
+        .listOfObjects(Manga::class.java)
+        .withQuery(
+            RawQuery.builder()
+                .query(getLastFetchedMangaQuery())
                 .observesTables(MangaTable.TABLE)
                 .build()
         )

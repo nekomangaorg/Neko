@@ -2,9 +2,8 @@ package eu.kanade.tachiyomi.ui.base.activity
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import androidx.appcompat.app.AppCompatDelegate
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import uy.kohesive.injekt.injectLazy
 
 abstract class BaseThemedActivity : AppCompatActivity() {
@@ -12,9 +11,7 @@ abstract class BaseThemedActivity : AppCompatActivity() {
     val preferences: PreferencesHelper by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        AppCompatDelegate.setDefaultNightMode(ThemeUtil.nightMode(preferences.theme()))
-        setTheme(ThemeUtil.theme(preferences.theme()))
-
+        setThemeAndNight(preferences)
         super.onCreate(savedInstanceState)
     }
 }

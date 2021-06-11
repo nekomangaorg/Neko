@@ -12,7 +12,6 @@
     <!--====-->
     <!--Tabs-->
     <!--====-->
-    <style name="Theme.ActionBar.Tab" parent="ThemeOverlay.AppCompat.Dark.ActionBar" />
 
     <style name="CustomActionModeStyle" parent="Base.Widget.AppCompat.ActionMode">
         <item name="android:statusBarColor">@android:color/transparent</item>
@@ -22,12 +21,6 @@
     <!--===========-->
     <!--AlertDialog-->
     <!--===========-->
-
-    <style name="Theme.AlertDialog.DayNight" parent="Theme.AppCompat.Light.Dialog.Alert">
-        <item name="android:windowMinWidthMajor">@android:dimen/dialog_min_width_major</item>
-        <item name="android:windowMinWidthMinor">@android:dimen/dialog_min_width_minor</item>
-        <item name="colorAccent">@color/colorAccent</item>
-    </style>
 
     <!--===============-->
     <!--Text Appearance-->
@@ -53,7 +46,7 @@
     </style>
 
     <style name="TextAppearance.Regular.Body1.Light">
-        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1.Secondary">
@@ -65,7 +58,7 @@
     </style>
 
     <style name="TextAppearance.Regular.Caption.Light">
-        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Regular.Caption.Hint">
@@ -81,7 +74,7 @@
     </style>
 
     <style name="TextAppearance.Regular.SubHeading.Light">
-        <item name="android:textColor">@color/textColorPrimary</item>
+        <item name="android:textColor">?android:attr/textColorPrimary</item>
     </style>
 
     <style name="TextAppearance.Regular.SubHeading.Light.Bold">
@@ -104,26 +97,31 @@
         <item name="android:textColor">?android:attr/textColorHint</item>
     </style>
 
+    <style name="TextAppearance.Widget.Tab" parent="TextAppearance.MaterialComponents.Button">
+        <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
+    </style>
+
     <!--=======-->
     <!--Widgets-->
     <!--=======-->
     <style name="Theme.Widget" />
 
-    <style name="Theme.Widget.FAB">
+    <style name="Theme.Widget.FAB" parent="@style/Widget.MaterialComponents.ExtendedFloatingActionButton.Icon">
         <item name="android:layout_height">wrap_content</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="fabCustomSize">@dimen/fab_size</item>
+        <item name="android:minWidth">@dimen/fab_size</item>
         <item name="android:layout_gravity">bottom|end</item>
         <item name="android:layout_margin">@dimen/fab_margin</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="layout_anchorGravity">bottom|right|end</item>
-        <item name="tint">@color/md_white_1000</item>
-        <item name="android:minHeight">@dimen/fab_size</item>
+        <item name="tint">?attr/colorOnAccent</item>
         <item name="backgroundTint">?attr/colorAccent</item>
-        <item name="android:tint">@color/md_white_1000</item>
-        <item name="iconTint">@android:color/white</item>
+        <item name="android:tint">?attr/colorOnAccent</item>
+        <item name="iconTint">?attr/colorOnAccent</item>
         <item name="textAllCaps">false</item>
-        <item name="android:textColor">@android:color/white</item>
+        <item name="android:textColor">?attr/colorOnAccent</item>
     </style>
 
     <style name="Theme.Widget.CardView" parent="Widget.MaterialComponents.CardView">
@@ -140,9 +138,9 @@
         </item>
         <item name="android:layout_marginEnd">@dimen/material_component_cards_space_between_cards
         </item>
-        <item name="cardBackgroundColor">?md_background_color</item>
-        <item name="cardElevation">2dp</item>
         <item name="cardCornerRadius">@dimen/rounded_radius</item>
+        <item name="cardBackgroundColor">?md_background_color</item>
+        <item name="cardElevation">4dp</item>
     </style>
 
     <style name="Theme.Widget.CardView.Item">
@@ -191,12 +189,51 @@
         <item name="android:windowIsFloating">false</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="enableEdgeToEdge">true</item>
+    </style>
+
+    <style name="OverflowDialogTheme" parent="BottomSheetDialogTheme">
+        <item name="android:windowAnimationStyle">@style/Theme.Widget.Animation.DropFromAbove</item>
+    </style>
+
+    <style name="Theme.Widget.Animation.DropFromAbove" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@anim/fade_in_grow_from_top</item>
+        <item name="android:windowExitAnimation">@anim/fade_out_short</item>
     </style>
 
     <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/text_input_stroke</item>
         <item name="hintTextColor">?colorAccent</item>
         <item name="android:textColorHint">?android:attr/textColorHint</item>
+    </style>
+
+    <!--=================-->
+    <!--Widgets.TabLayout-->
+    <!--=================-->
+    <style name="Theme.Widget.Tabs" parent="Widget.MaterialComponents.TabLayout.Colored">
+        <item name="tabGravity">center</item>
+        <item name="tabIndicator">@drawable/tab_indicator</item>
+        <item name="tabIndicatorColor">?attr/colorAccent</item>
+        <item name="tabTextColor">@color/tabs_selector</item>
+        <item name="tabRippleColor">@color/rippleColor</item>
+        <item name="tabIndicatorFullWidth">false</item>
+        <item name="tabInlineLabel">true</item>
+        <item name="tabMinWidth">75dp</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabTextAppearance">@style/TextAppearance.Widget.Tab</item>
+    </style>
+
+    <style name="Theme.Widget.Tabs.Highlight" parent="Theme.Widget.Tabs">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="tabIndicatorGravity">center</item>
+        <item name="tabTextColor">@color/tabs_selector_alt</item>
+        <item name="tabRippleColor">@android:color/transparent</item>
+        <item name="tabIndicator">@drawable/tab_highlight_indicator</item>
+        <item name="tabIndicatorColor">?tabHighlightBackground</item>
+        <item name="tabMaxWidth">0dp</item>
+        <item name="tabMode">fixed</item>
+        <item name="tabIndicatorAnimationMode">elastic</item>
+        <item name="tabIndicatorFullWidth">true</item>
     </style>
 
     <!--==============-->
@@ -212,10 +249,6 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:textColor">?attr/colorAccent</item>
         <item name="rippleColor">@color/fullRippleColor</item>
-    </style>
-
-    <style name="Theme.Widget.Button.Borderless.Negative">
-        <item name="android:textColor">@color/md_red_500</item>
     </style>
 
     <style name="Theme.Widget.Button.Borderless.Small">
@@ -278,6 +311,5 @@
     </style>
 
     <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert"></style>
-
 
 </resources>

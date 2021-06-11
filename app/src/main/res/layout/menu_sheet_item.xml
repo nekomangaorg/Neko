@@ -1,36 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.widget.MenuSheetItemView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="42dp"
+    android:layout_height="48sp"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="?attr/selectableItemBackground"
-    android:clickable="true"
-    android:focusable="true"
-    android:orientation="horizontal">
+    android:orientation="horizontal"
+    tools:icon="@drawable/ic_share_24dp"
+    tools:endIcon="@drawable/ic_arrow_downward_24dp"
+    tools:text="@string/share">
 
     <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/item_text_view"
         android:layout_width="0dp"
-        android:layout_height="42dp"
+        android:layout_height="48sp"
         android:layout_weight="1"
         android:drawablePadding="12dp"
         android:drawableTint="?android:textColorPrimary"
         android:gravity="center|start"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
+        android:ellipsize="end"
         android:textColor="?android:textColorPrimary"
         android:textSize="13sp"
-        android:tint="@color/md_white_1000_54"
-        tools:drawableStart="@drawable/ic_share_24dp"
-        tools:text="@string/share" />
+        android:tint="@color/md_white_1000_54" />
 
     <ImageView
+        android:id="@+id/menu_end_item"
         android:layout_width="42dp"
         android:layout_height="42dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        app:tint="@color/colorAccent"
+        app:tint="?colorAccent"
+        android:layout_gravity="center"
         android:visibility="invisible"
         tools:visibility="visible"
         android:src="@drawable/ic_arrow_upward_24dp" />
-</LinearLayout>
+</eu.kanade.tachiyomi.widget.MenuSheetItemView>

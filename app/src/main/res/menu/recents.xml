@@ -4,35 +4,21 @@
     tools:context=".MainActivity">
     <item
         android:id="@+id/action_search"
+        android:icon="@drawable/ic_search_24dp"
         android:title="@string/search"
         android:visible="false"
-        app:actionViewClass="androidx.appcompat.widget.SearchView"
+        app:actionViewClass="eu.kanade.tachiyomi.ui.base.MiniSearchView"
         app:showAsAction="ifRoom|collapseActionView" />
+
     <item
-        android:id="@+id/action_filter"
-        android:icon="@drawable/ic_filter_list_24dp"
-        android:title="@string/filter"
-        app:showAsAction="ifRoom">
-        <menu>
-            <group android:checkableBehavior="single">
-                <item
-                    android:id="@+id/action_group_all"
-                    android:title="@string/group_all" />
-                <item
-                    android:id="@+id/action_ungroup_all"
-                    android:title="@string/ungroup_all" />
-                <item
-                    android:id="@+id/action_only_history"
-                    android:title="@string/only_history" />
-                <item
-                    android:id="@+id/action_only_updates"
-                    android:title="@string/only_updates" />
-            </group>
-        </menu>
-    </item>
+        android:id="@+id/display_options"
+        android:icon="@drawable/ic_tune_24dp"
+        android:title="@string/display_options"
+        app:showAsAction="ifRoom" />
+
     <item
-        android:id="@+id/action_settings"
-        android:icon="@drawable/ic_settings_24dp"
-        android:title="@string/settings"
+        android:id="@+id/action_more"
+        android:icon="@drawable/ic_more_vert_24dp"
+        android:title="@string/more"
         app:showAsAction="ifRoom" />
 </menu>

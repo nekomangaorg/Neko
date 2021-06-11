@@ -1,9 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.filter
 
 import android.view.View
-import android.widget.ArrayAdapter
-import android.widget.Spinner
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
@@ -11,7 +8,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.davidea.viewholders.FlexibleViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter
-import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
+import eu.kanade.tachiyomi.widget.MaterialSpinnerView
 
 open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<SelectItem.Holder>() {
 
@@ -24,20 +21,13 @@ open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<Selec
     }
 
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any?>?) {
-        holder.text.text = filter.name + ": "
+        holder.spinnerView.title = filter.name + ": "
 
-        val spinner = holder.spinner
-        spinner.prompt = filter.name
-        spinner.adapter = ArrayAdapter<Any>(
-            holder.itemView.context,
-            android.R.layout.simple_spinner_item, filter.values
-        ).apply {
-            setDropDownViewResource(R.layout.common_spinner_item)
-        }
-        spinner.onItemSelectedListener = IgnoreFirstSpinnerListener { pos ->
+        holder.spinnerView.setEntries(filter.values.map { it.toString() })
+        holder.spinnerView.setSelection(filter.state)
+        holder.spinnerView.onItemSelectedListener = { pos ->
             filter.state = pos
         }
-        spinner.setSelection(filter.state)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -51,8 +41,6 @@ open class SelectItem(val filter: Filter.Select<*>) : AbstractFlexibleItem<Selec
     }
 
     class Holder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) : FlexibleViewHolder(view, adapter) {
-
-        val text: TextView = itemView.findViewById(R.id.nav_view_item_text)
-        val spinner: Spinner = itemView.findViewById(R.id.nav_view_item)
+        val spinnerView: MaterialSpinnerView = itemView.findViewById(R.id.nav_view_item)
     }
 }

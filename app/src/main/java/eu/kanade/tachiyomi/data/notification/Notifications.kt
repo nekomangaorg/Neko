@@ -104,21 +104,24 @@ object Notifications {
                 setShowBadge(false)
             },
             NotificationChannel(
-                CHANNEL_DOWNLOADER_PROGRESS, context.getString(R.string.downloads),
+                CHANNEL_DOWNLOADER_PROGRESS,
+                context.getString(R.string.downloads),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 group = GROUP_DOWNLOADER
                 setShowBadge(false)
             },
             NotificationChannel(
-                CHANNEL_DOWNLOADER_COMPLETE, context.getString(R.string.download_complete),
+                CHANNEL_DOWNLOADER_COMPLETE,
+                context.getString(R.string.download_complete),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 group = GROUP_DOWNLOADER
                 setShowBadge(false)
             },
             NotificationChannel(
-                CHANNEL_DOWNLOADER_ERROR, context.getString(R.string.download_error),
+                CHANNEL_DOWNLOADER_ERROR,
+                context.getString(R.string.download_error),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 group = GROUP_DOWNLOADER
@@ -130,14 +133,16 @@ object Notifications {
                 NotificationManager.IMPORTANCE_DEFAULT
             ),
             NotificationChannel(
-                CHANNEL_BACKUP_RESTORE_PROGRESS, context.getString(R.string.backup_restore_progress),
+                CHANNEL_BACKUP_RESTORE_PROGRESS,
+                context.getString(R.string.backup_restore_progress),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 group = GROUP_BACKUP_RESTORE
                 setShowBadge(false)
             },
             NotificationChannel(
-                CHANNEL_BACKUP_RESTORE_COMPLETE, context.getString(R.string.backup_restore_complete),
+                CHANNEL_BACKUP_RESTORE_COMPLETE,
+                context.getString(R.string.backup_restore_complete),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 group = GROUP_BACKUP_RESTORE
@@ -145,7 +150,8 @@ object Notifications {
                 setSound(null, null)
             },
             NotificationChannel(
-                CHANNEL_BACKUP_RESTORE_ERROR, context.getString(R.string.restore_error),
+                CHANNEL_BACKUP_RESTORE_ERROR,
+                context.getString(R.string.restore_error),
                 NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 group = GROUP_BACKUP_RESTORE
@@ -153,8 +159,9 @@ object Notifications {
                 setSound(null, null)
             },
             NotificationChannel(
-                    CHANNEL_V5_MIGRATION, context.getString(R.string.v5_migration_service),
-                    NotificationManager.IMPORTANCE_HIGH
+                CHANNEL_V5_MIGRATION,
+                context.getString(R.string.v5_migration_service),
+                NotificationManager.IMPORTANCE_HIGH
             ).apply {
                 setShowBadge(false)
                 setSound(null, null)

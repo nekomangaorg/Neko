@@ -13,15 +13,14 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
 import eu.kanade.tachiyomi.data.updater.UpdateResult
+import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.main.ChangelogDialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.toast
-import kotlinx.coroutines.CoroutineScope
+import eu.kanade.tachiyomi.util.view.openInBrowser
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -40,30 +39,34 @@ class AboutController : SettingsController() {
 
     private val userPreferences: PreferencesHelper by injectLazy()
 
-    private val dateFormat: DateFormat = userPreferences.dateFormat()
+    private val dateFormat: DateFormat by lazy {
+        preferences.dateFormat()
+    }
 
-    /**
-     * The subscribtion service of the obtained release object
-     */
-    private val scope = CoroutineScope(Job() + Dispatchers.IO)
+    private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.about
 
-        preferenceCategory {
-            preference {
-                titleRes = R.string.version
-                summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
-                else BuildConfig.VERSION_NAME
+        preference {
+            key = "pref_whats_new"
+            titleRes = R.string.whats_new_this_release
+            onClick {
+                val intent = Intent(
+                    Intent.ACTION_VIEW,
+                    if (BuildConfig.DEBUG) {
+                        "https://github.com/CarlosEsco/Neko/commits/master"
+                    } else {
+                        "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}"
+                    }.toUri()
+                )
+                startActivity(intent)
             }
+        }
+        if (isUpdaterEnabled) {
             preference {
-                titleRes = R.string.build_time
-                summary = getFormattedBuildTime()
-            }
-
-            preference {
+                key = "pref_check_for_updates"
                 titleRes = R.string.check_for_updates
-
                 onClick {
                     if (activity!!.isOnline()) {
                         checkVersion()
@@ -72,58 +75,53 @@ class AboutController : SettingsController() {
                     }
                 }
             }
-
-            preference {
-                titleRes = R.string.view_changelog
-                onClick {
-                    ChangelogDialogController().showDialog(router)
-                }
-            }
-
-            preference {
-                titleRes = R.string.view_release_notes
-                onClick {
-                    val intent = Intent(
-                        Intent.ACTION_VIEW,
-                        if (BuildConfig.DEBUG) {
-                            "https://github.com/CarlosEsco/Neko/commits/master"
-                        } else {
-                            "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}"
-                        }.toUri()
-                    )
-                    startActivity(intent)
-                }
-            }
+        }
+        preference {
+            key = "pref_version"
+            titleRes = R.string.version
+            summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
+            else BuildConfig.VERSION_NAME
+        }
+        preference {
+            key = "pref_build_time"
+            titleRes = R.string.build_time
+            summary = getFormattedBuildTime()
         }
 
         preferenceCategory {
-
             preference {
+                key = "pref_about_website"
                 titleRes = R.string.website
-                val url = "https://tachiyomi.org/forks/Neko/"
-                summary = url
-                onClick {
-                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                    startActivity(intent)
+                "https://tachiyomi.org".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
                 }
             }
 
             preference {
+                key = "pref_about_discord"
                 title = "Discord"
-                val url = "https://discord.gg/tachiyomi"
-                summary = url
-                onClick {
-                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                    startActivity(intent)
+                "https://discord.gg/tachiyomi".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
                 }
             }
+
             preference {
+                key = "pref_about_github"
                 title = "Github"
-                val url = "https://github.com/CarlosEsco/Neko"
-                summary = url
-                onClick {
-                    val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-                    startActivity(intent)
+                "https://github.com/CarlosEsco/Neko".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
+                }
+            }
+
+            preference {
+                key = "pref_about_twitter"
+                title = "Twitter"
+                "https://twitter.com/tachiyomiorg".also {
+                    summary = it
+                    onClick { openInBrowser(it) }
                 }
             }
 
@@ -156,7 +154,7 @@ class AboutController : SettingsController() {
         if (activity == null) return
 
         activity?.toast(R.string.searching_for_updates)
-        scope.launch {
+        viewScope.launch {
             val result = try {
                 updateChecker.checkForUpdate()
             } catch (error: Exception) {
@@ -172,6 +170,7 @@ class AboutController : SettingsController() {
 
                     // Create confirmation window
                     withContext(Dispatchers.Main) {
+                        UpdaterNotifier.releasePageUrl = result.release.releaseLink
                         NewUpdateDialogController(body, url).showDialog(router)
                     }
                 }
@@ -208,7 +207,7 @@ class AboutController : SettingsController() {
                 .negativeButton(R.string.ignore)
         }
 
-        private companion object {
+        companion object {
             const val BODY_KEY = "NewUpdateDialogController.body"
             const val URL_KEY = "NewUpdateDialogController.key"
         }

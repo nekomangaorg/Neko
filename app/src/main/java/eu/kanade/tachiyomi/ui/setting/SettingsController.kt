@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.ui.setting
 
+import android.animation.ArgbEvaluator
+import android.animation.ValueAnimator
 import android.content.Context
+import android.graphics.Color
 import android.os.Bundle
 import android.util.TypedValue
 import android.view.ContextThemeWrapper
@@ -8,23 +11,30 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.preference.PreferenceController
+import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.util.view.scrollViewWith
+import kotlinx.coroutines.MainScope
 import rx.Observable
 import rx.Subscription
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Locale
 
 abstract class SettingsController : PreferenceController() {
 
+    var preferenceKey: String? = null
     val preferences: PreferencesHelper = Injekt.get()
+    val viewScope = MainScope()
 
     var untilDestroySubscriptions = CompositeSubscription()
         private set
@@ -42,6 +52,25 @@ abstract class SettingsController : PreferenceController() {
         return view
     }
 
+    override fun onAttach(view: View) {
+        super.onAttach(view)
+
+        preferenceKey?.let { prefKey ->
+            val adapter = listView.adapter
+            scrollToPreference(prefKey)
+
+            listView.post {
+                if (adapter is PreferenceGroup.PreferencePositionCallback) {
+                    val pos = adapter.getPreferenceAdapterPosition(prefKey)
+                    listView.findViewHolderForAdapterPosition(pos)?.let {
+                        animatePreferenceHighlight(it.itemView)
+                    }
+                    preferenceKey = null
+                }
+            }
+        }
+    }
+
     override fun onDestroyView(view: View) {
         super.onDestroyView(view)
         untilDestroySubscriptions.unsubscribe()
@@ -53,7 +82,7 @@ abstract class SettingsController : PreferenceController() {
         setupPreferenceScreen(screen)
     }
 
-    abstract fun setupPreferenceScreen(screen: PreferenceScreen): Any?
+    abstract fun setupPreferenceScreen(screen: PreferenceScreen): PreferenceScreen
 
     private fun getThemedContext(): Context {
         val tv = TypedValue()
@@ -61,14 +90,28 @@ abstract class SettingsController : PreferenceController() {
         return ContextThemeWrapper(activity, tv.resourceId)
     }
 
+    private fun animatePreferenceHighlight(view: View) {
+        ValueAnimator
+            .ofObject(ArgbEvaluator(), Color.TRANSPARENT, ContextCompat.getColor(view.context, R.color.fullRippleColor))
+            .apply {
+                duration = 500L
+                repeatCount = 2
+                addUpdateListener { animator -> view.setBackgroundColor(animator.animatedValue as Int) }
+                reverse()
+            }
+    }
+
     open fun getTitle(): String? {
+        if (this is FloatingSearchInterface) {
+            return searchTitle(preferenceScreen?.title?.toString()?.lowercase(Locale.ROOT))
+        }
         return preferenceScreen?.title?.toString()
     }
 
     fun setTitle() {
         var parentController = parentController
         while (parentController != null) {
-            if (parentController is BaseController && parentController.getTitle() != null) {
+            if (parentController is BaseController<*> && parentController.getTitle() != null) {
                 return
             }
             parentController = parentController.parentController

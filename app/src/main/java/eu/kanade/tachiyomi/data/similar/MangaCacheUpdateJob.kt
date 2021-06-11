@@ -24,6 +24,5 @@ class MangaCacheUpdateJob(private val context: Context, workerParams: WorkerPara
             work.setInputData(data.build())
             WorkManager.getInstance().enqueue(work.build())
         }
-
     }
 }

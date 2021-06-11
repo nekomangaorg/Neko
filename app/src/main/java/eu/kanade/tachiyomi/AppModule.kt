@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
@@ -35,7 +36,6 @@ import uy.kohesive.injekt.api.get
 class AppModule(val app: Application) : InjektModule {
 
     override fun InjektRegistrar.registerInjectables() {
-
         addSingleton(app)
 
         addSingletonFactory { PreferencesHelper(app) }
@@ -83,6 +83,12 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(MangaDexLoginHelper())
 
         addSingleton(MangaPlusHandler())
+
+        addSingletonFactory { Json { ignoreUnknownKeys = true } }
+
+        addSingletonFactory { ChapterFilter() }
+
+        addSingletonFactory { MangaShortcutManager() }
 
         // Asynchronously init expensive components for a faster cold start
 

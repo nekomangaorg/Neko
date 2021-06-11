@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadStore
 import eu.kanade.tachiyomi.source.model.Page
-import rx.Observable
 import rx.subjects.PublishSubject
 import java.util.concurrent.CopyOnWriteArrayList
 
@@ -25,7 +24,7 @@ class DownloadQueue(
         downloads.forEach { download ->
             download.setStatusSubject(statusSubject)
             download.setStatusCallback(::setPagesFor)
-            download.status = Download.QUEUE
+            download.status = Download.State.QUEUE
         }
         queue.addAll(downloads)
         store.addAll(downloads)
@@ -37,8 +36,9 @@ class DownloadQueue(
         store.remove(download)
         download.setStatusSubject(null)
         download.setStatusCallback(null)
-        if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE)
-            download.status = Download.NOT_DOWNLOADED
+        if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
+            download.status = Download.State.NOT_DOWNLOADED
+        }
         downloadListeners.forEach { it.updateDownload(download) }
         if (removed) {
             updatedRelay.call(Unit)
@@ -65,8 +65,9 @@ class DownloadQueue(
         queue.forEach { download ->
             download.setStatusSubject(null)
             download.setStatusCallback(null)
-            if (download.status == Download.DOWNLOADING || download.status == Download.QUEUE)
-                download.status = Download.NOT_DOWNLOADED
+            if (download.status == Download.State.DOWNLOADING || download.status == Download.State.QUEUE) {
+                download.status = Download.State.NOT_DOWNLOADED
+            }
             downloadListeners.forEach { it.updateDownload(download) }
         }
         queue.clear()
@@ -74,54 +75,27 @@ class DownloadQueue(
         updatedRelay.call(Unit)
     }
 
-    fun getActiveDownloads(): Observable<Download> =
-        Observable.from(this).filter { download -> download.status == Download.DOWNLOADING }
-
-    fun getStatusObservable(): Observable<Download> = statusSubject.onBackpressureBuffer()
-
-    fun getUpdatedObservable(): Observable<List<Download>> = updatedRelay.onBackpressureBuffer()
-        .startWith(Unit)
-        .map { this }
-
     private fun setPagesFor(download: Download) {
-        if (download.status == Download.DOWNLOADING) {
-            if (download.pages != null)
+        if (download.status == Download.State.DOWNLOADING) {
+            if (download.pages != null) {
                 for (page in download.pages!!)
                     page.setStatusCallback {
                         callListeners(download)
                     }
-            downloadListeners.forEach { it.updateDownload(download) }
-        } else if (download.status == Download.DOWNLOADED || download.status == Download.ERROR) {
+            }
+            callListeners(download)
+        } else if (download.status == Download.State.DOWNLOADED || download.status == Download.State.ERROR) {
             setPagesSubject(download.pages, null)
-            downloadListeners.forEach { it.updateDownload(download) }
+            if (download.status == Download.State.ERROR) {
+                callListeners(download)
+            }
         } else {
-            downloadListeners.forEach { it.updateDownload(download) }
+            callListeners(download)
         }
     }
 
     private fun callListeners(download: Download) {
         downloadListeners.forEach { it.updateDownload(download) }
-    }
-
-    fun getProgressObservable(): Observable<Download> {
-        return statusSubject.onBackpressureBuffer()
-            .startWith(getActiveDownloads())
-            .flatMap { download ->
-                if (download.status == Download.DOWNLOADING) {
-                    val pageStatusSubject = PublishSubject.create<Int>()
-                    setPagesSubject(download.pages, pageStatusSubject)
-                    downloadListeners.forEach { it.updateDownload(download) }
-                    return@flatMap pageStatusSubject
-                        .onBackpressureBuffer()
-                        .filter { it == Page.READY }
-                        .map { download }
-                } else if (download.status == Download.DOWNLOADED || download.status == Download.ERROR) {
-                    setPagesSubject(download.pages, null)
-                    downloadListeners.forEach { it.updateDownload(download) }
-                }
-                Observable.just(download)
-            }
-            .filter { it.status == Download.DOWNLOADING }
     }
 
     private fun setPagesSubject(pages: List<Page>?, subject: PublishSubject<Int>?) {

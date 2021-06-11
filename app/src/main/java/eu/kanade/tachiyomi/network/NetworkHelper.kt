@@ -11,15 +11,12 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import okhttp3.Cache
 import okhttp3.Headers
-import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.dnsoverhttps.DnsOverHttps
 import okhttp3.logging.HttpLoggingInterceptor
 import org.isomorphism.util.TokenBuckets
 import uy.kohesive.injekt.injectLazy
 import java.io.File
-import java.net.InetAddress
 import java.util.concurrent.TimeUnit
 
 class NetworkHelper(val context: Context) {
@@ -52,24 +49,9 @@ class NetworkHelper(val context: Context) {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(ChuckerInterceptor(context))
                 }
-                if (preferences.enableDoh()) {
-                    dns(
-                        DnsOverHttps.Builder().client(build())
-                            .url("https://cloudflare-dns.com/dns-query".toHttpUrl())
-                            .bootstrapDnsHosts(
-                                listOf(
-                                    InetAddress.getByName("162.159.36.1"),
-                                    InetAddress.getByName("162.159.46.1"),
-                                    InetAddress.getByName("1.1.1.1"),
-                                    InetAddress.getByName("1.0.0.1"),
-                                    InetAddress.getByName("162.159.132.53"),
-                                    InetAddress.getByName("2606:4700:4700::1111"),
-                                    InetAddress.getByName("2606:4700:4700::1001"),
-                                    InetAddress.getByName("2606:4700:4700::0064"),
-                                    InetAddress.getByName("2606:4700:4700::6400")
-                                )
-                            ).build()
-                    )
+                when (preferences.dohProvider()) {
+                    PREF_DOH_CLOUDFLARE -> dohCloudflare()
+                    PREF_DOH_GOOGLE -> dohGoogle()
                 }
                 if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
                     val logger: HttpLoggingInterceptor.Logger = object : HttpLoggingInterceptor.Logger {

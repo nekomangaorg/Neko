@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
-import eu.kanade.tachiyomi.util.storage.DiskUtil
+import tachiyomi.source.model.MangaInfo
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -37,9 +37,7 @@ interface Manga : SManga {
 
     fun isBlank() = id == Long.MIN_VALUE
 
-    fun getGenres(): List<String>? {
-        return genre?.split(", ")?.map { it.trim() }
-    }
+    fun isHidden() = status == -1
 
     fun setChapterOrder(order: Int) {
         setFlags(order, SORT_MASK)
@@ -63,9 +61,9 @@ interface Manga : SManga {
 
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
-    fun mangaType(context: Context): String {
+    fun seriesType(context: Context): String {
         return context.getString(
-            when (mangaType()) {
+            when (seriesType()) {
                 TYPE_WEBTOON -> R.string.webtoon
                 TYPE_MANHWA -> R.string.manhwa
                 TYPE_MANHUA -> R.string.manhua
@@ -75,14 +73,20 @@ interface Manga : SManga {
         ).toLowerCase(Locale.getDefault())
     }
 
+    fun getGenres(): List<String>? {
+        return genre?.split(",")
+            ?.mapNotNull { tag -> tag.trim().takeUnless { it.isBlank() } }
+    }
+
     /**
      * The type of comic the manga is (ie. manga, manhwa, manhua)
      */
-    fun mangaType(): Int {
+    fun seriesType(): Int {
         // lump everything as manga if not manhua or manhwa
         return when (lang_flag) {
-            "kr" -> TYPE_MANHWA
-            "cn" -> TYPE_MANHUA
+            "ko" -> TYPE_MANHWA
+            "zh" -> TYPE_MANHUA
+            "zh-hk" -> TYPE_MANHUA
             else -> TYPE_MANGA
         }
     }
@@ -98,20 +102,20 @@ interface Manga : SManga {
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true
-        )
+        ) {
             ReaderActivity.WEBTOON
-        else if (currentTags?.any
+        } else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true
-        )
+        ) {
             ReaderActivity.LEFT_TO_RIGHT
-        else 0
+        } else 0
     }
 
     fun key(): String {
-        return DiskUtil.hashKeyForDisk(thumbnail_url.orEmpty())
+        return "manga-id-$id"
     }
 
     fun getExternalLinks(): List<ExternalLink> {
@@ -200,7 +204,7 @@ interface Manga : SManga {
     }
 }
 
-fun Manga.isWebtoon() = this.genre?.contains("long strip", true) ?: false
+fun Manga.isLongStrip() = this.genre?.contains("long strip", true) ?: false
 
 fun Manga.potentialAltThumbnail(): String? {
     // ignore null and already small thumbs
@@ -208,4 +212,17 @@ fun Manga.potentialAltThumbnail(): String? {
         return null
     }
     return thumbnail_url!!.replace(".jpg", ".thumb.jpg")
+}
+
+fun Manga.toMangaInfo(): MangaInfo {
+    return MangaInfo(
+        artist = this.artist ?: "",
+        author = this.author ?: "",
+        cover = this.thumbnail_url ?: "",
+        description = this.description ?: "",
+        genres = this.getGenres() ?: emptyList(),
+        key = this.url,
+        status = this.status,
+        title = this.title
+    )
 }

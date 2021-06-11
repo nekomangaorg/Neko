@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:end="2dp"
+        android:start="2dp" >
+        <shape>
+            <corners android:radius="4dp" />
+            <solid android:color="?tabHighlightBackground" />
+            <size android:height="28sp"/>
+        </shape>
+    </item>
+</layer-list>

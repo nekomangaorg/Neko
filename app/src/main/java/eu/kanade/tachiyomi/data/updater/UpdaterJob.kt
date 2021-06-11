@@ -1,10 +1,7 @@
 package eu.kanade.tachiyomi.data.updater
 
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import androidx.core.app.NotificationCompat
-import androidx.core.content.ContextCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -12,7 +9,6 @@ import androidx.work.NetworkType
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.coroutineScope
@@ -22,34 +18,19 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result = coroutineScope {
-        val result = try {
-            UpdateChecker.getUpdateChecker().checkForUpdate()
+        try {
+            val result = UpdateChecker.getUpdateChecker().checkForUpdate()
+            if (result is UpdateResult.NewUpdate<*>) {
+                UpdaterNotifier(context).promptUpdate(
+                    result.release.info,
+                    result.release.downloadLink,
+                    result.release.releaseLink
+                )
+            }
+            Result.success()
         } catch (e: Exception) {
             Result.failure()
         }
-        if (result is UpdateResult.NewUpdate<*>) {
-            val url = result.release.downloadLink
-
-            val intent = Intent(context, UpdaterService::class.java).apply {
-                putExtra(UpdaterService.EXTRA_DOWNLOAD_URL, url)
-            }
-
-            NotificationCompat.Builder(context, Notifications.CHANNEL_COMMON).update {
-                setContentTitle(context.getString(R.string.neko_app_name))
-                setContentText(context.getString(R.string.update_available))
-                setSmallIcon(android.R.drawable.stat_sys_download_done)
-                color = ContextCompat.getColor(context, R.color.colorAccent)
-                // Download action
-                addAction(
-                    android.R.drawable.stat_sys_download_done,
-                    context.getString(R.string.download),
-                    PendingIntent.getService(
-                        context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT
-                    )
-                )
-            }
-        }
-        Result.success()
     }
 
     fun NotificationCompat.Builder.update(block: NotificationCompat.Builder.() -> Unit) {
@@ -66,8 +47,10 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
                 .build()
 
             val request = PeriodicWorkRequestBuilder<UpdaterJob>(
-                1, TimeUnit.DAYS,
-                1, TimeUnit.HOURS
+                2,
+                TimeUnit.DAYS,
+                3,
+                TimeUnit.HOURS
             )
                 .addTag(TAG)
                 .setConstraints(constraints)

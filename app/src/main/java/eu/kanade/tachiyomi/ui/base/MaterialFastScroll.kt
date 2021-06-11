@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.fastscroller.FastScroller
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
 import eu.kanade.tachiyomi.util.view.marginTop
 import kotlin.math.abs
@@ -21,7 +22,9 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
     var scrollOffset = 0
     init {
         setViewsToUse(
-            R.layout.material_fastscroll, R.id.fast_scroller_bubble, R.id.fast_scroller_handle
+            R.layout.material_fastscroll,
+            R.id.fast_scroller_bubble,
+            R.id.fast_scroller_handle
         )
         autoHideEnabled = true
         ignoreTouchesOutsideHandle = false
@@ -51,7 +54,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             }
             MotionEvent.ACTION_MOVE -> {
                 val y = event.y
-                if (!canScroll && abs(y - startY) > 10) {
+                if (!canScroll && abs(y - startY) > 15.dpToPx) {
                     canScroll = true
                     handle.isSelected = true
                     notifyScrollStateChange(true)
@@ -85,10 +88,14 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             val targetPos = getTargetPos(y)
             if (layoutManager is StaggeredGridLayoutManager) {
                 (layoutManager as StaggeredGridLayoutManager).scrollToPositionWithOffset(
-                    targetPos, scrollOffset
+                    targetPos,
+                    scrollOffset
                 )
             } else {
-                (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(targetPos, scrollOffset)
+                (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
+                    targetPos,
+                    scrollOffset
+                )
             }
             updateBubbleText(targetPos)
         }
@@ -110,5 +117,9 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
                 }
             }
         }
+    }
+
+    companion object {
+        const val noUpdate = "don't update scroll"
     }
 }

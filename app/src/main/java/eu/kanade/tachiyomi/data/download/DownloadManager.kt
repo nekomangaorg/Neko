@@ -106,10 +106,11 @@ class DownloadManager(val context: Context) {
         queue.add(0, download)
         reorderQueue(queue)
         if (isPaused()) {
-            if (DownloadService.isRunning(context))
+            if (DownloadService.isRunning(context)) {
                 downloader.start()
-            else
+            } else {
                 DownloadService.start(context)
+            }
         }
     }
 
@@ -248,7 +249,9 @@ class DownloadManager(val context: Context) {
                 queue.remove(chapters)
                 val chapterDirs =
                     provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
-                        chapters, manga, source
+                        chapters,
+                        manga,
+                        source
                     )
                 chapterDirs.forEach { it.delete() }
                 cache.removeChapters(chapters, manga)
@@ -324,6 +327,7 @@ class DownloadManager(val context: Context) {
         queue.remove(manga)
         provider.findMangaDir(manga, sourceManager.getMangadex())?.delete()
         cache.removeManga(manga)
+        queue.updateListeners()
     }
 
     /**
@@ -370,8 +374,8 @@ class DownloadManager(val context: Context) {
 
     fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
     fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
-    
-    //forceRefresh the cache
+
+    // forceRefresh the cache
     fun refreshCache() {
         cache.forceRenewCache()
     }

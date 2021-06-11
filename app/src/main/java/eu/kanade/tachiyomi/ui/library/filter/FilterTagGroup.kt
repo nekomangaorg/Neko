@@ -1,19 +1,17 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.content.Context
-import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import androidx.core.view.isVisible
 import com.f2prateek.rx.preferences.Preference
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.filter_buttons.view.*
 
 class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : LinearLayout
 (context, attrs) {
@@ -25,11 +23,32 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
 
     private var root: ViewGroup? = null
 
-    private val buttons by lazy { arrayOf(firstButton, secondButton, thirdButton, fourthButton) }
-    private val separators by lazy { arrayOf(separator1, separator2, separator3) }
+    private val buttons by lazy {
+        arrayOf(
+            binding.firstButton,
+            binding.secondButton,
+            binding.thirdButton,
+            binding.fourthButton
+        )
+    }
+
+    private val separators by lazy {
+        arrayOf(
+            binding.separator1,
+            binding.separator2,
+            binding.separator3
+        )
+    }
 
     override fun isActivated(): Boolean {
         return buttons.any { it.isActivated }
+    }
+
+    lateinit var binding: FilterTagGroupBinding
+
+    override fun onFinishInflate() {
+        super.onFinishInflate()
+        binding = FilterTagGroupBinding.bind(this)
     }
 
     fun nameOf(index: Int): String? = buttons.getOrNull(index)?.text as? String
@@ -37,19 +56,19 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
     fun setup(root: ViewGroup, firstText: Int, vararg extra: Int?) {
         val text1 = context.getString(firstText)
         val strings = extra.mapNotNull { if (it != null) context.getString(it) else null }
-        setup(root, text1, extra = *strings.toTypedArray())
+        setup(root, text1, extra = strings.toTypedArray())
     }
 
     fun setup(root: ViewGroup, firstText: String, vararg extra: String?) {
         listener = root as? FilterTagGroupListener
         (layoutParams as? MarginLayoutParams)?.rightMargin = 5.dpToPx
         (layoutParams as? MarginLayoutParams)?.leftMargin = 5.dpToPx
-        firstButton.text = firstText
+        binding.firstButton.text = firstText
         val extras = (extra.toList() + listOf<String?>(null, null, null)).take(separators.size)
         extras.forEachIndexed { index, text ->
             buttons[index + 1].text = text
-            separators[index].visibleIf(text != null)
-            buttons[index + 1].visibleIf(text != null)
+            separators[index].isVisible = text != null
+            buttons[index + 1].isVisible = text != null
         }
         itemCount = buttons.count { !it.text.isNullOrBlank() }
         this.root = root
@@ -75,31 +94,39 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             it.isActivated = false
         }
         for (i in 0 until itemCount) {
-            buttons[i].visible()
+            buttons[i].isVisible = true
             buttons[i].setTextColor(context.getResourceColor(android.R.attr.textColorPrimary))
         }
-        for (i in 0 until (itemCount - 1)) separators[i].visible()
+        for (i in 0 until (itemCount - 1)) separators[i].isVisible = true
     }
 
     private fun toggleButton(index: Int, callBack: Boolean = true) {
         if (index < 0 || itemCount == 0 ||
             (isActivated && index != buttons.indexOfFirst { it.isActivated })
-        )
+        ) {
             return
+        }
         if (callBack) {
             val transition = androidx.transition.AutoTransition()
             transition.duration = 150
             androidx.transition.TransitionManager.beginDelayedTransition(
-                parent.parent as ViewGroup, transition
+                parent.parent as ViewGroup,
+                transition
             )
         }
         if (itemCount == 1) {
-            firstButton.isActivated = !firstButton.isActivated
-            firstButton.setTextColor(
-                if (firstButton.isActivated) Color.WHITE else context
-                    .getResourceColor(android.R.attr.textColorPrimary)
+            binding.firstButton.isActivated = !binding.firstButton.isActivated
+            binding.firstButton.setTextColor(
+                context.getResourceColor(
+                    if (binding.firstButton.isActivated) R.attr.colorOnAccent
+                    else android.R.attr.textColorPrimary
+                )
             )
-            listener?.onFilterClicked(this, if (firstButton.isActivated) index else -1, callBack)
+            listener?.onFilterClicked(
+                this,
+                if (binding.firstButton.isActivated) index else -1,
+                callBack
+            )
             return
         }
         val mainButton = buttons[index]
@@ -109,21 +136,23 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
             listener?.onFilterClicked(this, -1, callBack)
             buttons.forEachIndexed { viewIndex, textView ->
                 if (!textView.text.isNullOrBlank()) {
-                    textView.visible()
+                    textView.isVisible = true
                     if (viewIndex > 0) {
-                        separators[viewIndex - 1].visible()
+                        separators[viewIndex - 1].isVisible = true
                     }
                 }
             }
         } else {
             mainButton.isActivated = true
             listener?.onFilterClicked(this, index, callBack)
-            buttons.forEach { if (it != mainButton) it.gone() }
-            separators.forEach { it.gone() }
+            buttons.forEach { if (it != mainButton) it.isVisible = false }
+            separators.forEach { it.isVisible = false }
         }
         mainButton.setTextColor(
-            if (mainButton.isActivated) Color.WHITE else context
-                .getResourceColor(android.R.attr.textColorPrimary)
+            context.getResourceColor(
+                if (mainButton.isActivated) R.attr.colorOnAccent
+                else android.R.attr.textColorPrimary
+            )
         )
     }
 }

@@ -162,5 +162,4 @@ object MangaTable {
 
     val addMergeMangaImageCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MERGE_MANGA_IMAGE_URL} TEXT DEFAULT NULL"
-
 }

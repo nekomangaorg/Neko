@@ -11,8 +11,8 @@ import com.google.gson.JsonParser
 import com.google.gson.stream.JsonReader
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.RestoreHelper
-import eu.kanade.tachiyomi.data.backup.models.Backup
-import eu.kanade.tachiyomi.data.backup.models.DHistory
+import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
+import eu.kanade.tachiyomi.data.backup.legacy.models.DHistory
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.ChapterImpl
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -98,7 +98,6 @@ class LegacyRestore(val context: Context, val job: Job?) {
         val mangasJson = json.get(Backup.MANGAS).asJsonArray
 
         val mangdexManga = mangasJson.filter {
-
             val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(Backup.MANGA))
             val isMangaDex = backupManager.sourceManager.isMangadex(manga.source)
             if (!isMangaDex) {
@@ -173,7 +172,7 @@ class LegacyRestore(val context: Context, val job: Job?) {
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId != "") {
-                    manga.url = "/title/${newMangaId}"
+                    manga.url = "/title/$newMangaId"
                 }
             }
 

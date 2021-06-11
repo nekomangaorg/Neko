@@ -10,7 +10,6 @@ fun NotificationCompat.Builder.customize(
     smallIcon: Int,
     ongoing: Boolean = false
 ): NotificationCompat.Builder {
-
     setContentTitle(title)
     setSmallIcon(smallIcon)
     color = context.contextCompatColor(R.color.neko_green_darker)

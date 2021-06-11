@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
+import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import java.io.Serializable
@@ -34,70 +35,24 @@ interface Category : Serializable {
         return ((mangaSort?.minus('a') ?: 0) % 2) != 1
     }
 
-    fun sortingMode(): Int? = when (mangaSort) {
-        ALPHA_ASC, ALPHA_DSC -> LibrarySort.ALPHA
-        UPDATED_ASC, UPDATED_DSC -> LibrarySort.LATEST_CHAPTER
-        UNREAD_ASC, UNREAD_DSC -> LibrarySort.UNREAD
-        LAST_READ_ASC, LAST_READ_DSC -> LibrarySort.LAST_READ
-        TOTAL_ASC, TOTAL_DSC -> LibrarySort.TOTAL
-        DRAG_AND_DROP -> LibrarySort.DRAG_AND_DROP
-        DATE_ADDED_ASC, DATE_ADDED_DSC -> LibrarySort.DATE_ADDED
-        RATING_ASC, RATING_DSC -> LibrarySort.RATING
-        else -> null
-    }
+    fun sortingMode(nullAsDND: Boolean = false): LibrarySort? = LibrarySort.valueOf(mangaSort)
+        ?: if (nullAsDND && !isDynamic) LibrarySort.DragAndDrop else null
 
-    fun sortRes(): Int = when (mangaSort) {
-        ALPHA_ASC, ALPHA_DSC -> R.string.title
-        UPDATED_ASC, UPDATED_DSC -> R.string.latest_chapter
-        UNREAD_ASC, UNREAD_DSC -> R.string.unread
-        LAST_READ_ASC, LAST_READ_DSC -> R.string.last_read
-        TOTAL_ASC, TOTAL_DSC -> R.string.total_chapters
-        DATE_ADDED_ASC, DATE_ADDED_DSC -> R.string.date_added
-        RATING_ASC, RATING_DSC -> R.string.rating
-        else -> if (isDynamic) R.string.category else R.string.drag_and_drop
-    }
+    val isDragAndDrop
+        get() = (
+            mangaSort == null ||
+                mangaSort == LibrarySort.DragAndDrop.categoryValue
+            ) && !isDynamic
 
-    fun catSortingMode(): Int? = when (mangaSort) {
-        ALPHA_ASC, ALPHA_DSC -> 0
-        UPDATED_ASC, UPDATED_DSC -> 1
-        UNREAD_ASC, UNREAD_DSC -> 2
-        LAST_READ_ASC, LAST_READ_DSC -> 3
-        TOTAL_ASC, TOTAL_DSC -> 4
-        DATE_ADDED_ASC, DATE_ADDED_DSC -> 5
-        RATING_ASC, RATING_DSC -> 6
-        else -> null
-    }
+    @StringRes
+    fun sortRes(): Int =
+        (LibrarySort.valueOf(mangaSort) ?: LibrarySort.DragAndDrop).stringRes(isDynamic)
 
     fun changeSortTo(sort: Int) {
-        mangaSort = when (sort) {
-            LibrarySort.ALPHA -> ALPHA_ASC
-            LibrarySort.LATEST_CHAPTER -> UPDATED_ASC
-            LibrarySort.UNREAD -> UNREAD_ASC
-            LibrarySort.LAST_READ -> LAST_READ_ASC
-            LibrarySort.TOTAL -> ALPHA_ASC
-            LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
-            LibrarySort.RATING -> RATING_ASC
-            else -> ALPHA_ASC
-        }
+        mangaSort = (LibrarySort.valueOf(sort) ?: LibrarySort.Title).categoryValue
     }
 
     companion object {
-        private const val DRAG_AND_DROP = 'D'
-        private const val ALPHA_ASC = 'a'
-        private const val ALPHA_DSC = 'b'
-        private const val UPDATED_ASC = 'c'
-        private const val UPDATED_DSC = 'd'
-        private const val UNREAD_ASC = 'e'
-        private const val UNREAD_DSC = 'f'
-        private const val LAST_READ_ASC = 'g'
-        private const val LAST_READ_DSC = 'h'
-        private const val TOTAL_ASC = 'i'
-        private const val TOTAL_DSC = 'j'
-        private const val DATE_ADDED_ASC = 'k'
-        private const val DATE_ADDED_DSC = 'l'
-        private const val RATING_ASC = 'm'
-        private const val RATING_DSC = 'n'
-
         fun create(name: String): Category = CategoryImpl().apply {
             this.name = name
         }
@@ -109,18 +64,9 @@ interface Category : Serializable {
 
         fun createCustom(name: String, libSort: Int, ascending: Boolean): Category =
             create(name).apply {
-                mangaSort = when (libSort) {
-                    LibrarySort.ALPHA -> ALPHA_ASC
-                    LibrarySort.LATEST_CHAPTER -> UPDATED_ASC
-                    LibrarySort.UNREAD -> UNREAD_ASC
-                    LibrarySort.LAST_READ -> LAST_READ_ASC
-                    LibrarySort.TOTAL -> TOTAL_ASC
-                    LibrarySort.DATE_ADDED -> DATE_ADDED_ASC
-                    LibrarySort.DRAG_AND_DROP -> DRAG_AND_DROP
-                    LibrarySort.RATING -> RATING_ASC
-                    else -> DRAG_AND_DROP
-                }
-                if (mangaSort != DRAG_AND_DROP && !ascending) {
+                val librarySort = LibrarySort.valueOf(libSort) ?: LibrarySort.DragAndDrop
+                changeSortTo(librarySort.mainValue)
+                if (mangaSort != LibrarySort.DragAndDrop.categoryValue && !ascending) {
                     mangaSort = mangaSort?.plus(1)
                 }
                 isDynamic = true

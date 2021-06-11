@@ -14,7 +14,7 @@ abstract class BaseChapterItem<T : BaseChapterHolder, H : AbstractHeaderItem<*>>
     AbstractSectionableItem<T, H?>(header),
     Chapter by chapter {
 
-    private var _status: Int = 0
+    private var _status: Download.State = Download.State.default
 
     val progress: Int
         get() {
@@ -22,14 +22,14 @@ abstract class BaseChapterItem<T : BaseChapterHolder, H : AbstractHeaderItem<*>>
             return pages.map(Page::progress).average().toInt()
         }
 
-    var status: Int
+    var status: Download.State
         get() = download?.status ?: _status
         set(value) { _status = value }
 
     @Transient var download: Download? = null
 
     val isDownloaded: Boolean
-        get() = status == Download.DOWNLOADED
+        get() = status == Download.State.DOWNLOADED
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

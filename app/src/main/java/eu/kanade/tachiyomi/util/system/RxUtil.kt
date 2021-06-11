@@ -17,8 +17,9 @@ suspend fun <T> Single<T>.await(subscribeOn: Scheduler? = null): T {
                 }
             },
             {
-                if (!continuation.isCancelled)
+                if (!continuation.isCancelled) {
                     continuation.resumeWithException(it)
+                }
             }
         )
 

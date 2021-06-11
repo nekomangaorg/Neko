@@ -24,22 +24,22 @@ class IntListMatPreference @JvmOverloads constructor(
         set(value) { entries = value.map { context.getString(it) } }
     private var defValue: Int = 0
     var entries: List<String> = emptyList()
+    var customSelectedValue: Int? = null
+
+    override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
+        val index = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
+        if (entries.isEmpty() || index == -1) ""
+        else entries[index]
+    }
 
     override fun onSetInitialValue(defaultValue: Any?) {
         super.onSetInitialValue(defaultValue)
         defValue = defaultValue as? Int ?: defValue
     }
-    override fun getSummary(): CharSequence {
-        if (customSummary != null) return customSummary!!
-        if (key == null) return super.getSummary()
-        val index = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
-        return if (entries.isEmpty() || index == -1) ""
-        else entries[index]
-    }
 
     override fun dialog(): MaterialDialog {
         return super.dialog().apply {
-            val default = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
+            val default = entryValues.indexOf(customSelectedValue ?: prefs.getInt(key, defValue).getOrDefault())
             listItemsSingleChoice(
                 items = entries,
                 waitForPositiveButton = false,
@@ -47,10 +47,11 @@ class IntListMatPreference @JvmOverloads constructor(
             ) {
                 _, pos, _ ->
                 val value = entryValues[pos]
-                if (key != null)
+                if (key != null) {
                     prefs.getInt(key, defValue).set(value)
+                }
                 callChangeListener(value)
-                this@IntListMatPreference.summary = this@IntListMatPreference.summary
+                notifyChanged()
                 dismiss()
             }
         }

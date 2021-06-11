@@ -50,7 +50,6 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga to query.
      * @param source the source of the manga.
      */
-    @Synchronized
     internal fun getMangaDir(manga: Manga, source: Source): UniFile {
         try {
             return downloadsDir.createDirectory(getSourceDirName(source))
@@ -67,7 +66,7 @@ class DownloadProvider(private val context: Context) {
      * @param source the source to query.
      */
     fun findSourceDir(source: Source): UniFile? {
-        return downloadsDir.findFile(getSourceDirName(source))
+        return downloadsDir.findFile(getSourceDirName(source), true)
     }
 
     /**
@@ -78,7 +77,7 @@ class DownloadProvider(private val context: Context) {
      */
     fun findMangaDir(manga: Manga, source: Source): UniFile? {
         val sourceDir = findSourceDir(source)
-        return sourceDir?.findFile(getMangaDirName(manga))
+        return sourceDir?.findFile(getMangaDirName(manga), true)
     }
 
     /**
@@ -119,7 +118,7 @@ class DownloadProvider(private val context: Context) {
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
                 val mangadexId = fileName.substringAfterLast(" - ", "")
-                //legacy dex id
+                // legacy dex id
                 if (mangadexId.isNotEmpty() && mangadexId.isUUID()) {
                     return@filter idHashSet.contains(mangadexId)
                 } else if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
@@ -218,7 +217,6 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter, useNewId: Boolean = true): String {
-
         if (chapter.isMergedChapter()) {
             return getJ2kChapterName(chapter)
         } else {
@@ -247,7 +245,7 @@ class DownloadProvider(private val context: Context) {
             getChapterDirName(chapter, true),
             // chater names from j2k
             getJ2kChapterName(chapter),
-            //legacy manga id
+            // legacy manga id
             getChapterDirName(chapter, false),
             // Legacy chapter directory name used in v0.8.4 and before
             DiskUtil.buildValidFilename(chapter.name)

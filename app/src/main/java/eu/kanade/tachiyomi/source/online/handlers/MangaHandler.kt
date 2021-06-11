@@ -29,7 +29,6 @@ class MangaHandler() {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
-
             val response = network.client.newCall(mangaRequest(manga)).await()
 
             val jsonData = response.body!!.string()
@@ -70,7 +69,6 @@ class MangaHandler() {
     }
 
     fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-
         return network.client.newCall(mangaRequest(manga))
             .asObservableSuccess()
             .map { response ->
@@ -112,7 +110,6 @@ class MangaHandler() {
                         groupList.results.map { group -> Pair(group.data.id, group.data.attributes.name) }
                     }.flatten().toMap()
                 }.getOrNull() ?: emptyMap()
-
 
                 apiMangaParser.chapterListParse(results, groupMap)
             }

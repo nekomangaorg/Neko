@@ -4,26 +4,23 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowManager
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.customview.getCustomView
 import com.jakewharton.rxbinding.widget.itemClicks
 import com.jakewharton.rxbinding.widget.textChanges
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.MergeSearchDialogBinding
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsPresenter
 import eu.kanade.tachiyomi.util.lang.plusAssign
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.visible
-import kotlinx.android.synthetic.main.merge_search_dialog.view.*
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.subscriptions.CompositeSubscription
 import java.util.concurrent.TimeUnit
-
 
 class MergeSearchDialog : DialogController {
 
@@ -39,6 +36,8 @@ class MergeSearchDialog : DialogController {
 
     private lateinit var presenter: MangaDetailsPresenter
 
+    lateinit var binding: MergeSearchDialogBinding
+
     constructor(detailsController: MangaDetailsController) : super(Bundle()) {
         presenter = detailsController.presenter
     }
@@ -52,6 +51,9 @@ class MergeSearchDialog : DialogController {
             customView(viewRes = R.layout.merge_search_dialog, scrollable = false, noVerticalPadding = true)
             negativeButton(android.R.string.cancel)
         }
+
+        binding = MergeSearchDialogBinding.bind(dialog.getCustomView())
+
         val width = ViewGroup.LayoutParams.MATCH_PARENT
         val height = ViewGroup.LayoutParams.MATCH_PARENT
         dialog.window!!.setLayout(width, height)
@@ -70,19 +72,20 @@ class MergeSearchDialog : DialogController {
         // Create adapter
         val adapter = MergeSearchAdapter(view.context)
         this.adapter = adapter
-        view.merge_search_list.adapter = adapter
+
+        binding.mergeSearchList.adapter = adapter
 
         // Set listeners
         selectedItem = null
 
-        subscriptions += view.merge_search_list.itemClicks().subscribe { position ->
+        subscriptions += binding.mergeSearchList.itemClicks().subscribe { position ->
             MangaItem(position)
         }
 
         // Do an initial search based on the manga's title
         if (savedState == null) {
             val title = presenter.manga.title
-            view.merge_search.append(title)
+            binding.mergeSearch.append(title)
             search(title)
         }
     }
@@ -103,7 +106,7 @@ class MergeSearchDialog : DialogController {
 
     override fun onAttach(view: View) {
         super.onAttach(view)
-        searchTextSubscription = dialogView!!.merge_search.textChanges()
+        searchTextSubscription = binding.mergeSearch.textChanges()
             .skip(1)
             .debounce(1, TimeUnit.SECONDS, AndroidSchedulers.mainThread())
             .map { it.toString() }
@@ -118,36 +121,35 @@ class MergeSearchDialog : DialogController {
 
     private fun search(query: String) {
         val view = dialogView ?: return
-        view.progress.visibility = View.VISIBLE
-        view.merge_search_list.visibility = View.INVISIBLE
+        binding.progress.visibility = View.VISIBLE
+        binding.mergeSearchList.visibility = View.INVISIBLE
         presenter.mergeSearch(query)
     }
 
     fun onSearchResults(results: List<SManga>) {
         selectedItem = null
-        val view = dialogView ?: return
-        view.progress.visibility = View.INVISIBLE
+        binding.progress.visibility = View.GONE
         if (results.isEmpty()) {
-            noResults(view)
+            noResults()
         } else {
-            view.empty_view.gone()
-            view.merge_search_list.visible()
+            binding.emptyView.visibility = View.INVISIBLE
+            binding.mergeSearchList.visibility = View.VISIBLE
             adapter?.setItems(results)
         }
     }
 
-    private fun noResults(view: View) {
-        view.merge_search_list.gone()
-        view.empty_view.visible()
-        view.empty_view.showMedium(
-                CommunityMaterial.Icon.cmd_compass_off, view.context.getString(R.string.no_results_found)
+    private fun noResults() {
+        binding.progress.visibility = View.VISIBLE
+        binding.mergeSearchList.visibility = View.INVISIBLE
+        binding.emptyView.showMedium(
+            CommunityMaterial.Icon.cmd_compass_off,
+            binding.root.context.getString(R.string.no_results_found)
         )
     }
 
     fun onSearchResultsError() {
-        val view = dialogView ?: return
-        view.progress.visibility = View.INVISIBLE
-        noResults(view)
+        binding.progress.visibility = View.INVISIBLE
+        noResults()
     }
 
     companion object {

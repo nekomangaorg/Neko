@@ -5,4 +5,7 @@
 
     <item android:id="@+id/move_to_bottom"
         android:title="@string/move_to_bottom" />
+
+    <item android:id="@+id/cancel_series"
+        android:title="@string/cancel_all_for_series" />
 </menu>

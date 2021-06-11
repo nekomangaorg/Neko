@@ -33,6 +33,8 @@ class MangaFetcher : Fetcher<Manga> {
 
     companion object {
         const val realCover = "real_cover"
+        const val onlyCache = "only_cache"
+        const val onlyFetchRemotely = "only_fetch_remotely"
     }
 
     private val coverCache: CoverCache by injectLazy()
@@ -58,45 +60,78 @@ class MangaFetcher : Fetcher<Manga> {
     }
 
     private suspend fun httpLoader(manga: Manga, options: Options): FetchResult {
-        val customCoverFile = coverCache.getCustomCoverFile(manga)
-        if (customCoverFile.exists() && options.parameters.value(realCover) != true) {
-            return fileLoader(customCoverFile)
+        val onlyCache = options.parameters.value(onlyCache) == true
+        val shouldFetchRemotely = options.parameters.value(onlyFetchRemotely) == true && !onlyCache
+        if (!shouldFetchRemotely) {
+            val customCoverFile = coverCache.getCustomCoverFile(manga)
+            if (customCoverFile.exists() && options.parameters.value(realCover) != true) {
+                return fileLoader(customCoverFile)
+            }
         }
         val coverFile = coverCache.getCoverFile(manga)
-        if (coverFile.exists() && options.diskCachePolicy.readEnabled) {
+        if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
             if (!manga.favorite) {
                 coverFile.setLastModified(Date().time)
             }
             return fileLoader(coverFile)
         }
-        val (_, body) = awaitGetCall(
+        val (response, body) = awaitGetCall(
             manga,
             if (manga.favorite) {
-                !options.networkCachePolicy.readEnabled
+                onlyCache
             } else {
                 false
-            }
+            },
+            shouldFetchRemotely
         )
 
-        val tmpFile = File(coverFile.absolutePath + "_tmp")
-        body.source().use { input ->
-            tmpFile.sink().buffer().use { output ->
-                output.writeAll(input)
+        if (options.diskCachePolicy.writeEnabled) {
+            val tmpFile = File(coverFile.absolutePath + "_tmp")
+            body.source().use { input ->
+                tmpFile.sink().buffer().use { output ->
+                    output.writeAll(input)
+                }
             }
-        }
 
-        tmpFile.renameTo(coverFile)
-        if (manga.favorite) {
-            coverCache.deleteCachedCovers()
+            if (response.isSuccessful || !coverFile.exists()) {
+                if (coverFile.exists()) {
+                    coverFile.delete()
+                }
+
+                tmpFile.renameTo(coverFile)
+            }
+            if (manga.favorite) {
+                coverCache.deleteCachedCovers()
+            }
         }
         return fileLoader(coverFile)
     }
 
-    private suspend fun awaitGetCall(manga: Manga, onlyCache: Boolean = false): Pair<Response,
+    private suspend fun awaitGetCall(manga: Manga, onlyCache: Boolean = false, forceNetwork: Boolean): Pair<Response,
         ResponseBody> {
-        val call = getCall(manga, onlyCache)
+        val call = getCall(manga, onlyCache, forceNetwork)
         val response = call.await()
         return response to checkNotNull(response.body) { "Null response source" }
+    }
+
+    private fun getCall(manga: Manga, onlyCache: Boolean, forceNetwork: Boolean): Call {
+        val source = sourceManager.get(manga.source) as? HttpSource
+        val client = source?.client ?: defaultClient
+
+        val newClient = client.newBuilder().build()
+
+        val request = Request.Builder().url(manga.thumbnail_url!!).also {
+            if (source != null) {
+                it.headers(source.headers)
+            }
+            if (forceNetwork) {
+                it.cacheControl(CacheControl.FORCE_NETWORK)
+            } else if (onlyCache) {
+                it.cacheControl(CacheControl.FORCE_CACHE)
+            }
+        }.build()
+
+        return newClient.newCall(request)
     }
 
     /**
@@ -137,24 +172,6 @@ class MangaFetcher : Fetcher<Manga> {
             mimeType = "image/*",
             dataSource = DataSource.DISK
         )
-    }
-
-    private fun getCall(manga: Manga, onlyCache: Boolean): Call {
-        val source = sourceManager.get(manga.source) as? HttpSource
-        val client = source?.client ?: defaultClient
-
-        val newClient = client.newBuilder().build()
-
-        val request = Request.Builder().url(manga.thumbnail_url!!).also {
-            if (source != null) {
-                it.headers(source.headers)
-            }
-            if (onlyCache) {
-                it.cacheControl(CacheControl.FORCE_CACHE)
-            }
-        }.build()
-
-        return newClient.newCall(request)
     }
 
     private fun getResourceType(cover: String?): Type? {

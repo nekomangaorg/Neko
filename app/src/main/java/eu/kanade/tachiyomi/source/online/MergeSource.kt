@@ -90,7 +90,6 @@ class MergeSource : ReducedHttpSource() {
             return@withContext gson.fromJson<JsonArray>(vmChapters).map { json ->
                 val indexChapter = json["Chapter"].string
                 SChapter.create().apply {
-
                     val type = json["Type"].string
 
                     name = json["ChapterName"].nullString.let { if (it.isNullOrEmpty()) "$type ${chapterImage(indexChapter)}" else it }

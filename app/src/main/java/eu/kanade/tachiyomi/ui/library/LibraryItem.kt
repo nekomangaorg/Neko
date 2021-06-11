@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.library
 
-import android.annotation.SuppressLint
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -16,12 +15,11 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
-import kotlinx.android.synthetic.main.manga_grid_item.view.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -35,21 +33,24 @@ class LibraryItem(
 
     var downloadCount = -1
     var unreadType = 2
+    var filter = ""
 
+    private val sourceManager: SourceManager by injectLazy()
     private val uniformSize: Boolean
-        get() = preferences.uniformGrid().getOrDefault()
+        get() = preferences.uniformGrid().get()
 
     private val libraryLayout: Int
-        get() = preferences.libraryLayout().getOrDefault()
+        get() = preferences.libraryLayout().get()
 
     val hideReadingButton: Boolean
-        get() = preferences.hideStartReadingButton().getOrDefault()
+        get() = preferences.hideStartReadingButton().get()
 
     override fun getLayoutRes(): Int {
-        return if (libraryLayout == 0 || manga.isBlank())
+        return if (libraryLayout == 0 || manga.isBlank()) {
             R.layout.manga_list_item
-        else
+        } else {
             R.layout.manga_grid_item
+        }
     }
 
     override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): LibraryHolder {
@@ -61,38 +62,41 @@ class LibraryItem(
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             } else {
                 view.apply {
+                    val binding = MangaGridItemBinding.bind(this)
                     val coverHeight = (parent.itemWidth / 3f * 4f).toInt()
                     if (libraryLayout == 1) {
-                        gradient.layoutParams = FrameLayout.LayoutParams(
+                        binding.gradient.layoutParams = FrameLayout.LayoutParams(
                             FrameLayout.LayoutParams.MATCH_PARENT,
                             (coverHeight * 0.66f).toInt(),
                             Gravity.BOTTOM
                         )
-                        card.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                        binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                             bottomMargin = 6.dpToPx
                         }
                     } else if (libraryLayout == 2) {
-                        constraint_layout.background = ContextCompat.getDrawable(
-                            context, R.drawable.library_item_selector
+                        binding.constraintLayout.background = ContextCompat.getDrawable(
+                            context,
+                            R.drawable.library_item_selector
                         )
                     }
                     if (isFixedSize) {
-                        constraint_layout.layoutParams = FrameLayout.LayoutParams(
-                            ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT
+                        binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
+                            ViewGroup.LayoutParams.MATCH_PARENT,
+                            ViewGroup.LayoutParams.WRAP_CONTENT
                         )
-                        cover_thumbnail.maxHeight = Int.MAX_VALUE
-                        cover_thumbnail.minimumHeight = 0
-                        constraint_layout.minHeight = 0
-                        cover_thumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
-                        cover_thumbnail.adjustViewBounds = false
-                        cover_thumbnail.layoutParams = FrameLayout.LayoutParams(
+                        binding.coverThumbnail.maxHeight = Int.MAX_VALUE
+                        binding.coverThumbnail.minimumHeight = 0
+                        binding.constraintLayout.minHeight = 0
+                        binding.coverThumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
+                        binding.coverThumbnail.adjustViewBounds = false
+                        binding.coverThumbnail.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
                             (parent.itemWidth / 3f * 3.7f).toInt()
                         )
                     } else {
-                        constraint_layout.minHeight = coverHeight
-                        cover_thumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
-                        cover_thumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
+                        binding.constraintLayout.minHeight = coverHeight
+                        binding.coverThumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
+                        binding.coverThumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
                     }
                 }
                 LibraryGridHolder(
@@ -121,7 +125,7 @@ class LibraryItem(
      * Returns true if this item is draggable.
      */
     override fun isDraggable(): Boolean {
-        return !manga.isBlank()
+        return !manga.isBlank() && header.category.isDragAndDrop
     }
 
     override fun isEnabled(): Boolean {
@@ -139,10 +143,11 @@ class LibraryItem(
      * @return true if the manga should be included, false otherwise.
      */
     override fun filter(constraint: String): Boolean {
-        if (manga.isBlank() && manga.title.isBlank())
+        filter = constraint
+        if (manga.isBlank() && manga.title.isBlank()) {
             return constraint.isEmpty()
-        val sourceManager by injectLazy<SourceManager>()
-        val sourceName = sourceManager.getMangadex().name
+        }
+        val sourceName by lazy { sourceManager.getMangadex().name }
         return manga.title.contains(constraint, true) ||
             (manga.author?.contains(constraint, true) ?: false) ||
             (manga.artist?.contains(constraint, true) ?: false) ||
@@ -152,17 +157,17 @@ class LibraryItem(
             } else containsGenre(constraint, manga.genre?.split(", "))
     }
 
-    @SuppressLint("DefaultLocale")
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
-        return if (tag.startsWith("-"))
+        return if (tag.startsWith("-")) {
             genres?.find {
-                it.trim().toLowerCase() == tag.substringAfter("-").toLowerCase()
+                it.trim().equals(tag.substringAfter("-"), ignoreCase = true)
             } == null
-        else
+        } else {
             genres?.find {
-                it.trim().toLowerCase() == tag.toLowerCase()
+                it.trim().equals(tag, ignoreCase = true)
             } != null
+        }
     }
 
     override fun equals(other: Any?): Boolean {
@@ -173,6 +178,8 @@ class LibraryItem(
     }
 
     override fun hashCode(): Int {
-        return (manga.id!! + (manga.category shl 50).toLong()).hashCode() // !!.hashCode()
+        var result = manga.id!!.hashCode()
+        result = 31 * result + (header?.hashCode() ?: 0)
+        return result
     }
 }

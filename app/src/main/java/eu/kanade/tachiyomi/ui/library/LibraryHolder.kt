@@ -1,8 +1,11 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
+import androidx.core.graphics.ColorUtils
+import androidx.core.view.isVisible
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import kotlinx.android.synthetic.main.manga_grid_item.*
+import eu.kanade.tachiyomi.util.system.getResourceColor
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
@@ -16,6 +19,8 @@ abstract class LibraryHolder(
     val adapter: LibraryCategoryAdapter
 ) : BaseFlexibleViewHolder(view, adapter) {
 
+    protected val color = ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorAccent), 75)
+
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.
@@ -25,7 +30,7 @@ abstract class LibraryHolder(
     abstract fun onSetValues(item: LibraryItem)
 
     fun setUnreadBadge(badge: LibraryBadge, item: LibraryItem) {
-        val showTotal = item.header.category.sortingMode() == LibrarySort.TOTAL
+        val showTotal = item.header.category.sortingMode() == LibrarySort.TotalChapters
         badge.setUnreadDownload(
             when {
                 showTotal -> item.manga.totalChapters
@@ -42,8 +47,8 @@ abstract class LibraryHolder(
     }
 
     fun setReadingButton(item: LibraryItem) {
-        play_layout?.visibility = if (item.manga.unread > 0 && item.unreadType > 0 && !item.hideReadingButton)
-            View.VISIBLE else View.GONE
+        itemView.findViewById<View>(R.id.play_layout)?.isVisible =
+            item.manga.unread > 0 && !item.hideReadingButton
     }
 
     /**
@@ -58,8 +63,17 @@ abstract class LibraryHolder(
 
     override fun onLongClick(view: View?): Boolean {
         return if (adapter.isLongPressDragEnabled) {
+            val manga = (adapter.getItem(flexibleAdapterPosition) as LibraryItem).manga
+            if (!isDraggable && !manga.isBlank() && !manga.isHidden()) {
+                adapter.mItemLongClickListener.onItemLongClick(flexibleAdapterPosition)
+                toggleActivation()
+                true
+            } else {
+                super.onLongClick(view)
+                false
+            }
+        } else {
             super.onLongClick(view)
-            false
-        } else super.onLongClick(view)
+        }
     }
 }

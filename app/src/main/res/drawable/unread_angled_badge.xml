@@ -8,8 +8,8 @@
     tools:background="@color/material_red_500">
 
     <path
-        android:fillColor="@color/unread_badge"
+        android:fillColor="?attr/unreadBadgeColor"
         android:pathData="M0 20 L100 0 L100 20 Z"
-        android:strokeColor="@color/unread_badge" />
+        android:strokeColor="?attr/unreadBadgeColor" />
 
 </vector>

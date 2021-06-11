@@ -7,9 +7,19 @@ object PreferenceKeys {
 
     const val theme = "pref_theme_key"
 
+    const val nightMode = "night_mode"
+    const val lightTheme = "light_theme"
+    const val darkTheme = "dark_theme"
+
+    const val startingTab = "starting_tab"
+
+    const val backToStart = "back_to_start"
+
     const val rotation = "pref_rotation_type_key"
 
     const val enableTransitions = "pref_enable_transitions_key"
+
+    const val pagerCutoutBehavior = "pager_cutout_behavior"
 
     const val doubleTapAnimationSpeed = "pref_double_tap_anim_speed"
 
@@ -51,6 +61,25 @@ object PreferenceKeys {
 
     const val readWithVolumeKeysInverted = "reader_volume_keys_inverted"
 
+    const val navigationModePager = "reader_navigation_mode_pager"
+
+    const val navigationModeWebtoon = "reader_navigation_mode_webtoon"
+
+    const val pagerNavInverted = "reader_tapping_inverted"
+
+    const val webtoonNavInverted = "reader_tapping_inverted_webtoon"
+
+    const val pageLayout = "page_layout"
+
+    const val invertDoublePages = "invert_double_pages"
+
+    const val readerBottomButtons = "reader_bottom_buttons"
+
+    const val showNavigationOverlayNewUser = "reader_navigation_overlay_new_user"
+    const val showNavigationOverlayNewUserWebtoon = "reader_navigation_overlay_new_user_webtoon"
+
+    const val preloadSize = "preload_size"
+
     const val webtoonSidePadding = "webtoon_side_padding"
 
     const val webtoonEnableZoomOut = "webtoon_enable_zoom_out"
@@ -76,6 +105,12 @@ object PreferenceKeys {
     const val downloadsDirectory = "download_directory"
 
     const val downloadOnlyOverWifi = "pref_download_only_over_wifi_key"
+
+    const val folderPerManga = "create_folder_per_manga"
+
+    const val showLibrarySearchSuggestions = "show_library_search_suggestions"
+
+    const val librarySearchSuggestion = "library_search_suggestion"
 
     const val numberOfBackups = "backup_slots"
 
@@ -113,13 +148,19 @@ object PreferenceKeys {
 
     const val automaticUpdates = "automatic_updates"
 
+    const val autoHideHopper = "autohide_hopper"
+
+    const val hopperLongPress = "hopper_long_press"
+
+    const val onlySearchPinned = "only_search_pinned"
+
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"
 
     const val libraryLayout = "pref_display_library_layout"
 
-    const val gridSize = "grid_size"
+    const val gridSize = "grid_size_float"
 
     const val uniformGrid = "uniform_grid"
 
@@ -153,29 +194,37 @@ object PreferenceKeys {
 
     const val updateOnRefresh = "update_on_refresh"
 
+    const val showDLsInRecents = "show_dls_in_recents"
+    const val showRemHistoryInRecents = "show_rem_history_in_recents"
+    const val showReadInAllRecents = "show_read_in_all_recents"
+    const val showTitleFirstInRecents = "show_title_first_in_recents"
+
+    const val groupChaptersHistory = "group_chapters_history"
+
+    const val showUpdatedTime = "show_updated_time"
+    const val groupChaptersUpdates = "group_chapters_updates"
+
     const val showLibraryUpdateErrors = "show_library_update_errors"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
-    const val enableDoh = "enable_doh"
+    const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
-    const val contentRating = "content_rating_options"
+    const val showSideNavOnBottom = "show_side_nav_on_bottom"
 
-    const val lowQualityCovers = "low_quality_covers"
-
-    const val dataSaver = "data_saver_bool"
-
-    const val forceLatestCovers = "latest_cover_bool"
-
-    const val logLevel = "log_level"
-    
-    const val showContentRatingFilter = "show_R18_filter"
-
-    const val enablePort443Only = "use_port_443_only_for_image_server"
-
-    const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
+    const val showMangaAppShortcuts = "show_manga_app_shortcuts"
 
     const val createLegacyBackup = "create_legacy_backup"
+
+    const val dohProvider = "doh_provider"
+
+    const val incognitoMode = "incognito_mode"
+
+    fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
+
+    fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
+
+    fun trackToken(syncId: Int) = "track_token_$syncId"
 
     const val useCacheSource = "use_cache_source_new"
 
@@ -189,9 +238,19 @@ object PreferenceKeys {
 
     fun sourcePassword(sourceId: Long) = "pref_source_password_$sourceId"
 
-    fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
+    const val contentRating = "content_rating_options"
 
-    fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
+    const val lowQualityCovers = "low_quality_covers"
 
-    fun trackToken(syncId: Int) = "track_token_$syncId"
+    const val dataSaver = "data_saver_bool"
+
+    const val forceLatestCovers = "latest_cover_bool"
+
+    const val logLevel = "log_level"
+
+    const val showContentRatingFilter = "show_R18_filter"
+
+    const val enablePort443Only = "use_port_443_only_for_image_server"
+
+    const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 }

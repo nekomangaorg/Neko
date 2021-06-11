@@ -102,7 +102,6 @@ class DownloadCache(
         checkRenew()
 
         if (forceCheckFolder) {
-
             val mangaDir = provider.findMangaDir(manga, sourceManager.getMangadex())
 
             if (mangaDir != null) {
@@ -202,7 +201,6 @@ class DownloadCache(
      */
     @Synchronized
     fun addChapter(chapterDirName: String, mangaUniFile: UniFile, manga: Manga) {
-
         val id = manga.id ?: return
         val files = mangaFiles[id]
         val mangadexId = chapterDirName.substringAfterLast("- ")
@@ -270,6 +268,14 @@ class DownloadCache(
     fun removeManga(manga: Manga) {
         mangaFiles.remove(manga.id)
     }
+
+    /**
+     * Class to store the files under the root downloads directory.
+     */
+    private class RootDirectory(
+        val dir: UniFile,
+        var files: Map<Long, SourceDirectory> = hashMapOf()
+    )
 
     /**
      * Class to store the files under a source directory.

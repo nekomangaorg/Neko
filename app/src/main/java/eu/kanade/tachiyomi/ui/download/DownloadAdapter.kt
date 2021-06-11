@@ -9,7 +9,8 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
  * @param context the context of the fragment containing this adapter.
  */
 class DownloadAdapter(controller: DownloadItemListener) : FlexibleAdapter<DownloadItem>(
-    null, controller,
+    null,
+    controller,
     true
 ) {
 

@@ -1,28 +1,29 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.app.Application
+import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.os.Environment
+import androidx.annotation.ColorInt
 import com.elvishew.xlog.XLog
 import com.jakewharton.rxrelay.BehaviorRelay
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
-import eu.kanade.tachiyomi.data.database.models.isWebtoon
+import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
@@ -32,12 +33,15 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.withUIContext
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import rx.Completable
@@ -58,9 +62,9 @@ class ReaderPresenter(
     private val db: DatabaseHelper = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
+    private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get()
-
 ) : BasePresenter<ReaderActivity>() {
 
     /**
@@ -89,6 +93,9 @@ class ReaderPresenter(
      */
     private val viewerChaptersRelay = BehaviorRelay.create<ViewerChapters>()
 
+    val viewerChapters: ViewerChapters?
+        get() = viewerChaptersRelay.value
+
     /**
      * Relay used when loading prev/next chapter needed to lock the UI (with a dialog).
      */
@@ -106,19 +113,25 @@ class ReaderPresenter(
             ?: error("Requested chapter of id $chapterId not found in chapter list")
 
         val chaptersForReader =
-            chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter).filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
-        XLog.d("--chapter list--")
+            chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
+
         when (manga.sorting) {
             Manga.SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
             Manga.SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             else -> error("Unknown sorting method")
-        }.map { it ->
-            XLog.d("chapterList lazy ${it.chapterLog()}")
-            ReaderChapter(it)
-        }
+        }.map(::ReaderChapter)
     }
 
     var chapterItems = emptyList<ReaderChapterItem>()
+
+    private var scope = CoroutineScope(Job() + Dispatchers.Default)
+
+    private var hasTrackers: Boolean = false
+    private val checkTrackers: (Manga) -> Unit = { manga ->
+        val tracks = db.getTracks(manga).executeAsBlocking()
+
+        hasTrackers = tracks.size > 0
+    }
 
     /**
      * Called when the presenter is created. It retrieves the saved active chapter if the process
@@ -206,7 +219,9 @@ class ReaderPresenter(
                         }
                     }.map {
                         ReaderChapterItem(
-                            it, manga, it.id == getCurrentChapter()?.chapter?.id ?: chapterId
+                            it,
+                            manga,
+                            it.id == getCurrentChapter()?.chapter?.id ?: chapterId
                         )
                     }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())) {
@@ -215,11 +230,23 @@ class ReaderPresenter(
                 list
             }
         }
-        if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
-            XLog.d("chapter items")
-            chapterItems.forEach { XLog.d(it.chapter.name) }
-        }
+
         return chapterItems
+    }
+
+    /**
+     * Removes all filters and requests an UI update.
+     */
+    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
+        val manga = manga ?: return
+        manga.readFilter = when {
+            read -> Manga.SHOW_READ
+            unread -> Manga.SHOW_UNREAD
+            else -> Manga.SHOW_ALL
+        }
+        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
+        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
+        db.updateFlags(manga).executeAsBlocking()
     }
 
     /**
@@ -232,8 +259,12 @@ class ReaderPresenter(
         this.manga = manga
         if (chapterId == -1L) chapterId = initialChapterId
 
+        checkTrackers(manga)
+
         NotificationReceiver.dismissNotification(
-            preferences.context, manga.id!!.hashCode(), Notifications.ID_NEW_CHAPTERS
+            preferences.context,
+            manga.id!!.hashCode(),
+            Notifications.ID_NEW_CHAPTERS
         )
 
         loader = ChapterLoader(downloadManager, manga, sourceManager)
@@ -272,13 +303,7 @@ class ReaderPresenter(
             .andThen(
                 Observable.fromCallable {
                     val chapterPos = chapterList.indexOf(chapter)
-                    if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
-                        XLog.disableStackTrace().d("ChapterList in loadObservable")
-                        XLog.disableStackTrace().d("chapter position $chapterPos")
-                        chapterList.forEach {
-                            XLog.disableStackTrace().d(it.urlAndName() + " source order: " + it.chapter.source_order)
-                        }
-                    }
+
                     ViewerChapters(
                         chapter,
                         chapterList.getOrNull(chapterPos - 1),
@@ -288,24 +313,11 @@ class ReaderPresenter(
             )
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { newChapters ->
-
                 val oldChapters = viewerChaptersRelay.value
-
-                XLog.disableStackTrace().d("loadObservable oldChapters previousChapter %s", oldChapters?.prevChapter?.urlAndName())
-                XLog.disableStackTrace().d("loadObservable oldChapters currentChapter %s", oldChapters?.currChapter?.urlAndName())
-                XLog.disableStackTrace().d("loadObservable oldChapters nextChapter %s", oldChapters?.nextChapter?.urlAndName())
-
-                XLog.disableStackTrace().d("loadObservable newChapters previousChapter %s", newChapters?.prevChapter?.urlAndName())
-                XLog.disableStackTrace().d("loadObservable newChapters currentChapter %s", newChapters?.currChapter?.urlAndName())
-                XLog.disableStackTrace().d("loadObservable newChapters nextChapter %s", newChapters?.nextChapter?.urlAndName())
 
                 // Add new references first to avoid unnecessary recycling
                 newChapters.ref()
                 oldChapters?.unref()
-
-                XLog.disableStackTrace().d("loadObservable newChapters afterRef previousChapter %s", newChapters.prevChapter?.urlAndName())
-                XLog.disableStackTrace().d("loadObservable newChapters afterRef currentChapter %s", newChapters.currChapter.urlAndName())
-                XLog.disableStackTrace().d("loadObservable newChapters afterRef nextChapter %s", newChapters.nextChapter?.urlAndName())
 
                 viewerChaptersRelay.call(newChapters)
             }
@@ -381,13 +393,15 @@ class ReaderPresenter(
         XLog.d("Loading ${chapter.url}")
 
         activeChapterSubscription?.unsubscribe()
+        val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
         activeChapterSubscription = getLoadObservable(loader, ReaderChapter(chapter))
             .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
             .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
             .subscribeFirst(
                 { view, _ ->
-                    val lastPage = if (chapter.pages_left <= 1) 0 else chapter.last_page_read
-                    view.moveToPageIndex(lastPage)
+                    scope.launchUI {
+                        view.moveToPageIndex(lastPage, false)
+                    }
                     view.refreshChapters()
                 },
                 { _, _ ->
@@ -424,12 +438,30 @@ class ReaderPresenter(
     }
 
     /**
+     * Called from the activity to load and set the next chapter as active.
+     */
+    fun loadNextChapter(): Boolean {
+        val nextChapter = viewerChaptersRelay.value?.nextChapter ?: return false
+        loadChapter(nextChapter.chapter)
+        return true
+    }
+
+    /**
+     * Called from the activity to load and set the previous chapter as active.
+     */
+    fun loadPreviousChapter(): Boolean {
+        val prevChapter = viewerChaptersRelay.value?.prevChapter ?: return false
+        loadChapter(prevChapter.chapter)
+        return true
+    }
+
+    /**
      * Called every time a page changes on the reader. Used to mark the flag of chapters being
      * read, update tracking services, enqueue downloaded chapter deletion, and updating the active chapter if this
      * [page]'s chapter is different from the currently active.
      */
-    fun onPageSelected(page: ReaderPage): Boolean {
-        val currentChapters = viewerChaptersRelay.value ?: return false
+    fun onPageSelected(page: ReaderPage, hasExtraPage: Boolean) {
+        val currentChapters = viewerChaptersRelay.value ?: return
 
         val selectedChapter = page.chapter
 
@@ -437,7 +469,14 @@ class ReaderPresenter(
         selectedChapter.chapter.last_page_read = page.index
         selectedChapter.chapter.pages_left =
             (selectedChapter.pages?.size ?: page.index) - page.index
-        if (selectedChapter.pages?.lastIndex == page.index) {
+        val shouldTrack = !preferences.incognitoMode().get() || hasTrackers
+        if (shouldTrack &&
+            // For double pages, check if the second to last page is doubled up
+            (
+                selectedChapter.pages?.lastIndex == page.index ||
+                    (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
+                )
+        ) {
             selectedChapter.chapter.read = true
             updateTrackChapterRead(selectedChapter)
             deleteChapterIfNeeded(selectedChapter)
@@ -446,9 +485,7 @@ class ReaderPresenter(
         if (selectedChapter != currentChapters.currChapter) {
             onChapterChanged(currentChapters.currChapter)
             loadNewChapter(selectedChapter)
-            return true
         }
-        return false
     }
 
     /**
@@ -480,20 +517,25 @@ class ReaderPresenter(
 
     /**
      * Saves this [chapter] progress (last read page and whether it's read).
+     * If incognito mode isn't on or has at least 1 tracker
      */
     private fun saveChapterProgress(chapter: ReaderChapter) {
         db.getChapter(chapter.chapter.id!!).executeAsBlocking()?.let { dbChapter ->
             chapter.chapter.bookmark = dbChapter.bookmark
         }
-        db.updateChapterProgress(chapter.chapter).executeAsBlocking()
+        if (!preferences.incognitoMode().get() || hasTrackers) {
+            db.updateChapterProgress(chapter.chapter).executeAsBlocking()
+        }
     }
 
     /**
      * Saves this [chapter] last read history.
      */
     private fun saveChapterHistory(chapter: ReaderChapter) {
-        val history = History.create(chapter.chapter).apply { last_read = Date().time }
-        db.updateHistoryLastRead(history).executeAsBlocking()
+        if (!preferences.incognitoMode().get()) {
+            val history = History.create(chapter.chapter).apply { last_read = Date().time }
+            db.updateHistoryLastRead(history).executeAsBlocking()
+        }
     }
 
     /**
@@ -517,7 +559,10 @@ class ReaderPresenter(
         val default = preferences.defaultViewer()
         val manga = manga ?: return default
         val readerType = manga.defaultReaderType()
-        if (manga.viewer == -1 || (readerType == ReaderActivity.WEBTOON && readerType != manga.viewer)) {
+        if (manga.viewer == -1 ||
+            // Force webtoon mode
+            (manga.isLongStrip() && readerType != manga.viewer)
+        ) {
             val cantSwitchToLTR =
                 (readerType == ReaderActivity.LEFT_TO_RIGHT && default != ReaderActivity.RIGHT_TO_LEFT)
             manga.viewer = if (cantSwitchToLTR) 0 else readerType
@@ -527,7 +572,7 @@ class ReaderPresenter(
         val viewer = if (manga.viewer == 0) preferences.defaultViewer() else manga.viewer
 
         return when {
-            !manga.isWebtoon() && viewer == ReaderActivity.WEBTOON -> ReaderActivity.VERTICAL_PLUS
+            !manga.isLongStrip() && viewer == ReaderActivity.WEBTOON -> ReaderActivity.VERTICAL_PLUS
             else -> viewer
         }
     }
@@ -619,6 +664,40 @@ class ReaderPresenter(
     }
 
     /**
+     * Saves the image of this [page] in the given [directory] and returns the file location.
+     */
+    private fun saveImages(page1: ReaderPage, page2: ReaderPage, isLTR: Boolean, @ColorInt bg: Int, directory: File, manga: Manga): File {
+        val stream1 = page1.stream!!
+        ImageUtil.findImageType(stream1) ?: throw Exception("Not an image")
+        val stream2 = page2.stream!!
+        ImageUtil.findImageType(stream2) ?: throw Exception("Not an image")
+        val imageBytes = stream1().readBytes()
+        val imageBitmap = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+
+        val imageBytes2 = stream2().readBytes()
+        val imageBitmap2 = BitmapFactory.decodeByteArray(imageBytes2, 0, imageBytes2.size)
+
+        val stream = ImageUtil.mergeBitmaps(imageBitmap, imageBitmap2, isLTR, bg)
+        directory.mkdirs()
+
+        val chapter = page1.chapter.chapter
+
+        // Build destination file.
+        val filename = DiskUtil.buildValidFilename(
+            "${manga.title} - ${chapter.name}".take(225)
+        ) + " - ${page1.number}-${page2.number}.jpg"
+
+        val destFile = File(directory, filename)
+        stream.use { input ->
+            destFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        stream.close()
+        return destFile
+    }
+
+    /**
      * Saves the image of this [page] on the pictures directory and notifies the UI of the result.
      * There's also a notification to allow sharing the image somewhere else or deleting it.
      */
@@ -631,11 +710,14 @@ class ReaderPresenter(
         notifier.onClear()
 
         // Pictures directory.
-        val destDir = File(
-            Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + Environment.DIRECTORY_PICTURES +
-                File.separator + "Neko"
-        )
+        val baseDir = Environment.getExternalStorageDirectory().absolutePath +
+            File.separator + Environment.DIRECTORY_PICTURES +
+            File.separator + context.getString(R.string.app_name)
+        val destDir = if (preferences.folderPerManga()) {
+            File(baseDir + File.separator + manga.title)
+        } else {
+            File(baseDir)
+        }
 
         // Copy file in background.
         Observable.fromCallable { saveImage(page, destDir, manga) }
@@ -650,6 +732,34 @@ class ReaderPresenter(
                 { view, file -> view.onSaveImageResult(SaveImageResult.Success(file)) },
                 { view, error -> view.onSaveImageResult(SaveImageResult.Error(error)) }
             )
+    }
+
+    fun saveImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
+        scope.launch {
+            if (firstPage.status != Page.READY) return@launch
+            if (secondPage.status != Page.READY) return@launch
+            val manga = manga ?: return@launch
+            val context = Injekt.get<Application>()
+
+            val notifier = SaveImageNotifier(context)
+            notifier.onClear()
+
+            // Pictures directory.
+            val destDir = File(
+                Environment.getExternalStorageDirectory().absolutePath +
+                    File.separator + Environment.DIRECTORY_PICTURES +
+                    File.separator + context.getString(R.string.app_name)
+            )
+
+            try {
+                val file = saveImages(firstPage, secondPage, isLTR, bg, destDir, manga)
+                DiskUtil.scanMedia(context, file)
+                notifier.onComplete(file)
+                withUIContext { view?.onSaveImageResult(SaveImageResult.Success(file)) }
+            } catch (e: Exception) {
+                withUIContext { view?.onSaveImageResult(SaveImageResult.Error(e)) }
+            }
+        }
     }
 
     /**
@@ -674,6 +784,57 @@ class ReaderPresenter(
                 { view, file -> view.onShareImageResult(file, page) },
                 { _, _ -> /* Empty */ }
             )
+    }
+
+    fun shareImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
+        scope.launch {
+            if (firstPage.status != Page.READY) return@launch
+            if (secondPage.status != Page.READY) return@launch
+            val manga = manga ?: return@launch
+            val context = Injekt.get<Application>()
+
+            val destDir = File(context.cacheDir, "shared_image")
+            destDir.deleteRecursively()
+            try {
+                val file = saveImages(firstPage, secondPage, isLTR, bg, destDir, manga)
+                withUIContext {
+                    view?.onShareImageResult(file, firstPage, secondPage)
+                }
+            } catch (e: Exception) {
+            }
+        }
+    }
+
+    /**
+     * Sets the image of this [page] as cover and notifies the UI of the result.
+     */
+    fun setAsCover(page: ReaderPage) {
+        if (page.status != Page.READY) return
+        val manga = manga ?: return
+        val stream = page.stream ?: return
+
+        Observable
+            .fromCallable {
+                if (manga.favorite) {
+                    coverCache.setCustomCoverToCache(manga, stream())
+                    SetAsCoverResult.Success
+                } else {
+                    SetAsCoverResult.AddToLibraryFirst
+                }
+            }
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribeFirst(
+                { view, result -> view.onSetAsCoverResult(result) },
+                { view, _ -> view.onSetAsCoverResult(SetAsCoverResult.Error) }
+            )
+    }
+
+    /**
+     * Results of the set as cover feature.
+     */
+    enum class SetAsCoverResult {
+        Success, AddToLibraryFirst, Error
     }
 
     /**
@@ -702,12 +863,11 @@ class ReaderPresenter(
                 val trackList = db.getTracks(manga).executeAsBlocking()
                 trackList.map { track ->
                     val service = trackManager.getService(track.sync_id)
-
-                    if (shouldUpdateTracker(service, chapterRead, track)) {
+                    if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
                         try {
                             track.last_chapter_read = chapterRead
-                            val updatedTrack = service!!.update(track)
-                            db.insertTrack(updatedTrack).executeAsBlocking()
+                            service.update(track, true)
+                            db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
                             XLog.e(e)
                         }
@@ -715,20 +875,6 @@ class ReaderPresenter(
                 }
             }
         }
-    }
-
-    private fun shouldUpdateTracker(
-        service: TrackService?,
-        chapterRead: Int,
-        track: Track
-    ): Boolean {
-        if (service == null || !service.isLogged || chapterRead <= track.last_chapter_read) {
-            return false
-        }
-        if (service.isMdList() && track.status == FollowStatus.UNFOLLOWED.int) {
-            return false
-        }
-        return true
     }
 
     /**
@@ -757,40 +903,5 @@ class ReaderPresenter(
             .onErrorComplete()
             .subscribeOn(Schedulers.io())
             .subscribe()
-    }
-
-    /**
-     * Called from the activity to load and set the next chapter as active.
-     */
-    fun loadNextChapter() {
-        val nextChapter = viewerChaptersRelay.value?.nextChapter ?: return
-        loadAdjacent(nextChapter)
-    }
-
-    /**
-     * Called from the activity to load and set the previous chapter as active.
-     */
-    fun loadPreviousChapter() {
-        val prevChapter = viewerChaptersRelay.value?.prevChapter ?: return
-        loadAdjacent(prevChapter)
-    }
-
-    private fun loadAdjacent(chapter: ReaderChapter) {
-        val loader = loader ?: return
-
-        XLog.d("Loading adjacent ${chapter.chapter.url}")
-
-        activeChapterSubscription?.unsubscribe()
-        activeChapterSubscription = getLoadObservable(loader, chapter)
-            .doOnSubscribe { isLoadingAdjacentChapterRelay.call(true) }
-            .doOnUnsubscribe { isLoadingAdjacentChapterRelay.call(false) }
-            .subscribeFirst(
-                { view, _ ->
-                    view.moveToPageIndex(0)
-                },
-                { _, _ ->
-                    // Ignore onError event, viewers handle that state
-                }
-            )
     }
 }

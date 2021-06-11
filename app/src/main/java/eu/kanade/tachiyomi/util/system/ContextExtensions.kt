@@ -154,6 +154,8 @@ val Float.dpToPxEnd: Float
 val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
+fun Context.isTablet() = resources.getBoolean(R.bool.isTablet)
+
 /**
  * Helper method to create a notification builder.
  *
@@ -289,7 +291,7 @@ fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
             )
             .build()
         if (forceBrowser) {
-            val packages = getCustomTabsPackages().maxBy { it.preferredOrder }
+            val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
             val processName = packages?.activityInfo?.processName ?: return false
             intent.intent.`package` = processName
         }
@@ -369,10 +371,10 @@ fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.att
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }
 
+/**
+ * default tinted to actionbar
+ */
 @SuppressLint("ResourceType")
-    /**
-     * default tinted to actionbar
-     */
 fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }

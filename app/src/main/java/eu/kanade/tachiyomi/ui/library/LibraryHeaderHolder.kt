@@ -4,59 +4,50 @@ import android.app.Activity
 import android.graphics.Color
 import android.util.TypedValue
 import android.view.View
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
+import androidx.core.view.isInvisible
+import androidx.core.view.isVisible
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.gone
-import eu.kanade.tachiyomi.util.view.invisible
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import eu.kanade.tachiyomi.util.view.visible
-import eu.kanade.tachiyomi.util.view.visibleIf
-import kotlinx.android.synthetic.main.library_category_header_item.*
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAdapter) :
     BaseFlexibleViewHolder(view, adapter, true) {
 
-    private val sectionText: TextView = view.findViewById(R.id.category_title)
-    private val sortText: TextView = view.findViewById(R.id.category_sort)
-    private val updateButton: ImageView = view.findViewById(R.id.update_button)
-    private val checkboxImage: ImageView = view.findViewById(R.id.checkbox)
-    private val expandImage: ImageView = view.findViewById(R.id.collapse_arrow)
-    private val catProgress: ProgressBar = view.findViewById(R.id.cat_progress)
+    private val binding = LibraryCategoryHeaderItemBinding.bind(view)
 
     init {
-        category_header_layout.setOnClickListener { toggleCategory() }
-        updateButton.setOnClickListener { addCategoryToUpdate() }
-        sectionText.setOnLongClickListener {
-            val category = (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
-            adapter.libraryListener.manageCategory(adapterPosition)
+        binding.categoryHeaderLayout.setOnClickListener { toggleCategory() }
+        binding.updateButton.setOnClickListener { addCategoryToUpdate() }
+        binding.categoryTitle.setOnLongClickListener {
+            val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+            adapter.libraryListener.manageCategory(flexibleAdapterPosition)
             category?.isDynamic == false
         }
-        sectionText.setOnClickListener { toggleCategory() }
-        sortText.setOnClickListener { it.post { showCatSortOptions() } }
-        checkboxImage.setOnClickListener { selectAll() }
-        updateButton.drawable.mutate()
+        binding.categoryTitle.setOnClickListener { toggleCategory() }
+        binding.categorySort.setOnClickListener { it.post { showCatSortOptions() } }
+        binding.checkbox.setOnClickListener { selectAll() }
+        binding.updateButton.drawable.mutate()
     }
 
     private fun toggleCategory() {
-        adapter.libraryListener.toggleCategoryVisibility(adapterPosition)
+        adapter.libraryListener.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
-            ViewTooltip.on(itemView.context as? Activity, sectionText).autoHide(true, 5000L)
+            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle).autoHide(true, 5000L)
                 .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
                 .text(R.string.long_press_category)
                 .color(itemView.context.getResourceColor(R.attr.colorAccent))
@@ -77,7 +68,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 false
             }
         val shorterMargin = adapter.headerItems.firstOrNull() == item
-        sectionText.updateLayoutParams<ConstraintLayout.LayoutParams> {
+        binding.categoryTitle.updateLayoutParams<ConstraintLayout.LayoutParams> {
             topMargin = (
                 when {
                     shorterMargin -> 2
@@ -88,120 +79,70 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         }
         val category = item.category
 
-        if (category.isDynamic) {
-            category_header_layout.background = null
-            sectionText.background = null
-        } else {
-            category_header_layout.setBackgroundResource(R.drawable.list_item_selector)
-            sectionText.setBackgroundResource(R.drawable.square_ripple)
-        }
-
-        if (category.isAlone && !category.isDynamic) sectionText.text = ""
-        else sectionText.text = category.name
+        if (category.isAlone && !category.isDynamic) binding.categoryTitle.text = ""
+        else binding.categoryTitle.text = category.name
+        binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
 
         val isAscending = category.isAscending()
         val sortingMode = category.sortingMode()
-        val sortDrawable = when {
-            sortingMode == LibrarySort.DRAG_AND_DROP || sortingMode == null -> R.drawable.ic_sort_24dp
-            if (sortingMode == LibrarySort.RATING || sortingMode == LibrarySort.DATE_ADDED || sortingMode == LibrarySort.LATEST_CHAPTER || sortingMode == LibrarySort.LAST_READ) !isAscending else isAscending -> R.drawable.ic_arrow_downward_24dp
-            else -> R.drawable.ic_arrow_upward_24dp
-        }
+        val sortDrawable = getSortRes(sortingMode, isAscending, R.drawable.ic_sort_24dp)
 
-        sortText.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
-        sortText.setText(category.sortRes())
-        expandImage.setImageResource(
+        binding.categorySort.setCompoundDrawablesRelativeWithIntrinsicBounds(0, 0, sortDrawable, 0)
+        binding.categorySort.setText(category.sortRes())
+        binding.collapseArrow.setImageResource(
             if (category.isHidden) R.drawable.ic_expand_more_24dp
             else R.drawable.ic_expand_less_24dp
         )
         when {
             adapter.mode == SelectableAdapter.Mode.MULTI -> {
-                checkboxImage.visibleIf(!category.isHidden)
-                expandImage.visibleIf(category.isHidden && !adapter.isSingleCategory && !category.isDynamic)
-                updateButton.gone()
-                catProgress.gone()
+                binding.checkbox.isVisible = !category.isHidden
+                binding.collapseArrow.isVisible = category.isHidden && !adapter.isSingleCategory
+                binding.updateButton.isVisible = false
+                binding.catProgress.isVisible = false
                 setSelection()
             }
             category.id ?: -1 < 0 -> {
-                expandImage.gone()
-                checkboxImage.gone()
-                catProgress.gone()
-                updateButton.gone()
+                binding.collapseArrow.isVisible = false
+                binding.checkbox.isVisible = false
+                binding.catProgress.isVisible = false
+                binding.updateButton.isVisible = false
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
-                expandImage.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
-                checkboxImage.gone()
-                catProgress.visible()
-                updateButton.invisible()
+                binding.collapseArrow.isVisible = !adapter.isSingleCategory
+                binding.checkbox.isVisible = false
+                binding.catProgress.isVisible = true
+                binding.updateButton.isInvisible = true
             }
             else -> {
-                expandImage.visibleIf(!adapter.isSingleCategory && !category.isDynamic)
-                catProgress.gone()
-                checkboxImage.gone()
-                updateButton.visibleIf(!adapter.isSingleCategory)
+                binding.collapseArrow.isVisible = !adapter.isSingleCategory
+                binding.catProgress.isVisible = false
+                binding.checkbox.isVisible = false
+                binding.updateButton.isVisible = !adapter.isSingleCategory
             }
         }
     }
 
     private fun addCategoryToUpdate() {
-        if (adapter.libraryListener.updateCategory(adapterPosition)) {
-            catProgress.visible()
-            updateButton.invisible()
+        if (adapter.libraryListener.updateCategory(flexibleAdapterPosition)) {
+            binding.catProgress.isVisible = true
+            binding.updateButton.isInvisible = true
         }
     }
 
     private fun showCatSortOptions() {
         val category =
-            (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category ?: return
+            (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category ?: return
         adapter.controller.activity?.let { activity ->
-            val items = mutableListOf(
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.ALPHA, R.drawable.ic_sort_by_alpha_24dp, R.string.title
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.LAST_READ,
-                    R.drawable.ic_recent_read_outline_24dp,
-                    R.string.last_read
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.LATEST_CHAPTER,
-                    R.drawable.ic_new_releases_24dp,
-                    R.string.latest_chapter
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.UNREAD, R.drawable.ic_eye_24dp, R.string.unread
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.TOTAL,
-                    R.drawable.ic_sort_by_numeric_24dp,
-                    R.string.total_chapters
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.DATE_ADDED,
-                    R.drawable.ic_heart_outline_24dp,
-                    R.string.date_added
-                ),
-                MaterialMenuSheet.MenuSheetItem(
-                    LibrarySort.RATING,
-                    R.drawable.ic_poll_24dp,
-                    R.string.rating
-                )
-            )
-
-            if (category.isDynamic) {
-                items.add(
-                    MaterialMenuSheet.MenuSheetItem(
-                        LibrarySort.DRAG_AND_DROP,
-                        R.drawable.ic_label_outline_24dp,
-                        R.string.category
-                    )
-                )
-            }
-            val sortingMode = category.sortingMode()
+            val items = LibrarySort.values().map { it.menuSheetItem(category.isDynamic) }
+            val sortingMode = category.sortingMode(true)
             val sheet = MaterialMenuSheet(
-                activity, items, activity.getString(R.string.sort_by), sortingMode
+                activity,
+                items,
+                activity.getString(R.string.sort_by),
+                sortingMode?.mainValue
             ) { sheet, item ->
                 onCatSortClicked(category, item)
-                val nCategory = (adapter.getItem(adapterPosition) as? LibraryHeaderItem)?.category
+                val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
                 val isAscending = nCategory?.isAscending() ?: false
                 val drawableRes = getSortRes(item, isAscending)
                 sheet.setDrawable(item, drawableRes)
@@ -209,69 +150,82 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             }
             val isAscending = category.isAscending()
             val drawableRes = getSortRes(sortingMode, isAscending)
-            sheet.setDrawable(sortingMode ?: -1, drawableRes)
+            sheet.setDrawable(sortingMode?.mainValue ?: -1, drawableRes)
             sheet.show()
         }
     }
 
-    private fun getSortRes(sortingMode: Int?, isAscending: Boolean): Int = when {
-        sortingMode == LibrarySort.DRAG_AND_DROP -> R.drawable.ic_check_24dp
-        if (sortingMode == LibrarySort.RATING ||
-            sortingMode == LibrarySort.DATE_ADDED ||
-            sortingMode == LibrarySort.LATEST_CHAPTER ||
-            sortingMode == LibrarySort.LAST_READ
-        ) !isAscending else isAscending ->
-            R.drawable.ic_arrow_downward_24dp
-        else -> R.drawable.ic_arrow_upward_24dp
+    private fun getSortRes(
+        sortMode: LibrarySort?,
+        isAscending: Boolean,
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+    ): Int {
+        sortMode ?: return defaultDrawableRes
+        return when (sortMode) {
+            LibrarySort.DragAndDrop -> defaultDrawableRes
+            else -> {
+                if (if (sortMode.hasInvertedSort) !isAscending else isAscending) {
+                    R.drawable.ic_arrow_downward_24dp
+                } else {
+                    R.drawable.ic_arrow_upward_24dp
+                }
+            }
+        }
+    }
+
+    private fun getSortRes(
+        sortingMode: Int?,
+        isAscending: Boolean,
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+    ): Int {
+        sortingMode ?: return defaultDrawableRes
+        return when (val sortMode = LibrarySort.valueOf(sortingMode)) {
+            LibrarySort.DragAndDrop -> defaultDrawableRes
+            else -> {
+                if (if (sortMode?.hasInvertedSort == true) !isAscending else isAscending) {
+                    R.drawable.ic_arrow_downward_24dp
+                } else {
+                    R.drawable.ic_arrow_upward_24dp
+                }
+            }
+        }
     }
 
     private fun onCatSortClicked(category: Category, menuId: Int?) {
         val modType = if (menuId == null) {
-            val t = (category.mangaSort?.minus('a') ?: 0) + 1
-            if (t % 2 != 0) t + 1
-            else t - 1
-        } else {
-            val order = when (menuId) {
-                LibrarySort.DRAG_AND_DROP -> {
-                    adapter.libraryListener.sortCategory(category.id!!, 'D' - 'a' + 1)
-                    return
-                }
-                LibrarySort.RATING -> 6
-                LibrarySort.DATE_ADDED -> 5
-                LibrarySort.TOTAL -> 4
-                LibrarySort.LAST_READ -> 3
-                LibrarySort.UNREAD -> 2
-                LibrarySort.LATEST_CHAPTER -> 1
-                else -> 0
+            val sortingMode = category.sortingMode() ?: LibrarySort.Title
+            if (category.isAscending()) {
+                sortingMode.categoryValueDescending
+            } else {
+                sortingMode.categoryValue
             }
-            if (order == category.catSortingMode()) {
+        } else {
+            val sortingMode = LibrarySort.valueOf(menuId) ?: LibrarySort.Title
+            if (sortingMode != LibrarySort.DragAndDrop && sortingMode == category.sortingMode()) {
                 onCatSortClicked(category, null)
                 return
             }
-            (2 * order + 1)
+            sortingMode.categoryValue
         }
         adapter.libraryListener.sortCategory(category.id!!, modType)
     }
 
     private fun selectAll() {
-        adapter.libraryListener.selectAll(adapterPosition)
+        adapter.libraryListener.selectAll(flexibleAdapterPosition)
     }
 
     fun setSelection() {
-        val allSelected = adapter.libraryListener.allSelected(adapterPosition)
+        val allSelected = adapter.libraryListener.allSelected(flexibleAdapterPosition)
         val drawable = ContextCompat.getDrawable(
             contentView.context,
             if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp
         )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
-            ContextCompat.getColor(
-                contentView.context,
-                if (allSelected) R.color.colorAccent
-                else R.color.gray_button
-            )
+            if (allSelected) contentView.context.getResourceColor(R.attr.colorAccent)
+            else ContextCompat.getColor(contentView.context, R.color.gray_button)
         )
-        checkboxImage.setImageDrawable(tintedDrawable)
+        binding.checkbox.setImageDrawable(tintedDrawable)
     }
 
     override fun onLongClick(view: View?): Boolean {

@@ -9,7 +9,6 @@ import android.widget.CheckBox
 import android.widget.CheckedTextView
 import android.widget.EditText
 import android.widget.RadioButton
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.appcompat.widget.TintTypedArray
 import androidx.core.view.ViewCompat
@@ -25,7 +24,7 @@ import eu.kanade.tachiyomi.R as TR
 open class SimpleNavigationView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) :
     ScrimInsetsFrameLayout(context, attrs, defStyleAttr) {
 
@@ -42,20 +41,24 @@ open class SimpleNavigationView @JvmOverloads constructor(
     init {
         // Custom attributes
         val a = TintTypedArray.obtainStyledAttributes(
-            context, attrs,
-            R.styleable.NavigationView, defStyleAttr,
+            context,
+            attrs,
+            R.styleable.NavigationView,
+            defStyleAttr,
             R.style.Widget_Design_NavigationView
         )
 
         ViewCompat.setBackground(
-            this, a.getDrawable(R.styleable.NavigationView_android_background)
+            this,
+            a.getDrawable(R.styleable.NavigationView_android_background)
         )
 
         if (a.hasValue(R.styleable.NavigationView_elevation)) {
             ViewCompat.setElevation(
                 this,
                 a.getDimensionPixelSize(
-                    R.styleable.NavigationView_elevation, 0
+                    R.styleable.NavigationView_elevation,
+                    0
                 ).toFloat()
             )
         }
@@ -81,7 +84,8 @@ open class SimpleNavigationView @JvmOverloads constructor(
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         val width = when (MeasureSpec.getMode(widthSpec)) {
             MeasureSpec.AT_MOST -> MeasureSpec.makeMeasureSpec(
-                min(MeasureSpec.getSize(widthSpec), maxWidth), MeasureSpec.EXACTLY
+                min(MeasureSpec.getSize(widthSpec), maxWidth),
+                MeasureSpec.EXACTLY
             )
             MeasureSpec.UNSPECIFIED -> MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.EXACTLY)
             else -> widthSpec
@@ -149,8 +153,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
     class SpinnerHolder(parent: ViewGroup, listener: OnClickListener? = null) :
         ClickableHolder(parent.inflate(TR.layout.navigation_view_spinner), listener) {
 
-        val text: TextView = itemView.findViewById(TR.id.nav_view_item_text)
-        val spinner: Spinner = itemView.findViewById(TR.id.nav_view_item)
+        val spinnerView: MaterialSpinnerView = itemView.findViewById(TR.id.nav_view_item)
     }
 
     class EditTextHolder(parent: ViewGroup) :

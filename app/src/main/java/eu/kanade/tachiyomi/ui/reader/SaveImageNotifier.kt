@@ -38,7 +38,6 @@ class SaveImageNotifier(private val context: Context) {
      * @param file image file containing downloaded page image.
      */
     fun onComplete(file: File) {
-
         val request = ImageRequest.Builder(context).memoryCachePolicy(CachePolicy.DISABLED).diskCachePolicy(CachePolicy.DISABLED)
             .data(file)
             .size(720, 1280)
@@ -64,8 +63,7 @@ class SaveImageNotifier(private val context: Context) {
             setAutoCancel(true)
             color = ContextCompat.getColor(context, R.color.colorAccent)
             // Clear old actions if they exist
-            if (mActions.isNotEmpty())
-                mActions.clear()
+            clearActions()
 
             setContentIntent(NotificationHandler.openImagePendingActivity(context, file))
             // Share action

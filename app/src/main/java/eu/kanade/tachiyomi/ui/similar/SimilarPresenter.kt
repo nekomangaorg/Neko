@@ -42,7 +42,7 @@ class SimilarPresenter(
                     source.fetchMangaSimilarObservable(manga!!, true).toBlocking().first()
                     isRefreshing = false
                     withContext(Dispatchers.Main) {
-                        controller.showUserMessage("Updated Similar Mangas!")
+                        controller.showUserMessage("Updated Similar Manga")
                     }
                 } catch (e: java.lang.Exception) {
                     isRefreshing = false
@@ -57,10 +57,9 @@ class SimilarPresenter(
 
     private fun trimException(e: java.lang.Exception): String {
         return (
-                if (e.message?.contains(": ") == true) e.message?.split(": ")?.drop(1)
-                    ?.joinToString(": ")
-                else e.message
-                ) ?: preferences.context.getString(R.string.unknown_error)
+            if (e.message?.contains(": ") == true) e.message?.split(": ")?.drop(1)
+                ?.joinToString(": ")
+            else e.message
+            ) ?: preferences.context.getString(R.string.unknown_error)
     }
-
 }

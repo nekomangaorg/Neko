@@ -52,4 +52,3 @@ fun List<Chapter>.filterIfUsingCache(downloadManager: DownloadManager, manga: Ma
         }
     }
 }
-

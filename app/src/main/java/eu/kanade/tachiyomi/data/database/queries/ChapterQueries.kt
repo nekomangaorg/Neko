@@ -6,26 +6,25 @@ import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaChapter
-import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterKnownBackupPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterProgressPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.ChapterSourceOrderPutResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterGetResolver
-import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.ChapterTable
 import eu.kanade.tachiyomi.util.lang.sqLite
-import java.util.Date
 
 interface ChapterQueries : DbProvider {
 
-    fun getChapters(manga: Manga) = db.get()
+    fun getChapters(manga: Manga) = getChapters(manga.id)
+
+    fun getChapters(mangaId: Long?) = db.get()
         .listOfObjects(Chapter::class.java)
         .withQuery(
             Query.builder()
                 .table(ChapterTable.TABLE)
                 .where("${ChapterTable.COL_MANGA_ID} = ?")
-                .whereArgs(manga.id)
+                .whereArgs(mangaId)
                 .build()
         )
         .prepare()
@@ -41,28 +40,33 @@ interface ChapterQueries : DbProvider {
         )
         .prepare()
 
-    fun getRecentChapters(date: Date) = db.get()
+    fun getRecentChapters(search: String = "", offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapter::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentsQuery())
-                .args(date.time)
+                .query(getRecentsQuery(search.sqLite, offset, isResuming))
+//                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()
         )
         .withGetResolver(MangaChapterGetResolver.INSTANCE)
         .prepare()
 
-    fun getUpdatedManga(date: Date, search: String = "", endless: Boolean) = db.get()
-        .listOfObjects(MangaChapterHistory::class.java)
+    /**
+     * Returns history of recent manga containing last read chapter in 25s
+     * @param date recent date range
+     * @offset offset the db by
+     */
+    fun getUpdatedChaptersDistinct(search: String = "", offset: Int, isResuming: Boolean) = db.get()
+        .listOfObjects(MangaChapter::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentsQueryDistinct(search.sqLite, endless))
-                .args(date.time)
+                .query(getRecentsQueryDistinct(search.sqLite, offset, isResuming))
+//                .args(date.time, startDate.time)
                 .observesTables(ChapterTable.TABLE)
                 .build()
         )
-        .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
+        .withGetResolver(MangaChapterGetResolver.INSTANCE)
         .prepare()
 
     fun getChapter(id: Long) = db.get()

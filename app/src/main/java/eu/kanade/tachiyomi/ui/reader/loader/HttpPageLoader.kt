@@ -1,16 +1,18 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
-import android.graphics.BitmapFactory
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerPageHolder
 import eu.kanade.tachiyomi.util.lang.plusAssign
-import eu.kanade.tachiyomi.util.system.ImageUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import rx.Completable
 import rx.Observable
 import rx.schedulers.Schedulers
@@ -23,6 +25,7 @@ import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
+import com.elvishew.xlog.XLog
 
 /**
  * Loader used to load chapters from an online source.
@@ -41,9 +44,16 @@ class HttpPageLoader(
     private val subscriptions = CompositeSubscription()
 
     private val preferences by injectLazy<PreferencesHelper>()
-    private val preloadSize = 30
+    private var preloadSize = preferences.preloadSize().get()
 
+    private val scope = CoroutineScope(Job() + Dispatchers.IO)
     init {
+        // Adding flow since we can reach reader settings after this is created
+        preferences.preloadSize().asFlow()
+            .onEach {
+                preloadSize = it
+            }
+            .launchIn(scope)
         subscriptions += Observable.defer { Observable.just(queue.take().page) }
             .filter { it.status == Page.QUEUE }
             .concatMap { source.fetchImageFromCacheThenNet(it) }
@@ -65,6 +75,7 @@ class HttpPageLoader(
      */
     override fun recycle() {
         super.recycle()
+        scope.cancel()
         subscriptions.unsubscribe()
         queue.clear()
 
@@ -88,11 +99,11 @@ class HttpPageLoader(
      * the local cache, otherwise fallbacks to network.
      */
     override fun getPages(): Observable<List<ReaderPage>> {
-        return chapterCache
-            .getPageListFromCache(chapter.chapter)
+        return Observable.fromCallable { chapterCache.getPageListFromCache(chapter.chapter) }
             .onErrorResumeNext { source.fetchPageList(chapter.chapter) }
             .map { pages ->
-                pages.mapIndexed { index, page -> // Don't trust sources and use our own indexing
+                pages.mapIndexed { index, page ->
+                    // Don't trust sources and use our own indexing
                     ReaderPage(index, page.url, page.imageUrl)
                 }
             }
@@ -192,10 +203,11 @@ class HttpPageLoader(
      * @param page the page whose source image has to be downloaded.
      */
     private fun HttpSource.fetchImageFromCacheThenNet(page: ReaderPage): Observable<ReaderPage> {
-        return if (page.imageUrl.isNullOrEmpty())
+        return if (page.imageUrl.isNullOrEmpty()) {
             getImageUrl(page).flatMap { getCachedImage(it) }
-        else
+        } else {
             getCachedImage(page)
+        }
     }
 
     private fun HttpSource.getImageUrl(page: ReaderPage): Observable<ReaderPage> {
@@ -216,26 +228,20 @@ class HttpPageLoader(
     private fun HttpSource.getCachedImage(page: ReaderPage): Observable<ReaderPage> {
         val imageUrl = page.imageUrl ?: return Observable.just(page)
 
-        return Observable.just(page).flatMap {
-            if (!chapterCache.isImageInCache(imageUrl)) {
-                cacheImage(page)
-            } else {
-                Observable.just(page)
+        return Observable.just(page)
+            .flatMap {
+                if (!chapterCache.isImageInCache(imageUrl)) {
+                    cacheImage(page)
+                } else {
+                    Observable.just(page)
+                }
             }
-        }.doOnNext {
-            val readerTheme = preferences.readerTheme().get()
-            if (readerTheme >= 2) {
-                val stream = chapterCache.getImageFile(imageUrl).inputStream()
-                val image = BitmapFactory.decodeStream(stream)
-                page.bg = ImageUtil.autoSetBackground(
-                    image, readerTheme == 2, preferences.context
-                )
-                page.bgType = PagerPageHolder.getBGType(readerTheme, preferences.context)
-                stream.close()
+            .doOnNext {
+                page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
+                page.status = Page.READY
             }
-            page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
-            page.status = Page.READY
-        }.doOnError { page.status = Page.ERROR }.onErrorReturn { page }
+            .doOnError { page.status = Page.ERROR }
+            .onErrorReturn { page }
     }
 
     /**

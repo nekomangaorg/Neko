@@ -11,7 +11,7 @@ import eu.davidea.flexibleadapter.items.ISectionable
 import eu.davidea.viewholders.ExpandableViewHolder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Filter
-import eu.kanade.tachiyomi.util.view.setVectorCompat
+import eu.kanade.tachiyomi.util.view.setAnimVectorCompat
 
 class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<GroupItem.Holder, ISectionable<*, *>>() {
 
@@ -34,11 +34,12 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
     override fun bindViewHolder(adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>, holder: Holder, position: Int, payloads: MutableList<Any?>?) {
         holder.title.text = filter.name
 
-        holder.icon.setVectorCompat(
-            if (isExpanded)
-                R.drawable.ic_expand_more_24dp
-            else
-                R.drawable.ic_chevron_right_24dp
+        holder.icon.setAnimVectorCompat(
+            if (isExpanded) {
+                R.drawable.anim_expand_more_to_less
+            } else {
+                R.drawable.anim_expand_less_to_more
+            }
         )
 
         holder.itemView.setOnClickListener(holder)

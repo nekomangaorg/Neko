@@ -61,7 +61,7 @@
                     android:contentDescription="@string/start_reading"
                     android:padding="6dp"
                     android:src="@drawable/ic_start_reading_24dp"
-                    android:tint="@android:color/white" />
+                    app:tint="@android:color/white" />
 
             </FrameLayout>
 
@@ -109,6 +109,7 @@
 
         <include
             layout="@layout/unread_download_badge"
+            android:id="@+id/unread_download_badge"
             android:layout_width="wrap_content"
             android:layout_marginStart="1dp"
             android:layout_height="wrap_content"

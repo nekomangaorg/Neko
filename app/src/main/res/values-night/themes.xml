@@ -5,6 +5,9 @@
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="colorSecondaryVariant">@color/colorPrimary</item>
+        <item name="colorAccentText">@color/neko_green</item>
+        <item name="unreadBadgeColor">@color/neko_green</item>
+        <item name="colorOnUnreadBadge">@color/md_black_1000</item>
 
     </style>
 
@@ -12,7 +15,9 @@
     <!-- Amoled Theme -->
     <!--==============-->
     <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
-        <item name="colorPrimary">@color/colorAmoledPrimary</item>
+        <item name="unreadBadgeColor">@color/neko_green_darker</item>
+        <item name="colorOnUnreadBadge">@color/md_black_1000</item>
+        <item name="colorAccentText">@color/neko_green_darker</item>
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorSecondaryVariant">@color/colorAmoledPrimary</item>
@@ -24,4 +29,36 @@
         <!-- Material Dialog colors -->
         <item name="md_background_color">@color/colorAmoledPrimary</item>
     </style>
+
+    <style name="Theme.Tachiyomi.Amoled.Standard" parent="Theme.Tachiyomi.Amoled">
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled.Standard">
+        <item name="colorPrimary">@color/primaryRed</item>
+        <item name="colorAccent">@color/holo_red</item>
+        <item name="colorAccentText">@color/md_red_500</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled.Standard">
+        <item name="colorPrimary">@color/colorPrimaryPink</item>
+        <item name="colorAccent">@color/colorAccentPink</item>
+        <item name="colorAccentText">@color/colorAccentPink</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard">
+        <item name="colorPrimary">@color/primaryLime</item>
+        <item name="colorPrimaryDark">@color/backgroundLime</item>
+        <item name="colorAccent">@color/colorAccentLime</item>
+        <item name="colorAccentText">@color/colorAccentLime</item>
+        <item name="colorPrimaryVariant">@color/dialogLime</item>
+        <item name="colorSecondary">@color/backgroundLime</item>
+        <item name="background">@color/backgroundLime</item>
+        <item name="android:colorBackground">@color/backgroundLime</item>
+        <item name="colorSurface">@color/colorAccentLimeText</item>
+        <item name="colorOnAccent">@color/colorOnLime</item>
+    </style>
+
+
 </resources>

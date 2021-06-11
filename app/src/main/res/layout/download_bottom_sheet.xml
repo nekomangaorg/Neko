@@ -7,7 +7,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bottom_sheet_rounded_background"
-    android:backgroundTint="?android:attr/colorBackground"
+    android:backgroundTint="?colorPrimaryVariant"
     android:orientation="vertical"
     app:behavior_peekHeight="48sp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
@@ -56,7 +56,7 @@
             tools:text="Downloads" />
     </LinearLayout>
 
-    <FrameLayout
+    <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/recycler_layout"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -81,5 +81,11 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:fastScrollerBubbleEnabled="true" />
-    </FrameLayout>
+
+        <com.google.android.material.floatingactionbutton.ExtendedFloatingActionButton
+            android:id="@+id/download_fab"
+            style="@style/Theme.Widget.FAB"
+            android:text="@string/resume"
+            app:icon="@drawable/ic_play_arrow_24dp"/>
+    </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </eu.kanade.tachiyomi.ui.download.DownloadBottomSheet>

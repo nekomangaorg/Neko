@@ -6,8 +6,8 @@ import java.time.format.DateTimeFormatter
 plugins {
     id(Plugins.androidApplication)
     kotlin(Plugins.kotlinAndroid)
-    kotlin(Plugins.kotlinExtensions)
     kotlin(Plugins.kapt)
+    id(Plugins.kotlinParcelize)
     id(Plugins.kotlinSerialization)
     id(Plugins.aboutLibraries)
     id(Plugins.firebaseCrashlytics)
@@ -29,7 +29,6 @@ fun runCommand(command: String): String {
 
 android {
     compileSdkVersion(Configs.compileSdkVersion)
-    buildToolsVersion(Configs.buildToolsVersion)
 
     defaultConfig {
         minSdkVersion(Configs.minSdkVersion)
@@ -56,6 +55,10 @@ android {
         }
     }
 
+    buildFeatures {
+        viewBinding = true
+    }
+
     flavorDimensions("default")
 
     productFlavors {
@@ -68,6 +71,7 @@ android {
     }
 
     lintOptions {
+        disable("MissingTranslation")
         isAbortOnError = false
         isCheckReleaseBuilds = false
     }
@@ -80,13 +84,12 @@ android {
         jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 }
-androidExtensions {
-    isExperimental = true
-}
 
 dependencies {
     // Modified dependencies
     implementation(Libs.UI.subsamplingScaleImageView)
+    // Source models and interfaces from Tachiyomi 1.x
+    implementation("tachiyomi.sourceapi:source-api:1.1")
     // Android support library
     implementation(Libs.Android.appCompat)
     implementation(Libs.Android.cardView)
@@ -227,9 +230,6 @@ dependencies {
 
     // Conductor
     implementation(Libs.Navigation.conductor)
-    implementation(Libs.Navigation.conductorSupport) {
-        exclude("group", "com.android.support")
-    }
     implementation(Libs.Navigation.conductorSupportPreferences)
 
     // RxBindings
@@ -248,6 +248,7 @@ dependencies {
     testImplementation(Libs.Test.roboElectricShadowPlayServices)
 
     implementation(Libs.Kotlin.stdLib)
+    implementation(Libs.Kotlin.reflection)
     implementation(Libs.Kotlin.coroutines)
 
     // Text distance
@@ -264,21 +265,23 @@ dependencies {
     implementation(Libs.Util.aboutLibraries)
 }
 
-// See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api-markers
-tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().all {
-    kotlinOptions.freeCompilerArgs += listOf(
-        "-Xopt-in=kotlin.Experimental",
-        "-Xopt-in=kotlin.RequiresOptIn",
-        "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
-        "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
-        "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
-        "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
-        "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
-    )
-}
+tasks {
+    // See https://kotlinlang.org/docs/reference/experimental.html#experimental-status-of-experimental-api(-markers)
+    withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile> {
+        kotlinOptions.freeCompilerArgs += listOf(
+            "-Xopt-in=kotlin.Experimental",
+            "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
+            "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
+            "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
+            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+        )
+    }
 
-tasks.preBuild {
-    dependsOn(tasks.ktlintFormat)
+    preBuild {
+        // dependsOn(formatKotlin)
+    }
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {

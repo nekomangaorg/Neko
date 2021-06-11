@@ -19,7 +19,7 @@ import kotlinx.coroutines.launch
 import java.util.concurrent.TimeUnit
 
 /**
- * Restores backup from json file
+ * Restores backup.
  */
 class BackupRestoreService : Service() {
 
@@ -42,7 +42,8 @@ class BackupRestoreService : Service() {
         super.onCreate()
         startForeground(Notifications.ID_RESTORE_PROGRESS, restoreHelper.progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "BackupRestoreService:WakeLock"
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "BackupRestoreService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.HOURS.toMillis(3))
     }

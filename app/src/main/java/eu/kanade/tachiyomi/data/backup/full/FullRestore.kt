@@ -52,7 +52,6 @@ class FullRestore(val context: Context, val job: Job?) {
     internal val trackManager: TrackManager by injectLazy()
 
     suspend fun restoreBackup(uri: Uri) {
-
         backupManager = FullBackupManager(context)
 
         val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use { it.readByteArray() }
@@ -64,6 +63,7 @@ class FullRestore(val context: Context, val job: Job?) {
         skippedTitles = partitionedList.second.map { it.title }
         totalAmount = backup.backupManga.size
         skippedAmount = totalAmount - dexManga.size
+        restoreAmount = dexManga.size
         trackingErrors.clear()
         errors.clear()
         cancelled = 0
@@ -119,7 +119,7 @@ class FullRestore(val context: Context, val job: Job?) {
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
                 if (newMangaId.isNotBlank()) {
-                    manga.url = "/title/${newMangaId}"
+                    manga.url = "/title/$newMangaId"
                 }
             }
 

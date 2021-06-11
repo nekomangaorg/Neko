@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.ui.library.filter
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.databinding.CategoriesItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.view.gone
-import kotlinx.android.synthetic.main.categories_item.*
 
 /**
  * Category item for a recycler view.
@@ -74,27 +74,16 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
     class Holder(val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
         BaseFlexibleViewHolder(view, adapter, true) {
 
+        private val binding = CategoriesItemBinding.bind(view)
         init {
-            image.gone()
-            edit_button.gone()
-            edit_text.isEnabled = false
-            setDragHandleView(reorder)
+            binding.image.isVisible = false
+            binding.editButton.isVisible = false
+            binding.editText.isVisible = false
+            setDragHandleView(binding.reorder)
         }
 
         fun bind(char: Char) {
-            title.setText(
-                when (char) {
-                    'u' -> R.string.read_progress
-                    'r' -> R.string.unread
-                    'd' -> R.string.downloaded
-                    'c' -> R.string.status
-                    'm' -> R.string.series_type
-                    't' -> R.string.tracked
-                    'n' -> R.string.merged
-                    'o' -> R.string.has_missing_chp
-                    else -> R.string.unread
-                }
-            )
+            binding.title.setText(FilterBottomSheet.Filters.filterOf(char)?.stringRes ?: 0)
         }
     }
 }

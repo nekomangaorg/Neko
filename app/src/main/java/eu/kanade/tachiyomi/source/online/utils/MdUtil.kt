@@ -244,14 +244,6 @@ class MdUtil {
             return cleanString(newDescription)
         }
 
-        fun getImageUrl(attr: String): String {
-            // Some images are hosted elsewhere
-            if (attr.startsWith("http")) {
-                return attr
-            }
-            return baseUrl + attr
-        }
-
         fun getScanlators(scanlators: String): List<String> {
             if (scanlators.isBlank()) return emptyList()
             return scanlators.split(scanlatorSeparator).distinct()
@@ -317,7 +309,6 @@ class MdUtil {
         }
 
         fun getCoversFromMangaList(mangaResponseList: List<MangaResponse>, client: OkHttpClient): Map<String, String> {
-
             val idsAndCoverIds = mangaResponseList.mapNotNull { mangaResponse ->
                 val mangaId = mangaResponse.data.id
                 val coverId = mangaResponse.relationships.firstOrNull { relationship ->

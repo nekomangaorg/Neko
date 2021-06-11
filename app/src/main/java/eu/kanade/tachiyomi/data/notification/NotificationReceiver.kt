@@ -20,10 +20,12 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.similar.MangaCacheUpdateService
+import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.notificationManager
@@ -60,44 +62,58 @@ class NotificationReceiver : BroadcastReceiver() {
             // Clear the download queue
             ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue(true)
             // Launch share activity and dismiss notification
-            ACTION_SHARE_IMAGE ->
-                shareImage(
-                    context, intent.getStringExtra(EXTRA_FILE_LOCATION),
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-                )
+            ACTION_SHARE_IMAGE -> shareImage(
+                context,
+                intent.getStringExtra(EXTRA_FILE_LOCATION)!!,
+                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+            )
             // Delete image from path and dismiss notification
-            ACTION_DELETE_IMAGE ->
-                deleteImage(
-                    context, intent.getStringExtra(EXTRA_FILE_LOCATION),
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-                )
+            ACTION_DELETE_IMAGE -> deleteImage(
+                context,
+                intent.getStringExtra(EXTRA_FILE_LOCATION)!!,
+                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+            )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             ACTION_CANCEL_CACHE_UPDATE -> cancelCacheUpdate(context)
             ACTION_CANCEL_V5_MIGRATION -> cancelV5Migration(context)
+            ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Share backup file
             ACTION_SHARE_BACKUP ->
                 shareBackup(
-                    context, intent.getParcelableExtra(EXTRA_URI),
+                    context,
+                    intent.getParcelableExtra(EXTRA_URI)!!,
                     intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 )
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
                 openChapter(
-                    context, intent.getLongExtra(EXTRA_MANGA_ID, -1),
+                    context,
+                    intent.getLongExtra(EXTRA_MANGA_ID, -1),
                     intent.getLongExtra(EXTRA_CHAPTER_ID, -1)
                 )
             }
             ACTION_MARK_AS_READ -> {
                 val notificationId = intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
                 if (notificationId > -1) dismissNotification(
-                    context, notificationId, intent.getIntExtra(EXTRA_GROUP_ID, 0)
+                    context,
+                    notificationId,
+                    intent.getIntExtra(EXTRA_GROUP_ID, 0)
                 )
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
                 markAsRead(urls, mangaId)
             }
+
+            // Share crash dump file
+            ACTION_SHARE_CRASH_LOG ->
+                shareFile(
+                    context,
+                    intent.getParcelableExtra(EXTRA_URI)!!,
+                    "text/plain",
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                )
         }
     }
 
@@ -173,6 +189,26 @@ class NotificationReceiver : BroadcastReceiver() {
     }
 
     /**
+     * Called to start share intent to share backup file
+     *
+     * @param context context of application
+     * @param path path of file
+     * @param notificationId id of notification
+     */
+    private fun shareFile(context: Context, uri: Uri, fileMimeType: String, notificationId: Int) {
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            putExtra(Intent.EXTRA_STREAM, uri)
+            clipData = ClipData.newRawUri(null, uri)
+            type = fileMimeType
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        // Dismiss notification
+        dismissNotification(context, notificationId)
+        // Launch share activity
+        context.startActivity(sendIntent)
+    }
+
+    /**
      * Called to delete image
      *
      * @param path path of file
@@ -244,14 +280,17 @@ class NotificationReceiver : BroadcastReceiver() {
         }
     }
 
-    /* Method called when user wants to stop a restore
+    /** Method called when user wants to stop a restore
      *
      * @param context context of application
-     * @param notificationId id of notification
      */
     private fun cancelRestoreUpdate(context: Context) {
         BackupRestoreService.stop(context)
         Handler().post { dismissNotification(context, Notifications.ID_RESTORE_PROGRESS) }
+    }
+
+    private fun cancelDownloadUpdate(context: Context) {
+        UpdaterService.stop(context)
     }
 
     companion object {
@@ -266,6 +305,8 @@ class NotificationReceiver : BroadcastReceiver() {
         // Called to launch send intent.
         private const val ACTION_SHARE_BACKUP = "$ID.$NAME.SEND_BACKUP"
 
+        private const val ACTION_SHARE_CRASH_LOG = "$ID.$NAME.SEND_CRASH_LOG"
+
         // Called to cancel library update.
         private const val ACTION_CANCEL_LIBRARY_UPDATE = "$ID.$NAME.CANCEL_LIBRARY_UPDATE"
 
@@ -274,6 +315,8 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel library v5 migration update.
         private const val ACTION_CANCEL_V5_MIGRATION = "$ID.$NAME.CANCEL_V5_MIGRATION"
+
+        private const val ACTION_CANCEL_UPDATE_DOWNLOAD = "$ID.$NAME.CANCEL_UPDATE_DOWNLOAD"
 
         // Called to mark as read
         private const val ACTION_MARK_AS_READ = "$ID.$NAME.MARK_AS_READ"
@@ -316,6 +359,8 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Value containing chapter url.
         private const val EXTRA_CHAPTER_URL = "$ID.$NAME.EXTRA_CHAPTER_URL"
+
+        private const val EXTRA_IS_LEGACY_BACKUP = "$ID.$NAME.EXTRA_IS_LEGACY_BACKUP"
 
         /**
          * Returns a [PendingIntent] that resumes the download of a chapter
@@ -418,7 +463,9 @@ class NotificationReceiver : BroadcastReceiver() {
                 type = "image/*"
             }
             return PendingIntent.getActivity(
-                context, 0, shareIntent,
+                context,
+                0,
+                shareIntent,
                 PendingIntent
                     .FLAG_CANCEL_CURRENT
             )
@@ -456,9 +503,33 @@ class NotificationReceiver : BroadcastReceiver() {
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
-                context, manga.id.hashCode(), newIntent,
+                context,
+                manga.id.hashCode(),
+                newIntent,
                 PendingIntent
                     .FLAG_UPDATE_CURRENT
+            )
+        }
+
+        /**
+         * Returns [PendingIntent] that opens release notes for the next update.
+         *
+         * @param context context of application
+         * @param notes notes of the release
+         * @param downloadLink download link to the apk
+         */
+        internal fun openUpdatePendingActivity(context: Context, notes: String, downloadLink: String):
+            PendingIntent {
+            val newIntent =
+                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra(AboutController.NewUpdateDialogController.BODY_KEY, notes)
+                    .putExtra(AboutController.NewUpdateDialogController.URL_KEY, downloadLink)
+            return PendingIntent.getActivity(
+                context,
+                downloadLink.hashCode(),
+                newIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
             )
         }
 
@@ -470,16 +541,19 @@ class NotificationReceiver : BroadcastReceiver() {
          */
         internal fun openChapterPendingActivity(context: Context, manga: Manga, groupId: Int):
             PendingIntent {
-                val newIntent =
-                    Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
-                        .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                        .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
-                        .putExtra("notificationId", manga.id.hashCode())
-                        .putExtra("groupId", groupId)
-                return PendingIntent.getActivity(
-                    context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT
-                )
-            }
+            val newIntent =
+                Intent(context, MainActivity::class.java).setAction(MainActivity.SHORTCUT_MANGA)
+                    .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                    .putExtra(MangaDetailsController.MANGA_EXTRA, manga.id)
+                    .putExtra("notificationId", manga.id.hashCode())
+                    .putExtra("groupId", groupId)
+            return PendingIntent.getActivity(
+                context,
+                manga.id.hashCode(),
+                newIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
 
         /**
          * Returns [PendingIntent] that opens the error log file in an external viewer
@@ -488,7 +562,7 @@ class NotificationReceiver : BroadcastReceiver() {
          * @param uri uri of error log file
          * @return [PendingIntent]
          */
-        internal fun openErrorLogPendingActivity(context: Context, uri: Uri): PendingIntent {
+        internal fun openErrorLogPendingActivity(context: Context, uri: Uri?): PendingIntent {
             val intent = Intent().apply {
                 action = Intent.ACTION_VIEW
                 setDataAndType(uri, "text/plain")
@@ -523,15 +597,15 @@ class NotificationReceiver : BroadcastReceiver() {
             groupId: Int
         ):
             PendingIntent {
-                val newIntent = Intent(context, NotificationReceiver::class.java).apply {
-                    action = ACTION_MARK_AS_READ
-                    putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
-                    putExtra(EXTRA_MANGA_ID, manga.id)
-                    putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
-                    putExtra(EXTRA_GROUP_ID, groupId)
-                }
-                return PendingIntent.getBroadcast(context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+            val newIntent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_MARK_AS_READ
+                putExtra(EXTRA_CHAPTER_URL, chapters.map { it.url }.toTypedArray())
+                putExtra(EXTRA_MANGA_ID, manga.id)
+                putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
+                putExtra(EXTRA_GROUP_ID, groupId)
             }
+            return PendingIntent.getBroadcast(context, manga.id.hashCode(), newIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
 
         /**
          * Returns [PendingIntent] that starts a service which stops the library update
@@ -590,14 +664,64 @@ class NotificationReceiver : BroadcastReceiver() {
         }
 
         /**
-         * Returns [PendingIntent] that starts a service which stops the restore service
+         * Returns [PendingIntent] that cancels the download for a Tachiyomi update
          *
          * @param context context of application
          * @return [PendingIntent]
          */
-        internal fun cancelRestorePendingBroadcast(context: Context): PendingIntent {
+        internal fun cancelUpdateDownloadPendingBroadcast(context: Context): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_CANCEL_UPDATE_DOWNLOAD
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that starts a share activity for a backup file.
+         *
+         * @param context context of application
+         * @param uri uri of backup file
+         * @param notificationId id of notification
+         * @return [PendingIntent]
+         */
+        internal fun shareBackupPendingBroadcast(context: Context, uri: Uri, isLegacyFormat: Boolean, notificationId: Int): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_SHARE_BACKUP
+                putExtra(EXTRA_URI, uri)
+                putExtra(EXTRA_IS_LEGACY_BACKUP, isLegacyFormat)
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that starts a share activity for a crash log dump file.
+         *
+         * @param context context of application
+         * @param uri uri of file
+         * @param notificationId id of notification
+         * @return [PendingIntent]
+         */
+        internal fun shareCrashLogPendingBroadcast(context: Context, uri: Uri, notificationId: Int): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_SHARE_CRASH_LOG
+                putExtra(EXTRA_URI, uri)
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that cancels a backup restore job.
+         *
+         * @param context context of application
+         * @param notificationId id of notification
+         * @return [PendingIntent]
+         */
+        internal fun cancelRestorePendingBroadcast(context: Context, notificationId: Int): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_RESTORE
+                putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }

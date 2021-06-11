@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import android.graphics.Bitmap
 import android.view.View
 import androidx.recyclerview.widget.ItemTouchHelper
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -97,7 +96,8 @@ class MangaDetailsAdapter(
     private fun getChapterName(item: ChapterItem): String {
         return if (item.chapter_number > 0) {
             recyclerView.context.getString(
-                R.string.chapter_, decimalFormat.format(item.chapter_number)
+                R.string.chapter_,
+                decimalFormat.format(item.chapter_number)
             )
         } else {
             item.name
@@ -119,8 +119,6 @@ class MangaDetailsAdapter(
         fun coverColor(): Int?
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
-        fun openSimilar()
-        fun openMerge()
         fun startDownloadRange(position: Int)
         fun readNextChapter()
         fun topCoverHeight(): Int
@@ -132,7 +130,9 @@ class MangaDetailsAdapter(
         fun showTrackingSheet()
         fun updateScroll()
         fun setFavButtonPopup(popupView: View)
+
         fun showExternalSheet()
-        fun generatePalette(input: Bitmap)
+        fun openSimilar()
+        fun openMerge()
     }
 }

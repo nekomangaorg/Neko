@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.net.toUri
+import androidx.core.view.isVisible
 import coil.clear
 import coil.loadAny
 import coil.request.CachePolicy
@@ -26,9 +27,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.gone
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.visible
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import rx.Observable
 import rx.Subscription
@@ -64,6 +63,7 @@ class WebtoonPageHolder(
      * Image view that supports subsampling on zoom.
      */
     private var subsamplingImageView: SubsamplingScaleImageView? = null
+    private var cropBorders: Boolean = false
 
     /**
      * Simple image view only used on GIFs.
@@ -108,7 +108,7 @@ class WebtoonPageHolder(
     private var readImageHeaderSubscription: Subscription? = null
 
     init {
-        frame.layoutParams = FrameLayout.LayoutParams(MATCH_PARENT, WRAP_CONTENT)
+        refreshLayoutParams()
         frame.setBackgroundColor(Color.BLACK)
     }
 
@@ -127,7 +127,7 @@ class WebtoonPageHolder(
             marginEnd = margin.toInt()
             marginStart = margin.toInt()
         }
-        if (!viewer.isContinuous) {
+        if (viewer.hasMargins) {
             frame.updatePaddingRelative(bottom = 15.dpToPx)
         }
     }
@@ -142,9 +142,9 @@ class WebtoonPageHolder(
 
         removeDecodeErrorLayout()
         subsamplingImageView?.recycle()
-        subsamplingImageView?.gone()
+        subsamplingImageView?.isVisible = false
         imageView?.clear()
-        imageView?.gone()
+        imageView?.isVisible = false
         progressBar.setProgress(0)
     }
 
@@ -235,9 +235,9 @@ class WebtoonPageHolder(
      * Called when the page is queued.
      */
     private fun setQueued() {
-        progressContainer.visible()
-        progressBar.visible()
-        retryContainer?.gone()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
 
@@ -245,9 +245,9 @@ class WebtoonPageHolder(
      * Called when the page is loading.
      */
     private fun setLoading() {
-        progressContainer.visible()
-        progressBar.visible()
-        retryContainer?.gone()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
 
@@ -255,9 +255,9 @@ class WebtoonPageHolder(
      * Called when the page is downloading
      */
     private fun setDownloading() {
-        progressContainer.visible()
-        progressBar.visible()
-        retryContainer?.gone()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
     }
 
@@ -265,10 +265,10 @@ class WebtoonPageHolder(
      * Called when the page is ready.
      */
     private fun setImage() {
-        progressContainer.visible()
-        progressBar.visible()
+        progressContainer.isVisible = true
+        progressBar.isVisible = true
         progressBar.completeAndFadeOut()
-        retryContainer?.gone()
+        retryContainer?.isVisible = false
         removeDecodeErrorLayout()
 
         unsubscribeReadImageHeader()
@@ -287,11 +287,11 @@ class WebtoonPageHolder(
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
                     val subsamplingView = initSubsamplingImageView()
-                    subsamplingView.visible()
+                    subsamplingView.isVisible = true
                     subsamplingView.setImage(ImageSource.inputStream(openStream!!))
                 } else {
                     val imageView = initImageView()
-                    imageView.visible()
+                    imageView.isVisible = true
                     imageView.setImage(openStream!!)
                 }
             }
@@ -307,23 +307,23 @@ class WebtoonPageHolder(
      * Called when the page has an error.
      */
     private fun setError() {
-        progressContainer.gone()
-        initRetryLayout().visible()
+        progressContainer.isVisible = false
+        initRetryLayout().isVisible = true
     }
 
     /**
      * Called when the image is decoded and going to be displayed.
      */
     private fun onImageDecoded() {
-        progressContainer.gone()
+        progressContainer.isVisible = false
     }
 
     /**
      * Called when the image fails to decode.
      */
     private fun onImageDecodeError() {
-        progressContainer.gone()
-        initDecodeErrorLayout().visible()
+        progressContainer.isVisible = false
+        initDecodeErrorLayout().isVisible = true
     }
 
     /**
@@ -349,9 +349,18 @@ class WebtoonPageHolder(
      * Initializes a subsampling scale view.
      */
     private fun initSubsamplingImageView(): SubsamplingScaleImageView {
-        if (subsamplingImageView != null) return subsamplingImageView!!
-
         val config = viewer.config
+        val newCropBorders = if (viewer.hasMargins) config.verticalCropBorders else config.webtoonCropBorders
+
+        subsamplingImageView?.apply {
+            if (newCropBorders != cropBorders) {
+                cropBorders = newCropBorders
+                setCropBorders(newCropBorders)
+            }
+            return this
+        }
+
+        cropBorders = newCropBorders
 
         subsamplingImageView = WebtoonSubsamplingImageView(context).apply {
             setMaxTileSize(viewer.activity.maxBitmapSize)
@@ -359,16 +368,18 @@ class WebtoonPageHolder(
             setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH)
             setMinimumDpi(90)
             setMinimumTileDpi(180)
-            setCropBorders(config.imageCropBorders)
-            setOnImageEventListener(object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
-                override fun onReady() {
-                    onImageDecoded()
-                }
+            setCropBorders(cropBorders)
+            setOnImageEventListener(
+                object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                    override fun onReady() {
+                        onImageDecoded()
+                    }
 
-                override fun onImageLoadError(e: Exception) {
-                    onImageDecodeError()
+                    override fun onImageLoadError(e: Exception) {
+                        onImageDecodeError()
+                    }
                 }
-            })
+            )
         }
         frame.addView(subsamplingImageView, MATCH_PARENT, MATCH_PARENT)
         return subsamplingImageView!!
@@ -451,14 +462,14 @@ class WebtoonPageHolder(
         }
 
         val imageUrl = page?.imageUrl
-        if (imageUrl.orEmpty().startsWith("http")) {
+        if (imageUrl != null && imageUrl.startsWith("http")) {
             AppCompatButton(context).apply {
                 layoutParams = FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT).apply {
                     setMargins(0, margins, 0, margins)
                 }
                 setText(R.string.open_in_browser)
                 setOnClickListener {
-                    val intent = Intent(Intent.ACTION_VIEW, imageUrl!!.toUri())
+                    val intent = Intent(Intent.ACTION_VIEW, imageUrl.toUri())
                     context.startActivity(intent)
                 }
 

@@ -1,33 +1,21 @@
 package eu.kanade.tachiyomi.v5.job
 
-import android.app.Notification
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
 import android.net.Uri
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import coil.Coil
-import coil.request.CachePolicy
-import coil.request.ImageRequest
-import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Chapter
-import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.chop
-import eu.kanade.tachiyomi.util.system.notification
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
-import uy.kohesive.injekt.injectLazy
 
 class V5MigrationNotifier(private val context: Context) {
 
@@ -70,11 +58,11 @@ class V5MigrationNotifier(private val context: Context) {
     fun showProgressNotification(manga: SManga, current: Int, total: Int) {
         val title = manga.title
         context.notificationManager.notify(
-                Notifications.ID_V5_MIGRATION_PROGRESS,
-                progressNotificationBuilder
-                        .setContentTitle(title)
-                        .setProgress(total, current, false)
-                        .build()
+            Notifications.ID_V5_MIGRATION_PROGRESS,
+            progressNotificationBuilder
+                .setContentTitle(title)
+                .setProgress(total, current, false)
+                .build()
         )
     }
 
@@ -88,11 +76,11 @@ class V5MigrationNotifier(private val context: Context) {
     fun showProgressNotification(chapter: SChapter, current: Int, total: Int) {
         val title = chapter.chapter_title
         context.notificationManager.notify(
-                Notifications.ID_V5_MIGRATION_PROGRESS,
-                progressNotificationBuilder
-                        .setContentTitle(title)
-                        .setProgress(total, current, false)
-                        .build()
+            Notifications.ID_V5_MIGRATION_PROGRESS,
+            progressNotificationBuilder
+                .setContentTitle(title)
+                .setProgress(total, current, false)
+                .build()
         )
     }
 
@@ -107,23 +95,23 @@ class V5MigrationNotifier(private val context: Context) {
             return
         }
         context.notificationManager.notify(
-                Notifications.ID_V5_MIGRATION_ERROR,
-                context.notificationBuilder(Notifications.CHANNEL_V5_MIGRATION) {
-                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
-                    addAction(
-                            R.drawable.nnf_ic_file_folder,
-                            context.getString(R.string.view_all_errors),
-                            NotificationReceiver.openErrorLogPendingActivity(context, uri!!)
+            Notifications.ID_V5_MIGRATION_ERROR,
+            context.notificationBuilder(Notifications.CHANNEL_V5_MIGRATION) {
+                setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
+                addAction(
+                    R.drawable.nnf_ic_file_folder,
+                    context.getString(R.string.view_all_errors),
+                    NotificationReceiver.openErrorLogPendingActivity(context, uri!!)
+                )
+                setStyle(
+                    NotificationCompat.BigTextStyle().bigText(
+                        errors.joinToString("\n") {
+                            it.chop(TITLE_MAX_LEN)
+                        }
                     )
-                    setStyle(
-                            NotificationCompat.BigTextStyle().bigText(
-                                    errors.joinToString("\n") {
-                                        it.chop(TITLE_MAX_LEN)
-                                    }
-                            )
-                    )
-                    setSmallIcon(R.drawable.ic_neko_notification)
-                }.build()
+                )
+                setSmallIcon(R.drawable.ic_neko_notification)
+            }.build()
         )
     }
 

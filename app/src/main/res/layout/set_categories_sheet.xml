@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/source_filter_sheet"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@drawable/bottom_sheet_rounded_background"
+    app:layout_constraintVertical_chainStyle="packed"
+    android:backgroundTint="?android:attr/colorBackground">
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/category_recycler_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scrollbars="vertical"
+        app:layout_constraintTop_toBottomOf="@id/title_layout"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/button_layout"
+        tools:listitem="@layout/add_category_item"/>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/title_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="top"
+        android:background="@drawable/bottom_sheet_rounded_background"
+        android:backgroundTint="?attr/colorSecondary"
+        android:elevation="0dp"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toTopOf="@id/category_recycler_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/toolbar_title"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginStart="20dp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="@string/add_x_to"
+            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            android:textColor="?actionBarTintColor"
+            android:textSize="17sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/new_category_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Add manga to…"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/new_category_button"
+            android:layout_width="wrap_content"
+            android:layout_height="0dp"
+            android:layout_marginEnd="16dp"
+            app:icon="@drawable/ic_plus_24dp"
+            app:iconTint="?colorAccent"
+            style="@style/Theme.Widget.Button.TextButton"
+            android:text="@string/new_category"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/toolbar_title"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:background="@color/divider"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/button_layout"
+        android:layout_width="match_parent"
+        android:layout_height="?actionBarSize"
+        android:layout_gravity="top"
+        android:background="@drawable/bottom_sheet_rounded_background"
+        android:backgroundTint="?attr/colorSecondary"
+        android:clickable="true"
+        android:elevation="0dp"
+        android:focusable="true"
+        android:orientation="horizontal"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/category_recycler_view">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/cancel_button"
+            style="@style/Theme.Widget.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="8dp"
+            android:text="@string/cancel"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/add_to_categories_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/add_to_categories_button"
+            style="@style/Theme.Widget.Button.Primary"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="48dp"
+            android:layout_marginEnd="8dp"
+            android:text="@string/new_category"
+            app:iconTint="?colorAccent"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/cancel_button"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Add to Default" />
+
+        <View
+            android:id="@+id/bottom_divider"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            android:background="@color/divider"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -31,7 +31,7 @@ class SettingsSiteController :
 
     private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
+    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.site_specific_settings
 
         val sourcePreference = SiteLoginPreference(context, mdex).apply {
@@ -48,9 +48,10 @@ class SettingsSiteController :
                     dialog.showDialog(router)
                 }
             }
+            this.isIconSpaceReserved = false
         }
 
-        preferenceScreen.addPreference(sourcePreference)
+        addPreference(sourcePreference)
 
         preference {
             titleRes = R.string.show_languages
@@ -80,7 +81,7 @@ class SettingsSiteController :
         multiSelectListPreferenceMat(activity) {
             key = PreferenceKeys.contentRating
             titleRes = R.string.content_rating_title
-            customSummaryRes = R.string.content_rating_summary
+            summaryRes = R.string.content_rating_summary
             entriesRes = arrayOf(
                 R.string.content_rating_safe,
                 R.string.content_rating_suggestive,
@@ -88,14 +89,16 @@ class SettingsSiteController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                "safe", "suggestive", "erotica", "pornographic"
+                "safe",
+                "suggestive",
+                "erotica",
+                "pornographic"
             )
 
-            defSet = setOf("safe", "suggestive")
+            defValue = setOf("safe", "suggestive")
 
             defaultValue = listOf("safe", "suggestive")
         }
-
 
         switchPreference {
             key = PreferenceKeys.showContentRatingFilter
@@ -109,7 +112,6 @@ class SettingsSiteController :
             summaryRes = R.string.use_port_443_summary
             defaultValue = true
         }
-
 
         switchPreference {
             key = PreferenceKeys.dataSaver
@@ -151,7 +153,6 @@ class SettingsSiteController :
             }
         }
 
-
         preference {
             titleRes = R.string.push_favorites_to_mangadex
             summaryRes = R.string.push_favorites_to_mangadex_summary
@@ -163,7 +164,7 @@ class SettingsSiteController :
                 )
             }
         }
-        
+
         switchPreference {
             key = PreferenceKeys.addToLibraryAsPlannedToRead
             titleRes = R.string.add_favorites_as_planned_to_read
@@ -183,7 +184,6 @@ class SettingsSiteController :
                 }
             }
         }
-
     }
 
     override fun siteLoginDialogClosed(source: Source) {

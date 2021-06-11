@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.model
 import android.net.Uri
 import eu.kanade.tachiyomi.network.ProgressListener
 import rx.subjects.Subject
+import tachiyomi.source.model.PageUrl
 
 open class Page(
     val index: Int,
@@ -14,14 +15,16 @@ open class Page(
     val number: Int
         get() = index + 1
 
-    @Transient @Volatile var status: Int = 0
+    @Transient @Volatile
+    var status: Int = 0
         set(value) {
             field = value
             statusSubject?.onNext(value)
             statusCallback?.invoke(this)
         }
 
-    @Transient @Volatile var progress: Int = 0
+    @Transient @Volatile
+    var progress: Int = 0
         set(value) {
             field = value
             statusCallback?.invoke(this)
@@ -54,4 +57,17 @@ open class Page(
         const val READY = 3
         const val ERROR = 4
     }
+}
+
+fun Page.toPageUrl(): PageUrl {
+    return PageUrl(
+        url = this.imageUrl ?: this.url
+    )
+}
+
+fun PageUrl.toPage(index: Int): Page {
+    return Page(
+        index = index,
+        imageUrl = this.url
+    )
 }

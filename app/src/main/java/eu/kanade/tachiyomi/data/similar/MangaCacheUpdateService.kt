@@ -28,7 +28,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.BufferedReader
 import java.io.InputStreamReader
-import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
 
@@ -74,7 +73,8 @@ class MangaCacheUpdateService(
         super.onCreate()
         startForeground(Notifications.ID_CACHE_PROGRESS, progressNotification.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK, "SimilarUpdateService:WakeLock"
+            PowerManager.PARTIAL_WAKE_LOCK,
+            "SimilarUpdateService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
     }
@@ -124,7 +124,6 @@ class MangaCacheUpdateService(
     }
 
     private suspend fun updateCachedManga() = withContext(Dispatchers.IO) {
-
         // Open the connection to the remove csv file
         // https://stackoverflow.com/a/38374532/7718197
         XLog.i("CACHE: Starting download!")
@@ -147,7 +146,7 @@ class MangaCacheUpdateService(
 
         // Insert into our database
         XLog.i("CACHE: Beginning cache manga insert")
-        //db.insertCachedManga2(cachedManga)
+        // db.insertCachedManga2(cachedManga)
         val totalManga = lines.size
         lines.mapIndexed { index, line ->
 
@@ -159,12 +158,11 @@ class MangaCacheUpdateService(
             // Insert into the database
             showProgressNotification(index, totalManga)
             val strs = line.split(",").toTypedArray()
-            if(strs.size == 3) {
+            if (strs.size == 3) {
                 val regex = Regex("[^A-Za-z0-9 ]")
-                val manga = CachedManga(regex.replace(strs[1],""), strs[0], strs[2])
+                val manga = CachedManga(regex.replace(strs[1], ""), strs[0], strs[2])
                 db.insertCachedManga2Single(manga)
             }
-
         }
         db.optimizeCachedManga()
         showProgressNotification(totalManga, totalManga)
@@ -173,7 +171,6 @@ class MangaCacheUpdateService(
         // Done!
         XLog.i("CACHE: Done with cached manga")
         showResultNotification()
-
     }
 
     /**

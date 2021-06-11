@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -12,24 +13,25 @@
         android:layout_width="54dp"
         android:layout_height="@dimen/material_component_lists_single_line_with_avatar_height"
         android:scaleType="center"
-        android:tint="?android:attr/textColorPrimary"
+        app:tint="?android:attr/textColorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        tools:srcCompat="@drawable/border_circle" />
+        app:srcCompat="@drawable/ic_drag_handle_24dp" />
 
 
     <ImageView
         android:id="@+id/image"
         android:layout_width="24dp"
         android:layout_height="match_parent"
-        android:tint="@color/gray_button"
+        app:tint="@color/gray_button"
         android:src="@drawable/ic_label_outline_24dp"
         app:layout_constraintBottom_toBottomOf="parent"
         android:layout_marginEnd="6dp"
-        app:layout_constraintStart_toEndOf="@+id/reorder"
-        app:layout_constraintEnd_toStartOf="@+id/title"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toEndOf="@id/reorder"
+        app:layout_constraintEnd_toStartOf="@id/title"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
     <ImageView
         android:id="@+id/edit_button"
@@ -37,7 +39,7 @@
         android:layout_height="wrap_content"
         android:layout_marginEnd="12dp"
         android:src="@drawable/ic_edit_24dp"
-        android:tint="@color/gray_button"
+        app:tint="@color/gray_button"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -48,16 +50,18 @@
         android:layout_height="match_parent"
         android:background="@null"
         android:imeOptions="actionDone"
-        android:inputType="none"
+        android:inputType="textCapSentences"
+        android:hint="@string/category"
         android:maxLines="1"
         android:singleLine="true"
-        android:textColor="@color/textColorPrimary"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
         app:layout_constraintEnd_toEndOf="@id/title"
         app:layout_constraintTop_toTopOf="@id/title"
         app:layout_constraintBottom_toBottomOf="@id/title"
         app:layout_constraintStart_toStartOf="@id/title"
-        tools:text="Title" />
+        tools:text="Title"
+        android:autofillHints="" />
 
     <TextView
         android:id="@+id/title"
@@ -65,12 +69,11 @@
         android:layout_height="match_parent"
         android:gravity="center|start"
         android:layout_marginStart="3dp"
-        android:inputType="none"
         android:maxLines="1"
-        android:textColor="@color/textColorPrimary"
+        android:textColor="?android:attr/textColorPrimary"
         android:textSize="16sp"
-        app:layout_constraintEnd_toStartOf="@+id/edit_button"
-        app:layout_constraintStart_toEndOf="@+id/image"
+        app:layout_constraintEnd_toStartOf="@id/edit_button"
+        app:layout_constraintStart_toEndOf="@id/image"
         tools:text="Title" />
 
 

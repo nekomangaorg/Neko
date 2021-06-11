@@ -37,6 +37,8 @@ data class BackupTracking(
             total_chapters = this@BackupTracking.totalChapters
             score = this@BackupTracking.score
             status = this@BackupTracking.status
+            started_reading_date = this@BackupTracking.startedReadingDate
+            finished_reading_date = this@BackupTracking.finishedReadingDate
             tracking_url = this@BackupTracking.trackingUrl
         }
     }
@@ -54,6 +56,8 @@ data class BackupTracking(
                 totalChapters = track.total_chapters,
                 score = track.score,
                 status = track.status,
+                startedReadingDate = track.started_reading_date,
+                finishedReadingDate = track.finished_reading_date,
                 trackingUrl = track.tracking_url
             )
         }

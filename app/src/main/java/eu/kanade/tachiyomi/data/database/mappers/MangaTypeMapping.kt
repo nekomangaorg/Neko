@@ -82,7 +82,6 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_VIEWER, obj.viewer)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
         put(COL_DATE_ADDED, obj.date_added)
-        put(COL_DATE_ADDED, obj.date_added)
         put(COL_LANG_FLAG, obj.lang_flag)
         put(COL_FOLLOW_STATUS, obj.follow_status?.int)
         put(COL_ANILIST_ID, obj.anilist_id)
