@@ -8,9 +8,9 @@ import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterListResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.GroupListResponse
+import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -20,7 +20,7 @@ import okhttp3.Request
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
-class MangaHandler() {
+class MangaHandler {
 
     val network: NetworkHelper by injectLazy()
     val filterHandler: FilterHandler by injectLazy()
@@ -72,7 +72,8 @@ class MangaHandler() {
         return network.client.newCall(mangaRequest(manga))
             .asObservableSuccess()
             .map { response ->
-                apiMangaParser.mangaDetailsParse(response.body!!.string()).apply { initialized = true }
+                apiMangaParser.mangaDetailsParse(response.body!!.string())
+                    .apply { initialized = true }
             }
     }
 
@@ -86,28 +87,40 @@ class MangaHandler() {
                     return@map emptyList()
                 }
 
-                val chapterListResponse = MdUtil.jsonParser.decodeFromString<ChapterListResponse>(response.body!!.string())
+                val chapterListResponse =
+                    MdUtil.jsonParser.decodeFromString<ChapterListDto>(response.body!!.string())
                 val results = chapterListResponse.results.toMutableList()
 
-                var hasMoreResults = chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
+                var hasMoreResults =
+                    chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
 
                 var offset = chapterListResponse.offset
                 val limit = chapterListResponse.limit
 
                 while (hasMoreResults) {
                     offset += limit
-                    val newResponse = network.client.newCall(mangaFeedRequest(manga, offset, langs)).execute()
-                    val newChapterListResponse = MdUtil.jsonParser.decodeFromString<ChapterListResponse>(newResponse.body!!.string())
+                    val newResponse =
+                        network.client.newCall(mangaFeedRequest(manga, offset, langs)).execute()
+                    val newChapterListResponse =
+                        MdUtil.jsonParser.decodeFromString<ChapterListDto>(newResponse.body!!.string())
                     results.addAll(newChapterListResponse.results)
-                    hasMoreResults = newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
+                    hasMoreResults =
+                        newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
                 }
-                val groupIds = results.map { chapter -> chapter.relationships }.flatten().filter { it.type == "scanlation_group" }.map { it.id }.distinct()
+                val groupIds = results.map { chapter -> chapter.relationships }.flatten()
+                    .filter { it.type == "scanlation_group" }.map { it.id }.distinct()
 
                 val groupMap = runCatching {
                     groupIds.chunked(100).mapIndexed { index, ids ->
-                        val newResponse = network.client.newCall(groupIdRequest(ids, 100 * index)).execute()
-                        val groupList = MdUtil.jsonParser.decodeFromString(GroupListResponse.serializer(), newResponse.body!!.string())
-                        groupList.results.map { group -> Pair(group.data.id, group.data.attributes.name) }
+                        val newResponse =
+                            network.client.newCall(groupIdRequest(ids, 100 * index)).execute()
+                        val groupList =
+                            MdUtil.jsonParser.decodeFromString(GroupListDto.serializer(),
+                                newResponse.body!!.string())
+                        groupList.results.map { group ->
+                            Pair(group.data.id,
+                                group.data.attributes.name)
+                        }
                     }.flatten().toMap()
                 }.getOrNull() ?: emptyMap()
 
@@ -126,23 +139,28 @@ class MangaHandler() {
             if (response.code == 204) {
                 return@withContext emptyList()
             }
-            val chapterListResponse = MdUtil.jsonParser.decodeFromString<ChapterListResponse>(response.body!!.string())
+            val chapterListResponse =
+                MdUtil.jsonParser.decodeFromString<ChapterListDto>(response.body!!.string())
             val results = chapterListResponse.results.toMutableList()
 
-            var hasMoreResults = chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
+            var hasMoreResults =
+                chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
 
             var offset = chapterListResponse.offset
             val limit = chapterListResponse.limit
 
             while (hasMoreResults) {
                 offset += limit
-                val newResponse = network.client.newCall(mangaFeedRequest(manga, offset, langs)).await()
+                val newResponse =
+                    network.client.newCall(mangaFeedRequest(manga, offset, langs)).await()
                 if (newResponse.code != 200) {
                     hasMoreResults = false
                 } else {
-                    val newChapterListResponse = MdUtil.jsonParser.decodeFromString<ChapterListResponse>(newResponse.body!!.string())
+                    val newChapterListResponse =
+                        MdUtil.jsonParser.decodeFromString<ChapterListDto>(newResponse.body!!.string())
                     results.addAll(newChapterListResponse.results)
-                    hasMoreResults = newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
+                    hasMoreResults =
+                        newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
                 }
             }
 
@@ -152,12 +170,14 @@ class MangaHandler() {
         }
     }
 
-    private suspend fun getGroupMap(results: List<ChapterResponse>): Map<String, String> {
-        val groupIds = results.map { chapter -> chapter.relationships }.flatten().filter { it.type == "scanlation_group" }.map { it.id }.distinct()
+    private suspend fun getGroupMap(results: List<ChapterDto>): Map<String, String> {
+        val groupIds = results.map { chapter -> chapter.relationships }.flatten()
+            .filter { it.type == "scanlation_group" }.map { it.id }.distinct()
         val groupMap = runCatching {
             groupIds.chunked(100).mapIndexed { index, ids ->
                 val newResponse = network.client.newCall(groupIdRequest(ids, 100 * index)).await()
-                val groupList = MdUtil.jsonParser.decodeFromString<GroupListResponse>(newResponse.body!!.string())
+                val groupList =
+                    MdUtil.jsonParser.decodeFromString<GroupListDto>(newResponse.body!!.string())
                 groupList.results.map { group -> Pair(group.data.id, group.data.attributes.name) }
             }.flatten().toMap()
         }.getOrNull() ?: emptyMap()
@@ -178,11 +198,15 @@ class MangaHandler() {
     }
 
     private fun mangaRequest(manga: SManga): Request {
-        return GET(MdUtil.mangaUrl + "/" + MdUtil.getMangaId(manga.url), network.headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.mangaUrl + "/" + MdUtil.getMangaId(manga.url),
+            network.headers,
+            CacheControl.FORCE_NETWORK)
     }
 
     private fun mangaFeedRequest(manga: SManga, offset: Int, langs: List<String>): Request {
-        return GET(MdUtil.mangaFeedUrl(MdUtil.getMangaId(manga.url), offset, langs), network.headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.mangaFeedUrl(MdUtil.getMangaId(manga.url), offset, langs),
+            network.headers,
+            CacheControl.FORCE_NETWORK)
     }
 
     private fun groupIdRequest(id: List<String>, offset: Int): Request {

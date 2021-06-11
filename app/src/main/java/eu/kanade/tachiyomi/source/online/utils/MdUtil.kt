@@ -5,10 +5,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverListResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
+import eu.kanade.tachiyomi.source.online.handlers.dto.AtHomeDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.CoverDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.CoverListDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.MangaDto
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.CacheControl
@@ -27,7 +27,8 @@ class MdUtil {
         const val cdnUrl = "https://uploads.mangadex.org"
         const val baseUrl = "https://mangadex.org"
         const val apiUrl = "https://api.mangadex.org"
-        const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
+        const val imageUrlCacheNotFound =
+            "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
         const val atHomeUrl = "$apiUrl/at-home/server"
         const val coverUrl = "$apiUrl/cover"
         const val chapterUrl = "$apiUrl/chapter/"
@@ -56,7 +57,8 @@ class MdUtil {
             }.build().toString()
         }
 
-        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
+        fun coverUrl(mangaId: String, coverId: String) =
+            "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
 
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
         const val similarCacheMangas = "https://api.similarmanga.com/manga/"
@@ -278,10 +280,15 @@ class MdUtil {
             return null
         }
 
-        fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient, headers: Headers, cacheControl: CacheControl): String {
+        fun atHomeUrlHostUrl(
+            requestUrl: String,
+            client: OkHttpClient,
+            headers: Headers,
+            cacheControl: CacheControl,
+        ): String {
             val atHomeRequest = GET(requestUrl, headers, cache = cacheControl)
             val atHomeResponse = client.newCall(atHomeRequest).execute()
-            return jsonParser.decodeFromString<AtHomeResponse>(atHomeResponse.body!!.string()).baseUrl
+            return jsonParser.decodeFromString<AtHomeDto>(atHomeResponse.body!!.string()).baseUrl
         }
 
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
@@ -290,7 +297,7 @@ class MdUtil {
         fun parseDate(dateAsString: String): Long =
             dateFormatter.parse(dateAsString)?.time ?: 0
 
-        fun createMangaEntry(json: MangaResponse, coverUrl: String?): SManga {
+        fun createMangaEntry(json: MangaDto, coverUrl: String?): SManga {
             return SManga.create().apply {
                 url = "/title/" + json.data.id
                 title = cleanString(json.data.attributes.title["en"]!!)
@@ -303,12 +310,15 @@ class MdUtil {
             val response =
                 client.newCall(GET("$coverUrl/$coverId"))
                     .execute()
-            val coverResponse = jsonParser.decodeFromString<CoverResponse>(response.body!!.string())
+            val coverResponse = jsonParser.decodeFromString<CoverDto>(response.body!!.string())
             val fileName = coverResponse.data.attributes.fileName
             return "$cdnUrl/covers/$dexId/$fileName"
         }
 
-        fun getCoversFromMangaList(mangaResponseList: List<MangaResponse>, client: OkHttpClient): Map<String, String> {
+        fun getCoversFromMangaList(
+            mangaResponseList: List<MangaDto>,
+            client: OkHttpClient,
+        ): Map<String, String> {
             val idsAndCoverIds = mangaResponseList.mapNotNull { mangaResponse ->
                 val mangaId = mangaResponse.data.id
                 val coverId = mangaResponse.relationships.firstOrNull { relationship ->
@@ -326,7 +336,10 @@ class MdUtil {
             }.getOrNull()!!
         }
 
-        private fun getBatchCoverUrls(ids: Map<String, String>, client: OkHttpClient): Map<String, String> {
+        private fun getBatchCoverUrls(
+            ids: Map<String, String>,
+            client: OkHttpClient,
+        ): Map<String, String> {
             try {
                 val url = coverUrl.toHttpUrl().newBuilder().apply {
                     ids.values.forEach { coverArtId ->
@@ -335,10 +348,12 @@ class MdUtil {
                     addQueryParameter("limit", ids.size.toString())
                 }.build().toString()
                 val response = client.newCall(GET(url)).execute()
-                val coverList = jsonParser.decodeFromString<CoverListResponse>(response.body!!.string())
+                val coverList =
+                    jsonParser.decodeFromString<CoverListDto>(response.body!!.string())
                 return coverList.results.map { coverResponse ->
                     val fileName = coverResponse.data.attributes.fileName
-                    val mangaId = coverResponse.relationships.first { it.type.equals("manga", true) }.id
+                    val mangaId =
+                        coverResponse.relationships.first { it.type.equals("manga", true) }.id
                     val thumbnailUrl = "$cdnUrl/covers/$mangaId/$fileName"
                     Pair(mangaId, thumbnailUrl)
                 }.toMap()
@@ -348,8 +363,11 @@ class MdUtil {
             }
         }
 
-        fun getLangsToShow(preferences: PreferencesHelper) = preferences.langsToShow().get().split(",")
+        fun getLangsToShow(preferences: PreferencesHelper) =
+            preferences.langsToShow().get().split(",")
 
-        fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) = headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}").build()
+        fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) =
+            headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}")
+                .build()
     }
 }

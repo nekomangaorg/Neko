@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.follows
 
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.ui.source.browse.Pager
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -12,7 +12,7 @@ import rx.schedulers.Schedulers
  */
 class FollowsPager(val source: Source) : Pager() {
 
-    override fun requestNext(): Observable<MangasPage> {
+    override fun requestNext(): Observable<MangaListPage> {
         return source.fetchFollows()
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

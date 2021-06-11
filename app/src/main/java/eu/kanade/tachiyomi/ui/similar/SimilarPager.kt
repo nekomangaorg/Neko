@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.similar
 
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.Source
-import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.ui.source.browse.NoResultsException
 import eu.kanade.tachiyomi.ui.source.browse.Pager
 import rx.Observable
@@ -14,7 +14,7 @@ import rx.schedulers.Schedulers
  */
 class SimilarPager(val manga: Manga, val source: Source) : Pager() {
 
-    override fun requestNext(): Observable<MangasPage> {
+    override fun requestNext(): Observable<MangaListPage> {
         return source.fetchMangaSimilarObservable(manga, false)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

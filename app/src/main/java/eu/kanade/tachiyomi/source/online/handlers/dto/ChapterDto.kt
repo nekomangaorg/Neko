@@ -1,31 +1,31 @@
-package eu.kanade.tachiyomi.source.online.handlers.serializers
+package eu.kanade.tachiyomi.source.online.handlers.dto
 
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class ChapterListResponse(
+data class ChapterListDto(
     val limit: Int,
     val offset: Int,
     val total: Int,
-    val results: List<ChapterResponse>
+    val results: List<ChapterDto>,
 )
 
 @Serializable
-data class ChapterResponse(
+data class ChapterDto(
     val result: String,
-    val data: NetworkChapter,
-    val relationships: List<Relationships>
+    val data: ChapterDataDto,
+    val relationships: List<RelationshipDto>,
 )
 
 @Serializable
-data class NetworkChapter(
+data class ChapterDataDto(
     val id: String,
     val type: String,
-    val attributes: ChapterAttributes,
+    val attributes: ChapterAttributesDto,
 )
 
 @Serializable
-data class ChapterAttributes(
+data class ChapterAttributesDto(
     val title: String?,
     val volume: String?,
     val chapter: String?,
@@ -37,31 +37,26 @@ data class ChapterAttributes(
 )
 
 @Serializable
-data class AtHomeResponse(
-    val baseUrl: String
-)
-
-@Serializable
-data class GroupListResponse(
+data class GroupListDto(
     val limit: Int,
     val offset: Int,
     val total: Int,
-    val results: List<GroupResponse>
+    val results: List<GroupDto>,
 )
 
 @Serializable
-data class GroupResponse(
+data class GroupDto(
     val result: String,
-    val data: GroupData,
+    val data: GroupDataDto,
 )
 
 @Serializable
-data class GroupData(
+data class GroupDataDto(
     val id: String,
-    val attributes: GroupAttributes,
+    val attributes: GroupAttributesDto,
 )
 
 @Serializable
-data class GroupAttributes(
+data class GroupAttributesDto(
     val name: String,
 )

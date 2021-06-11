@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -32,7 +32,7 @@ interface Source {
      *
      * @param page the page number to retrieve.
      */
-    fun fetchPopularManga(page: Int): Observable<MangasPage>
+    fun fetchPopularManga(page: Int): Observable<MangaListPage>
 
     /**
      * Returns an observable containing a page with a list of manga.
@@ -41,14 +41,14 @@ interface Source {
      * @param query the search query.
      * @param filters the list of filters to apply.
      */
-    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage>
+    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangaListPage>
 
     /**
      * Returns an observable containing a page with a list of users follows.
      *
      * @param page the page number to retrieve.
      */
-    fun fetchFollows(): Observable<MangasPage>
+    fun fetchFollows(): Observable<MangaListPage>
 
     /**
      * Returns a list of all Follows retrieved by Coroutines
@@ -92,7 +92,7 @@ interface Source {
      * @param manga the manga to update.
      * @param refresh if we should get the latest
      */
-    fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage>
+    fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangaListPage>
 
     /**
      * Returns a updated details for a manga and the chapter list

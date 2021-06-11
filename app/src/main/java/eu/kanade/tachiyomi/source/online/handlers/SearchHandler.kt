@@ -5,8 +5,8 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
-import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaListResponse
+import eu.kanade.tachiyomi.source.model.MangaListPage
+import eu.kanade.tachiyomi.source.online.handlers.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.serialization.decodeFromString
@@ -24,7 +24,7 @@ class SearchHandler {
     private val apiMangaParser: ApiMangaParser by injectLazy()
     private val v5DbHelper: V5DbHelper by injectLazy()
 
-    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
+    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangaListPage> {
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
             val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
             network.client.newCall(searchMangaByIdRequest(realQuery))
@@ -32,7 +32,7 @@ class SearchHandler {
                 .map { response ->
                     val details = apiMangaParser.mangaDetailsParse(response.body!!.string())
                     details.url = "/title/$realQuery/"
-                    MangasPage(listOf(details), false)
+                    MangaListPage(listOf(details), false)
                 }
         } else {
             network.client.newCall(searchMangaRequest(page, query, filters))
@@ -43,16 +43,17 @@ class SearchHandler {
         }
     }
 
-    private fun searchMangaParse(response: Response): MangasPage {
+    private fun searchMangaParse(response: Response): MangaListPage {
         if (response.isSuccessful.not()) {
             throw Exception("Error getting search manga http code: ${response.code}")
         }
 
         if (response.code == 204) {
-            return MangasPage(emptyList(), false)
+            return MangaListPage(emptyList(), false)
         }
 
-        val mlResponse = MdUtil.jsonParser.decodeFromString<MangaListResponse>(response.body!!.string())
+        val mlResponse =
+            MdUtil.jsonParser.decodeFromString<MangaListDto>(response.body!!.string())
         val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
         val coverMap = MdUtil.getCoversFromMangaList(mlResponse.results, network.client)
 
@@ -60,7 +61,7 @@ class SearchHandler {
             val coverUrl = coverMap[it.data.id]
             MdUtil.createMangaEntry(it, coverUrl)
         }
-        return MangasPage(mangaList, hasMoreResults)
+        return MangaListPage(mangaList, hasMoreResults)
     }
 
     private fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {

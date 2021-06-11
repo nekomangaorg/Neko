@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -10,7 +11,7 @@ import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -22,10 +23,15 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.serializers.ImageReportResult
+import eu.kanade.tachiyomi.source.online.handlers.dto.ImageReportResultDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.encodeToString
 import okhttp3.CacheControl
@@ -68,19 +74,28 @@ open class MangaDex : HttpSource() {
         return followsHandler.updateFollowStatus(mangaID, followStatus)
     }
 
-    open fun fetchRandomMangaId(): Observable<String> {
-        return mangaHandler.fetchRandomMangaId()
+    fun getRandomManga(): Flow<SManga?> {
+        return flow {
+            if (network.service.randomManga().isSuccessful) {
+                emit(network.service.randomManga().body()!!.toBasicManga())
+            } else {
+                emit(null)
+            }
+        }.catch { e ->
+            XLog.e("error getting random manga", e)
+            emit(null)
+        }.flowOn(Dispatchers.IO)
     }
 
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
+    override fun fetchPopularManga(page: Int): Observable<MangaListPage> {
         return popularHandler.fetchPopularManga(page)
     }
 
     override fun fetchSearchManga(
         page: Int,
         query: String,
-        filters: FilterList
-    ): Observable<MangasPage> {
+        filters: FilterList,
+    ): Observable<MangaListPage> {
         return searchHandler.fetchSearchManga(
             page,
             query,
@@ -88,7 +103,7 @@ open class MangaDex : HttpSource() {
         )
     }
 
-    override fun fetchFollows(): Observable<MangasPage> {
+    override fun fetchFollows(): Observable<MangaListPage> {
         return followsHandler.fetchFollows()
     }
 
@@ -125,39 +140,40 @@ open class MangaDex : HttpSource() {
             return mangaPlusHandler.client.newCall(GET(page.imageUrl!!, headers))
                 .asObservableSuccess()
         } else {
-            return nonRateLimitedClient.newCallWithProgress(imageRequest(page), page).asObservable().doOnNext { response ->
+            return nonRateLimitedClient.newCallWithProgress(imageRequest(page), page).asObservable()
+                .doOnNext { response ->
 
-                val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
-                val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
-                val cache = response.header("X-Cache", "") == "HIT"
-                val result = ImageReportResult(
-                    page.imageUrl!!,
-                    response.isSuccessful,
-                    byteSize,
-                    cache,
-                    duration
-                )
-
-                val jsonString = MdUtil.jsonParser.encodeToString(result)
-
-                val postResult = network.client.newCall(
-                    POST(
-                        MdUtil.reportUrl,
-                        headers,
-                        jsonString.toRequestBody("application/json".toMediaType())
+                    val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
+                    val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
+                    val cache = response.header("X-Cache", "") == "HIT"
+                    val result = ImageReportResultDto(
+                        page.imageUrl!!,
+                        response.isSuccessful,
+                        byteSize,
+                        cache,
+                        duration
                     )
-                )
-                try {
-                    postResult.execute()
-                } catch (e: Exception) {
-                    Timber.e(e, "error trying to post to dex@home")
-                }
 
-                if (!response.isSuccessful) {
-                    response.close()
-                    throw Exception("HTTP error ${response.code}")
+                    val jsonString = MdUtil.jsonParser.encodeToString(result)
+
+                    val postResult = network.client.newCall(
+                        POST(
+                            MdUtil.reportUrl,
+                            headers,
+                            jsonString.toRequestBody("application/json".toMediaType())
+                        )
+                    )
+                    try {
+                        postResult.execute()
+                    } catch (e: Exception) {
+                        Timber.e(e, "error trying to post to dex@home")
+                    }
+
+                    if (!response.isSuccessful) {
+                        response.close()
+                        throw Exception("HTTP error ${response.code}")
+                    }
                 }
-            }
         }
     }
 
@@ -176,9 +192,9 @@ open class MangaDex : HttpSource() {
                     val tokenRequestUrl = data[1]
                     val cacheControl =
                         if (Date().time - (
-                            tokenTracker[tokenRequestUrl]
-                                ?: 0
-                            ) > MdUtil.mdAtHomeTokenLifespan
+                                tokenTracker[tokenRequestUrl]
+                                    ?: 0
+                                ) > MdUtil.mdAtHomeTokenLifespan
                         ) {
                             tokenTracker[tokenRequestUrl] = Date().time
                             CacheControl.FORCE_NETWORK
@@ -210,19 +226,23 @@ open class MangaDex : HttpSource() {
         return followsHandler.fetchTrackingInfo(url)
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
+    override fun fetchMangaSimilarObservable(
+        manga: Manga,
+        refresh: Boolean,
+    ): Observable<MangaListPage> {
         return similarHandler.fetchSimilarObserable(manga, refresh)
     }
 
     override fun isLogged(): Boolean {
-        return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(this).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not() &&
+        return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(
+            this).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not() &&
             preferences.refreshToken().isNullOrBlank().not()
     }
 
     override suspend fun login(
         username: String,
         password: String,
-        twoFactorCode: String
+        twoFactorCode: String,
     ): Boolean {
         return loginHelper.login(username, password)
     }

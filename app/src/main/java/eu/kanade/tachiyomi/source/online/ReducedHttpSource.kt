@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -38,7 +38,9 @@ abstract class ReducedHttpSource : HttpSource() {
 
     override val headers = Headers.Builder()
         .add("Referer", "https://manga4life.com/")
-        .add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36").build()
+        .add("User-Agent",
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36")
+        .build()
 
     override fun fetchImage(page: Page): Observable<Response> {
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
@@ -57,15 +59,19 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
+    override fun fetchPopularManga(page: Int): Observable<MangaListPage> {
         TODO("Not yet implemented")
     }
 
-    override fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
+    override fun fetchSearchManga(
+        page: Int,
+        query: String,
+        filters: FilterList,
+    ): Observable<MangaListPage> {
         TODO("Not yet implemented")
     }
 
-    override fun fetchFollows(): Observable<MangasPage> {
+    override fun fetchFollows(): Observable<MangaListPage> {
         TODO("Not yet implemented")
     }
 
@@ -89,7 +95,10 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
+    override fun fetchMangaSimilarObservable(
+        manga: Manga,
+        refresh: Boolean,
+    ): Observable<MangaListPage> {
         TODO("Not yet implemented")
     }
 
