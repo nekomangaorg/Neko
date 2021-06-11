@@ -21,10 +21,10 @@ abstract class Pager(var currentPage: Int = 1) {
 
     abstract fun requestNext(): Observable<MangaListPage>
 
-    fun onPageReceived(mangasPage: MangaListPage) {
+    fun onPageReceived(mangaListPage: MangaListPage) {
         val page = currentPage
         currentPage++
-        hasNextPage = mangasPage.hasNextPage && mangasPage.manga.isNotEmpty()
-        results.call(Pair(page, mangasPage.manga))
+        hasNextPage = mangaListPage.hasNextPage && mangaListPage.manga.isNotEmpty()
+        results.call(Pair(page, mangaListPage.manga))
     }
 }

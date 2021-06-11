@@ -95,9 +95,9 @@ class LegacyRestore(val context: Context, val job: Job?) {
         // Initialize manager
         backupManager = LegacyBackupManager(context, version)
 
-        val mangasJson = json.get(Backup.MANGAS).asJsonArray
+        val mangaListJson = json.get(Backup.MANGAS).asJsonArray
 
-        val mangdexManga = mangasJson.filter {
+        val mangdexManga = mangaListJson.filter {
             val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(Backup.MANGA))
             val isMangaDex = backupManager.sourceManager.isMangadex(manga.source)
             if (!isMangaDex) {
@@ -106,8 +106,8 @@ class LegacyRestore(val context: Context, val job: Job?) {
             isMangaDex
         }
         // +1 for categories
-        totalAmount = mangasJson.size()
-        skippedAmount = mangasJson.size() - mangdexManga.count()
+        totalAmount = mangaListJson.size()
+        skippedAmount = mangaListJson.size() - mangdexManga.count()
         restoreAmount = mangdexManga.count()
         trackingErrors.clear()
         errors.clear()
@@ -127,7 +127,16 @@ class LegacyRestore(val context: Context, val job: Job?) {
         errors.addAll(tmpErrors)
 
         val logFile = restoreHelper.writeErrorLog(errors, skippedAmount, skippedTitles)
-        restoreHelper.showResultNotification(logFile.parent, logFile.name, categoriesAmount, restoreProgress, restoreAmount, skippedAmount, totalAmount, cancelled, errors, trackingErrors)
+        restoreHelper.showResultNotification(logFile.parent,
+            logFile.name,
+            categoriesAmount,
+            restoreProgress,
+            restoreAmount,
+            skippedAmount,
+            totalAmount,
+            cancelled,
+            errors,
+            trackingErrors)
     }
 
     /**Restore categories if they were backed up
@@ -150,10 +159,14 @@ class LegacyRestore(val context: Context, val job: Job?) {
      */
     private suspend fun restoreManga(obj: JsonObject) {
         val manga = backupManager.parser.fromJson<MangaImpl>(obj.get(Backup.MANGA))
-        val chapters = backupManager.parser.fromJson<List<ChapterImpl>>(obj.get(Backup.CHAPTERS) ?: JsonArray())
-        val categories = backupManager.parser.fromJson<List<String>>(obj.get(Backup.CATEGORIES) ?: JsonArray())
-        val history = backupManager.parser.fromJson<List<DHistory>>(obj.get(Backup.HISTORY) ?: JsonArray())
-        val tracks = backupManager.parser.fromJson<List<TrackImpl>>(obj.get(Backup.TRACK) ?: JsonArray())
+        val chapters = backupManager.parser.fromJson<List<ChapterImpl>>(obj.get(Backup.CHAPTERS)
+            ?: JsonArray())
+        val categories =
+            backupManager.parser.fromJson<List<String>>(obj.get(Backup.CATEGORIES) ?: JsonArray())
+        val history =
+            backupManager.parser.fromJson<List<DHistory>>(obj.get(Backup.HISTORY) ?: JsonArray())
+        val tracks =
+            backupManager.parser.fromJson<List<TrackImpl>>(obj.get(Backup.TRACK) ?: JsonArray())
         val source = backupManager.sourceManager.getMangadex()
 
         try {
@@ -211,7 +224,8 @@ class LegacyRestore(val context: Context, val job: Job?) {
     private suspend fun trackingFetch(manga: Manga, tracks: List<Track>) {
         // add mdlist tracker backup has it missing
 
-        val validTracks = tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
+        val validTracks =
+            tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
 
         if (validTracks.isEmpty()) {
             // always create an mdlist tracker
@@ -229,8 +243,12 @@ class LegacyRestore(val context: Context, val job: Job?) {
                     errors.add("${manga.title} - ${e.message}")
                 }
             } else {
-                errors.add("${manga.title} - ${context.getString(R.string.not_logged_into_, context.getString(service?.nameRes()!!))}")
-                val notLoggedIn = context.getString(R.string.not_logged_into_, context.getString(service?.nameRes()!!))
+                errors.add("${manga.title} - ${
+                    context.getString(R.string.not_logged_into_,
+                        context.getString(service?.nameRes()!!))
+                }")
+                val notLoggedIn = context.getString(R.string.not_logged_into_,
+                    context.getString(service?.nameRes()!!))
                 trackingErrors.add(notLoggedIn)
             }
         }

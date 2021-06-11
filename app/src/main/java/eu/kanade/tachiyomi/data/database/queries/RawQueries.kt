@@ -103,10 +103,10 @@ fun getRecentsQueryDistinct(search: String, offset: Int = 0, isResuming: Boolean
  * The select statement returns all information of chapters that have the same id as the chapter in max_last_read
  * and are read after the given time period
  */
-fun getRecentMangasLimitQuery(
+fun getRecentMangaListLimitQuery(
     search: String = "",
     offset: Int = 0,
-    isResuming: Boolean
+    isResuming: Boolean,
 ) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
@@ -137,7 +137,7 @@ fun getRecentMangasLimitQuery(
 fun getRecentHistoryUngrouped(
     search: String = "",
     offset: Int = 0,
-    isResuming: Boolean
+    isResuming: Boolean,
 ) =
     """
     SELECT ${Manga.TABLE}.${Manga.COL_URL} as mangaUrl, ${Manga.TABLE}.*, ${Chapter.TABLE}.*, ${History.TABLE}.*
@@ -166,7 +166,7 @@ fun getAllRecentsType(
     includeRead: Boolean,
     endless: Boolean,
     offset: Int = 0,
-    isResuming: Boolean
+    isResuming: Boolean,
 ) = """
 	SELECT * FROM
 	(SELECT mangas.url as mangaUrl, mangas.*, chapters.*, history.*

@@ -25,12 +25,12 @@ class SimilarHandler {
     private val db: DatabaseHelper by injectLazy()
 
     /**
-     * fetch our similar mangas
+     * fetch our similar mangaList
      */
     fun fetchSimilarObserable(manga: Manga, refresh: Boolean): Observable<MangaListPage> {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if (mangaDb != null && !refresh) {
-            return Observable.just(similarStringToMangasPage(manga, mangaDb.data))
+            return Observable.just(similarStringToMangaListPage(manga, mangaDb.data))
         }
         return network.client.newCall(similarMangaRequest(manga))
             .asObservableSuccess()
@@ -52,9 +52,9 @@ class SimilarHandler {
         if (response.isSuccessful.not() || response.code != 200) {
             throw Exception("Error getting search manga http code: ${response.code}")
         }
-        // Get our page of mangas
+        // Get our page of mangaList
         val bodyData = response.body!!.string()
-        val mangaPages = similarStringToMangasPage(manga, bodyData)
+        val mangaPages = similarStringToMangaListPage(manga, bodyData)
         // Insert into our database and return
         val mangaSimilar = MangaSimilar.create().apply {
             manga_id = MdUtil.getMangaId(manga.url)
@@ -64,7 +64,7 @@ class SimilarHandler {
         return mangaPages
     }
 
-    private fun similarStringToMangasPage(manga: Manga, data: String): MangaListPage {
+    private fun similarStringToMangaListPage(manga: Manga, data: String): MangaListPage {
         // TODO: also filter based on the content rating here?
         // TODO: also append here the related manga?
         val mlResponse = MdUtil.jsonParser.decodeFromString<SimilarMangaDto>(data)

@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable
 
 interface MangaQueries : DbProvider {
 
-    fun getMangas() = db.get()
+    fun getMangaList() = db.get()
         .listOfObjects(Manga::class.java)
         .withQuery(
             Query.builder()
@@ -31,18 +31,21 @@ interface MangaQueries : DbProvider {
         )
         .prepare()
 
-    fun getLibraryMangas() = db.get()
+    fun getLibraryMangaList() = db.get()
         .listOfObjects(LibraryManga::class.java)
         .withQuery(
             RawQuery.builder()
                 .query(libraryQuery)
-                .observesTables(MangaTable.TABLE, ChapterTable.TABLE, MangaCategoryTable.TABLE, CategoryTable.TABLE)
+                .observesTables(MangaTable.TABLE,
+                    ChapterTable.TABLE,
+                    MangaCategoryTable.TABLE,
+                    CategoryTable.TABLE)
                 .build()
         )
         .withGetResolver(LibraryMangaGetResolver.INSTANCE)
         .prepare()
 
-    fun getFavoriteMangas() = db.get()
+    fun getFavoriteMangaList() = db.get()
         .listOfObjects(Manga::class.java)
         .withQuery(
             Query.builder()
@@ -89,7 +92,7 @@ interface MangaQueries : DbProvider {
 
     fun insertManga(manga: Manga) = db.put().`object`(manga).prepare()
 
-    fun insertMangas(mangas: List<Manga>) = db.put().objects(mangas).prepare()
+    fun insertMangaList(mangaList: List<Manga>) = db.put().objects(mangaList).prepare()
 
     fun updateFlags(manga: Manga) = db.put()
         .`object`(manga)
@@ -138,9 +141,9 @@ interface MangaQueries : DbProvider {
 
     fun deleteManga(manga: Manga) = db.delete().`object`(manga).prepare()
 
-    fun deleteManga(mangas: List<Manga>) = db.delete().objects(mangas).prepare()
+    fun deleteManga(mangaList: List<Manga>) = db.delete().objects(mangaList).prepare()
 
-    fun deleteMangasNotInLibrary() = db.delete()
+    fun deleteMangaListNotInLibrary() = db.delete()
         .byQuery(
             DeleteQuery.builder()
                 .table(MangaTable.TABLE)
@@ -150,7 +153,7 @@ interface MangaQueries : DbProvider {
         )
         .prepare()
 
-    fun deleteMangas() = db.delete()
+    fun deleteMangaList() = db.delete()
         .byQuery(
             DeleteQuery.builder()
                 .table(MangaTable.TABLE)
@@ -179,5 +182,6 @@ interface MangaQueries : DbProvider {
         .prepare()
 
     fun getTotalChapterManga() = db.get().listOfObjects(Manga::class.java)
-        .withQuery(RawQuery.builder().query(getTotalChapterMangaQuery()).observesTables(MangaTable.TABLE).build()).prepare()
+        .withQuery(RawQuery.builder().query(getTotalChapterMangaQuery())
+            .observesTables(MangaTable.TABLE).build()).prepare()
 }

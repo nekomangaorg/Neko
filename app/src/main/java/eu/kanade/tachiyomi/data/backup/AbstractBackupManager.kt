@@ -39,7 +39,11 @@ abstract class AbstractBackupManager(protected val context: Context) {
      * @param chapters list of chapters in the backup
      * @return Updated manga chapters.
      */
-    internal suspend fun restoreChapters(source: Source, manga: Manga, chapters: List<Chapter>): Pair<List<Chapter>, List<Chapter>> {
+    internal suspend fun restoreChapters(
+        source: Source,
+        manga: Manga,
+        chapters: List<Chapter>,
+    ): Pair<List<Chapter>, List<Chapter>> {
         val fetchedChapters = source.fetchChapterList(manga)
         val syncedChapters = syncChaptersWithSource(databaseHelper, fetchedChapters, manga)
         if (syncedChapters.first.isNotEmpty()) {
@@ -55,7 +59,7 @@ abstract class AbstractBackupManager(protected val context: Context) {
      * @return [Manga] from library
      */
     protected fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangas().executeAsBlocking()
+        databaseHelper.getFavoriteMangaList().executeAsBlocking()
 
     /**
      * Inserts manga and returns id

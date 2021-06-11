@@ -43,9 +43,9 @@ class CategoryTest {
     }
 
     @Test
-    fun testHasLibraryMangas() {
-        val mangas = db.getLibraryMangas().executeAsBlocking()
-        assertThat(mangas).hasSize(5)
+    fun testHasLibraryMangaList() {
+        val mangaList = db.getLibraryMangaList().executeAsBlocking()
+        assertThat(mangaList).hasSize(5)
     }
 
     @Test
@@ -60,8 +60,8 @@ class CategoryTest {
         m.url = "url to manga"
         m.favorite = false
         db.insertManga(m).executeAsBlocking()
-        val mangas = db.getLibraryMangas().executeAsBlocking()
-        assertThat(mangas).hasSize(5)
+        val mangaList = db.getLibraryMangaList().executeAsBlocking()
+        assertThat(mangaList).hasSize(5)
     }
 
     @Test
@@ -75,13 +75,13 @@ class CategoryTest {
         assertThat(c.id).isNotZero()
 
         // Add a manga to a category
-        val m = db.getMangas().executeAsBlocking()[0]
+        val m = db.getMangaList().executeAsBlocking()[0]
         val mc = MangaCategory.create(m, c)
         db.insertMangaCategory(mc).executeAsBlocking()
 
-        // Get mangas from library and assert manga category is the same
-        val mangas = db.getLibraryMangas().executeAsBlocking()
-        for (manga in mangas) {
+        // Get mangaList from library and assert manga category is the same
+        val mangaList = db.getLibraryMangaList().executeAsBlocking()
+        for (manga in mangaList) {
             if (manga.id == m.id) {
                 assertThat(manga.category).isEqualTo(c.id)
             }

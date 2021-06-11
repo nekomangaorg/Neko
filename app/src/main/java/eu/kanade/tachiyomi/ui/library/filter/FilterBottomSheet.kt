@@ -118,8 +118,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
-                ?: 0
+                    ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
+                        ?: 0
         }
         val shadow2: View = controller.binding.shadow2
         val shadow: View = controller.binding.shadow
@@ -198,7 +198,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = 1f
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight
+                ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -311,7 +312,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 db.getCategories().executeAsBlocking()
                     .isNotEmpty()
             }
-            val libraryManga = db.getLibraryMangas().executeAsBlocking()
+            val libraryManga = db.getLibraryMangaList().executeAsBlocking()
             val types = mutableListOf<Int>()
             if (libraryManga.any { it.seriesType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
             if (libraryManga.any { it.seriesType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
@@ -386,7 +387,14 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 filterItems.add(it)
             }
         }
-        listOfNotNull(unreadProgress, unread, downloaded, completed, mangaType, tracked, missingChapters, merged)
+        listOfNotNull(unreadProgress,
+            unread,
+            downloaded,
+            completed,
+            mangaType,
+            tracked,
+            missingChapters,
+            merged)
             .forEach {
                 if (!filterItems.contains(it)) {
                     filterItems.add(it)
@@ -484,7 +492,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
-        androidx.transition.TransitionManager.beginDelayedTransition(binding.filterLayout, transition)
+        androidx.transition.TransitionManager.beginDelayedTransition(binding.filterLayout,
+            transition)
         reorderFilters()
         filterItems.forEach {
             it.reset()

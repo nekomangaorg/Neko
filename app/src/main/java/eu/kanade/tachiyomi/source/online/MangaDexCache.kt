@@ -77,13 +77,13 @@ open class MangaDexCache : MangaDex() {
                 }
             }.toList().map {
                 val haveMore = (it.size > limit)
-                val mangasClean = it.take(limit).filter { manga ->
+                val mangaListClean = it.take(limit).filter { manga ->
                     manga.rating in preferences.contentRatingSelections()
                 }
-                mangasClean.forEach { manga ->
+                mangaListClean.forEach { manga ->
                     manga.rating = null
                 }
-                MangaListPage(mangasClean, haveMore)
+                MangaListPage(mangaListClean, haveMore)
             }
     }
 
@@ -114,13 +114,13 @@ open class MangaDexCache : MangaDex() {
                 }
             }.toList().map {
                 val haveMore = (it.size > limit)
-                val mangasClean = it.take(limit).filter { manga ->
+                val mangaListClean = it.take(limit).filter { manga ->
                     manga.rating in preferences.contentRatingSelections()
                 }
-                mangasClean.forEach { manga ->
+                mangaListClean.forEach { manga ->
                     manga.rating = null
                 }
-                MangaListPage(mangasClean, haveMore)
+                MangaListPage(mangaListClean, haveMore)
             }
     }
 
@@ -226,7 +226,7 @@ open class MangaDexCache : MangaDex() {
 
     private fun apiRequest(manga: SManga): Request {
         val mangaId = MdUtil.getMangaId(manga.url)
-        return GET(MdUtil.similarCacheMangas + mangaId + ".json",
+        return GET(MdUtil.similarCacheMangaList + mangaId + ".json",
             headers,
             CacheControl.FORCE_NETWORK)
     }

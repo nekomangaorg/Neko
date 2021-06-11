@@ -61,7 +61,7 @@ class MdUtil {
             "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
 
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
-        const val similarCacheMangas = "https://api.similarmanga.com/manga/"
+        const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
         const val similarBaseApi = "https://api.similarmanga.com/similar/"
 
         const val reportUrl = "https://api.mangadex.network/report"
