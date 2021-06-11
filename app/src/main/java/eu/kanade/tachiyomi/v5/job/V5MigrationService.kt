@@ -29,7 +29,7 @@ import java.io.File
 import java.util.concurrent.TimeUnit
 
 /**
- * This class will perform migration of old mangas ids to the new v5 mangadex.
+ * This class will perform migration of old mangaList ids to the new v5 mangadex.
  */
 class V5MigrationService(
     val db: DatabaseHelper = Injekt.get(),
@@ -47,7 +47,7 @@ class V5MigrationService(
     private var job: Job? = null
 
     // List containing failed updates
-    private val failedUpdatesMangas = mutableMapOf<Manga, String?>()
+    private val failedUpdatesMangaList = mutableMapOf<Manga, String?>()
     private val failedUpdatesChapters = mutableMapOf<Chapter, String?>()
     private val failedUpdatesErrors = mutableListOf<String>()
 
@@ -58,7 +58,8 @@ class V5MigrationService(
     override fun onCreate() {
         super.onCreate()
         notifier = V5MigrationNotifier(this)
-        startForeground(Notifications.ID_V5_MIGRATION_PROGRESS, notifier.progressNotificationBuilder.build())
+        startForeground(Notifications.ID_V5_MIGRATION_PROGRESS,
+            notifier.progressNotificationBuilder.build())
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "V5MigrationService:WakeLock"
@@ -106,11 +107,11 @@ class V5MigrationService(
     }
 
     /**
-     * This will migrate the mangas in the library to the new ids
+     * This will migrate the mangaList in the library to the new ids
      */
     private fun migrateLibraryToV5() {
-        val mangas = db.getMangas().executeAsBlocking()
-        mangas.forEachIndexed { index, manga ->
+        val mangaList = db.getMangaList().executeAsBlocking()
+        mangaList.forEachIndexed { index, manga ->
 
             // Return if job was canceled
             if (job?.isCancelled == true) {
@@ -118,14 +119,14 @@ class V5MigrationService(
             }
 
             // Update progress bar
-            notifier.showProgressNotification(manga, index, mangas.size)
+            notifier.showProgressNotification(manga, index, mangaList.size)
 
             // Get the old id and check if it is a number
             val oldMangaId = MdUtil.getMangaId(manga.url)
             val isNumericId = oldMangaId.isDigitsOnly()
 
             // Get the new id for this manga
-            // We skip mangas which have already been converted (non-numeric ids)
+            // We skip mangaList which have already been converted (non-numeric ids)
             var mangaErroredOut = false
             if (isNumericId) {
                 val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
@@ -140,7 +141,7 @@ class V5MigrationService(
                         db.insertTrack(it).executeAsBlocking()
                     }
                 } else {
-                    failedUpdatesMangas[manga] = "unable to find new manga id"
+                    failedUpdatesMangaList[manga] = "unable to find new manga id"
                     failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed it")
                     mangaErroredOut = true
                 }
@@ -168,7 +169,8 @@ class V5MigrationService(
                             chapter.old_mangadex_id = oldChapterId
                             db.insertChapter(chapter).executeAsBlocking()
                         } else {
-                            failedUpdatesChapters[chapter] = "unable to find new chapter V5 id deleting chapter"
+                            failedUpdatesChapters[chapter] =
+                                "unable to find new chapter V5 id deleting chapter"
                             chapterErrors.add(
                                 "\t- unable to find new chapter id for " +
                                     "vol ${chapter.vol} - ${chapter.chapter_number} - ${chapter.name}"
@@ -192,10 +194,10 @@ class V5MigrationService(
      * Finall function called when we have finished / requested to stop the update
      */
     private fun finishUpdates() {
-        if (failedUpdatesMangas.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
+        if (failedUpdatesMangaList.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(failedUpdatesErrors)
             notifier.showUpdateErrorNotification(
-                failedUpdatesMangas.map { it.key.title } +
+                failedUpdatesMangaList.map { it.key.title } +
                     failedUpdatesChapters.map { it.key.chapter_title },
                 errorFile.getUriCompat(this)
             )

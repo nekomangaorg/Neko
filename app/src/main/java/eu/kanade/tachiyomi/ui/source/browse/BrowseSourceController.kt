@@ -409,16 +409,16 @@ open class BrowseSourceController(bundle: Bundle) :
      * Called from the presenter when the network request is received.
      *
      * @param page the current page.
-     * @param mangas the list of manga of the page.
+     * @param mangaList the list of manga of the page.
      */
-    fun onAddPage(page: Int, mangas: List<BrowseSourceItem>) {
+    fun onAddPage(page: Int, mangaList: List<BrowseSourceItem>) {
         val adapter = adapter ?: return
         hideProgressBar()
         if (page == 1) {
             adapter.clear()
             resetProgressItem()
         }
-        adapter.onLoadMoreComplete(mangas)
+        adapter.onLoadMoreComplete(mangaList)
     }
 
     /**
@@ -521,11 +521,11 @@ open class BrowseSourceController(bundle: Bundle) :
         activity?.invalidateOptionsMenu()
         setupRecycler(view)
         if (!isListMode || !view.context.connectivityManager.isActiveNetworkMetered) {
-            // Initialize mangas if going to grid view or if over wifi when going to list view
-            val mangas = (0 until adapter.itemCount).mapNotNull {
+            // Initialize mangaList if going to grid view or if over wifi when going to list view
+            val mangaList = (0 until adapter.itemCount).mapNotNull {
                 (adapter.getItem(it) as? BrowseSourceItem)?.manga
             }
-            presenter.initializeMangaList(mangas)
+            presenter.initializeMangaList(mangaList)
         }
     }
 

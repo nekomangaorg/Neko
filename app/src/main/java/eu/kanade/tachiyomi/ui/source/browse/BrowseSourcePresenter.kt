@@ -252,7 +252,7 @@ open class BrowseSourcePresenter(
     /**
      * Sets the library shown mode.
      *
-     * @param showLibrary whether mangas in library should be shown
+     * @param showLibrary whether mangaList in library should be shown
      */
     private fun setShowLibrary(showLibrary: Boolean) {
         isLibraryVisible = showLibrary
@@ -309,10 +309,10 @@ open class BrowseSourcePresenter(
     /**
      * Initialize a list of manga.
      *
-     * @param mangas the list of manga to initialize.
+     * @param mangaList the list of manga to initialize.
      */
-    fun initializeMangaList(mangas: List<Manga>) {
-        mangaDetailSubject.onNext(mangas)
+    fun initializeMangaList(mangaList: List<Manga>) {
+        mangaDetailSubject.onNext(mangaList)
     }
 
     /**

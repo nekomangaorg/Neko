@@ -34,7 +34,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     /**
      * The list of manga in this category.
      */
-    private var mangas: List<LibraryItem> = emptyList()
+    private var mangaList: List<LibraryItem> = emptyList()
 
     val libraryListener: LibraryListener = controller
 
@@ -48,7 +48,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
      */
     fun setItems(list: List<LibraryItem>) {
         // A copy of manga always unfiltered.
-        mangas = list.toList()
+        mangaList = list.toList()
 
         performFilter()
     }
@@ -110,12 +110,12 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
-            if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {
-                mangas.forEach { it.filter = "" }
+            if (mangaList.firstOrNull()?.filter?.isNotBlank() == true) {
+                mangaList.forEach { it.filter = "" }
             }
-            updateDataSet(mangas)
+            updateDataSet(mangaList)
         } else {
-            updateDataSet(mangas.filter { it.filter(s) })
+            updateDataSet(mangaList.filter { it.filter(s) })
         }
         isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
     }
@@ -123,12 +123,12 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     suspend fun performFilterAsync() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
-            if (mangas.firstOrNull()?.filter?.isNotBlank() == true) {
-                mangas.forEach { it.filter = "" }
+            if (mangaList.firstOrNull()?.filter?.isNotBlank() == true) {
+                mangaList.forEach { it.filter = "" }
             }
-            updateDataSet(mangas)
+            updateDataSet(mangaList)
         } else {
-            val filteredManga = withDefContext { mangas.filter { it.filter(s) } }
+            val filteredManga = withDefContext { mangaList.filter { it.filter(s) } }
             updateDataSet(filteredManga)
         }
         isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
@@ -160,11 +160,13 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                 else when (getSort(position)) {
                     LibrarySort.DragAndDrop -> {
                         if (item.header.category.isDynamic) {
-                            val category = db.getCategoriesForManga(item.manga).executeAsBlocking().firstOrNull()?.name
+                            val category = db.getCategoriesForManga(item.manga).executeAsBlocking()
+                                .firstOrNull()?.name
                             category ?: recyclerView.context.getString(R.string.default_value)
                         } else {
                             val title = item.manga.title
-                            if (preferences.removeArticles().getOrDefault()) title.removeArticles().chop(15)
+                            if (preferences.removeArticles().getOrDefault()) title.removeArticles()
+                                .chop(15)
                             else title.take(10)
                         }
                     }
@@ -224,7 +226,8 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                     LibrarySort.DateAdded -> {
                         val added = item.manga.date_added
                         if (added > 0) {
-                            recyclerView.context.getString(R.string.added_, added.timeSpanFromNow(preferences.context))
+                            recyclerView.context.getString(R.string.added_,
+                                added.timeSpanFromNow(preferences.context))
                         } else {
                             "N/A"
                         }

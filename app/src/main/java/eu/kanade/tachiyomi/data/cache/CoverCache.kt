@@ -46,7 +46,8 @@ class CoverCache(val context: Context) {
     private val customCoverCacheDir = getCacheDir(CUSTOM_COVERS_DIR)
 
     /** Cache directory used for covers not in library management.*/
-    private val onlineCoverDirectory = File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
+    private val onlineCoverDirectory =
+        File(context.cacheDir, ONLINE_COVERS_DIR).also { it.mkdirs() }
 
     private val maxOnlineCacheSize = 50L * 1024L * 1024L // 50 MB
 
@@ -70,7 +71,7 @@ class CoverCache(val context: Context) {
         GlobalScope.launch(Dispatchers.Default) {
             val db = Injekt.get<DatabaseHelper>()
             var deletedSize = 0L
-            val urls = db.getLibraryMangas().executeOnIO().mapNotNull {
+            val urls = db.getLibraryMangaList().executeOnIO().mapNotNull {
                 it.thumbnail_url?.let { url -> return@mapNotNull DiskUtil.hashKeyForDisk(url) }
                 null
             }
@@ -223,7 +224,7 @@ class CoverCache(val context: Context) {
      */
     fun deleteFromCache(
         manga: Manga,
-        deleteCustom: Boolean = true
+        deleteCustom: Boolean = true,
     ) {
         // Check if url is empty.
         if (manga.thumbnail_url.isNullOrEmpty()) return
