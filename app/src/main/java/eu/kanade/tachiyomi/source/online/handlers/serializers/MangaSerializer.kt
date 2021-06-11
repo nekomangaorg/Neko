@@ -7,14 +7,14 @@ data class MangaListResponse(
     val limit: Int,
     val offset: Int,
     val total: Int,
-    val results: List<MangaResponse>
+    val results: List<MangaResponse>,
 )
 
 @Serializable
 data class MangaResponse(
     val result: String,
     val data: NetworkManga,
-    val relationships: List<Relationships>
+    val relationships: List<Relationships>,
 )
 
 @Serializable
@@ -38,13 +38,20 @@ data class NetworkMangaAttributes(
 
 @Serializable
 data class TagsSerializer(
-    val id: String
+    val id: String,
 )
 
 @Serializable
 data class Relationships(
     val id: String,
     val type: String,
+    val attributes: IncludesAttributes,
+)
+
+@Serializable
+data class IncludesAttributes(
+    val name: String = "",
+    val fileName: String = "",
 )
 
 @Serializable
@@ -71,17 +78,17 @@ data class AuthorAttributes(
 
 @Serializable
 data class GetReadingStatus(
-    val status: String?
+    val status: String?,
 )
 
 @Serializable
 data class UpdateReadingStatus(
-    val status: String?
+    val status: String?,
 )
 
 @Serializable
 data class MangaStatusListResponse(
-    val statuses: Map<String, String?>
+    val statuses: Map<String, String?>,
 )
 
 @Serializable
@@ -92,7 +99,7 @@ data class CoverListResponse(
 @Serializable
 data class CoverResponse(
     val data: Cover,
-    val relationships: List<Relationships>
+    val relationships: List<Relationships>,
 )
 
 @Serializable

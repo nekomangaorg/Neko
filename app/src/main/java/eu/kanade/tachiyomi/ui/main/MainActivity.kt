@@ -262,9 +262,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                        continueSwitchingTabs = true
-                        this@MainActivity.nav.selectedItemId = id
-                    }
+                    continueSwitchingTabs = true
+                    this@MainActivity.nav.selectedItemId = id
+                }
                 ) return@setOnItemSelectedListener false
             }
             continueSwitchingTabs = false

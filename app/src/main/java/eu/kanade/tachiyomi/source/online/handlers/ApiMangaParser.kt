@@ -49,7 +49,6 @@ class ApiMangaParser {
                 json.results.map { MdUtil.cleanString(it.data.attributes.name) }
             }.getOrNull() ?: emptyList()
 
-
             manga.author = authors.joinToString()
             manga.artist = null
             manga.lang_flag = networkManga.originalLanguage
@@ -80,7 +79,7 @@ class ApiMangaParser {
                 manga.missing_chapters = null
             } else {*/
             manga.status = tempStatus
-            //}
+            // }
 
             val tags = filterHandler.getTags()
 
@@ -93,11 +92,11 @@ class ApiMangaParser {
             }
 
             val genres = (
-                listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
-                    + networkManga.tags.map { it.id }
-                    .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
-                    .map { tag -> tag?.name }
-                    + listOf(contentRating)
+                listOf(networkManga.publicationDemographic?.capitalize(Locale.US)) +
+                    networkManga.tags.map { it.id }
+                        .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
+                        .map { tag -> tag?.name } +
+                    listOf(contentRating)
                 )
                 .filterNotNull()
 
@@ -249,7 +248,6 @@ class ApiMangaParser {
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
         val scanlatorName = networkChapter.relationships.filter { it.type == "scanlation_group" }.mapNotNull { groups[it.id] }.toSet()
-
 
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 

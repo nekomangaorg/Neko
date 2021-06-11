@@ -89,14 +89,16 @@ class SettingsSiteController :
                 R.string.content_rating_pornographic,
             )
             entryValues = listOf(
-                "safe", "suggestive", "erotica", "pornographic"
+                "safe",
+                "suggestive",
+                "erotica",
+                "pornographic"
             )
 
             defValue = setOf("safe", "suggestive")
 
             defaultValue = listOf("safe", "suggestive")
         }
-
 
         switchPreference {
             key = PreferenceKeys.showContentRatingFilter
@@ -110,7 +112,6 @@ class SettingsSiteController :
             summaryRes = R.string.use_port_443_summary
             defaultValue = true
         }
-
 
         switchPreference {
             key = PreferenceKeys.dataSaver
@@ -152,7 +153,6 @@ class SettingsSiteController :
             }
         }
 
-
         preference {
             titleRes = R.string.push_favorites_to_mangadex
             summaryRes = R.string.push_favorites_to_mangadex_summary
@@ -164,7 +164,7 @@ class SettingsSiteController :
                 )
             }
         }
-        
+
         switchPreference {
             key = PreferenceKeys.addToLibraryAsPlannedToRead
             titleRes = R.string.add_favorites_as_planned_to_read
@@ -184,7 +184,6 @@ class SettingsSiteController :
                 }
             }
         }
-
     }
 
     override fun siteLoginDialogClosed(source: Source) {

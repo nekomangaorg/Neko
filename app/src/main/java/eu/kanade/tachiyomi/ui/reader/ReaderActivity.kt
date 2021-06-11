@@ -424,7 +424,7 @@ class ReaderActivity :
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -1242,10 +1242,10 @@ class ReaderActivity :
             getString(R.string.page_, page.number)
         }
         val text = "${manga.title}: ${
-            getString(
-                R.string.chapter_,
-                decimalFormat.format(chapter.chapter_number)
-            )
+        getString(
+            R.string.chapter_,
+            decimalFormat.format(chapter.chapter_number)
+        )
         }, $pageNumber"
 
         val stream = file.getUriCompat(this)
@@ -1293,7 +1293,6 @@ class ReaderActivity :
                 toast(R.string.comments_unavailable_dex, duration = Toast.LENGTH_SHORT)
             }
         } else {
-
             var url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(currentChapter.chapter.url)
             if (isComments) {
                 url += "/comments"

@@ -80,7 +80,7 @@ class DownloadManager(val context: Context) {
     fun stopDownloads(reason: String? = null) {
         downloader.stop(reason)
     }
-    
+
     /**
      * Tells the downloader to pause downloads.
      */
@@ -375,7 +375,7 @@ class DownloadManager(val context: Context) {
     fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
     fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
 
-    //forceRefresh the cache
+    // forceRefresh the cache
     fun refreshCache() {
         cache.forceRenewCache()
     }

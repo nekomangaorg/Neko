@@ -67,8 +67,8 @@ inline fun PreferenceGroup.listPreference(
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
     block: (
-    @DSL
-    IntListMatPreference
+        @DSL
+        IntListMatPreference
     ).() -> Unit
 ):
     IntListMatPreference {
@@ -78,8 +78,8 @@ inline fun PreferenceGroup.intListPreference(
 inline fun PreferenceGroup.multiSelectListPreferenceMat(
     activity: Activity?,
     block: (
-    @DSL
-    MultiListMatPreference
+        @DSL
+        MultiListMatPreference
     ).()
     -> Unit
 ): MultiListMatPreference {

@@ -159,14 +159,15 @@ class LibraryItem(
 
     private fun containsGenre(tag: String, genres: List<String>?): Boolean {
         if (tag.trim().isEmpty()) return true
-        return if (tag.startsWith("-"))
+        return if (tag.startsWith("-")) {
             genres?.find {
                 it.trim().equals(tag.substringAfter("-"), ignoreCase = true)
             } == null
-        else
+        } else {
             genres?.find {
                 it.trim().equals(tag, ignoreCase = true)
             } != null
+        }
     }
 
     override fun equals(other: Any?): Boolean {

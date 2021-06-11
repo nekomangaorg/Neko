@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
-import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.set
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
@@ -116,7 +115,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
     }
 
     suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
-        if(manga.kitsu_id !== null && !wasPreviouslyTracked) {
+        if (manga.kitsu_id !== null && !wasPreviouslyTracked) {
             val response = client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!))).await()
             val jsonData = response.body!!.string()
             var json = JsonParser.parseString(jsonData).asJsonObject

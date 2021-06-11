@@ -371,10 +371,10 @@ fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.att
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }
 
+/**
+ * default tinted to actionbar
+ */
 @SuppressLint("ResourceType")
-    /**
-     * default tinted to actionbar
-     */
 fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }

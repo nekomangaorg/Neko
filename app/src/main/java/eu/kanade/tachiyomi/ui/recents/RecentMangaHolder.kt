@@ -139,7 +139,7 @@ class RecentMangaHolder(
         if ((itemView.context as? Activity)?.isDestroyed != true) {
             binding.coverThumbnail.loadManga(item.mch.manga)
         }
-        
+
         resetFrontView()
     }
 

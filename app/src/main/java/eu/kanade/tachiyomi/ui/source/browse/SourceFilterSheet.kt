@@ -46,23 +46,23 @@ class SourceFilterSheet(val activity: Activity) :
         binding.followsBtn.setOnClickListener { onFollowsClicked() }
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
-            OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                activity.window.decorView.rootWindowInsets?.let {
-                    setCardViewMax(it)
+                OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    activity.window.decorView.rootWindowInsets?.let {
+                        setCardViewMax(it)
+                    }
+                    if (binding.titleLayout.height > 0) {
+                        binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    }
                 }
-                if (binding.titleLayout.height > 0) {
-                    binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                }
-            }
-        })
+            })
 
         binding.cardView.doOnApplyWindowInsets { _, insets, _ ->
             binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
                 matchConstraintMaxHeight =
                     fullHeight - insets.systemWindowInsetTop -
-                        binding.titleLayout.height - 75.dpToPx
+                    binding.titleLayout.height - 75.dpToPx
             }
         }
 

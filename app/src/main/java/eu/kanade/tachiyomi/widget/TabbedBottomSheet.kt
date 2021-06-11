@@ -17,9 +17,11 @@ import kotlin.math.max
 abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     E2EBottomSheetDialog<TabbedBottomSheetBinding>(activity) {
 
-    override fun createBinding(inflater: LayoutInflater) = TabbedBottomSheetBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        TabbedBottomSheetBinding.inflate(inflater)
 
     open var offset = -1
+
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
         binding.pager.maxHeight = activity.window.decorView.height - height - 125.dpToPx
@@ -80,7 +82,8 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     }
 }
 
-class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) : ViewPager(context, attrs) {
+class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
+    ViewPager(context, attrs) {
 
     var maxHeight = 0
         set(value) {

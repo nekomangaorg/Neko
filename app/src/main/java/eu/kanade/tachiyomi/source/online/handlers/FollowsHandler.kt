@@ -79,7 +79,6 @@ class FollowsHandler {
      * used when multiple follows
      */
     private fun followsParseMangaPage(response: List<MangaResponse>, readingStatusMap: Map<String, String?>): MangasPage {
-
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
 
         val coverMap = MdUtil.getCoversFromMangaList(response, network.client)
@@ -99,7 +98,6 @@ class FollowsHandler {
      */
 
     private fun followStatusParse(response: Response, mangaId: String): Track {
-
         val mangaResponse = MdUtil.jsonParser.decodeFromString<GetReadingStatus>(response.body!!.string())
         val followStatus = FollowStatus.fromDex(mangaResponse.status)
         val track = Track.create(TrackManager.MDLIST)
@@ -136,7 +134,6 @@ class FollowsHandler {
      */
     suspend fun updateFollowStatus(mangaId: String, followStatus: FollowStatus): Boolean {
         return withContext(Dispatchers.IO) {
-
             val status = when (followStatus == FollowStatus.UNFOLLOWED) {
                 true -> null
                 false -> followStatus.name.toLowerCase(Locale.US)

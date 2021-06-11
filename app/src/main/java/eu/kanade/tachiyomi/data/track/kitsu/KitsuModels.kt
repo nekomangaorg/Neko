@@ -23,7 +23,7 @@ class KitsuSearchManga(obj: JsonObject, api: Boolean = false) {
     val original = obj.get("posterImage").nullObj?.get("original")?.asString
     private val synopsis by obj.byString
     private var startDate = obj.get("startDate").nullString?.let {
-        if(!api) {
+        if (!api) {
             val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
             outputDf.format(Date(it.toLong() * 1000))
         } else {

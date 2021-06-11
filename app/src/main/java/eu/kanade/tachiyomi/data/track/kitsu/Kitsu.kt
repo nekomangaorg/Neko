@@ -11,7 +11,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 

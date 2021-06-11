@@ -64,7 +64,7 @@ class SearchActivity : MainActivity() {
         to: Controller?,
         from: Controller?,
         isPush:
-        Boolean
+            Boolean
     ) {
         if (from is DialogController || to is DialogController) {
             return

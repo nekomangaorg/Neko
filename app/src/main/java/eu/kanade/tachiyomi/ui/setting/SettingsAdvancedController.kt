@@ -205,8 +205,7 @@ class SettingsAdvancedController : SettingsController() {
                 onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
             }
         }
-        intListPreference(activity)
-        {
+        intListPreference(activity) {
             key = PreferenceKeys.logLevel
             titleRes = R.string.log_level
             summary = context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]

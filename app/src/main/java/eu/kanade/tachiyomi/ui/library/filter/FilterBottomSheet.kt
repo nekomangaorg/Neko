@@ -288,13 +288,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         unread = inflate(R.layout.filter_tag_group) as FilterTagGroup
         unread.setup(this, R.string.unread, R.string.read)
 
-
         missingChapters = inflate(R.layout.filter_tag_group) as FilterTagGroup
         missingChapters.setup(this, R.string.has_missing_chp, R.string.no_missing_chp)
 
         merged = inflate(R.layout.filter_tag_group) as FilterTagGroup
         merged.setup(this, R.string.merged, R.string.not_merged)
-
 
         if (hasTracking) {
             tracked = inflate(R.layout.filter_tag_group) as FilterTagGroup

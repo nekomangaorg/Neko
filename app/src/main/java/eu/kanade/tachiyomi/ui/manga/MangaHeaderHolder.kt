@@ -105,7 +105,6 @@ class MangaHeaderHolder(
             similarButton.setOnClickListener { adapter.delegate.openSimilar() }
             mergeButton.setOnClickListener { adapter.delegate.openMerge() }
 
-
             shareButton.setOnClickListener { adapter.delegate.prepareToShareManga() }
             favoriteButton.setOnClickListener {
                 adapter.delegate.favoriteManga(false)
@@ -255,7 +254,6 @@ class MangaHeaderHolder(
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_share))
         }
 
-
         with(binding.startReadingButton) {
             val nextChapter = presenter.getNextUnreadChapter()
             isVisible = presenter.chapters.isNotEmpty() && !item.isLocked && !adapter.hasFilter()
@@ -324,7 +322,6 @@ class MangaHeaderHolder(
         }
 
         binding.filtersText.text = presenter.currentFilters()
-
 
         if (!manga.initialized) return
         updateCover(manga)

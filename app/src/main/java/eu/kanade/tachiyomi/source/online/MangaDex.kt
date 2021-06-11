@@ -131,7 +131,11 @@ open class MangaDex : HttpSource() {
                 val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
                 val cache = response.header("X-Cache", "") == "HIT"
                 val result = ImageReportResult(
-                    page.imageUrl!!, response.isSuccessful, byteSize, cache, duration
+                    page.imageUrl!!,
+                    response.isSuccessful,
+                    byteSize,
+                    cache,
+                    duration
                 )
 
                 val jsonString = MdUtil.jsonParser.encodeToString(result)
@@ -158,7 +162,6 @@ open class MangaDex : HttpSource() {
     }
 
     open fun imageRequest(page: Page): Request {
-
         val atHomeHeaders = if (isLogged()) {
             MdUtil.getAuthHeaders(headers, preferences)
         } else {
@@ -173,9 +176,9 @@ open class MangaDex : HttpSource() {
                     val tokenRequestUrl = data[1]
                     val cacheControl =
                         if (Date().time - (
-                                tokenTracker[tokenRequestUrl]
-                                    ?: 0
-                                ) > MdUtil.mdAtHomeTokenLifespan
+                            tokenTracker[tokenRequestUrl]
+                                ?: 0
+                            ) > MdUtil.mdAtHomeTokenLifespan
                         ) {
                             tokenTracker[tokenRequestUrl] = Date().time
                             CacheControl.FORCE_NETWORK
@@ -212,8 +215,8 @@ open class MangaDex : HttpSource() {
     }
 
     override fun isLogged(): Boolean {
-        return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(this).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not()
-            && preferences.refreshToken().isNullOrBlank().not()
+        return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(this).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not() &&
+            preferences.refreshToken().isNullOrBlank().not()
     }
 
     override suspend fun login(

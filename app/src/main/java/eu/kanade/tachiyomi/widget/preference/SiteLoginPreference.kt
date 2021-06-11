@@ -34,9 +34,7 @@ class SiteLoginPreference @JvmOverloads constructor(
         val color = when (source.isLogged()) {
             true -> ContextCompat.getColor(context, R.color.gold)
             false -> ContextCompat.getColor(context, R.color.material_on_surface_disabled)
-
         }
-
 
         (holder.findViewById(R.id.image_view) as? ImageView)?.let { imageView ->
             imageView.setImageDrawable(

@@ -69,8 +69,9 @@ open class BrowseSourceController(bundle: Bundle) :
             putBoolean(APPLY_INSET, applyInset)
             putBoolean(DEEP_LINK, deepLink)
 
-            if (searchQuery != null)
+            if (searchQuery != null) {
                 putString(SEARCH_QUERY_KEY, searchQuery)
+            }
         }
     )
 
@@ -349,14 +350,18 @@ open class BrowseSourceController(bundle: Bundle) :
             val source = presenter.source as? HttpSource ?: return
             val activity = activity ?: return
             WebViewActivity.newIntent(
-                activity, source.id, source.baseUrl,
+                activity,
+                source.id,
+                source.baseUrl,
                 presenter.source.name
             )
         } else {
             val source = presenter.sourceManager.getMergeSource() as? HttpSource ?: return
             val activity = activity ?: return
             WebViewActivity.newIntent(
-                activity, source.id, source.baseUrl,
+                activity,
+                source.id,
+                source.baseUrl,
                 source.name
             )
         }

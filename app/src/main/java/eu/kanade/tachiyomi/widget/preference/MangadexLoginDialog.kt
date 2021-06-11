@@ -47,9 +47,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     }
 
     override fun checkLogin() {
-
         v?.apply {
-
             binding.login.apply {
                 progressType = ProgressType.INDETERMINATE
                 startAnimation()

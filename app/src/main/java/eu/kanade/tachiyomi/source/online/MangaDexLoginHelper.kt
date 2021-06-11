@@ -75,7 +75,6 @@ class MangaDexLoginHelper {
         password: String,
     ): Boolean {
         return withContext(Dispatchers.IO) {
-
             val loginRequest = LoginRequest(username, password)
 
             val jsonString = MdUtil.jsonParser.encodeToString(LoginRequest.serializer(), loginRequest)
@@ -88,7 +87,6 @@ class MangaDexLoginHelper {
             ).await()
 
             if (postResult.code == 200) {
-
                 val loginResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
                 preferences.setRefreshToken(loginResponse.token.refresh)
                 preferences.setSessionToken(loginResponse.token.session)

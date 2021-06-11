@@ -739,7 +739,7 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                    binding.libraryGridRecycler.recycler.translationY
+                binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
@@ -779,8 +779,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                    newOffset > -1
-                } else {
+                newOffset > -1
+            } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1149,7 +1149,7 @@ class LibraryController(
             binding.libraryGridRecycler.recycler.scrollToPosition(0)
         }
         this.query = query ?: ""
-        
+
         adapter.setFilter(query)
         viewScope.launchUI {
             adapter.performFilterAsync()
@@ -1318,9 +1318,9 @@ class LibraryController(
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
         if ((
-                adapter.getItem(fromPosition) is LibraryItem &&
-                    adapter.getItem(fromPosition) is LibraryItem
-                ) ||
+            adapter.getItem(fromPosition) is LibraryItem &&
+                adapter.getItem(fromPosition) is LibraryItem
+            ) ||
             adapter.getItem(fromPosition) == null
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(

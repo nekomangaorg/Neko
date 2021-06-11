@@ -30,8 +30,6 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         val size = 18
         val tintColor = context.getResourceColor(R.attr.colorAccent)
 
-
-
         preference {
             iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_tune)
             titleRes = R.string.general

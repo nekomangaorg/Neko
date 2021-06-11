@@ -25,7 +25,6 @@ class SearchHandler {
     private val v5DbHelper: V5DbHelper by injectLazy()
 
     fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangasPage> {
-
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
             val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
             network.client.newCall(searchMangaByIdRequest(realQuery))
@@ -65,7 +64,6 @@ class SearchHandler {
     }
 
     private fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
-
         val tempUrl = MdUtil.mangaUrl.toHttpUrlOrNull()!!.newBuilder()
 
         tempUrl.apply {

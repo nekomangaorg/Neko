@@ -45,7 +45,6 @@ fun POSTWithCookie(
     body: RequestBody = DEFAULT_BODY,
     cache: CacheControl = DEFAULT_CACHE_CONTROL
 ): Request {
-
     return Request.Builder()
         .url(url)
         .post(body)

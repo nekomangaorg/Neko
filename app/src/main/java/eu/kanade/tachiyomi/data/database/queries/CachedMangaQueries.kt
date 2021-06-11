@@ -13,9 +13,11 @@ interface CachedMangaQueries : DbProvider {
 
     fun insertCachedManga2(cachedManga: List<CachedManga>) = db.inTransaction {
         val query = RawQuery.builder()
-            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
+            .query(
+                "INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
                     "(${CachedMangaTable.COL_MANGA_TITLE}, ${CachedMangaTable.COL_MANGA_UUID}," +
-                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);")
+                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);"
+            )
 
         cachedManga.forEach {
             db.lowLevel().executeSQL(
@@ -27,9 +29,11 @@ interface CachedMangaQueries : DbProvider {
 
     fun insertCachedManga2Single(cachedManga: CachedManga) = db.inTransaction {
         val query = RawQuery.builder()
-            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
+            .query(
+                "INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
                     "(${CachedMangaTable.COL_MANGA_TITLE}, ${CachedMangaTable.COL_MANGA_UUID}," +
-                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);")
+                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);"
+            )
         db.lowLevel().executeSQL(
             query.args(cachedManga.title, cachedManga.uuid, cachedManga.rating)
                 .build()
@@ -46,7 +50,7 @@ interface CachedMangaQueries : DbProvider {
         .listOfObjects(CachedManga::class.java)
         .withQuery(
             RawQuery.builder()
-                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT ${limit+1} OFFSET ${page*limit}")
+                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT ${limit + 1} OFFSET ${page * limit}")
                 .build()
         )
         .prepare()

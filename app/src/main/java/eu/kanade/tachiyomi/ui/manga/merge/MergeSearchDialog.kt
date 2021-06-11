@@ -73,7 +73,6 @@ class MergeSearchDialog : DialogController {
         val adapter = MergeSearchAdapter(view.context)
         this.adapter = adapter
 
-
         binding.mergeSearchList.adapter = adapter
 
         // Set listeners
@@ -143,7 +142,8 @@ class MergeSearchDialog : DialogController {
         binding.progress.visibility = View.VISIBLE
         binding.mergeSearchList.visibility = View.INVISIBLE
         binding.emptyView.showMedium(
-            CommunityMaterial.Icon.cmd_compass_off, binding.root.context.getString(R.string.no_results_found)
+            CommunityMaterial.Icon.cmd_compass_off,
+            binding.root.context.getString(R.string.no_results_found)
         )
     }
 

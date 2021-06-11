@@ -31,7 +31,6 @@ class PopularHandler {
     }
 
     private fun popularMangaRequest(page: Int): Request {
-
         val tempUrl = MdUtil.mangaUrl.toHttpUrlOrNull()!!.newBuilder()
 
         tempUrl.apply {

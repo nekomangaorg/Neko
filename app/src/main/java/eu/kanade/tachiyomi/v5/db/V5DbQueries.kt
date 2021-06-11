@@ -35,4 +35,3 @@ class V5DbQueries {
         }
     }
 }
-

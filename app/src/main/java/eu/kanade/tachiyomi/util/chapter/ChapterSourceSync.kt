@@ -29,12 +29,11 @@ fun syncChaptersWithSource(
     manga: Manga,
     errorFromMerged: Boolean = false
 ): Pair<List<Chapter>, List<Chapter>> {
-
     val downloadManager: DownloadManager = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
-    //no need to handle cache in dedupe because rawsource already has the correct chapters
+    // no need to handle cache in dedupe because rawsource already has the correct chapters
     val dedupedChapters = deduplicateChapters(rawSourceChapters, manga)
 
     val sourceChapters = dedupedChapters.mapIndexed { i, sChapter ->
@@ -68,7 +67,6 @@ fun syncChaptersWithSource(
         if (dbChapter == null) {
             toAdd.add(sourceChapter)
         } else {
-
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
@@ -124,7 +122,7 @@ fun syncChaptersWithSource(
 
         // Recalculate update rate if unset and enough chapters are present
         if (manga.next_update == 0L && topChapters.size > 1) {
-            var delta = 0L;
+            var delta = 0L
             for (i in 0 until topChapters.size - 1) {
                 delta += (topChapters[i].date_upload - topChapters[i + 1].date_upload)
             }
@@ -183,7 +181,7 @@ fun syncChaptersWithSource(
         val topChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource()).sortedByDescending { it.date_upload }.take(4)
         // Recalculate next update since chapters were changed
         if (topChapters.size > 1) {
-            var delta = 0L;
+            var delta = 0L
             for (i in 0 until topChapters.size - 1) {
                 delta += (topChapters[i].date_upload - topChapters[i + 1].date_upload)
             }
@@ -196,8 +194,9 @@ fun syncChaptersWithSource(
         val newestChapter = topChapters.getOrNull(0)
         val dateFetch = newestChapter?.date_upload ?: manga.last_update
         if (dateFetch == 0L) {
-            if (toAdd.isNotEmpty())
+            if (toAdd.isNotEmpty()) {
                 manga.last_update = Date().time
+            }
         } else manga.last_update = dateFetch
         db.updateLastUpdated(manga).executeAsBlocking()
     }

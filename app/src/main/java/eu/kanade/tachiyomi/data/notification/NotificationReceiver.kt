@@ -499,7 +499,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-            Chapter
+                Chapter
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
@@ -593,7 +593,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapters:
-            Array<Chapter>,
+                Array<Chapter>,
             groupId: Int
         ):
             PendingIntent {

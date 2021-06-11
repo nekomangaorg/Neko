@@ -7,7 +7,7 @@ import androidx.work.Worker
 import androidx.work.WorkerParameters
 
 class V5MigrationJob(private val context: Context, workerParams: WorkerParameters) :
-        Worker(context, workerParams) {
+    Worker(context, workerParams) {
 
     override fun doWork(): Result {
         V5MigrationService.start(context)
@@ -20,6 +20,5 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
         fun doWorkNow() {
             WorkManager.getInstance().enqueue(OneTimeWorkRequestBuilder<V5MigrationJob>().build())
         }
-
     }
 }

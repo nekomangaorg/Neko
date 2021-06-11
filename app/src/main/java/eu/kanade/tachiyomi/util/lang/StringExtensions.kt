@@ -152,11 +152,10 @@ private val uuidFormatDigits = arrayOf((0..7), (9..12), (14..17), (19..22), (24.
  * Check if a string is in UUID format.
  */
 fun String.isUUID() =
-    this.length == 36
-        && uuidFormatLines.all { idx -> this[idx] == '-' }
-        && uuidFormatDigits.all { range ->
-        range.all { idx ->
-            this[idx].let { char -> char in '0'..'9' || char in 'a'..'f' || char in 'A'..'F' }
+    this.length == 36 &&
+        uuidFormatLines.all { idx -> this[idx] == '-' } &&
+        uuidFormatDigits.all { range ->
+            range.all { idx ->
+                this[idx].let { char -> char in '0'..'9' || char in 'a'..'f' || char in 'A'..'F' }
+            }
         }
-    }
-

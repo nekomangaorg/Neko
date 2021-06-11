@@ -62,7 +62,6 @@ open class MangaDexCache() : MangaDex() {
     }
 
     override fun fetchPopularManga(page: Int): Observable<MangasPage> {
-
         // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
         if (count == 0) {
@@ -99,7 +98,6 @@ open class MangaDexCache() : MangaDex() {
         query: String,
         filters: FilterList
     ): Observable<MangasPage> {
-
         // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
         XLog.i("Number of Cached entries: $count")
@@ -158,7 +156,7 @@ open class MangaDexCache() : MangaDex() {
         } else {
             db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking()
         }
-        //don't replace manga info if it already exists waste of network, and loses the original non cached info
+        // don't replace manga info if it already exists waste of network, and loses the original non cached info
         val mangaToReturn = if (manga.description.isNullOrBlank()) {
             fetchMangaDetails(manga)
         } else {
@@ -234,7 +232,6 @@ open class MangaDexCache() : MangaDex() {
     }
 
     private fun parseMangaCacheApi(response: Response): SManga {
-
         // Error check http response
         if (response.code == 404) {
             throw Exception("Manga has not been cached...")
@@ -253,7 +250,7 @@ open class MangaDexCache() : MangaDex() {
             // Convert from the api format
             mangaReturn.title = MdUtil.cleanString(networkApiManga.data.attributes.title["en"]!!)
             mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.data.attributes.description["en"]!!)
-            //mangaReturn.rating = networkApiManga.toString()
+            // mangaReturn.rating = networkApiManga.toString()
             mangaReturn.thumbnail_url = MdUtil.imageUrlCacheNotFound
 
             // Get the external tracking ids for this manga
@@ -276,13 +273,14 @@ open class MangaDexCache() : MangaDex() {
             // List the labels for this manga
             val tags = filterHandler.getTags()
             val genres = (
-                listOf(networkManga.publicationDemographic?.capitalize(Locale.US))
-                    + networkManga.tags?.map { it.id }
-                    ?.map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
-                    ?.map { tag -> tag?.name }
-                    + listOf(
-                    "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
-                ))
+                listOf(networkManga.publicationDemographic?.capitalize(Locale.US)) +
+                    networkManga.tags?.map { it.id }
+                        ?.map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
+                        ?.map { tag -> tag?.name } +
+                    listOf(
+                        "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
+                    )
+                )
                 .filterNotNull()
             mangaReturn.genre = genres.joinToString(", ")
 

@@ -109,7 +109,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
     private fun submitChanges() {
         if (binding.editText.visibility == View.VISIBLE) {
             if (adapter.categoryItemListener
-                    .onCategoryRename(flexibleAdapterPosition, binding.editText.text.toString())
+                .onCategoryRename(flexibleAdapterPosition, binding.editText.text.toString())
             ) {
                 isEditing(false)
                 if (!createCategory) {

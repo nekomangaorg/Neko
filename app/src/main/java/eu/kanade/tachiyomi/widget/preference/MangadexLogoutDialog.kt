@@ -29,7 +29,6 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
             .title(R.string.logout)
             .positiveButton(R.string.logout) {
                 launchNow {
-
                     val loggedOut = source.logout()
 
                     if (loggedOut.loggedOut) {

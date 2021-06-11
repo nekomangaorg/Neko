@@ -89,7 +89,6 @@ class MangaShortcutManager(
                                 .build()
                         }
                         is Source -> {
-
                             val bitmap = BitmapFactory.decodeResource(context.resources, R.drawable.ic_tracker_mangadex_logo)
 
                             ShortcutInfo.Builder(context, "Source-${item.id}")

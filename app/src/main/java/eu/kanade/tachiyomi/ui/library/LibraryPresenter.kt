@@ -299,8 +299,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-                } else {
+                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+            } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) return false
@@ -562,9 +562,9 @@ class LibraryPresenter(
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
                     if (catId > 0 && !categorySet.contains(catId) && (
-                            catId !in categoriesHidden ||
-                                !showAll
-                            )
+                        catId !in categoriesHidden ||
+                            !showAll
+                        )
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(

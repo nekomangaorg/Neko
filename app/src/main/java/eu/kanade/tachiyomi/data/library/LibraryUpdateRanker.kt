@@ -23,8 +23,8 @@ object LibraryUpdateRanker {
     fun nextFirstRanking(): Comparator<Manga> {
         val time = System.currentTimeMillis()
         return Comparator { mangaFirst: Manga,
-                            mangaSecond: Manga ->
-            compareValues(abs(mangaSecond.next_update-time), abs(mangaFirst.next_update-time))
+            mangaSecond: Manga ->
+            compareValues(abs(mangaSecond.next_update - time), abs(mangaFirst.next_update - time))
         }.reversed()
     }
 

@@ -27,7 +27,6 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
 import com.elvishew.xlog.XLog
 
-
 /**
  * Loader used to load chapters from an online source.
  */

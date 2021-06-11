@@ -686,9 +686,9 @@ class MangaDetailsController :
             )
         )
         // add comments in future
-        //if (!item.chapter.isMergedChapter()) {
+        // if (!item.chapter.isMergedChapter()) {
         //    popup.menu.findItem(R.id.action_view_comments).isVisible = true
-        //}
+        // }
         val menuSheet = MaterialMenuSheet(activity!!, items, item.name) { _, itemPos ->
             when (itemPos) {
                 0 -> markPreviousAs(item, true)
@@ -992,7 +992,9 @@ class MangaDetailsController :
         if (isNotOnline()) return
         val activity = activity ?: return
         val intent = WebViewActivity.newIntent(
-            activity.applicationContext, presenter.source.id, url,
+            activity.applicationContext,
+            presenter.source.id,
+            url,
             presenter.manga
                 .title
         )
@@ -1079,12 +1081,12 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.seriesType
-                (view.context).toLowerCase(Locale.ROOT)
+            (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
-                snack == null ||
-                    snack?.getText() != text
-                )
+            snack == null ||
+                snack?.getText() != text
+            )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
@@ -1290,7 +1292,7 @@ class MangaDetailsController :
     }
 
     fun refreshTracker() {
-        //getHeader()?.updateTracking()
+        // getHeader()?.updateTracking()
     }
 
     fun onMergeSearchResults(results: List<SManga>) {

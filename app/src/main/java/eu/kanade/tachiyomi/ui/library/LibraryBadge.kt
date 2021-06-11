@@ -29,7 +29,6 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             context.contextCompatColor(R.color.total_badge)
         } else context.getResourceColor(R.attr.unreadBadgeColor)
 
-
         with(binding.unreadText) {
             isVisible = unread > 0 || unread == -1 || showTotalChapters
             if (!isVisible) {

@@ -90,41 +90,40 @@ interface SManga : Serializable {
             thumbnail_url = other.thumbnail_url
         }
 
-
-        if (other.lang_flag != null){
+        if (other.lang_flag != null) {
             lang_flag = other.lang_flag
-            }
+        }
 
-        if (other.follow_status != null){
+        if (other.follow_status != null) {
             follow_status = other.follow_status
-            }
+        }
 
-        if (other.anilist_id != null){
+        if (other.anilist_id != null) {
             anilist_id = other.anilist_id
-            }
-        if (other.kitsu_id != null){
+        }
+        if (other.kitsu_id != null) {
             kitsu_id = other.kitsu_id
-            }
+        }
 
-        if (other.my_anime_list_id != null){
+        if (other.my_anime_list_id != null) {
             my_anime_list_id = other.my_anime_list_id
-            }
+        }
 
-        if (other.anime_planet_id != null){
+        if (other.anime_planet_id != null) {
             anime_planet_id = other.anime_planet_id
-            }
+        }
 
-        if (other.manga_updates_id != null){
+        if (other.manga_updates_id != null) {
             manga_updates_id = other.manga_updates_id
-            }
+        }
 
-        if (other.rating != null){
+        if (other.rating != null) {
             rating = other.rating
-            }
+        }
 
-        if (other.users != null){
+        if (other.users != null) {
             users = other.users
-            }
+        }
 
         if (other.last_chapter_number != null) {
             last_chapter_number = other.last_chapter_number

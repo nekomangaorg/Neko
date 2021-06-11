@@ -13,7 +13,6 @@ class FilterHandler() {
     val preferencesHelper: PreferencesHelper by injectLazy()
 
     internal fun getMDFilterList(): FilterList {
-
         val filters = mutableListOf(
             OriginalLanguageList(getOriginalLanguage()),
             DemographicList(getDemographics()),
@@ -269,4 +268,3 @@ class FilterHandler() {
         return url.toString()
     }
 }
-

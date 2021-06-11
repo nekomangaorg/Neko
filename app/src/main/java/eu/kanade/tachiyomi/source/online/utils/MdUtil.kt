@@ -277,7 +277,7 @@ class MdUtil {
             }
             return null
         }
-        
+
         fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient, headers: Headers, cacheControl: CacheControl): String {
             val atHomeRequest = GET(requestUrl, headers, cache = cacheControl)
             val atHomeResponse = client.newCall(atHomeRequest).execute()
@@ -309,7 +309,6 @@ class MdUtil {
         }
 
         fun getCoversFromMangaList(mangaResponseList: List<MangaResponse>, client: OkHttpClient): Map<String, String> {
-
             val idsAndCoverIds = mangaResponseList.mapNotNull { mangaResponse ->
                 val mangaId = mangaResponse.data.id
                 val coverId = mangaResponse.relationships.firstOrNull { relationship ->

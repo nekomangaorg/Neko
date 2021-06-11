@@ -76,10 +76,12 @@ class ChapterHolder(
             binding.chapterLanguage.isVisible = true
             binding.chapterLanguage.text = chapter.language
             ChapterUtil.setTextViewForChapter(
-                binding.chapterLanguage, item, showBookmark = false, hideStatus = isLocked
+                binding.chapterLanguage,
+                item,
+                showBookmark = false,
+                hideStatus = isLocked
             )
         }
-
 
         if (chapter.scanlator?.isNotBlank() == true) {
             statuses.add(chapter.scanlator!!)

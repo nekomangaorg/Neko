@@ -198,7 +198,6 @@ class MangaDetailsPresenter(
     }
 
     fun filterScanlatorsClicked(selectedScanlators: List<String>) {
-
         allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
 
         filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
@@ -463,7 +462,7 @@ class MangaDetailsPresenter(
             val networkManga = networkPair.first
             val mangaWasInitalized = manga.initialized
             if (networkManga != null) {
-                //only copy if it had no data
+                // only copy if it had no data
                 if (usingCache && manga.description.isNullOrEmpty()) {
                     manga.copyFrom(networkManga)
                 }
@@ -711,7 +710,6 @@ class MangaDetailsPresenter(
             true -> {
                 manga.date_added = Date().time
                 if (preferences.addToLibraryAsPlannedToRead()) {
-
                     val mdTrack = trackList.firstOrNull { it.service.isMdList() }?.track
 
                     mdTrack?.let {
@@ -896,7 +894,6 @@ class MangaDetailsPresenter(
                         }
                         if (trackItem != null) {
                             if (item.service.isMdList()) {
-
                                 if (manga.favorite && preferences.addToLibraryAsPlannedToRead() && trackItem.status == FollowStatus.UNFOLLOWED.int) {
                                     trackItem.status = FollowStatus.PLAN_TO_READ.int
                                     scope.launch {

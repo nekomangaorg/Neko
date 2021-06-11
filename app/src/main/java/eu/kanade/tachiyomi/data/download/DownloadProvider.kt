@@ -6,7 +6,6 @@ import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -119,7 +118,7 @@ class DownloadProvider(private val context: Context) {
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
                 val mangadexId = fileName.substringAfterLast(" - ", "")
-                //legacy dex id
+                // legacy dex id
                 if (mangadexId.isNotEmpty() && mangadexId.isUUID()) {
                     return@filter idHashSet.contains(mangadexId)
                 } else if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
@@ -218,7 +217,6 @@ class DownloadProvider(private val context: Context) {
      * @param chapter the chapter to query.
      */
     fun getChapterDirName(chapter: Chapter, useNewId: Boolean = true): String {
-
         if (chapter.isMergedChapter()) {
             return getJ2kChapterName(chapter)
         } else {
@@ -247,7 +245,7 @@ class DownloadProvider(private val context: Context) {
             getChapterDirName(chapter, true),
             // chater names from j2k
             getJ2kChapterName(chapter),
-            //legacy manga id
+            // legacy manga id
             getChapterDirName(chapter, false),
             // Legacy chapter directory name used in v0.8.4 and before
             DiskUtil.buildValidFilename(chapter.name)

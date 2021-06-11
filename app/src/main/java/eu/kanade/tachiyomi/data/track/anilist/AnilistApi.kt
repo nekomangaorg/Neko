@@ -20,7 +20,6 @@ import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.jsonMime
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.MediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -34,7 +33,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     suspend fun addLibManga(track: Track): Track {
         return withContext(Dispatchers.IO) {
-
             val variables = jsonObject(
                 "mangaId" to track.media_id,
                 "progress" to track.last_chapter_read,
@@ -104,7 +102,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
 
     suspend fun search(search: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         return withContext(Dispatchers.IO) {
-
             val variables = jsonObject(
                 "query" to if (manga.anilist_id != null && !wasPreviouslyTracked) manga.anilist_id else search
             )
@@ -124,7 +121,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     }
 
     suspend fun findLibManga(track: Track, userid: Int): Track? {
-
         return withContext(Dispatchers.IO) {
             val variables = jsonObject(
                 "id" to userid,
@@ -160,7 +156,6 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     suspend fun remove(track: Track): Boolean {
         return withContext(Dispatchers.IO) {
             try {
-
                 val variables = jsonObject(
                     "listId" to track.library_id
                 )

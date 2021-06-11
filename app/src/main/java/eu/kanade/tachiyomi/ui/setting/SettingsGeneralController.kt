@@ -126,7 +126,7 @@ class SettingsGeneralController : SettingsController() {
                 titleRes = R.string.app_theme
                 lastScrollPostion = lastThemeX
                 summary = if (preferences.nightMode()
-                        .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                    .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
                     val lightTheme = preferences.lightTheme().get().nameRes
                     val darkTheme = preferences.darkTheme().get().nameRes
