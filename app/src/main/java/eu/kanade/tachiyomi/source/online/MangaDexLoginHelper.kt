@@ -6,10 +6,10 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.source.online.handlers.serializers.CheckTokenResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.LoginRequest
-import eu.kanade.tachiyomi.source.online.handlers.serializers.LoginResponse
-import eu.kanade.tachiyomi.source.online.handlers.serializers.RefreshTokenRequest
+import eu.kanade.tachiyomi.source.online.handlers.dto.CheckTokenDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.LoginRequestDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.LoginResponseDto
+import eu.kanade.tachiyomi.source.online.handlers.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -43,8 +43,11 @@ class MangaDexLoginHelper {
             return true
         }
         XLog.i("token was not refreshed recently hit dex auth check")
-        val response = network.client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
-        val body = MdUtil.jsonParser.decodeFromString<CheckTokenResponse>(response.body!!.string())
+        val response = network.client.newCall(GET(MdUtil.checkTokenUrl,
+            authHeaders,
+            CacheControl.FORCE_NETWORK)).await()
+        val body =
+            MdUtil.jsonParser.decodeFromString<CheckTokenDto>(response.body!!.string())
         return body.isAuthenticated
     }
 
@@ -54,8 +57,9 @@ class MangaDexLoginHelper {
             XLog.i("refresh token is null can't refresh token")
             return false
         }
-        val result = RefreshTokenRequest(refreshToken)
-        val jsonString = MdUtil.jsonParser.encodeToString(RefreshTokenRequest.serializer(), result)
+        val result = RefreshTokenDto(refreshToken)
+        val jsonString =
+            MdUtil.jsonParser.encodeToString(RefreshTokenDto.serializer(), result)
         val postResult = network.client.newCall(
             POST(
                 MdUtil.refreshTokenUrl,
@@ -64,7 +68,8 @@ class MangaDexLoginHelper {
             )
         ).await()
 
-        val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
+        val jsonResponse =
+            MdUtil.jsonParser.decodeFromString<LoginResponseDto>(postResult.body!!.string())
         preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
         XLog.i("refreshing token")
         return jsonResponse.result == "ok"
@@ -75,9 +80,10 @@ class MangaDexLoginHelper {
         password: String,
     ): Boolean {
         return withContext(Dispatchers.IO) {
-            val loginRequest = LoginRequest(username, password)
+            val loginRequest = LoginRequestDto(username, password)
 
-            val jsonString = MdUtil.jsonParser.encodeToString(LoginRequest.serializer(), loginRequest)
+            val jsonString =
+                MdUtil.jsonParser.encodeToString(LoginRequestDto.serializer(), loginRequest)
 
             val postResult = network.client.newCall(
                 POST(
@@ -87,7 +93,8 @@ class MangaDexLoginHelper {
             ).await()
 
             if (postResult.code == 200) {
-                val loginResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
+                val loginResponse =
+                    MdUtil.jsonParser.decodeFromString<LoginResponseDto>(postResult.body!!.string())
                 preferences.setRefreshToken(loginResponse.token.refresh)
                 preferences.setSessionToken(loginResponse.token.session)
                 preferences.setSourceCredentials(MangaDex(), username, password)

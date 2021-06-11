@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxSectionItem
@@ -34,7 +33,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import rx.Observable
 import rx.Subscription
@@ -53,7 +54,7 @@ open class BrowseSourcePresenter(
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get()
+    private val coverCache: CoverCache = Injekt.get(),
 ) : BasePresenter<BrowseSourceController>() {
 
     /**
@@ -188,17 +189,22 @@ open class BrowseSourcePresenter(
         pagerSubscription = pager.results()
             .observeOn(Schedulers.io())
             .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
-            .doOnNext { initializeMangas(it.second) }
+            .doOnNext { initializeMangaList(it.second) }
             .map {
-                it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
+                it.first to it.second.map {
+                    BrowseSourceItem(it,
+                        browseAsList,
+                        sourceListType,
+                        isFollows)
+                }
                     .filter { isDeepLink || isLibraryVisible || !it.manga.favorite }
             }.observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay(
-                { view, (page, mangas) ->
+                { view, (page, mangaList) ->
                     if (isDeepLink) {
-                        view.goDirectlyForDeepLink(mangas.first().manga)
+                        view.goDirectlyForDeepLink(mangaList.first().manga)
                     } else {
-                        view.onAddPage(page, mangas)
+                        view.onAddPage(page, mangaList)
                     }
                 },
                 { _, error ->
@@ -305,7 +311,7 @@ open class BrowseSourcePresenter(
      *
      * @param mangas the list of manga to initialize.
      */
-    fun initializeMangas(mangas: List<Manga>) {
+    fun initializeMangaList(mangas: List<Manga>) {
         mangaDetailSubject.onNext(mangas)
     }
 
@@ -351,17 +357,13 @@ open class BrowseSourcePresenter(
     /**
      * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
      */
-    fun searchRandomManga() {
-        source.apply {
-            fetchRandomMangaId()
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe { randMangaId ->
-                    // Query string, e.g. "id:350"
-                    restartPager("${SearchHandler.PREFIX_ID_SEARCH}$randMangaId")
-                    // Clear search query so user can browse all manga again when they hit the Search button
-                    query = ""
-                }
+    fun searchRandomManga(): Flow<Manga?> {
+        return source.getRandomManga().map { smanga ->
+            if (smanga == null) {
+                null
+            } else {
+                networkToLocalManga(smanga, source.id)
+            }
         }
     }
 

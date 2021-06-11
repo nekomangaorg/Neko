@@ -10,7 +10,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangasPage
+import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -18,10 +18,9 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.serializers.CacheApiMangaSerializer
+import eu.kanade.tachiyomi.source.online.handlers.dto.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.CacheControl
@@ -33,12 +32,10 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 import java.util.concurrent.TimeUnit
-import kotlin.random.Random
 
-open class MangaDexCache() : MangaDex() {
+open class MangaDexCache : MangaDex() {
 
     private val db: DatabaseHelper by injectLazy()
-    private val v5DbHelper: V5DbHelper by injectLazy()
     private val downloadManager: DownloadManager by injectLazy()
     private val similarHandler: SimilarHandler by injectLazy()
     private val filterHandler: FilterHandler by injectLazy()
@@ -51,17 +48,14 @@ open class MangaDexCache() : MangaDex() {
         bucket.consume()
         it.proceed(it.request())
     }
-    private val clientLessRateLimits = network.nonRateLimitedClient.newBuilder().addInterceptor(rateLimitInterceptor).build()
+    private val clientLessRateLimits =
+        network.nonRateLimitedClient.newBuilder().addInterceptor(rateLimitInterceptor).build()
 
     override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         throw Exception("Cache source cannot update follow status")
     }
 
-    override fun fetchRandomMangaId(): Observable<String> {
-        return Observable.just(Random(1060).nextInt().toString())
-    }
-
-    override fun fetchPopularManga(page: Int): Observable<MangasPage> {
+    override fun fetchPopularManga(page: Int): Observable<MangaListPage> {
         // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
         if (count == 0) {
@@ -89,15 +83,15 @@ open class MangaDexCache() : MangaDex() {
                 mangasClean.forEach { manga ->
                     manga.rating = null
                 }
-                MangasPage(mangasClean, haveMore)
+                MangaListPage(mangasClean, haveMore)
             }
     }
 
     override fun fetchSearchManga(
         page: Int,
         query: String,
-        filters: FilterList
-    ): Observable<MangasPage> {
+        filters: FilterList,
+    ): Observable<MangaListPage> {
         // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
         XLog.i("Number of Cached entries: $count")
@@ -126,11 +120,11 @@ open class MangaDexCache() : MangaDex() {
                 mangasClean.forEach { manga ->
                     manga.rating = null
                 }
-                MangasPage(mangasClean, haveMore)
+                MangaListPage(mangasClean, haveMore)
             }
     }
 
-    override fun fetchFollows(): Observable<MangasPage> {
+    override fun fetchFollows(): Observable<MangaListPage> {
         throw Exception("Cache source cannot get follows")
     }
 
@@ -152,7 +146,8 @@ open class MangaDexCache() : MangaDex() {
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         val dbManga = db.getMangadexManga(manga.url).executeAsBlocking()!!
         val dbChapters = if (manga.isMerged()) {
-            db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking().filter { downloadManager.isChapterDownloaded(it, dbManga) || it.isMergedChapter() }
+            db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking()
+                .filter { downloadManager.isChapterDownloaded(it, dbManga) || it.isMergedChapter() }
         } else {
             db.getChaptersByMangaId(dbManga.id!!).executeAsBlocking()
         }
@@ -206,7 +201,10 @@ open class MangaDexCache() : MangaDex() {
         return Track.create(TrackManager.MDLIST)
     }
 
-    override fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangasPage> {
+    override fun fetchMangaSimilarObservable(
+        manga: Manga,
+        refresh: Boolean,
+    ): Observable<MangaListPage> {
         return similarHandler.fetchSimilarObserable(manga, refresh)
     }
 
@@ -228,7 +226,9 @@ open class MangaDexCache() : MangaDex() {
 
     private fun apiRequest(manga: SManga): Request {
         val mangaId = MdUtil.getMangaId(manga.url)
-        return GET(MdUtil.similarCacheMangas + mangaId + ".json", headers, CacheControl.FORCE_NETWORK)
+        return GET(MdUtil.similarCacheMangas + mangaId + ".json",
+            headers,
+            CacheControl.FORCE_NETWORK)
     }
 
     private fun parseMangaCacheApi(response: Response): SManga {
@@ -245,11 +245,13 @@ open class MangaDexCache() : MangaDex() {
             // Serialize the api response
             val jsonData = response.body!!.string()
             val mangaReturn = SManga.create()
-            val networkApiManga = MdUtil.jsonParser.decodeFromString(CacheApiMangaSerializer.serializer(), jsonData)
+            val networkApiManga =
+                MdUtil.jsonParser.decodeFromString(CacheApiMangaSerializer.serializer(), jsonData)
             mangaReturn.url = "/manga/${networkApiManga.data.id}"
             // Convert from the api format
             mangaReturn.title = MdUtil.cleanString(networkApiManga.data.attributes.title["en"]!!)
-            mangaReturn.description = "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.data.attributes.description["en"]!!)
+            mangaReturn.description =
+                "NOTE: THIS IS A CACHED MANGA ENTRY\n" + MdUtil.cleanDescription(networkApiManga.data.attributes.description["en"]!!)
             // mangaReturn.rating = networkApiManga.toString()
             mangaReturn.thumbnail_url = MdUtil.imageUrlCacheNotFound
 
@@ -278,7 +280,8 @@ open class MangaDexCache() : MangaDex() {
                         ?.map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
                         ?.map { tag -> tag?.name } +
                     listOf(
-                        "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US) ?: "Unknown")
+                        "Content Rating - " + (networkManga.contentRating?.capitalize(Locale.US)
+                            ?: "Unknown")
                     )
                 )
                 .filterNotNull()

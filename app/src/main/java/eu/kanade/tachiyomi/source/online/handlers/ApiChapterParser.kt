@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterResponse
+import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.serialization.decodeFromString
 import okhttp3.Response
@@ -10,7 +10,7 @@ import java.util.Date
 class ApiChapterParser {
     fun pageListParse(response: Response, host: String, dataSaver: Boolean): List<Page> {
         val jsonData = response.body!!.string()
-        val networkApiChapter = MdUtil.jsonParser.decodeFromString<ChapterResponse>(jsonData)
+        val networkApiChapter = MdUtil.jsonParser.decodeFromString<ChapterDto>(jsonData)
 
         val pages = mutableListOf<Page>()
 
@@ -33,7 +33,8 @@ class ApiChapterParser {
 
     fun externalParse(response: Response): String {
         val jsonData = response.body!!.string()
-        val networkApiChapter = MdUtil.jsonParser.decodeFromString(ChapterResponse.serializer(), jsonData)
+        val networkApiChapter =
+            MdUtil.jsonParser.decodeFromString(ChapterDto.serializer(), jsonData)
         return networkApiChapter.data.attributes.data.first().substringAfterLast("/")
     }
 }

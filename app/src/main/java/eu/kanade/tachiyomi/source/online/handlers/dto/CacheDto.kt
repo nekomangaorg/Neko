@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.source.online.handlers.serializers
+package eu.kanade.tachiyomi.source.online.handlers.dto
 
 import kotlinx.serialization.Serializable
 
@@ -6,20 +6,20 @@ import kotlinx.serialization.Serializable
 data class CacheApiMangaSerializer(
     val result: String,
     val data: CacheApiData,
-    val relationships: List<CacheApiRelationships>
+    val relationships: List<CacheApiRelationships>,
 )
 
 @Serializable
 data class CacheApiRelationships(
     val id: String,
-    val type: String
+    val type: String,
 )
 
 @Serializable
 data class CacheApiData(
     val id: String,
     val type: String,
-    val attributes: CacheApiDataAttributes
+    val attributes: CacheApiDataAttributes,
 )
 
 @Serializable
@@ -35,14 +35,14 @@ data class CacheApiDataAttributes(
     val tags: List<CacheApiTags>? = null,
     val version: Int,
     val createdAt: String,
-    val updatedAt: String
+    val updatedAt: String,
 )
 
 @Serializable
 data class CacheApiTags(
     val id: String,
     val type: String,
-    val attributes: CacheApiTagAttributes
+    val attributes: CacheApiTagAttributes,
 )
 
 @Serializable
