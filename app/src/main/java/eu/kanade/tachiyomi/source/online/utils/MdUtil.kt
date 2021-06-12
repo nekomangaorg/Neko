@@ -5,10 +5,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.dto.AtHomeDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.CoverDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.CoverListDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
+import eu.kanade.tachiyomi.source.online.dto.CoverDto
+import eu.kanade.tachiyomi.source.online.dto.CoverListDto
+import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.CacheControl

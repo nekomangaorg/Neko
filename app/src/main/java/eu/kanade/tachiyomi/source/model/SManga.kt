@@ -25,24 +25,6 @@ interface SManga : Serializable {
 
     var initialized: Boolean
 
-    val originalTitle: String
-        get() = (this as? MangaImpl)?.ogTitle ?: title
-
-    val originalAuthor: String?
-        get() = (this as? MangaImpl)?.ogAuthor ?: author
-
-    val originalArtist: String?
-        get() = (this as? MangaImpl)?.ogArtist ?: artist
-
-    val originalDescription: String?
-        get() = (this as? MangaImpl)?.ogDesc ?: description
-
-    val originalGenre: String?
-        get() = (this as? MangaImpl)?.ogGenre ?: genre
-
-    val originalStatus: Int
-        get() = (this as? MangaImpl)?.ogStatus ?: status
-
     var follow_status: FollowStatus?
 
     var lang_flag: String?
@@ -71,19 +53,19 @@ interface SManga : Serializable {
 
     fun copyFrom(other: SManga) {
         if (other.author != null) {
-            author = other.originalAuthor
+            author = other.author
         }
 
         if (other.artist != null) {
-            artist = other.originalArtist
+            artist = other.artist
         }
 
         if (other.description != null) {
-            description = other.originalDescription
+            description = other.description
         }
 
         if (other.genre != null) {
-            genre = other.originalGenre
+            genre = other.genre
         }
 
         if (other.thumbnail_url != null) {

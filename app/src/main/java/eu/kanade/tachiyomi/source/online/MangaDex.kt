@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.dto.ImageReportResultDto
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
@@ -23,7 +24,6 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.dto.ImageReportResultDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
@@ -105,10 +105,6 @@ open class MangaDex : HttpSource() {
 
     override fun fetchFollows(): Observable<MangaListPage> {
         return followsHandler.fetchFollows()
-    }
-
-    override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return mangaHandler.fetchMangaDetailsObservable(manga)
     }
 
     override suspend fun fetchMangaDetails(manga: SManga): SManga {

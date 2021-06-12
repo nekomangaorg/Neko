@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -22,7 +21,6 @@ import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -52,8 +50,6 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { DownloadManager(app) }
 
-        addSingletonFactory { CustomMangaManager(app) }
-
         addSingletonFactory { TrackManager(app) }
 
         addSingletonFactory { Gson() }
@@ -61,8 +57,6 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
-
-        addSingletonFactory { V5DbHelper(app.applicationContext) }
 
         addSingleton(FilterHandler())
 
@@ -101,7 +95,5 @@ class AppModule(val app: Application) : InjektModule {
         GlobalScope.launch { get<DatabaseHelper>() }
 
         GlobalScope.launch { get<DownloadManager>() }
-
-        GlobalScope.launch { get<CustomMangaManager>() }
     }
 }

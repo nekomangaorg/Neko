@@ -26,11 +26,11 @@ class MangaInfoPutResolver() : PutResolver<Manga>() {
         .build()
 
     fun mapToContentValues(manga: Manga) = ContentValues(1).apply {
-        put(MangaTable.COL_TITLE, manga.originalTitle)
-        put(MangaTable.COL_GENRE, manga.originalGenre)
-        put(MangaTable.COL_AUTHOR, manga.originalAuthor)
-        put(MangaTable.COL_ARTIST, manga.originalArtist)
-        put(MangaTable.COL_DESCRIPTION, manga.originalDescription)
-        put(MangaTable.COL_STATUS, manga.originalStatus)
+        put(MangaTable.COL_TITLE, manga.title)
+        put(MangaTable.COL_GENRE, manga.genre)
+        put(MangaTable.COL_AUTHOR, manga.author)
+        put(MangaTable.COL_ARTIST, manga.artist)
+        put(MangaTable.COL_DESCRIPTION, manga.description)
+        put(MangaTable.COL_STATUS, manga.status)
     }
 }

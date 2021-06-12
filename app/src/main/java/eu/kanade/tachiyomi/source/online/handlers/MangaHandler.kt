@@ -8,9 +8,9 @@ import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterListDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.GroupListDto
+import eu.kanade.tachiyomi.source.online.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,19 +29,20 @@ class MangaHandler {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
-            val response = network.client.newCall(mangaRequest(manga)).await()
+            val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
 
-            val jsonData = response.body!!.string()
-            if (response.code != 200) {
-                if (response.code == 502) {
+            if (response.code() != 200) {
+                if (response.code() == 502) {
                     throw Exception("MangaDex appears to be down, or under heavy load")
                 } else {
-                    XLog.e("error from MangaDex with response code ${response.code} \n body: \n$jsonData")
-                    throw Exception("Error from MangaDex Response code ${response.code} ")
+                    XLog.e("error from MangaDex with response code ${response.code()} error body: ${
+                        response.errorBody()?.string()
+                    }")
+                    throw Exception("Error from MangaDex Response code ${response.code()} ")
                 }
             }
 
-            val detailsManga = apiMangaParser.mangaDetailsParse(jsonData)
+            val detailsManga = apiMangaParser.mangaDetailsParse(response.body()!!)
             manga.copyFrom(detailsManga)
 
             val chapterList = fetchChapterList(manga)
@@ -63,18 +64,14 @@ class MangaHandler {
 
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
-            val response = network.client.newCall(mangaRequest(manga)).await()
-            apiMangaParser.mangaDetailsParse(response.body!!.string()).apply { initialized = true }
-        }
-    }
-
-    fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return network.client.newCall(mangaRequest(manga))
-            .asObservableSuccess()
-            .map { response ->
-                apiMangaParser.mangaDetailsParse(response.body!!.string())
-                    .apply { initialized = true }
+            val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
+            if (response.isSuccessful.not()) {
+                throw(Exception("Error from MangaDex ${response.code()} error body: ${
+                    response.errorBody()?.string()
+                }"))
             }
+            apiMangaParser.mangaDetailsParse(response.body()!!).apply { initialized = true }
+        }
     }
 
     fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {

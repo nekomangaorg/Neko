@@ -86,11 +86,7 @@ abstract class ReducedHttpSource : HttpSource() {
     override suspend fun fetchTrackingInfo(url: String): Track {
         TODO("Not yet implemented")
     }
-
-    override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        TODO("Not yet implemented")
-    }
-
+    
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         TODO("Not yet implemented")
     }

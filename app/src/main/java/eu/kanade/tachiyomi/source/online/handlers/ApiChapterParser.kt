@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.serialization.decodeFromString
 import okhttp3.Response

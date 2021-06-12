@@ -13,12 +13,12 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.isServiceRunning
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -33,9 +33,9 @@ import java.util.concurrent.TimeUnit
  */
 class V5MigrationService(
     val db: DatabaseHelper = Injekt.get(),
-    val dbV5: V5DbHelper = Injekt.get(),
     val preferences: PreferencesHelper = Injekt.get(),
     val trackManager: TrackManager = Injekt.get(),
+    val networkHelper: NetworkHelper = Injekt.get(),
 ) : Service() {
 
     /**
@@ -109,7 +109,7 @@ class V5MigrationService(
     /**
      * This will migrate the mangaList in the library to the new ids
      */
-    private fun migrateLibraryToV5() {
+    private suspend fun migrateLibraryToV5() {
         val mangaList = db.getMangaList().executeAsBlocking()
         mangaList.forEachIndexed { index, manga ->
 
@@ -129,9 +129,13 @@ class V5MigrationService(
             // We skip mangaList which have already been converted (non-numeric ids)
             var mangaErroredOut = false
             if (isNumericId) {
-                val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
-                if (newMangaId.isNotBlank()) {
-                    manga.url = "/title/$newMangaId"
+
+                val responseDto = networkHelper.service.legacyMapping(LegacyIdDto(type = "manga",
+                    listOf(oldMangaId.toInt())))
+
+                if (responseDto.isSuccessful) {
+                    val newId = responseDto.body()!!.first().data.attributes.newId
+                    manga.url = "/title/$newId"
                     manga.initialized = false
                     manga.thumbnail_url = null
                     db.insertManga(manga).executeAsBlocking()
@@ -142,7 +146,7 @@ class V5MigrationService(
                     }
                 } else {
                     failedUpdatesMangaList[manga] = "unable to find new manga id"
-                    failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed it")
+                    failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed this manga or the id changed")
                     mangaErroredOut = true
                 }
             }
@@ -151,34 +155,47 @@ class V5MigrationService(
             val chapters = db.getChapters(manga).executeAsBlocking()
             val chapterErrors = mutableListOf<String>()
             if (!mangaErroredOut) {
-                chapters.asSequence().filter { it.isMergedChapter().not() }.forEach { chapter ->
-                    // Return if job was canceled
-                    if (job?.isCancelled == true) {
-                        return
-                    }
-                    // Get the old id and check if it is a number
-                    val oldChapterId = chapter.mangadex_chapter_id
 
-                    // Get the new id for this chapter
-                    // We skip chapters which have already been converted (non-numeric ids)
-                    if (oldChapterId.isDigitsOnly()) {
-                        val newChapterId = V5DbQueries.getNewChapterId(dbV5.idDb, oldChapterId)
-                        if (newChapterId != "") {
-                            chapter.mangadex_chapter_id = newChapterId
-                            chapter.url = MdUtil.chapterSuffix + newChapterId
-                            chapter.old_mangadex_id = oldChapterId
+                val chapterMap = chapters.filter { it.isMergedChapter().not() }
+                    .filter { it.mangadex_chapter_id.isDigitsOnly() }
+                    .map { it.mangadex_chapter_id.toInt() to it }
+                    .toMap()
+                val chapterChunks = chapters.filter { it.isMergedChapter().not() }
+                    .filter { it.mangadex_chapter_id.isDigitsOnly() }
+                    .map { it.mangadex_chapter_id.toInt() }
+                    .chunked(100)
+
+                chapterChunks.asSequence().forEach { legacyIds ->
+                    val responseDto =
+                        networkHelper.service.legacyMapping(LegacyIdDto("chapter", legacyIds))
+                    if (responseDto.isSuccessful) {
+                        responseDto.body()!!.forEach { legacyMappingDto ->
+                            if (job?.isCancelled == true) {
+                                return
+                            }
+                            val oldId = legacyMappingDto.data.attributes.legacyId
+                            val newId = legacyMappingDto.data.attributes.newId
+                            val chapter = chapterMap[oldId]!!
+                            chapter.mangadex_chapter_id = newId
+                            chapter.url = MdUtil.chapterSuffix + newId
+                            chapter.old_mangadex_id = oldId.toString()
                             db.insertChapter(chapter).executeAsBlocking()
-                        } else {
-                            failedUpdatesChapters[chapter] =
+
+                        }
+                    } else {
+                        legacyIds.forEach {
+                            val failedChapter = chapterMap[it]!!
+                            failedUpdatesChapters[failedChapter] =
                                 "unable to find new chapter V5 id deleting chapter"
                             chapterErrors.add(
                                 "\t- unable to find new chapter id for " +
-                                    "vol ${chapter.vol} - ${chapter.chapter_number} - ${chapter.name}"
+                                    "vol ${failedChapter.vol} - ${failedChapter.chapter_number} - ${failedChapter.name}"
                             )
-                            db.deleteChapter(chapter).executeAsBlocking()
+                            db.deleteChapter(failedChapter).executeAsBlocking()
                         }
                     }
                 }
+
                 // Append chapter errors if we have them
                 if (chapterErrors.size > 0) {
                     failedUpdatesErrors.add(manga.title + ": has chapter conversion errors")

@@ -12,4 +12,5 @@ object MdApi {
     const val author = "/author"
     const val chapterImageServer = "/at-home/server"
     const val userFollows = "/user/follows/manga"
+    const val legacyMapping = "/legacy/mapping"
 }
