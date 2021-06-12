@@ -22,7 +22,6 @@ import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 class MangaHandler {
-
     val network: NetworkHelper by injectLazy()
     val filterHandler: FilterHandler by injectLazy()
     val preferencesHelper: PreferencesHelper by injectLazy()
@@ -31,20 +30,7 @@ class MangaHandler {
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
             val detailsManga = async {
-                val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
-                
-                if (response.code() != 200) {
-                    if (response.code() == 502) {
-                        throw Exception("MangaDex appears to be down, or under heavy load")
-                    } else {
-                        XLog.e("error from MangaDex with response code ${response.code()} error body: ${
-                            response.errorBody()?.string()
-                        }")
-                        throw Exception("Error from MangaDex Response code ${response.code()} ")
-                    }
-                }
-
-                apiMangaParser.mangaDetailsParse(response.body()!!)
+                fetchMangaDetails(manga)
             }
             val chapterList = async {
                 fetchChapterList(manga)
@@ -75,7 +61,7 @@ class MangaHandler {
                     response.errorBody()?.string()
                 }"))
             }
-            apiMangaParser.mangaDetailsParse(response.body()!!).apply { initialized = true }
+            apiMangaParser.mangaDetailsParse(response.body()!!)
         }
     }
 
