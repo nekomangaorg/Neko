@@ -1,14 +1,13 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.util.system.runAsObservable
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
@@ -20,20 +19,16 @@ import uy.kohesive.injekt.injectLazy
 class SearchHandler {
     private val network: NetworkHelper by injectLazy()
     private val filterHandler: FilterHandler by injectLazy()
-    private val preferences: PreferencesHelper by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
-    private val v5DbHelper: V5DbHelper by injectLazy()
 
     fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangaListPage> {
         return if (query.startsWith(PREFIX_ID_SEARCH)) {
-            val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
-            network.client.newCall(searchMangaByIdRequest(realQuery))
-                .asObservableSuccess()
-                .map { response ->
-                    val details = apiMangaParser.mangaDetailsParse(response.body!!.string())
-                    details.url = "/title/$realQuery/"
-                    MangaListPage(listOf(details), false)
-                }
+            runAsObservable {
+                val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
+                val response = network.service.viewManga(realQuery)
+                val details = apiMangaParser.mangaDetailsParse(response.body()!!)
+                MangaListPage(listOf(details), false)
+            }
         } else {
             network.client.newCall(searchMangaRequest(page, query, filters))
                 .asObservableSuccess()

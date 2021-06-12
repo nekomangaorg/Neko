@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.source.filter.TextSectionItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.runAsObservable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -174,7 +175,7 @@ open class BrowseSourcePresenter(
         }
         this.appliedFilters = filters
 
-        subscribeToMangaInitializer()
+        //subscribeToMangaInitializer()
 
         // Create a new pager.
         pager = createPager(query, filters)
@@ -268,7 +269,9 @@ open class BrowseSourcePresenter(
             .flatMap { Observable.from(it) }
             .filter { it.thumbnail_url == null && !it.initialized }
             .filter { isDeepLink || isLibraryVisible || !it.favorite }
-            .concatMap { getMangaDetailsObservable(it) }
+            .concatMap {
+                getMangaDetailsObservable(it)
+            }
             .onBackpressureBuffer()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -322,14 +325,13 @@ open class BrowseSourcePresenter(
      * @return an observable of the manga to initialize
      */
     private fun getMangaDetailsObservable(manga: Manga): Observable<Manga> {
-        return source.fetchMangaDetailsObservable(manga)
-            .flatMap { networkManga ->
-                manga.copyFrom(networkManga)
-                manga.initialized = true
-                db.insertManga(manga).executeAsBlocking()
-                Observable.just(manga)
-            }
-            .onErrorResumeNext { Observable.just(manga) }
+        return runAsObservable(scope) {
+            val networkManga = source.fetchMangaDetails(manga)
+            manga.copyFrom(networkManga)
+            manga.initialized = true
+            db.insertManga(manga).executeAsBlocking()
+            manga
+        }
     }
 
     fun confirmDeletion(manga: Manga) {

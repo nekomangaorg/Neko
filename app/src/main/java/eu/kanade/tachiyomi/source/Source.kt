@@ -71,14 +71,7 @@ interface Source {
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList
-
-    /**
-     * Returns an observable with the updated details for a manga.
-     *
-     * @param manga the manga to update.
-     */
-    fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga>
-
+    
     /**
      * Returns a updated details for a manga
      *

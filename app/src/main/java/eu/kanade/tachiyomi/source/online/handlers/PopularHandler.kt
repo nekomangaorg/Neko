@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangaListPage
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl

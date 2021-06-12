@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -201,8 +202,8 @@ class DownloadCache(
      */
     private fun findManga(mangaList: List<Manga>, mangaKey: String, sourceKey: Long): Manga? {
         return mangaList.find {
-            DiskUtil.buildValidFilename(it.originalTitle)
-                .toLowerCase() == mangaKey.toLowerCase() && it.source == sourceKey
+            DiskUtil.buildValidFilename(it.title)
+                .lowercase(Locale.US) == mangaKey.lowercase(Locale.US) && it.source == sourceKey
         }
     }
 

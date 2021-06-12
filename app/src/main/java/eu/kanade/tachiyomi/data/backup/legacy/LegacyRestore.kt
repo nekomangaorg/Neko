@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.backup.legacy
 
 import android.content.Context
 import android.net.Uri
-import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.fromJson
 import com.google.gson.JsonArray
@@ -21,10 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.database.models.TrackImpl
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.notificationManager
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.Job
 import uy.kohesive.injekt.injectLazy
 
@@ -73,11 +69,6 @@ class LegacyRestore(val context: Context, val job: Job?) {
     private val db: DatabaseHelper by injectLazy()
 
     /**
-     * pre-V5 mangadex to V5 mangadex utility class
-     */
-    internal val dbV5: V5DbHelper by injectLazy()
-
-    /**
      * Tracking manager
      */
     internal val trackManager: TrackManager by injectLazy()
@@ -101,7 +92,7 @@ class LegacyRestore(val context: Context, val job: Job?) {
             val manga = backupManager.parser.fromJson<MangaImpl>(it.asJsonObject.get(Backup.MANGA))
             val isMangaDex = backupManager.sourceManager.isMangadex(manga.source)
             if (!isMangaDex) {
-                skippedTitles.add(manga.ogTitle)
+                skippedTitles.add(manga.title)
             }
             isMangaDex
         }
@@ -178,16 +169,6 @@ class LegacyRestore(val context: Context, val job: Job?) {
             }
             val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
-
-            // If it is an old pre-V5 manga try to find the new id
-            val oldMangaId = MdUtil.getMangaId(manga.url)
-            val isNumericId = oldMangaId.isDigitsOnly()
-            if (isNumericId) {
-                val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
-                if (newMangaId != "") {
-                    manga.url = "/title/$newMangaId"
-                }
-            }
 
             if (dbMangaExists) {
                 // Manga in database copy information from manga already in database

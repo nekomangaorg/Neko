@@ -6,10 +6,10 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.source.online.handlers.dto.CheckTokenDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.LoginRequestDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.LoginResponseDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.source.online.dto.CheckTokenDto
+import eu.kanade.tachiyomi.source.online.dto.LoginRequestDto
+import eu.kanade.tachiyomi.source.online.dto.LoginResponseDto
+import eu.kanade.tachiyomi.source.online.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

@@ -1,13 +1,17 @@
 package eu.kanade.tachiyomi.source.model
 
-import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterListDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
+import eu.kanade.tachiyomi.source.online.dto.LegacyMappingDto
+import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.Response
+import retrofit2.http.Body
 import retrofit2.http.GET
+import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
@@ -32,4 +36,7 @@ interface MangaDexService {
 
     @GET("${MdApi.manga}/random")
     suspend fun randomManga(): Response<MangaDto>
+
+    @POST(MdApi.legacyMapping)
+    suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
 }

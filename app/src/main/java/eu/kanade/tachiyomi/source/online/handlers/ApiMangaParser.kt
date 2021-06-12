@@ -4,13 +4,12 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
-import kotlinx.serialization.decodeFromString
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
@@ -20,14 +19,12 @@ import kotlin.math.floor
 class ApiMangaParser {
     val network: NetworkHelper by injectLazy()
     val filterHandler: FilterHandler by injectLazy()
-    val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * Parse the manga details json into manga object
      */
-    fun mangaDetailsParse(jsonData: String): SManga {
+    fun mangaDetailsParse(mangaDto: MangaDto): SManga {
         try {
-            val mangaDto = MdUtil.jsonParser.decodeFromString<MangaDto>(jsonData)
             val mangaAttributesDto = mangaDto.data.attributes
 
             val manga = mangaDto.toBasicManga()
@@ -56,12 +53,12 @@ class ApiMangaParser {
                 manga.users = it.users
             }*/
 
-            mangaAttributesDto.links?.let {
-                it["al"]?.let { manga.anilist_id = it }
-                it["kt"]?.let { manga.kitsu_id = it }
-                it["mal"]?.let { manga.my_anime_list_id = it }
-                it["mu"]?.let { manga.manga_updates_id = it }
-                it["ap"]?.let { manga.anime_planet_id = it }
+            mangaAttributesDto.links?.let { linkMap ->
+                linkMap["al"]?.let { id -> manga.anilist_id = id }
+                linkMap["kt"]?.let { id -> manga.kitsu_id = id }
+                linkMap["mal"]?.let { id -> manga.my_anime_list_id = id }
+                linkMap["mu"]?.let { id -> manga.manga_updates_id = id }
+                linkMap["ap"]?.let { id -> manga.anime_planet_id = id }
             }
             // val filteredChapters = filterChapterForChecking(networkApiManga)
 

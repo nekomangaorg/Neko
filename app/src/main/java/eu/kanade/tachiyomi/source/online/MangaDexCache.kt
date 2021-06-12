@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -16,9 +15,9 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.dto.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.dto.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
@@ -127,15 +126,7 @@ open class MangaDexCache : MangaDex() {
     override fun fetchFollows(): Observable<MangaListPage> {
         throw Exception("Cache source cannot get follows")
     }
-
-    override fun fetchMangaDetailsObservable(manga: SManga): Observable<SManga> {
-        return clientLessRateLimits.newCall(apiRequest(manga))
-            .asObservableSuccess()
-            .map { response ->
-                parseMangaCacheApi(response)
-            }
-    }
-
+    
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             var response = clientLessRateLimits.newCall(apiRequest(manga)).execute()

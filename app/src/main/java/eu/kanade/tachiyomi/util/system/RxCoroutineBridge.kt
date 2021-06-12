@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.system
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.suspendCancellableCoroutine
 import rx.Emitter
@@ -56,10 +57,11 @@ internal fun <T> CancellableContinuation<T>.unsubscribeOnCancellation(sub: Subsc
     invokeOnCancellation { sub.unsubscribe() }
 
 fun <T> runAsObservable(
-    scope: CoroutineScope,
-    block: suspend () -> T,
+    scope: CoroutineScope = GlobalScope,
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,
-): Observable<T> {
+    block: suspend () -> T,
+  
+    ): Observable<T> {
     return Observable.create(
         { emitter ->
             val job = scope.launch {

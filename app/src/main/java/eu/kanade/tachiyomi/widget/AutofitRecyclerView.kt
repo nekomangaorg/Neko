@@ -67,7 +67,6 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
                         3 -> 1.5f
                         2 -> 1f
                         1 -> 0f
-                        0 -> -.5f
                         else -> .5f
                     }
                 )

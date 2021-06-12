@@ -11,15 +11,14 @@ import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaListDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.MangaStatusListDto
-import eu.kanade.tachiyomi.source.online.handlers.dto.ReadingStatusDto
+import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.dto.MangaStatusListDto
+import eu.kanade.tachiyomi.source.online.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
-import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
@@ -38,7 +37,6 @@ class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     val network: NetworkHelper by injectLazy()
-    val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * fetch all follows

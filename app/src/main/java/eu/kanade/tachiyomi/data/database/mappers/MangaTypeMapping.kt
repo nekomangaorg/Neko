@@ -27,13 +27,13 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_INITIALIZED
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_KITSU_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LANG_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_LAST_UPDATE
-import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_NEXT_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_LAST_CHAPTER
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MANGA_UPDATES_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_IMAGE_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_NEXT_UPDATE
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_RATING
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SCANLATOR_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
@@ -68,11 +68,11 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_ID, obj.id)
         put(COL_SOURCE, obj.source)
         put(COL_URL, obj.url)
-        put(COL_ARTIST, obj.originalArtist)
-        put(COL_AUTHOR, obj.originalAuthor)
-        put(COL_DESCRIPTION, obj.originalDescription)
-        put(COL_GENRE, obj.originalGenre)
-        put(COL_TITLE, obj.originalTitle)
+        put(COL_ARTIST, obj.artist)
+        put(COL_AUTHOR, obj.author)
+        put(COL_DESCRIPTION, obj.description)
+        put(COL_GENRE, obj.genre)
+        put(COL_TITLE, obj.title)
         put(COL_STATUS, obj.status)
         put(COL_THUMBNAIL_URL, obj.thumbnail_url)
         put(COL_FAVORITE, obj.favorite)
