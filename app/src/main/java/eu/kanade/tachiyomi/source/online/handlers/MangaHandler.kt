@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.online.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.dto.GroupListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import okhttp3.CacheControl
@@ -29,27 +30,31 @@ class MangaHandler {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         return withContext(Dispatchers.IO) {
-            val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
-
-            if (response.code() != 200) {
-                if (response.code() == 502) {
-                    throw Exception("MangaDex appears to be down, or under heavy load")
-                } else {
-                    XLog.e("error from MangaDex with response code ${response.code()} error body: ${
-                        response.errorBody()?.string()
-                    }")
-                    throw Exception("Error from MangaDex Response code ${response.code()} ")
+            val detailsManga = async {
+                val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
+                
+                if (response.code() != 200) {
+                    if (response.code() == 502) {
+                        throw Exception("MangaDex appears to be down, or under heavy load")
+                    } else {
+                        XLog.e("error from MangaDex with response code ${response.code()} error body: ${
+                            response.errorBody()?.string()
+                        }")
+                        throw Exception("Error from MangaDex Response code ${response.code()} ")
+                    }
                 }
+
+                apiMangaParser.mangaDetailsParse(response.body()!!)
+            }
+            val chapterList = async {
+                fetchChapterList(manga)
             }
 
-            val detailsManga = apiMangaParser.mangaDetailsParse(response.body()!!)
-            manga.copyFrom(detailsManga)
-
-            val chapterList = fetchChapterList(manga)
+            manga.copyFrom(detailsManga.await())
 
             Pair(
                 manga,
-                chapterList
+                chapterList.await()
             )
         }
     }
@@ -128,6 +133,7 @@ class MangaHandler {
     suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return withContext(Dispatchers.IO) {
             val langs = MdUtil.getLangsToShow(preferencesHelper)
+
             val response = network.client.newCall(mangaFeedRequest(manga, 0, langs)).await()
             if (response.isSuccessful.not()) {
                 XLog.e("error", response.body!!.string())
