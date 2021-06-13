@@ -26,23 +26,7 @@ interface Source {
      * Name of the source.
      */
     val name: String
-
-    /**
-     * Returns an observable containing a page with a list of manga.
-     *
-     * @param page the page number to retrieve.
-     */
-    fun fetchPopularManga(page: Int): Observable<MangaListPage>
-
-    /**
-     * Returns an observable containing a page with a list of manga.
-     *
-     * @param page the page number to retrieve.
-     * @param query the search query.
-     * @param filters the list of filters to apply.
-     */
-    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangaListPage>
-
+    
     /**
      * Returns an observable containing a page with a list of users follows.
      *
@@ -71,7 +55,7 @@ interface Source {
      * Returns the list of filters for the source.
      */
     fun getFilterList(): FilterList
-    
+
     /**
      * Returns a updated details for a manga
      *

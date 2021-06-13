@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.model
 
+import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
@@ -19,7 +20,7 @@ import retrofit2.http.QueryMap
 interface MangaDexService {
 
     @GET("${MdApi.manga}?includes[]=${MdConstants.coverArt}")
-    suspend fun search(@QueryMap options: MutableMap<String, Any>): Response<MangaListDto>
+    suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): Response<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.coverArt}&includes[]=${MdConstants.author}&includes[]=${MdConstants.artist}")
     suspend fun viewManga(@Path("id") id: String): Response<MangaDto>

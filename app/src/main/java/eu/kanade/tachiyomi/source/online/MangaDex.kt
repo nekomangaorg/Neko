@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
-import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
@@ -55,8 +54,6 @@ open class MangaDex : HttpSource() {
 
     private val mangaHandler: MangaHandler by injectLazy()
 
-    private val popularHandler: PopularHandler by injectLazy()
-
     private val searchHandler: SearchHandler by injectLazy()
 
     private val pageHandler: PageHandler by injectLazy()
@@ -87,20 +84,8 @@ open class MangaDex : HttpSource() {
         }.flowOn(Dispatchers.IO)
     }
 
-    override fun fetchPopularManga(page: Int): Observable<MangaListPage> {
-        return popularHandler.fetchPopularManga(page)
-    }
-
-    override fun fetchSearchManga(
-        page: Int,
-        query: String,
-        filters: FilterList,
-    ): Observable<MangaListPage> {
-        return searchHandler.fetchSearchManga(
-            page,
-            query,
-            filters
-        )
+    suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
+        return searchHandler.search(page, query, filters)
     }
 
     override fun fetchFollows(): Observable<MangaListPage> {

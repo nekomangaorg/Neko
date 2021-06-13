@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
-import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
@@ -65,9 +64,7 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(MangaHandler())
 
         addSingleton(ApiMangaParser())
-
-        addSingleton(PopularHandler())
-
+        
         addSingleton(SearchHandler())
 
         addSingleton(PageHandler())

@@ -88,10 +88,10 @@ class FollowsHandler {
     ): MangaListPage {
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
 
-        val coverMap = MdUtil.getCoversFromMangaList(response, network.client)
+        // val coverMap = MdUtil.getCoversFromMangaList(response, network.client)
 
         val result = response.map {
-            val coverUrl = coverMap[it.data.id]
+            val coverUrl = ""
             MdUtil.createMangaEntry(it, coverUrl).apply {
                 this.follow_status = FollowStatus.fromDex(readingStatusMap[it.data.id])
             }

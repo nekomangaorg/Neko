@@ -12,8 +12,7 @@ fun MangaDto.toBasicManga(): SManga {
             .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.coverArt }
             ?.attributes?.fileName
             ?.let { coverFileName ->
-                thumbnail_url =
-                    "${MdConstants.cdnUrl}/covers/${this@toBasicManga.data.id}/$coverFileName"
+                thumbnail_url = MdUtil.cdnCoverUrl(this@toBasicManga.data.id, coverFileName)
             }
     }
 }

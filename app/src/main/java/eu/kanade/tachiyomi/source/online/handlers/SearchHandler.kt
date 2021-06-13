@@ -1,83 +1,66 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.asObservableSuccess
+import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.model.FilterList
+import eu.kanade.tachiyomi.source.model.MangaDexService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.system.runAsObservable
-import kotlinx.serialization.decodeFromString
-import okhttp3.CacheControl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.Request
-import okhttp3.Response
-import rx.Observable
+import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import retrofit2.Response
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class SearchHandler {
-    private val network: NetworkHelper by injectLazy()
+    private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
     private val filterHandler: FilterHandler by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
 
-    fun fetchSearchManga(page: Int, query: String, filters: FilterList): Observable<MangaListPage> {
-        return if (query.startsWith(PREFIX_ID_SEARCH)) {
-            runAsObservable {
+    suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
+        return withContext(Dispatchers.IO) {
+            if (query.startsWith(PREFIX_ID_SEARCH)) {
                 val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
-                val response = network.service.viewManga(realQuery)
+                val response = service.viewManga(realQuery)
                 val details = apiMangaParser.mangaDetailsParse(response.body()!!)
                 MangaListPage(listOf(details), false)
-            }
-        } else {
-            network.client.newCall(searchMangaRequest(page, query, filters))
-                .asObservableSuccess()
-                .map { response ->
-                    searchMangaParse(response)
+            } else {
+                val queryParamters = mutableMapOf<String, Any>()
+
+                queryParamters["limit"] = MdUtil.mangaLimit.toString()
+                queryParamters["offset"] = (MdUtil.getMangaListOffset(page))
+                val actualQuery = query.replace(WHITESPACE_REGEX, " ")
+
+                if (actualQuery.isNotBlank()) {
+                    queryParamters["title"] = actualQuery
                 }
-        }
-    }
+                val additonalQueries = filterHandler.getQueryMap(filters)
+                queryParamters.putAll(additonalQueries)
 
-    private fun searchMangaParse(response: Response): MangaListPage {
-        if (response.isSuccessful.not()) {
-            throw Exception("Error getting search manga http code: ${response.code}")
-        }
+                val response = service.search(ProxyRetrofitQueryMap(queryParamters))
 
-        if (response.code == 204) {
-            return MangaListPage(emptyList(), false)
-        }
-
-        val mlResponse =
-            MdUtil.jsonParser.decodeFromString<MangaListDto>(response.body!!.string())
-        val hasMoreResults = mlResponse.limit + mlResponse.offset < mlResponse.total
-        val coverMap = MdUtil.getCoversFromMangaList(mlResponse.results, network.client)
-
-        val mangaList = mlResponse.results.map {
-            val coverUrl = coverMap[it.data.id]
-            MdUtil.createMangaEntry(it, coverUrl)
-        }
-        return MangaListPage(mangaList, hasMoreResults)
-    }
-
-    private fun searchMangaRequest(page: Int, query: String, filters: FilterList): Request {
-        val tempUrl = MdUtil.mangaUrl.toHttpUrlOrNull()!!.newBuilder()
-
-        tempUrl.apply {
-            addQueryParameter("limit", MdUtil.mangaLimit.toString())
-            addQueryParameter("offset", (MdUtil.getMangaListOffset(page)))
-            val actualQuery = query.replace(WHITESPACE_REGEX, " ")
-            if (actualQuery.isNotBlank()) {
-                addQueryParameter("title", actualQuery)
+                searchMangaParse(response)
             }
         }
-
-        val finalUrl = filterHandler.addFiltersToUrl(tempUrl, filters)
-
-        return GET(finalUrl, network.headers, CacheControl.FORCE_NETWORK)
     }
 
-    private fun searchMangaByIdRequest(id: String): Request {
-        return GET(MdUtil.mangaUrl + "/" + id, network.headers, CacheControl.FORCE_NETWORK)
+    private fun searchMangaParse(response: Response<MangaListDto>): MangaListPage {
+        if (response.isSuccessful.not()) {
+            throw Exception("Error getting search manga http code: ${response.code()}")
+        }
+
+        val mangaListDto = response.body()!!
+
+        val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
+
+        val mangaList = mangaListDto.results.map {
+            it.toBasicManga()
+        }
+
+        return MangaListPage(mangaList, hasMoreResults)
     }
 
     companion object {

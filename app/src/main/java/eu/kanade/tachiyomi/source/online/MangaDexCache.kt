@@ -54,7 +54,7 @@ open class MangaDexCache : MangaDex() {
         throw Exception("Cache source cannot update follow status")
     }
 
-    override fun fetchPopularManga(page: Int): Observable<MangaListPage> {
+    fun fetchPopularManga(page: Int): Observable<MangaListPage> {
         // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
         if (count == 0) {
@@ -86,7 +86,7 @@ open class MangaDexCache : MangaDex() {
             }
     }
 
-    override fun fetchSearchManga(
+    fun fetchSearchManga(
         page: Int,
         query: String,
         filters: FilterList,
@@ -126,7 +126,7 @@ open class MangaDexCache : MangaDex() {
     override fun fetchFollows(): Observable<MangaListPage> {
         throw Exception("Cache source cannot get follows")
     }
-    
+
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             var response = clientLessRateLimits.newCall(apiRequest(manga)).execute()
