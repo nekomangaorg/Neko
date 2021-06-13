@@ -1,13 +1,10 @@
 package eu.kanade.tachiyomi.source.online.utils
 
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
-import eu.kanade.tachiyomi.source.online.dto.CoverDto
-import eu.kanade.tachiyomi.source.online.dto.CoverListDto
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -305,62 +302,8 @@ class MdUtil {
             }
         }
 
-        fun getCoverUrl(dexId: String, coverId: String?, client: OkHttpClient): String {
-            coverId ?: return ""
-            val response =
-                client.newCall(GET("$coverUrl/$coverId"))
-                    .execute()
-            val coverResponse = jsonParser.decodeFromString<CoverDto>(response.body!!.string())
-            val fileName = coverResponse.data.attributes.fileName
+        fun cdnCoverUrl(dexId: String, fileName: String): String {
             return "$cdnUrl/covers/$dexId/$fileName"
-        }
-
-        fun getCoversFromMangaList(
-            mangaResponseList: List<MangaDto>,
-            client: OkHttpClient,
-        ): Map<String, String> {
-            val idsAndCoverIds = mangaResponseList.mapNotNull { mangaResponse ->
-                val mangaId = mangaResponse.data.id
-                val coverId = mangaResponse.relationships.firstOrNull { relationship ->
-                    relationship.type.equals("cover_art", true)
-                }?.id
-                if (coverId == null) {
-                    null
-                } else {
-                    Pair(mangaId, coverId)
-                }
-            }.toMap()
-
-            return runCatching {
-                getBatchCoverUrls(idsAndCoverIds, client)
-            }.getOrNull()!!
-        }
-
-        private fun getBatchCoverUrls(
-            ids: Map<String, String>,
-            client: OkHttpClient,
-        ): Map<String, String> {
-            try {
-                val url = coverUrl.toHttpUrl().newBuilder().apply {
-                    ids.values.forEach { coverArtId ->
-                        addQueryParameter("ids[]", coverArtId)
-                    }
-                    addQueryParameter("limit", ids.size.toString())
-                }.build().toString()
-                val response = client.newCall(GET(url)).execute()
-                val coverList =
-                    jsonParser.decodeFromString<CoverListDto>(response.body!!.string())
-                return coverList.results.map { coverResponse ->
-                    val fileName = coverResponse.data.attributes.fileName
-                    val mangaId =
-                        coverResponse.relationships.first { it.type.equals("manga", true) }.id
-                    val thumbnailUrl = "$cdnUrl/covers/$mangaId/$fileName"
-                    Pair(mangaId, thumbnailUrl)
-                }.toMap()
-            } catch (e: Exception) {
-                XLog.e(e)
-                throw e
-            }
         }
 
         fun getLangsToShow(preferences: PreferencesHelper) =

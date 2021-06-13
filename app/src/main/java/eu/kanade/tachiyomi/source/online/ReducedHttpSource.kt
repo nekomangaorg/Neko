@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.newCallWithProgress
-import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -59,18 +58,6 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override fun fetchPopularManga(page: Int): Observable<MangaListPage> {
-        TODO("Not yet implemented")
-    }
-
-    override fun fetchSearchManga(
-        page: Int,
-        query: String,
-        filters: FilterList,
-    ): Observable<MangaListPage> {
-        TODO("Not yet implemented")
-    }
-
     override fun fetchFollows(): Observable<MangaListPage> {
         TODO("Not yet implemented")
     }
@@ -86,7 +73,7 @@ abstract class ReducedHttpSource : HttpSource() {
     override suspend fun fetchTrackingInfo(url: String): Track {
         TODO("Not yet implemented")
     }
-    
+
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         TODO("Not yet implemented")
     }
