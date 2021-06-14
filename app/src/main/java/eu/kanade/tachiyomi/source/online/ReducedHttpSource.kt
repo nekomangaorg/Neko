@@ -58,10 +58,6 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override fun fetchFollows(): Observable<MangaListPage> {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
         TODO("Not yet implemented")
     }

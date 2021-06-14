@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import eu.kanade.tachiyomi.network.MangaDexService
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangaDexService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil

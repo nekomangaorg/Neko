@@ -82,7 +82,7 @@ data class ReadingStatusDto(
 )
 
 @Serializable
-data class MangaStatusListDto(
+data class ReadingStatusMapDto(
     val statuses: Map<String, String?>,
 )
 

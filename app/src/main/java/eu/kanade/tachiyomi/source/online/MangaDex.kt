@@ -88,7 +88,7 @@ open class MangaDex : HttpSource() {
         return searchHandler.search(page, query, filters)
     }
 
-    override fun fetchFollows(): Observable<MangaListPage> {
+    suspend fun fetchFollowList(): MangaListPage {
         return followsHandler.fetchFollows()
     }
 

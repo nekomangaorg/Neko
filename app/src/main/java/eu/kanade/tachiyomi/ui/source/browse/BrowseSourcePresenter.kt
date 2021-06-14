@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.os.Bundle
 import com.elvishew.xlog.XLog
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.davidea.flexibleadapter.items.ISectionable
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -50,7 +49,7 @@ import uy.kohesive.injekt.api.get
  * Presenter of [BrowseSourceController].
  */
 open class BrowseSourcePresenter(
-    var searchQuery: String = "",
+    searchQuery: String = "",
     private var isDeepLink: Boolean = false,
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
@@ -128,7 +127,7 @@ open class BrowseSourcePresenter(
     private var scope = CoroutineScope(Job() + Dispatchers.IO)
 
     init {
-        query = searchQuery ?: ""
+        query = searchQuery
     }
 
     override fun onCreate(savedState: Bundle?) {
@@ -189,16 +188,16 @@ open class BrowseSourcePresenter(
         pagerSubscription?.let { remove(it) }
         pagerSubscription = pager.results()
             .observeOn(Schedulers.io())
-            .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
+            .map { it.first to it.second.map { sManga -> networkToLocalManga(sManga, sourceId) } }
             .doOnNext { initializeMangaList(it.second) }
             .map {
-                it.first to it.second.map {
-                    BrowseSourceItem(it,
+                it.first to it.second.map { manga ->
+                    BrowseSourceItem(manga,
                         browseAsList,
                         sourceListType,
                         isFollows)
                 }
-                    .filter { isDeepLink || isLibraryVisible || !it.manga.favorite }
+                    .filter { manga -> isDeepLink || isLibraryVisible || !manga.manga.favorite }
             }.observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay(
                 { view, (page, mangaList) ->
@@ -379,37 +378,37 @@ open class BrowseSourcePresenter(
     }
 
     open fun createPager(query: String, filters: FilterList): Pager {
-        return BrowseSourcePager(source, query, filters)
+        return BrowseSourcePager(scope, source, query, filters)
     }
 
     private fun FilterList.toItems(): List<IFlexible<*>> {
-        return mapNotNull {
-            when (it) {
-                is Filter.Header -> HeaderItem(it)
-                is Filter.Separator -> SeparatorItem(it)
-                is Filter.CheckBox -> CheckboxItem(it)
-                is Filter.TriState -> TriStateItem(it)
-                is Filter.Text -> TextItem(it)
-                is Filter.Select<*> -> SelectItem(it)
+        return mapNotNull { filterItem ->
+            when (filterItem) {
+                is Filter.Header -> HeaderItem(filterItem)
+                is Filter.Separator -> SeparatorItem(filterItem)
+                is Filter.CheckBox -> CheckboxItem(filterItem)
+                is Filter.TriState -> TriStateItem(filterItem)
+                is Filter.Text -> TextItem(filterItem)
+                is Filter.Select<*> -> SelectItem(filterItem)
                 is Filter.Group<*> -> {
-                    val group = GroupItem(it)
-                    val subItems = it.state.mapNotNull {
-                        when (it) {
-                            is Filter.CheckBox -> CheckboxSectionItem(it)
-                            is Filter.TriState -> TriStateSectionItem(it)
-                            is Filter.Text -> TextSectionItem(it)
-                            is Filter.Select<*> -> SelectSectionItem(it)
+                    val group = GroupItem(filterItem)
+                    val subItems = filterItem.state.mapNotNull { filterSubItem ->
+                        when (filterSubItem) {
+                            is Filter.CheckBox -> CheckboxSectionItem(filterSubItem)
+                            is Filter.TriState -> TriStateSectionItem(filterSubItem)
+                            is Filter.Text -> TextSectionItem(filterSubItem)
+                            is Filter.Select<*> -> SelectSectionItem(filterSubItem)
                             else -> null
-                        } as? ISectionable<*, *>
+                        }
                     }
                     subItems.forEach { it.header = group }
                     group.subItems = subItems
                     group
                 }
                 is Filter.Sort -> {
-                    val group = SortGroup(it)
-                    val subItems = it.values.map {
-                        SortItem(it, group)
+                    val group = SortGroup(filterItem)
+                    val subItems = filterItem.values.map { filterSubItem ->
+                        SortItem(filterSubItem, group)
                     }
                     group.subItems = subItems
                     group
