@@ -28,13 +28,6 @@ interface Source {
     val name: String
     
     /**
-     * Returns an observable containing a page with a list of users follows.
-     *
-     * @param page the page number to retrieve.
-     */
-    fun fetchFollows(): Observable<MangaListPage>
-
-    /**
      * Returns a list of all Follows retrieved by Coroutines
      *
      * @param SManga all smanga found for user

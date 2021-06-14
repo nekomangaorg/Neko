@@ -5,21 +5,24 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
+import eu.kanade.tachiyomi.network.MangaDexAuthService
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.asObservable
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.dto.MangaListDto
-import eu.kanade.tachiyomi.source.online.dto.MangaStatusListDto
 import eu.kanade.tachiyomi.source.online.dto.ReadingStatusDto
+import eu.kanade.tachiyomi.source.online.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
+import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -29,7 +32,8 @@ import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
-import rx.Observable
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
@@ -37,45 +41,34 @@ class FollowsHandler {
 
     val preferences: PreferencesHelper by injectLazy()
     val network: NetworkHelper by injectLazy()
+    val service: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
 
     /**
      * fetch all follows
      */
-    fun fetchFollows(): Observable<MangaListPage> {
-        return network.authClient.newCall(followsListRequest(0))
-            .asObservable()
-            .map { response ->
-                val mangaListResponse =
-                    MdUtil.jsonParser.decodeFromString<MangaListDto>(response.body!!.string())
-                val results = mangaListResponse.results.toMutableList()
+    suspend fun fetchFollows(): MangaListPage {
+        return withContext(Dispatchers.IO) {
+            val response = service.userFollowList(0)
 
-                var hasMoreResults =
-                    mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
+            val mangaListDto = response.body()!!
+            val results = mangaListDto.results.toMutableList()
 
-                var offset = mangaListResponse.offset
-                val limit = mangaListResponse.limit
+            val readingFuture = async { service.readingStatusForAllManga().body()!!.statuses }
 
-                while (hasMoreResults) {
-                    offset += limit
-                    val newResponse =
-                        network.authClient.newCall(followsListRequest(offset)).execute()
-                    if (newResponse.code != 200) {
-                        hasMoreResults = false
-                    } else {
-                        val newMangaListResponse =
-                            MdUtil.jsonParser.decodeFromString<MangaListDto>(newResponse.body!!.string())
-                        hasMoreResults =
-                            newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
-                        results.addAll(newMangaListResponse.results)
+            if (mangaListDto.total > mangaListDto.limit) {
+                val totalRequestNo = (mangaListDto.total / mangaListDto.limit)
+                val restOfResults = (1..totalRequestNo).asSequence().map { pos ->
+                    async {
+                        val newResponse = service.userFollowList(pos * mangaListDto.limit)
+                        newResponse.body()!!.results
                     }
-                }
-                val readingStatusResponse =
-                    network.authClient.newCall(readingStatusRequest()).execute()
-                val json = MdUtil.jsonParser.decodeFromString<MangaStatusListDto>(
-                    readingStatusResponse.body!!.string())
-
-                followsParseMangaPage(results, json.statuses)
+                }.toList().awaitAll().flatten()
+                results.addAll(restOfResults)
             }
+            val readingStatusResponse = readingFuture.await()
+
+            followsParseMangaPage(results, readingStatusResponse)
+        }
     }
 
     /**
@@ -88,12 +81,9 @@ class FollowsHandler {
     ): MangaListPage {
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
 
-        // val coverMap = MdUtil.getCoversFromMangaList(response, network.client)
-
-        val result = response.map {
-            val coverUrl = ""
-            MdUtil.createMangaEntry(it, coverUrl).apply {
-                this.follow_status = FollowStatus.fromDex(readingStatusMap[it.data.id])
+        val result = response.map { mangaDto ->
+            mangaDto.toBasicManga().apply {
+                this.follow_status = FollowStatus.fromDex(readingStatusMap[mangaDto.data.id])
             }
         }.sortedWith(comparator)
 
@@ -255,7 +245,7 @@ class FollowsHandler {
 
             val readingStatusResponse = network.authClient.newCall(readingStatusRequest()).execute()
             val json =
-                MdUtil.jsonParser.decodeFromString<MangaStatusListDto>(readingStatusResponse.body!!.string())
+                MdUtil.jsonParser.decodeFromString<ReadingStatusMapDto>(readingStatusResponse.body!!.string())
 
             followsParseMangaPage(results, json.statuses).manga
         }

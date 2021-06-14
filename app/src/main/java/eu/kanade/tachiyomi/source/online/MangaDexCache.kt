@@ -123,10 +123,6 @@ open class MangaDexCache : MangaDex() {
             }
     }
 
-    override fun fetchFollows(): Observable<MangaListPage> {
-        throw Exception("Cache source cannot get follows")
-    }
-
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             var response = clientLessRateLimits.newCall(apiRequest(manga)).execute()

@@ -7,7 +7,6 @@ import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.model.MangaDexService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -46,6 +45,22 @@ class NetworkHelper(val context: Context) {
         it.proceed(it.request())
     }
 
+    private fun authInterceptor() = Interceptor { chain ->
+        val newRequest = when {
+            preferences.sessionToken().isNullOrBlank() -> chain.request()
+            else -> {
+                val originalRequest = chain.request()
+                XLog.e("ESCO sessionToken: ${preferences.sessionToken()}")
+                originalRequest
+                    .newBuilder()
+                    .header("Authorization", "Bearer ${preferences.sessionToken()}")
+                    .method(originalRequest.method, originalRequest.body)
+                    .build()
+            }
+        }
+        chain.proceed(newRequest)
+    }
+
     private fun buildNonRateLimitedClient(): OkHttpClient {
         return OkHttpClient.Builder()
             .connectTimeout(30, TimeUnit.SECONDS)
@@ -62,16 +77,14 @@ class NetworkHelper(val context: Context) {
                 }
                 if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
                     val logger: HttpLoggingInterceptor.Logger =
-                        object : HttpLoggingInterceptor.Logger {
-                            override fun log(message: String) {
-                                try {
-                                    Gson().fromJson(message, Any::class.java)
-                                    XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
-                                        .json(message)
-                                } catch (ex: Exception) {
-                                    XLog.tag("||NEKO-NETWORK").disableBorder().disableStackTrace()
-                                        .d(message)
-                                }
+                        HttpLoggingInterceptor.Logger { message ->
+                            try {
+                                Gson().fromJson(message, Any::class.java)
+                                XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
+                                    .json(message)
+                            } catch (ex: Exception) {
+                                XLog.tag("||NEKO-NETWORK").disableBorder().disableStackTrace()
+                                    .d(message)
                             }
                         }
                     addInterceptor(HttpLoggingInterceptor(logger).apply {
@@ -87,6 +100,7 @@ class NetworkHelper(val context: Context) {
 
     private fun buildRateLimitedAuthenticatedClient(): OkHttpClient {
         return buildRateLimitedClient().newBuilder()
+            .addNetworkInterceptor(authInterceptor())
             .authenticator(TokenAuthenticator(mangaDexLoginHelper)).build()
     }
 
@@ -121,4 +135,7 @@ class NetworkHelper(val context: Context) {
 
     val service: MangaDexService = jsonRetrofitClient.baseUrl(MdApi.baseUrl).client(client).build()
         .create(MangaDexService::class.java)
+
+    val authService = jsonRetrofitClient.baseUrl(MdApi.baseUrl).client(authClient).build()
+        .create(MangaDexAuthService::class.java)
 }
