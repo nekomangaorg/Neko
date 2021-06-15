@@ -98,8 +98,8 @@ object Libs {
         const val okhttp = "com.squareup.okhttp3:okhttp:4.9.1"
         const val okhttpDns = "com.squareup.okhttp3:okhttp-dnsoverhttps:4.9.1"
         const val okhttpLoggingInterceptor = "com.squareup.okhttp3:logging-interceptor:4.9.1"
-        const val retrofit = "com.squareup.retrofit2:retrofit:2.7.2"
-        const val retrofitGsonConverter = "com.squareup.retrofit2:converter-gson:2.7.2"
+        const val retrofit = "com.squareup.retrofit2:retrofit:2.9.0"
+        const val retrofitGsonConverter = "com.squareup.retrofit2:converter-gson:2.9.0"
         const val retrofitKotlinxConverter =
             "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.7.0"
     }

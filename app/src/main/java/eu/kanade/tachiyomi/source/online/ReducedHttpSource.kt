@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source.online
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.network.GET
-import eu.kanade.tachiyomi.network.asObservableSuccess
+import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
@@ -41,9 +41,8 @@ abstract class ReducedHttpSource : HttpSource() {
             "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36")
         .build()
 
-    override fun fetchImage(page: Page): Observable<Response> {
-        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page)
-            .asObservableSuccess()
+    override suspend fun fetchImage(page: Page): Response {
+        return client.newCallWithProgress(GET(page.imageUrl!!, headers), page).await()
     }
 
     override fun isLogged(): Boolean {
@@ -82,10 +81,6 @@ abstract class ReducedHttpSource : HttpSource() {
     }
 
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
-        TODO("Not yet implemented")
-    }
-
-    override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
         TODO("Not yet implemented")
     }
 

@@ -14,8 +14,8 @@ class ReaderPage(
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false,
     /** Value to check if a page is can be doubled up, but can't because the next page is too wide */
-    var isolatedPage: Boolean = false
-) : Page(index, url, imageUrl, null) {
+    var isolatedPage: Boolean = false,
+) : Page(index, url, imageUrl, uri = null) {
 
     lateinit var chapter: ReaderChapter
 

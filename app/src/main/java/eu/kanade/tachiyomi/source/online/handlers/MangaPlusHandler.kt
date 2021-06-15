@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import MangaPlusSerializer
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import kotlinx.serialization.protobuf.ProtoBuf
 import okhttp3.Headers
@@ -28,8 +29,8 @@ class MangaPlusHandler() {
         .addInterceptor { imageIntercept(it) }
         .build()
 
-    fun fetchPageList(chapterId: String): List<Page> {
-        val response = client.newCall(pageListRequest(chapterId)).execute()
+    suspend fun fetchPageList(chapterId: String): List<Page> {
+        val response = client.newCall(pageListRequest(chapterId)).await()
         return pageListParse(response)
     }
 

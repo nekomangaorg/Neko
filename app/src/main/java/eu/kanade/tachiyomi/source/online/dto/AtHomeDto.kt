@@ -8,7 +8,7 @@ data class AtHomeDto(
 )
 
 @Serializable
-data class ImageReportResultDto(
+data class AtHomeImageReportDto(
     val url: String,
     val success: Boolean,
     val bytes: Int?,

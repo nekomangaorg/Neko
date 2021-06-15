@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.network
 
+import eu.kanade.tachiyomi.source.online.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
@@ -17,7 +18,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
-interface MangaDexService {
+interface MangaDexService : MangaDexImageService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}?includes[]=${MdConstants.coverArt}")
@@ -45,4 +46,7 @@ interface MangaDexService {
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
+
+    @POST(MdConstants.atHomeReportUrl)
+    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
 }
