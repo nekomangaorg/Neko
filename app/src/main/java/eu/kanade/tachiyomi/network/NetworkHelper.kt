@@ -50,7 +50,6 @@ class NetworkHelper(val context: Context) {
             preferences.sessionToken().isNullOrBlank() -> chain.request()
             else -> {
                 val originalRequest = chain.request()
-                XLog.e("ESCO sessionToken: ${preferences.sessionToken()}")
                 originalRequest
                     .newBuilder()
                     .header("Authorization", "Bearer ${preferences.sessionToken()}")
@@ -121,6 +120,9 @@ class NetworkHelper(val context: Context) {
 
     val headers = Headers.Builder().apply {
         add("User-Agent", "Neko " + System.getProperty("http.agent"))
+        add("Referer", MdUtil.baseUrl)
+        add("X-Requested-With", "XMLHttpRequest")
+        add("Content-Type", "application/json")
         add("Referer", MdUtil.baseUrl)
     }.build()
 

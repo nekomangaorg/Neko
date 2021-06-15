@@ -26,7 +26,7 @@ interface Source {
      * Name of the source.
      */
     val name: String
-    
+
     /**
      * Returns a list of all Follows retrieved by Coroutines
      *
@@ -76,13 +76,6 @@ interface Source {
      *
      * @param manga the manga to update.
      */
-    fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>>
-
-    /**
-     * Returns an observable with all the available chapters for a manga.
-     *
-     * @param manga the manga to update.
-     */
     suspend fun fetchChapterList(manga: SManga): List<SChapter>
 
     /**
@@ -90,9 +83,9 @@ interface Source {
      *
      * @param chapter the chapter.
      */
-    fun fetchPageList(chapter: SChapter): Observable<List<Page>>
+    suspend fun fetchPageList(chapter: SChapter): List<Page>
 
-    fun fetchImage(page: Page): Observable<Response>
+    suspend fun fetchImage(page: Page): Response
 
     fun isLogged(): Boolean
 

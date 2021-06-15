@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
-import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
@@ -148,10 +147,6 @@ open class MangaDexCache : MangaDex() {
         return Pair(mangaToReturn, dbChapters)
     }
 
-    override fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
-        return Observable.just(emptyList())
-    }
-
     override suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         throw Exception("Cache source cannot convert chapter id to manga id")
     }
@@ -159,19 +154,7 @@ open class MangaDexCache : MangaDex() {
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return emptyList()
     }
-
-    override fun fetchPageList(chapter: SChapter): Observable<List<Page>> {
-        return Observable.just(emptyList())
-    }
-
-    override fun fetchImage(page: Page): Observable<Response> {
-        throw Exception("Cache source cannot fetch images")
-    }
-
-    override fun imageRequest(page: Page): Request {
-        throw Exception("Cache source cannot request images")
-    }
-
+    
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
         throw Exception("Cache source cannot fetch follows")
     }

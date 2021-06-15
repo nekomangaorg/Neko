@@ -15,7 +15,7 @@ import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Query
 
-interface MangaDexAuthService {
+interface MangaDexAuthService : MangaDexImageService {
 
     // New API
     @Headers("Cache-Control: no-cache")

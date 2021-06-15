@@ -19,13 +19,16 @@ import eu.kanade.tachiyomi.databinding.MangaListItemBinding
  * @param adapter the adapter handling this holder.
  * @constructor creates a new catalogue holder.
  */
-class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
+class BrowseSourceListHolder(
+    private val view: View,
+    adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+) :
     BrowseSourceHolder(view, adapter) {
 
     private val binding = MangaListItemBinding.bind(view)
 
     /**
-     * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
+     * Method called from. It updates the data for this
      * holder with the given manga.
      *
      * @param manga the manga to bind.

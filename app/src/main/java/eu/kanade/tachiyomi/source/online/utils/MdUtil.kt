@@ -63,7 +63,6 @@ class MdUtil {
 
         const val reportUrl = "https://api.mangadex.network/report"
 
-        const val mdAtHomeTokenLifespan = 10 * 60 * 1000
         const val mangaLimit = 40
 
         /**

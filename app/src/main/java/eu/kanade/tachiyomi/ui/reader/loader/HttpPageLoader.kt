@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.loader
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -7,6 +8,7 @@ import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.plusAssign
+import eu.kanade.tachiyomi.util.system.runAsObservable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -25,7 +27,6 @@ import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.PriorityBlockingQueue
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.min
-import com.elvishew.xlog.XLog
 
 /**
  * Loader used to load chapters from an online source.
@@ -33,7 +34,7 @@ import com.elvishew.xlog.XLog
 class HttpPageLoader(
     private val chapter: ReaderChapter,
     private val source: HttpSource,
-    private val chapterCache: ChapterCache = Injekt.get()
+    private val chapterCache: ChapterCache = Injekt.get(),
 ) : PageLoader() {
 
     /**
@@ -47,6 +48,7 @@ class HttpPageLoader(
     private var preloadSize = preferences.preloadSize().get()
 
     private val scope = CoroutineScope(Job() + Dispatchers.IO)
+
     init {
         // Adding flow since we can reach reader settings after this is created
         preferences.preloadSize().asFlow()
@@ -99,14 +101,15 @@ class HttpPageLoader(
      * the local cache, otherwise fallbacks to network.
      */
     override fun getPages(): Observable<List<ReaderPage>> {
-        return Observable.fromCallable { chapterCache.getPageListFromCache(chapter.chapter) }
-            .onErrorResumeNext { source.fetchPageList(chapter.chapter) }
-            .map { pages ->
-                pages.mapIndexed { index, page ->
-                    // Don't trust sources and use our own indexing
-                    ReaderPage(index, page.url, page.imageUrl)
-                }
+        return runAsObservable {
+            runCatching {
+                chapterCache.getPageListFromCache(chapter.chapter)
+            }.getOrElse {
+                source.fetchPageList(chapter.chapter)
+            }.mapIndexed { index, page ->
+                ReaderPage(index, page.url, page.imageUrl)
             }
+        }
     }
 
     /**
@@ -118,7 +121,9 @@ class HttpPageLoader(
             val imageUrl = page.imageUrl
 
             // Check if the image has been deleted
-            if (page.status == Page.READY && imageUrl != null && !chapterCache.isImageInCache(imageUrl)) {
+            if (page.status == Page.READY && imageUrl != null && !chapterCache.isImageInCache(
+                    imageUrl)
+            ) {
                 page.status = Page.QUEUE
             }
 
@@ -182,7 +187,7 @@ class HttpPageLoader(
      */
     private class PriorityPage(
         val page: ReaderPage,
-        val priority: Int
+        val priority: Int,
     ) : Comparable<PriorityPage> {
 
         companion object {
@@ -251,8 +256,9 @@ class HttpPageLoader(
      */
     private fun HttpSource.cacheImage(page: ReaderPage): Observable<ReaderPage> {
         page.status = Page.DOWNLOAD_IMAGE
-        return fetchImage(page)
-            .doOnNext { chapterCache.putImageToCache(page.imageUrl!!, it) }
+        return runAsObservable {
+            fetchImage(page)
+        }.doOnNext { chapterCache.putImageToCache(page.imageUrl!!, it) }
             .map { page }
     }
 }

@@ -65,57 +65,6 @@ class MangaHandler {
         }
     }
 
-    fun fetchChapterListObservable(manga: SManga): Observable<List<SChapter>> {
-        val langs = MdUtil.getLangsToShow(preferencesHelper)
-        return network.client.newCall(mangaFeedRequest(manga, 0, langs))
-            .asObservableSuccess()
-            .map { response ->
-
-                if (response.code == 204) {
-                    return@map emptyList()
-                }
-
-                val chapterListResponse =
-                    MdUtil.jsonParser.decodeFromString<ChapterListDto>(response.body!!.string())
-                val results = chapterListResponse.results.toMutableList()
-
-                var hasMoreResults =
-                    chapterListResponse.limit + chapterListResponse.offset < chapterListResponse.total
-
-                var offset = chapterListResponse.offset
-                val limit = chapterListResponse.limit
-
-                while (hasMoreResults) {
-                    offset += limit
-                    val newResponse =
-                        network.client.newCall(mangaFeedRequest(manga, offset, langs)).execute()
-                    val newChapterListResponse =
-                        MdUtil.jsonParser.decodeFromString<ChapterListDto>(newResponse.body!!.string())
-                    results.addAll(newChapterListResponse.results)
-                    hasMoreResults =
-                        newChapterListResponse.limit + newChapterListResponse.offset < newChapterListResponse.total
-                }
-                val groupIds = results.map { chapter -> chapter.relationships }.flatten()
-                    .filter { it.type == "scanlation_group" }.map { it.id }.distinct()
-
-                val groupMap = runCatching {
-                    groupIds.chunked(100).mapIndexed { index, ids ->
-                        val newResponse =
-                            network.client.newCall(groupIdRequest(ids, 100 * index)).execute()
-                        val groupList =
-                            MdUtil.jsonParser.decodeFromString(GroupListDto.serializer(),
-                                newResponse.body!!.string())
-                        groupList.results.map { group ->
-                            Pair(group.data.id,
-                                group.data.attributes.name)
-                        }
-                    }.flatten().toMap()
-                }.getOrNull() ?: emptyMap()
-
-                apiMangaParser.chapterListParse(results, groupMap)
-            }
-    }
-
     suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return withContext(Dispatchers.IO) {
             val langs = MdUtil.getLangsToShow(preferencesHelper)
@@ -184,12 +133,6 @@ class MangaHandler {
 
     private fun randomMangaRequest(): Request {
         return GET(MdUtil.randomMangaUrl)
-    }
-
-    private fun mangaRequest(manga: SManga): Request {
-        return GET(MdUtil.mangaUrl + "/" + MdUtil.getMangaId(manga.url),
-            network.headers,
-            CacheControl.FORCE_NETWORK)
     }
 
     private fun mangaFeedRequest(manga: SManga, offset: Int, langs: List<String>): Request {
