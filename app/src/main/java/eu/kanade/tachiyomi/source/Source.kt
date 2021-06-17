@@ -1,16 +1,13 @@
 package eu.kanade.tachiyomi.source
 
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.source.model.FilterList
-import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.Logout
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.Response
-import rx.Observable
 
 /**
  * A basic interface for creating a source. It could be an online source, a local source, etc...
@@ -55,14 +52,6 @@ interface Source {
      * @param manga the manga to update.
      */
     suspend fun fetchMangaDetails(manga: SManga): SManga
-
-    /**
-     * Returns an observable with all the relatable for a manga.
-     *
-     * @param manga the manga to update.
-     * @param refresh if we should get the latest
-     */
-    fun fetchMangaSimilarObservable(manga: Manga, refresh: Boolean): Observable<MangaListPage>
 
     /**
      * Returns a updated details for a manga and the chapter list

@@ -1,5 +1,6 @@
-package eu.kanade.tachiyomi.network
+package eu.kanade.tachiyomi.network.services
 
+import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.dto.ChapterListDto

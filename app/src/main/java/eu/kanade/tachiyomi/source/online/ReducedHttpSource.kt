@@ -1,11 +1,9 @@
 package eu.kanade.tachiyomi.source.online
 
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
-import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -15,7 +13,6 @@ import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
 import org.isomorphism.util.TokenBuckets
-import rx.Observable
 import java.util.concurrent.TimeUnit
 
 abstract class ReducedHttpSource : HttpSource() {
@@ -72,14 +69,7 @@ abstract class ReducedHttpSource : HttpSource() {
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         TODO("Not yet implemented")
     }
-
-    override fun fetchMangaSimilarObservable(
-        manga: Manga,
-        refresh: Boolean,
-    ): Observable<MangaListPage> {
-        TODO("Not yet implemented")
-    }
-
+    
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         TODO("Not yet implemented")
     }

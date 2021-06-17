@@ -7,6 +7,9 @@ import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.network.services.MangaDexService
+import eu.kanade.tachiyomi.network.services.SimilarService
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -140,4 +143,9 @@ class NetworkHelper(val context: Context) {
 
     val authService = jsonRetrofitClient.baseUrl(MdApi.baseUrl).client(authClient).build()
         .create(MangaDexAuthService::class.java)
+
+    val similarService =
+        jsonRetrofitClient.baseUrl("https://api.similarmanga.com/similar/").client(authClient)
+            .build()
+            .create(SimilarService::class.java)
 }

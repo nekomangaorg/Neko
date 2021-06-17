@@ -26,7 +26,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
 import okhttp3.Headers
 import okhttp3.Response
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 open class MangaDex : HttpSource() {
@@ -117,11 +116,11 @@ open class MangaDex : HttpSource() {
         return followsHandler.fetchTrackingInfo(url)
     }
 
-    override fun fetchMangaSimilarObservable(
+    suspend fun fetchSimilarManga(
         manga: Manga,
         refresh: Boolean,
-    ): Observable<MangaListPage> {
-        return similarHandler.fetchSimilarObserable(manga, refresh)
+    ): MangaListPage {
+        return similarHandler.fetchSimilarManga(manga, refresh)
     }
 
     override fun isLogged(): Boolean {

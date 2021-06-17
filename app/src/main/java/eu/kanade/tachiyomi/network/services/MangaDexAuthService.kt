@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network
+package eu.kanade.tachiyomi.network.services
 
 import eu.kanade.tachiyomi.source.online.dto.CheckTokenDto
 import eu.kanade.tachiyomi.source.online.dto.LoginRequestDto
