@@ -5,18 +5,15 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.CoverListDto
 import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.serialization.decodeFromString
-import okhttp3.CacheControl
+import kotlinx.serialization.encodeToString
 import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.Request
-import okhttp3.Response
-import rx.Observable
+import retrofit2.Response
 import uy.kohesive.injekt.injectLazy
 
 class SimilarHandler {
@@ -27,49 +24,50 @@ class SimilarHandler {
     /**
      * fetch our similar mangaList
      */
-    fun fetchSimilarObserable(manga: Manga, refresh: Boolean): Observable<MangaListPage> {
+    suspend fun fetchSimilarManga(manga: Manga, refresh: Boolean): MangaListPage {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if (mangaDb != null && !refresh) {
-            return Observable.just(similarStringToMangaListPage(manga, mangaDb.data))
+            val similarDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDto>(mangaDb.data)
+            return similarDtoToMangaListPage(manga, similarDto)
         }
-        return network.client.newCall(similarMangaRequest(manga))
-            .asObservableSuccess()
-            .map { response ->
-                similarMangaParse(manga, response)
-            }
+
+        val response = network.similarService.getSimilarManga(MdUtil.getMangaId(manga.url))
+        return similarMangaParse(manga, response)
     }
 
-    private fun similarMangaRequest(manga: Manga): Request {
-        val tempUrl = MdUtil.similarBaseApi + MdUtil.getMangaId(manga.url) + ".json"
-        return GET(tempUrl, network.headers, CacheControl.FORCE_NETWORK)
-    }
-
-    private fun similarMangaParse(manga: Manga, response: Response): MangaListPage {
+    private fun similarMangaParse(
+        manga: Manga,
+        response: Response<SimilarMangaDto>,
+    ): MangaListPage {
         // Error check http response
-        if (response.code == 404) {
+        if (response.code() == 404) {
             return MangaListPage(emptyList(), false)
         }
-        if (response.isSuccessful.not() || response.code != 200) {
-            throw Exception("Error getting search manga http code: ${response.code}")
+        if (response.isSuccessful.not() || response.code() != 200) {
+            throw Exception("Error getting search manga http code: ${response.code()}")
         }
         // Get our page of mangaList
-        val bodyData = response.body!!.string()
-        val mangaPages = similarStringToMangaListPage(manga, bodyData)
+        val similarDto = response.body()!!
+        val mangaPages = similarDtoToMangaListPage(manga, similarDto)
+        val similarDtoString = MdUtil.jsonParser.encodeToString(similarDto)
+
         // Insert into our database and return
         val mangaSimilar = MangaSimilar.create().apply {
             manga_id = MdUtil.getMangaId(manga.url)
-            data = bodyData
+            data = similarDtoString
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
         return mangaPages
     }
 
-    private fun similarStringToMangaListPage(manga: Manga, data: String): MangaListPage {
+    private fun similarDtoToMangaListPage(
+        manga: Manga,
+        similarMangaDto: SimilarMangaDto,
+    ): MangaListPage {
         // TODO: also filter based on the content rating here?
         // TODO: also append here the related manga?
-        val mlResponse = MdUtil.jsonParser.decodeFromString<SimilarMangaDto>(data)
 
-        val ids = mlResponse.matches.map {
+        val ids = similarMangaDto.matches.map {
             it.id
         }
 
@@ -92,7 +90,7 @@ class SimilarHandler {
             Pair(mangaId, thumbnailUrl)
         }.toMap()
 
-        val mangaList = mlResponse.matches.map {
+        val mangaList = similarMangaDto.matches.map {
             SManga.create().apply {
                 url = "/title/" + it.id
                 title = MdUtil.cleanString(it.title["en"]!!)

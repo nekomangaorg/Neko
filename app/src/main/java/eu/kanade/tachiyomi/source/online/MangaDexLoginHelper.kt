@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.MangaDexAuthService
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.online.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.dto.RefreshTokenDto
 import kotlinx.coroutines.Dispatchers

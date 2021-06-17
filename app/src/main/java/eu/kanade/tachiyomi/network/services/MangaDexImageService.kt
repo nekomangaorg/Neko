@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.network
+package eu.kanade.tachiyomi.network.services
 
 import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi

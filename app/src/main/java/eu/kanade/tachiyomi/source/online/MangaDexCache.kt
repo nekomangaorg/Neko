@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -154,7 +153,7 @@ open class MangaDexCache : MangaDex() {
     override suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return emptyList()
     }
-    
+
     override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
         throw Exception("Cache source cannot fetch follows")
     }
@@ -169,13 +168,6 @@ open class MangaDexCache : MangaDex() {
 
     override suspend fun fetchTrackingInfo(url: String): Track {
         return Track.create(TrackManager.MDLIST)
-    }
-
-    override fun fetchMangaSimilarObservable(
-        manga: Manga,
-        refresh: Boolean,
-    ): Observable<MangaListPage> {
-        return similarHandler.fetchSimilarObserable(manga, refresh)
     }
 
     override fun isLogged(): Boolean {
