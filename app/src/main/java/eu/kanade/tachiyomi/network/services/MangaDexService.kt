@@ -33,7 +33,7 @@ interface MangaDexService : MangaDexImageService {
     @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.scanlator}")
     suspend fun viewChapters(
         @Path("id") id: String,
-        @Query(value = "locales[]") locales: List<String>,
+        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
         @Query("offset") offset: Int,
     ): Response<ChapterListDto>
 
