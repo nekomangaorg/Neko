@@ -601,8 +601,6 @@
     <string name="backup_and_restore">Backup and restore</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
-    <string name="create_legacy_backup">Create legacy backup</string>
-    <string name="can_be_used_in_older_tachi">Can be used in older versions of Tachiyomi</string>
     <string name="restore_backup">Restore backup</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
     <string name="restore_in_progress">Restore already in progress</string>
@@ -1040,7 +1038,7 @@
     <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
     <!-- Backup Settings -->
-    <string name="restore_neko">Data from the backup file will be restored.\n\n If this is a json file it will be an online restore to fetch data,  and carrier costs may apply.  Please log into MangaDex and any trackers before restoring.</string>
+    <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

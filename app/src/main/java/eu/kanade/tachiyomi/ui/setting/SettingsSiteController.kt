@@ -177,8 +177,8 @@ class SettingsSiteController :
             summary = context.resources.getString(R.string.v5_migration_desc)
             onClick {
                 MaterialDialog(activity!!).show {
-                    title(text = "This will start legacy id migration")
-                    positiveButton(android.R.string.ok) { dialog ->
+                    title(text = "This will start legacy id migration (Note: This uses data)")
+                    positiveButton(android.R.string.ok) {
                         V5MigrationJob.doWorkNow()
                     }
                 }
