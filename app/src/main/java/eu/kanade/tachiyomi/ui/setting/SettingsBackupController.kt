@@ -21,7 +21,6 @@ import eu.kanade.tachiyomi.data.backup.BackupCreateService
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
-import eu.kanade.tachiyomi.data.backup.legacy.models.Backup
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.getFilePicker
@@ -56,13 +55,7 @@ class SettingsBackupController : SettingsController() {
 
                 onClick { backup(context, BackupConst.BACKUP_TYPE_FULL) }
             }
-            preference {
-                key = "pref_create_legacy_backup"
-                titleRes = R.string.create_legacy_backup
-                summaryRes = R.string.can_be_used_in_older_tachi
 
-                onClick { backup(context, BackupConst.BACKUP_TYPE_LEGACY) }
-            }
             preference {
                 key = "pref_restore_backup"
                 titleRes = R.string.restore_backup
@@ -119,7 +112,8 @@ class SettingsBackupController : SettingsController() {
                         startActivityForResult(intent, CODE_BACKUP_DIR)
                     } catch (e: ActivityNotFoundException) {
                         // Fall back to custom picker on error
-                        startActivityForResult(preferences.context.getFilePicker(currentDir), CODE_BACKUP_DIR)
+                        startActivityForResult(preferences.context.getFilePicker(currentDir),
+                            CODE_BACKUP_DIR)
                     }
                 }
 
@@ -196,12 +190,13 @@ class SettingsBackupController : SettingsController() {
                         activity,
                         file.uri,
                         backupFlags,
-                        if (requestCode == CODE_FULL_BACKUP_CREATE) BackupConst.BACKUP_TYPE_FULL else BackupConst.BACKUP_TYPE_LEGACY
+                        BackupConst.BACKUP_TYPE_FULL
                     )
                 }
                 CODE_BACKUP_RESTORE -> {
                     uri?.path?.let {
-                        val fileName = DocumentFile.fromSingleUri(activity, uri)?.name ?: uri.toString()
+                        val fileName =
+                            DocumentFile.fromSingleUri(activity, uri)?.name ?: uri.toString()
                         when {
                             fileName.endsWith(".proto.gz") -> {
                                 RestoreBackupDialog(
@@ -209,14 +204,9 @@ class SettingsBackupController : SettingsController() {
                                     BackupConst.BACKUP_TYPE_FULL
                                 ).showDialog(router)
                             }
-                            fileName.endsWith(".json") -> {
-                                RestoreBackupDialog(
-                                    uri,
-                                    BackupConst.BACKUP_TYPE_LEGACY
-                                ).showDialog(router)
-                            }
                             else -> {
-                                activity.toast(activity.getString(R.string.invalid_backup_file_type, fileName))
+                                activity.toast(activity.getString(R.string.invalid_backup_file_type,
+                                    fileName))
                             }
                         }
                     }
@@ -228,14 +218,11 @@ class SettingsBackupController : SettingsController() {
     fun createBackup(flags: Int, type: Int) {
         backupFlags = flags
 
-        val code = when (type) {
-            BackupConst.BACKUP_TYPE_FULL -> CODE_FULL_BACKUP_CREATE
-            else -> CODE_LEGACY_BACKUP_CREATE
-        }
-        val fileName = when (type) {
-            BackupConst.BACKUP_TYPE_FULL -> BackupFull.getDefaultFilename()
-            else -> Backup.getDefaultFilename()
-        }
+        val code = CODE_FULL_BACKUP_CREATE
+
+        val fileName = BackupFull.getDefaultFilename()
+        //else -> Backup.getDefaultFilename()
+
         // Setup custom file picker intent
         // Get dirs
         val currentDir = preferences.backupsDirectory().get()
