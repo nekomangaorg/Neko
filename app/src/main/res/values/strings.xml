@@ -568,6 +568,8 @@
     <string name="app_theme">App theme</string>
     <string name="dark">Neko 2x Dark</string>
     <string name="amoled_black">Neko 2x Black</string>
+    <string name="outrun">Outrun</string>
+
     <string name="dark_blue">Dark Blue</string>
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>

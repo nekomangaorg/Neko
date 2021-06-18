@@ -18,6 +18,11 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.amoled_black
     ),
+    OUTRUN(
+        R.style.Theme_Tachiyomi_Amoled,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.amoled_black
+    ),
     SPRING(
         R.style.Theme_Tachiyomi_MidnightDusk,
         AppCompatDelegate.MODE_NIGHT_NO,
@@ -99,11 +104,13 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
 
     /** Complies with textColorSecondary (primary with alpha) */
     @ColorInt
-    val lightSecondaryText: Int = ColorUtils.setAlphaComponent(lightPrimaryText, (0.54f * 255f).roundToInt())
+    val lightSecondaryText: Int =
+        ColorUtils.setAlphaComponent(lightPrimaryText, (0.54f * 255f).roundToInt())
 
     /** Complies with textColorSecondary (primary with alpha) */
     @ColorInt
-    val darkSecondaryText: Int = ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
+    val darkSecondaryText: Int =
+        ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
 
     /** Complies with colorBackground */
     @ColorInt

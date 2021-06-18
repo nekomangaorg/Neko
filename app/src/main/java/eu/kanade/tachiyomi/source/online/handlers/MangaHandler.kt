@@ -4,7 +4,6 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -15,7 +14,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
 import okhttp3.Request
-import rx.Observable
 import uy.kohesive.injekt.injectLazy
 
 class MangaHandler {
@@ -109,19 +107,7 @@ class MangaHandler {
             .map { it.id to it.attributes!!.name!! }
             .toMap()
     }
-
-    fun fetchRandomMangaId(): Observable<String> {
-        return network.client.newCall(randomMangaRequest())
-            .asObservableSuccess()
-            .map { response ->
-                apiMangaParser.randomMangaIdParse(response)
-            }
-    }
-
-    private fun randomMangaRequest(): Request {
-        return GET(MdUtil.randomMangaUrl)
-    }
-
+    
     private fun groupIdRequest(id: List<String>, offset: Int): Request {
         val urlSuffix = id.joinToString("&ids[]=", "?limit=100&offset=$offset&ids[]=")
         return GET(MdUtil.groupUrl + urlSuffix, network.headers)
