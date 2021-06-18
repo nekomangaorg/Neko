@@ -90,6 +90,9 @@
 
     <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard" />
 
+    <style name="Theme.Tachiyomi.Outrun" parent="Theme.Tachiyomi.Standard" />
+
+
     <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi.Standard">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
