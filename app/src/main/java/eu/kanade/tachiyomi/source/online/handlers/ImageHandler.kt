@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -27,9 +28,14 @@ class ImageHandler {
             return mangaPlusHandler.client.newCall(GET(page.imageUrl!!, mangaPlusHandler.headers))
                 .await()
         } else {
-            val response =
-                network.nonRateLimitedClient.newCallWithProgress(imageRequest(page, isLogged), page)
+            val response = try {
+                network.nonRateLimitedClient.newCallWithProgress(imageRequest(page, isLogged),
+                    page)
                     .await()
+            } catch (e: Exception) {
+                XLog.e("error getting images", e)
+                throw (e)
+            }
 
             val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
             val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
@@ -67,16 +73,12 @@ class ImageHandler {
         val data = page.url.split(",")
         val currentTime = Date().time
         val mdAtHomeServerUrl =
-            when (currentTime - data[2].toLong() > MdConstants.mdAtHomeTokenLifespan) {
-                false -> data[0]
-                true -> {
-                    if (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
-                        data[0]
-                    } else {
-                        tokenTracker[page.mangaDexChapterId] = currentTime
-                        service.getAtHomeServer(page.mangaDexChapterId,
-                            preferences.usePort443Only()).body()!!.baseUrl
-                    }
+            when (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
+                true -> data[0]
+                false -> {
+                    updateTokenTracker(page.mangaDexChapterId, currentTime)
+                    service.getAtHomeServer(page.mangaDexChapterId,
+                        preferences.usePort443Only()).body()!!.baseUrl
                 }
             }
         return GET(mdAtHomeServerUrl + page.imageUrl, network.headers)

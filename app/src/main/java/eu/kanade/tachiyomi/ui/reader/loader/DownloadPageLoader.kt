@@ -18,7 +18,7 @@ class DownloadPageLoader(
     private val chapter: ReaderChapter,
     private val manga: Manga,
     private val source: Source,
-    private val downloadManager: DownloadManager
+    private val downloadManager: DownloadManager,
 ) : PageLoader() {
 
     /**
@@ -37,6 +37,7 @@ class DownloadPageLoader(
                         page.index,
                         page.url,
                         page.imageUrl,
+                        page.mangaDexChapterId,
                         {
                             context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
                         }

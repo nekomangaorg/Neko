@@ -73,6 +73,6 @@ fun Page.toPageUrl(): PageUrl {
 fun PageUrl.toPage(index: Int): Page {
     return Page(
         index = index,
-        imageUrl = this.url
+        imageUrl = this.url,
     )
 }

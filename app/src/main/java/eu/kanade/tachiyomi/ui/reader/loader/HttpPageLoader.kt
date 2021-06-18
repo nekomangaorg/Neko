@@ -107,7 +107,7 @@ class HttpPageLoader(
             }.getOrElse {
                 source.fetchPageList(chapter.chapter)
             }.mapIndexed { index, page ->
-                ReaderPage(index, page.url, page.imageUrl)
+                ReaderPage(index, page.url, page.imageUrl, page.mangaDexChapterId)
             }
         }
     }
