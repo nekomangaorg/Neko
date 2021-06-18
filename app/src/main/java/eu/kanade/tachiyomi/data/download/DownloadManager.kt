@@ -380,11 +380,11 @@ class DownloadManager(val context: Context) {
         }
     }
 
-    fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
-    fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
-
     // forceRefresh the cache
     fun refreshCache() {
         cache.forceRenewCache()
     }
+
+    fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
+    fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
 }
