@@ -161,7 +161,7 @@ class DownloadProvider(private val context: Context) {
                     return@filter true
                 }
                 val mangadexId = fileName.substringAfterLast("- ", "")
-                if (mangadexId.isNotEmpty() && mangadexId.isDigitsOnly()) {
+                if (mangadexId.isNotEmpty() && (mangadexId.isDigitsOnly() || mangadexId.isUUID())) {
                     return@filter !idHashSet.contains(mangadexId)
                 } else {
                     if (scanalatorNameHashSet.contains(fileName)) {
