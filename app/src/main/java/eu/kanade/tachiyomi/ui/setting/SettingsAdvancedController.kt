@@ -233,7 +233,7 @@ class SettingsAdvancedController : SettingsController() {
                 title(R.string.clean_up_downloaded_chapters)
                     .listItemsMultiChoice(R.array.clean_up_downloads,
                         disabledIndices = intArrayOf(0),
-                        initialSelection = intArrayOf(0, 1, 2)) { dialog, selections, items ->
+                        initialSelection = intArrayOf(0, 1, 2)) { _, selections, _ ->
                         val deleteRead = selections.contains(1)
                         val deleteNonFavorite = selections.contains(2)
                         (targetController as? SettingsAdvancedController)?.cleanupDownloads(
