@@ -65,9 +65,9 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -111,6 +111,8 @@ import eu.kanade.tachiyomi.util.view.toolbarHeight
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.cascadeMenuStyler
+import me.saket.cascade.CascadePopupMenu
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -128,7 +130,7 @@ class MangaDetailsController :
     constructor(
         manga: Manga,
         fromCatalogue: Boolean = false,
-        update: Boolean = false
+        update: Boolean = false,
     ) : super(
         Bundle().apply {
             putLong(MANGA_EXTRA, manga.id ?: 0)
@@ -167,7 +169,7 @@ class MangaDetailsController :
     private var mergeSearchDialog: MergeSearchDialog? = null
     private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
-    var chapterPopupMenu: Pair<Int, PopupMenu>? = null
+    var chapterPopupMenu: Pair<Int, CascadePopupMenu>? = null
 
     // Tablet Layout
     var isTablet = false
@@ -188,7 +190,8 @@ class MangaDetailsController :
         return null
     }
 
-    override fun createBinding(inflater: LayoutInflater) = MangaDetailsControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        MangaDetailsControllerBinding.inflate(inflater)
 
     //region UI Methods
     override fun onViewCreated(view: View) {
@@ -257,7 +260,8 @@ class MangaDetailsController :
 
         if (isTablet) {
             val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
-            headerHeight = tHeight + (activityBinding?.root?.rootWindowInsets?.systemWindowInsetTop ?: 0)
+            headerHeight =
+                tHeight + (activityBinding?.root?.rootWindowInsets?.systemWindowInsetTop ?: 0)
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
             binding.recycler.doOnApplyWindowInsets { _, insets, _ ->
                 setInsets(insets, appbarHeight, offset)
@@ -303,7 +307,9 @@ class MangaDetailsController :
         headerHeight = tHeight + insets.systemWindowInsetTop
         binding.swipeRefresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         if (isTablet) {
-            binding.tabletOverlay.updateLayoutParams<ViewGroup.LayoutParams> { height = headerHeight }
+            binding.tabletOverlay.updateLayoutParams<ViewGroup.LayoutParams> {
+                height = headerHeight
+            }
             // 4dp extra to line up chapter header and manga header
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
         }
@@ -362,7 +368,8 @@ class MangaDetailsController :
     fun setPaletteColor() {
         val view = view ?: return
 
-        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false).memoryCacheKey(presenter.manga.key())
+        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
+            .memoryCacheKey(presenter.manga.key())
             .target(
                 onSuccess = { drawable ->
                     val bitmap = (drawable as BitmapDrawable).bitmap
@@ -403,7 +410,9 @@ class MangaDetailsController :
         val activity = activity as? MainActivity ?: return
         val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
-        if (ThemeUtil.hasDarkActionBarInLight(activity, activity.getPrefTheme(presenter.preferences))) {
+        if (ThemeUtil.hasDarkActionBarInLight(activity,
+                activity.getPrefTheme(presenter.preferences))
+        ) {
             if (forThis) activityBinding.appBar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
             )
@@ -430,7 +439,8 @@ class MangaDetailsController :
 
     private fun setStatusBarAndToolbar() {
         activity?.window?.statusBarColor = if (toolbarIsColored) {
-            val translucentColor = ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
+            val translucentColor =
+                ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
             activityBinding?.toolbar?.setBackgroundColor(translucentColor)
             translucentColor
         } else Color.TRANSPARENT
@@ -499,7 +509,7 @@ class MangaDetailsController :
 
     override fun onChangeEnded(
         changeHandler: ControllerChangeHandler,
-        type: ControllerChangeType
+        type: ControllerChangeType,
     ) {
         super.onChangeEnded(changeHandler, type)
         if (type == ControllerChangeType.PUSH_ENTER) {
@@ -554,7 +564,8 @@ class MangaDetailsController :
                     if (it.isCheckPromptChecked()) deleteRemovedPref.set(2)
                 }.negativeButton(R.string.keep) {
                     if (it.isCheckPromptChecked()) deleteRemovedPref.set(1)
-                }.cancelOnTouchOutside(false).checkBoxPrompt(R.string.remember_this_choice) {}.show()
+                }.cancelOnTouchOutside(false).checkBoxPrompt(R.string.remember_this_choice) {}
+                    .show()
             }
         }
     }
@@ -659,63 +670,51 @@ class MangaDetailsController :
         return false
     }
 
+    //create chapter popup on long click
     override fun onItemLongClick(position: Int) {
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
-        val descending = presenter.sortDescending()
-        val items = listOf(
-            MaterialMenuSheet.MenuSheetItem(
-                0,
-                if (descending) R.drawable.ic_eye_down_24dp else R.drawable.ic_eye_up_24dp,
-                R.string.mark_previous_as_read
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                1,
-                if (descending) R.drawable.ic_eye_off_down_24dp else R.drawable.ic_eye_off_up_24dp,
-                R.string.mark_previous_as_unread
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                2,
-                R.drawable.ic_eye_range_24dp,
-                R.string.mark_range_as_read
-            ),
-            MaterialMenuSheet.MenuSheetItem(
-                3,
-                R.drawable.ic_eye_off_range_24dp,
-                R.string.mark_range_as_unread
-            )
-        )
-        // add comments in future
-        // if (!item.chapter.isMergedChapter()) {
-        //    popup.menu.findItem(R.id.action_view_comments).isVisible = true
-        // }
-        val menuSheet = MaterialMenuSheet(activity!!, items, item.name) { _, itemPos ->
-            when (itemPos) {
-                0 -> markPreviousAs(item, true)
-                1 -> markPreviousAs(item, false)
-                2 -> startReadRange(position, RangeMode.Read)
-                3 -> startReadRange(position, RangeMode.Unread)
-            }
+        val itemView = getHolder(item)?.itemView ?: return
+        val popup = CascadePopupMenu(binding.root.context,
+            itemView,
+            styler = cascadeMenuStyler(binding.root.context))
+        val isDexChapter = item.chapter.isMergedChapter().not()
+
+        //wrapper to reduce some boilerplate on menu click
+        fun menuClick(click: () -> (Unit)) = MenuItem.OnMenuItemClickListener {
+            click()
+            chapterPopupMenu = null
             true
         }
-        menuSheet.show()
-//        val popup = PopupMenu(itemView.context, itemView)
-//        chapterPopupMenu = position to popup
-//
-//        // Inflate our menu resource into the PopupMenu's Menu
-//        popup.menuInflater.inflate(R.menu.chapter_single, popup.menu)
-//
-//        popup.setOnMenuItemClickListener { menuItem ->
-//            when (menuItem.itemId) {
-//                R.id.action_mark_previous_as_read -> markPreviousAs(item, true)
-//                R.id.action_mark_previous_as_unread -> markPreviousAs(item, false)
-//            }
-//            chapterPopupMenu = null
-//            true
-//        }
-//
-//        // Finally show the PopupMenu
-//        popup.show()
+
+        chapterPopupMenu = position to popup
+        popup.menu.apply {
+            if (isDexChapter) {
+                add(R.string.comments).setOnMenuItemClickListener(menuClick {
+                    activity?.toast(R.string.comments_unavailable_dex)
+                    //viewComments(item)  })
+                })
+            }
+            addSubMenu(R.string.mark_previous_as).also { sub ->
+                sub.add(R.string.read)
+                    .setOnMenuItemClickListener(menuClick { markPreviousAs(item, true) })
+                sub.add(R.string.unread)
+                    .setOnMenuItemClickListener(menuClick { markPreviousAs(item, false) })
+            }
+            addSubMenu(R.string.mark_range_as).also { sub ->
+                sub.add(R.string.read).setOnMenuItemClickListener(menuClick {
+                    startReadRange(position,
+                        RangeMode.Read)
+                })
+                sub.add(R.string.unread).setOnMenuItemClickListener(menuClick {
+                    startReadRange(position,
+                        RangeMode.Unread)
+                })
+            }
+
+        }
+
+        popup.show()
     }
 
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
@@ -813,7 +812,10 @@ class MangaDetailsController :
 
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
-        if (presenter.preferences.useCacheSource() && presenter.manga.isMerged().not() && presenter.downloadManager.isChapterDownloaded(chapter, presenter.manga).not()) {
+        if (presenter.preferences.useCacheSource() && presenter.manga.isMerged()
+                .not() && presenter.downloadManager.isChapterDownloaded(chapter, presenter.manga)
+                .not()
+        ) {
             view?.snack(R.string.using_cached_source_cant_open)
             return
         }
@@ -909,7 +911,8 @@ class MangaDetailsController :
                     val stream = cover.getUriCompat(activity!!)
                     val intent = Intent(Intent.ACTION_SEND).apply {
                         putExtra(Intent.EXTRA_STREAM, stream)
-                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                        flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
                         clipData = ClipData.newRawUri(null, stream)
                         type = "image/*"
                     }
@@ -963,7 +966,8 @@ class MangaDetailsController :
     }
 
     override fun openSimilar() {
-        router.pushController(SimilarController(presenter.manga, presenter.source).withFadeTransaction())
+        router.pushController(SimilarController(presenter.manga,
+            presenter.source).withFadeTransaction())
     }
 
     override fun openMerge() {
@@ -1081,12 +1085,12 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.seriesType
-            (view.context).toLowerCase(Locale.ROOT)
+                (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
-            snack == null ||
-                snack?.getText() != text
-            )
+                snack == null ||
+                    snack?.getText() != text
+                )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
@@ -1195,7 +1199,11 @@ class MangaDetailsController :
         popupView.setOnTouchListener(popup?.dragToOpenListener)
     }
 
-    private fun makeFavPopup(popupView: View, manga: Manga, categories: List<Category>): PopupMenu? {
+    private fun makeFavPopup(
+        popupView: View,
+        manga: Manga,
+        categories: List<Category>,
+    ): PopupMenu? {
         val view = view ?: return null
         val popup = PopupMenu(view.context, popupView)
         popup.menu.add(0, 1, 0, R.string.remove_from_library)
@@ -1325,8 +1333,9 @@ class MangaDetailsController :
             actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
             activityBinding?.toolbar?.setBackgroundColor(Color.TRANSPARENT)
             val view = activity?.window?.currentFocus ?: return
-            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                ?: return
+            val imm =
+                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    ?: return
             imm.hideSoftInputFromWindow(view.windowToken, 0)
             if (adapter?.mode != SelectableAdapter.Mode.MULTI) {
                 adapter?.mode = SelectableAdapter.Mode.MULTI

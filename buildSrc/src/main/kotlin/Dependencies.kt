@@ -151,16 +151,17 @@ object Libs {
         const val materialDateTime = "com.afollestad.material-dialogs:datetime:3.1.1"
 
         const val numberSlidingPicker =
-            "com.github.sephiroth74:NumberSlidingPicker:${Versions.numberSlidingPicker}"
-        const val photoView = "com.github.chrisbanes:PhotoView:${Versions.photoView}"
+            "com.github.sephiroth74:NumberSlidingPicker:1.0.3"
+        const val photoView = "com.github.chrisbanes:PhotoView:2.3.0"
         const val subsamplingScaleImageView =
             "com.github.jays2kings:subsampling-scale-image-view:dfd3e43"
         const val systemUiHelper =
-            "me.zhanghai.android.systemuihelper:library:${Versions.systemUiHelper}"
+            "me.zhanghai.android.systemuihelper:library:1.0.0"
         const val tapTargetView = "com.getkeepsafe.taptargetview:taptargetview:1.13.0"
         const val viewStatePager =
             "com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0"
-        const val viewToolTip = "com.github.florent37:viewtooltip:${Versions.viewToolTip}"
+        const val viewToolTip = "com.github.florent37:viewtooltip:1.2.2"
+        const val cascade = "me.saket.cascade:cascade:1.3.0"
     }
 
     object Util {
@@ -194,13 +195,9 @@ object Versions {
     const val mockito = "1.10.19"
     const val moshi = "1.9.3"
     const val nucleus = "3.0.0"
-    const val numberSlidingPicker = "1.0.3"
-    const val photoView = "2.3.0"
     const val roboElectric = "3.1.4"
-    const val systemUiHelper = "1.0.0"
 
     //const val unifile = "e9ee588"
-    const val viewToolTip = "1.2.2"
     const val xlog = "1.8.0"
     const val kotlinter = "3.4.4"
 }
