@@ -25,7 +25,7 @@ fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
             null,
             ColorDrawable(Color.BLACK))
     }
-
+    
     return CascadePopupMenu.Styler(
         background = {
             RoundedRectDrawable(context.getResourceColor(R.attr.colorPrimaryVariant),
@@ -33,14 +33,15 @@ fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
         },
         menuTitle = {
             it.titleView.typeface =
-                ResourcesCompat.getFont(context, R.font.metropolis_medium)
+                ResourcesCompat.getFont(context, R.font.metropolis_regular)
             it.itemView.background = rippleDrawable()
         },
         menuItem = {
             it.titleView.typeface =
-                ResourcesCompat.getFont(context, R.font.metropolis_medium)
+                ResourcesCompat.getFont(context, R.font.metropolis_regular)
             it.contentView.background = rippleDrawable()
             it.setGroupDividerColor(context.getResourceColor(R.attr.colorAccent))
-        }
+
+        },
     )
 }

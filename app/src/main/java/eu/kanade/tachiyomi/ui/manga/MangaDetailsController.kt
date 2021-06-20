@@ -841,10 +841,8 @@ class MangaDetailsController :
             }
         inflater.inflate(R.menu.manga_details, menu)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_read).isVisible =
-            presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_unread).isVisible =
-            presenter.anyRead() && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_read).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_unread).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
@@ -895,7 +893,7 @@ class MangaDetailsController :
                         markAsUnread(presenter.chapters)
                     }.negativeButton(android.R.string.cancel).show()
             }
-            R.id.download_next, R.id.download_next_5, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
+            R.id.download_next, R.id.download_next_5, R.id.download_next_10, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
                 item.itemId
             )
             R.id.save -> {
@@ -1039,6 +1037,7 @@ class MangaDetailsController :
         val chaptersToDownload = when (choice) {
             R.id.download_next -> presenter.getUnreadChaptersSorted().take(1)
             R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
+            R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
             R.id.download_custom -> {
                 createActionModeIfNeeded()
                 rangeMode = RangeMode.Download
