@@ -14,8 +14,8 @@ import com.elvishew.xlog.printer.file.naming.DateFileNameGenerator
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import java.io.File
+import kotlin.time.Duration
 import kotlin.time.ExperimentalTime
-import kotlin.time.days
 
 @OptIn(ExperimentalTime::class)
 class XLogSetup(context: Context) {
@@ -47,10 +47,11 @@ class XLogSetup(context: Context) {
             )
             .fileNameGenerator(object : DateFileNameGenerator() {
                 override fun generateFileName(logLevel: Int, timestamp: Long): String {
-                    return super.generateFileName(logLevel, timestamp) + "-${BuildConfig.BUILD_TYPE}"
+                    return super.generateFileName(logLevel,
+                        timestamp) + "-${BuildConfig.BUILD_TYPE}.txt"
                 }
             })
-            .cleanStrategy(FileLastModifiedCleanStrategy(1.days.inMilliseconds.toLong()))
+            .cleanStrategy(FileLastModifiedCleanStrategy(Duration.days(1).inWholeMilliseconds))
             .backupStrategy(NeverBackupStrategy())
             .build()
 
