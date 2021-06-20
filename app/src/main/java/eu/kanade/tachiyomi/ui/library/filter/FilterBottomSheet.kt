@@ -351,6 +351,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         else -> ""
                     }
                 )
+                missingChapters.setState(preferences.filterMissingChapters())
+                merged.setState(preferences.filterMerged())
+
                 reorderFilters()
                 reSortViews()
             }
@@ -413,6 +416,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             Filters.Downloaded -> downloaded
             Filters.Completed -> completed
             Filters.SeriesType -> mangaType
+            Filters.MissingChapters -> missingChapters
+            Filters.Merged -> merged
             Filters.Tracked -> if (hasTracking) tracked else null
             else -> null
         }
@@ -541,6 +546,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         Downloaded('d', R.string.downloaded),
         Completed('c', R.string.status),
         SeriesType('m', R.string.series_type),
+        MissingChapters('o', R.string.missing_chapters),
+        Merged('n', R.string.merged),
         Tracked('t', R.string.tracked);
 
         companion object {
@@ -550,6 +557,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 Downloaded,
                 Completed,
                 SeriesType,
+                MissingChapters,
+                Merged,
                 Tracked
             ).joinToString("") { it.value.toString() }
 
