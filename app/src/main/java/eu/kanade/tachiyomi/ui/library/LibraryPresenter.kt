@@ -359,6 +359,7 @@ class LibraryPresenter(
             }
             return if (filterDownloaded == STATE_INCLUDE) isDownloaded else !isDownloaded
         }
+
         return true
     }
 
