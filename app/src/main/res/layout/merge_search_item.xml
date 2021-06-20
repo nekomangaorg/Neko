@@ -3,11 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     style="@style/Theme.Widget.CardView.Item"
-    android:layout_width="180dp"
-    android:layout_height="260dp"
-    android:layout_marginBottom="10dp"
-    android:padding="15dp"
-    app:cardCornerRadius="0dp">
+    android:layout_width="120dp"
+    android:layout_height="180dp"
+    android:padding="10dp"
+    app:cardCornerRadius="8dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -17,8 +16,8 @@
 
         <ImageView
             android:id="@+id/merge_search_cover"
-            android:layout_width="170dp"
-            android:layout_height="200dp"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
             android:layout_marginTop="4dp"
             android:contentDescription="@string/cover_of_image"
             android:scaleType="centerCrop"
@@ -31,17 +30,15 @@
 
         <TextView
             android:id="@+id/merge_search_title"
-            android:layout_width="165dp"
-            android:layout_height="50dp"
-            android:layout_marginBottom="4dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="4dp"
             android:gravity="center"
             android:maxLines="3"
-            android:padding="2dp"
             android:textAppearance="@style/Neko.Headline4"
             android:textSize="14sp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.428"
             app:layout_constraintStart_toStartOf="parent"
             tools:text="One Piece ref efe fef ef efe fef ef ef ef f fse fewfwefwf wef feef ef ef" />
 
