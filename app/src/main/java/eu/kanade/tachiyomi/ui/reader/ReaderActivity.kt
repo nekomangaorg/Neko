@@ -310,20 +310,6 @@ class ReaderActivity :
     }
 
     /**
-     * Called when the window focus changes. It sets the menu visibility to the last known state
-     * to apply again System UI (for immersive mode).
-     */
-    override fun onWindowFocusChanged(hasFocus: Boolean) {
-        super.onWindowFocusChanged(hasFocus)
-        if (hasFocus) {
-            when (menuStickyVisible) {
-                true -> setMenuVisibility(false)
-                false -> setMenuVisibility(menuVisible, animate = false)
-            }
-        }
-    }
-
-    /**
      * Called when the options menu of the binding.toolbar is being created. It adds our custom menu.
      */
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -1327,7 +1313,7 @@ class ReaderActivity :
     }
 
     override fun onVisibilityChange(visible: Boolean) {
-        if (visible && !menuStickyVisible && !menuVisible) {
+        if (visible && !menuStickyVisible && !menuVisible && !binding.readerMenu.isVisible) {
             menuStickyVisible = visible
             if (visible) {
                 coroutine = launchUI {
@@ -1350,9 +1336,9 @@ class ReaderActivity :
                 )
                 binding.appBar.startAnimation(toolbarAnimation)
             }
-        } else {
+        } else if (!visible && (menuStickyVisible || menuVisible)) {
             if (menuStickyVisible && !menuVisible) {
-                setMenuVisibility(false, animate = false)
+                setMenuVisibility(false)
             }
             coroutine?.cancel()
         }
