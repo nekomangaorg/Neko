@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.clear
@@ -28,14 +29,15 @@ class BrowseSourceListHolder(
     private val binding = MangaListItemBinding.bind(view)
 
     /**
-     * Method called from. It updates the data for this
+     * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this
      * holder with the given manga.
      *
      * @param manga the manga to bind.
      */
     override fun onSetValues(manga: Manga) {
         binding.title.text = manga.title
-        binding.inLibraryBadge.badge.visibility = if (manga.favorite) View.VISIBLE else View.GONE
+        binding.inLibraryBadge.badge.isVisible = manga.favorite
+
         setImage(manga)
     }
 
