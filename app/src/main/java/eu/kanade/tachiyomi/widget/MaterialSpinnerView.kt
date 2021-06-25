@@ -11,7 +11,6 @@ import android.widget.FrameLayout
 import androidx.annotation.ArrayRes
 import androidx.annotation.StringRes
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.forEach
@@ -22,6 +21,7 @@ import eu.kanade.tachiyomi.databinding.MaterialSpinnerViewBinding
 import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
+import me.saket.cascade.CascadePopupMenu
 import kotlin.math.max
 
 class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
@@ -32,7 +32,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         private set
     private var pref: Preference<Int>? = null
     private var prefOffset = 0
-    private var popup: PopupMenu? = null
+    private var popup: CascadePopupMenu? = null
     var title: CharSequence
         get() {
             return binding.titleView.text
@@ -52,7 +52,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
             field = value
             if (value != null) {
                 popup = makeSettingsPopup()
-                setOnTouchListener(popup?.dragToOpenListener)
+                //setOnTouchListener(popup?.dragToOpenListener)
                 setOnClickListener {
                     popup?.show()
                 }
@@ -66,13 +66,14 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     )
 
     init {
-        addView(binding.root)
+        //addView(binding.root)
         val a = context.obtainStyledAttributes(attrs, R.styleable.MaterialSpinnerView, 0, 0)
 
         val str = a.getString(R.styleable.MaterialSpinnerView_title) ?: ""
         title = str
 
-        val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
+        val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries)
+            ?: emptyArray()).map { it.toString() }
         this.entries = entries
 
         val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, Int.MAX_VALUE)
@@ -83,19 +84,19 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
 
         if (entries.isNotEmpty()) {
             popup = makeSettingsPopup()
-            setOnTouchListener(popup?.dragToOpenListener)
+            //setOnTouchListener(popup?.dragToOpenListener)
             setOnClickListener {
                 popup?.show()
             }
         }
 
-        a.recycle()
+        //a.recycle()
     }
 
     fun setEntries(entries: List<String>) {
         this.entries = entries
         popup = makeSettingsPopup()
-        setOnTouchListener(popup?.dragToOpenListener)
+        //setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {
             popup?.show()
         }
@@ -117,7 +118,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     fun setDisabledState(@StringRes messageRes: Int = 0) {
         alpha = 0.5f
         popup = null
-        setOnTouchListener(null)
+        // setOnTouchListener(null)
         setOnClickListener {
             if (messageRes != 0) {
                 context.toast(messageRes)
@@ -130,7 +131,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         this.pref = pref
         prefOffset = offset
         popup = makeSettingsPopup(pref, prefOffset, block)
-        setOnTouchListener(popup?.dragToOpenListener)
+        //setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {
             popup?.show()
         }
@@ -140,7 +141,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         val enumConstants = T::class.java.enumConstants
         enumConstants?.indexOf(pref.get())?.let { setSelection(it) }
         val popup = makeSettingsPopup(pref)
-        setOnTouchListener(popup.dragToOpenListener)
+        //setOnTouchListener(popup.dragToOpenListener)
         setOnClickListener {
             popup.show()
         }
@@ -149,20 +150,20 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     fun bindToIntPreference(
         pref: Preference<Int>,
         @ArrayRes intValuesResource: Int,
-        block: ((Int) -> Unit)? = null
+        block: ((Int) -> Unit)? = null,
     ) {
         this.pref = pref
         prefOffset = 0
         val intValues = resources.getStringArray(intValuesResource).map { it.toIntOrNull() }
         setSelection(max(0, intValues.indexOf(pref.get())))
         popup = makeSettingsPopup(pref, intValues, block)
-        setOnTouchListener(popup?.dragToOpenListener)
+        // setOnTouchListener(popup?.dragToOpenListener)
         setOnClickListener {
             popup?.show()
         }
     }
 
-    inline fun <reified T : Enum<T>> makeSettingsPopup(preference: Preference<T>): PopupMenu {
+    inline fun <reified T : Enum<T>> makeSettingsPopup(preference: Preference<T>): CascadePopupMenu {
         val popup = popup()
 
         // Set a listener so we are notified if a menu item is clicked
@@ -184,8 +185,8 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     private fun makeSettingsPopup(
         preference: Preference<Int>,
         intValues: List<Int?>,
-        block: ((Int) -> Unit)? = null
-    ): PopupMenu {
+        block: ((Int) -> Unit)? = null,
+    ): CascadePopupMenu {
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
@@ -200,8 +201,8 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     private fun makeSettingsPopup(
         preference: Preference<Int>,
         offset: Int = 0,
-        block: ((Int) -> Unit)? = null
-    ): PopupMenu {
+        block: ((Int) -> Unit)? = null,
+    ): CascadePopupMenu {
         val popup = popup()
         // Set a listener so we are notified if a menu item is clicked
         popup.setOnMenuItemClickListener { menuItem ->
@@ -213,7 +214,7 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         return popup
     }
 
-    private fun makeSettingsPopup(): PopupMenu {
+    private fun makeSettingsPopup(): CascadePopupMenu {
         val popup = popup()
 
         // Set a listener so we are notified if a menu item is clicked
@@ -232,8 +233,9 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     @SuppressLint("RestrictedApi")
-    fun popup(): PopupMenu {
-        val popup = PopupMenu(context, this, Gravity.END)
+    fun popup(): CascadePopupMenu {
+        val popup =
+            CascadePopupMenu(context, this, Gravity.END, styler = cascadeMenuStyler(context))
         entries.forEachIndexed { index, entry ->
             popup.menu.add(0, index, 0, entry)
         }
