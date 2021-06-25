@@ -16,8 +16,6 @@ object Libs {
         const val palette = "androidx.palette:palette:1.0.0"
         const val preference = "androidx.preference:preference:1.1.1"
         const val recyclerView = "androidx.recyclerview:recyclerview:1.2.0"
-        const val workManager = "androidx.work:work-runtime:2.5.0"
-        const val workManagerKtx = "androidx.work:work-runtime-ktx:2.5.0"
         const val dataBinding = "com.android.databinding:compiler:${Versions.dataBinding}"
     }
 
@@ -38,8 +36,6 @@ object Libs {
         const val firebaseCore = "com.google.firebase:firebase-core:18.0.3"
         const val firebaseCrashltyics =
             "com.google.firebase:firebase-crashlytics:${Versions.firebaseCrashlytics}"
-        const val playServices =
-            "com.google.android.gms:play-services-gcm:${Versions.googlePlayServices}"
     }
 
     object Image {
@@ -170,7 +166,6 @@ object Versions {
     const val conductor = "2.1.5"
     const val directionalViewPager = "a844dbca0a"
     const val firebaseCrashlytics = "17.2.1"
-    const val googlePlayServices = "17.0.0"
     const val googleServices = "4.3.3"
     const val gradleVersions = "0.29.0"
     const val junit = "4.13"

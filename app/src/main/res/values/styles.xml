@@ -30,7 +30,7 @@
     </style>
 
     <style name="TextAppearance.Regular">
-        <item name="android:fontFamily">@font/metropolis_regular</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1">
@@ -42,7 +42,7 @@
     </style>
 
     <style name="TextAppearance.Regular.Body1.SemiBold">
-        <item name="android:fontFamily">@font/metropolis_semi_bold</item>
+        <item name="android:fontFamily">@font/montserrat_semi_bold</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1.Light">
@@ -82,7 +82,7 @@
     </style>
 
     <style name="TextAppearance.Medium">
-        <item name="android:fontFamily">@font/metropolis_medium</item>
+        <item name="android:fontFamily">@font/montserrat_medium</item>
     </style>
 
     <style name="TextAppearance.Medium.Title">
