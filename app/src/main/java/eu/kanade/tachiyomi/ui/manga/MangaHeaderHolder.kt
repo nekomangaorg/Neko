@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -30,7 +31,7 @@ class MangaHeaderHolder(
     view: View,
     private val adapter: MangaDetailsAdapter,
     startExpanded: Boolean,
-    isTablet: Boolean = false
+    isTablet: Boolean = false,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     val binding: MangaHeaderItemBinding? = try {
@@ -195,7 +196,8 @@ class MangaHeaderHolder(
         if (manga.author == manga.artist || manga.artist.isNullOrBlank()) {
             binding.mangaAuthor.text = manga.author?.trim()
         } else {
-            binding.mangaAuthor.text = listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
+            binding.mangaAuthor.text =
+                listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
         binding.mangaSummary.text =
             if (manga.description.isNullOrBlank()) itemView.context.getString(R.string.no_description)
@@ -214,24 +216,22 @@ class MangaHeaderHolder(
             if (adapter.hasFilter()) collapse()
             else expand()
         }
-        binding.mangaSummaryLabel.text = itemView.context.getString(
-            R.string.about_this_,
-            manga.seriesType(itemView.context)
-        )
+
         with(binding.favoriteButton) {
             val icon = when {
                 item.isLocked -> MaterialDesignDx.Icon.gmf_lock
                 item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
                 else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
             }
-            setImageDrawable(context.iconicsDrawableLarge(icon))
+            setImageDrawable(icon.create(context, 24f))
             adapter.delegate.setFavButtonPopup(this)
         }
 
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(binding.trackButton) {
-            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_art_track, size = 32))
+            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_art_track,
+                size = 32))
         }
 
         with(binding.similarButton) {
@@ -264,7 +264,8 @@ class MangaHeaderHolder(
                     if (nextChapter.isMergedChapter() || (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty())) {
                         nextChapter.chapter.name
                     } else {
-                        listOf(nextChapter.chapter.vol, nextChapter.chapter.chapter_txt).joinToString(" ")
+                        listOf(nextChapter.chapter.vol,
+                            nextChapter.chapter.chapter_txt).joinToString(" ")
                     }
                 resources.getString(
                     if (nextChapter.last_page_read > 0) R.string.continue_reading_
@@ -277,7 +278,8 @@ class MangaHeaderHolder(
         }
 
         val count = presenter.chapters.size
-        binding.chaptersTitle.text = itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
+        binding.chaptersTitle.text =
+            itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
 
         binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = adapter.delegate.topCoverHeight()
@@ -306,14 +308,15 @@ class MangaHeaderHolder(
 
         binding.mangaMissingChapters.isVisible = manga.missing_chapters != null
 
-        binding.mangaMissingChapters.text = itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
+        binding.mangaMissingChapters.text =
+            itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
 
         manga.genre?.let {
             binding.r18Badge.isVisible = (it.contains("pornographic", true))
         }
 
         binding.mangaLangFlag.visibility = View.VISIBLE
-        when (manga.lang_flag?.toLowerCase(Locale.US)) {
+        when (manga.lang_flag?.lowercase(Locale.US)) {
             "zh-hk" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_china)
             "zh" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_china)
             "ko" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_korea)
@@ -390,7 +393,8 @@ class MangaHeaderHolder(
         binding.subItemGroup.isVisible = true
         if (!showMoreButton) binding.moreButtonGroup.isVisible = false
         else {
-            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.isVisible = true
+            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.isVisible =
+                true
             else {
                 binding.lessButton.isVisible = true
                 binding.mangaGenresTags.isVisible = true

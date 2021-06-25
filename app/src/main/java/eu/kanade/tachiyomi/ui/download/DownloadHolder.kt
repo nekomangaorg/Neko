@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
-import androidx.appcompat.widget.PopupMenu
-import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import eu.kanade.tachiyomi.widget.cascadeMenuStyler
+import me.saket.cascade.CascadePopupMenu
 
 /**
  * Class used to hold the data of a download.
@@ -21,6 +21,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     BaseFlexibleViewHolder(view, adapter) {
 
     private val binding = DownloadItemBinding.bind(view)
+
     init {
         setDragHandleView(binding.reorder)
         binding.downloadMenu.setOnClickListener { it.post { showPopupMenu(it) } }
@@ -88,10 +89,10 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         val item = adapter.getItem(flexibleAdapterPosition) ?: return
 
         // Create a PopupMenu, giving it the clicked view for an anchor
-        val popup = PopupMenu(view.context, view)
+        val popup = CascadePopupMenu(view.context, view, styler = cascadeMenuStyler(view.context))
 
         // Inflate our menu resource into the PopupMenu's Menu
-        popup.menuInflater.inflate(R.menu.download_single, popup.menu)
+        popup.inflate(R.menu.download_single)
 
         popup.menu.findItem(R.id.move_to_top).isVisible = flexibleAdapterPosition != 0
         popup.menu.findItem(R.id.move_to_bottom).isVisible = flexibleAdapterPosition != adapter

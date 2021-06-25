@@ -27,7 +27,6 @@ import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
-import androidx.appcompat.widget.PopupMenu
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -1195,16 +1194,17 @@ class MangaDetailsController :
             return
         }
         val popup = makeFavPopup(popupView, manga, presenter.getCategories())
-        popupView.setOnTouchListener(popup?.dragToOpenListener)
+        //  popupView.setOnTouchListener(popup?.dragToOpenListener)
     }
 
     private fun makeFavPopup(
         popupView: View,
         manga: Manga,
         categories: List<Category>,
-    ): PopupMenu? {
+    ): CascadePopupMenu? {
         val view = view ?: return null
-        val popup = PopupMenu(view.context, popupView)
+        val popup =
+            CascadePopupMenu(view.context, popupView, styler = cascadeMenuStyler(view.context))
         popup.menu.add(0, 1, 0, R.string.remove_from_library)
         if (categories.isNotEmpty()) {
             popup.menu.add(0, 0, 1, R.string.edit_categories)

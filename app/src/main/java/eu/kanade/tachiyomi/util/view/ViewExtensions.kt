@@ -21,7 +21,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.appcompat.view.menu.MenuBuilder
-import androidx.appcompat.widget.PopupMenu
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
@@ -46,6 +45,8 @@ import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
+import eu.kanade.tachiyomi.widget.cascadeMenuStyler
+import me.saket.cascade.CascadePopupMenu
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.max
@@ -70,7 +71,7 @@ fun View.getCoordinates() = Point((left + right) / 2, (top + bottom) / 2)
 fun View.snack(
     message: String,
     length: Int = Snackbar.LENGTH_SHORT,
-    f: (Snackbar.() -> Unit)? = null
+    f: (Snackbar.() -> Unit)? = null,
 ): Snackbar {
     val snack = Snackbar.make(this, message, length)
     if (f != null) {
@@ -93,7 +94,7 @@ fun View.snack(
 fun View.snack(
     resource: Int,
     length: Int = Snackbar.LENGTH_SHORT,
-    f: (Snackbar.() -> Unit)? = null
+    f: (Snackbar.() -> Unit)? = null,
 ): Snackbar {
     return snack(context.getString(resource), length, f)
 }
@@ -156,7 +157,7 @@ fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = 
 
             override fun onStart(
                 animation: WindowInsetsAnimationCompat,
-                bounds: WindowInsetsAnimationCompat.BoundsCompat
+                bounds: WindowInsetsAnimationCompat.BoundsCompat,
             ): WindowInsetsAnimationCompat.BoundsCompat {
                 handleInsets = false
                 rootWindowInsets?.let { insets -> setInsets(insets) }
@@ -165,7 +166,7 @@ fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = 
 
             override fun onProgress(
                 insets: WindowInsetsCompat,
-                runningAnimations: List<WindowInsetsAnimationCompat>
+                runningAnimations: List<WindowInsetsAnimationCompat>,
             ): WindowInsetsCompat {
                 insets.toWindowInsets()?.let { setInsets(it) }
                 return insets
@@ -267,7 +268,7 @@ inline fun View.updatePadding(
     @Px left: Int = paddingLeft,
     @Px top: Int = paddingTop,
     @Px right: Int = paddingRight,
-    @Px bottom: Int = paddingBottom
+    @Px bottom: Int = paddingBottom,
 ) {
     setPadding(left, top, right, bottom)
 }
@@ -287,14 +288,14 @@ data class ViewPaddingState(
     val right: Int,
     val bottom: Int,
     val start: Int,
-    val end: Int
+    val end: Int,
 )
 
 inline fun View.updatePaddingRelative(
     @Px start: Int = paddingStart,
     @Px top: Int = paddingTop,
     @Px end: Int = paddingEnd,
-    @Px bottom: Int = paddingBottom
+    @Px bottom: Int = paddingBottom,
 ) {
     setPaddingRelative(start, top, end, bottom)
 }
@@ -361,7 +362,8 @@ fun View.rowsForValue(value: Int): Int {
 
 fun View.rowsForValue(value: Float): Int {
     val size = 1.5f.pow(value)
-    val trueSize = AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) / 100f
+    val trueSize =
+        AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) / 100f
     val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
     return max(1, (dpWidth / trueSize).roundToInt())
 }
@@ -380,9 +382,10 @@ var View.compatToolTipText: CharSequence?
 inline fun View.popupMenu(
     items: List<Pair<Int, Int>>,
     selectedItemId: Int? = null,
-    noinline onMenuItemClick: MenuItem.() -> Unit
-): PopupMenu {
-    val popup = PopupMenu(context, this, Gravity.NO_GRAVITY)
+    noinline onMenuItemClick: MenuItem.() -> Unit,
+): CascadePopupMenu {
+    val popup =
+        CascadePopupMenu(context, this, Gravity.NO_GRAVITY, styler = cascadeMenuStyler(context))
     items.forEach { (id, stringRes) ->
         popup.menu.add(0, id, 0, stringRes)
     }
@@ -397,7 +400,8 @@ inline fun View.popupMenu(
         val emptyIcon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
         popup.menu.forEach { item ->
             item.icon = when (item.itemId) {
-                selectedItemId -> ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)?.mutate()?.apply {
+                selectedItemId -> ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)
+                    ?.mutate()?.apply {
                     setTint(blendedAccent)
                 }
                 else -> emptyIcon
