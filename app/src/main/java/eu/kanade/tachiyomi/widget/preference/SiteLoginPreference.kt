@@ -3,20 +3,18 @@ package eu.kanade.tachiyomi.widget.preference
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
-import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.utils.colorInt
-import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.util.system.create
+import eu.kanade.tachiyomi.util.system.createWithColorRes
 
 class SiteLoginPreference @JvmOverloads constructor(
     context: Context,
     val source: HttpSource,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : Preference(context, attrs) {
 
     init {
@@ -31,19 +29,14 @@ class SiteLoginPreference @JvmOverloads constructor(
             onLoginClick()
         }
 
-        val color = when (source.isLogged()) {
-            true -> ContextCompat.getColor(context, R.color.gold)
-            false -> ContextCompat.getColor(context, R.color.material_on_surface_disabled)
-        }
-
-        (holder.findViewById(R.id.image_view) as? ImageView)?.let { imageView ->
-            imageView.setImageDrawable(
-                IconicsDrawable(context, CommunityMaterial.Icon.cmd_account_circle).apply {
-                    sizeDp = 24
-                    colorInt = color
-                }
-            )
-        }
+        (holder.findViewById(R.id.image_view) as? ImageView)?.setImageDrawable(
+            when (source.isLogged()) {
+                true -> CommunityMaterial.Icon.cmd_account_circle.create(context, 24f)
+                false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(context,
+                    24f,
+                    R.color.material_on_surface_disabled)
+            }
+        )
     }
 
     fun setOnLoginClickListener(block: () -> Unit) {
