@@ -139,17 +139,12 @@ dependencies {
     releaseImplementation(Libs.Network.chuckerNoOp)
 
     // hyperion
-    debugImplementation(Libs.Hyperion.attr)
-    debugImplementation(Libs.Hyperion.buildConfig)
-    debugImplementation(Libs.Hyperion.core)
-    debugImplementation(Libs.Hyperion.crash)
-    debugImplementation(Libs.Hyperion.disk)
-    debugImplementation(Libs.Hyperion.geigerCounter)
-    debugImplementation(Libs.Hyperion.measurement)
-    debugImplementation(Libs.Hyperion.phoenix)
-    debugImplementation(Libs.Hyperion.recorder)
-    debugImplementation(Libs.Hyperion.sharedPreferences)
-    debugImplementation(Libs.Hyperion.timber)
+    val hyperionVersion = "0.9.31"
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:$hyperionVersion")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
 
     // REST
     implementation(Libs.Network.retrofit)
@@ -262,6 +257,11 @@ dependencies {
     implementation(Libs.Util.tokenBucket)
     // needed to compile with token bucket
     implementation(Libs.Util.listenableFutureConflictResolve)
+
+    //helpers
+    implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:3.0.5")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.12")
+
 
     implementation(Libs.Util.aboutLibraries)
 

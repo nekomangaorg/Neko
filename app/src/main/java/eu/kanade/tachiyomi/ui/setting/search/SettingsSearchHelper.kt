@@ -13,8 +13,10 @@ import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsDownloadController
 import eu.kanade.tachiyomi.ui.setting.SettingsGeneralController
 import eu.kanade.tachiyomi.ui.setting.SettingsLibraryController
+import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.setting.SettingsSecurityController
+import eu.kanade.tachiyomi.ui.setting.SettingsSiteController
 import eu.kanade.tachiyomi.ui.setting.SettingsTrackingController
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.launchNow
@@ -32,9 +34,11 @@ object SettingsSearchHelper {
         SettingsBackupController::class,
         SettingsDownloadController::class,
         SettingsGeneralController::class,
-        SettingsSecurityController::class,
         SettingsLibraryController::class,
+        SettingsMainController::class,
         SettingsReaderController::class,
+        SettingsSecurityController::class,
+        SettingsSiteController::class,
         SettingsTrackingController::class
     )
 
@@ -49,7 +53,8 @@ object SettingsSearchHelper {
         launchNow {
             settingControllersList.forEach { kClass ->
                 val ctrl = kClass.createInstance()
-                val settingsPrefScreen = ctrl.setupPreferenceScreen(preferenceManager.createPreferenceScreen(context))
+                val settingsPrefScreen =
+                    ctrl.setupPreferenceScreen(preferenceManager.createPreferenceScreen(context))
                 val prefCount = settingsPrefScreen.preferenceCount
                 for (i in 0 until prefCount) {
                     val rootPref = settingsPrefScreen.getPreference(i)
@@ -77,7 +82,7 @@ object SettingsSearchHelper {
     private fun getSettingSearchResult(
         ctrl: SettingsController,
         pref: Preference,
-        breadcrumbs: String = ""
+        breadcrumbs: String = "",
     ) {
         when {
             pref is PreferenceGroup -> {
@@ -134,6 +139,6 @@ object SettingsSearchHelper {
         val title: String,
         val summary: String,
         val breadcrumb: String,
-        val searchController: SettingsController
+        val searchController: SettingsController,
     )
 }
