@@ -625,7 +625,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     fun updateFab() {
-        binding.fab.y = -(activityBinding!!.bottomNav!!.height.pxToDp.toFloat() + 25f.dpToPx)
+        binding.fab.y = -(activityBinding!!.bottomNav?.height?.pxToDp?.toFloat() ?: 0f + 25f.dpToPx)
     }
 
     companion object {
