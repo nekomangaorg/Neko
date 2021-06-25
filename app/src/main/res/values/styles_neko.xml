@@ -12,25 +12,25 @@
     </style>
 
     <style name="Neko.Preference" parent="PreferenceThemeOverlay">
-        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
         <item name="android:textColorSecondary">@color/text_color_high_emphasis</item>
     </style>
 
     <style name="Neko.Button" parent="Theme.Widget.Button"></style>
 
     <style name="Neko.Button.Primary" parent="Theme.Widget.Button.Primary">
-        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
     <style name="Neko.Button.TextButton" parent="Theme.Widget.Button.TextButton">
-        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
     <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
         <item name="strokeColor">?attr/colorAccent</item>
         <item name="android:letterSpacing">-0.02</item>
         <item name="android:textAllCaps">true</item>
-        <item name="fontFamily">@font/metropolis_medium</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
 

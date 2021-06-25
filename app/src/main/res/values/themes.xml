@@ -31,8 +31,8 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
-        <item name="android:fontFamily">@font/metropolis_regular</item>
-        <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+        <item name="fontFamily">@font/montserrat_regular</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
 
         <item name="unreadBadgeColor">@color/md_white_1000</item>

@@ -174,9 +174,8 @@ dependencies {
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 
     // Job scheduling
-    implementation(Libs.Android.workManager)
-    implementation(Libs.Android.workManagerKtx)
-    implementation(Libs.Google.playServices)
+    implementation("androidx.work:work-runtime-ktx:2.5.0")
+    implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
     // Changelog
     implementation(Libs.Util.changelog)
