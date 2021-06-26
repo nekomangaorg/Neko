@@ -21,13 +21,13 @@ class LegacyBackupRestoreValidator : AbstractBackupRestoreValidator() {
         val json = JsonParser.parseReader(reader).asJsonObject
 
         val version = json.get(Backup.VERSION)
-        val mangaListJson = json.get(Backup.MANGAS)
-        if (version == null || mangaListJson == null) {
+        val mangasJson = json.get(Backup.MANGAS)
+        if (version == null || mangasJson == null) {
             throw Exception(context.getString(R.string.file_is_missing_data))
         }
 
-        val mangaList = mangaListJson.asJsonArray
-        if (mangaList.size() == 0) {
+        val mangas = mangasJson.asJsonArray
+        if (mangas.size() == 0) {
             throw Exception(context.getString(R.string.backup_has_no_manga))
         }
 
@@ -37,7 +37,7 @@ class LegacyBackupRestoreValidator : AbstractBackupRestoreValidator() {
             .values
             .sorted()
 
-        val trackers = mangaList
+        val trackers = mangas
             .filter { it.asJsonObject.has("track") }
             .flatMap { it.asJsonObject["track"].asJsonArray }
             .map { it.asJsonObject["s"].asInt }

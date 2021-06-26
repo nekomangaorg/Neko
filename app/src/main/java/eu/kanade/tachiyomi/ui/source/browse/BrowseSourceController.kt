@@ -36,7 +36,6 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.pxToDp
-import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
@@ -48,8 +47,6 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -65,7 +62,7 @@ open class BrowseSourceController(bundle: Bundle) :
     constructor(
         searchQuery: String? = null,
         applyInset: Boolean = true,
-        deepLink: Boolean = false,
+        deepLink: Boolean = false
     ) : this(
         Bundle().apply
         {
@@ -118,12 +115,10 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(args.getString(SEARCH_QUERY_KEY) ?: "",
-            args.getBoolean(DEEP_LINK))
+        return BrowseSourcePresenter(args.getString(SEARCH_QUERY_KEY) ?: "", args.getBoolean(DEEP_LINK))
     }
 
-    override fun createBinding(inflater: LayoutInflater) =
-        BrowseSourceControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) = BrowseSourceControllerBinding.inflate(inflater)
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
@@ -157,8 +152,7 @@ open class BrowseSourceController(bundle: Bundle) :
         var oldPosition = RecyclerView.NO_POSITION
         val oldRecycler = binding.catalogueView.getChildAt(1)
         if (oldRecycler is RecyclerView) {
-            oldPosition =
-                (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+            oldPosition = (oldRecycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
             oldRecycler.adapter = null
 
             binding.catalogueView.removeView(oldRecycler)
@@ -168,23 +162,21 @@ open class BrowseSourceController(bundle: Bundle) :
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
             (binding.catalogueView.inflate(R.layout.manga_recycler_autofit) as AutofitRecyclerView).apply {
                 setGridSize(preferences)
 
-                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup =
-                    object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
-                        override fun getSpanSize(position: Int): Int {
-                            return when (adapter?.getItemViewType(position)) {
-                                R.layout.manga_grid_item, null -> 1
-                                else -> spanCount
-                            }
+                (layoutManager as androidx.recyclerview.widget.GridLayoutManager).spanSizeLookup = object : androidx.recyclerview.widget.GridLayoutManager.SpanSizeLookup() {
+                    override fun getSpanSize(position: Int): Int {
+                        return when (adapter?.getItemViewType(position)) {
+                            R.layout.manga_grid_item, null -> 1
+                            else -> spanCount
                         }
                     }
+                }
             }
         }
         recycler.clipToPadding = false
@@ -339,28 +331,16 @@ open class BrowseSourceController(bundle: Bundle) :
         }
 
         sheet.onRandomClicked = {
-            viewScope.launch {
-                sheet.dismiss()
-                showProgressBar()
-                adapter?.clear()
-                presenter.searchRandomManga().collect { manga ->
-                    if (manga == null) {
-                        onAddPageError(Exception("Error opening random manga"))
-                    } else {
-                        openManga(manga)
-                    }
-                }
-            }
+            sheet.dismiss()
+            showProgressBar()
+            adapter?.clear()
+            presenter.searchRandomManga()
         }
 
         sheet.onFollowsClicked = {
             sheet.dismiss()
-            if (presenter.source.isLogged().not()) {
-                view?.context?.toast("Please login to view follows")
-            } else {
-                adapter?.clear()
-                router.pushController(FollowsController().withFadeTransaction())
-            }
+            adapter?.clear()
+            router.pushController(FollowsController().withFadeTransaction())
         }
         sheet.show()
     }
@@ -414,16 +394,16 @@ open class BrowseSourceController(bundle: Bundle) :
      * Called from the presenter when the network request is received.
      *
      * @param page the current page.
-     * @param mangaList the list of manga of the page.
+     * @param mangas the list of manga of the page.
      */
-    fun onAddPage(page: Int, mangaList: List<BrowseSourceItem>) {
+    fun onAddPage(page: Int, mangas: List<BrowseSourceItem>) {
         val adapter = adapter ?: return
         hideProgressBar()
         if (page == 1) {
             adapter.clear()
             resetProgressItem()
         }
-        adapter.onLoadMoreComplete(mangaList)
+        adapter.onLoadMoreComplete(mangas)
     }
 
     /**
@@ -454,8 +434,7 @@ open class BrowseSourceController(bundle: Bundle) :
             val actions = emptyList<EmptyView.Action>().toMutableList()
 
             actions += EmptyView.Action(R.string.retry, retryAction)
-            actions += EmptyView.Action(R.string.open_in_webview,
-                View.OnClickListener { openInWebView() })
+            actions += EmptyView.Action(R.string.open_in_webview, View.OnClickListener { openInWebView() })
 
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_compass_off,
@@ -526,11 +505,11 @@ open class BrowseSourceController(bundle: Bundle) :
         activity?.invalidateOptionsMenu()
         setupRecycler(view)
         if (!isListMode || !view.context.connectivityManager.isActiveNetworkMetered) {
-            // Initialize mangaList if going to grid view or if over wifi when going to list view
-            val mangaList = (0 until adapter.itemCount).mapNotNull {
+            // Initialize mangas if going to grid view or if over wifi when going to list view
+            val mangas = (0 until adapter.itemCount).mapNotNull {
                 (adapter.getItem(it) as? BrowseSourceItem)?.manga
             }
-            presenter.initializeMangaList(mangaList)
+            presenter.initializeMangas(mangas)
         }
     }
 
@@ -587,15 +566,9 @@ open class BrowseSourceController(bundle: Bundle) :
      */
     override fun onItemClick(view: View?, position: Int): Boolean {
         val item = adapter?.getItem(position) as? BrowseSourceItem ?: return false
-        openManga(item.manga)
-        return false
-    }
+        router.pushController(MangaDetailsController(item.manga, true).withFadeTransaction())
 
-    /**
-     * opens a manga
-     */
-    private fun openManga(manga: Manga) {
-        router.pushController(MangaDetailsController(manga, true).withFadeTransaction())
+        return false
     }
 
     /**
@@ -630,8 +603,7 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     fun updateFab() {
-        binding.fab.y =
-            -((activityBinding!!.bottomNav?.height?.pxToDp?.toFloat() ?: 0f) + 25f.dpToPx)
+        binding.fab.y = -(activityBinding!!.bottomNav!!.height.pxToDp.toFloat() + 25f.dpToPx)
     }
 
     companion object {

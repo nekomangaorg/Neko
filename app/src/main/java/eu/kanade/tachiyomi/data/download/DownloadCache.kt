@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Locale
 import java.util.concurrent.TimeUnit
 
 /**
@@ -34,7 +33,7 @@ class DownloadCache(
     private val context: Context,
     private val provider: DownloadProvider,
     private val sourceManager: SourceManager,
-    private val preferences: PreferencesHelper = Injekt.get(),
+    private val preferences: PreferencesHelper = Injekt.get()
 ) {
 
     /**
@@ -48,8 +47,7 @@ class DownloadCache(
      */
     private var lastRenew = 0L
 
-    private var mangaFiles: MutableMap<Long, Pair<MutableSet<String>, MutableSet<String>>> =
-        mutableMapOf()
+    private var mangaFiles: MutableMap<Long, Pair<MutableSet<String>, MutableSet<String>>> = mutableMapOf()
 
     init {
         preferences.downloadsDirectory().asObservable().skip(1).subscribe {
@@ -107,8 +105,7 @@ class DownloadCache(
             val mangaDir = provider.findMangaDir(manga, sourceManager.getMangadex())
 
             if (mangaDir != null) {
-                val listFiles =
-                    mangaDir.listFiles { dir, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
+                val listFiles = mangaDir.listFiles { dir, filename -> !filename.endsWith(Downloader.TMP_DIR_SUFFIX) }
                 if (!listFiles.isNullOrEmpty()) {
                     return listFiles.size
                 }
@@ -116,16 +113,13 @@ class DownloadCache(
             return 0
         } else {
             mangaFiles[manga.id] ?: return 0
-            val files =
-                mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
+            val files = mangaFiles[manga.id]!!.first.filter { !it.endsWith(Downloader.TMP_DIR_SUFFIX) }
             val ids = mangaFiles[manga.id]!!.second
             var count = files.size
             files.forEach {
                 if (!it.contains(MergeSource.name)) {
                     val mangadexId = it.substringAfterLast("- ")
-                    if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(
-                            mangadexId)
-                    ) {
+                    if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(mangadexId)) {
                         count++
                     }
                 }
@@ -162,33 +156,25 @@ class DownloadCache(
             }
 
         val db: DatabaseHelper by injectLazy()
-        val mangaGroupedBySource = db.getMangaList().executeAsBlocking().groupBy { it.source }
+        val mangaGroupedBySource = db.getMangas().executeAsBlocking().groupBy { it.source }
 
         sourceDirs.forEach { sourceValue ->
-            val sourceMangaRaw =
-                mangaGroupedBySource[sourceValue.key]?.toMutableSet() ?: return@forEach
+            val sourceMangaRaw = mangaGroupedBySource[sourceValue.key]?.toMutableSet() ?: return@forEach
             val sourceMangaPair = sourceMangaRaw.partition { it.favorite }
 
             val sourceDir = sourceValue.value
 
             val mangaDirs = sourceDir.dir.listFiles().orEmpty().mapNotNull { mangaDir ->
                 val name = mangaDir.name ?: return@mapNotNull null
-                val chapterDirs =
-                    mangaDir.listFiles().orEmpty().mapNotNull { chapterFile -> chapterFile.name }
-                        .toHashSet()
+                val chapterDirs = mangaDir.listFiles().orEmpty().mapNotNull { chapterFile -> chapterFile.name }.toHashSet()
                 name to MangaDirectory(mangaDir, chapterDirs)
             }.toMap()
 
             val trueMangaDirs = mangaDirs.mapNotNull { mangaDir ->
-                val manga =
-                    findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(
-                        sourceMangaPair.second,
-                        mangaDir.key,
-                        sourceValue.key)
+                val manga = findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(sourceMangaPair.second, mangaDir.key, sourceValue.key)
                 val id = manga?.id ?: return@mapNotNull null
 
-                val mangadexIds = mangaDir.value.files.map { it.substringAfterLast("- ", "") }
-                    .filter { it.isNotEmpty() }.toMutableSet()
+                val mangadexIds = mangaDir.value.files.map { it.substringAfterLast("- ", "") }.filter { it.isNotEmpty() }.toMutableSet()
 
                 id to Pair(mangaDir.value.files, mangadexIds)
             }.toMap()
@@ -202,8 +188,7 @@ class DownloadCache(
      */
     private fun findManga(mangaList: List<Manga>, mangaKey: String, sourceKey: Long): Manga? {
         return mangaList.find {
-            DiskUtil.buildValidFilename(it.title)
-                .lowercase(Locale.US) == mangaKey.lowercase(Locale.US) && it.source == sourceKey
+            DiskUtil.buildValidFilename(it.originalTitle).toLowerCase() == mangaKey.toLowerCase() && it.source == sourceKey
         }
     }
 
@@ -289,7 +274,7 @@ class DownloadCache(
      */
     private class RootDirectory(
         val dir: UniFile,
-        var files: Map<Long, SourceDirectory> = hashMapOf(),
+        var files: Map<Long, SourceDirectory> = hashMapOf()
     )
 
     /**
@@ -297,7 +282,7 @@ class DownloadCache(
      */
     private class SourceDirectory(
         val dir: UniFile,
-        var files: Map<Long, MutableSet<String>> = hashMapOf(),
+        var files: Map<Long, MutableSet<String>> = hashMapOf()
     )
 
     /**
@@ -305,7 +290,7 @@ class DownloadCache(
      */
     private class MangaDirectory(
         val dir: UniFile,
-        var files: MutableSet<String> = hashSetOf(),
+        var files: MutableSet<String> = hashSetOf()
     )
 
     /**

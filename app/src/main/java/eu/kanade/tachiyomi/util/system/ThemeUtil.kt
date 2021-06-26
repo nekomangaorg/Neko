@@ -13,7 +13,7 @@ object ThemeUtil {
         preferences.nightMode().set(
             when (theme) {
                 0, 1 -> AppCompatDelegate.MODE_NIGHT_NO
-                2, 3, 4, 9 -> AppCompatDelegate.MODE_NIGHT_YES
+                2, 3, 4 -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         )
@@ -27,7 +27,7 @@ object ThemeUtil {
     }
 
     fun isColoredTheme(theme: Themes): Boolean {
-        return false
+        return return false
     }
 
     fun isPitchBlack(context: Context, theme: Themes): Boolean {
@@ -59,8 +59,7 @@ fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
         (
-            if ((applicationContext.isInNightMode() || preferences.nightMode()
-                    .get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+            if ((applicationContext.isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
                 preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
             ) preferences.darkTheme() else preferences.lightTheme()
             ).get()

@@ -4,13 +4,11 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.view.View
 import androidx.core.view.isVisible
-import coil.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -19,7 +17,7 @@ import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
 class ChapterHolder(
     view: View,
-    private val adapter: MangaDetailsAdapter,
+    private val adapter: MangaDetailsAdapter
 ) : BaseChapterHolder(view, adapter) {
 
     private val binding = ChaptersItemBinding.bind(view)
@@ -36,9 +34,7 @@ class ChapterHolder(
         val chapter = item.chapter
         val isLocked = item.isLocked
 
-        if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter()
-                .not() && item.isDownloaded.not()
-        ) {
+        if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter().not() && item.isDownloaded.not()) {
             binding.downloadButton.root.isVisible = false
         }
 
@@ -74,19 +70,17 @@ class ChapterHolder(
                 )
             )
         }
-
-
-
-        if (chapter.language.isNullOrBlank() || chapter.language.equals("en", true)) {
-            binding.flag.isVisible = false
+        if (chapter.language.isNullOrBlank() || chapter.language.equals("english", true)) {
+            binding.chapterLanguage.isVisible = false
         } else {
-            val drawable = MdLang.fromIsoCode(chapter.language!!)?.iconResId
-            drawable?.let { drawableId ->
-                if (drawableId != 0) {
-                    binding.flag.isVisible = true
-                    binding.flag.load(drawableId)
-                }
-            }
+            binding.chapterLanguage.isVisible = true
+            binding.chapterLanguage.text = chapter.language
+            ChapterUtil.setTextViewForChapter(
+                binding.chapterLanguage,
+                item,
+                showBookmark = false,
+                hideStatus = isLocked
+            )
         }
 
         if (chapter.scanlator?.isNotBlank() == true) {
@@ -166,17 +160,10 @@ class ChapterHolder(
     }
 
     private fun resetFrontView() {
-        if (binding.frontView.translationX != 0f) itemView.post {
-            adapter.notifyItemChanged(flexibleAdapterPosition)
-        }
+        if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
     }
 
-    fun notifyStatus(
-        status: Download.State,
-        locked: Boolean,
-        progress: Int,
-        animated: Boolean = false,
-    ) = with(binding.downloadButton.downloadButton) {
+    fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
         if (locked) {
             isVisible = false
             return

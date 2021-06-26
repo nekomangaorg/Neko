@@ -11,8 +11,8 @@ import com.google.android.material.button.MaterialButton
 import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
-import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -62,9 +62,9 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                         null
                     ) as MaterialButton
                     ).apply {
-                        setText(it.resId)
-                        setOnClickListener(it.listener)
-                    }
+                    setText(it.resId)
+                    setOnClickListener(it.listener)
+                }
 
                 binding.actionsContainer.addView(button)
             }
@@ -89,10 +89,10 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     fun showMedium(icon: IIcon, message: String, actions: List<Action>? = null) {
         binding.imageView.setImageDrawable(
-            icon.create(
-                context,
-                48f,
-                android.R.attr.textColorHint
+            context.iconicsDrawable(
+                icon,
+                color = android.R.attr.textColorHint,
+                size = 48
             )
         )
         iconicsAfter(message, actions)
@@ -100,10 +100,10 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
 
     fun show(icon: IIcon, message: String, actions: List<Action>? = null) {
         binding.imageView.setImageDrawable(
-            icon.create(
-                context,
-                128f,
-                android.R.attr.textColorHint
+            context.iconicsDrawable(
+                icon,
+                color = android.R.attr.textColorHint,
+                size = 128
             )
         )
         iconicsAfter(message, actions)
@@ -122,9 +122,9 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                         null
                     ) as MaterialButton
                     ).apply {
-                        setText(it.resId)
-                        setOnClickListener(it.listener)
-                    }
+                    setText(it.resId)
+                    setOnClickListener(it.listener)
+                }
 
                 binding.actionsContainer.addView(button)
             }

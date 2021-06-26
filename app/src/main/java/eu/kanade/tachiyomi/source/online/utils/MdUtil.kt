@@ -1,11 +1,20 @@
 package eu.kanade.tachiyomi.source.online.utils
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.handlers.serializers.AtHomeResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverListResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.CoverResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
+import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
+import okhttp3.CacheControl
 import okhttp3.Headers
+import okhttp3.HttpUrl.Companion.toHttpUrl
+import okhttp3.OkHttpClient
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -18,24 +27,44 @@ class MdUtil {
         const val cdnUrl = "https://uploads.mangadex.org"
         const val baseUrl = "https://mangadex.org"
         const val apiUrl = "https://api.mangadex.org"
-        const val imageUrlCacheNotFound =
-            "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
+        const val imageUrlCacheNotFound = "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
+        const val atHomeUrl = "$apiUrl/at-home/server"
         const val coverUrl = "$apiUrl/cover"
         const val chapterUrl = "$apiUrl/chapter/"
         const val chapterSuffix = "/chapter/"
+        const val checkTokenUrl = "$apiUrl/auth/check"
+        const val refreshTokenUrl = "$apiUrl/auth/refresh"
         const val loginUrl = "$apiUrl/auth/login"
+        const val logoutUrl = "$apiUrl/auth/logout"
         const val groupUrl = "$apiUrl/group"
+        const val authorUrl = "$apiUrl/author"
+        const val randomMangaUrl = "$apiUrl/manga/random"
         const val mangaUrl = "$apiUrl/manga"
         const val userFollowsUrl = "$apiUrl/user/follows/manga"
         const val readingStatusesUrl = "$apiUrl/manga/status"
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
-        fun coverUrl(mangaId: String, coverId: String) =
-            "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
+        fun mangaFeedUrl(id: String, offset: Int, language: List<String>): String {
+            return "$mangaUrl/$id/feed".toHttpUrl().newBuilder().apply {
+                addQueryParameter("limit", "500")
+                addQueryParameter("offset", offset.toString())
+                addQueryParameter("order[volume]", "desc")
+                addQueryParameter("order[chapter]", "desc")
+                language.forEach {
+                    addQueryParameter("translatedLanguage[]", it)
+                }
+            }.build().toString()
+        }
+
+        fun coverUrl(mangaId: String, coverId: String) = "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
 
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
-        const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
+        const val similarCacheMangas = "https://api.similarmanga.com/manga/"
+        const val similarBaseApi = "https://api.similarmanga.com/similar/"
 
+        const val reportUrl = "https://api.mangadex.network/report"
+
+        const val mdAtHomeTokenLifespan = 10 * 60 * 1000
         const val mangaLimit = 40
 
         /**
@@ -249,13 +278,19 @@ class MdUtil {
             return null
         }
 
+        fun atHomeUrlHostUrl(requestUrl: String, client: OkHttpClient, headers: Headers, cacheControl: CacheControl): String {
+            val atHomeRequest = GET(requestUrl, headers, cache = cacheControl)
+            val atHomeResponse = client.newCall(atHomeRequest).execute()
+            return jsonParser.decodeFromString<AtHomeResponse>(atHomeResponse.body!!.string()).baseUrl
+        }
+
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
 
         fun parseDate(dateAsString: String): Long =
             dateFormatter.parse(dateAsString)?.time ?: 0
 
-        fun createMangaEntry(json: MangaDto, coverUrl: String?): SManga {
+        fun createMangaEntry(json: MangaResponse, coverUrl: String?): SManga {
             return SManga.create().apply {
                 url = "/title/" + json.data.id
                 title = cleanString(json.data.attributes.title["en"]!!)
@@ -263,15 +298,58 @@ class MdUtil {
             }
         }
 
-        fun cdnCoverUrl(dexId: String, fileName: String): String {
+        fun getCoverUrl(dexId: String, coverId: String?, client: OkHttpClient): String {
+            coverId ?: return ""
+            val response =
+                client.newCall(GET("$coverUrl/$coverId"))
+                    .execute()
+            val coverResponse = jsonParser.decodeFromString<CoverResponse>(response.body!!.string())
+            val fileName = coverResponse.data.attributes.fileName
             return "$cdnUrl/covers/$dexId/$fileName"
         }
 
-        fun getLangsToShow(preferences: PreferencesHelper) =
-            preferences.langsToShow().get().split(",")
+        fun getCoversFromMangaList(mangaResponseList: List<MangaResponse>, client: OkHttpClient): Map<String, String> {
+            val idsAndCoverIds = mangaResponseList.mapNotNull { mangaResponse ->
+                val mangaId = mangaResponse.data.id
+                val coverId = mangaResponse.relationships.firstOrNull { relationship ->
+                    relationship.type.equals("cover_art", true)
+                }?.id
+                if (coverId == null) {
+                    null
+                } else {
+                    Pair(mangaId, coverId)
+                }
+            }.toMap()
 
-        fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) =
-            headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}")
-                .build()
+            return runCatching {
+                getBatchCoverUrls(idsAndCoverIds, client)
+            }.getOrNull()!!
+        }
+
+        private fun getBatchCoverUrls(ids: Map<String, String>, client: OkHttpClient): Map<String, String> {
+            try {
+                val url = coverUrl.toHttpUrl().newBuilder().apply {
+                    ids.values.forEach { coverArtId ->
+                        addQueryParameter("ids[]", coverArtId)
+                    }
+                    addQueryParameter("limit", ids.size.toString())
+                }.build().toString()
+                val response = client.newCall(GET(url)).execute()
+                val coverList = jsonParser.decodeFromString<CoverListResponse>(response.body!!.string())
+                return coverList.results.map { coverResponse ->
+                    val fileName = coverResponse.data.attributes.fileName
+                    val mangaId = coverResponse.relationships.first { it.type.equals("manga", true) }.id
+                    val thumbnailUrl = "$cdnUrl/covers/$mangaId/$fileName"
+                    Pair(mangaId, thumbnailUrl)
+                }.toMap()
+            } catch (e: Exception) {
+                XLog.e(e)
+                throw e
+            }
+        }
+
+        fun getLangsToShow(preferences: PreferencesHelper) = preferences.langsToShow().get().split(",")
+
+        fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) = headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}").build()
     }
 }

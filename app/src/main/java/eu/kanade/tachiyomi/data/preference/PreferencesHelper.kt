@@ -38,10 +38,7 @@ fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(block: (value: T) 
         .onEach { block(it) }
 }
 
-fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlowIn(
-    scope: CoroutineScope,
-    block: (value: T) -> Unit,
-): Job {
+fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlowIn(scope: CoroutineScope, block: (value: T) -> Unit): Job {
     block(get())
     return asFlow()
         .onEach { block(it) }
@@ -179,11 +176,9 @@ class PreferencesHelper(val context: Context) {
 
     fun navigationModeWebtoon() = flowPrefs.getInt(Keys.navigationModeWebtoon, 0)
 
-    fun pagerNavInverted() =
-        flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+    fun pagerNavInverted() = flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
-    fun webtoonNavInverted() =
-        flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+    fun webtoonNavInverted() = flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
     fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
 
@@ -194,11 +189,9 @@ class PreferencesHelper(val context: Context) {
         ReaderBottomButton.BUTTONS_DEFAULTS
     )
 
-    fun showNavigationOverlayNewUser() =
-        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
+    fun showNavigationOverlayNewUser() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
-    fun showNavigationOverlayNewUserWebtoon() =
-        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
+    fun showNavigationOverlayNewUserWebtoon() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
 
     fun preloadSize() = flowPrefs.getInt(Keys.preloadSize, 6)
 
@@ -218,8 +211,7 @@ class PreferencesHelper(val context: Context) {
 
     fun browseShowLibrary() = flowPrefs.getBoolean(Keys.catalogueShowLibrary, true)
 
-    fun enabledLanguages() =
-        flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
+    fun enabledLanguages() = flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
     fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
 
@@ -251,14 +243,12 @@ class PreferencesHelper(val context: Context) {
 
     fun backupsDirectory() = flowPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
-    fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat =
-        when (format) {
-            "" -> DateFormat.getDateInstance(DateFormat.SHORT)
-            else -> SimpleDateFormat(format, Locale.getDefault())
-        }
+    fun dateFormat(format: String = flowPrefs.getString(Keys.dateFormat, "").get()): DateFormat = when (format) {
+        "" -> DateFormat.getDateInstance(DateFormat.SHORT)
+        else -> SimpleDateFormat(format, Locale.getDefault())
+    }
 
-    fun downloadsDirectory() =
-        rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun downloadsDirectory() = rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
@@ -266,8 +256,7 @@ class PreferencesHelper(val context: Context) {
 
     fun librarySearchSuggestion() = flowPrefs.getString(Keys.librarySearchSuggestion, "")
 
-    fun showLibrarySearchSuggestions() =
-        flowPrefs.getBoolean(Keys.showLibrarySearchSuggestions, false)
+    fun showLibrarySearchSuggestions() = flowPrefs.getBoolean(Keys.showLibrarySearchSuggestions, false)
 
     fun lastLibrarySuggestion() = flowPrefs.getLong("last_library_suggestion", 0L)
 
@@ -319,8 +308,7 @@ class PreferencesHelper(val context: Context) {
 
     fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
-    fun collapsedDynamicCategories() =
-        flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())
+    fun collapsedDynamicCategories() = flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())
 
     fun collapsedDynamicAtBottom() = flowPrefs.getBoolean("collapsed_dynamic_at_bottom", false)
 
@@ -373,8 +361,7 @@ class PreferencesHelper(val context: Context) {
 
     fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
 
-    fun showRecentsDownloads() =
-        flowPrefs.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
+    fun showRecentsDownloads() = flowPrefs.getEnum(Keys.showDLsInRecents, RecentMangaAdapter.ShowRecentsDLs.All)
 
     fun showRecentsRemHistory() = flowPrefs.getBoolean(Keys.showRemHistoryInRecents, true)
 
@@ -441,47 +428,51 @@ class PreferencesHelper(val context: Context) {
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 
+    fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
+
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 
     fun usePort443Only() = prefs.getBoolean(Keys.enablePort443Only, false)
 
+    fun forceLatestCovers() = prefs.getBoolean(Keys.forceLatestCovers, false)
+
     fun logLevel() = prefs.getInt(Keys.logLevel, 0)
 
     fun showContentRatingFilter(): Boolean = prefs.getBoolean(Keys.showContentRatingFilter, true)
 
-    fun addToLibraryAsPlannedToRead(): Boolean =
-        prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
+    fun addToLibraryAsPlannedToRead(): Boolean = prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
 
-    fun contentRatingSelections(): MutableSet<String> =
-        prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
+    fun contentRatingSelections(): MutableSet<String> = prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")
 
+    fun setSessionToken(session: String) {
+        prefs.edit()
+            .putString(Keys.sessionToken, session)
+            .apply()
+    }
+
     fun refreshToken() = prefs.getString(Keys.refreshToken, "")
 
+    fun setRefreshToken(refresh: String) {
+        prefs.edit()
+            .putString(Keys.refreshToken, refresh)
+            .apply()
+    }
+
     fun setTokens(refresh: String, session: String) {
-        val time = if (refresh.isBlank() && session.isBlank()) {
-            0
-        } else {
-            System.currentTimeMillis()
-        }
         prefs.edit()
             .putString(Keys.sessionToken, session)
             .putString(Keys.refreshToken, refresh)
-            .putLong(Keys.lastRefreshTokenTime, time)
+            .putLong(Keys.lastRefreshTokenTime, System.currentTimeMillis())
             .apply()
     }
 
     fun lastRefreshTime(): Long {
         return prefs.getLong(Keys.lastRefreshTokenTime, 0)
     }
-
-    fun readingSync(): Boolean = prefs.getBoolean(Keys.readingSync, false)
-
-    fun mangadexSyncToLibraryIndexes() =
-        flowPrefs.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
 }

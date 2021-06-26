@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import kotlin.math.abs
 
 /**
- * This class will provide various functions to Rank mangaList to efficiently schedule mangaList to update.
+ * This class will provide various functions to Rank mangas to efficiently schedule mangas to update.
  */
 object LibraryUpdateRanker {
 
@@ -15,23 +15,21 @@ object LibraryUpdateRanker {
     )
 
     /**
-     * Provides a total ordering over all the MangaList.
+     * Provides a total ordering over all the Mangas.
      *
      * Orders the manga based on the distance between the next expected update and now.
      * The comparator is reversed, placing the smallest (and thus closest to updating now) first.
      */
     fun nextFirstRanking(): Comparator<Manga> {
         val time = System.currentTimeMillis()
-        return Comparator {
-                mangaFirst: Manga,
-                mangaSecond: Manga,
-            ->
+        return Comparator { mangaFirst: Manga,
+            mangaSecond: Manga ->
             compareValues(abs(mangaSecond.next_update - time), abs(mangaFirst.next_update - time))
         }.reversed()
     }
 
     /**
-     * Provides a total ordering over all the MangaList.
+     * Provides a total ordering over all the Mangas.
      *
      * Assumption: An active [Manga] mActive is expected to have been last updated after an
      * inactive [Manga] mInactive.
@@ -40,25 +38,21 @@ object LibraryUpdateRanker {
      * @return a Comparator that ranks manga based on relevance.
      */
     fun latestFirstRanking(): Comparator<Manga> {
-        return Comparator {
-                mangaFirst: Manga,
-                mangaSecond: Manga,
-            ->
+        return Comparator { mangaFirst: Manga,
+            mangaSecond: Manga ->
             compareValues(mangaSecond.last_update, mangaFirst.last_update)
         }
     }
 
     /**
-     * Provides a total ordering over all the MangaList.
+     * Provides a total ordering over all the Mangas.
      *
      * Order the manga lexicographically.
      * @return a Comparator that ranks manga lexicographically based on the title.
      */
     fun lexicographicRanking(): Comparator<Manga> {
-        return Comparator {
-                mangaFirst: Manga,
-                mangaSecond: Manga,
-            ->
+        return Comparator { mangaFirst: Manga,
+            mangaSecond: Manga ->
             compareValues(mangaFirst.title, mangaSecond.title)
         }
     }

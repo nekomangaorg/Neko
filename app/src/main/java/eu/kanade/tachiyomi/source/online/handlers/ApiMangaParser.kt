@@ -1,14 +1,17 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.dto.MangaDto
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.source.online.handlers.serializers.AuthorResponseList
+import eu.kanade.tachiyomi.source.online.handlers.serializers.ChapterResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.MangaResponse
+import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import kotlinx.serialization.decodeFromString
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
@@ -18,31 +21,38 @@ import kotlin.math.floor
 class ApiMangaParser {
     val network: NetworkHelper by injectLazy()
     val filterHandler: FilterHandler by injectLazy()
+    val v5DbHelper: V5DbHelper by injectLazy()
 
     /**
      * Parse the manga details json into manga object
      */
-    fun mangaDetailsParse(mangaDto: MangaDto): SManga {
+    fun mangaDetailsParse(jsonData: String): SManga {
         try {
-            val mangaAttributesDto = mangaDto.data.attributes
+            val manga = SManga.create()
+            val networkApiManga = MdUtil.jsonParser.decodeFromString<MangaResponse>(jsonData)
+            val networkManga = networkApiManga.data.attributes
+            manga.url = "/title/" + networkApiManga.data.id
+            manga.title = MdUtil.cleanString(networkManga.title["en"]!!)
 
-            val manga = mangaDto.toBasicManga()
+            val coverId = networkApiManga.relationships.firstOrNull { it.type.equals("cover_art", true) }?.id
 
-            manga.description = MdUtil.cleanDescription(mangaAttributesDto.description["en"]!!)
+            manga.thumbnail_url = MdUtil.getCoverUrl(networkApiManga.data.id, coverId, network.client)
 
-            val authors = mangaDto.relationships.filter { relationshipDto ->
-                relationshipDto.type.equals(MdConstants.Types.author, true)
-            }.mapNotNull { it.attributes!!.name }.distinct()
+            manga.description = MdUtil.cleanDescription(networkManga.description["en"]!!)
 
-            val artists = mangaDto.relationships.filter { relationshipDto ->
-                relationshipDto.type.equals(MdConstants.Types.artist, true)
-            }.mapNotNull { it.attributes!!.name }.distinct()
+            val authorIds = networkApiManga.relationships.filter { it.type == "author" || it.type == "artist" }.map { it.id }.distinct()
 
+            val authors = runCatching {
+                val ids = authorIds.joinToString("&ids[]=", "?ids[]=")
+                val response = network.client.newCall(GET("${MdUtil.authorUrl}$ids")).execute()
+                val json = MdUtil.jsonParser.decodeFromString<AuthorResponseList>(response.body!!.string())
+                json.results.map { MdUtil.cleanString(it.data.attributes.name) }
+            }.getOrNull() ?: emptyList()
 
             manga.author = authors.joinToString()
-            manga.artist = artists.joinToString()
-            manga.lang_flag = mangaAttributesDto.originalLanguage
-            val lastChapter = mangaAttributesDto.lastChapter?.toFloatOrNull()
+            manga.artist = null
+            manga.lang_flag = networkManga.originalLanguage
+            val lastChapter = networkManga.lastChapter?.toFloatOrNull()
             lastChapter?.let {
                 manga.last_chapter_number = floor(it).toInt()
             }
@@ -52,16 +62,16 @@ class ApiMangaParser {
                 manga.users = it.users
             }*/
 
-            mangaAttributesDto.links?.let { linkMap ->
-                linkMap["al"]?.let { id -> manga.anilist_id = id }
-                linkMap["kt"]?.let { id -> manga.kitsu_id = id }
-                linkMap["mal"]?.let { id -> manga.my_anime_list_id = id }
-                linkMap["mu"]?.let { id -> manga.manga_updates_id = id }
-                linkMap["ap"]?.let { id -> manga.anime_planet_id = id }
+            networkManga.links?.let {
+                it["al"]?.let { manga.anilist_id = it }
+                it["kt"]?.let { manga.kitsu_id = it }
+                it["mal"]?.let { manga.my_anime_list_id = it }
+                it["mu"]?.let { manga.manga_updates_id = it }
+                it["ap"]?.let { manga.anime_planet_id = it }
             }
             // val filteredChapters = filterChapterForChecking(networkApiManga)
 
-            val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
+            val tempStatus = parseStatus(networkManga.status ?: "")
             val publishedOrCancelled =
                 tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED
             /*if (publishedOrCancelled && isMangaCompleted(networkApiManga, filteredChapters)) {
@@ -73,7 +83,7 @@ class ApiMangaParser {
 
             val tags = filterHandler.getTags()
 
-            val tempContentRating = mangaAttributesDto.contentRating?.capitalize(Locale.US)
+            val tempContentRating = networkManga.contentRating?.capitalize(Locale.US)
 
             val contentRating = if (tempContentRating == null || tempContentRating == "Safe") {
                 null
@@ -82,8 +92,8 @@ class ApiMangaParser {
             }
 
             val genres = (
-                listOf(mangaAttributesDto.publicationDemographic?.capitalize(Locale.US)) +
-                    mangaAttributesDto.tags.map { it.id }
+                listOf(networkManga.publicationDemographic?.capitalize(Locale.US)) +
+                    networkManga.tags.map { it.id }
                         .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
                         .map { tag -> tag?.name } +
                     listOf(contentRating)
@@ -155,10 +165,15 @@ class ApiMangaParser {
         else -> SManga.UNKNOWN
     }
 
-    fun chapterListParse(
-        chapterListResponse: List<ChapterDto>,
-        groupMap: Map<String, String>,
-    ): List<SChapter> {
+    /**
+     * Parse for the random manga id from the [MdUtil.randMangaPage] response.
+     */
+    fun randomMangaIdParse(response: Response): String {
+        val manga = MdUtil.jsonParser.decodeFromString(MangaResponse.serializer(), response.body!!.string())
+        return manga.data.id
+    }
+
+    fun chapterListParse(chapterListResponse: List<ChapterResponse>, groupMap: Map<String, String>): List<SChapter> {
         val now = Date().time
 
         return chapterListResponse.asSequence()
@@ -177,10 +192,8 @@ class ApiMangaParser {
                 throw Exception("Null Response")
             }
 
-            val apiChapter =
-                MdUtil.jsonParser.decodeFromString(ChapterDto.serializer(), jsonBody)
-            return apiChapter.relationships.firstOrNull { it.type.equals("manga", true) }?.id
-                ?: throw Exception("Not found")
+            val apiChapter = MdUtil.jsonParser.decodeFromString(ChapterResponse.serializer(), jsonBody)
+            return apiChapter.relationships.firstOrNull { it.type.equals("manga", true) }?.id ?: throw Exception("Not found")
         } catch (e: Exception) {
             XLog.e(e)
             throw e
@@ -188,7 +201,7 @@ class ApiMangaParser {
     }
 
     private fun mapChapter(
-        networkChapter: ChapterDto,
+        networkChapter: ChapterResponse,
         groups: Map<String, String>,
     ): SChapter {
         val chapter = SChapter.create()
@@ -234,14 +247,13 @@ class ApiMangaParser {
         // Convert from unix time
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
-        val scanlatorName = networkChapter.relationships.filter { it.type == "scanlation_group" }
-            .mapNotNull { groups[it.id] }.toSet()
+        val scanlatorName = networkChapter.relationships.filter { it.type == "scanlation_group" }.mapNotNull { groups[it.id] }.toSet()
 
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 
         chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
 
-        chapter.language = attributes.translatedLanguage
+        chapter.language = MdLang.fromIsoCode(attributes.translatedLanguage)?.prettyPrint ?: ""
 
         return chapter
     }

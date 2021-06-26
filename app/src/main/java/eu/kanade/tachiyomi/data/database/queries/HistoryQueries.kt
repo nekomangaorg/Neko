@@ -27,7 +27,7 @@ interface HistoryQueries : DbProvider {
 //        .listOfObjects(MangaChapterHistory::class.java)
 //        .withQuery(
 //            RawQuery.builder()
-//                .query(getRecentMangaListQuery(offset, search.sqLite))
+//                .query(getRecentMangasQuery(offset, search.sqLite))
 //                .args(date.time)
 //                .observesTables(HistoryTable.TABLE)
 //                .build()
@@ -44,7 +44,7 @@ interface HistoryQueries : DbProvider {
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
-                .query(getRecentMangaListLimitQuery(search.sqLite, offset, isResuming))
+                .query(getRecentMangasLimitQuery(search.sqLite, offset, isResuming))
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
                 .build()
@@ -74,13 +74,7 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getAllRecentsTypes(
-        search: String = "",
-        includeRead: Boolean,
-        endless: Boolean,
-        offset: Int,
-        isResuming: Boolean,
-    ) = db.get()
+    fun getAllRecentsTypes(search: String = "", includeRead: Boolean, endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()

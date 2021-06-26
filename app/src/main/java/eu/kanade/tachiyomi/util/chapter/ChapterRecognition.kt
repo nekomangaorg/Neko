@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import java.util.Locale
 
 /**
  * -R> = regex conversion.
@@ -59,9 +58,7 @@ object ChapterRecognition {
 
         // Remove unwanted white spaces.
         unwantedWhiteSpace.findAll(name).let {
-            it.forEach { occurrence ->
-                name = name.replace(occurrence.value, occurrence.value.trim())
-            }
+            it.forEach { occurrence -> name = name.replace(occurrence.value, occurrence.value.trim()) }
         }
 
         // Remove unwanted tags.
@@ -87,7 +84,7 @@ object ChapterRecognition {
         }
 
         // Remove manga title from chapter title.
-        val nameWithoutManga = name.replace(manga.title.lowercase(Locale.US), "").trim()
+        val nameWithoutManga = name.replace(manga.originalTitle.toLowerCase(), "").trim()
 
         // Check if first value is number after title remove.
         if (updateChapter(withoutManga.find(nameWithoutManga), chapter)) {

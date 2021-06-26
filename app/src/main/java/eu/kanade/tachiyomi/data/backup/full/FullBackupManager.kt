@@ -59,7 +59,7 @@ class FullBackupManager(val context: Context) {
         var backup: Backup? = null
 
         databaseHelper.inTransaction {
-            val databaseManga = databaseHelper.getFavoriteMangaList().executeAsBlocking()
+            val databaseManga = databaseHelper.getFavoriteMangas().executeAsBlocking()
 
             backup = Backup(
                 backupManga(databaseManga, flags),
@@ -100,8 +100,8 @@ class FullBackupManager(val context: Context) {
         }
     }
 
-    private fun backupManga(mangaList: List<Manga>, flags: Int): List<BackupManga> {
-        return mangaList.map {
+    private fun backupManga(mangas: List<Manga>, flags: Int): List<BackupManga> {
+        return mangas.map {
             backupMangaObject(it, flags)
         }
     }
@@ -236,11 +236,7 @@ class FullBackupManager(val context: Context) {
      * @param manga the manga whose categories have to be restored.
      * @param categories the categories to restore.
      */
-    internal fun restoreCategoriesForManga(
-        manga: Manga,
-        categories: List<Int>,
-        backupCategories: List<BackupCategory>,
-    ) {
+    internal fun restoreCategoriesForManga(manga: Manga, categories: List<Int>, backupCategories: List<BackupCategory>) {
         val dbCategories = databaseHelper.getCategories().executeAsBlocking()
         val mangaCategoriesToUpdate = ArrayList<MangaCategory>(categories.size)
         categories.forEach { backupCategoryOrder ->
@@ -257,8 +253,8 @@ class FullBackupManager(val context: Context) {
 
         // Update database
         if (mangaCategoriesToUpdate.isNotEmpty()) {
-            databaseHelper.deleteOldMangaListCategories(listOf(manga)).executeAsBlocking()
-            databaseHelper.insertMangaListCategories(mangaCategoriesToUpdate).executeAsBlocking()
+            databaseHelper.deleteOldMangasCategories(listOf(manga)).executeAsBlocking()
+            databaseHelper.insertMangasCategories(mangaCategoriesToUpdate).executeAsBlocking()
         }
     }
 
@@ -301,8 +297,7 @@ class FullBackupManager(val context: Context) {
         // Fix foreign keys with the current manga id
         tracks.map { it.manga_id = manga.id!! }
 
-        val validTracks =
-            tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
+        val validTracks = tracks.filter { it.sync_id == TrackManager.MYANIMELIST || it.sync_id == TrackManager.ANILIST || it.sync_id == TrackManager.KITSU }
 
         if (validTracks.isEmpty()) {
             // always create an mdlist tracker
@@ -327,8 +322,7 @@ class FullBackupManager(val context: Context) {
                         if (track.library_id != dbTrack.library_id) {
                             dbTrack.library_id = track.library_id
                         }
-                        dbTrack.last_chapter_read =
-                            max(dbTrack.last_chapter_read, track.last_chapter_read)
+                        dbTrack.last_chapter_read = max(dbTrack.last_chapter_read, track.last_chapter_read)
                         isInDatabase = true
                         trackToUpdate.add(dbTrack)
                         break

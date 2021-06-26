@@ -59,7 +59,7 @@ abstract class HttpSource : Source {
     /**
      * Headers used for requests.
      */
-    abstract val headers: Headers
+    open val headers: Headers by lazy { headersBuilder().build() }
 
     /**
      * Default network client for doing requests.
@@ -67,6 +67,16 @@ abstract class HttpSource : Source {
     open val client: OkHttpClient = network.client
 
     val nonRateLimitedClient = network.nonRateLimitedClient
+
+    /**
+     * Headers builder for request.
+     */
+    protected fun headersBuilder() = Headers.Builder().apply {
+        add("User-Agent", "Neko " + System.getProperty("http.agent"))
+        add("X-Requested-With", "XMLHttpRequest")
+        add("Content-Type", "application/json")
+        add("Referer", MdUtil.baseUrl)
+    }
 
     /**
      * Visible name of the source.
