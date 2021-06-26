@@ -5,7 +5,6 @@ import android.net.Uri
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.Source
@@ -19,7 +18,6 @@ abstract class AbstractBackupManager(protected val context: Context) {
     internal val sourceManager: SourceManager by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
     protected val preferences: PreferencesHelper by injectLazy()
-    protected val customMangaManager: CustomMangaManager by injectLazy()
 
     abstract fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String?
 
@@ -39,7 +37,11 @@ abstract class AbstractBackupManager(protected val context: Context) {
      * @param chapters list of chapters in the backup
      * @return Updated manga chapters.
      */
-    internal suspend fun restoreChapters(source: Source, manga: Manga, chapters: List<Chapter>): Pair<List<Chapter>, List<Chapter>> {
+    internal suspend fun restoreChapters(
+        source: Source,
+        manga: Manga,
+        chapters: List<Chapter>,
+    ): Pair<List<Chapter>, List<Chapter>> {
         val fetchedChapters = source.fetchChapterList(manga)
         val syncedChapters = syncChaptersWithSource(databaseHelper, fetchedChapters, manga)
         if (syncedChapters.first.isNotEmpty()) {
@@ -55,7 +57,7 @@ abstract class AbstractBackupManager(protected val context: Context) {
      * @return [Manga] from library
      */
     protected fun getFavoriteManga(): List<Manga> =
-        databaseHelper.getFavoriteMangas().executeAsBlocking()
+        databaseHelper.getFavoriteMangaList().executeAsBlocking()
 
     /**
      * Inserts manga and returns id

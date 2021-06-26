@@ -4,8 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
-import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
@@ -65,6 +63,7 @@ class SettingsSiteController :
         switchPreference {
             key = PreferenceKeys.useCacheSource
             titleRes = R.string.use_cache_source
+            summaryRes = R.string.use_cache_source_summary
             defaultValue = false
             onClick {
                 if (isChecked) {
@@ -116,21 +115,16 @@ class SettingsSiteController :
         switchPreference {
             key = PreferenceKeys.dataSaver
             titleRes = R.string.data_saver
+            summaryRes = R.string.data_saver_summary
             defaultValue = false
         }
 
-        /* switchPreference {
-             key = PreferenceKeys.lowQualityCovers
-             titleRes = R.string.low_quality_covers
-             defaultValue = false
-         }*/
-
-        /*   switchPreference {
-               key = PreferenceKeys.forceLatestCovers
-               titleRes = R.string.use_latest_cover
-               summaryRes = R.string.use_latest_cover_summary
-               defaultValue = false
-           }*/
+        switchPreference {
+            key = PreferenceKeys.readingSync
+            titleRes = R.string.reading_sync
+            summaryRes = R.string.reading_sync_summary
+            defaultValue = false
+        }
 
         preference {
             titleRes = R.string.sync_follows_to_library
@@ -138,17 +132,20 @@ class SettingsSiteController :
 
             onClick {
                 MaterialDialog(activity!!).show {
-                    checkBoxPrompt(text = "Sync planned to read also?", onToggle = null)
-                    positiveButton(android.R.string.ok) { dialog ->
-                        val type = when {
-                            dialog.isCheckPromptChecked() -> LibraryUpdateService.Target.SYNC_FOLLOWS_PLUS
-                            else -> LibraryUpdateService.Target.SYNC_FOLLOWS
-                        }
+                    listItemsMultiChoice(
+                        items = context.resources.getStringArray(R.array.follows_options).toList()
+                            .let { it.subList(1, it.size) },
+                        initialSelection = intArrayOf(0, 5)
+                    ) { _, indices, _ ->
+                        preferences.mangadexSyncToLibraryIndexes()
+                            .set(indices.map { (it + 1).toString() }.toSet())
                         LibraryUpdateService.start(
                             context,
-                            target = type
+                            target = LibraryUpdateService.Target.SYNC_FOLLOWS
                         )
                     }
+                    positiveButton(android.R.string.ok)
+                    negativeButton(android.R.string.cancel)
                 }
             }
         }
@@ -177,8 +174,8 @@ class SettingsSiteController :
             summary = context.resources.getString(R.string.v5_migration_desc)
             onClick {
                 MaterialDialog(activity!!).show {
-                    title(text = "This will start legacy id migration")
-                    positiveButton(android.R.string.ok) { dialog ->
+                    title(text = "This will start legacy id migration (Note: This uses data)")
+                    positiveButton(android.R.string.ok) {
                         V5MigrationJob.doWorkNow()
                     }
                 }

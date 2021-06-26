@@ -127,10 +127,10 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
 
         databaseHelper.inTransaction {
             // Get manga from database
-            val mangas = databaseHelper.getFavoriteMangas().executeAsBlocking()
+            val mangaList = databaseHelper.getFavoriteMangaList().executeAsBlocking()
 
             // Backup library manga and its dependencies
-            mangas.forEach { manga ->
+            mangaList.forEach { manga ->
                 mangaEntries.add(backupMangaObject(manga, flags))
             }
 
@@ -355,8 +355,8 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
         if (mangaCategoriesToUpdate.isNotEmpty()) {
             val mangaAsList = ArrayList<Manga>()
             mangaAsList.add(manga)
-            databaseHelper.deleteOldMangasCategories(mangaAsList).executeAsBlocking()
-            databaseHelper.insertMangasCategories(mangaCategoriesToUpdate).executeAsBlocking()
+            databaseHelper.deleteOldMangaListCategories(mangaAsList).executeAsBlocking()
+            databaseHelper.insertMangaListCategories(mangaCategoriesToUpdate).executeAsBlocking()
         }
     }
 
@@ -416,7 +416,8 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
                         if (track.library_id != dbTrack.library_id) {
                             dbTrack.library_id = track.library_id
                         }
-                        dbTrack.last_chapter_read = max(dbTrack.last_chapter_read, track.last_chapter_read)
+                        dbTrack.last_chapter_read =
+                            max(dbTrack.last_chapter_read, track.last_chapter_read)
                         isInDatabase = true
                         trackToUpdate.add(dbTrack)
                         break

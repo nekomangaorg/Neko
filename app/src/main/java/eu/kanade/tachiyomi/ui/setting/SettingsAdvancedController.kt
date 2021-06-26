@@ -56,7 +56,7 @@ class SettingsAdvancedController : SettingsController() {
 
     private val coverCache: CoverCache by injectLazy()
 
-    private val downloadMangager: DownloadManager by injectLazy()
+    private val downloadManager: DownloadManager by injectLazy()
 
     @SuppressLint("BatteryLife")
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -115,7 +115,7 @@ class SettingsAdvancedController : SettingsController() {
             preference {
                 titleRes = R.string.force_download_cache_refresh
                 summaryRes = R.string.force_download_cache_refresh_summary
-                onClick { downloadMangager.refreshCache() }
+                onClick { downloadManager.refreshCache() }
             }
 
             preference {
@@ -208,7 +208,8 @@ class SettingsAdvancedController : SettingsController() {
         intListPreference(activity) {
             key = PreferenceKeys.logLevel
             titleRes = R.string.log_level
-            summary = context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
+            summary =
+                context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${it.name.toLowerCase().capitalize()} (${it.description})"
             }
@@ -230,10 +231,14 @@ class SettingsAdvancedController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!).show {
                 title(R.string.clean_up_downloaded_chapters)
-                    .listItemsMultiChoice(R.array.clean_up_downloads, disabledIndices = intArrayOf(0), initialSelection = intArrayOf(0, 1, 2)) { dialog, selections, items ->
+                    .listItemsMultiChoice(R.array.clean_up_downloads,
+                        disabledIndices = intArrayOf(0),
+                        initialSelection = intArrayOf(0, 1, 2)) { _, selections, _ ->
                         val deleteRead = selections.contains(1)
                         val deleteNonFavorite = selections.contains(2)
-                        (targetController as? SettingsAdvancedController)?.cleanupDownloads(deleteRead, deleteNonFavorite)
+                        (targetController as? SettingsAdvancedController)?.cleanupDownloads(
+                            deleteRead,
+                            deleteNonFavorite)
                     }
                 positiveButton(android.R.string.ok)
                 negativeButton(android.R.string.cancel)
@@ -250,15 +255,15 @@ class SettingsAdvancedController : SettingsController() {
         activity?.toast(R.string.starting_cleanup)
         job = GlobalScope.launch(Dispatchers.IO) {
             val sourceManager: SourceManager = Injekt.get()
-            val downloadManager: DownloadManager = Injekt.get()
             val downloadProvider = DownloadProvider(activity!!)
             var foldersCleared = 0
-            val mangaList = db.getMangas().executeAsBlocking()
+            val mangaList = db.getMangaList().executeAsBlocking()
             val source = sourceManager.getMangadex()
             val mangaFolders = downloadManager.getMangaFolders(source)
 
             for (mangaFolder in mangaFolders) {
-                val manga = mangaList.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
+                val manga =
+                    mangaList.find { downloadProvider.getMangaDirName(it) == mangaFolder.name }
                 if (manga == null) {
                     // download is orphaned delete it if remove non favorited is enabled
                     if (removeNonFavorite) {
@@ -268,7 +273,11 @@ class SettingsAdvancedController : SettingsController() {
                     continue
                 }
                 val chapterList = db.getChapters(manga).executeAsBlocking()
-                foldersCleared += downloadManager.cleanupChapters(chapterList, manga, source, removeRead, removeNonFavorite)
+                foldersCleared += downloadManager.cleanupChapters(chapterList,
+                    manga,
+                    source,
+                    removeRead,
+                    removeNonFavorite)
             }
             launchUI {
                 val activity = activity ?: return@launchUI
@@ -330,7 +339,7 @@ class SettingsAdvancedController : SettingsController() {
     }
 
     private fun clearDatabase() {
-        db.deleteMangasNotInLibrary().executeAsBlocking()
+        db.deleteMangaListNotInLibrary().executeAsBlocking()
         db.deleteHistoryNoLastRead().executeAsBlocking()
         activity?.toast(R.string.clear_database_completed)
     }

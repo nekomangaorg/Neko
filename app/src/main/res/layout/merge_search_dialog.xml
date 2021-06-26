@@ -3,7 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_height="wrap_content"
     android:orientation="vertical">
 
     <com.google.android.material.textfield.TextInputLayout
@@ -42,29 +42,22 @@
             android:visibility="invisible"
             tools:visibility="visible" />
 
-        <GridView
-            android:id="@+id/merge_search_list"
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/merge_recycler"
             style="@style/Theme.Widget.CardView"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
             android:choiceMode="singleChoice"
-            android:clipToPadding="false"
-            android:divider="@null"
-            android:dividerHeight="10dp"
-            android:footerDividersEnabled="true"
-            android:headerDividersEnabled="true"
             android:listSelector="@drawable/list_item_selector"
-            android:padding="0dp"
             android:scrollbars="none"
             android:visibility="invisible"
-            android:numColumns="2"
             tools:listitem="@layout/merge_search_item"
             tools:visibility="visible" />
 
         <eu.kanade.tachiyomi.widget.EmptyView
             android:id="@+id/empty_view"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
             android:visibility="gone"
             android:paddingTop="15dp"
             android:gravity="center"

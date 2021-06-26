@@ -5,7 +5,6 @@
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="colorPrimaryDark">@color/md_white_1000</color>
     <color name="app_color_primary">@color/neko_primary</color>
-    <color name="splashBackground">@color/neko_green</color>
     <color name="fullRippleColor">#C2C2C2</color>
     <color name="rippleColor">@color/md_black_1000_12</color>
     <color name="colorAccent">@color/neko_accent</color>
@@ -92,6 +91,13 @@
     <color name="dialogLime">#282A2E</color>
     <color name="colorOnLime">#2C2D32</color>
 
+    <!--Outrun theme -->
+    <color name="outrun_pink">#dd546e</color>
+    <color name="outrun_blush">#C06C84</color>
+    <color name="outrun_blue">#202146</color>
+    <color name="outrun_black">#170c32</color>
+    <color name="outrun_dark_purple">#201147</color>
+
 
     <color name="neko_primary">#101820</color>
     <color name="neko_accent">#101820</color>
@@ -104,12 +110,6 @@
     <color name="neko_green_darker">#20aa5e</color>
     <color name="gold">#D4AF37</color>
 
-    <color name="neko_outrun_primary">#2E2157</color>
-    <color name="neko_outrun_primary_variant">#241734</color>
-    <color name="neko_outrun_status">#241734</color>
-    <color name="neko_outrun_accent">#FD3777</color>
-    <color name="neko_outrun_dark_accent">#AFFD3777</color>
-    <color name="neko_outrun_badge_1">#F706CF</color>
 
     <color name="neko_miami_primary">#41B6E6</color>
     <color name="neko_miami_primary_variant">#000000</color>

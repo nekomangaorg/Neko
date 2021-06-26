@@ -18,6 +18,11 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.amoled_black
     ),
+    OUTRUN(
+        R.style.Theme_Tachiyomi_Outrun,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.outrun
+    ),
     SPRING(
         R.style.Theme_Tachiyomi_MidnightDusk,
         AppCompatDelegate.MODE_NIGHT_NO,
@@ -99,11 +104,13 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
 
     /** Complies with textColorSecondary (primary with alpha) */
     @ColorInt
-    val lightSecondaryText: Int = ColorUtils.setAlphaComponent(lightPrimaryText, (0.54f * 255f).roundToInt())
+    val lightSecondaryText: Int =
+        ColorUtils.setAlphaComponent(lightPrimaryText, (0.54f * 255f).roundToInt())
 
     /** Complies with textColorSecondary (primary with alpha) */
     @ColorInt
-    val darkSecondaryText: Int = ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
+    val darkSecondaryText: Int =
+        ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
 
     /** Complies with colorBackground */
     @ColorInt
@@ -122,6 +129,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
             R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
             R.style.Theme_Tachiyomi_FlatLime -> "#202125"
             R.style.Theme_Tachiyomi -> "#292929"
+            R.style.Theme_Tachiyomi_Outrun -> "#170c32"
             else -> "#1C1C1D"
         }
     )
@@ -145,6 +153,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
             R.style.Theme_Tachiyomi_HotPink -> "#FF3399"
             R.style.Theme_Tachiyomi_FlatLime -> "#4AF88A"
             R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi -> "#20aa5e"
+            R.style.Theme_Tachiyomi_Outrun -> "#dd546e"
             else -> "#3399FF"
         }
     )
@@ -191,6 +200,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
             R.style.Theme_Tachiyomi -> "#292929"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
             R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"
+            R.style.Theme_Tachiyomi_Outrun -> "#201147"
             else -> "#212121"
         }
     )

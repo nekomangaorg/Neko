@@ -15,6 +15,8 @@ import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -28,6 +30,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.Calendar
 import java.util.Date
 import java.util.TreeMap
@@ -38,9 +41,11 @@ class RecentsPresenter(
     val controller: RecentsController?,
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    private val db: DatabaseHelper = Injekt.get()
-) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener, DownloadServiceListener {
+    private val db: DatabaseHelper = Injekt.get(),
+) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener,
+    DownloadServiceListener {
 
+    val statusHandler: StatusHandler by injectLazy()
     private var recentsJob: Job? = null
     var recentItems = listOf<RecentMangaItem>()
         private set
@@ -116,7 +121,7 @@ class RecentsPresenter(
         itemCount: Int = 0,
         limit: Boolean = false,
         customViewType: Int? = null,
-        includeReadAnyway: Boolean = false
+        includeReadAnyway: Boolean = false,
     ) {
         if (retryCount > 5) {
             finished = true
@@ -131,8 +136,9 @@ class RecentsPresenter(
         }
         val viewType = customViewType ?: viewType
 
-        val showRead = ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit) ||
-            includeReadAnyway == true
+        val showRead =
+            ((preferences.showReadInAllRecents().get() || query.isNotEmpty()) && !limit) ||
+                includeReadAnyway == true
         val isUngrouped = viewType > VIEW_TYPE_GROUP_ALL || query.isNotEmpty()
         val groupChaptersUpdates = preferences.groupChaptersUpdates().get()
         val groupChaptersHistory = preferences.groupChaptersHistory().get()
@@ -451,7 +457,7 @@ class RecentsPresenter(
         chapter: Chapter,
         read: Boolean,
         lastRead: Int? = null,
-        pagesLeft: Int? = null
+        pagesLeft: Int? = null,
     ) {
         presenterScope.launch(Dispatchers.IO) {
             chapter.apply {
@@ -461,11 +467,19 @@ class RecentsPresenter(
                     pages_left = pagesLeft ?: 0
                 }
             }
+            if (preferences.readingSync() && chapter.isMergedChapter().not()) {
+                launchIO {
+                    when (read) {
+                        true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                        false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
+                    }
+                }
+            }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()
             getRecents()
         }
     }
-
+    
     // History
     /**
      * Reset last read of chapter to 0L
@@ -512,7 +526,8 @@ class RecentsPresenter(
             SHORT_LIMIT = if (includeRead) 50 else 25
             presenter.runRecents(limit = true, includeReadAnyway = includeRead)
             SHORT_LIMIT = 25
-            return presenter.recentItems.filter { it.mch.manga.id != null }.map { it.mch.manga to it.mch.history.last_read }
+            return presenter.recentItems.filter { it.mch.manga.id != null }
+                .map { it.mch.manga to it.mch.history.last_read }
         }
     }
 }

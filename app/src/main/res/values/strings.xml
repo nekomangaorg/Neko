@@ -423,10 +423,10 @@
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>
-    <string name="start_reading">Start reading</string>
-    <string name="start_reading_chapter_">Start reading Chapter %1$s</string>
-    <string name="continue_reading_chapter_">Continue reading Chapter %1$s</string>
-    <string name="continue_reading">Continue reading</string>
+    <string name="start_reading">Start Reading</string>
+    <string name="start_reading_chapter_">Start Reading Chapter %1$s</string>
+    <string name="continue_reading_chapter_">Continue Reading Chapter %1$s</string>
+    <string name="continue_reading">Continue Reading</string>
     <string name="chapters_">Chapters %1$s</string>
     <string name="volume_">Volume %1$d</string>
     <string name="season_">Season %1$d</string>
@@ -442,13 +442,13 @@
     <string name="select_starting_chapter">Select starting chapter</string>
     <string name="select_ending_chapter">Select ending chapter</string>
     <string name="search_chapters">Search chapters</string>
-    <string name="next_unread_chapter">Next unread chapter</string>
-    <string name="next_5_unread">Next 5 unread</string>
+    <string name="next_unread">Next unread</string>
+    <string name="next_1_unread">One</string>
+    <string name="next_5_unread">Five</string>
+    <string name="next_10_unread">Ten</string>
     <string name="custom_range">Custom range</string>
-    <string name="all_chapters">All chapters</string>
-    <string name="all_unread_chapters">All unread chapters</string>
     <string name="all_read_chapters">All read chapters</string>
-    <string name="all_but_bookmarked_chapters">All but bookmarked chapters</string>
+    <string name="all_except_bookmarked">all except bookmarked</string>
     <string name="add_x_to_library">Add %1$s to library?</string>
     <string name="show_all">Show All</string>
     <string name="show_bookmarked_chapters">Show bookmarked chapters</string>
@@ -568,6 +568,8 @@
     <string name="app_theme">App theme</string>
     <string name="dark">Neko 2x Dark</string>
     <string name="amoled_black">Neko 2x Black</string>
+    <string name="outrun">Outrun</string>
+
     <string name="dark_blue">Dark Blue</string>
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>
@@ -601,8 +603,6 @@
     <string name="backup_and_restore">Backup and restore</string>
     <string name="create_backup">Create backup</string>
     <string name="can_be_used_to_restore">Can be used to restore current library</string>
-    <string name="create_legacy_backup">Create legacy backup</string>
-    <string name="can_be_used_in_older_tachi">Can be used in older versions of Tachiyomi</string>
     <string name="restore_backup">Restore backup</string>
     <string name="restore_from_backup_file">Restore library from backup file</string>
     <string name="restore_in_progress">Restore already in progress</string>
@@ -727,7 +727,7 @@
     <string name="not_downloaded">Not downloaded</string>
     <string name="downloading">Downloading</string>
     <string name="download">Download</string>
-    <string name="start_downloading_now">Start downloading now</string>
+    <string name="start_downloading_now">Immediately download</string>
     <string name="remove_download">Remove download</string>
     <string name="remove_downloads">Remove downloads</string>
     <string name="downloading_progress">Downloading (%1$d/%2$d)</string>
@@ -774,13 +774,10 @@
     <!-- Time -->
     <string name="manual">Manual</string>
     <string name="hourly">Hourly</string>
-    <string name="every_2_hours">Every 2 hours</string>
-    <string name="every_3_hours">Every 3 hours</string>
     <string name="every_6_hours">Every 6 hours</string>
     <string name="every_12_hours">Every 12 hours</string>
     <string name="daily">Daily</string>
     <string name="every_2_days">Every 2 days</string>
-    <string name="every_3_days">Every 3 days</string>
     <string name="weekly">Weekly</string>
     <string name="monthly">Monthly</string>
     <plurals name="after_minutes">
@@ -844,12 +841,11 @@
     <string name="lock">Lock</string>
     <string name="mark_as_read">Mark as read</string>
     <string name="mark_as_unread">Mark as unread</string>
+    <string name="mark_all_as">Mark all as</string>
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="mark_all_as_unread">Mark all as unread</string>
-    <string name="mark_range_as_read">Mark a range of chapters as read</string>
-    <string name="mark_range_as_unread">Mark a range of chapters as unread</string>
-    <string name="mark_previous_as_read">Mark previous chapters as read</string>
-    <string name="mark_previous_as_unread">Mark previous chapters as unread</string>
+    <string name="mark_range_as">Mark range as</string>
+    <string name="mark_previous_as">Mark Previous as</string>
     <string name="menu">menu</string>
     <string name="more">More</string>
     <string name="move_to_bottom">Move to bottom</string>
@@ -945,7 +941,7 @@
 
     <!-- Manga Details-->
     <string name="open_external">Open external links</string>
-    <string name="view_comments">View comments</string>
+    <string name="comments">Comments</string>
     <string name="comments_unavailable">"Comments not available for merged chapters"</string>
     <string name="comments_unavailable_dex">"Comments not available on MangaDex at this time"</string>
     <string name="merge_other">Merge another source to fill potential missing chapters</string>
@@ -969,6 +965,7 @@
 
 
     <!-- Follows -->
+    <string name="status_channel">Manga status sync</string>
     <string name="follows">My follows</string>
     <string name="add_to_follows">Add to MangaDex follows</string>
     <string name="follows_status">Follows Sstatus</string>
@@ -1014,33 +1011,34 @@
     <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
     <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
     <string name="show_languages">Choose languages to show</string>
-    <string name="data_saver">Data Saver (Compressed Chapter Images)</string>
+    <string name="data_saver">Data Saver</string>
+    <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
-    <string name="sync_follows_to_library">Sync MangaDex manga to Neko</string>
-    <string name="sync_follows_to_library_summary">Pulls reading/rereading/planned to read manga from MangaDex into your Neko library if they are not already added.</string>
+    <string name="sync_follows_to_library">Sync MangaDex Follows</string>
+    <string name="sync_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
     <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
-    <string name="push_favorites_to_mangadex">Sync Neko manga to MangaDex</string>
-    <string name="push_favorites_to_mangadex_summary">Sync any non MdList tracked manga to MangaDex as reading.</string>
+    <string name="push_favorites_to_mangadex">Sync Library Manga to Follows</string>
+    <string name="push_favorites_to_mangadex_summary">Syncs your entire library to your MangaDex Follows List with a Reading Status</string>
     <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>
     <string name="use_new_api_server">Use the new api cache server</string>
     <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
-    <string name="use_latest_cover">Use latest uploaded cover</string>
-    <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
-    <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
-    <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
+    <string name="reading_sync">Auto sync read status</string>
+    <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex.  This only pulls read from MangaDex to prevent accidentally marking chapters unread</string>
     <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
-    <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
-    <string name="use_cache_source">Use cached manga api source and search</string>
+    <string name="add_favorites_as_planned_to_read_summary">When enabled manga added to your library will be updated with Plan To Read Status on MangaDex</string>
+    <string name="use_cache_source">Use cached source</string>
+    <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
+
     <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
     <!-- Backup Settings -->
-    <string name="restore_neko">Data from the backup file will be restored.\n\n If this is a json file it will be an online restore to fetch data,  and carrier costs may apply.  Please log into MangaDex and any trackers before restoring.</string>
+    <string name="restore_neko">Data from the backup file will be restored.\n\n If this a pre v5 backup you will need to v5 migrate after you restore.</string>
 
     <!-- Advanced Settings -->
     <string name="clear_image_cache">Clear image cover cache</string>

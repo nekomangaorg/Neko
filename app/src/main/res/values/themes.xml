@@ -31,8 +31,8 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
-        <item name="android:fontFamily">@font/metropolis_regular</item>
-        <item name="fontFamily">@font/metropolis_regular</item>
+        <item name="android:fontFamily">@font/montserrat_regular</item>
+        <item name="fontFamily">@font/montserrat_regular</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
 
         <item name="unreadBadgeColor">@color/md_white_1000</item>
@@ -59,8 +59,7 @@
         <item name="md_color_title">?android:attr/textColorPrimary</item>
         <item name="md_color_content">@color/text_color_secondary</item>
         <item name="md_color_button_text">?colorAccent</item>
-        <item name="md_background_color">@color/dialog</item>
-        <item name="md_color_widget">@color/colorAccent</item>
+        <item name="md_background_color">?colorPrimaryVariant</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
 
@@ -90,12 +89,16 @@
 
     <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard" />
 
+    <style name="Theme.Tachiyomi.Outrun" parent="Theme.Tachiyomi.Standard" />
+
+
     <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi.Standard">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
         <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
         <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
         <item name="colorSecondary">@color/backgroundDuskDawn</item>
+        <item name="colorSecondaryVariant">@color/dialogDuskDawn</item>
         <item name="background">@color/backgroundDuskDawn</item>
         <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
@@ -108,8 +111,8 @@
     <!--===============-->
     <style name="Theme.Splash" parent="Theme.Tachiyomi">
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/neko_green_darker</item>
-        <item name="android:navigationBarColor">@color/neko_green_darker</item>
+        <item name="android:statusBarColor">@color/black</item>
+        <item name="android:navigationBarColor">@color/black</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>

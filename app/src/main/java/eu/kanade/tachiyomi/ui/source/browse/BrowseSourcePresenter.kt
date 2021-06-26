@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.os.Bundle
 import com.elvishew.xlog.XLog
 import eu.davidea.flexibleadapter.items.IFlexible
-import eu.davidea.flexibleadapter.items.ISectionable
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -14,7 +13,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxItem
 import eu.kanade.tachiyomi.ui.source.filter.CheckboxSectionItem
@@ -30,11 +28,14 @@ import eu.kanade.tachiyomi.ui.source.filter.TextSectionItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateItem
 import eu.kanade.tachiyomi.ui.source.filter.TriStateSectionItem
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.runAsObservable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import rx.Observable
 import rx.Subscription
@@ -48,12 +49,12 @@ import uy.kohesive.injekt.api.get
  * Presenter of [BrowseSourceController].
  */
 open class BrowseSourcePresenter(
-    var searchQuery: String = "",
+    searchQuery: String = "",
     private var isDeepLink: Boolean = false,
     val sourceManager: SourceManager = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     private val prefs: PreferencesHelper = Injekt.get(),
-    private val coverCache: CoverCache = Injekt.get()
+    private val coverCache: CoverCache = Injekt.get(),
 ) : BasePresenter<BrowseSourceController>() {
 
     /**
@@ -126,7 +127,7 @@ open class BrowseSourcePresenter(
     private var scope = CoroutineScope(Job() + Dispatchers.IO)
 
     init {
-        query = searchQuery ?: ""
+        query = searchQuery
     }
 
     override fun onCreate(savedState: Bundle?) {
@@ -173,7 +174,7 @@ open class BrowseSourcePresenter(
         }
         this.appliedFilters = filters
 
-        subscribeToMangaInitializer()
+        //subscribeToMangaInitializer()
 
         // Create a new pager.
         pager = createPager(query, filters)
@@ -187,18 +188,23 @@ open class BrowseSourcePresenter(
         pagerSubscription?.let { remove(it) }
         pagerSubscription = pager.results()
             .observeOn(Schedulers.io())
-            .map { it.first to it.second.map { networkToLocalManga(it, sourceId) } }
-            .doOnNext { initializeMangas(it.second) }
+            .map { it.first to it.second.map { sManga -> networkToLocalManga(sManga, sourceId) } }
+            .doOnNext { initializeMangaList(it.second) }
             .map {
-                it.first to it.second.map { BrowseSourceItem(it, browseAsList, sourceListType, isFollows) }
-                    .filter { isDeepLink || isLibraryVisible || !it.manga.favorite }
+                it.first to it.second.map { manga ->
+                    BrowseSourceItem(manga,
+                        browseAsList,
+                        sourceListType,
+                        isFollows)
+                }
+                    .filter { manga -> isDeepLink || isLibraryVisible || !manga.manga.favorite }
             }.observeOn(AndroidSchedulers.mainThread())
             .subscribeReplay(
-                { view, (page, mangas) ->
+                { view, (page, mangaList) ->
                     if (isDeepLink) {
-                        view.goDirectlyForDeepLink(mangas.first().manga)
+                        view.goDirectlyForDeepLink(mangaList.first().manga)
                     } else {
-                        view.onAddPage(page, mangas)
+                        view.onAddPage(page, mangaList)
                     }
                 },
                 { _, error ->
@@ -246,7 +252,7 @@ open class BrowseSourcePresenter(
     /**
      * Sets the library shown mode.
      *
-     * @param showLibrary whether mangas in library should be shown
+     * @param showLibrary whether mangaList in library should be shown
      */
     private fun setShowLibrary(showLibrary: Boolean) {
         isLibraryVisible = showLibrary
@@ -262,7 +268,9 @@ open class BrowseSourcePresenter(
             .flatMap { Observable.from(it) }
             .filter { it.thumbnail_url == null && !it.initialized }
             .filter { isDeepLink || isLibraryVisible || !it.favorite }
-            .concatMap { getMangaDetailsObservable(it) }
+            .concatMap {
+                getMangaDetailsObservable(it)
+            }
             .onBackpressureBuffer()
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(
@@ -303,10 +311,10 @@ open class BrowseSourcePresenter(
     /**
      * Initialize a list of manga.
      *
-     * @param mangas the list of manga to initialize.
+     * @param mangaList the list of manga to initialize.
      */
-    fun initializeMangas(mangas: List<Manga>) {
-        mangaDetailSubject.onNext(mangas)
+    fun initializeMangaList(mangaList: List<Manga>) {
+        mangaDetailSubject.onNext(mangaList)
     }
 
     /**
@@ -316,14 +324,13 @@ open class BrowseSourcePresenter(
      * @return an observable of the manga to initialize
      */
     private fun getMangaDetailsObservable(manga: Manga): Observable<Manga> {
-        return source.fetchMangaDetailsObservable(manga)
-            .flatMap { networkManga ->
-                manga.copyFrom(networkManga)
-                manga.initialized = true
-                db.insertManga(manga).executeAsBlocking()
-                Observable.just(manga)
-            }
-            .onErrorResumeNext { Observable.just(manga) }
+        return runAsObservable(scope) {
+            val networkManga = source.fetchMangaDetails(manga)
+            manga.copyFrom(networkManga)
+            manga.initialized = true
+            db.insertManga(manga).executeAsBlocking()
+            manga
+        }
     }
 
     fun confirmDeletion(manga: Manga) {
@@ -351,17 +358,13 @@ open class BrowseSourcePresenter(
     /**
      * Search for manga based off of a random manga id by utilizing the [query] and the [restartPager].
      */
-    fun searchRandomManga() {
-        source.apply {
-            fetchRandomMangaId()
-                .observeOn(Schedulers.io())
-                .subscribeOn(Schedulers.io())
-                .subscribe { randMangaId ->
-                    // Query string, e.g. "id:350"
-                    restartPager("${SearchHandler.PREFIX_ID_SEARCH}$randMangaId")
-                    // Clear search query so user can browse all manga again when they hit the Search button
-                    query = ""
-                }
+    fun searchRandomManga(): Flow<Manga?> {
+        return source.getRandomManga().map { smanga ->
+            if (smanga == null) {
+                null
+            } else {
+                networkToLocalManga(smanga, source.id)
+            }
         }
     }
 
@@ -375,37 +378,37 @@ open class BrowseSourcePresenter(
     }
 
     open fun createPager(query: String, filters: FilterList): Pager {
-        return BrowseSourcePager(source, query, filters)
+        return BrowseSourcePager(scope, source, query, filters)
     }
 
     private fun FilterList.toItems(): List<IFlexible<*>> {
-        return mapNotNull {
-            when (it) {
-                is Filter.Header -> HeaderItem(it)
-                is Filter.Separator -> SeparatorItem(it)
-                is Filter.CheckBox -> CheckboxItem(it)
-                is Filter.TriState -> TriStateItem(it)
-                is Filter.Text -> TextItem(it)
-                is Filter.Select<*> -> SelectItem(it)
+        return mapNotNull { filterItem ->
+            when (filterItem) {
+                is Filter.Header -> HeaderItem(filterItem)
+                is Filter.Separator -> SeparatorItem(filterItem)
+                is Filter.CheckBox -> CheckboxItem(filterItem)
+                is Filter.TriState -> TriStateItem(filterItem)
+                is Filter.Text -> TextItem(filterItem)
+                is Filter.Select<*> -> SelectItem(filterItem)
                 is Filter.Group<*> -> {
-                    val group = GroupItem(it)
-                    val subItems = it.state.mapNotNull {
-                        when (it) {
-                            is Filter.CheckBox -> CheckboxSectionItem(it)
-                            is Filter.TriState -> TriStateSectionItem(it)
-                            is Filter.Text -> TextSectionItem(it)
-                            is Filter.Select<*> -> SelectSectionItem(it)
+                    val group = GroupItem(filterItem)
+                    val subItems = filterItem.state.mapNotNull { filterSubItem ->
+                        when (filterSubItem) {
+                            is Filter.CheckBox -> CheckboxSectionItem(filterSubItem)
+                            is Filter.TriState -> TriStateSectionItem(filterSubItem)
+                            is Filter.Text -> TextSectionItem(filterSubItem)
+                            is Filter.Select<*> -> SelectSectionItem(filterSubItem)
                             else -> null
-                        } as? ISectionable<*, *>
+                        }
                     }
                     subItems.forEach { it.header = group }
                     group.subItems = subItems
                     group
                 }
                 is Filter.Sort -> {
-                    val group = SortGroup(it)
-                    val subItems = it.values.map {
-                        SortItem(it, group)
+                    val group = SortGroup(filterItem)
+                    val subItems = filterItem.values.map { filterSubItem ->
+                        SortItem(filterSubItem, group)
                     }
                     group.subItems = subItems
                     group

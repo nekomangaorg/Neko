@@ -71,7 +71,10 @@ class SettingsLibraryController : SettingsController() {
                 isPersistent = false
                 val catCount = db.getCategories().executeAsBlocking().size
                 titleRes = if (catCount > 0) R.string.edit_categories else R.string.add_categories
-                if (catCount > 0) summary = context.resources.getQuantityString(R.plurals.category_plural, catCount, catCount)
+                if (catCount > 0) summary =
+                    context.resources.getQuantityString(R.plurals.category_plural,
+                        catCount,
+                        catCount)
                 onClick { router.pushController(CategoryController().withFadeTransaction()) }
             }
             intListPreference(activity) {
@@ -80,7 +83,8 @@ class SettingsLibraryController : SettingsController() {
 
                 val categories = listOf(Category.createDefault(context)) + dbCategories
                 entries =
-                    listOf(context.getString(R.string.always_ask)) + categories.map { it.name }.toTypedArray()
+                    listOf(context.getString(R.string.always_ask)) + categories.map { it.name }
+                        .toTypedArray()
                 entryValues = listOf(-1) + categories.mapNotNull { it.id }.toList()
                 defaultValue = "-1"
 
@@ -103,15 +107,13 @@ class SettingsLibraryController : SettingsController() {
                 titleRes = R.string.library_update_frequency
                 entriesRes = arrayOf(
                     R.string.manual,
-                    R.string.hourly,
-                    R.string.every_2_hours,
-                    R.string.every_3_hours,
                     R.string.every_6_hours,
                     R.string.every_12_hours,
                     R.string.daily,
-                    R.string.every_2_days
+                    R.string.every_2_days,
+                    R.string.weekly
                 )
-                entryValues = listOf(0, 1, 2, 3, 6, 12, 24, 48)
+                entryValues = listOf(0, 6, 12, 24, 48, 168)
                 defaultValue = 24
 
                 onChange { newValue ->

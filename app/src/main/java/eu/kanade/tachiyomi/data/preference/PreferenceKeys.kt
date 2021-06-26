@@ -244,7 +244,7 @@ object PreferenceKeys {
 
     const val dataSaver = "data_saver_bool"
 
-    const val forceLatestCovers = "latest_cover_bool"
+    const val readingSync = "reading_sync_bool"
 
     const val logLevel = "log_level"
 
@@ -253,4 +253,6 @@ object PreferenceKeys {
     const val enablePort443Only = "use_port_443_only_for_image_server"
 
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
+
+    const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
 }

@@ -10,24 +10,26 @@ import eu.kanade.tachiyomi.data.database.tables.MangaCategoryTable
 
 interface MangaCategoryQueries : DbProvider {
 
-    fun insertMangaCategory(mangaCategory: MangaCategory) = db.put().`object`(mangaCategory).prepare()
+    fun insertMangaCategory(mangaCategory: MangaCategory) =
+        db.put().`object`(mangaCategory).prepare()
 
-    fun insertMangasCategories(mangasCategories: List<MangaCategory>) = db.put().objects(mangasCategories).prepare()
+    fun insertMangaListCategories(mangaListCategories: List<MangaCategory>) =
+        db.put().objects(mangaListCategories).prepare()
 
-    fun deleteOldMangasCategories(mangas: List<Manga>) = db.delete()
+    fun deleteOldMangaListCategories(mangaList: List<Manga>) = db.delete()
         .byQuery(
             DeleteQuery.builder()
                 .table(MangaCategoryTable.TABLE)
-                .where("${MangaCategoryTable.COL_MANGA_ID} IN (${Queries.placeholders(mangas.size)})")
-                .whereArgs(*mangas.map { it.id }.toTypedArray())
+                .where("${MangaCategoryTable.COL_MANGA_ID} IN (${Queries.placeholders(mangaList.size)})")
+                .whereArgs(*mangaList.map { it.id }.toTypedArray())
                 .build()
         )
         .prepare()
 
-    fun setMangaCategories(mangasCategories: List<MangaCategory>, mangas: List<Manga>) {
+    fun setMangaCategories(mangaListCategories: List<MangaCategory>, mangaList: List<Manga>) {
         db.inTransaction {
-            deleteOldMangasCategories(mangas).executeAsBlocking()
-            insertMangasCategories(mangasCategories).executeAsBlocking()
+            deleteOldMangaListCategories(mangaList).executeAsBlocking()
+            insertMangaListCategories(mangaListCategories).executeAsBlocking()
         }
     }
 }

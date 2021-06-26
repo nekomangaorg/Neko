@@ -115,7 +115,7 @@ import kotlin.random.nextInt
 
 class LibraryController(
     bundle: Bundle? = null,
-    val preferences: PreferencesHelper = Injekt.get()
+    val preferences: PreferencesHelper = Injekt.get(),
 ) : BaseCoroutineController<LibraryControllerBinding, LibraryPresenter>(bundle),
     ActionMode.Callback,
     FlexibleAdapter.OnItemClickListener,
@@ -156,9 +156,9 @@ class LibraryController(
     private var query = ""
 
     /**
-     * Currently selected mangas.
+     * Currently selected mangaList.
      */
-    private val selectedMangas = mutableSetOf<Manga>()
+    private val selectedMangaSet = mutableSetOf<Manga>()
 
     private lateinit var adapter: LibraryCategoryAdapter
 
@@ -223,7 +223,7 @@ class LibraryController(
     val cb = object : WindowInsetsAnimationCompat.Callback(DISPATCH_MODE_STOP) {
         override fun onStart(
             animation: WindowInsetsAnimationCompat,
-            bounds: WindowInsetsAnimationCompat.BoundsCompat
+            bounds: WindowInsetsAnimationCompat.BoundsCompat,
         ): WindowInsetsAnimationCompat.BoundsCompat {
             updateHopperY()
             return bounds
@@ -231,7 +231,7 @@ class LibraryController(
 
         override fun onProgress(
             insets: WindowInsetsCompat,
-            runningAnimations: List<WindowInsetsAnimationCompat>
+            runningAnimations: List<WindowInsetsAnimationCompat>,
         ): WindowInsetsCompat {
             updateHopperY(insets.toWindowInsets())
             return insets
@@ -252,7 +252,9 @@ class LibraryController(
                     hopperOffset += dy
                     hopperOffset = hopperOffset.coerceIn(0f, maxHopperOffset)
                 }
-                if (!preferences.hideBottomNavOnScroll().get() || activityBinding?.bottomNav == null) {
+                if (!preferences.hideBottomNavOnScroll()
+                        .get() || activityBinding?.bottomNav == null
+                ) {
                     updateFilterSheetY()
                 }
                 binding.roundedCategoryHopper.upCategory.alpha = if (isAtTop()) 0.25f else 1f
@@ -314,7 +316,8 @@ class LibraryController(
                 (-pad).toInt(),
                 view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
             )
-            binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight = 60.dpToPx + padding
+            binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight =
+                60.dpToPx + padding
             updateHopperY()
             binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = -pad.toInt()
@@ -338,7 +341,9 @@ class LibraryController(
             val closerToBottom = (activityBinding?.bottomNav?.translationY ?: 0f) > halfWayBottom
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
             val closerToEdge =
-                if (preferences.hideBottomNavOnScroll().get() && activityBinding?.bottomNav != null) {
+                if (preferences.hideBottomNavOnScroll()
+                        .get() && activityBinding?.bottomNav != null
+                ) {
                     closerToBottom && !atTop
                 } else {
                     closerToHopperBottom
@@ -423,7 +428,9 @@ class LibraryController(
         if (preferences.shownFilterTutorial().get() || !hasExpanded) return
         val activityBinding = activityBinding ?: return
         val activity = activity ?: return
-        val icon = (activityBinding.bottomNav ?: activityBinding.sideNav)?.getItemView(R.id.nav_library) ?: return
+        val icon =
+            (activityBinding.bottomNav ?: activityBinding.sideNav)?.getItemView(R.id.nav_library)
+                ?: return
         filterTooltip =
             ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
                 .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
@@ -478,13 +485,15 @@ class LibraryController(
         }
     }
 
-    override fun createBinding(inflater: LayoutInflater) = LibraryControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        LibraryControllerBinding.inflate(inflater)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         adapter = LibraryCategoryAdapter(this)
-        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        adapter.stateRestorationPolicy =
+            RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         setRecyclerLayout()
         binding.libraryGridRecycler.recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {
@@ -515,9 +524,11 @@ class LibraryController(
             showCategories(show = false, closeSearch = true)
         }
         binding.categoryRecycler.setOnTouchListener { _, _ ->
-            val searchView = activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView
-                ?: return@setOnTouchListener false
-            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            val searchView =
+                activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView
+                    ?: return@setOnTouchListener false
+            val imm =
+                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm!!.hideSoftInputFromWindow(searchView.windowToken, 0)
             false
         }
@@ -562,7 +573,7 @@ class LibraryController(
 
         ViewCompat.setWindowInsetsAnimationCallback(view, cb)
 
-        if (selectedMangas.isNotEmpty()) {
+        if (selectedMangaSet.isNotEmpty()) {
             createActionModeIfNeeded()
         }
 
@@ -729,7 +740,8 @@ class LibraryController(
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
-            val insetKey = insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+            val insetKey =
+                insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
             listOfYs.add(view.height - (insetKey).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +
@@ -739,9 +751,10 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                binding.libraryGridRecycler.recycler.translationY
+                    binding.libraryGridRecycler.recycler.translationY
         } else {
-            binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
+            binding.jumperCategoryText.translationY =
+                binding.libraryGridRecycler.recycler.translationY
         }
     }
 
@@ -779,8 +792,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1050,7 +1063,8 @@ class LibraryController(
         if (closeSearch) {
             activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.collapseActionView()
         }
-        val full = binding.categoryRecycler.height.toFloat() + binding.libraryGridRecycler.recycler.paddingTop
+        val full =
+            binding.categoryRecycler.height.toFloat() + binding.libraryGridRecycler.recycler.paddingTop
         val translateY = if (show) full else 0f
         binding.libraryGridRecycler.recycler.animate().translationY(translateY).apply {
             setUpdateListener {
@@ -1158,7 +1172,7 @@ class LibraryController(
     }
 
     override fun onDestroyActionMode(mode: ActionMode?) {
-        selectedMangas.clear()
+        selectedMangaSet.clear()
         actionMode = null
         adapter.mode = SelectableAdapter.Mode.SINGLE
         adapter.clearSelection()
@@ -1171,7 +1185,7 @@ class LibraryController(
         if (manga.isBlank()) return
         val currentMode = adapter.mode
         if (selected) {
-            if (selectedMangas.add(manga)) {
+            if (selectedMangaSet.add(manga)) {
                 val positions = adapter.allIndexOf(manga)
                 if (adapter.mode != SelectableAdapter.Mode.MULTI) {
                     adapter.mode = SelectableAdapter.Mode.MULTI
@@ -1186,10 +1200,10 @@ class LibraryController(
                 }
             }
         } else {
-            if (selectedMangas.remove(manga)) {
+            if (selectedMangaSet.remove(manga)) {
                 val positions = adapter.allIndexOf(manga)
                 lastClickPosition = -1
-                if (selectedMangas.isEmpty()) {
+                if (selectedMangaSet.isEmpty()) {
                     adapter.mode = SelectableAdapter.Mode.SINGLE
                     adapter.isLongPressDragEnabled = canDrag()
                 }
@@ -1234,7 +1248,8 @@ class LibraryController(
     }
 
     override fun canDrag(): Boolean {
-        val filterOff = !binding.filterBottomSheet.filterBottomSheet.hasActiveFilters() && presenter.groupType == BY_DEFAULT
+        val filterOff =
+            !binding.filterBottomSheet.filterBottomSheet.hasActiveFilters() && presenter.groupType == BY_DEFAULT
         return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
     }
 
@@ -1318,9 +1333,9 @@ class LibraryController(
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
         if ((
-            adapter.getItem(fromPosition) is LibraryItem &&
-                adapter.getItem(fromPosition) is LibraryItem
-            ) ||
+                adapter.getItem(fromPosition) is LibraryItem &&
+                    adapter.getItem(fromPosition) is LibraryItem
+                ) ||
             adapter.getItem(fromPosition) == null
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
@@ -1382,7 +1397,7 @@ class LibraryController(
     private fun moveMangaToCategory(
         manga: LibraryManga,
         category: Category?,
-        mangaIds: List<Long>
+        mangaIds: List<Long>,
     ) {
         if (category?.id == null) return
         val oldCatId = manga.category
@@ -1622,7 +1637,7 @@ class LibraryController(
     }
 
     override fun onPrepareActionMode(mode: ActionMode, menu: Menu): Boolean {
-        val count = selectedMangas.size
+        val count = selectedMangaSet.size
         // Destroy action mode if there are no items selected.
         val shareItem = menu.findItem(R.id.action_share)
         val categoryItem = menu.findItem(R.id.action_move_to_category)
@@ -1641,22 +1656,22 @@ class LibraryController(
             R.id.action_delete -> {
                 MaterialDialog(activity!!).message(R.string.remove_from_library_question)
                     .positiveButton(R.string.remove) {
-                        deleteMangasFromLibrary()
+                        deleteMangaListFromLibrary()
                     }.negativeButton(android.R.string.no).show()
             }
             R.id.action_download_unread -> {
-                presenter.downloadUnread(selectedMangas.toList())
+                presenter.downloadUnread(selectedMangaSet.toList())
             }
             R.id.action_mark_as_read -> {
-                presenter.markReadStatus(selectedMangas.toList(), true)
+                presenter.markReadStatus(selectedMangaSet.toList(), true)
                 destroyActionModeIfNeeded()
             }
             R.id.action_mark_as_unread -> {
-                presenter.markReadStatus(selectedMangas.toList(), false)
+                presenter.markReadStatus(selectedMangaSet.toList(), false)
                 destroyActionModeIfNeeded()
             }
             R.id.action_sync_to_dex -> {
-                presenter.syncMangaToDex(selectedMangas.toList())
+                presenter.syncMangaToDex(selectedMangaSet.toList())
                 destroyActionModeIfNeeded()
             }
             else -> return false
@@ -1666,10 +1681,10 @@ class LibraryController(
 
     private fun shareManga() {
         val context = view?.context ?: return
-        val mangas = selectedMangas.toList()
-        val urlList = presenter.getMangaUrls(mangas)
+        val mangaList = selectedMangaSet.toList()
+        val urlList = presenter.getMangaUrls(mangaList)
         if (urlList.isEmpty()) return
-        val urls = presenter.getMangaUrls(mangas).joinToString("\n")
+        val urls = presenter.getMangaUrls(mangaList).joinToString("\n")
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/*"
             putExtra(Intent.EXTRA_TEXT, urls)
@@ -1677,9 +1692,9 @@ class LibraryController(
         startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
     }
 
-    private fun deleteMangasFromLibrary() {
-        val mangas = selectedMangas.toList()
-        presenter.removeMangaFromLibrary(mangas)
+    private fun deleteMangaListFromLibrary() {
+        val mangaList = selectedMangaSet.toList()
+        presenter.removeMangaFromLibrary(mangaList)
         destroyActionModeIfNeeded()
         snack?.dismiss()
         snack = view?.snack(
@@ -1690,14 +1705,14 @@ class LibraryController(
             view.elevation = 15f.dpToPx
             var undoing = false
             setAction(R.string.undo) {
-                presenter.reAddMangas(mangas)
+                presenter.reAddMangaList(mangaList)
                 undoing = true
             }
             addCallback(
                 object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
-                        if (!undoing) presenter.confirmDeletion(mangas)
+                        if (!undoing) presenter.confirmDeletion(mangaList)
                     }
                 }
             )
@@ -1710,7 +1725,7 @@ class LibraryController(
      */
     private fun showChangeMangaCategoriesSheet() {
         val activity = activity ?: return
-        selectedMangas.toList().moveCategories(presenter.db, activity) {
+        selectedMangaSet.toList().moveCategories(presenter.db, activity) {
             presenter.getLibrary()
             destroyActionModeIfNeeded()
         }

@@ -219,7 +219,7 @@
         android:clipToPadding="false"
         android:requiresFadingEdge="horizontal"
         android:scrollbars="none"
-        app:layout_constraintBottom_toTopOf="@id/manga_summary_label"
+        app:layout_constraintBottom_toTopOf="@id/manga_summary"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/bottom_line">
@@ -321,21 +321,6 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/manga_summary_label"
-        style="@style/Neko.Headline5"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/description"
-        android:textIsSelectable="false"
-        android:textSize="17sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sub_button_scroll"
-        tools:text="About this manga" />
-
     <TextView
         android:id="@+id/manga_summary"
         style="@style/Neko.Condensed"
@@ -346,13 +331,13 @@
         android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:textSize="16sp"
         android:maxLines="3"
         android:textColor="@color/text_color_secondary"
-        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/manga_summary_label"
+        app:layout_constraintTop_toBottomOf="@id/sub_button_scroll"
         tools:maxLines="10"
         tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
 
@@ -448,7 +433,8 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_reading_button"
-        style="@style/Neko.Button.RoundedOutline"
+        style="@style/Neko.Button.Rounded.Alternative"
+        android:textColor="?attr/colorOnUnreadBadge"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="16dp"
@@ -511,7 +497,7 @@
             android:maxLines="2"
             android:padding="5dp"
             android:textAlignment="textEnd"
-            android:textColor="@color/colorAccent"
+            android:textColor="?attr/colorAccent"
             android:textSize="13sp"
             app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
