@@ -1011,7 +1011,8 @@
     <string name="content_rating_erotica">Erotica (Manga usually tagged smut)</string>
     <string name="content_rating_pornographic">Pornographic (Manga usually tagged Hentai)</string>
     <string name="show_languages">Choose languages to show</string>
-    <string name="data_saver">Data Saver (Compressed Chapter Images)</string>
+    <string name="data_saver">Data Saver</string>
+    <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
     <string name="sync_follows_to_library">Sync MangaDex manga to Neko</string>
@@ -1032,8 +1033,10 @@
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>
 
     <string name="add_favorites_as_planned_to_read">Add to library as planned to read</string>
-    <string name="add_favorites_as_planned_to_read_summary">When enabled adding a manga to your library inside the manga view will add the manga as planned to read in MDList</string>
-    <string name="use_cache_source">Use cached manga api source and search</string>
+    <string name="add_favorites_as_planned_to_read_summary">When enabled manga added to your library will be updated with Plan To Read Status on MangaDex</string>
+    <string name="use_cache_source">Use cached source</string>
+    <string name="use_cache_source_summary">Recommended to not use at this time, this was a legacy feature for V3 of MangaDex</string>
+
     <string name="use_cache_source_dialog">This will download 5MB file. You only need to download it once. If you already downloaded just dismiss this dialog.</string>
 
     <!-- Backup Settings -->

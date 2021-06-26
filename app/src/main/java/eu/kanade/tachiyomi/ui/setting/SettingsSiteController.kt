@@ -65,6 +65,7 @@ class SettingsSiteController :
         switchPreference {
             key = PreferenceKeys.useCacheSource
             titleRes = R.string.use_cache_source
+            summaryRes = R.string.use_cache_source_summary
             defaultValue = false
             onClick {
                 if (isChecked) {
@@ -116,6 +117,7 @@ class SettingsSiteController :
         switchPreference {
             key = PreferenceKeys.dataSaver
             titleRes = R.string.data_saver
+            summaryRes = R.string.data_saver_summary
             defaultValue = false
         }
 
