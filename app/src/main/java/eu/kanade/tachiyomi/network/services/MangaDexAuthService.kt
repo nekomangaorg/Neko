@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.online.dto.ReadChapterDto
 import eu.kanade.tachiyomi.source.online.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.source.online.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import retrofit2.Response
 import retrofit2.http.Body
@@ -54,7 +55,7 @@ interface MangaDexAuthService : MangaDexImageService {
     suspend fun updateReadingStatusForManga(
         @Path("id") mangaId: String,
         @Body readingStatusDto: ReadingStatusDto,
-    ): Response<String>
+    ): Response<ResultDto>
 
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.readingStatusForAllManga)
@@ -65,8 +66,14 @@ interface MangaDexAuthService : MangaDexImageService {
     suspend fun readingStatusByType(@Query("status") status: String): Response<ReadingStatusMapDto>
 
     @POST("${MdApi.chapter}/{id}/read")
-    suspend fun markChapterRead(@Path("id") chapterId: String): Response<String>
+    suspend fun markChapterRead(@Path("id") chapterId: String): Response<ResultDto>
 
     @DELETE("${MdApi.chapter}/{id}/read")
-    suspend fun markChapterUnRead(@Path("id") chapterId: String): Response<String>
+    suspend fun markChapterUnRead(@Path("id") chapterId: String): Response<ResultDto>
+
+    @POST("${MdApi.manga}/{id}/follow")
+    suspend fun followManga(@Path("id") mangaId: String): Response<ResultDto>
+
+    @DELETE("${MdApi.manga}/{id}/follow")
+    suspend fun unfollowManga(@Path("id") mangaId: String): Response<ResultDto>
 }

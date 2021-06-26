@@ -1015,11 +1015,11 @@
     <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
-    <string name="sync_follows_to_library">Sync MangaDex manga to Neko</string>
-    <string name="sync_follows_to_library_summary">Pulls reading/rereading/planned to read manga from MangaDex into your Neko library if they are not already added.</string>
+    <string name="sync_follows_to_library">Sync MangaDex Follows</string>
+    <string name="sync_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
     <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
-    <string name="push_favorites_to_mangadex">Sync Neko manga to MangaDex</string>
-    <string name="push_favorites_to_mangadex_summary">Sync any non MdList tracked manga to MangaDex as reading.</string>
+    <string name="push_favorites_to_mangadex">Sync Library Manga to Follows</string>
+    <string name="push_favorites_to_mangadex_summary">Syncs your entire library to your MangaDex Follows List with a Reading Status</string>
     <string name="push_favorites_to_mangadex_toast">Pushed %d manga to MangaDex</string>
     <string name="use_new_api_server">Use the new api cache server</string>
     <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
