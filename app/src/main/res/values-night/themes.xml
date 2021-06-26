@@ -52,6 +52,7 @@
         <item name="android:colorBackground">@color/outrun_black</item>
         <item name="colorSurface">@color/outrun_black</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
+        <item name="colorOnUnreadBadge">@color/outrun_black</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard">

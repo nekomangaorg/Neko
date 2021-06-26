@@ -355,10 +355,10 @@ open class BrowseSourceController(bundle: Bundle) :
 
         sheet.onFollowsClicked = {
             sheet.dismiss()
-            adapter?.clear()
             if (presenter.source.isLogged().not()) {
                 view?.context?.toast("Please login to view follows")
             } else {
+                adapter?.clear()
                 router.pushController(FollowsController().withFadeTransaction())
             }
         }

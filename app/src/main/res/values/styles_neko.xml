@@ -26,6 +26,14 @@
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
+    <style name="Neko.Button.Rounded" parent="Theme.Widget.Button.Primary">
+        <item name="android:letterSpacing">-0.02</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
+        <item name="cornerRadius">20dp</item>
+    </style>
+
+
     <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
         <item name="strokeColor">?attr/colorAccent</item>
         <item name="android:letterSpacing">-0.02</item>
