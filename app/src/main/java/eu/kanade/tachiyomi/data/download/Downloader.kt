@@ -319,7 +319,7 @@ class Downloader(
         }
         val chapterDirname = provider.getChapterDirName(download.chapter)
         val tmpDir = mangaDir.createDirectory(chapterDirname + TMP_DIR_SUFFIX)
-        val pagesToDownload = if (download.source is MergeSource) 3 else 10
+        val pagesToDownload = if (download.source is MergeSource) 3 else 6
 
         val pageListObservable = if (download.pages == null) {
             // Pull page list from network and add them to download object

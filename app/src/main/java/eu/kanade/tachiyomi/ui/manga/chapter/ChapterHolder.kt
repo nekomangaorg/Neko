@@ -80,10 +80,12 @@ class ChapterHolder(
         if (chapter.language.isNullOrBlank() || chapter.language.equals("en", true)) {
             binding.flag.isVisible = false
         } else {
-            binding.flag.isVisible = true
             val drawable = MdLang.fromIsoCode(chapter.language!!)?.iconResId
-            drawable?.let {
-                binding.flag.load(it)
+            drawable?.let { drawableId ->
+                if (drawableId != 0) {
+                    binding.flag.isVisible = true
+                    binding.flag.load(drawableId)
+                }
             }
         }
 

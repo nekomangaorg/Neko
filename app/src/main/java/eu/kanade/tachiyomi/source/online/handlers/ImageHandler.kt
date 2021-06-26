@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.util.system.launchIO
 import okhttp3.Request
 import okhttp3.Response
 import timber.log.Timber
@@ -36,23 +37,24 @@ class ImageHandler {
                 XLog.e("error getting images", e)
                 throw (e)
             }
-
             val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
-            val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
-            val cache = response.header("X-Cache", "") == "HIT"
-            val result = AtHomeImageReportDto(
-                page.imageUrl!!,
-                response.isSuccessful,
-                byteSize,
-                cache,
-                duration
-            )
+            
+            launchIO {
+                val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
+                val cache = response.header("X-Cache", "") == "HIT"
+                val result = AtHomeImageReportDto(
+                    page.imageUrl!!,
+                    response.isSuccessful,
+                    byteSize,
+                    cache,
+                    duration
+                )
+                runCatching {
+                    network.service.atHomeImageReport(result)
+                }.onFailure { e ->
+                    Timber.e(e, "error trying to post to dex@home")
 
-            runCatching {
-                network.service.atHomeImageReport(result)
-            }.onFailure { e ->
-                Timber.e(e, "error trying to post to dex@home")
-
+                }
             }
 
             if (!response.isSuccessful) {
