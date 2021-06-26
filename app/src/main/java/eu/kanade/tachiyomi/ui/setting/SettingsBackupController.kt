@@ -265,7 +265,7 @@ class SettingsBackupController : SettingsController() {
                 .listItemsMultiChoice(
                     items = options,
                     disabledIndices = intArrayOf(0),
-                    initialSelection = intArrayOf(0, 1, 2, 3, 4, 5)
+                    initialSelection = intArrayOf(0, 1, 2, 3, 4)
                 ) { _, positions, _ ->
                     var flags = 0
                     for (i in 1 until positions.size) {
