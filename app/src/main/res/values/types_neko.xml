@@ -85,7 +85,7 @@
         <item name="fontFamily">@font/montserrat_regular</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">14sp</item>
-        <item name="android:letterSpacing">-.023</item>
+        <item name="android:letterSpacing">-.026</item>
         <!--Your custom type style here-->
     </style>
 
@@ -93,7 +93,7 @@
         <item name="fontFamily">@font/montserrat_medium</item>
         <item name="android:textColor">?android:attr/textColorPrimary</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:letterSpacing">-.023</item>
+        <item name="android:letterSpacing">-.025</item>
         <!--Your custom type style here-->
     </style>
 

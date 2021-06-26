@@ -331,9 +331,9 @@
         android:layout_marginEnd="16dp"
         android:clickable="true"
         android:focusable="true"
+        android:textSize="16sp"
         android:maxLines="3"
         android:textColor="@color/text_color_secondary"
-        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -433,7 +433,7 @@
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_reading_button"
-        style="@style/Neko.Button.Rounded"
+        style="@style/Neko.Button.Rounded.Alternative"
         android:textColor="?attr/colorOnUnreadBadge"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -1,0 +1,18 @@
+<vector android:height="18dp" android:viewportHeight="480"
+    android:viewportWidth="640" android:width="24dp" xmlns:android="http://schemas.android.com/apk/res/android">
+    <path android:fillColor="#c4272f" android:pathData="M0,0h640v480H0z"/>
+    <path android:fillColor="#015197" android:pathData="M213.3,0h213.4v480H213.3z"/>
+    <path android:fillColor="#f9cf02" android:pathData="M107,189.1m-35,0a35,35 0,1 1,70 0a35,35 0,1 1,-70 0"/>
+    <path android:fillColor="#c4272f" android:pathData="M107,173.2m-38.2,0a38.2,38.2 0,1 1,76.4 0a38.2,38.2 0,1 1,-76.4 0"/>
+    <path android:fillColor="#f9cf02" android:fillType="evenOdd" android:pathData="M91.1,131.8a15.9,15.9 0,0 0,31.8 0c0,-6.3 -4,-7.2 -4,-9.5 0,-2.4 2.4,-5.6 -2.4,-9.6 2.4,4 -1.6,4.8 -1.6,8.8 0,4 1.6,4 1.6,7.1a3.2,3.2 0,0 1,-6.3 0c0,-3.1 3.1,-6.3 3.1,-11 0,-4.9 -0.7,-6.5 -3.1,-10.4 -2.4,-4 -6.4,-7.2 -3.2,-10.4 -4.8,1.6 -2.4,8 -2.4,12s-3.2,6.3 -3.2,11 2.4,5.7 2.4,8.8a3.2,3.2 0,0 1,-6.3 0c0,-3.1 1.6,-3.1 1.6,-7.1s-4,-4.8 -1.6,-8.8c-4.8,4 -2.4,7.2 -2.4,9.6 0,2.4 -4,3.1 -4,9.5z"/>
+    <path android:fillColor="#f9cf02" android:pathData="M107,179.5m-25.4,0a25.4,25.4 0,1 1,50.8 0a25.4,25.4 0,1 1,-50.8 0"/>
+    <path android:fillColor="#f9cf02" android:pathData="M37,230.4v152.7h31.8L68.8,230.4zM145.2,230.4v152.7L177,383.1L177,230.4zM75.2,255.9v12.7h63.6v-12.7zM75.2,344.9v12.8h63.6L138.8,345zM75.2,230.4h63.6L107,249.5zM75.2,364.1h63.6L107,383z"/>
+    <path android:fillColor="#f9cf02"
+        android:pathData="M107,306.8m-33.7,0a33.7,33.7 0,1 1,67.4 0a33.7,33.7 0,1 1,-67.4 0"
+        android:strokeColor="#c4272f" android:strokeWidth="3.8"/>
+    <path android:fillColor="#00000000"
+        android:pathData="M107,273a16.9,16.9 0,0 1,0 33.8,16.9 16.9,0 1,0 0,33.7"
+        android:strokeColor="#c4272f" android:strokeWidth="3.8"/>
+    <path android:fillColor="#c4272f" android:pathData="M107,289.9m-6.4,0a6.4,6.4 0,1 1,12.8 0a6.4,6.4 0,1 1,-12.8 0"/>
+    <path android:fillColor="#c4272f" android:pathData="M107,323.6m-6.4,0a6.4,6.4 0,1 1,12.8 0a6.4,6.4 0,1 1,-12.8 0"/>
+</vector>
