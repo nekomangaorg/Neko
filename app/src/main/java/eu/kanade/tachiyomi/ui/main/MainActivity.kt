@@ -83,13 +83,10 @@ import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
-import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.saket.cascade.CascadePopupMenu
-import me.saket.cascade.overrideAllPopupMenus
 import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -265,9 +262,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                        continueSwitchingTabs = true
-                        this@MainActivity.nav.selectedItemId = id
-                    }
+                    continueSwitchingTabs = true
+                    this@MainActivity.nav.selectedItemId = id
+                }
                 ) return@setOnItemSelectedListener false
             }
             continueSwitchingTabs = false
@@ -298,10 +295,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
         }
 
-        binding.toolbar.overrideAllPopupMenus { context, anchor ->
-            CascadePopupMenu(context, anchor, styler = cascadeMenuStyler(this))
-        }
-
         binding.toolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if (rootSearchController is RootSearchInterface) {
@@ -321,8 +314,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         nav.isVisible = !hideBottomNav
-        binding.bottomView?.visibility =
-            if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
+        binding.bottomView?.visibility = if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
         nav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(
             object : ControllerChangeHandler.ControllerChangeListener {
@@ -331,7 +323,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     from: Controller?,
                     isPush: Boolean,
                     container: ViewGroup,
-                    handler: ControllerChangeHandler,
+                    handler: ControllerChangeHandler
                 ) {
                     syncActivityViewWithController(to, from, isPush)
                     binding.appBar.y = 0f
@@ -346,7 +338,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     from: Controller?,
                     isPush: Boolean,
                     container: ViewGroup,
-                    handler: ControllerChangeHandler,
+                    handler: ControllerChangeHandler
                 ) {
                     binding.appBar.y = 0f
                     nav.translationY = 0f
@@ -357,8 +349,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
 
-        binding.toolbar.navigationIcon =
-            if (router.backstackSize > 1) drawerArrow else searchDrawable
+        binding.toolbar.navigationIcon = if (router.backstackSize > 1) drawerArrow else searchDrawable
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
 
@@ -382,8 +373,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             .asImmediateFlowIn(lifecycleScope) {
                 binding.sideNav?.menuGravity = if (!it) Gravity.TOP else Gravity.BOTTOM
             }
-        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller),
-            changeBG = false)
+        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
     }
 
     open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false, changeBG: Boolean = true) {
@@ -735,7 +725,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     protected open fun syncActivityViewWithController(
         to: Controller?,
         from: Controller? = null,
-        isPush: Boolean = false,
+        isPush: Boolean = false
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -874,7 +864,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             e1: MotionEvent,
             e2: MotionEvent,
             velocityX: Float,
-            velocityY: Float,
+            velocityY: Float
         ): Boolean {
             var result = false
             val diffY = e2.y - e1.y

@@ -42,8 +42,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val chapterColor = ChapterUtil.chapterColor(itemView.context, item.chapter)
 
-            val typeface = if (item.isCurrent) ResourcesCompat.getFont(itemView.context,
-                R.font.montserrat_black) else null
+            val typeface = if (item.isCurrent) ResourcesCompat.getFont(itemView.context, R.font.metropolis_bold_italic) else null
 
             binding.chapterTitle.text = when (manga.displayMode) {
                 Manga.DISPLAY_NUMBER -> {
@@ -65,9 +64,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 binding.chapterSubtitle.setTypeface(null, Typeface.NORMAL)
             }
 
-            if (item.chapter.language.isNullOrBlank() || item.chapter.language.equals("english",
-                    true)
-            ) {
+            if (item.chapter.language.isNullOrBlank() || item.chapter.language.equals("english", true)) {
                 binding.chapterLanguage.isVisible = false
             } else {
                 binding.chapterLanguage.isVisible = true

@@ -14,7 +14,8 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.search.SettingsSearchController
-import eu.kanade.tachiyomi.util.system.create
+import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
 class SettingsMainController : SettingsController(), FloatingSearchInterface {
@@ -25,66 +26,57 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.settings
-        
+
+        val size = 18
+        val tintColor = context.getResourceColor(R.attr.colorAccent)
+
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_tune.create(context, colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_tune)
             titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_book.create(context, colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_book)
             titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
-            iconDrawable = CommunityMaterial.Icon.cmd_google_chrome.create(context,
-                colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(CommunityMaterial.Icon.cmd_google_chrome)
             titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_chrome_reader_mode.create(context,
-                    colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_chrome_reader_mode)
             titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
-            iconDrawable = MaterialDesignDx.Icon.gmf_file_download.create(context,
-                colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_file_download)
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_sync.create(context, colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_sync)
             titleRes = R.string.tracking
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_backup.create(context, colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_backup)
             titleRes = R.string.backup
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
-            iconDrawable = MaterialDesignDx.Icon.gmf_security.create(context,
-                colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_security)
             titleRes = R.string.security
             onClick { navigateTo(SettingsSecurityController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_code.create(context, colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_code)
             titleRes = R.string.advanced
             onClick { navigateTo(SettingsAdvancedController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_volunteer_activism.create(context,
-                    colorAttr = R.attr.colorOnSurface)
+            iconDrawable = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_volunteer_activism)
             titleRes = R.string.dex_donations
             onClick {
                 val intent = Intent(Intent.ACTION_VIEW, "https://mangadex.org/support".toUri())

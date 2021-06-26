@@ -1,75 +1,54 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.asObservableSuccess
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
-import eu.kanade.tachiyomi.source.online.dto.ChapterDto
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.async
-import kotlinx.coroutines.withContext
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import okhttp3.CacheControl
+import okhttp3.Request
+import rx.Observable
 import uy.kohesive.injekt.injectLazy
-import java.util.Date
 
 class PageHandler {
 
     val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
-    val imageHandler: ImageHandler by injectLazy()
 
-    suspend fun fetchPageList(chapter: SChapter, isLogged: Boolean): List<Page> {
-        return withContext(Dispatchers.IO) {
-
-            val chapterResponse = async {
-                network.service.viewChapter(chapter.mangadex_chapter_id)
-            }
-
-            if (chapter.scanlator.equals("mangaplus", true)) {
-                val mpChpId = chapterResponse.await().body()!!.data.attributes.data.first()
-                    .substringAfterLast("/")
-                mangaPlusHandler.fetchPageList(mpChpId)
-            } else {
-
-                val service = if (isLogged) {
-                    network.authService
-                } else {
-                    network.service
+    fun fetchPageList(chapter: SChapter, isLogged: Boolean): Observable<List<Page>> {
+        if (chapter.scanlator.equals("MangaPlus")) {
+            return network.client.newCall(pageListRequest(chapter))
+                .asObservableSuccess()
+                .map { response ->
+                    val chapterId = ApiChapterParser().externalParse(response)
+                    mangaPlusHandler.fetchPageList(chapterId)
                 }
-
-                val atHomeResponse = async {
-                    service.getAtHomeServer(chapter.mangadex_chapter_id,
-                        preferences.usePort443Only())
-                }
-
-                pageListParse(chapterResponse.await().body()!!,
-                    atHomeResponse.await().body()!!,
-                    preferences.dataSaver())
-            }
         }
+
+        val atHomeRequestUrl = if (preferences.usePort443Only()) {
+            "${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}?forcePort443=true"
+        } else {
+            "${MdUtil.atHomeUrl}/${chapter.mangadex_chapter_id}"
+        }
+
+        val (client, headers) = if (isLogged) {
+            Pair(network.authClient, MdUtil.getAuthHeaders(network.headers, preferences))
+        } else {
+            Pair(network.client, network.headers)
+        }
+
+        return client.newCall(pageListRequest(chapter))
+            .asObservableSuccess()
+            .map { response ->
+                val host = MdUtil.atHomeUrlHostUrl(atHomeRequestUrl, client, headers, CacheControl.FORCE_NETWORK)
+                ApiChapterParser().pageListParse(response, host, preferences.dataSaver())
+            }
     }
 
-    fun pageListParse(
-        chapterDto: ChapterDto,
-        atHomeDto: AtHomeDto,
-        dataSaver: Boolean,
-    ): List<Page> {
-
-        val hash = chapterDto.data.attributes.hash
-        val pageArray = if (dataSaver) {
-            chapterDto.data.attributes.dataSaver.map { "/data-saver/$hash/$it" }
-        } else {
-            chapterDto.data.attributes.data.map { "/data/$hash/$it" }
-        }
-        val now = Date().time
-
-        val pages = pageArray.mapIndexed { pos, imgUrl ->
-            Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterDto.data.id)
-        }
-        
-        imageHandler.updateTokenTracker(chapterDto.data.id, now)
-
-        return pages
+    private fun pageListRequest(chapter: SChapter): Request {
+        return GET("${MdUtil.chapterUrl}${chapter.mangadex_chapter_id}", network.headers, CacheControl.FORCE_NETWORK)
     }
 }

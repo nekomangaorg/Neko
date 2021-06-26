@@ -6,6 +6,7 @@ import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.clear
+import coil.imageLoader
 import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -31,7 +32,6 @@ class BrowseSourceGridHolder(
 ) : BrowseSourceHolder(view, adapter) {
 
     private val binding = MangaGridItemBinding.bind(view)
-
     init {
         if (compact) {
             binding.textLayout.isVisible = false
@@ -51,12 +51,7 @@ class BrowseSourceGridHolder(
         // Update the title of the manga.
         binding.title.text = manga.title
         binding.compactTitle.text = binding.title.text
-        when (isFollows) {
-            true -> binding.unreadDownloadBadge.root.setStatus(manga.follow_status!!,
-                manga.favorite)
-            false -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
-
-        }
+        binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
 
         // Update the cover.
         setImage(manga)

@@ -23,8 +23,8 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="15dp"
         android:hint="@string/username"
-        app:boxStrokeColor="?attr/colorAccent"
-        app:hintTextColor="?attr/colorAccent">
+        app:boxStrokeColor="@color/colorAccent"
+        app:hintTextColor="@color/colorAccent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/username"
@@ -38,9 +38,9 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
         android:hint="@string/password"
-        app:boxStrokeColor="?attr/colorAccent"
+        app:boxStrokeColor="?colorAccent"
         app:endIconMode="password_toggle"
-        app:hintTextColor="?attr/colorAccent">
+        app:hintTextColor="?colorAccent">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
@@ -79,7 +79,7 @@
         android:id="@+id/login"
         style="@style/Theme.Widget.Button.Primary"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="55dp"
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:scaleType="fitCenter"

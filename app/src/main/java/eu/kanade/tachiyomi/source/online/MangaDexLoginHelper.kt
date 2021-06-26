@@ -2,14 +2,22 @@ package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.services.MangaDexAuthService
-import eu.kanade.tachiyomi.source.online.dto.LoginRequestDto
-import eu.kanade.tachiyomi.source.online.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.network.POST
+import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.source.online.handlers.serializers.CheckTokenResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.LoginRequest
+import eu.kanade.tachiyomi.source.online.handlers.serializers.LoginResponse
+import eu.kanade.tachiyomi.source.online.handlers.serializers.RefreshTokenRequest
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import kotlinx.serialization.decodeFromString
+import okhttp3.CacheControl
+import okhttp3.Headers
+import okhttp3.MediaType.Companion.toMediaType
+import okhttp3.RequestBody.Companion.toRequestBody
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 
@@ -23,10 +31,10 @@ import java.util.concurrent.TimeUnit
 
 class MangaDexLoginHelper {
 
-    val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
+    val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
 
-    suspend fun isAuthenticated(): Boolean {
+    suspend fun isAuthenticated(authHeaders: Headers): Boolean {
         val lastRefreshTime = preferences.lastRefreshTime()
         XLog.i("last refresh time $lastRefreshTime")
         XLog.i("current time ${System.currentTimeMillis()}")
@@ -35,28 +43,31 @@ class MangaDexLoginHelper {
             return true
         }
         XLog.i("token was not refreshed recently hit dex auth check")
-        val checkTokenResponse = authService.checkToken()
-        XLog.i("check token is authenticated ${checkTokenResponse.body()!!.isAuthenticated}")
-        return checkTokenResponse.body()!!.isAuthenticated
+        val response = network.client.newCall(GET(MdUtil.checkTokenUrl, authHeaders, CacheControl.FORCE_NETWORK)).await()
+        val body = MdUtil.jsonParser.decodeFromString<CheckTokenResponse>(response.body!!.string())
+        return body.isAuthenticated
     }
 
-    suspend fun refreshToken(): Boolean {
+    suspend fun refreshToken(authHeaders: Headers): Boolean {
         val refreshToken = preferences.refreshToken()
         if (refreshToken.isNullOrEmpty()) {
             XLog.i("refresh token is null can't refresh token")
             return false
         }
-        val refreshTokenResponse = authService.refreshToken(RefreshTokenDto(refreshToken))
+        val result = RefreshTokenRequest(refreshToken)
+        val jsonString = MdUtil.jsonParser.encodeToString(RefreshTokenRequest.serializer(), result)
+        val postResult = network.client.newCall(
+            POST(
+                MdUtil.refreshTokenUrl,
+                authHeaders,
+                jsonString.toRequestBody("application/json".toMediaType())
+            )
+        ).await()
 
+        val jsonResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
+        preferences.setTokens(jsonResponse.token.refresh, jsonResponse.token.session)
         XLog.i("refreshing token")
-        val refreshTokenDto = refreshTokenResponse.body()!!
-        val result = refreshTokenDto.result == "ok"
-        if (result) {
-            preferences.setTokens(refreshTokenDto.token.refresh,
-                refreshTokenDto.token.session)
-        }
-
-        return result
+        return jsonResponse.result == "ok"
     }
 
     suspend fun login(
@@ -64,19 +75,25 @@ class MangaDexLoginHelper {
         password: String,
     ): Boolean {
         return withContext(Dispatchers.IO) {
-            val loginRequest = LoginRequestDto(username, password)
-            val loginResponse = authService.login(loginRequest)
+            val loginRequest = LoginRequest(username, password)
 
-            if (loginResponse.code() == 200) {
-                val loginResponseDto = loginResponse.body()!!
-                preferences.setTokens(loginResponseDto.token.refresh,
-                    loginResponseDto.token.session)
+            val jsonString = MdUtil.jsonParser.encodeToString(LoginRequest.serializer(), loginRequest)
+
+            val postResult = network.client.newCall(
+                POST(
+                    url = MdUtil.loginUrl,
+                    body = jsonString.toRequestBody("application/json".toMediaType())
+                )
+            ).await()
+
+            if (postResult.code == 200) {
+                val loginResponse = MdUtil.jsonParser.decodeFromString<LoginResponse>(postResult.body!!.string())
+                preferences.setRefreshToken(loginResponse.token.refresh)
+                preferences.setSessionToken(loginResponse.token.session)
                 preferences.setSourceCredentials(MangaDex(), username, password)
                 return@withContext true
-            } else {
-                preferences.setTokens("", "")
-                return@withContext false
             }
+            return@withContext false
         }
     }
 

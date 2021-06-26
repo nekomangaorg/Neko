@@ -139,12 +139,17 @@ dependencies {
     releaseImplementation(Libs.Network.chuckerNoOp)
 
     // hyperion
-    val hyperionVersion = "0.9.31"
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
+    debugImplementation(Libs.Hyperion.attr)
+    debugImplementation(Libs.Hyperion.buildConfig)
+    debugImplementation(Libs.Hyperion.core)
+    debugImplementation(Libs.Hyperion.crash)
+    debugImplementation(Libs.Hyperion.disk)
+    debugImplementation(Libs.Hyperion.geigerCounter)
+    debugImplementation(Libs.Hyperion.measurement)
+    debugImplementation(Libs.Hyperion.phoenix)
+    debugImplementation(Libs.Hyperion.recorder)
+    debugImplementation(Libs.Hyperion.sharedPreferences)
+    debugImplementation(Libs.Hyperion.timber)
 
     // REST
     implementation(Libs.Network.retrofit)
@@ -174,8 +179,9 @@ dependencies {
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.0-kotlin@aar")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.5.0")
-    implementation("com.google.android.gms:play-services-gcm:17.0.0")
+    implementation(Libs.Android.workManager)
+    implementation(Libs.Android.workManagerKtx)
+    implementation(Libs.Google.playServices)
 
     // Changelog
     implementation(Libs.Util.changelog)
@@ -221,7 +227,6 @@ dependencies {
     implementation(Libs.UI.directionalPageView)
     implementation(Libs.UI.viewToolTip)
     implementation(Libs.UI.tapTargetView)
-    implementation(Libs.UI.cascade)
 
     // Conductor
     implementation(Libs.Navigation.conductor)
@@ -257,13 +262,7 @@ dependencies {
     // needed to compile with token bucket
     implementation(Libs.Util.listenableFutureConflictResolve)
 
-    //helpers
-    implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:3.0.5")
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.12")
-
-
     implementation(Libs.Util.aboutLibraries)
-
 }
 
 tasks {

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.backup.full
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.backup.RestoreHelper
 import eu.kanade.tachiyomi.data.backup.full.models.BackupCategory
@@ -10,7 +11,10 @@ import eu.kanade.tachiyomi.data.backup.full.models.BackupSerializer
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
+import eu.kanade.tachiyomi.v5.db.V5DbQueries
 import kotlinx.coroutines.Job
 import okio.buffer
 import okio.gzip
@@ -44,17 +48,16 @@ class FullRestore(val context: Context, val job: Job?) {
     private val trackingErrors = mutableListOf<String>()
 
     private val db: DatabaseHelper by injectLazy()
+    internal val dbV5: V5DbHelper by injectLazy()
     internal val trackManager: TrackManager by injectLazy()
 
     suspend fun restoreBackup(uri: Uri) {
         backupManager = FullBackupManager(context)
 
-        val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer()
-            .use { it.readByteArray() }
+        val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use { it.readByteArray() }
         val backup = backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
 
-        val partitionedList =
-            backup.backupManga.partition { backupManager.sourceManager.isMangadex(it.source) }
+        val partitionedList = backup.backupManga.partition { backupManager.sourceManager.isMangadex(it.source) }
 
         val dexManga = partitionedList.first
         skippedTitles = partitionedList.second.map { it.title }
@@ -81,16 +84,7 @@ class FullRestore(val context: Context, val job: Job?) {
         errors.addAll(tmpErrors)
 
         val logFile = restoreHelper.writeErrorLog(errors, skippedAmount, skippedTitles)
-        restoreHelper.showResultNotification(logFile.parent,
-            logFile.name,
-            categoriesAmount,
-            restoreProgress,
-            restoreAmount,
-            skippedAmount,
-            totalAmount,
-            cancelled,
-            errors,
-            trackingErrors)
+        restoreHelper.showResultNotification(logFile.parent, logFile.name, categoriesAmount, restoreProgress, restoreAmount, skippedAmount, totalAmount, cancelled, errors, trackingErrors)
     }
 
     private fun restoreCategories(backupCategories: List<BackupCategory>) {
@@ -105,9 +99,7 @@ class FullRestore(val context: Context, val job: Job?) {
     private fun restoreManga(backupManga: BackupManga, backupCategories: List<BackupCategory>) {
         try {
             if (job?.isCancelled == false) {
-                restoreHelper.showProgressNotification(restoreProgress,
-                    totalAmount,
-                    backupManga.title)
+                restoreHelper.showProgressNotification(restoreProgress, totalAmount, backupManga.title)
                 restoreProgress += 1
             } else {
                 throw java.lang.Exception("Job was cancelled")
@@ -120,6 +112,16 @@ class FullRestore(val context: Context, val job: Job?) {
 
             var dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
+
+            // If it is an old pre-V5 manga try to find the new id
+            val oldMangaId = MdUtil.getMangaId(manga.url)
+            val isNumericId = oldMangaId.isDigitsOnly()
+            if (isNumericId) {
+                val newMangaId = V5DbQueries.getNewMangaId(dbV5.idDb, oldMangaId)
+                if (newMangaId.isNotBlank()) {
+                    manga.url = "/title/$newMangaId"
+                }
+            }
 
             if (dbMangaExists) {
                 backupManager.restoreMangaNoFetch(manga, dbManga!!)

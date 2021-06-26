@@ -6,10 +6,13 @@ import eu.kanade.tachiyomi.data.external.AnimePlanet
 import eu.kanade.tachiyomi.data.external.Dex
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.external.MangaUpdates
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import tachiyomi.source.model.MangaInfo
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Locale
 
 interface Manga : SManga {
@@ -56,8 +59,7 @@ interface Manga : SManga {
         else sortDescending()
     }
 
-    fun showChapterTitle(defaultShow: Boolean): Boolean =
-        chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
+    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and DISPLAY_MASK == DISPLAY_NUMBER
 
     fun seriesType(context: Context): String {
         return context.getString(
@@ -94,23 +96,22 @@ interface Manga : SManga {
      * read types
      */
     fun defaultReaderType(): Int {
-        val currentTags = genre?.split(",")?.map { it.trim().lowercase(Locale.US) }
-        return when {
-            currentTags?.any
+        val sourceName = Injekt.get<SourceManager>().getMangadex().name
+        val currentTags = genre?.split(",")?.map { it.trim().toLowerCase(Locale.US) }
+        return if (currentTags?.any
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
-            } == true -> {
-                ReaderActivity.WEBTOON
-            }
-            currentTags?.any
+            } == true
+        ) {
+            ReaderActivity.WEBTOON
+        } else if (currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
-            } == true -> {
-                ReaderActivity.LEFT_TO_RIGHT
-            }
-            else -> 0
-        }
+            } == true
+        ) {
+            ReaderActivity.LEFT_TO_RIGHT
+        } else 0
     }
 
     fun key(): String {
@@ -204,6 +205,14 @@ interface Manga : SManga {
 }
 
 fun Manga.isLongStrip() = this.genre?.contains("long strip", true) ?: false
+
+fun Manga.potentialAltThumbnail(): String? {
+    // ignore null and already small thumbs
+    if (thumbnail_url == null || thumbnail_url!!.contains(".thumb.jpg")) {
+        return null
+    }
+    return thumbnail_url!!.replace(".jpg", ".thumb.jpg")
+}
 
 fun Manga.toMangaInfo(): MangaInfo {
     return MangaInfo(

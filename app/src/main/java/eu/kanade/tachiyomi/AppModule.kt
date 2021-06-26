@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.library.CustomMangaManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -14,14 +15,14 @@ import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
-import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
+import eu.kanade.tachiyomi.source.online.handlers.PopularHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.v5.db.V5DbHelper
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -51,6 +52,8 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingletonFactory { DownloadManager(app) }
 
+        addSingletonFactory { CustomMangaManager(app) }
+
         addSingletonFactory { TrackManager(app) }
 
         addSingletonFactory { Gson() }
@@ -58,6 +61,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
+
+        addSingletonFactory { V5DbHelper(app.applicationContext) }
 
         addSingleton(FilterHandler())
 
@@ -67,19 +72,17 @@ class AppModule(val app: Application) : InjektModule {
 
         addSingleton(ApiMangaParser())
 
+        addSingleton(PopularHandler())
+
         addSingleton(SearchHandler())
 
         addSingleton(PageHandler())
-
-        addSingleton(ImageHandler())
 
         addSingleton(SimilarHandler())
 
         addSingleton(MangaDexLoginHelper())
 
         addSingleton(MangaPlusHandler())
-
-        addSingleton(StatusHandler())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 
@@ -98,5 +101,7 @@ class AppModule(val app: Application) : InjektModule {
         GlobalScope.launch { get<DatabaseHelper>() }
 
         GlobalScope.launch { get<DownloadManager>() }
+
+        GlobalScope.launch { get<CustomMangaManager>() }
     }
 }

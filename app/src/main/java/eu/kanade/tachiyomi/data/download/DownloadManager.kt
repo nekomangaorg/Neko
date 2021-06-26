@@ -248,9 +248,7 @@ class DownloadManager(val context: Context) {
                 }
                 queue.remove(chapters)
                 val chapterDirs =
-                    provider.findChapterDirs(chapters,
-                        manga,
-                        source) + provider.findTempChapterDirs(
+                    provider.findChapterDirs(chapters, manga, source) + provider.findTempChapterDirs(
                         chapters,
                         manga,
                         source
@@ -281,13 +279,7 @@ class DownloadManager(val context: Context) {
      * @param manga the manga of the chapters.
      * @param source the source of the chapters.
      */
-    fun cleanupChapters(
-        allChapters: List<Chapter>,
-        manga: Manga,
-        source: Source,
-        removeRead: Boolean,
-        removeNonFavorite: Boolean,
-    ): Int {
+    fun cleanupChapters(allChapters: List<Chapter>, manga: Manga, source: Source, removeRead: Boolean, removeNonFavorite: Boolean): Int {
         var cleaned = 0
 
         if (removeNonFavorite && !manga.favorite) {
@@ -380,11 +372,11 @@ class DownloadManager(val context: Context) {
         }
     }
 
+    fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
+    fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
+
     // forceRefresh the cache
     fun refreshCache() {
         cache.forceRenewCache()
     }
-
-    fun addListener(listener: DownloadQueue.DownloadListener) = queue.addListener(listener)
-    fun removeListener(listener: DownloadQueue.DownloadListener) = queue.removeListener(listener)
 }

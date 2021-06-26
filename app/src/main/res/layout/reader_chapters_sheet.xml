@@ -54,7 +54,7 @@
             android:background="?selectableItemBackgroundBorderless"
             android:contentDescription="@string/open_in_webview"
             android:padding="@dimen/material_layout_keylines_screen_edge_margin"
-            android:tooltipText="@string/comments"
+            android:tooltipText="@string/view_comments"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/webview_button"
             app:layout_constraintHorizontal_chainStyle="spread"

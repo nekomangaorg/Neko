@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.network
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.runBlocking
 import okhttp3.Authenticator
+import okhttp3.Headers
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.Route
@@ -23,19 +25,17 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
 
     @Synchronized
     fun refreshToken(loginHelper: MangaDexLoginHelper): String {
-        var validated = false
+        var validated: Boolean = false
 
         runBlocking {
-            val checkToken =
-                loginHelper.isAuthenticated()
+            val checkToken = loginHelper.isAuthenticated(MdUtil.getAuthHeaders(Headers.Builder().build(), loginHelper.preferences))
             if (checkToken) {
                 XLog.i("Token is valid, other thread must have refreshed it")
                 validated = true
             }
             if (validated.not()) {
                 XLog.i("Token is invalid trying to refresh")
-                validated =
-                    loginHelper.refreshToken()
+                validated = loginHelper.refreshToken(MdUtil.getAuthHeaders(Headers.Builder().build(), loginHelper.preferences))
             }
 
             if (validated.not()) {

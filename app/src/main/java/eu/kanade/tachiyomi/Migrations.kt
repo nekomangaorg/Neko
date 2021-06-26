@@ -75,12 +75,6 @@ object Migrations {
                 }
                 // Reset rotation to Free after replacing Lock
                 preferences.rotation().set(1)
-                // Handle removed every 1 or 2, 3 hour library updates
-                val updateInterval = preferences.libraryUpdateInterval().get()
-                if (updateInterval == 1 || updateInterval == 2 || updateInterval == 3) {
-                    preferences.libraryUpdateInterval().set(6)
-                    LibraryUpdateJob.setupTask(6)
-                }
             }
             return true
         }

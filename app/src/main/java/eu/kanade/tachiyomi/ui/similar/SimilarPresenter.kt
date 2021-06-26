@@ -21,7 +21,7 @@ import uy.kohesive.injekt.api.get
 class SimilarPresenter(
     val mangaId: Long,
     private val controller: SimilarController,
-    val preferences: PreferencesHelper = Injekt.get(),
+    val preferences: PreferencesHelper = Injekt.get()
 ) : BrowseSourcePresenter() {
 
     var manga: Manga? = null
@@ -39,7 +39,7 @@ class SimilarPresenter(
                 isRefreshing = true
                 try {
                     val manga = db.getManga(mangaId).executeAsBlocking()
-                    source.fetchSimilarManga(manga!!, true)
+                    source.fetchMangaSimilarObservable(manga!!, true).toBlocking().first()
                     isRefreshing = false
                     withContext(Dispatchers.Main) {
                         controller.showUserMessage("Updated Similar Manga")

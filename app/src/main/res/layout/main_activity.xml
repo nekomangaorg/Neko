@@ -119,7 +119,7 @@
                                 android:layout_gravity="center"
                                 android:maxLines="1"
                                 android:textColor="?actionBarTintColor"
-                                android:fontFamily="@font/montserrat_medium"
+                                android:fontFamily="@font/metropolis_medium"
                                 android:textSize="20sp"
                                 tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
                                 tools:drawableStart="@drawable/ic_blank_24dp"

@@ -24,8 +24,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
@@ -38,11 +36,11 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,7 +51,6 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -67,7 +64,7 @@ class ReaderPresenter(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get(),
+    private val chapterFilter: ChapterFilter = Injekt.get()
 ) : BasePresenter<ReaderActivity>() {
 
     /**
@@ -110,8 +107,7 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
+        val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
@@ -129,8 +125,6 @@ class ReaderPresenter(
     var chapterItems = emptyList<ReaderChapterItem>()
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
-
-    private val statusHandler: StatusHandler by injectLazy()
 
     private var hasTrackers: Boolean = false
     private val checkTrackers: (Manga) -> Unit = { manga ->
@@ -217,9 +211,7 @@ class ReaderPresenter(
         chapterItems = withContext(Dispatchers.IO) {
             val dbChapters = db.getChapters(manga).executeAsBlocking()
             val list =
-                chapterFilter.filterChaptersForReader(dbChapters,
-                    manga,
-                    getCurrentChapter()?.chapter)
+                chapterFilter.filterChaptersForReader(dbChapters, manga, getCurrentChapter()?.chapter)
                     .sortedBy {
                         when (manga.sorting) {
                             Manga.SORTING_NUMBER -> it.chapter_number
@@ -305,7 +297,7 @@ class ReaderPresenter(
      */
     private fun getLoadObservable(
         loader: ChapterLoader,
-        chapter: ReaderChapter,
+        chapter: ReaderChapter
     ): Observable<ViewerChapters> {
         return loader.loadChapter(chapter)
             .andThen(
@@ -344,7 +336,7 @@ class ReaderPresenter(
         }
         val mangaDex = sourceManager.getMangadex()
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
-        val url = "/title/$mangaId"
+        val url = "/title/$mangaId/"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
         val tempManga = dbManga ?: (
             MangaImpl().apply {
@@ -477,8 +469,7 @@ class ReaderPresenter(
         selectedChapter.chapter.last_page_read = page.index
         selectedChapter.chapter.pages_left =
             (selectedChapter.pages?.size ?: page.index) - page.index
-        val shouldTrack =
-            !preferences.incognitoMode().get() || hasTrackers || preferences.readingSync()
+        val shouldTrack = !preferences.incognitoMode().get() || hasTrackers
         if (shouldTrack &&
             // For double pages, check if the second to last page is doubled up
             (
@@ -488,7 +479,6 @@ class ReaderPresenter(
         ) {
             selectedChapter.chapter.read = true
             updateTrackChapterRead(selectedChapter)
-            updateReadingStatus(selectedChapter)
             deleteChapterIfNeeded(selectedChapter)
         }
 
@@ -642,7 +632,7 @@ class ReaderPresenter(
     private fun parseChapterName(
         chapterName: String,
         pageNumber: String,
-        scanlator: String?,
+        scanlator: String?
     ): String {
         val builder = StringBuilder()
         var title = ""
@@ -676,14 +666,7 @@ class ReaderPresenter(
     /**
      * Saves the image of this [page] in the given [directory] and returns the file location.
      */
-    private fun saveImages(
-        page1: ReaderPage,
-        page2: ReaderPage,
-        isLTR: Boolean,
-        @ColorInt bg: Int,
-        directory: File,
-        manga: Manga,
-    ): File {
+    private fun saveImages(page1: ReaderPage, page2: ReaderPage, isLTR: Boolean, @ColorInt bg: Int, directory: File, manga: Manga): File {
         val stream1 = page1.stream!!
         ImageUtil.findImageType(stream1) ?: throw Exception("Not an image")
         val stream2 = page2.stream!!
@@ -751,12 +734,7 @@ class ReaderPresenter(
             )
     }
 
-    fun saveImages(
-        firstPage: ReaderPage,
-        secondPage: ReaderPage,
-        isLTR: Boolean,
-        @ColorInt bg: Int,
-    ) {
+    fun saveImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
         scope.launch {
             if (firstPage.status != Page.READY) return@launch
             if (secondPage.status != Page.READY) return@launch
@@ -808,12 +786,7 @@ class ReaderPresenter(
             )
     }
 
-    fun shareImages(
-        firstPage: ReaderPage,
-        secondPage: ReaderPage,
-        isLTR: Boolean,
-        @ColorInt bg: Int,
-    ) {
+    fun shareImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
         scope.launch {
             if (firstPage.status != Page.READY) return@launch
             if (secondPage.status != Page.READY) return@launch
@@ -872,13 +845,6 @@ class ReaderPresenter(
         class Error(val error: Throwable) : SaveImageResult()
     }
 
-    private fun updateReadingStatus(readerChapter: ReaderChapter) {
-        if (preferences.readingSync().not() && readerChapter.chapter.isMergedChapter().not()) return
-        launchIO {
-            statusHandler.markChapterRead(readerChapter.chapter.mangadex_chapter_id)
-        }
-    }
-
     /**
      * Starts the service that updates the last chapter read in sync services. This operation
      * will run in a background thread and errors are ignored.
@@ -892,21 +858,22 @@ class ReaderPresenter(
         val trackManager = Injekt.get<TrackManager>()
 
         // We wan't these to execute even if the presenter is destroyed so launch on GlobalScope
-        launchIO {
-            val trackList = db.getTracks(manga).executeAsBlocking()
-            trackList.map { track ->
-                val service = trackManager.getService(track.sync_id)
-                if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
-                    try {
-                        track.last_chapter_read = chapterRead
-                        service.update(track, true)
-                        db.insertTrack(track).executeAsBlocking()
-                    } catch (e: Exception) {
-                        XLog.e(e)
+        GlobalScope.launch {
+            withContext(Dispatchers.IO) {
+                val trackList = db.getTracks(manga).executeAsBlocking()
+                trackList.map { track ->
+                    val service = trackManager.getService(track.sync_id)
+                    if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
+                        try {
+                            track.last_chapter_read = chapterRead
+                            service.update(track, true)
+                            db.insertTrack(track).executeAsBlocking()
+                        } catch (e: Exception) {
+                            XLog.e(e)
+                        }
                     }
                 }
             }
-
         }
     }
 

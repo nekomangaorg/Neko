@@ -8,15 +8,14 @@ class ReaderPage(
     index: Int,
     url: String = "",
     imageUrl: String? = null,
-    mangaDexChapterId: String = "",
     var stream: (() -> InputStream)? = null,
     var bg: Drawable? = null,
     var bgType: Int? = null,
     /** Value to check if this page is used to as if it was too wide */
     var shiftedPage: Boolean = false,
     /** Value to check if a page is can be doubled up, but can't because the next page is too wide */
-    var isolatedPage: Boolean = false,
-) : Page(index, url, imageUrl, mangaDexChapterId, uri = null) {
+    var isolatedPage: Boolean = false
+) : Page(index, url, imageUrl, null) {
 
     lateinit var chapter: ReaderChapter
 

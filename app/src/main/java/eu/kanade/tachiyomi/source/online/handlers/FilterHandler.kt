@@ -4,10 +4,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import okhttp3.HttpUrl
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
-class FilterHandler {
+class FilterHandler() {
 
     val preferencesHelper: PreferencesHelper by injectLazy()
 
@@ -26,15 +27,9 @@ class FilterHandler {
             val set = preferencesHelper.contentRatingSelections()
             val contentRating = listOf(
                 ContentRating("Safe").apply { state = set.contains(MdUtil.contentRatingSafe) },
-                ContentRating("Suggestive").apply {
-                    state = set.contains(MdUtil.contentRatingSuggestive)
-                },
-                ContentRating("Erotica").apply {
-                    state = set.contains(MdUtil.contentRatingErotica)
-                },
-                ContentRating("Pornographic").apply {
-                    state = set.contains(MdUtil.contentRatingPornographic)
-                },
+                ContentRating("Suggestive").apply { state = set.contains(MdUtil.contentRatingSuggestive) },
+                ContentRating("Erotica").apply { state = set.contains(MdUtil.contentRatingErotica) },
+                ContentRating("Pornographic").apply { state = set.contains(MdUtil.contentRatingPornographic) },
             )
 
             filters.add(2, ContentRatingList(contentRating))
@@ -95,7 +90,7 @@ class FilterHandler {
         Tag("4d32cc48-9f00-4cca-9b5a-a839f0764984", "Comedy"),
         Tag("ea2bc92d-1c26-4930-9b7c-d5c0dc1b6869", "Cooking"),
         Tag("5ca48985-9a9d-4bd8-be29-80dc0303db72", "Crime"),
-        Tag("9ab53f92-3eed-4e9b-903a-917c86035ee3", "Crossdressing"),
+        Tag("489dd859-9b61-4c37-af75-5b18e88daafc", "Crossdressing"),
         Tag("da2d50ca-3018-4cc0-ac7a-6b7d472a29ea", "Delinquents"),
         Tag("39730448-9a5f-48a2-85b0-a70db87b1233", "Demons"),
         Tag("b13b2a48-c720-44a9-9c77-39c9979373fb", "Doujinshi"),
@@ -177,92 +172,99 @@ class FilterHandler {
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
 
-    fun getQueryMap(filters: FilterList): Map<String, Any> {
-        val queryMap = mutableMapOf<String, Any>()
-
-        val originalLanguageList = mutableListOf<String>() //originalLanguage[]
-        val contentRatingList = mutableListOf<String>() //contentRating[]
-        val demographicList = mutableListOf<String>()//publicationDemographic[]
-        val statusList = mutableListOf<String>()//status[]
-        val includeTagList = mutableListOf<String>()//includedTags[]
-        val excludeTagList = mutableListOf<String>()//excludedTags[]
-
-        // add filters
-        filters.forEach { filter ->
-            when (filter) {
-                is OriginalLanguageList -> {
-                    filter.state.filter { lang -> lang.state }
-                        .forEach { lang ->
-                            if (lang.isoCode == "zh") {
-                                originalLanguageList.add("zh-hk")
+    fun addFiltersToUrl(url: HttpUrl.Builder, filters: FilterList): String {
+        url.apply {
+            // add filters
+            filters.forEach { filter ->
+                when (filter) {
+                    is OriginalLanguageList -> {
+                        filter.state.forEach { lang ->
+                            if (lang.state) {
+                                // dex has zh and zh-hk for chinese manhua
+                                if (lang.isoCode == "zh") {
+                                    addQueryParameter(
+                                        "originalLanguage[]",
+                                        "zh-hk"
+                                    )
+                                }
+                                addQueryParameter(
+                                    "originalLanguage[]",
+                                    lang.isoCode
+                                )
                             }
-                            originalLanguageList.add(lang.isoCode)
-                        }
-                }
-                is ContentRatingList -> {
-                    filter.state.filter { rating -> rating.state }
-                        .forEach { rating ->
-                            contentRatingList.add(rating.name.lowercase(Locale.US))
-                        }
-                }
-                is DemographicList -> {
-                    filter.state.filter { demographic -> demographic.state }
-                        .forEach { demographic ->
-                            demographicList.add(demographic.name.lowercase(Locale.US))
-                        }
-                }
-                is StatusList -> {
-                    filter.state.filter { status -> status.state }
-                        .forEach { status ->
-                            statusList.add(status.name.lowercase(Locale.US))
-                        }
-                }
-                is SortFilter -> {
-                    if (filter.state != null && filter.state!!.index != 0) {
-                        val query = sortableList[filter.state!!.index].second
-                        val value = when (filter.state!!.ascending) {
-                            true -> "asc"
-                            false -> "desc"
-                        }
-                        queryMap["order[$query]"] = value
-                    }
-                }
-                is TagList -> {
-                    filter.state.forEach { tag ->
-                        if (tag.isIncluded()) {
-                            includeTagList.add(tag.id)
-                        } else if (tag.isExcluded()) {
-                            excludeTagList.add(tag.id)
                         }
                     }
-                }
-                is TagInclusionMode -> {
-                    queryMap["includedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
-                }
-                is TagExclusionMode -> {
-                    queryMap["excludedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
+                    is ContentRatingList -> {
+                        filter.state.forEach { rating ->
+                            if (rating.state) {
+                                addQueryParameter(
+                                    "contentRating[]",
+                                    rating.name.toLowerCase(Locale.US)
+                                )
+                            }
+                        }
+                    }
+                    is DemographicList -> {
+                        filter.state.forEach { demographic ->
+                            if (demographic.state) {
+                                addQueryParameter(
+                                    "publicationDemographic[]",
+                                    demographic.name.toLowerCase(
+                                        Locale.US
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    is StatusList -> {
+                        filter.state.forEach { status ->
+                            if (status.state) {
+                                addQueryParameter(
+                                    "status[]",
+                                    status.name.toLowerCase(
+                                        Locale.US
+                                    )
+                                )
+                            }
+                        }
+                    }
+                    is SortFilter -> {
+                        if (filter.state != null) {
+                            if (filter.state!!.index != 0) {
+                                val query = sortableList[filter.state!!.index].second
+                                val value = when (filter.state!!.ascending) {
+                                    true -> "asc"
+                                    false -> "desc"
+                                }
+                                addQueryParameter("order[$query]", value)
+                            }
+                        }
+                    }
+                    is TagList -> {
+                        filter.state.forEach { tag ->
+                            if (tag.isIncluded()) {
+                                addQueryParameter("includedTags[]", tag.id)
+                            } else if (tag.isExcluded()) {
+                                addQueryParameter("excludedTags[]", tag.id)
+                            }
+                        }
+                    }
+                    is TagInclusionMode -> {
+                        addQueryParameter(
+                            "includedTagsMode",
+                            filter.values[filter.state].toUpperCase(Locale.US)
+                        )
+                    }
+                    is TagExclusionMode -> {
+                        addQueryParameter(
+                            "excludedTagsMode",
+                            filter.values[filter.state].toUpperCase(Locale.US)
+                        )
+                    }
                 }
             }
         }
-        if (originalLanguageList.isNotEmpty()) {
-            queryMap["originalLanguage[]"] = originalLanguageList
-        }
-        if (contentRatingList.isNotEmpty()) {
-            queryMap["contentRating[]"] = contentRatingList
-        }
-        if (demographicList.isNotEmpty()) {
-            queryMap["publicationDemographic[]"] = demographicList
-        }
-        if (statusList.isNotEmpty()) {
-            queryMap["status[]"] = statusList
-        }
-        if (includeTagList.isNotEmpty()) {
-            queryMap["includedTags[]"] = includeTagList
-        }
-        if (excludeTagList.isNotEmpty()) {
-            queryMap["excludedTags[]"] = excludeTagList
-        }
 
-        return queryMap
+        return url.toString()
     }
 }

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.view.View
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import coil.Coil
 import coil.clear
@@ -20,10 +19,7 @@ import eu.kanade.tachiyomi.databinding.MangaListItemBinding
  * @param adapter the adapter handling this holder.
  * @constructor creates a new catalogue holder.
  */
-class BrowseSourceListHolder(
-    private val view: View,
-    adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
-) :
+class BrowseSourceListHolder(private val view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>) :
     BrowseSourceHolder(view, adapter) {
 
     private val binding = MangaListItemBinding.bind(view)
@@ -36,8 +32,7 @@ class BrowseSourceListHolder(
      */
     override fun onSetValues(manga: Manga) {
         binding.title.text = manga.title
-        binding.inLibraryBadge.badge.isVisible = manga.favorite
-
+        binding.inLibraryBadge.badge.visibility = if (manga.favorite) View.VISIBLE else View.GONE
         setImage(manga)
     }
 

@@ -1,15 +1,14 @@
 package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.view.View
+import androidx.appcompat.widget.PopupMenu
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.widget.cascadeMenuStyler
-import me.saket.cascade.CascadePopupMenu
 
 open class BaseChapterHolder(
     view: View,
-    private val adapter: BaseChapterAdapter<*>,
+    private val adapter: BaseChapterAdapter<*>
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     init {
@@ -25,29 +24,23 @@ open class BaseChapterHolder(
         } else {
             downloadButton.post {
                 // Create a PopupMenu, giving it the clicked view for an anchor
-                val popup = CascadePopupMenu(downloadButton.context,
-                    downloadButton,
-                    styler = cascadeMenuStyler(downloadButton.context))
+                val popup = PopupMenu(downloadButton.context, downloadButton)
 
                 // Inflate our menu resource into the PopupMenu's Menu
-                popup.inflate(R.menu.chapter_download)
+                popup.menuInflater.inflate(R.menu.chapter_download, popup.menu)
 
-                popup.menu.findItem(R.id.action_start).isVisible =
-                    chapter.status == Download.State.QUEUE
+                popup.menu.findItem(R.id.action_start).isVisible = chapter.status == Download.State.QUEUE
 
                 // Hide download and show delete if the chapter is downloaded
-                if (chapter.status != Download.State.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title =
-                    downloadButton.context.getString(
-                        R.string.cancel
-                    )
+                if (chapter.status != Download.State.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title = downloadButton.context.getString(
+                    R.string.cancel
+                )
 
                 // Set a listener so we are notified if a menu item is clicked
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
-                        R.id.action_delete -> adapter.baseDelegate.downloadChapter(
-                            flexibleAdapterPosition)
-                        R.id.action_start -> adapter.baseDelegate.startDownloadNow(
-                            flexibleAdapterPosition)
+                        R.id.action_delete -> adapter.baseDelegate.downloadChapter(flexibleAdapterPosition)
+                        R.id.action_start -> adapter.baseDelegate.startDownloadNow(flexibleAdapterPosition)
                     }
                     true
                 }
