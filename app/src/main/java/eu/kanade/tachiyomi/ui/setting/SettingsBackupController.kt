@@ -136,14 +136,14 @@ class SettingsBackupController : SettingsController() {
                 preferences.backupInterval().asImmediateFlow { isVisible = it > 0 }
                     .launchIn(viewScope)
             }
-            switchPreference {
-                key = Keys.createLegacyBackup
-                titleRes = R.string.also_create_legacy_backup
-                defaultValue = true
+            /* switchPreference {
+                 key = Keys.createLegacyBackup
+                 titleRes = R.string.also_create_legacy_backup
+                 defaultValue = true
 
-                preferences.backupInterval().asImmediateFlow { isVisible = it > 0 }
-                    .launchIn(viewScope)
-            }
+                 preferences.backupInterval().asImmediateFlow { isVisible = it > 0 }
+                     .launchIn(viewScope)
+             }*/
         }
     }
 
