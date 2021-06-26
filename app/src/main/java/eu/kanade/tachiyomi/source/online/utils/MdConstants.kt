@@ -7,10 +7,13 @@ object MdConstants {
     const val cdnUrl = "https://uploads.mangadex.org"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
 
-    const val coverArt = "cover_art"
-    const val scanlator = "scanlation_group"
-    const val author = "author"
-    const val artist = "artist"
+    object Types {
+        const val author = "author"
+        const val artist = "artist"
+        const val coverArt = "cover_art"
+        const val manga = "manga"
+        const val scanlator = "scanlation_group"
+    }
 
     val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(5)
 }

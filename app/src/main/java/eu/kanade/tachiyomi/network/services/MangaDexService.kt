@@ -22,15 +22,15 @@ import retrofit2.http.QueryMap
 interface MangaDexService : MangaDexImageService {
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}?includes[]=${MdConstants.coverArt}")
+    @GET("${MdApi.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): Response<MangaListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.coverArt}&includes[]=${MdConstants.author}&includes[]=${MdConstants.artist}")
+    @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
     suspend fun viewManga(@Path("id") id: String): Response<MangaDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.scanlator}")
+    @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.Types.scanlator}")
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,

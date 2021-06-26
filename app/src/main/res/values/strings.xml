@@ -965,6 +965,7 @@
 
 
     <!-- Follows -->
+    <string name="status_channel">Manga status sync</string>
     <string name="follows">My follows</string>
     <string name="add_to_follows">Add to MangaDex follows</string>
     <string name="follows_status">Follows Sstatus</string>

@@ -32,11 +32,11 @@ class ApiMangaParser {
             manga.description = MdUtil.cleanDescription(mangaAttributesDto.description["en"]!!)
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
-                relationshipDto.type.equals(MdConstants.author, true)
+                relationshipDto.type.equals(MdConstants.Types.author, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
             val artists = mangaDto.relationships.filter { relationshipDto ->
-                relationshipDto.type.equals(MdConstants.artist, true)
+                relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
 
@@ -154,15 +154,6 @@ class ApiMangaParser {
         "cancelled" -> SManga.CANCELLED
         "hiatus" -> SManga.HIATUS
         else -> SManga.UNKNOWN
-    }
-
-    /**
-     * Parse for the random manga id from the [MdUtil.randMangaPage] response.
-     */
-    fun randomMangaIdParse(response: Response): String {
-        val manga = MdUtil.jsonParser.decodeFromString(MangaDto.serializer(),
-            response.body!!.string())
-        return manga.data.id
     }
 
     fun chapterListParse(

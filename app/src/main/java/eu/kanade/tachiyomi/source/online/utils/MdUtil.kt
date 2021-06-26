@@ -1,17 +1,11 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
-import okhttp3.CacheControl
 import okhttp3.Headers
-import okhttp3.HttpUrl.Companion.toHttpUrl
-import okhttp3.OkHttpClient
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -26,41 +20,21 @@ class MdUtil {
         const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound =
             "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-        const val atHomeUrl = "$apiUrl/at-home/server"
         const val coverUrl = "$apiUrl/cover"
         const val chapterUrl = "$apiUrl/chapter/"
         const val chapterSuffix = "/chapter/"
-        const val checkTokenUrl = "$apiUrl/auth/check"
-        const val refreshTokenUrl = "$apiUrl/auth/refresh"
         const val loginUrl = "$apiUrl/auth/login"
-        const val logoutUrl = "$apiUrl/auth/logout"
         const val groupUrl = "$apiUrl/group"
-        const val authorUrl = "$apiUrl/author"
-        const val randomMangaUrl = "$apiUrl/manga/random"
         const val mangaUrl = "$apiUrl/manga"
         const val userFollowsUrl = "$apiUrl/user/follows/manga"
         const val readingStatusesUrl = "$apiUrl/manga/status"
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
-
-        fun mangaFeedUrl(id: String, offset: Int, language: List<String>): String {
-            return "$mangaUrl/$id/feed".toHttpUrl().newBuilder().apply {
-                addQueryParameter("limit", "500")
-                addQueryParameter("offset", offset.toString())
-                addQueryParameter("order[volume]", "desc")
-                addQueryParameter("order[chapter]", "desc")
-                language.forEach {
-                    addQueryParameter("translatedLanguage[]", it)
-                }
-            }.build().toString()
-        }
 
         fun coverUrl(mangaId: String, coverId: String) =
             "$apiUrl/cover?manga[]=$mangaId&ids[]=$coverId"
 
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
         const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
-
-        const val reportUrl = "https://api.mangadex.network/report"
 
         const val mangaLimit = 40
 
@@ -273,17 +247,6 @@ class MdUtil {
                 return allChapters.size.toString()
             }
             return null
-        }
-
-        fun atHomeUrlHostUrl(
-            requestUrl: String,
-            client: OkHttpClient,
-            headers: Headers,
-            cacheControl: CacheControl,
-        ): String {
-            val atHomeRequest = GET(requestUrl, headers, cache = cacheControl)
-            val atHomeResponse = client.newCall(atHomeRequest).execute()
-            return jsonParser.decodeFromString<AtHomeDto>(atHomeResponse.body!!.string()).baseUrl
         }
 
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
