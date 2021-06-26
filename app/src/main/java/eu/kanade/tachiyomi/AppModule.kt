@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
@@ -77,6 +78,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(MangaDexLoginHelper())
 
         addSingleton(MangaPlusHandler())
+
+        addSingleton(StatusHandler())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

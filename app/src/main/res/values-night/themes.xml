@@ -48,6 +48,7 @@
         <item name="colorAccentText">@color/md_white_1000</item>
         <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
         <item name="colorSecondary">@color/outrun_black</item>
+        <item name="colorSecondaryVariant">@color/outrun_dark_purple</item>
         <item name="background">@color/outrun_black</item>
         <item name="android:colorBackground">@color/outrun_black</item>
         <item name="colorSurface">@color/outrun_black</item>
@@ -62,6 +63,7 @@
         <item name="colorAccentText">@color/colorAccentLime</item>
         <item name="colorPrimaryVariant">@color/dialogLime</item>
         <item name="colorSecondary">@color/backgroundLime</item>
+        <item name="colorSecondaryVariant">@color/dialogLime</item>
         <item name="background">@color/backgroundLime</item>
         <item name="android:colorBackground">@color/backgroundLime</item>
         <item name="colorSurface">@color/colorAccentLimeText</item>

@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaListPage
@@ -15,8 +14,6 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.dto.CacheApiMangaSerializer
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
-import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -34,7 +31,6 @@ open class MangaDexCache : MangaDex() {
 
     private val db: DatabaseHelper by injectLazy()
     private val downloadManager: DownloadManager by injectLazy()
-    private val similarHandler: SimilarHandler by injectLazy()
     private val filterHandler: FilterHandler by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
 
@@ -47,11 +43,7 @@ open class MangaDexCache : MangaDex() {
     }
     private val clientLessRateLimits =
         network.nonRateLimitedClient.newBuilder().addInterceptor(rateLimitInterceptor).build()
-
-    override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        throw Exception("Cache source cannot update follow status")
-    }
-
+    
     fun fetchPopularManga(page: Int): Observable<MangaListPage> {
         // First check if we have manga to select
         val count = db.getCachedMangaCount().executeAsBlocking()
@@ -154,20 +146,12 @@ open class MangaDexCache : MangaDex() {
         return emptyList()
     }
 
-    override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
-        throw Exception("Cache source cannot fetch follows")
-    }
-
     override suspend fun updateReadingProgress(track: Track): Boolean {
         throw Exception("Cache source cannot update reading progress")
     }
 
     override suspend fun updateRating(track: Track): Boolean {
         throw Exception("Cache source cannot update rating")
-    }
-
-    override suspend fun fetchTrackingInfo(url: String): Track {
-        return Track.create(TrackManager.MDLIST)
     }
 
     override fun isLogged(): Boolean {

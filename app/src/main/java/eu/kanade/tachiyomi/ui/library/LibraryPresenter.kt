@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -46,6 +47,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.ArrayList
 import java.util.Calendar
 import java.util.Comparator
@@ -69,6 +71,8 @@ class LibraryPresenter(
     private val context = preferences.context
 
     private val loggedServices by lazy { Injekt.get<TrackManager>().services.filter { it.isLogged || it.isMdList() } }
+
+    private val statusHandler: StatusHandler by injectLazy()
 
     var groupType = preferences.groupLibraryBy().get()
 
@@ -1031,23 +1035,30 @@ class LibraryPresenter(
     }
 
     fun markReadStatus(mangaList: List<Manga>, markRead: Boolean) {
-        presenterScope.launch {
-            withContext(Dispatchers.IO) {
-                mangaList.forEach {
-                    withContext(Dispatchers.IO) {
-                        val chapters = db.getChapters(it).executeAsBlocking()
-                        chapters.forEach {
-                            it.read = markRead
-                            it.last_page_read = 0
-                        }
-                        db.updateChaptersProgress(chapters).executeAsBlocking()
-                        if (markRead && preferences.removeAfterMarkedAsRead()) {
-                            deleteChapters(it, chapters)
+        presenterScope.launchIO {
+            mangaList.forEach {
+                withContext(Dispatchers.IO) {
+                    val chapters = db.getChapters(it).executeAsBlocking()
+                    chapters.forEach { chapter ->
+                        chapter.read = markRead
+                        chapter.last_page_read = 0
+                        if (preferences.readingSync() && chapter.isMergedChapter().not()) {
+                            launchIO {
+                                when (markRead) {
+                                    true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                                    false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
+                                }
+                            }
                         }
                     }
+                    db.updateChaptersProgress(chapters).executeAsBlocking()
+                    if (markRead && preferences.removeAfterMarkedAsRead()) {
+                        deleteChapters(it, chapters)
+                    }
+
                 }
-                getLibrary()
             }
+            getLibrary()
         }
     }
 

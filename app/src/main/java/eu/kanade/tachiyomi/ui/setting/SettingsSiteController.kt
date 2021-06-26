@@ -121,18 +121,12 @@ class SettingsSiteController :
             defaultValue = false
         }
 
-        /* switchPreference {
-             key = PreferenceKeys.lowQualityCovers
-             titleRes = R.string.low_quality_covers
-             defaultValue = false
-         }*/
-
-        /*   switchPreference {
-               key = PreferenceKeys.forceLatestCovers
-               titleRes = R.string.use_latest_cover
-               summaryRes = R.string.use_latest_cover_summary
-               defaultValue = false
-           }*/
+        switchPreference {
+            key = PreferenceKeys.readingSync
+            titleRes = R.string.reading_sync
+            summaryRes = R.string.reading_sync_summary
+            defaultValue = false
+        }
 
         preference {
             titleRes = R.string.sync_follows_to_library

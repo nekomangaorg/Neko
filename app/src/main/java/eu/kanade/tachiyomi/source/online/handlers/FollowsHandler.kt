@@ -6,15 +6,11 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.POST
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
-import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.dto.ReadingStatusDto
-import eu.kanade.tachiyomi.source.online.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
@@ -24,18 +20,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import kotlinx.serialization.decodeFromString
-import kotlinx.serialization.encodeToString
 import okhttp3.CacheControl
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.Request
-import okhttp3.RequestBody.Companion.toRequestBody
-import okhttp3.Response
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import java.util.Locale
 
 class FollowsHandler {
 
@@ -48,6 +38,7 @@ class FollowsHandler {
      */
     suspend fun fetchFollows(): MangaListPage {
         return withContext(Dispatchers.IO) {
+
             val readingFuture = async { service.readingStatusAllManga().body()!!.statuses }
 
             val response = async { service.userFollowList(0) }
@@ -89,26 +80,6 @@ class FollowsHandler {
         return MangaListPage(result, false)
     }
 
-    /**fetch follow status used when fetching status for 1 manga
-     *
-     */
-
-    private fun followStatusParse(response: Response, mangaId: String): Track {
-        val mangaResponse =
-            MdUtil.jsonParser.decodeFromString<ReadingStatusDto>(response.body!!.string())
-        val followStatus = FollowStatus.fromDex(mangaResponse.status)
-        val track = Track.create(TrackManager.MDLIST)
-        track.status = followStatus.int
-        track.tracking_url = "$baseUrl/title/$mangaId"
-
-/* if (follow.chapter.isNotBlank()) {
-                track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()
-            }
-
-        */
-        return track
-    }
-
     /**build Request for follows page
      *
      */
@@ -137,20 +108,16 @@ class FollowsHandler {
         return withContext(Dispatchers.IO) {
             val status = when (followStatus == FollowStatus.UNFOLLOWED) {
                 true -> null
-                false -> followStatus.name.toLowerCase(Locale.US)
+                false -> followStatus.toDex()
             }
-
-            val jsonString = MdUtil.jsonParser.encodeToString(ReadingStatusDto(status))
+            val readingStatusDto = ReadingStatusDto(status)
 
             try {
-                val postResult = network.authClient.newCall(
-                    POST(
-                        MdUtil.getReadingStatusUrl(mangaId),
-                        MdUtil.getAuthHeaders(network.headers, preferences),
-                        jsonString.toRequestBody("application/json".toMediaType())
-                    )
-                ).await()
-                postResult.isSuccessful
+
+                val response =
+                    network.authService.updateReadingStatusForManga(mangaId, readingStatusDto)
+
+                response.isSuccessful
             } catch (e: Exception) {
                 XLog.e("error posting", e)
                 false
@@ -217,50 +184,22 @@ class FollowsHandler {
      * fetch all manga from all possible pages
      */
     suspend fun fetchAllFollows(): List<SManga> {
-        return withContext(Dispatchers.IO) {
-            val response = network.authClient.newCall(followsListRequest(0)).await()
-            val mangaListResponse =
-                MdUtil.jsonParser.decodeFromString<MangaListDto>(response.body!!.string())
-            val results = mangaListResponse.results.toMutableList()
-
-            var hasMoreResults =
-                mangaListResponse.limit + mangaListResponse.offset < mangaListResponse.total
-            var offset = mangaListResponse.offset
-            val limit = mangaListResponse.limit
-
-            while (hasMoreResults) {
-                offset += limit
-                val newResponse = network.authClient.newCall(followsListRequest(offset)).await()
-                if (newResponse.code != 200) {
-                    hasMoreResults = false
-                } else {
-                    val newMangaListResponse =
-                        MdUtil.jsonParser.decodeFromString<MangaListDto>(newResponse.body!!.string())
-                    results.addAll(newMangaListResponse.results)
-                    hasMoreResults =
-                        newMangaListResponse.limit + newMangaListResponse.offset < newMangaListResponse.total
-                }
-            }
-
-            val readingStatusResponse = network.authClient.newCall(readingStatusRequest()).execute()
-            val json =
-                MdUtil.jsonParser.decodeFromString<ReadingStatusMapDto>(readingStatusResponse.body!!.string())
-
-            followsParseMangaPage(results, json.statuses).manga
-        }
+        return fetchFollows().manga
     }
 
     suspend fun fetchTrackingInfo(url: String): Track {
         return withContext(Dispatchers.IO) {
             val mangaId = getMangaId(url)
-            val request = GET(
-                MdUtil.getReadingStatusUrl(mangaId),
-                MdUtil.getAuthHeaders(network.headers, preferences),
-                CacheControl.FORCE_NETWORK
-            )
-            val response = network.authClient.newCall(request).await()
-            val track = followStatusParse(response, mangaId)
+            val response = network.authService.readingStatusForManga(mangaId)
 
+            val followStatus = FollowStatus.fromDex(response.body()!!.status)
+            val track = Track.create(TrackManager.MDLIST).apply {
+                status = followStatus.int
+                tracking_url = "$baseUrl/title/$mangaId"
+            }
+            /* if (follow.chapter.isNotBlank()) {
+                track.last_chapter_read = floor(follow.chapter.toFloat()).toInt()
+            } */
             track
         }
     }

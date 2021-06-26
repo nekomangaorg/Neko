@@ -1024,10 +1024,8 @@
     <string name="use_new_api_server">Use the new api cache server</string>
     <string name="use_new_api_server_summary">enable this if MangaDex starts breaking (meaning they removed old api server)</string>
     <string name="low_quality_covers">Use low quality thumbnails</string>
-    <string name="use_latest_cover">Use latest uploaded cover</string>
-    <string name="use_latest_cover_summary">When enabled, it uses the latest uploaded manga cover under the /covers url instead of using the cover on MangaDex\'s manga page</string>
-    <string name="mark_mdlist_chapters_read">(Experiment) Mark MDList chapters read in app</string>
-    <string name="mark_mdlist_chapters_read_summary">When enabled, this will mark chapters read in Neko when they are tracked and read on MangaDex</string>
+    <string name="reading_sync">Auto sync read status</string>
+    <string name="reading_sync_summary">Two way automatic sync of read/unread status of a chapter with MangaDex.  This only pulls read from MangaDex to prevent accidentally marking chapters unread</string>
     <string name="show_content_rating_filter_in_search">Show Content rating filter in search</string>
     <string name="use_port_443_title">Use Image Servers with Port 443 only</string>
     <string name="use_port_443_summary">"Enable to only request image servers that use port 443. This allows users with stricter firewall restrictions to access MangaDex images"</string>

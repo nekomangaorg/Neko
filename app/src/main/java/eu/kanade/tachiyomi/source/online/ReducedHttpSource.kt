@@ -1,13 +1,11 @@
 package eu.kanade.tachiyomi.source.online
 
-import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -54,22 +52,10 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override suspend fun fetchTrackingInfo(url: String): Track {
-        TODO("Not yet implemented")
-    }
-
     override suspend fun fetchMangaDetails(manga: SManga): SManga {
         TODO("Not yet implemented")
     }
-    
+
     override suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         TODO("Not yet implemented")
     }
