@@ -264,7 +264,7 @@ class MangaHeaderHolder(
                     if (nextChapter.isMergedChapter() || (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty())) {
                         nextChapter.chapter.name
                     } else {
-                        listOf(nextChapter.chapter.vol,
+                        listOf("Vol.", nextChapter.chapter.vol,
                             nextChapter.chapter.chapter_txt).joinToString(" ")
                     }
                 resources.getString(
