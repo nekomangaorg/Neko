@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.source
 
-import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.Logout
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import okhttp3.Response
 
 /**
@@ -23,23 +21,6 @@ interface Source {
      * Name of the source.
      */
     val name: String
-
-    /**
-     * Returns a list of all Follows retrieved by Coroutines
-     *
-     * @param SManga all smanga found for user
-     */
-    suspend fun fetchAllFollows(forceHd: Boolean = false): List<SManga>
-
-    /**
-     * updates the follow status for a manga
-     */
-    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean
-
-    /**
-     * Get a MdList Track of the manga
-     */
-    suspend fun fetchTrackingInfo(url: String): Track
 
     /**
      * Returns the list of filters for the source.

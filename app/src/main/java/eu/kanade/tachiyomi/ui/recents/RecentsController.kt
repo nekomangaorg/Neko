@@ -124,7 +124,8 @@ class RecentsController(bundle: Bundle? = null) :
         )
     }
 
-    override fun createBinding(inflater: LayoutInflater) = RecentsControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        RecentsControllerBinding.inflate(inflater)
 
     /**
      * Called when view is created
@@ -182,7 +183,9 @@ class RecentsController(bundle: Bundle? = null) :
         )
 
         activityBinding?.root?.post {
-            val height = activityBinding?.bottomNav?.height ?: view.rootWindowInsets?.systemWindowInsetBottom ?: 0
+            val height =
+                activityBinding?.bottomNav?.height ?: view.rootWindowInsets?.systemWindowInsetBottom
+                ?: 0
             binding.recycler.updatePaddingRelative(bottom = height)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
                 bottom = height
@@ -204,7 +207,8 @@ class RecentsController(bundle: Bundle? = null) :
                     isExpanded.toInt().toFloat()
                 )
             )
-            binding.downloadBottomSheet.root.backgroundTintList = binding.downloadBottomSheet.sheetLayout.backgroundTintList
+            binding.downloadBottomSheet.root.backgroundTintList =
+                binding.downloadBottomSheet.sheetLayout.backgroundTintList
             updateTitleAndMenu()
         }
 
@@ -239,14 +243,16 @@ class RecentsController(bundle: Bundle? = null) :
                     binding.fakeAppBar.alpha = max(0f, (progress - cap) / (1f - cap))
                     binding.downloadBottomSheet.sheetLayout.alpha = 1 - max(0f, progress / cap)
                     binding.downloadBottomSheet.dlRecycler.alpha = progress * 10
-                    binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
-                        ColorUtils.blendARGB(
-                            view.context.getResourceColor(R.attr.colorPrimaryVariant),
-                            view.context.getResourceColor(android.R.attr.colorBackground),
-                            (progress * 2f).coerceIn(0f, 1f)
+                    binding.downloadBottomSheet.sheetLayout.backgroundTintList =
+                        ColorStateList.valueOf(
+                            ColorUtils.blendARGB(
+                                view.context.getResourceColor(R.attr.colorPrimaryVariant),
+                                view.context.getResourceColor(android.R.attr.colorBackground),
+                                (progress * 2f).coerceIn(0f, 1f)
+                            )
                         )
-                    )
-                    binding.downloadBottomSheet.root.backgroundTintList = binding.downloadBottomSheet.sheetLayout.backgroundTintList
+                    binding.downloadBottomSheet.root.backgroundTintList =
+                        binding.downloadBottomSheet.sheetLayout.backgroundTintList
                     activityBinding?.appBar?.y = max(
                         activityBinding!!.appBar.y,
                         -headerHeight * (1 - progress)
@@ -392,7 +398,8 @@ class RecentsController(bundle: Bundle? = null) :
                 binding.downloadBottomSheet.downloadFab.height + 20.dpToPx
         )
         binding.downloadBottomSheet.downloadFab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) + 16.dpToPx
+            bottomMargin =
+                max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) + 16.dpToPx
         }
     }
 
@@ -400,7 +407,7 @@ class RecentsController(bundle: Bundle? = null) :
         binding.swipeRefresh.isRefreshing = refresh
     }
 
-    override fun onItemMove(fromPosition: Int, toPosition: Int) { }
+    override fun onItemMove(fromPosition: Int, toPosition: Int) {}
 
     override fun shouldMoveItem(fromPosition: Int, toPosition: Int) = true
 
@@ -455,7 +462,7 @@ class RecentsController(bundle: Bundle? = null) :
     fun showLists(
         recents: List<RecentMangaItem>,
         hasNewItems: Boolean,
-        shouldMoveToTop: Boolean = false
+        shouldMoveToTop: Boolean = false,
     ) {
         if (view == null) return
         binding.progress.isVisible = false
@@ -747,7 +754,8 @@ class RecentsController(bundle: Bundle? = null) :
         else binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
     }
 
-    override fun sheetIsExpanded(): Boolean = binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()
+    override fun sheetIsExpanded(): Boolean =
+        binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()
 
     override fun expandSearch() {
         if (showingDownloads) {

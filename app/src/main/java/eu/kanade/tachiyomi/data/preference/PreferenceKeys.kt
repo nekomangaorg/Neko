@@ -244,7 +244,7 @@ object PreferenceKeys {
 
     const val dataSaver = "data_saver_bool"
 
-    const val forceLatestCovers = "latest_cover_bool"
+    const val readingSync = "reading_sync_bool"
 
     const val logLevel = "log_level"
 

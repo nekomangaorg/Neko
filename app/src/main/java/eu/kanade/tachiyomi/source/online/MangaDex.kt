@@ -48,7 +48,7 @@ open class MangaDex : HttpSource() {
 
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 
-    override suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
+    suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         return followsHandler.updateFollowStatus(mangaID, followStatus)
     }
 
@@ -97,7 +97,7 @@ open class MangaDex : HttpSource() {
         return imageHandler.getImage(page, isLogged())
     }
 
-    override suspend fun fetchAllFollows(forceHd: Boolean): List<SManga> {
+    suspend fun fetchAllFollows(): List<SManga> {
         return followsHandler.fetchAllFollows()
     }
 
@@ -109,7 +109,7 @@ open class MangaDex : HttpSource() {
         return followsHandler.updateRating(track)
     }
 
-    override suspend fun fetchTrackingInfo(url: String): Track {
+    suspend fun fetchTrackingInfo(url: String): Track {
         if (!isLogged()) {
             throw Exception("Not Logged in to MangaDex")
         }

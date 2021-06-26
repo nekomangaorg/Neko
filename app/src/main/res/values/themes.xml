@@ -98,6 +98,7 @@
         <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
         <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
         <item name="colorSecondary">@color/backgroundDuskDawn</item>
+        <item name="colorSecondaryVariant">@color/dialogDuskDawn</item>
         <item name="background">@color/backgroundDuskDawn</item>
         <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>

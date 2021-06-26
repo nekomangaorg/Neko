@@ -122,7 +122,6 @@ class MergeSearchDialog : DialogController {
     }
 
     private fun noResults() {
-        binding.progress.visibility = View.VISIBLE
         binding.mergeRecycler.visibility = View.INVISIBLE
         binding.emptyView.showMedium(
             CommunityMaterial.Icon.cmd_compass_off,
@@ -131,7 +130,7 @@ class MergeSearchDialog : DialogController {
     }
 
     fun onSearchResultsError() {
-        binding.progress.visibility = View.INVISIBLE
+        binding.progress.visibility = View.GONE
         noResults()
     }
 

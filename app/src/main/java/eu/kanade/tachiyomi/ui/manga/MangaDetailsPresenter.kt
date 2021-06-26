@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MergeSource
+import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
@@ -58,6 +59,7 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -78,6 +80,7 @@ class MangaDetailsPresenter(
     val downloadManager: DownloadManager = Injekt.get(),
     private val chapterFilter: ChapterFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
+    val statusHandler: StatusHandler = Injekt.get(),
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
 
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
@@ -144,6 +147,7 @@ class MangaDetailsPresenter(
         fetchExternalLinks()
         setTrackItems()
         refreshTracking(false)
+        syncChapterReadStatus()
     }
 
     fun onDestroy() {
@@ -555,6 +559,7 @@ class MangaDetailsPresenter(
                     db.insertManga(manga).executeOnIO()
                 }
                 refreshTracking(false)
+                syncChapterReadStatus()
             }
             withContext(Dispatchers.IO) {
                 getChapters()
@@ -636,6 +641,7 @@ class MangaDetailsPresenter(
         deleteNow: Boolean = true,
         lastRead: Int? = null,
         pagesLeft: Int? = null,
+        skipReadingSync: Boolean = false,
     ) {
         scope.launch(Dispatchers.IO) {
             selectedChapters.forEach {
@@ -643,6 +649,16 @@ class MangaDetailsPresenter(
                 if (!read) {
                     it.last_page_read = lastRead ?: 0
                     it.pages_left = pagesLeft ?: 0
+                }
+                if (preferences.readingSync() && it.chapter.isMergedChapter()
+                        .not() && skipReadingSync.not()
+                ) {
+                    launchIO {
+                        when (read) {
+                            true -> statusHandler.markChapterRead(it.chapter.mangadex_chapter_id)
+                            false -> statusHandler.markChapterUnRead(it.chapter.mangadex_chapter_id)
+                        }
+                    }
                 }
             }
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
@@ -652,6 +668,9 @@ class MangaDetailsPresenter(
             if (read && deleteNow && preferences.removeAfterMarkedAsRead() && numberOfNonBookmarkedChapters.size > 0) {
                 deleteChapters(numberOfNonBookmarkedChapters, false)
             }
+
+
+
             getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
@@ -913,15 +932,6 @@ class MangaDetailsPresenter(
                                     }
                                 }
 
-                                /*  if (preferences.markChaptersReadFromMDList() && trackItem.status == FollowStatus.READING.int) {
-                                      chapters.firstOrNull { ceil(it.chapter_number.toDouble()).toInt() == trackItem.last_chapter_read && !it.chapter.read && it.chapter_number.toInt() != 0 }
-                                          ?.let {
-                                              scope.launch(Dispatchers.Main) {
-                                                  controller.markAsRead(listOf(it))
-                                                  controller.markPreviousAs(it, true)
-                                              }
-                                          }
-                                  }*/
 
                                 if (trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {
                                     trackItem.total_chapters = manga.last_chapter_number!!
@@ -936,6 +946,20 @@ class MangaDetailsPresenter(
                 asyncList.awaitAll()
                 fetchTracks()
             }
+        }
+    }
+
+    fun syncChapterReadStatus() {
+        if (preferences.readingSync().not()) return
+
+        scope.launch {
+            statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url)).collect { chapterIds ->
+                val chaptersToMark = chapters.asSequence().filter { it.isMergedChapter().not() }
+                    .filter { chapterIds.contains(it.mangadex_chapter_id) }
+                    .toList()
+                markChaptersRead(chapters, true, skipReadingSync = true)
+            }
+
         }
     }
 

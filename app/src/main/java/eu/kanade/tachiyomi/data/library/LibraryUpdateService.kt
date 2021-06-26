@@ -581,7 +581,7 @@ class LibraryUpdateService(
         val isDexUp = sourceManager.getMangadex().checkIfUp()
 
         if (isDexUp) {
-            val listManga = sourceManager.getMangadex().fetchAllFollows(true)
+            val listManga = sourceManager.getMangadex().fetchAllFollows()
             // filter all follows from Mangadex and only add reading or rereading manga to library
 
             /*  val defaultCategoryId = preferences.defaultCategory()

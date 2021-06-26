@@ -441,15 +441,11 @@ class PreferencesHelper(val context: Context) {
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 
-    fun shownSimilarTutorial() = flowPrefs.getBoolean("shown_similar_tutorial", false)
-
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 
     fun usePort443Only() = prefs.getBoolean(Keys.enablePort443Only, false)
-
-    fun forceLatestCovers() = prefs.getBoolean(Keys.forceLatestCovers, false)
 
     fun logLevel() = prefs.getInt(Keys.logLevel, 0)
 
@@ -483,4 +479,6 @@ class PreferencesHelper(val context: Context) {
     fun lastRefreshTime(): Long {
         return prefs.getLong(Keys.lastRefreshTokenTime, 0)
     }
+
+    fun readingSync(): Boolean = prefs.getBoolean(Keys.readingSync, false)
 }
