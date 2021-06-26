@@ -9,7 +9,7 @@ fun MangaDto.toBasicManga(): SManga {
         title = MdUtil.cleanString(this@toBasicManga.data.attributes.title["en"]!!)
 
         this@toBasicManga.relationships
-            .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.coverArt }
+            .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
             ?.attributes?.fileName
             ?.let { coverFileName ->
                 thumbnail_url = MdUtil.cdnCoverUrl(this@toBasicManga.data.id, coverFileName)

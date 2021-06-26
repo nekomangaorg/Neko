@@ -4,7 +4,6 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
@@ -42,9 +41,8 @@ class MangaHandler {
 
     suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         return withContext(Dispatchers.IO) {
-            val request = GET(MdUtil.chapterUrl + urlChapterId)
-            val response = network.client.newCall(request).await()
-            apiMangaParser.chapterParseForMangaId(response)
+            val response = network.service.viewChapter(urlChapterId)
+            response.body()!!.relationships.first { it.type == MdConstants.Types.manga }.id
         }
     }
 
@@ -103,11 +101,11 @@ class MangaHandler {
     private fun getGroupMap(results: List<ChapterDto>): Map<String, String> {
         return results.map { chapter -> chapter.relationships }
             .flatten()
-            .filter { it.type == MdConstants.scanlator }
+            .filter { it.type == MdConstants.Types.scanlator }
             .map { it.id to it.attributes!!.name!! }
             .toMap()
     }
-    
+
     private fun groupIdRequest(id: List<String>, offset: Int): Request {
         val urlSuffix = id.joinToString("&ids[]=", "?limit=100&offset=$offset&ids[]=")
         return GET(MdUtil.groupUrl + urlSuffix, network.headers)

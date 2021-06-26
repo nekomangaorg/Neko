@@ -13,6 +13,18 @@ import eu.kanade.tachiyomi.util.system.notificationManager
  */
 object Notifications {
 
+    object Channel {
+        const val Status = "status_channel"
+    }
+
+    object Id {
+        object Status {
+            const val Progress = -1002
+            const val Complete = -1002
+            const val Error = -1003
+        }
+    }
+
     /**
      * Common notification channel and ids used anywhere.
      */
@@ -86,7 +98,8 @@ object Notifications {
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         listOf(
-            NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.group_backup_restore)),
+            NotificationChannelGroup(GROUP_BACKUP_RESTORE,
+                context.getString(R.string.group_backup_restore)),
             NotificationChannelGroup(GROUP_DOWNLOADER, context.getString(R.string.group_downloader))
         ).forEach(context.notificationManager::createNotificationChannelGroup)
 
@@ -158,6 +171,11 @@ object Notifications {
                 setShowBadge(false)
                 setSound(null, null)
             },
+            NotificationChannel(
+                Channel.Status,
+                context.getString(R.string.status_channel),
+                NotificationManager.IMPORTANCE_HIGH
+            ),
             NotificationChannel(
                 CHANNEL_V5_MIGRATION,
                 context.getString(R.string.v5_migration_service),

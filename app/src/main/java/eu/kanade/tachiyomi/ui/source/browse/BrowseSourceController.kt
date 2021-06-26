@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
@@ -355,7 +356,11 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onFollowsClicked = {
             sheet.dismiss()
             adapter?.clear()
-            router.pushController(FollowsController().withFadeTransaction())
+            if (presenter.source.isLogged().not()) {
+                view?.context?.toast("Please login to view follows")
+            } else {
+                router.pushController(FollowsController().withFadeTransaction())
+            }
         }
         sheet.show()
     }
@@ -625,7 +630,8 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     fun updateFab() {
-        binding.fab.y = -(activityBinding!!.bottomNav?.height?.pxToDp?.toFloat() ?: 0f + 25f.dpToPx)
+        binding.fab.y =
+            -((activityBinding!!.bottomNav?.height?.pxToDp?.toFloat() ?: 0f) + 25f.dpToPx)
     }
 
     companion object {

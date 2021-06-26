@@ -37,8 +37,8 @@ class SearchHandler {
                 if (actualQuery.isNotBlank()) {
                     queryParamters["title"] = actualQuery
                 }
-                val additonalQueries = filterHandler.getQueryMap(filters)
-                queryParamters.putAll(additonalQueries)
+                val additionalQueries = filterHandler.getQueryMap(filters)
+                queryParamters.putAll(additionalQueries)
 
                 val response = service.search(ProxyRetrofitQueryMap(queryParamters))
 

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -37,7 +38,8 @@ class SourceFilterSheet(val activity: Activity) :
 
     override var recyclerView: RecyclerView? = binding.filtersRecycler
 
-    override fun createBinding(inflater: LayoutInflater) = SourceFilterSheetBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        SourceFilterSheetBinding.inflate(inflater)
 
     init {
         binding.searchBtn.setOnClickListener { dismiss() }
@@ -46,23 +48,23 @@ class SourceFilterSheet(val activity: Activity) :
         binding.followsBtn.setOnClickListener { onFollowsClicked() }
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
-                OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    activity.window.decorView.rootWindowInsets?.let {
-                        setCardViewMax(it)
-                    }
-                    if (binding.titleLayout.height > 0) {
-                        binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    }
+            OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                activity.window.decorView.rootWindowInsets?.let {
+                    setCardViewMax(it)
                 }
-            })
+                if (binding.titleLayout.height > 0) {
+                    binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            }
+        })
 
         binding.cardView.doOnApplyWindowInsets { _, insets, _ ->
             binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
                 matchConstraintMaxHeight =
                     fullHeight - insets.systemWindowInsetTop -
-                    binding.titleLayout.height - 75.dpToPx
+                        binding.titleLayout.height - 75.dpToPx
             }
         }
 
@@ -80,11 +82,13 @@ class SourceFilterSheet(val activity: Activity) :
             setCardViewMax(insets)
         }
 
-        (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(object : OnGlobalLayoutListener {
+        (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(object :
+            OnGlobalLayoutListener {
             override fun onGlobalLayout() {
                 updateBottomButtons()
                 if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
-                    (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(this)
+                    (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(
+                        this)
                 }
             }
         })
@@ -93,7 +97,8 @@ class SourceFilterSheet(val activity: Activity) :
             updateBottomButtons()
         }
 
-        binding.filtersRecycler.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(context)
+        binding.filtersRecycler.layoutManager =
+            androidx.recyclerview.widget.LinearLayoutManager(context)
         binding.filtersRecycler.clipToPadding = false
         binding.filtersRecycler.adapter = adapter
         binding.filtersRecycler.setHasFixedSize(true)
@@ -149,7 +154,8 @@ class SourceFilterSheet(val activity: Activity) :
 
     private fun updateBottomButtons() {
         val bottomSheet = binding.root.parent as View
-        val bottomSheetVisibleHeight = -bottomSheet.top + (activity.window.decorView.height - bottomSheet.height)
+        val bottomSheetVisibleHeight =
+            -bottomSheet.top + (activity.window.decorView.height - bottomSheet.height)
 
         binding.titleLayout.translationY = bottomSheetVisibleHeight.toFloat()
     }

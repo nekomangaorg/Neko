@@ -64,7 +64,7 @@ class ReaderPresenter(
     private val downloadManager: DownloadManager = Injekt.get(),
     private val coverCache: CoverCache = Injekt.get(),
     private val preferences: PreferencesHelper = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get()
+    private val chapterFilter: ChapterFilter = Injekt.get(),
 ) : BasePresenter<ReaderActivity>() {
 
     /**
@@ -107,7 +107,8 @@ class ReaderPresenter(
      */
     private val chapterList by lazy {
         val manga = manga!!
-        val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
+        val dbChapters = db.getChapters(manga).executeAsBlocking()
+            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")
@@ -211,7 +212,9 @@ class ReaderPresenter(
         chapterItems = withContext(Dispatchers.IO) {
             val dbChapters = db.getChapters(manga).executeAsBlocking()
             val list =
-                chapterFilter.filterChaptersForReader(dbChapters, manga, getCurrentChapter()?.chapter)
+                chapterFilter.filterChaptersForReader(dbChapters,
+                    manga,
+                    getCurrentChapter()?.chapter)
                     .sortedBy {
                         when (manga.sorting) {
                             Manga.SORTING_NUMBER -> it.chapter_number
@@ -297,7 +300,7 @@ class ReaderPresenter(
      */
     private fun getLoadObservable(
         loader: ChapterLoader,
-        chapter: ReaderChapter
+        chapter: ReaderChapter,
     ): Observable<ViewerChapters> {
         return loader.loadChapter(chapter)
             .andThen(
@@ -336,7 +339,7 @@ class ReaderPresenter(
         }
         val mangaDex = sourceManager.getMangadex()
         val mangaId = mangaDex.getMangaIdFromChapterId(urlChapterId)
-        val url = "/title/$mangaId/"
+        val url = "/title/$mangaId"
         val dbManga = db.getMangadexManga(url).executeAsBlocking()
         val tempManga = dbManga ?: (
             MangaImpl().apply {
@@ -632,7 +635,7 @@ class ReaderPresenter(
     private fun parseChapterName(
         chapterName: String,
         pageNumber: String,
-        scanlator: String?
+        scanlator: String?,
     ): String {
         val builder = StringBuilder()
         var title = ""
@@ -666,7 +669,14 @@ class ReaderPresenter(
     /**
      * Saves the image of this [page] in the given [directory] and returns the file location.
      */
-    private fun saveImages(page1: ReaderPage, page2: ReaderPage, isLTR: Boolean, @ColorInt bg: Int, directory: File, manga: Manga): File {
+    private fun saveImages(
+        page1: ReaderPage,
+        page2: ReaderPage,
+        isLTR: Boolean,
+        @ColorInt bg: Int,
+        directory: File,
+        manga: Manga,
+    ): File {
         val stream1 = page1.stream!!
         ImageUtil.findImageType(stream1) ?: throw Exception("Not an image")
         val stream2 = page2.stream!!
@@ -734,7 +744,12 @@ class ReaderPresenter(
             )
     }
 
-    fun saveImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
+    fun saveImages(
+        firstPage: ReaderPage,
+        secondPage: ReaderPage,
+        isLTR: Boolean,
+        @ColorInt bg: Int,
+    ) {
         scope.launch {
             if (firstPage.status != Page.READY) return@launch
             if (secondPage.status != Page.READY) return@launch
@@ -786,7 +801,12 @@ class ReaderPresenter(
             )
     }
 
-    fun shareImages(firstPage: ReaderPage, secondPage: ReaderPage, isLTR: Boolean, @ColorInt bg: Int) {
+    fun shareImages(
+        firstPage: ReaderPage,
+        secondPage: ReaderPage,
+        isLTR: Boolean,
+        @ColorInt bg: Int,
+    ) {
         scope.launch {
             if (firstPage.status != Page.READY) return@launch
             if (secondPage.status != Page.READY) return@launch

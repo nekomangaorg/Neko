@@ -48,21 +48,20 @@ class FollowsHandler {
      */
     suspend fun fetchFollows(): MangaListPage {
         return withContext(Dispatchers.IO) {
-            val response = service.userFollowList(0)
+            val readingFuture = async { service.readingStatusAllManga().body()!!.statuses }
 
-            val mangaListDto = response.body()!!
+            val response = async { service.userFollowList(0) }
+            val mangaListDto = response.await().body()!!
             val results = mangaListDto.results.toMutableList()
-
-            val readingFuture = async { service.readingStatusForAllManga().body()!!.statuses }
 
             if (mangaListDto.total > mangaListDto.limit) {
                 val totalRequestNo = (mangaListDto.total / mangaListDto.limit)
-                val restOfResults = (1..totalRequestNo).asSequence().map { pos ->
+                val restOfResults = (1..totalRequestNo).map { pos ->
                     async {
                         val newResponse = service.userFollowList(pos * mangaListDto.limit)
                         newResponse.body()!!.results
                     }
-                }.toList().awaitAll().flatten()
+                }.awaitAll().flatten()
                 results.addAll(restOfResults)
             }
             val readingStatusResponse = readingFuture.await()
