@@ -72,6 +72,7 @@
         <item name="colorPrimary">@color/colorPrimaryPink</item>
         <item name="colorAccent">@color/colorAccentPink</item>
         <item name="colorAccentText">@color/colorAccentPink</item>
+        <item name="colorOnUnreadBadge">@color/md_black_1000</item>
     </style>
 
 
