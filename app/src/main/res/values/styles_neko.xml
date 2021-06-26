@@ -26,10 +26,12 @@
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
-    <style name="Neko.Button.Rounded" parent="Theme.Widget.Button.Primary">
+    <style name="Neko.Button.Rounded.Alternative" parent="Theme.Widget.Button.Primary">
         <item name="android:letterSpacing">-0.02</item>
         <item name="android:textAllCaps">false</item>
         <item name="fontFamily">@font/montserrat_medium</item>
+        <item name="backgroundTint">@color/mtrl_btn_bg_color_selector_alternative</item>
+        <item name="android:textColor">?attr/colorOnUnreadBadge</item>
         <item name="cornerRadius">20dp</item>
     </style>
 

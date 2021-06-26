@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import okhttp3.Response
@@ -242,7 +241,7 @@ class ApiMangaParser {
 
         chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
 
-        chapter.language = MdLang.fromIsoCode(attributes.translatedLanguage)?.prettyPrint ?: ""
+        chapter.language = attributes.translatedLanguage
 
         return chapter
     }

@@ -423,10 +423,10 @@
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>
-    <string name="start_reading">Start reading</string>
-    <string name="start_reading_chapter_">Start reading Chapter %1$s</string>
-    <string name="continue_reading_chapter_">Continue reading Chapter %1$s</string>
-    <string name="continue_reading">Continue reading</string>
+    <string name="start_reading">Start Reading</string>
+    <string name="start_reading_chapter_">Start Reading Chapter %1$s</string>
+    <string name="continue_reading_chapter_">Continue Reading Chapter %1$s</string>
+    <string name="continue_reading">Continue Reading</string>
     <string name="chapters_">Chapters %1$s</string>
     <string name="volume_">Volume %1$d</string>
     <string name="season_">Season %1$d</string>
@@ -844,7 +844,7 @@
     <string name="mark_all_as">Mark all as</string>
     <string name="mark_all_as_read">Mark all as read</string>
     <string name="mark_all_as_unread">Mark all as unread</string>
-    <string name="mark_range_as">Mark a range of chapters as</string>
+    <string name="mark_range_as">Mark range as</string>
     <string name="mark_previous_as">Mark Previous as</string>
     <string name="menu">menu</string>
     <string name="more">More</string>
