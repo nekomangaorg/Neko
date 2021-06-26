@@ -481,4 +481,7 @@ class PreferencesHelper(val context: Context) {
     }
 
     fun readingSync(): Boolean = prefs.getBoolean(Keys.readingSync, false)
+
+    fun mangadexSyncToLibraryIndexes() =
+        flowPrefs.getStringSet(Keys.mangadexSyncToLibraryIndexes, emptySet())
 }

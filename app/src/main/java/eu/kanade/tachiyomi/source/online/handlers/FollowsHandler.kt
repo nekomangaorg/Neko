@@ -4,7 +4,6 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.model.MangaListPage
@@ -12,17 +11,14 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.withContext
-import okhttp3.CacheControl
-import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
-import okhttp3.Request
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -80,27 +76,6 @@ class FollowsHandler {
         return MangaListPage(result, false)
     }
 
-    /**build Request for follows page
-     *
-     */
-    private fun followsListRequest(offset: Int): Request {
-        val tempUrl = MdUtil.userFollowsUrl.toHttpUrlOrNull()!!.newBuilder()
-
-        tempUrl.apply {
-            addQueryParameter("limit", "100")
-            addQueryParameter("offset", offset.toString())
-        }
-        return GET(tempUrl.build().toString(),
-            MdUtil.getAuthHeaders(network.headers, preferences),
-            CacheControl.FORCE_NETWORK)
-    }
-
-    private fun readingStatusRequest(): Request {
-        return GET(MdUtil.readingStatusesUrl,
-            MdUtil.getAuthHeaders(network.headers, preferences),
-            CacheControl.FORCE_NETWORK)
-    }
-
     /**
      * Change the status of a manga
      */
@@ -113,6 +88,13 @@ class FollowsHandler {
             val readingStatusDto = ReadingStatusDto(status)
 
             try {
+                withIOContext {
+                    if (followStatus == FollowStatus.UNFOLLOWED) {
+                        network.authService.unfollowManga(mangaId)
+                    } else {
+                        network.authService.followManga(mangaId)
+                    }
+                }
 
                 val response =
                     network.authService.updateReadingStatusForManga(mangaId, readingStatusDto)
