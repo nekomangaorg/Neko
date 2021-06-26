@@ -141,7 +141,7 @@ class TrackSearchDialog : DialogController {
     }
 
     fun onSearchResultsError() {
-        binding.progress.visibility = View.VISIBLE
+        binding.progress.visibility = View.INVISIBLE
         binding.trackSearchList.visibility = View.INVISIBLE
         adapter?.setItems(emptyList())
     }
