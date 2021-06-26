@@ -12,7 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import kotlin.math.max
@@ -24,11 +24,10 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
     private val presenter = controller.presenter
 
-    override fun createBinding(inflater: LayoutInflater) = ChapterSortBottomSheetBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) =
+        ChapterSortBottomSheetBinding.inflate(inflater)
 
     init {
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 415.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -51,6 +50,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
     override fun onStart() {
         super.onStart()
+        sheetBehavior.expand()
         sheetBehavior.skipCollapsed = true
     }
 
