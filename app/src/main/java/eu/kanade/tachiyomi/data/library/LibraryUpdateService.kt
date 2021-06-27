@@ -426,10 +426,16 @@ class LibraryUpdateService(
                 db.insertTrack(track).executeAsBlocking()
                 tracks.add(track)
             }
-            tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.apply {
-                val refreshedTrack = trackManager.mdList.refresh(this)
-                db.insertTrack(refreshedTrack).executeAsBlocking()
-                copyPersonalFrom(refreshedTrack)
+            if (source.isLogged()) {
+                runCatching {
+                    tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.apply {
+                        val refreshedTrack = trackManager.mdList.refresh(this)
+                        db.insertTrack(refreshedTrack).executeAsBlocking()
+                        copyPersonalFrom(refreshedTrack)
+                    }
+                }.onFailure {
+                    XLog.e("Error refreshing tracking", it)
+                }
             }
 
             if (fetchedChapters.isNotEmpty()) {
