@@ -31,7 +31,9 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         binding.trackChapters.setOnClickListener { listener.onChaptersClick(bindingAdapterPosition) }
         binding.scoreContainer.setOnClickListener { listener.onScoreClick(bindingAdapterPosition) }
         binding.trackStartDate.setOnClickListener { listener.onStartDateClick(bindingAdapterPosition) }
-        binding.trackFinishDate.setOnClickListener { listener.onFinishDateClick(bindingAdapterPosition) }
+        binding.trackFinishDate.setOnClickListener {
+            listener.onFinishDateClick(bindingAdapterPosition)
+        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -70,8 +72,13 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             val status = item.service.getStatus(track.status)
             if (status.isEmpty()) binding.trackStatus.setText(R.string.unknown_status)
             else binding.trackStatus.text = item.service.getStatus(track.status)
-            binding.trackScore.text = if (track.score == 0f) "-" else item.service.displayScore(track)
+            binding.trackScore.text =
+                if (track.score == 0f) "-" else item.service.displayScore(track)
             binding.trackScore.setCompoundDrawablesWithIntrinsicBounds(0, 0, starIcon(track), 0)
+            if (item.service.isMdList()) {
+                binding.scoreContainer.isVisible = false
+                binding.trackChapters.isVisible = false
+            }
             binding.dateGroup.isVisible = item.service.supportsReadingDates
             if (item.service.supportsReadingDates) {
                 binding.trackStartDate.text =
@@ -84,7 +91,9 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     }
 
     private fun starIcon(track: Track): Int {
-        return if (track.score == 0f || binding.trackScore.text.toString().toFloatOrNull() != null) {
+        return if (track.score == 0f || binding.trackScore.text.toString()
+                .toFloatOrNull() != null
+        ) {
             R.drawable.ic_star_12dp
         } else {
             0
