@@ -966,6 +966,11 @@
 
     <!-- Follows -->
     <string name="status_channel">Manga status sync</string>
+    <string name="syncing_follows">Begin syncing follows</string>
+    <string name="sync_follows_complete">Syncing follows complete</string>
+    <string name="sync_to_follows_complete">Syncing Manga to Follows List complete</string>
+
+    <string name="sync_follows_failed">Syncing follows failed</string>
     <string name="follows">My follows</string>
     <string name="add_to_follows">Add to MangaDex follows</string>
     <string name="follows_status">Follows Sstatus</string>

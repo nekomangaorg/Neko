@@ -1,44 +1,125 @@
 package eu.kanade.tachiyomi.data.jobs
 
 import android.content.Context
+import android.widget.Toast
+import androidx.annotation.StringRes
 import androidx.work.CoroutineWorker
+import androidx.work.Data
+import androidx.work.ForegroundInfo
+import androidx.work.OneTimeWorkRequestBuilder
+import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.notificationBuilder
+import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
+import uy.kohesive.injekt.injectLazy
+import kotlin.time.Duration
 
+/**
+ * WorkManager job that syncs FollowsList to and from Neko
+ */
 class StatusSyncJob(
-    context: Context,
+    val context: Context,
     params: WorkerParameters,
 ) : CoroutineWorker(context, params) {
-    override suspend fun doWork(): Result {
-        TODO("Not yet implemented")
+
+    val followsSyncService: FollowsSyncService by injectLazy()
+
+    private val progressNotification =
+        applicationContext.notificationBuilder(Notifications.Channel.Status)
+            .setContentTitle(context.getString(R.string.syncing_follows))
+            .setSmallIcon(R.drawable.ic_neko_notification)
+            .setOngoing(true)
+            .setAutoCancel(true)
+            .setOnlyAlertOnce(true)
+
+    override suspend fun doWork(): Result = coroutineScope {
+
+        val notification = progressNotification.build()
+        val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
+        setForeground(foregroundInfo)
+        try {
+            when (inputData.getBoolean(SYNC_TO_MANGADEX, false)) {
+                true -> {
+                    val total = followsSyncService.toMangaDex(::updateNotificationProgress,
+                        ::completeNotificationToDex)
+                    withUIContext {
+                        applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
+                            total),
+                            Toast.LENGTH_LONG)
+                    }
+                }
+
+                false -> {
+                    val total = followsSyncService.fromMangaDex(::updateNotificationProgress,
+                        ::completeNotificationFromDex)
+                    withUIContext {
+                        applicationContext.toast(applicationContext.getString(R.string.sync_follows_to_library_toast,
+                            total),
+                            Toast.LENGTH_LONG)
+                    }
+                }
+            }
+
+            return@coroutineScope Result.success()
+        } catch (e: Exception) {
+            XLog.e("error syncing follows", e)
+            return@coroutineScope Result.failure()
+        } finally {
+            launchIO {
+                delay(Duration.seconds(3).inWholeMilliseconds)
+                context.notificationManager.cancel(Notifications.Id.Status.Complete)
+            }
+        }
     }
 
-    /*  val followsSyncService: FollowsSyncService by injectLazy()
+    private fun updateNotificationProgress(title: String, progress: Int, total: Int) {
+        val notification = progressNotification
+            .setContentTitle(title)
+            .setProgress(total, progress, false)
+            .build()
+        applicationContext.notificationManager.notify(
+            Notifications.Id.Status.Progress,
+            notification
+        )
+    }
 
-      override suspend fun doWork(): Result = coroutineScope {
-          val notification =
-              NotificationCompat.Builder(applicationContext, Notifications.Channel.Status)
-                  .setContentTitle("Updating similar manga database")
-                  .setSmallIcon(R.drawable.ic_neko_notification)
-                  .setOngoing(true)
-                  .setAutoCancel(true)
-                  .build()
-          val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
-          setForeground(foregroundInfo)
+    private fun completeNotificationToDex() {
+        completeNotification(R.string.sync_follows_complete)
+    }
 
-          *//*      followsSyncService.syncFrom().collect {
-                  return@coroutineScope Result.success()
-              }*//*
-        Result.success()
+    private fun completeNotificationFromDex() {
+        completeNotification(R.string.sync_to_follows_complete)
+    }
 
+    private fun completeNotification(@StringRes title: Int) {
+        val notification = progressNotification
+            .setContentTitle(context.getString(R.string.sync_follows_complete))
+            .build()
+        context.applicationContext.notificationManager.notify(
+            Notifications.Id.Status.Complete,
+            notification
+        )
     }
 
     companion object {
-        fun doWorkNow(context: Context) {
+
+        private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
+
+        fun doWorkNow(context: Context, syncToMangadex: Boolean) {
             WorkManager.getInstance(context).enqueue(
                 OneTimeWorkRequestBuilder<StatusSyncJob>().apply {
-
+                    setInputData(Data.Builder().putBoolean(SYNC_TO_MANGADEX, syncToMangadex)
+                        .build())
                 }.build()
             )
         }
-    }*/
+    }
 }

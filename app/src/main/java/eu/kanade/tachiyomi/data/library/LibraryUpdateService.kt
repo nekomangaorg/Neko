@@ -6,12 +6,10 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import android.widget.Toast
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -31,28 +29,21 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
-import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
-import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
-import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.Date
 import java.util.concurrent.TimeUnit
 import java.util.concurrent.atomic.AtomicInteger
 
@@ -71,7 +62,6 @@ class LibraryUpdateService(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val trackManager: TrackManager = Injekt.get(),
-    val statusHandler: StatusHandler = Injekt.get(),
 ) : Service() {
 
     /**
@@ -288,8 +278,6 @@ class LibraryUpdateService(
         job = GlobalScope.launch(handler) {
             when (target) {
                 Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
-                Target.SYNC_FOLLOWS -> syncFollows()
-                Target.PUSH_FAVORITES -> pushFavorites()
                 else -> updateTrackings(mangaToAdd)
             }
         }
@@ -573,88 +561,6 @@ class LibraryUpdateService(
     }
 
     /**
-     * Method that updates the syncs reading and rereading manga into neko library
-     */
-    private suspend fun syncFollows() {
-        var count = AtomicInteger(0)
-        var countNew = AtomicInteger(0)
-        val syncFollowStatusInts =
-            preferences.mangadexSyncToLibraryIndexes().get().map { it.toInt() }
-
-        val listManga = sourceManager.getMangadex().fetchAllFollows().filter { networkManga ->
-            syncFollowStatusInts.contains(networkManga.follow_status?.int ?: 0)
-        }
-        listManga.forEach { networkManga ->
-            showProgressNotification(networkManga, count.andIncrement, listManga.size)
-
-            var dbManga = db.getManga(networkManga.url, sourceManager.getMangadex().id)
-                .executeAsBlocking()
-            if (dbManga == null) {
-                dbManga = Manga.create(
-                    networkManga.url,
-                    networkManga.title,
-                    sourceManager.getMangadex().id
-                )
-                dbManga.date_added = Date().time
-            }
-
-            // Increment and update if it is not already favorited
-            if (!dbManga.favorite) {
-                countNew.incrementAndGet()
-                dbManga.favorite = true
-                dbManga.copyFrom(networkManga)
-
-                db.insertManga(dbManga).executeAsBlocking()
-            }
-        }
-
-        notifier.cancelProgressNotification()
-        withContext(Dispatchers.Main) {
-            toast(getString(R.string.sync_follows_to_library_toast, countNew.toInt()),
-                Toast.LENGTH_LONG)
-        }
-    }
-
-    /**
-     * Method that updates the all mangaList which are not tracked as "reading" on mangadex
-     */
-    private suspend fun pushFavorites() {
-        val count = AtomicInteger(0)
-        var countNew = AtomicInteger(0)
-
-        val listManga = db.getLibraryMangaList().executeAsBlocking()
-        // filter all follows from Mangadex and only add reading or rereading manga to library
-
-        listManga.forEach { manga ->
-            showProgressNotification(manga, count.andIncrement, listManga.size)
-
-            // Get this manga's trackers from the database
-            val dbTracks = db.getTracks(manga).executeAsBlocking()
-            val trackList = loggedServices.map { service ->
-                TrackItem(dbTracks.find { it.sync_id == service.id }, service)
-            }
-
-            // find the mdlist entry if its unfollowed the follow it
-
-            trackList.firstOrNull { it.service.isMdList() }?.let { tracker ->
-                if (tracker.track?.status == FollowStatus.UNFOLLOWED.int) {
-                    tracker.track.status = FollowStatus.READING.int
-                    val returnedTracker = tracker.service.update(tracker.track)
-                    db.insertTrack(returnedTracker)
-                    countNew.incrementAndGet()
-                }
-            }
-        }
-        notifier.cancelProgressNotification()
-
-        withContext(Dispatchers.Main)
-        {
-            toast(getString(R.string.push_favorites_to_mangadex_toast, countNew.toInt()),
-                Toast.LENGTH_LONG)
-        }
-    }
-
-    /**
      * Shows the notification containing the currently updating manga and the progress.
      *
      * @param manga the manga that's being updated.
@@ -691,8 +597,6 @@ class LibraryUpdateService(
      */
     enum class Target {
         CHAPTERS, // Manga meta data and  chapters
-        SYNC_FOLLOWS, // SYnc MangaDex FollowsList
-        PUSH_FAVORITES, // Manga in reading
         TRACKING // Tracking metadata
     }
 

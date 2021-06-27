@@ -272,11 +272,12 @@ tasks {
         kotlinOptions.freeCompilerArgs += listOf(
             "-Xopt-in=kotlin.Experimental",
             "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=kotlin.time.ExperimentalTime",
             "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
             "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
             "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
             "-Xuse-experimental=kotlinx.coroutines.InternalCoroutinesApi",
-            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi"
+            "-Xuse-experimental=kotlinx.serialization.ExperimentalSerializationApi",
         )
     }
 
