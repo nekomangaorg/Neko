@@ -33,7 +33,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         binding.categoryHeaderLayout.setOnClickListener { toggleCategory() }
         binding.updateButton.setOnClickListener { addCategoryToUpdate() }
         binding.categoryTitle.setOnLongClickListener {
-            val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+            val category =
+                (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
             adapter.libraryListener.manageCategory(flexibleAdapterPosition)
             category?.isDynamic == false
         }
@@ -47,7 +48,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         adapter.libraryListener.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
-            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle).autoHide(true, 5000L)
+            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle)
+                .autoHide(true, 5000L)
                 .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
                 .text(R.string.long_press_category)
                 .color(itemView.context.getResourceColor(R.attr.colorAccent))
@@ -142,7 +144,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 sortingMode?.mainValue
             ) { sheet, item ->
                 onCatSortClicked(category, item)
-                val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+                val nCategory =
+                    (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
                 val isAscending = nCategory?.isAscending() ?: false
                 val drawableRes = getSortRes(item, isAscending)
                 sheet.setDrawable(item, drawableRes)
@@ -158,13 +161,13 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     private fun getSortRes(
         sortMode: LibrarySort?,
         isAscending: Boolean,
-        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp,
     ): Int {
         sortMode ?: return defaultDrawableRes
         return when (sortMode) {
             LibrarySort.DragAndDrop -> defaultDrawableRes
             else -> {
-                if (if (sortMode.hasInvertedSort) !isAscending else isAscending) {
+                if (isAscending) {
                     R.drawable.ic_arrow_downward_24dp
                 } else {
                     R.drawable.ic_arrow_upward_24dp
@@ -176,13 +179,13 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     private fun getSortRes(
         sortingMode: Int?,
         isAscending: Boolean,
-        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp
+        @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp,
     ): Int {
         sortingMode ?: return defaultDrawableRes
         return when (val sortMode = LibrarySort.valueOf(sortingMode)) {
             LibrarySort.DragAndDrop -> defaultDrawableRes
             else -> {
-                if (if (sortMode?.hasInvertedSort == true) !isAscending else isAscending) {
+                if (isAscending) {
                     R.drawable.ic_arrow_downward_24dp
                 } else {
                     R.drawable.ic_arrow_upward_24dp

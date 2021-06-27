@@ -11,7 +11,7 @@ enum class LibrarySort(
     @DrawableRes private val iconRes: Int,
     private val catValue: Int = mainValue,
     @StringRes private val dynamicStringRes: Int = stringRes,
-    @DrawableRes private val dynamicIconRes: Int = iconRes
+    @DrawableRes private val dynamicIconRes: Int = iconRes,
 ) {
 
     Title(0, R.string.title, R.drawable.ic_sort_by_alpha_24dp),
@@ -43,9 +43,6 @@ enum class LibrarySort(
     @DrawableRes
     fun iconRes(isDynamic: Boolean) = if (isDynamic) dynamicIconRes else iconRes
 
-    val hasInvertedSort: Boolean
-        get() = this in listOf(LastRead, DateAdded, LatestChapter, DateFetched)
-
     fun menuSheetItem(isDynamic: Boolean): MaterialMenuSheet.MenuSheetItem {
         return MaterialMenuSheet.MenuSheetItem(
             mainValue,
@@ -56,6 +53,7 @@ enum class LibrarySort(
 
     companion object {
         fun valueOf(value: Int) = values().find { it.mainValue == value }
-        fun valueOf(char: Char?) = values().find { it.categoryValue == char || it.categoryValueDescending == char }
+        fun valueOf(char: Char?) =
+            values().find { it.categoryValue == char || it.categoryValueDescending == char }
     }
 }
