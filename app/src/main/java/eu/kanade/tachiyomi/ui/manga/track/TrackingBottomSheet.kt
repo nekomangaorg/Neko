@@ -8,6 +8,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -18,9 +19,9 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
+import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
-import com.elvishew.xlog.XLog
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
     E2EBottomSheetDialog<TrackingBottomSheetBinding>(controller.activity!!),
@@ -48,7 +49,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onSlide(bottomSheet: View, progress: Float) { }
+                override fun onSlide(bottomSheet: View, progress: Float) {}
 
                 override fun onStateChanged(p0: View, state: Int) {
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -70,6 +71,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     override fun onStart() {
         super.onStart()
         sheetBehavior.skipCollapsed = true
+        sheetBehavior.expand()
     }
 
     /**
@@ -107,13 +109,15 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     fun onRefreshDone() {
         for (i in adapter!!.items.indices) {
-            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(
+                false)
         }
     }
 
     fun onRefreshError(error: Throwable) {
         for (i in adapter!!.items.indices) {
-            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(
+                false)
         }
         activity.toast(error.message)
     }
@@ -209,7 +213,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         val item = adapter?.getItem(position) ?: return
         if (item.track == null) return
 
-        val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
+        val suggestedDate =
+            presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
         SetTrackReadingDatesDialog(
             controller,
             this,
@@ -230,7 +235,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     fun refreshItem(index: Int) {
-        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(true)
+        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(
+            true)
     }
 
     fun refreshTrack(item: TrackService?) {
@@ -256,10 +262,18 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         presenter.removeTracker(item, fromServiceAlso)
     }
 
-    override fun setReadingDate(item: TrackItem, type: SetTrackReadingDatesDialog.ReadingDate, date: Long) {
+    override fun setReadingDate(
+        item: TrackItem,
+        type: SetTrackReadingDatesDialog.ReadingDate,
+        date: Long,
+    ) {
         when (type) {
-            SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(item, date)
-            SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(item, date)
+            SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(
+                item,
+                date)
+            SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(
+                item,
+                date)
         }
     }
 
