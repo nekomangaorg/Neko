@@ -957,7 +957,7 @@ class MangaDetailsPresenter(
                 val chaptersToMark = chapters.asSequence().filter { it.isMergedChapter().not() }
                     .filter { chapterIds.contains(it.mangadex_chapter_id) }
                     .toList()
-                markChaptersRead(chapters, true, skipReadingSync = true)
+                markChaptersRead(chaptersToMark, true, skipReadingSync = true)
             }
 
         }
