@@ -420,7 +420,7 @@ class LibraryUpdateService(
             }
             db.insertManga(manga).executeAsBlocking()
             // add mdlist tracker if manga in library has it missing
-            val tracks = db.getTracks(manga).executeAsBlocking()
+            val tracks = db.getTracks(manga).executeAsBlocking().toMutableList()
             if (tracks.isEmpty() || !tracks.any { it.sync_id == trackManager.mdList.id }) {
                 val track = trackManager.mdList.createInitialTracker(manga)
                 db.insertTrack(track).executeAsBlocking()
