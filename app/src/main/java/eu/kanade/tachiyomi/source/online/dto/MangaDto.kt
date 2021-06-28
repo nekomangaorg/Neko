@@ -88,7 +88,7 @@ data class ReadingStatusMapDto(
 
 @Serializable
 data class ReadChapterDto(
-    val chapterIds: List<String>,
+    val data: List<String>,
 )
 
 @Serializable

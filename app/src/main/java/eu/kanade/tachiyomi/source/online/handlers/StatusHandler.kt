@@ -74,7 +74,7 @@ class StatusHandler {
 
     suspend fun getReadChapterIds(mangaId: String) = flow {
         val result = runCatching {
-            network.authService.readChaptersForManga(mangaId).body()!!.chapterIds.toSet()
+            network.authService.readChaptersForManga(mangaId).body()!!.data.toSet()
         }.onFailure {
             XLog.e("error trying to get chapterIds", it)
         }

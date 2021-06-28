@@ -47,7 +47,7 @@ interface MangaDexAuthService : MangaDexImageService {
     suspend fun readingStatusForManga(@Path("id") mangaId: String): Response<ReadingStatusDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/status")
+    @GET("${MdApi.manga}/{id}/read")
     suspend fun readChaptersForManga(@Path("id") mangaId: String): Response<ReadChapterDto>
 
     @Headers("Cache-Control: no-cache")
