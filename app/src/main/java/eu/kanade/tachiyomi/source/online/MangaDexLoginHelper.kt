@@ -47,16 +47,18 @@ class MangaDexLoginHelper {
             return false
         }
         val refreshTokenResponse = authService.refreshToken(RefreshTokenDto(refreshToken))
-
         XLog.i("refreshing token")
-        val refreshTokenDto = refreshTokenResponse.body()!!
-        val result = refreshTokenDto.result == "ok"
-        if (result) {
-            preferences.setTokens(refreshTokenDto.token.refresh,
-                refreshTokenDto.token.session)
-        }
-
-        return result
+        return runCatching {
+            val refreshTokenDto = refreshTokenResponse.body()!!
+            val result = refreshTokenDto.result == "ok"
+            if (result) {
+                preferences.setTokens(refreshTokenDto.token.refresh,
+                    refreshTokenDto.token.session)
+            }
+            result
+        }.onFailure {
+            XLog.e("Error refreshing token ", it)
+        }.getOrElse { false }
     }
 
     suspend fun login(
