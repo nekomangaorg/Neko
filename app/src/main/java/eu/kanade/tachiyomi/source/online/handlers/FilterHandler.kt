@@ -60,7 +60,7 @@ class FilterHandler {
         Filter.Group<Status>("Status", status)
 
     private fun getStatus() = listOf(
-        Status("Onging"),
+        Status("Ongoing"),
         Status("Completed"),
         Status("Hiatus"),
         Status("Abandoned"),
