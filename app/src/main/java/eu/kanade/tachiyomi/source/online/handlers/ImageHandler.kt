@@ -38,17 +38,18 @@ class ImageHandler {
                 throw (e)
             }
             val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
-            
+
             launchIO {
                 val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
                 val cache = response.header("X-Cache", "") == "HIT"
                 val result = AtHomeImageReportDto(
-                    page.imageUrl!!,
+                    response.request.url.toString(),
                     response.isSuccessful,
                     byteSize,
                     cache,
                     duration
                 )
+                XLog.e("CESCO reporting $result")
                 runCatching {
                     network.service.atHomeImageReport(result)
                 }.onFailure { e ->
