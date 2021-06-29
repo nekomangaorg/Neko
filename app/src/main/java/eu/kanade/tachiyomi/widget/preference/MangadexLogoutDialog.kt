@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.widget.preference
 import android.app.Dialog
 import android.os.Bundle
 import com.afollestad.materialdialogs.MaterialDialog
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.toast
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -29,15 +31,23 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
             .title(R.string.logout)
             .positiveButton(R.string.logout) {
                 launchNow {
-                    val loggedOut = source.logout()
+                    runCatching {
+                        val loggedOut = source.logout()
 
-                    if (loggedOut.loggedOut) {
-                        preferences.setSourceCredentials(source, "", "")
-                        preferences.setTokens("", "")
-                        activity?.toast(R.string.successfully_logged_out)
-                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
-                    } else {
-                        activity?.toast(loggedOut.error)
+                        if (loggedOut.loggedOut) {
+                            launch {
+                                preferences.setSourceCredentials(source, "", "")
+                                preferences.setTokens("", "")
+                            }
+                            activity?.toast(R.string.successfully_logged_out)
+                            (targetController as? Listener)?.siteLogoutDialogClosed(source)
+                        } else {
+                            activity?.toast(loggedOut.error)
+                        }
+                    }.onFailure { e ->
+                        XLog.e("error logging out", e)
+                        activity?.toast(R.string.could_not_log_in)
+
                     }
                 }
             }

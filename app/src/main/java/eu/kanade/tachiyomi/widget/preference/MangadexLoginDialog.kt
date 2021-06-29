@@ -71,12 +71,15 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                     )
                     if (result) {
                         dialog?.dismiss()
-                        preferences.setSourceCredentials(
-                            source,
-                            binding.username.text.toString(),
-                            binding.password.text.toString()
-                        )
+                        launch {
+                            preferences.setSourceCredentials(
+                                source,
+                                binding.username.text.toString(),
+                                binding.password.text.toString()
+                            )
+                        }
                         context.toast(R.string.successfully_logged_in)
+                        (targetController as? Listener)?.siteLoginDialogClosed(source)
                     } else {
                         errorResult()
                     }
@@ -97,16 +100,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
             }
         }
     }
-
-    override fun onDialogClosed() {
-        super.onDialogClosed()
-        if (activity != null) {
-            (activity as? Listener)?.siteLoginDialogClosed(source)
-        } else {
-            (targetController as? Listener)?.siteLoginDialogClosed(source)
-        }
-    }
-
+    
     interface Listener {
         fun siteLoginDialogClosed(source: Source)
     }
