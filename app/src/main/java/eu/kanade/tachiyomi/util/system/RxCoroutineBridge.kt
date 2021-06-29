@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.util.system
 
+import com.elvishew.xlog.XLog
 import kotlinx.coroutines.CancellableContinuation
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -60,19 +62,21 @@ fun <T> runAsObservable(
     scope: CoroutineScope = GlobalScope,
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,
     block: suspend () -> T,
-  
+
     ): Observable<T> {
     return Observable.create(
         { emitter ->
-            val job = scope.launch {
+            val job = scope.launch(CoroutineName("runAsObservable")) {
                 try {
                     emitter.onNext(block())
                     emitter.onCompleted()
                 } catch (e: Throwable) {
                     // Ignore `CancellationException` as error, since it indicates "normal cancellation"
                     if (e !is CancellationException) {
+                        XLog.d("coroutine is cancelled")
                         emitter.onError(e)
                     } else {
+                        XLog.e("error in coroutine bridge", e)
                         emitter.onCompleted()
                     }
                 }
