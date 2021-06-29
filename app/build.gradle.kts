@@ -44,6 +44,10 @@ android {
         buildConfigField("String", "BUILD_TIME", "\"${getBuildTime()}\"")
         buildConfigField("Boolean", "INCLUDE_UPDATER", "false")
 
+        ndk {
+            abiFilters += setOf("armeabi-v7a", "arm64-v8a", "x86")
+        }
+
         buildFeatures {
             dataBinding = true
         }
