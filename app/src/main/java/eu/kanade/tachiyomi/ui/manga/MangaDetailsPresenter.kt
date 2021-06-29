@@ -426,7 +426,7 @@ class MangaDetailsPresenter(
     /** Refresh Manga Info and Chapter List (not tracking) */
     fun refreshAll() {
         if (controller.isNotOnline()) return
-
+        XLog.d("refreshing all")
         val usingCache = preferences.useCacheSource()
 
         scope.launch {
@@ -442,7 +442,7 @@ class MangaDetailsPresenter(
                 }
                 return@launch
             }
-
+            XLog.d("begin processing chapters and manga refresh")
             val nPair = async(Dispatchers.IO) {
                 try {
                     val result = source.fetchMangaAndChapterDetails(manga)

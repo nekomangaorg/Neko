@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -21,7 +22,7 @@ class PageHandler {
 
     suspend fun fetchPageList(chapter: SChapter, isLogged: Boolean): List<Page> {
         return withContext(Dispatchers.IO) {
-
+            XLog.d("fetching page list")
             val chapterResponse = async {
                 network.service.viewChapter(chapter.mangadex_chapter_id)
             }
@@ -67,7 +68,7 @@ class PageHandler {
         val pages = pageArray.mapIndexed { pos, imgUrl ->
             Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterDto.data.id)
         }
-        
+
         imageHandler.updateTokenTracker(chapterDto.data.id, now)
 
         return pages

@@ -22,6 +22,7 @@ class MangaHandler {
     val apiMangaParser: ApiMangaParser by injectLazy()
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
+        XLog.d("fetch manga and chapter details")
         return withContext(Dispatchers.IO) {
             val detailsManga = async {
                 fetchMangaDetails(manga)
