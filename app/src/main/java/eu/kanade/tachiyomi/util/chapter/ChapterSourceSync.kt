@@ -27,12 +27,13 @@ fun syncChaptersWithSource(
     db: DatabaseHelper,
     rawSourceChapters: List<SChapter>,
     manga: Manga,
-    errorFromMerged: Boolean = false
+    errorFromMerged: Boolean = false,
 ): Pair<List<Chapter>, List<Chapter>> {
     val downloadManager: DownloadManager = Injekt.get()
     val preferences: PreferencesHelper = Injekt.get()
     // Chapters from db.
-    val dbChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
+    val dbChapters = db.getChapters(manga).executeAsBlocking()
+        .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
     // no need to handle cache in dedupe because rawsource already has the correct chapters
     val dedupedChapters = deduplicateChapters(rawSourceChapters, manga)
 
@@ -70,7 +71,10 @@ fun syncChaptersWithSource(
             ChapterRecognition.parseChapterNumber(sourceChapter, manga)
 
             if (shouldUpdateDbChapter(dbChapter, sourceChapter)) {
-                if (dbChapter.name != sourceChapter.name && downloadManager.isChapterDownloaded(dbChapter, manga)) {
+                if (dbChapter.name != sourceChapter.name && downloadManager.isChapterDownloaded(
+                        dbChapter,
+                        manga)
+                ) {
                     downloadManager.renameChapter(manga, dbChapter, sourceChapter)
                 }
                 dbChapter.scanlator = sourceChapter.scanlator
@@ -82,6 +86,7 @@ fun syncChaptersWithSource(
                 dbChapter.chapter_number = sourceChapter.chapter_number
                 dbChapter.mangadex_chapter_id = sourceChapter.mangadex_chapter_id
                 dbChapter.language = sourceChapter.language
+                dbChapter.source_order = sourceChapter.source_order
                 toChange.add(dbChapter)
             }
         }
@@ -178,7 +183,9 @@ fun syncChaptersWithSource(
         if (toChange.isNotEmpty()) {
             db.insertChapters(toChange).executeAsBlocking()
         }
-        val topChapters = db.getChapters(manga).executeAsBlocking().filterIfUsingCache(downloadManager, manga, preferences.useCacheSource()).sortedByDescending { it.date_upload }.take(4)
+        val topChapters = db.getChapters(manga).executeAsBlocking()
+            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
+            .sortedByDescending { it.date_upload }.take(4)
         // Recalculate next update since chapters were changed
         if (topChapters.size > 1) {
             var delta = 0L
@@ -205,7 +212,7 @@ fun syncChaptersWithSource(
 }
 
 // checks if the chapter in db needs updated
-private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: SChapter): Boolean {
+private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: Chapter): Boolean {
     return dbChapter.scanlator != sourceChapter.scanlator ||
         dbChapter.name != sourceChapter.name ||
         dbChapter.date_upload != sourceChapter.date_upload ||
@@ -214,5 +221,6 @@ private fun shouldUpdateDbChapter(dbChapter: Chapter, sourceChapter: SChapter): 
         dbChapter.chapter_title != sourceChapter.chapter_title ||
         dbChapter.chapter_txt != sourceChapter.chapter_txt ||
         dbChapter.mangadex_chapter_id != sourceChapter.mangadex_chapter_id ||
-        dbChapter.language != sourceChapter.language
+        dbChapter.language != sourceChapter.language ||
+        dbChapter.source_order != sourceChapter.source_order
 }

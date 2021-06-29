@@ -11,7 +11,7 @@ data class AtHomeDto(
 data class AtHomeImageReportDto(
     val url: String,
     val success: Boolean,
-    val bytes: Int?,
-    val cached: Boolean,
+    val bytes: Int? = null,
+    val cached: Boolean? = null,
     val duration: Long,
 )

@@ -35,9 +35,14 @@ class MangaDexLoginHelper {
             return true
         }
         XLog.i("token was not refreshed recently hit dex auth check")
-        val checkTokenResponse = authService.checkToken()
-        XLog.i("check token is authenticated ${checkTokenResponse.body()!!.isAuthenticated}")
-        return checkTokenResponse.body()!!.isAuthenticated
+        val authenticated = runCatching {
+            authService.checkToken().body()!!.isAuthenticated
+        }.getOrElse { e ->
+            XLog.e("error authenticating", e)
+            false
+        }
+        XLog.i("check token is authenticated ${authenticated}")
+        return authenticated
     }
 
     suspend fun refreshToken(): Boolean {
@@ -47,16 +52,19 @@ class MangaDexLoginHelper {
             return false
         }
         val refreshTokenResponse = authService.refreshToken(RefreshTokenDto(refreshToken))
-
         XLog.i("refreshing token")
-        val refreshTokenDto = refreshTokenResponse.body()!!
-        val result = refreshTokenDto.result == "ok"
-        if (result) {
-            preferences.setTokens(refreshTokenDto.token.refresh,
-                refreshTokenDto.token.session)
+        return runCatching {
+            val refreshTokenDto = refreshTokenResponse.body()!!
+            val result = refreshTokenDto.result == "ok"
+            if (result) {
+                preferences.setTokens(refreshTokenDto.token.refresh,
+                    refreshTokenDto.token.session)
+            }
+            result
+        }.getOrElse { e ->
+            XLog.e("Error refreshing token ", e)
+            false
         }
-
-        return result
     }
 
     suspend fun login(

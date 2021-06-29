@@ -6,7 +6,7 @@ import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.jobs.StatusSyncJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.similar.MangaCacheUpdateJob
@@ -139,10 +139,7 @@ class SettingsSiteController :
                     ) { _, indices, _ ->
                         preferences.mangadexSyncToLibraryIndexes()
                             .set(indices.map { (it + 1).toString() }.toSet())
-                        LibraryUpdateService.start(
-                            context,
-                            target = LibraryUpdateService.Target.SYNC_FOLLOWS
-                        )
+                        StatusSyncJob.doWorkNow(context, false)
                     }
                     positiveButton(android.R.string.ok)
                     negativeButton(android.R.string.cancel)
@@ -155,10 +152,7 @@ class SettingsSiteController :
             summaryRes = R.string.push_favorites_to_mangadex_summary
 
             onClick {
-                LibraryUpdateService.start(
-                    context,
-                    target = LibraryUpdateService.Target.PUSH_FAVORITES
-                )
+                StatusSyncJob.doWorkNow(context, true)
             }
         }
 

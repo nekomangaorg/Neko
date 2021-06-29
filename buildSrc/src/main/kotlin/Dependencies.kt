@@ -117,8 +117,7 @@ object Libs {
 
     object UI {
         const val androidTagGroup = "com.github.kizitonwose:AndroidTagGroup:1.6.0"
-        const val directionalPageView =
-            "com.github.carlosesco:DirectionalViewPager:${Versions.directionalViewPager}"
+        const val directionalPageView = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
         const val fastAdapter = "com.mikepenz:fastadapter:5.4.1"
         const val fastAdapterBinding = "com.mikepenz:fastadapter-extensions-binding:5.4.1"
         const val filePicker = "com.nononsenseapps:filepicker:2.4.2"
@@ -164,7 +163,6 @@ object Versions {
     const val changelog = "2.1.0"
     const val coil = "1.1.1"
     const val conductor = "2.1.5"
-    const val directionalViewPager = "a844dbca0a"
     const val firebaseCrashlytics = "17.2.1"
     const val googleServices = "4.3.3"
     const val gradleVersions = "0.29.0"

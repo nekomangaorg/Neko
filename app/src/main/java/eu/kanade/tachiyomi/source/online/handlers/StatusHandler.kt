@@ -6,11 +6,23 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 
 class StatusHandler {
     val preferences: PreferencesHelper by injectLazy()
     val network: NetworkHelper by injectLazy()
+
+    suspend fun fetchReadingStatusForAllManga(): Map<String, String?> {
+        return withContext(Dispatchers.IO) {
+            val response = network.authService.readingStatusAllManga()
+            if (response.isSuccessful.not()) {
+                return@withContext emptyMap()
+            } else {
+                return@withContext response.body()!!.statuses
+            }
+        }
+    }
 
     /* suspend fun fetchMangaWithStatus(statusList: List<FollowStatus>) = flow<List<SManga>> {
          coroutineScope {
@@ -62,7 +74,7 @@ class StatusHandler {
 
     suspend fun getReadChapterIds(mangaId: String) = flow {
         val result = runCatching {
-            network.authService.readChaptersForManga(mangaId).body()!!.chapterIds.toSet()
+            network.authService.readChaptersForManga(mangaId).body()!!.data.toSet()
         }.onFailure {
             XLog.e("error trying to get chapterIds", it)
         }

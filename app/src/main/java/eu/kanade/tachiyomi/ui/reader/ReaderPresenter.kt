@@ -216,6 +216,7 @@ class ReaderPresenter(
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
             val dbChapters = db.getChapters(manga).executeAsBlocking()
+            val currentChapter = getCurrentChapter()?.chapter?.id
             val list =
                 chapterFilter.filterChaptersForReader(dbChapters,
                     manga,
@@ -229,7 +230,7 @@ class ReaderPresenter(
                         ReaderChapterItem(
                             it,
                             manga,
-                            it.id == getCurrentChapter()?.chapter?.id ?: chapterId
+                            it.id == currentChapter ?: chapterId
                         )
                     }
             if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())) {
@@ -874,7 +875,7 @@ class ReaderPresenter(
 
     private fun updateReadingStatus(readerChapter: ReaderChapter) {
         if (preferences.readingSync().not() && readerChapter.chapter.isMergedChapter().not()) return
-        launchIO {
+        scope.launchIO {
             statusHandler.markChapterRead(readerChapter.chapter.mangadex_chapter_id)
         }
     }

@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -101,7 +100,6 @@ class SourceFilterSheet(val activity: Activity) :
             androidx.recyclerview.widget.LinearLayoutManager(context)
         binding.filtersRecycler.clipToPadding = false
         binding.filtersRecycler.adapter = adapter
-        binding.filtersRecycler.setHasFixedSize(true)
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {

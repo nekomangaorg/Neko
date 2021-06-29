@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.Response
@@ -30,7 +31,7 @@ interface MangaDexService : MangaDexImageService {
     suspend fun viewManga(@Path("id") id: String): Response<MangaDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.Types.scanlator}")
+    @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
@@ -49,5 +50,5 @@ interface MangaDexService : MangaDexImageService {
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
 
     @POST(MdConstants.atHomeReportUrl)
-    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
+    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): Response<ResultDto>
 }

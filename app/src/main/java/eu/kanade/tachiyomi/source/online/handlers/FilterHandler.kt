@@ -60,7 +60,7 @@ class FilterHandler {
         Filter.Group<Status>("Status", status)
 
     private fun getStatus() = listOf(
-        Status("Onging"),
+        Status("Ongoing"),
         Status("Completed"),
         Status("Hiatus"),
         Status("Abandoned"),
@@ -84,6 +84,7 @@ class FilterHandler {
     private class TagList(tags: List<Tag>) : Filter.Group<Tag>("Tags", tags)
 
     internal fun getTags() = listOf(
+        Tag("b11fda93-8f1d-4bef-b2ed-8803d3733170", "4-koma"),
         Tag("391b0423-d847-456f-aff0-8b0cfc03066b", "Action"),
         Tag("f4122d1c-3b44-44d0-9936-ff7502c39ad3", "Adaptation"),
         Tag("87cc87cd-a395-47af-b27a-93258283bbc6", "Adventure"),
@@ -103,7 +104,6 @@ class FilterHandler {
         Tag("fad12b5e-68ba-460e-b933-9ae8318f5b65", "Ecchi"),
         Tag("7b2ce280-79ef-4c09-9b58-12b7c23a9b78", "Fan Colored"),
         Tag("cdc58593-87dd-415e-bbc0-2ec27bf404cc", "Fantasy"),
-        Tag("b11fda93-8f1d-4bef-b2ed-8803d3733170", "4-koma"),
         Tag("f5ba408b-0e7a-484d-8d49-4e9125ac96de", "Full Color"),
         Tag("2bd2e8d0-f146-434a-9b51-fc9ff2c5fe6a", "Genderswap"),
         Tag("3bb26d85-09d5-4d2e-880c-c34b974339e9", "Ghosts"),

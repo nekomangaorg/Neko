@@ -101,10 +101,13 @@ class HttpPageLoader(
      * the local cache, otherwise fallbacks to network.
      */
     override fun getPages(): Observable<List<ReaderPage>> {
-        return runAsObservable {
+        return runAsObservable(scope) {
+            XLog.d("get pages")
             runCatching {
+                XLog.d("try to get page from cache")
                 chapterCache.getPageListFromCache(chapter.chapter)
             }.getOrElse {
+                XLog.d("try to get page from network")
                 source.fetchPageList(chapter.chapter)
             }.mapIndexed { index, page ->
                 ReaderPage(index, page.url, page.imageUrl, page.mangaDexChapterId)

@@ -16,7 +16,7 @@ import okhttp3.ResponseBody.Companion.toResponseBody
 import uy.kohesive.injekt.injectLazy
 import java.util.UUID
 
-class MangaPlusHandler() {
+class MangaPlusHandler {
     val networkHelper: NetworkHelper by injectLazy()
     val baseUrl = "https://jumpg-webapi.tokyo-cdn.com/api"
     val headers = Headers.Builder()

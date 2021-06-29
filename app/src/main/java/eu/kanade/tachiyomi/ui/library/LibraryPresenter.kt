@@ -422,7 +422,7 @@ class LibraryPresenter(
                     category.mangaSort != null -> {
                         var sort = when (category.sortingMode() ?: LibrarySort.Title) {
                             LibrarySort.Title -> sortAlphabetical(i1, i2)
-                            LibrarySort.LatestChapter -> i2.manga.last_update.compareTo(i2.manga.last_update)
+                            LibrarySort.LatestChapter -> i2.manga.last_update.compareTo(i1.manga.last_update)
                             LibrarySort.Unread -> when {
                                 i1.manga.unread == i2.manga.unread -> 0
                                 i1.manga.unread == 0 -> if (category.isAscending()) 1 else -1
@@ -1043,11 +1043,9 @@ class LibraryPresenter(
                         chapter.read = markRead
                         chapter.last_page_read = 0
                         if (preferences.readingSync() && chapter.isMergedChapter().not()) {
-                            launchIO {
-                                when (markRead) {
-                                    true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
-                                    false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
-                                }
+                            when (markRead) {
+                                true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                                false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
                             }
                         }
                     }

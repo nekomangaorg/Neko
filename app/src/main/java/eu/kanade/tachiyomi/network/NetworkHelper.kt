@@ -65,8 +65,8 @@ class NetworkHelper(val context: Context) {
 
     private fun buildNonRateLimitedClient(): OkHttpClient {
         return OkHttpClient.Builder()
-            .connectTimeout(30, TimeUnit.SECONDS)
-            .readTimeout(30, TimeUnit.SECONDS)
+            .connectTimeout(15, TimeUnit.SECONDS)
+            .readTimeout(15, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .cookieJar(cookieManager)
             .apply {

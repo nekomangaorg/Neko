@@ -468,18 +468,16 @@ class RecentsPresenter(
                 }
             }
             if (preferences.readingSync() && chapter.isMergedChapter().not()) {
-                launchIO {
-                    when (read) {
-                        true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
-                        false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
-                    }
+                when (read) {
+                    true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                    false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
                 }
             }
             db.updateChaptersProgress(listOf(chapter)).executeAsBlocking()
             getRecents()
         }
     }
-    
+
     // History
     /**
      * Reset last read of chapter to 0L
