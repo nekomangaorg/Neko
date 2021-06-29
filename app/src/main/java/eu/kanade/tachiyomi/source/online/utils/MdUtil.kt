@@ -36,7 +36,7 @@ class MdUtil {
         const val similarCacheMapping = "https://api.similarmanga.com/mapping/mdex2search.csv"
         const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
 
-        const val mangaLimit = 40
+        const val mangaLimit = 20
 
         /**
          * Get the manga offset pages are 1 based, so subtract 1
