@@ -1043,11 +1043,9 @@ class LibraryPresenter(
                         chapter.read = markRead
                         chapter.last_page_read = 0
                         if (preferences.readingSync() && chapter.isMergedChapter().not()) {
-                            launchIO {
-                                when (markRead) {
-                                    true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
-                                    false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
-                                }
+                            when (markRead) {
+                                true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                                false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
                             }
                         }
                     }

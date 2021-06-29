@@ -15,6 +15,7 @@ import okhttp3.Response
 import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import kotlin.time.Duration
 
 class ImageHandler {
     val network: NetworkHelper by injectLazy()
@@ -29,40 +30,62 @@ class ImageHandler {
             return mangaPlusHandler.client.newCall(GET(page.imageUrl!!, mangaPlusHandler.headers))
                 .await()
         } else {
+            val request = imageRequest(page, isLogged)
             val response = try {
-                network.nonRateLimitedClient.newCallWithProgress(imageRequest(page, isLogged),
-                    page)
+                network.nonRateLimitedClient.newCallWithProgress(request, page)
                     .await()
             } catch (e: Exception) {
                 XLog.e("error getting images", e)
+                reportFailedImage(request.url.toString())
                 throw (e)
             }
-            val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
 
-            launchIO {
-                val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
-                val cache = response.header("X-Cache", "") == "HIT"
-                val result = AtHomeImageReportDto(
-                    response.request.url.toString(),
-                    response.isSuccessful,
-                    byteSize,
-                    cache,
-                    duration
-                )
-                XLog.e("CESCO reporting $result")
-                runCatching {
-                    network.service.atHomeImageReport(result)
-                }.onFailure { e ->
-                    Timber.e(e, "error trying to post to dex@home")
-
-                }
-            }
+            reportImageWithResponse(response)
 
             if (!response.isSuccessful) {
                 response.close()
                 throw Exception("HTTP error ${response.code}")
             }
             return response
+        }
+    }
+
+    fun reportFailedImage(url: String) {
+        val atHomeImageReportDto = AtHomeImageReportDto(
+            url,
+            false,
+            duration = Duration.seconds(30).inWholeMilliseconds
+        )
+        sendReport(atHomeImageReportDto)
+    }
+
+    private fun reportImageWithResponse(response: Response) {
+        val byteSize = response.peekBody(Long.MAX_VALUE).bytes().size
+        val duration = response.receivedResponseAtMillis - response.sentRequestAtMillis
+        val cache = response.header("X-Cache", "") == "HIT"
+        val atHomeImageReportDto = AtHomeImageReportDto(
+            response.request.url.toString(),
+            response.isSuccessful,
+            byteSize,
+            cache,
+            duration
+        )
+        sendReport(atHomeImageReportDto)
+    }
+
+    fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
+        launchIO {
+            XLog.d("Image to report $atHomeImageReportDto")
+
+            if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
+                XLog.d("image is at CDN don't report to md@home node")
+                return@launchIO
+            }
+            runCatching {
+                network.service.atHomeImageReport(atHomeImageReportDto)
+            }.onFailure { e ->
+                Timber.e(e, "error trying to post to dex@home")
+            }
         }
     }
 
@@ -84,6 +107,8 @@ class ImageHandler {
                         preferences.usePort443Only()).body()!!.baseUrl
                 }
             }
+        XLog.d("Image server is $mdAtHomeServerUrl")
+        XLog.d("page url is ${page.imageUrl}")
         return GET(mdAtHomeServerUrl + page.imageUrl, network.headers)
     }
 

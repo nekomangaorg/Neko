@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.Response
@@ -49,5 +50,5 @@ interface MangaDexService : MangaDexImageService {
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
 
     @POST(MdConstants.atHomeReportUrl)
-    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto)
+    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): Response<ResultDto>
 }
