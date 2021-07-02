@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
@@ -170,9 +169,7 @@ class MangaDetailsPresenter(
     }
 
     private suspend fun getChapters() {
-        val chapters = db.getChapters(manga).executeOnIO()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
-            .map { it.toModel() }
+        val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 
         // update all scanlators
         updateScanlators(chapters)
@@ -427,7 +424,6 @@ class MangaDetailsPresenter(
     fun refreshAll() {
         if (controller.isNotOnline()) return
         XLog.d("refreshing all")
-        val usingCache = preferences.useCacheSource()
 
         scope.launch {
             isLoading = true
@@ -436,7 +432,7 @@ class MangaDetailsPresenter(
             var error = false
             val thumbnailUrl = manga.thumbnail_url
 
-            if (usingCache.not() && source.checkIfUp().not()) {
+            if (source.checkIfUp().not()) {
                 withContext(Dispatchers.Main) {
                     controller.showError("MangaDex appears to be down, or under heavy load")
                 }
@@ -475,19 +471,16 @@ class MangaDetailsPresenter(
             val mangaWasInitalized = manga.initialized
             if (networkManga != null) {
                 // only copy if it had no data
-                if (usingCache && manga.description.isNullOrEmpty()) {
-                    manga.copyFrom(networkManga)
-                }
+                manga.copyFrom(networkManga)
                 manga.initialized = true
 
                 // force new cover if it exists
-                if (usingCache.not()) {
-                    if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
-                            .getOrDefault()
-                    ) {
-                        coverCache.deleteFromCache(thumbnailUrl)
-                    }
+                if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
+                        .getOrDefault()
+                ) {
+                    coverCache.deleteFromCache(thumbnailUrl)
                 }
+
 
                 db.insertManga(manga).executeAsBlocking()
 
@@ -512,7 +505,7 @@ class MangaDetailsPresenter(
                 }
             }
             val finChapters = networkPair.second
-            if (!error && (usingCache.not() || (usingCache && manga.isMerged()))) {
+            if (!error) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     val downloadNew = preferences.downloadNew().get()
@@ -548,7 +541,6 @@ class MangaDetailsPresenter(
 
             withContext(Dispatchers.IO) {
                 val allChaps = db.getChapters(manga).executeAsBlocking()
-                    .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
                 updateScanlators(allChaps.map { it.toModel() })
                 manga.scanlator_filter?.let {
                     filteredScanlators = MdUtil.getScanlators(it).toSet()

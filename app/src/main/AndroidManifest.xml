@@ -190,10 +190,6 @@
             android:exported="false" />
 
         <service
-            android:name=".data.similar.MangaCacheUpdateService"
-            android:exported="false" />
-
-        <service
             android:name=".data.download.DownloadService"
             android:exported="false" />
 

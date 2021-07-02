@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.ChaptersItemBinding
-import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -35,13 +34,7 @@ class ChapterHolder(
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
         val isLocked = item.isLocked
-
-        if (adapter.preferences.useCacheSource() && item.chapter.isMergedChapter()
-                .not() && item.isDownloaded.not()
-        ) {
-            binding.downloadButton.root.isVisible = false
-        }
-
+        
         binding.chapterTitle.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())

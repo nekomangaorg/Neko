@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaImpl
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.isLongStrip
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
@@ -111,7 +110,6 @@ class ReaderPresenter(
     private val chapterList by lazy {
         val manga = manga!!
         val dbChapters = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
 
         val selectedChapter = dbChapters.find { it.id == chapterId }
             ?: error("Requested chapter of id $chapterId not found in chapter list")

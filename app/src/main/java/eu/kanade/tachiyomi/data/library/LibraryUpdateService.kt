@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -305,7 +304,7 @@ class LibraryUpdateService(
             val isDexUp = sourceManager.getMangadex().checkIfUp()
 
             jobCount.andIncrement
-            if (isDexUp || preferences.useCacheSource()) {
+            if (isDexUp) {
                 val results = mangaToUpdateMap.keys.map { source ->
                     try {
                         updateMangaInSource(source, downloadNew, categoriesToDownload)
@@ -339,7 +338,7 @@ class LibraryUpdateService(
                 errorFile.getUriCompat(this)
             )
         }
-        if (isDexUp.not() && !preferences.useCacheSource()) {
+        if (isDexUp.not()) {
             notifier.showUpdateErrorNotification(
                 listOf("Skipping library update"),
                 null
@@ -457,7 +456,7 @@ class LibraryUpdateService(
 
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                            .getOrDefault() && preferences.useCacheSource().not()
+                            .getOrDefault()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl)
                         // load new covers in background
@@ -481,7 +480,6 @@ class LibraryUpdateService(
 
                 if (fetchedChapters.isNotEmpty()) {
                     val originalChapters = db.getChapters(manga).executeAsBlocking()
-                        .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
                     val newChapters =
                         syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
 
@@ -564,7 +562,6 @@ class LibraryUpdateService(
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
         val allChaps = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters

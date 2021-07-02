@@ -453,9 +453,7 @@ class PreferencesHelper(val context: Context) {
 
     fun addToLibraryAsPlannedToRead(): Boolean =
         prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
-
-    fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
-
+    
     fun contentRatingSelections(): MutableSet<String> =
         prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
 

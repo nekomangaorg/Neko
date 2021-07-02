@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.util.chapter
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -10,7 +9,10 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downloadManager: DownloadManager = Injekt.get()) {
+class ChapterFilter(
+    val preferences: PreferencesHelper = Injekt.get(),
+    val downloadManager: DownloadManager = Injekt.get(),
+) {
 
     // filters chapters based on the manga values
     fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
@@ -28,7 +30,8 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
                     (unreadEnabled && it.read) ||
                     (bookmarkEnabled && it.bookmark.not()) ||
                     (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
-                    (scanlatorEnabled && it.scanlatorList().none { group -> listValidScanlators.contains(group) })
+                    (scanlatorEnabled && it.scanlatorList()
+                        .none { group -> listValidScanlators.contains(group) })
                 ) {
                     return@filter false
                 }
@@ -40,13 +43,17 @@ class ChapterFilter(val preferences: PreferencesHelper = Injekt.get(), val downl
     }
 
     // filter chapters for the reader
-    fun filterChaptersForReader(chapters: List<Chapter>, manga: Manga, selectedChapter: Chapter? = null): List<Chapter> {
+    fun filterChaptersForReader(
+        chapters: List<Chapter>,
+        manga: Manga,
+        selectedChapter: Chapter? = null,
+    ): List<Chapter> {
         // if neither preference is enabled don't even filter
-        var filteredChapters = chapters.filterIfUsingCache(downloadManager, manga, preferences.useCacheSource(), true)
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
-            return filteredChapters
+            return chapters
         }
 
+        var filteredChapters = chapters
         if (preferences.skipRead()) {
             filteredChapters = filteredChapters.filter { !it.read }
         }

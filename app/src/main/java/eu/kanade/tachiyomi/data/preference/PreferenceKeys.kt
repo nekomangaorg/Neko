@@ -226,8 +226,6 @@ object PreferenceKeys {
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
 
-    const val useCacheSource = "use_cache_source_new"
-
     const val sessionToken = "mangadex_session_token"
 
     const val refreshToken = "mangadex_refresh_token"

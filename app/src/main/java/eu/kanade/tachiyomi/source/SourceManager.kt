@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.source
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.MangaDex
-import eu.kanade.tachiyomi.source.online.MangaDexCache
 import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.source.online.utils.MdLang
 import uy.kohesive.injekt.injectLazy
@@ -17,7 +16,6 @@ open class SourceManager {
 
     // private val sourcesMap = mutableMapOf<Long, Source>()
     private val source: MangaDex = MangaDex()
-    private val sourceCache: MangaDexCache = MangaDexCache()
 
     private val mergeSource = MergeSource()
 
@@ -29,9 +27,7 @@ open class SourceManager {
         return possibleIds.contains(sourceKey)
     }
 
-    fun getMangadex(): MangaDex {
-        return if (preferences.useCacheSource()) sourceCache else source
-    }
+    fun getMangadex(): MangaDex = source
 
     fun getMergeSource() = mergeSource
 

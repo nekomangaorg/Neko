@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -550,16 +549,6 @@ class LibraryPresenter(
                     else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
-                if (preferences.useCacheSource()) {
-                    it.unread = db.getChaptersByMangaId(it.id!!).executeAsBlocking().asSequence()
-                        .filter { chp -> chp.read.not() }
-                        .filter { chp ->
-                            it.isMerged()
-                                .not() || chp.isMergedChapter() || downloadManager.isChapterDownloaded(
-                                chp,
-                                it)
-                        }.count()
-                }
                 LibraryItem(it, headerItem)
             }.toMutableList()
 
@@ -875,7 +864,6 @@ class LibraryPresenter(
     /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
 
