@@ -106,7 +106,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             updatePref(preferences.libraryUpdateCategories(), binding.includeGlobal) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
-            LibraryUpdateJob.setupTask(0)
+            LibraryUpdateJob.setupTask(binding.root.context, 0)
         }
         updateLibrary?.invoke(category.id)
         return true
@@ -173,7 +173,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     private fun setCheckbox(
         box: CompoundButton,
         categories: Preference<Set<String>>,
-        shouldShow: Boolean
+        shouldShow: Boolean,
     ) {
         val updateCategories = categories.get()
         box.isVisible = updateCategories.isNotEmpty() && shouldShow

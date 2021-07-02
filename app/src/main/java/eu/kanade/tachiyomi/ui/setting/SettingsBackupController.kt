@@ -97,7 +97,7 @@ class SettingsBackupController : SettingsController() {
                     // Always cancel the previous task, it seems that sometimes they are not updated
 
                     val interval = newValue as Int
-                    BackupCreatorJob.setupTask(interval)
+                    BackupCreatorJob.setupTask(context, interval)
                     true
                 }
             }

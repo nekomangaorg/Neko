@@ -40,8 +40,8 @@ object Migrations {
                 }
             }
             if (oldVersion < 53) {
-                LibraryUpdateJob.setupTask()
-                BackupCreatorJob.setupTask()
+                LibraryUpdateJob.setupTask(context)
+                BackupCreatorJob.setupTask(context)
             }
             if (oldVersion < 95 && oldVersion != 0) {
                 // Force MAL log out due to login flow change
@@ -79,7 +79,7 @@ object Migrations {
                 val updateInterval = preferences.libraryUpdateInterval().get()
                 if (updateInterval == 1 || updateInterval == 2 || updateInterval == 3) {
                     preferences.libraryUpdateInterval().set(6)
-                    LibraryUpdateJob.setupTask(6)
+                    LibraryUpdateJob.setupTask(context, 6)
                 }
             }
             return true

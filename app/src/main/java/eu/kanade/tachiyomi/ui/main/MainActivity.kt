@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
+import android.os.Looper
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.Gravity
@@ -188,7 +189,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
                         LibraryUpdateService.stop(context)
-                        Handler().post {
+                        Handler(Looper.getMainLooper()).post {
                             NotificationReceiver.dismissNotification(
                                 context,
                                 Notifications.ID_LIBRARY_PROGRESS

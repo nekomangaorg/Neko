@@ -118,11 +118,11 @@ class SettingsLibraryController : SettingsController() {
 
                 onChange { newValue ->
                     // Always cancel the previous task, it seems that sometimes they are not updated.
-                    LibraryUpdateJob.setupTask(0)
+                    LibraryUpdateJob.setupTask(context, 0)
 
                     val interval = newValue as Int
                     if (interval > 0) {
-                        LibraryUpdateJob.setupTask(interval)
+                        LibraryUpdateJob.setupTask(context, interval)
                     }
                     true
                 }
@@ -139,7 +139,7 @@ class SettingsLibraryController : SettingsController() {
 
                 onChange {
                     // Post to event looper to allow the preference to be updated.
-                    Handler().post { LibraryUpdateJob.setupTask() }
+                    Handler().post { LibraryUpdateJob.setupTask(context) }
                     true
                 }
             }
