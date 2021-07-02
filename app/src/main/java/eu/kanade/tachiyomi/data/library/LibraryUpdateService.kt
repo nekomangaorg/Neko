@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -369,12 +370,12 @@ class LibraryUpdateService(
             }
 
             mangaList.map { libraryManga ->
-                async {
-                    val shouldDownload =
-                        downloadNew && (categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
-                            libraryManga).executeOnIO()
-                            .any { (it.id ?: -1) in categoriesToDownload })
+                val shouldDownload =
+                    downloadNew && (categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
+                        libraryManga).executeOnIO()
+                        .any { (it.id ?: -1) in categoriesToDownload })
 
+                logTimeTaken("library manga ${libraryManga.title}") {
                     val downloads =
                         updateMangaChapters(libraryManga, shouldDownload)
 
@@ -385,7 +386,7 @@ class LibraryUpdateService(
                     if (downloads) hasDownloads.set(true)
 
                 }
-            }.awaitAll()
+            }
             val readingStatus = deferredReadingStatus.await()
             if (readingStatus.isNotEmpty() && job?.isCancelled == false) {
                 mangaList.map { libraryManga ->
@@ -498,7 +499,7 @@ class LibraryUpdateService(
                                         .toSet()
 
                                 val results = newScanlators.subtract(originalScanlators)
-                      
+
                                 val scanlatorsToDownload =
                                     MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
 

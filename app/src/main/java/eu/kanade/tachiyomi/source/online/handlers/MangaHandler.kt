@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.system.logTimeTaken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -23,20 +24,24 @@ class MangaHandler {
 
     suspend fun fetchMangaAndChapterDetails(manga: SManga): Pair<SManga, List<SChapter>> {
         XLog.d("fetch manga and chapter details")
+
         return withContext(Dispatchers.IO) {
-            val detailsManga = async {
-                fetchMangaDetails(manga)
-            }
-            val chapterList = async {
-                fetchChapterList(manga)
-            }
+            logTimeTaken("Chapter and Manga Details for  ${manga.title}") {
 
-            manga.copyFrom(detailsManga.await())
+                val detailsManga = async {
+                    fetchMangaDetails(manga)
+                }
+                val chapterList = async {
+                    fetchChapterList(manga)
+                }
 
-            Pair(
-                manga,
-                chapterList.await()
-            )
+                manga.copyFrom(detailsManga.await())
+
+                Pair(
+                    manga,
+                    chapterList.await()
+                )
+            }
         }
     }
 
@@ -49,53 +54,59 @@ class MangaHandler {
 
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
-            val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
-            if (response.isSuccessful.not()) {
-                throw(Exception("Error from MangaDex ${response.code()} error body: ${
-                    response.errorBody()?.string()
-                }"))
+            logTimeTaken("Manga Detail for  ${manga.title}") {
+
+                val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
+                if (response.isSuccessful.not()) {
+                    throw(Exception("Error from MangaDex ${response.code()} error body: ${
+                        response.errorBody()?.string()
+                    }"))
+                }
+                apiMangaParser.mangaDetailsParse(response.body()!!)
+
             }
-            apiMangaParser.mangaDetailsParse(response.body()!!)
         }
     }
 
     suspend fun fetchChapterList(manga: SManga): List<SChapter> {
         return withContext(Dispatchers.IO) {
-            val langs = MdUtil.getLangsToShow(preferencesHelper)
+            logTimeTaken("Fetch Chapters for  ${manga.title}") {
+                val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-            val response = network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
+                val response = network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
 
-            if (response.isSuccessful.not()) {
-                XLog.e("error", response.errorBody()!!.string())
-                throw Exception("error returned from MangaDex.  Http code : ${response.code()}")
-            }
-
-            val chapterListDto = response.body()!!
-            val results = chapterListDto.results.toMutableList()
-
-            var hasMoreResults =
-                chapterListDto.limit + chapterListDto.offset < chapterListDto.total
-
-            var offset = chapterListDto.offset
-            val limit = chapterListDto.limit
-
-            while (hasMoreResults) {
-                offset += limit
-                val newResponse =
-                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
-
-                hasMoreResults = if (newResponse.code() != 200) {
-                    false
-                } else {
-                    val newChapterListDto = newResponse.body()!!
-                    results.addAll(newChapterListDto.results)
-                    newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
+                if (response.isSuccessful.not()) {
+                    XLog.e("error", response.errorBody()!!.string())
+                    throw Exception("error returned from MangaDex.  Http code : ${response.code()}")
                 }
+
+                val chapterListDto = response.body()!!
+                val results = chapterListDto.results.toMutableList()
+
+                var hasMoreResults =
+                    chapterListDto.limit + chapterListDto.offset < chapterListDto.total
+
+                var offset = chapterListDto.offset
+                val limit = chapterListDto.limit
+
+                while (hasMoreResults) {
+                    offset += limit
+                    val newResponse =
+                        network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
+
+                    hasMoreResults = if (newResponse.code() != 200) {
+                        false
+                    } else {
+                        val newChapterListDto = newResponse.body()!!
+                        results.addAll(newChapterListDto.results)
+                        newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
+                    }
+                }
+
+                val groupMap = getGroupMap(results)
+
+                apiMangaParser.chapterListParse(results, groupMap)
             }
-
-            val groupMap = getGroupMap(results)
-
-            apiMangaParser.chapterListParse(results, groupMap)
         }
     }
 
