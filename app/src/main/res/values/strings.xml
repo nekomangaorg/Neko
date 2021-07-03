@@ -588,8 +588,6 @@
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
     <string name="move_side_nav_to_bottom">Move side navigation buttons to bottom</string>
-    <string name="app_shortcuts">App shortcuts</string>
-    <string name="show_recent_in_shortcuts">Show recent sources and series in app shortcuts</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
@@ -597,6 +595,13 @@
     <string name="starting_screen">Starting screen</string>
     <string name="back_to_start">Back to start</string>
     <string name="pressing_back_to_start">Pressing back to starting screen</string>
+
+    <string name="app_shortcuts">App shortcuts</string>
+    <string name="show_recent_sources">Show recently used sources</string>
+    <string name="show_recent_series">Show recent series</string>
+    <string name="includes_recently_read_updated_added">Includes recently read, updated, and added series</string>
+    <string name="series_opens_new_chapters">Series shortcuts opens new chapters</string>
+    <string name="no_new_chapters_open_details">When there\'s no new chapters, the series\' details will open instead</string>
 
     <!-- Backup -->
     <string name="backup">Backup</string>

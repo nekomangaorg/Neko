@@ -437,7 +437,10 @@ class PreferencesHelper(val context: Context) {
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
-    fun appShortcuts() = prefs.getBoolean(Keys.showMangaAppShortcuts, true)
+
+    fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)
+    fun showSourcesInShortcuts() = prefs.getBoolean(Keys.showSourcesInShortcuts, true)
+    fun openChapterInShortcuts() = prefs.getBoolean(Keys.openChapterInShortcuts, true)
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 

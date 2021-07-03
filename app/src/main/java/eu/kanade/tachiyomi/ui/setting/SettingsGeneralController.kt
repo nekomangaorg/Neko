@@ -111,13 +111,6 @@ class SettingsGeneralController : SettingsController() {
             isVisible = activity?.isTablet() == true
         }
 
-        switchPreference {
-            key = Keys.showMangaAppShortcuts
-            titleRes = R.string.app_shortcuts
-            summaryRes = R.string.show_recent_in_shortcuts
-            defaultValue = true
-        }
-
         preferenceCategory {
             titleRes = R.string.display
 
@@ -160,6 +153,29 @@ class SettingsGeneralController : SettingsController() {
                 preferences.nightMode().asImmediateFlow { mode ->
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
+            }
+        }
+        preferenceCategory {
+            titleRes = R.string.app_shortcuts
+
+            switchPreference {
+                key = Keys.showSeriesInShortcuts
+                titleRes = R.string.show_recent_series
+                summaryRes = R.string.includes_recently_read_updated_added
+                defaultValue = true
+            }
+
+            switchPreference {
+                key = Keys.showSourcesInShortcuts
+                titleRes = R.string.show_recent_sources
+                defaultValue = true
+            }
+
+            switchPreference {
+                key = Keys.openChapterInShortcuts
+                titleRes = R.string.series_opens_new_chapters
+                summaryRes = R.string.no_new_chapters_open_details
+                defaultValue = true
             }
         }
     }

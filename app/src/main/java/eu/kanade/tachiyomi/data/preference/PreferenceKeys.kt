@@ -212,7 +212,9 @@ object PreferenceKeys {
 
     const val showSideNavOnBottom = "show_side_nav_on_bottom"
 
-    const val showMangaAppShortcuts = "show_manga_app_shortcuts"
+    const val showSeriesInShortcuts = "show_series_shortcuts"
+    const val showSourcesInShortcuts = "show_sources_shortcuts"
+    const val openChapterInShortcuts = "open_chapter_shortcuts"
 
     const val createLegacyBackup = "create_legacy_backup"
 
