@@ -128,6 +128,7 @@
     <string name="no_matches_for_filters">No matches found for your current filters</string>
     <string name="show_all_categories">Show all categories</string>
     <string name="move_dynamic_to_bottom">Move collapsed dynamic categories to bottom</string>
+    <string name="show_number_of_items">Show number of items</string>
     <string name="when_grouping_by_sources_tags">When grouping library by sources, status, etc.</string>
     <string name="always_show_current_category">Always show current category</string>
     <string name="category_hopper_long_press">Category hopper long-press action</string>

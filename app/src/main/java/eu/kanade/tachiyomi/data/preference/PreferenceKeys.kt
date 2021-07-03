@@ -206,6 +206,8 @@ object PreferenceKeys {
 
     const val showLibraryUpdateErrors = "show_library_update_errors"
 
+    const val categoryNumberOfItems = "display_number_of_items"
+
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
     const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"

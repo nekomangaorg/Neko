@@ -394,6 +394,8 @@ class PreferencesHelper(val context: Context) {
 
     fun unreadBadgeType() = flowPrefs.getInt("unread_badge_type", 2)
 
+    fun categoryNumberOfItems() = flowPrefs.getBoolean(Keys.categoryNumberOfItems, false)
+
     fun hideStartReadingButton() = flowPrefs.getBoolean("hide_reading_button", false)
 
     fun alwaysShowChapterTransition() = flowPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)

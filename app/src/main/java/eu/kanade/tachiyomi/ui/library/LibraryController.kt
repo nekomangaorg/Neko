@@ -914,6 +914,13 @@ class LibraryController(
                 adapter.notifyDataSetChanged()
             }
             .launchIn(viewScope)
+        preferences.categoryNumberOfItems().asFlow()
+            .drop(1)
+            .onEach {
+                adapter.showNumber = it
+                adapter.notifyDataSetChanged()
+            }
+            .launchIn(viewScope)
     }
 
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
