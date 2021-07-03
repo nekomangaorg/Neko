@@ -57,9 +57,9 @@
 
         <!-- Material Dialog colors -->
         <item name="md_color_title">?android:attr/textColorPrimary</item>
-        <item name="md_color_content">@color/text_color_secondary</item>
+        <item name="md_color_content">?android:textColorSecondary</item>
         <item name="md_color_button_text">?colorAccent</item>
-        <item name="md_background_color">?colorPrimaryVariant</item>
+        <item name="md_background_color">?android:attr/colorBackground</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
 
