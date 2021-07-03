@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
+import eu.kanade.tachiyomi.widget.preference.TriStateListPreference
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -84,6 +85,17 @@ inline fun PreferenceGroup.multiSelectListPreferenceMat(
     -> Unit
 ): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(activity, context), block)
+}
+
+inline fun PreferenceGroup.triStateListPreference(
+    activity: Activity?,
+    block: (
+        @DSL
+        TriStateListPreference
+    ).()
+    -> Unit
+): TriStateListPreference {
+    return initThenAdd(TriStateListPreference(activity, context), block)
 }
 
 inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).() -> Unit): PreferenceCategory {

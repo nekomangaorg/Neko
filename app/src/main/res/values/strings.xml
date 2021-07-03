@@ -217,6 +217,7 @@
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
+    <string name="global_updates">Global updates</string>
     <string name="show_notification_error">Show a notification for errors</string>
     <string name="display_buttons_bottom_reader">Buttons at bottom of reader</string>
     <string name="certain_buttons_can_be_found">Certain buttons can be found in other places if disabled here</string>
@@ -841,12 +842,14 @@
     <string name="edit">Edit</string>
     <string name="enable">Enable</string>
     <string name="enabled">Enabled</string>
+    <string name="exclude_">Exclude: %s</string>
     <string name="fast">Fast</string>
     <string name="filter">Filter</string>
     <string name="forward">Forward</string>
     <string name="free">Free</string>
     <string name="hide">Hide</string>
     <string name="ignore">Ignore</string>
+    <string name="include_">Include: %s</string>
     <string name="install">Install</string>
     <string name="keep">Keep</string>
     <string name="left">Left</string>
