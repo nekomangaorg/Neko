@@ -13,16 +13,6 @@ import kotlin.math.roundToInt
 enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
     PURE_WHITE(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_NO, R.string.white_theme),
     DARK(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_YES, R.string.dark),
-    AMOLED(
-        R.style.Theme_Tachiyomi_Amoled,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.amoled_black
-    ),
-    OUTRUN(
-        R.style.Theme_Tachiyomi_Outrun,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.outrun
-    ),
     SPRING(
         R.style.Theme_Tachiyomi_MidnightDusk,
         AppCompatDelegate.MODE_NIGHT_NO,
@@ -38,6 +28,21 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.flat_lime
     ),
+    AMOLED(
+        R.style.Theme_Tachiyomi_Amoled,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.amoled_black
+    ),
+    OUTRUN(
+        R.style.Theme_Tachiyomi_Outrun,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.outrun
+    ),
+    STRAWBERRY_DAIQUIRI(
+        R.style.Theme_Tachiyomi_StrawberryDaiquiri,
+        AppCompatDelegate.MODE_NIGHT_NO,
+        R.string.strawberry_daiquiri
+    ),
     BLACK_N_RED(
         R.style.Theme_Tachiyomi_BlackAndRed,
         AppCompatDelegate.MODE_NIGHT_YES,
@@ -47,6 +52,11 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         R.style.Theme_Tachiyomi_HotPink,
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.hot_pink
+    ),
+    YOTSUBA(
+    R.style.Theme_Tachiyomi_Yotsuba,
+    AppCompatDelegate.MODE_NIGHT_NO,
+    R.string.yotsuba
     );
 
     fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
@@ -139,6 +149,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     val lightAccent: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
+            R.style.Theme_Tachiyomi_StrawberryDaiquiri -> "#ED4A65"
+            R.style.Theme_Tachiyomi_Yotsuba -> "#FC8C5C"
             R.style.Theme_Tachiyomi -> "#101820"
             else -> "#2979FF"
         }

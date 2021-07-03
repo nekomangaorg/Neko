@@ -97,6 +97,15 @@
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
+    <style name="Theme.Tachiyomi.StrawberryDaiquiri">
+        <item name="colorAccent">@color/colorAccentStrawberry</item>
+        <item name="colorAccentText">@color/colorAccentStrawberryText</item>
+    </style>
+    <style name="Theme.Tachiyomi.Yotsuba">
+        <item name="colorAccent">@color/colorAccentYotsuba</item>
+        <item name="colorAccentText">@color/colorAccentYotsubaText</item>
+    </style>
+    <style name="Theme.Tachiyomi.Monet"/>
 
     <!--===============-->
     <!-- Launch Screen -->
