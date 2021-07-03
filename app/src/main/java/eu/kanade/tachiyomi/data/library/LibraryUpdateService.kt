@@ -286,7 +286,6 @@ class LibraryUpdateService(
         job = GlobalScope.launch(handler) {
             when (target) {
                 Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
-                else -> updateTrackings(mangaToAdd)
             }
         }
 
@@ -577,37 +576,6 @@ class LibraryUpdateService(
     }
 
     /**
-     * Method that updates the metadata of the connected tracking services. It's called in a
-     * background thread, so it's safe to do heavy operations or network calls here.
-     */
-
-    private suspend fun updateTrackings(mangaToUpdate: List<LibraryManga>) {
-        // Initialize the variables holding the progress of the updates.
-        var count = 0
-
-        val loggedServices = trackManager.services.filter { it.isLogged }
-
-        mangaToUpdate.forEach { manga ->
-            notifier.showProgressNotification(manga, count++, mangaToUpdate.size)
-
-            val tracks = db.getTracks(manga).executeAsBlocking()
-
-            tracks.forEach { track ->
-                val service = trackManager.getService(track.sync_id)
-                if (service != null && service in loggedServices) {
-                    try {
-                        val newTrack = service.refresh(track)
-                        db.insertTrack(newTrack).executeAsBlocking()
-                    } catch (e: Exception) {
-                        XLog.e(e)
-                    }
-                }
-            }
-        }
-        notifier.cancelProgressNotification()
-    }
-
-    /**
      * Shows the notification containing the currently updating manga and the progress.
      *
      * @param manga the manga that's being updated.
@@ -644,7 +612,6 @@ class LibraryUpdateService(
      */
     enum class Target {
         CHAPTERS, // Manga meta data and  chapters
-        TRACKING // Tracking metadata
     }
 
     companion object {

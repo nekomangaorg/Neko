@@ -28,11 +28,11 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Chapter and Manga Details for  ${manga.title}") {
 
-                val detailsManga = async {
-                    fetchMangaDetails(manga)
-                }
                 val chapterList = async {
                     fetchChapterList(manga)
+                }
+                val detailsManga = async {
+                    fetchMangaDetails(manga)
                 }
 
                 manga.copyFrom(detailsManga.await())
@@ -73,7 +73,9 @@ class MangaHandler {
             logTimeTaken("Fetch Chapters for  ${manga.title}") {
                 val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-                val response = network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
+                val response = logTimeTaken("fetching chapters from Dex") {
+                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
+                }
 
                 if (response.isSuccessful.not()) {
                     XLog.e("error", response.errorBody()!!.string())

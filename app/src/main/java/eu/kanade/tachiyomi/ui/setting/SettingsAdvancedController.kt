@@ -22,9 +22,8 @@ import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadProvider
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService
-import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Target
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
@@ -45,6 +44,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
+import java.util.Locale
 
 class SettingsAdvancedController : SettingsController() {
 
@@ -202,7 +202,10 @@ class SettingsAdvancedController : SettingsController() {
                 titleRes = R.string.refresh_tracking_metadata
                 summaryRes = R.string.updates_tracking_details
 
-                onClick { LibraryUpdateService.start(context, target = Target.TRACKING) }
+                onClick {
+                    TrackingSyncJob.doWorkNow(context)
+                }
+
             }
         }
         intListPreference(activity) {
@@ -211,7 +214,10 @@ class SettingsAdvancedController : SettingsController() {
             summary =
                 context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
-                "${it.name.toLowerCase().capitalize()} (${it.description})"
+                "${
+                    it.name.lowercase(Locale.ENGLISH)
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                } (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
             defaultValue = if (BuildConfig.DEBUG) 2 else 0
@@ -248,7 +254,7 @@ class SettingsAdvancedController : SettingsController() {
 
     private fun cleanupDownloads(removeRead: Boolean, removeNonFavorite: Boolean) {
         if (job?.isActive == true) return
-       
+
         activity?.toast(R.string.starting_cleanup)
         job = GlobalScope.launch(Dispatchers.IO) {
             val sourceManager: SourceManager = Injekt.get()

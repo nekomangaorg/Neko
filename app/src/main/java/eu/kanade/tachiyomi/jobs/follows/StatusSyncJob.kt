@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.jobs
+package eu.kanade.tachiyomi.jobs.follows
 
 import android.content.Context
 import android.widget.Toast
@@ -42,9 +42,11 @@ class StatusSyncJob(
 
     override suspend fun doWork(): Result = coroutineScope {
 
-        val notification = progressNotification.build()
-        val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
-        setForeground(foregroundInfo)
+        withUIContext {
+            val notification = progressNotification.build()
+            val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
+            setForeground(foregroundInfo)
+        }
         try {
             when (inputData.getBoolean(SYNC_TO_MANGADEX, false)) {
                 true -> {

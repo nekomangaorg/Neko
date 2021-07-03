@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.jobs
+package eu.kanade.tachiyomi.jobs.follows
 
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper

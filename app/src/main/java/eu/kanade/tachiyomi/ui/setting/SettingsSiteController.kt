@@ -6,9 +6,9 @@ import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.jobs.StatusSyncJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -58,7 +58,7 @@ class SettingsSiteController :
                 ctrl.showDialog(router)
             }
         }
-        
+
         multiSelectListPreferenceMat(activity) {
             key = PreferenceKeys.contentRating
             titleRes = R.string.content_rating_title
