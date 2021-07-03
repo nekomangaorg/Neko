@@ -14,7 +14,7 @@
     <!--==============-->
     <!-- Amoled Theme -->
     <!--==============-->
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi">
+    <style name="Theme.Tachiyomi.Amoled">
         <item name="unreadBadgeColor">@color/neko_green_darker</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
         <item name="colorAccentText">@color/neko_green_darker</item>
@@ -56,7 +56,7 @@
         <item name="colorOnUnreadBadge">@color/outrun_black</item>
     </style>
 
-    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard">
+    <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>
         <item name="colorPrimaryDark">@color/backgroundLime</item>
         <item name="colorAccent">@color/colorAccentLime</item>

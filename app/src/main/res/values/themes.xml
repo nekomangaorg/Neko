@@ -75,24 +75,17 @@
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
-
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
+    <style name="Theme.Tachiyomi.Amoled" />
 
     <style name="Theme.Tachiyomi.Amoled.Standard" parent="Theme.Tachiyomi.Amoled">
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
-
-    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled.Standard" />
-
-    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled.Standard" />
-
-    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard" />
-
-    <style name="Theme.Tachiyomi.Outrun" parent="Theme.Tachiyomi.Standard" />
-
-
-    <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi.Standard">
+    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled"/>
+    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled"/>
+    <style name="Theme.Tachiyomi.FlatLime"/>
+    <style name="Theme.Tachiyomi.Outrun"/>
+    <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
         <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
@@ -104,7 +97,6 @@
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
-
 
     <!--===============-->
     <!-- Launch Screen -->
