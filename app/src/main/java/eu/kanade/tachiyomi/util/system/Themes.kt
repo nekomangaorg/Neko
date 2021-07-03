@@ -217,13 +217,13 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         else -> Color.parseColor("#C2FFFFFF")
     }
 
-    /** Complies with tabBarIconColor */
+    /** Complies with tabBarIconColor or colorAccent */
     @ColorInt
     val lightActiveTab: Int = when (styleRes) {
         else -> lightAccent
     }
 
-    /** Complies with tabBarIconColor (probably night) */
+    /** Complies with tabBarIconColor or colorAccent (probably night) */
     @ColorInt
     val darkActiveTab: Int = when (styleRes) {
         else -> darkAccent
@@ -234,10 +234,15 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         @ColorInt val secondaryText: Int,
         @ColorInt val colorBackground: Int,
         @ColorInt val colorAccent: Int,
+        /** Complies with colorSecondary */
         @ColorInt val appBar: Int,
+        /** Complies with actionBarTintColor */
         @ColorInt val appBarText: Int,
+        /** Complies with colorPrimaryVariant */
         @ColorInt val bottomBar: Int,
+        /** Complies with tabBarIconInactive */
         @ColorInt val inactiveTab: Int,
+        /** Complies with tabBarIconColor */
         @ColorInt val activeTab: Int,
     )
 }
