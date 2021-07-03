@@ -89,9 +89,10 @@ class SettingsDownloadController : SettingsController() {
                 titleRes = R.string.download_new_chapters
                 defaultValue = false
             }
-            multiSelectListPreferenceMat(activity) {
+            triStateListPreference(activity) {
                 key = Keys.downloadNewCategories
-                titleRes = R.string.categories_to_include_in_download
+                excludeKey = Keys.downloadNewCategoriesExclude
+                titleRes = R.string.categories
                 entries = categories.map { it.name }
                 entryValues = categories.map { it.id.toString() }
                 allSelectionRes = R.string.all
