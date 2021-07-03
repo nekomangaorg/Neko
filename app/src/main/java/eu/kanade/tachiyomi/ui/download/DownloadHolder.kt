@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
@@ -56,8 +55,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
 
         binding.downloadMenu.setVectorCompat(
             R.drawable.ic_more_vert_24dp,
-            view.context
-                .getResourceColor(android.R.attr.textColorPrimary)
+            android.R.attr.textColorPrimary
         )
     }
 
