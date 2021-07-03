@@ -21,7 +21,8 @@ class SettingsGeneralController : SettingsController() {
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
-    var lastThemeX: Int? = null
+    var lastThemeXLight: Int? = null
+    var lastThemeXDark: Int? = null
     var themePreference: ThemePreference? = null
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.general
@@ -118,12 +119,13 @@ class SettingsGeneralController : SettingsController() {
         }
 
         preferenceCategory {
-            titleRes = R.string.display
+            titleRes = R.string.app_theme
 
             themePreference = themePreference {
                 key = "theme_preference"
                 titleRes = R.string.app_theme
-                lastScrollPostion = lastThemeX
+                lastScrollPostionLight = lastThemeXLight
+                lastScrollPostionDark = lastThemeXDark
                 summary = if (preferences.nightMode()
                     .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
@@ -152,7 +154,8 @@ class SettingsGeneralController : SettingsController() {
                         activity?.recreate()
                     } else {
                         preferences.nightMode().set(context.appDelegateNightMode())
-                        themePreference?.fastAdapter?.notifyDataSetChanged()
+                        themePreference?.fastAdapterLight?.notifyDataSetChanged()
+                        themePreference?.fastAdapterDark?.notifyDataSetChanged()
                     }
                     true
                 }
@@ -192,13 +195,16 @@ class SettingsGeneralController : SettingsController() {
     }
 
     override fun onSaveViewState(view: View, outState: Bundle) {
-        outState.putInt(::lastThemeX.name, themePreference?.lastScrollPostion ?: 0)
+        outState.putInt(::lastThemeXLight.name, themePreference?.lastScrollPostionLight ?: 0)
+        outState.putInt(::lastThemeXDark.name, themePreference?.lastScrollPostionDark ?: 0)
         super.onSaveInstanceState(outState)
     }
 
     override fun onRestoreViewState(view: View, savedViewState: Bundle) {
         super.onRestoreViewState(view, savedViewState)
-        lastThemeX = savedViewState.getInt(::lastThemeX.name)
-        themePreference?.lastScrollPostion = lastThemeX
+        lastThemeXLight = savedViewState.getInt(::lastThemeXLight.name)
+        lastThemeXDark = savedViewState.getInt(::lastThemeXDark.name)
+        themePreference?.lastScrollPostionLight = lastThemeXLight
+        themePreference?.lastScrollPostionDark = lastThemeXDark
     }
 }
