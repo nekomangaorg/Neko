@@ -88,10 +88,10 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
             val response = responseToJson(netResponse)
             try {
                 val media = response["data"]["SaveMediaListEntry"].asJsonObject
-                if (track.started_reading_date == 0L) {
+                if (track.started_reading_date <= 0L) {
                     track.started_reading_date = parseDate(media, "startedAt")
                 }
-                if (track.finished_reading_date == 0L) {
+                if (track.finished_reading_date <= 0L) {
                     track.finished_reading_date = parseDate(media, "completedAt")
                 }
             } catch (e: Exception) {
@@ -237,6 +237,11 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     }
 
     private fun createDate(dateValue: Long): JsonObject? {
+        if (dateValue == -1L) return jsonObject(
+            "year" to null,
+            "month" to null,
+            "day" to null,
+        )
         if (dateValue == 0L) return null
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = dateValue

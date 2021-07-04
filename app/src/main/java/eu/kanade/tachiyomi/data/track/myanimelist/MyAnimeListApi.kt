@@ -232,7 +232,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     }
 
     private fun convertToIsoDate(epochTime: Long): String? {
-        if (epochTime == 0L) {
+        if (epochTime <= 0L) {
             return ""
         }
         return try {
