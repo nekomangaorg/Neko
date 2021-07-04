@@ -35,8 +35,8 @@ class MergeSource : ReducedHttpSource() {
     suspend fun searchManga(query: String): List<SManga> {
         return withContext(Dispatchers.IO) {
             if (directory == null) {
-                val response = client.newCall(GET("$baseUrl/search/", headers)).execute()
-                directory = gson.fromJson<JsonArray>(directoryFromResponse(response))
+                val response = client.newCall(GET("$baseUrl/search/", headers)).await()
+                directory = gson.fromJson(directoryFromResponse(response))
             }
             val textDistance = Levenshtein()
             val textDistance2 = JaroWinkler()
