@@ -98,7 +98,11 @@ android {
 
 dependencies {
     // Modified dependencies
-    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43")
+    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43") {
+        exclude(module = "image-decoder")
+    }
+    implementation("com.github.tachiyomiorg:image-decoder:0e91111")
+
     // Source models and interfaces from Tachiyomi 1.x
     implementation("tachiyomi.sourceapi:source-api:1.1")
     // Android support library
