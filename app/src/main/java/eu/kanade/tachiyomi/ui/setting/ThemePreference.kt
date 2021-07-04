@@ -224,6 +224,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     binding.themeLayout.setBackgroundColor(Color.BLACK)
                     if (!ThemeUtil.isColoredTheme(item.theme)) {
                         binding.themeBottomBar.setBackgroundColor(Color.BLACK)
+                        binding.themeToolbar.setBackgroundColor(Color.BLACK)
                     }
                 }
             }
