@@ -6,10 +6,16 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -22,6 +28,8 @@ class FollowsSyncService {
     val db: DatabaseHelper = Injekt.get()
     val sourceManager: SourceManager = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
+    val followsHandler: FollowsHandler = Injekt.get()
+    private val requestSemaphore = Semaphore(5)
 
     /**
      * Syncs follows list manga into library based off the preference
@@ -78,28 +86,50 @@ class FollowsSyncService {
     suspend fun toMangaDex(
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
+        ids: String? = null,
     ): Int {
         return withContext(Dispatchers.IO) {
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 
-            val listManga = db.getLibraryMangaList().executeAsBlocking()
-            // filter all follows from Mangadex and only add reading or rereading manga to library
+            val listManga =
+                ids?.split(", ")?.mapNotNull {
+                    db.getManga(it.toLong()).executeAsBlocking()
+                }?.toList()
+                    ?: db.getLibraryMangaList().executeAsBlocking()
+
+            // only add if the current tracker is not set to reading
 
             listManga.forEach { manga ->
+                launchIO {
+                    requestSemaphore.withPermit {
 
-                updateNotification(manga.title, count.andIncrement, listManga.size)
+                        updateNotification(manga.title, count.andIncrement, listManga.size)
 
-                // Get this manga's trackers from the database
-                val dbTracks = db.getTracks(manga).executeAsBlocking()
-                val trackItem = TrackItem(dbTracks.find { it.sync_id == trackManager.mdList.id },
-                    trackManager.mdList)
+                        // Get this manga's trackers from the database
+                        var mdListTrack = db.getMDList(manga).executeOnIO()
 
-                if (trackItem.track?.status == FollowStatus.UNFOLLOWED.int) {
-                    trackItem.track.status = FollowStatus.READING.int
-                    val returnedTracker = trackItem.service.update(trackItem.track)
-                    db.insertTrack(returnedTracker).executeOnIO()
-                    countNew.incrementAndGet()
+                        //create mdList if missing
+                        if (mdListTrack == null) {
+                            mdListTrack = trackManager.mdList.createInitialTracker(manga)
+                            db.insertTrack(mdListTrack).executeAsBlocking()
+                        }
+
+                        val trackItem = TrackItem(mdListTrack, trackManager.mdList)
+
+                        if (trackItem.track!!.status == FollowStatus.UNFOLLOWED.int) {
+
+                            withIOContext {
+                                followsHandler.updateFollowStatus(MdUtil.getMangaId(manga.url),
+                                    FollowStatus.READING)
+                            }
+
+                            trackItem.track.status = FollowStatus.READING.int
+                            val returnedTracker = trackItem.service.update(trackItem.track)
+                            db.insertTrack(returnedTracker).executeOnIO()
+                            countNew.incrementAndGet()
+                        }
+                    }
                 }
 
             }

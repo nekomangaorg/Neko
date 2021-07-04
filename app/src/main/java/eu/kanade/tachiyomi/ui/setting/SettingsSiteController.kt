@@ -121,7 +121,7 @@ class SettingsSiteController :
                     ) { _, indices, _ ->
                         preferences.mangadexSyncToLibraryIndexes()
                             .set(indices.map { (it + 1).toString() }.toSet())
-                        StatusSyncJob.doWorkNow(context, false)
+                        StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
                     }
                     positiveButton(android.R.string.ok)
                     negativeButton(android.R.string.cancel)
@@ -134,7 +134,7 @@ class SettingsSiteController :
             summaryRes = R.string.push_favorites_to_mangadex_summary
 
             onClick {
-                StatusSyncJob.doWorkNow(context, true)
+                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
             }
         }
 
