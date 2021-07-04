@@ -11,18 +11,11 @@
 
     </style>
 
-    <!--==============-->
-    <!-- Amoled Theme -->
-    <!--==============-->
-    <style name="Theme.Tachiyomi.Amoled">
-        <item name="unreadBadgeColor">@color/neko_green_darker</item>
-        <item name="colorOnUnreadBadge">@color/md_black_1000</item>
-        <item name="colorAccentText">@color/neko_green_darker</item>
+    <!--== AMOLED theme overlay ==-->
+    <style name="ThemeOverlay.Tachiyomi.Amoled" parent="">
         <item name="colorSecondary">@color/colorAmoledPrimary</item>
         <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
-        <item name="colorSecondaryVariant">@color/colorAmoledPrimary</item>
         <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
-        <item name="colorPrimaryDark">@color/colorAmoledPrimary</item>
         <item name="android:colorBackground">@color/colorAmoledPrimary</item>
         <item name="readerBackground">@color/colorAmoledPrimary</item>
 
@@ -30,30 +23,13 @@
         <item name="md_background_color">@color/colorAmoledPrimary</item>
     </style>
 
-    <style name="Theme.Tachiyomi.Amoled.Standard" parent="Theme.Tachiyomi.Amoled">
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-    </style>
-
-    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled.Standard">
+    <style name="Theme.Tachiyomi.ChocolateStrawberries">
         <item name="colorPrimary">@color/primaryRed</item>
         <item name="colorAccent">@color/holo_red</item>
         <item name="colorAccentText">@color/md_red_500</item>
-    </style>
-
-    <style name="Theme.Tachiyomi.Outrun" parent="Theme.Tachiyomi.Standard">
-        <item name="colorPrimary">@color/outrun_blush</item>
-        <item name="colorPrimaryDark">@color/outrun_dark_purple</item>
-        <item name="colorAccent">@color/outrun_pink</item>
-        <item name="colorAccentText">@color/md_white_1000</item>
-        <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
-        <item name="colorSecondary">@color/outrun_black</item>
-        <item name="colorSecondaryVariant">@color/outrun_dark_purple</item>
-        <item name="background">@color/outrun_black</item>
-        <item name="android:colorBackground">@color/outrun_black</item>
-        <item name="colorSurface">@color/outrun_black</item>
-        <item name="colorOnAccent">@color/md_white_1000</item>
-        <item name="colorOnUnreadBadge">@color/outrun_black</item>
+        <item name="colorPrimaryVariant">@color/secondaryChocolateStrawberries</item>
+        <item name="android:colorBackground">@color/backgroundChocolateStrawberries</item>
+        <item name="colorSecondary">@color/backgroundChocolateStrawberries</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime">
@@ -70,11 +46,19 @@
         <item name="colorOnAccent">@color/colorOnLime</item>
     </style>
 
-    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled.Standard">
-        <item name="colorPrimary">@color/colorPrimaryPink</item>
-        <item name="colorAccent">@color/colorAccentPink</item>
-        <item name="colorAccentText">@color/colorAccentPink</item>
-        <item name="colorOnUnreadBadge">@color/md_black_1000</item>
+    <style name="Theme.Tachiyomi.Outrun">
+        <item name="colorPrimary">@color/outrun_blush</item>
+        <item name="colorPrimaryDark">@color/outrun_dark_purple</item>
+        <item name="colorAccent">@color/outrun_pink</item>
+        <item name="colorAccentText">@color/md_white_1000</item>
+        <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
+        <item name="colorSecondary">@color/outrun_black</item>
+        <item name="colorSecondaryVariant">@color/outrun_dark_purple</item>
+        <item name="background">@color/outrun_black</item>
+        <item name="android:colorBackground">@color/outrun_black</item>
+        <item name="colorSurface">@color/outrun_black</item>
+        <item name="colorOnAccent">@color/md_white_1000</item>
+        <item name="colorOnUnreadBadge">@color/outrun_black</item>
     </style>
 
 

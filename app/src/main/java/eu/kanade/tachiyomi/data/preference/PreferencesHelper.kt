@@ -122,6 +122,8 @@ class PreferencesHelper(val context: Context) {
 
     fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
+    fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
+
     fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.PURE_WHITE)
     fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DARK)
 

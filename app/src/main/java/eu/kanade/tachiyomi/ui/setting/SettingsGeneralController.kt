@@ -10,6 +10,7 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -162,6 +163,25 @@ class SettingsGeneralController : SettingsController() {
                 preferences.nightMode().asImmediateFlow { mode ->
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
+            }
+
+            switchPreference {
+                key = Keys.themeDarkAmoled
+                titleRes = R.string.pure_black_dark_mode
+                defaultValue = false
+
+                preferences.nightMode().asImmediateFlowIn(viewScope) { mode ->
+                    isVisible = mode != AppCompatDelegate.MODE_NIGHT_NO
+                }
+
+                onChange {
+                    if (context.isInNightMode()) {
+                        activity?.recreate()
+                    } else {
+                        themePreference?.fastAdapterDark?.notifyDataSetChanged()
+                    }
+                    true
+                }
             }
         }
         preferenceCategory {

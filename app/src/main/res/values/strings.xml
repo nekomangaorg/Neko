@@ -582,7 +582,7 @@
     <string name="spring_blossom">Spring Blossom</string>
     <string name="strawberry_daiquiri">Strawberry Daiquiri</string>
     <string name="yotsuba">Yotsuba</string>
-    <string name="black_and_red">Black \'n\' Red</string>
+    <string name="chocolate_strawberries">Chocolate Strawberries</string>
     <string name="hot_pink">Hot Pink</string>
     <string name="flat_lime">Flat Lime</string>
     <string name="white_theme">Neko 2X Pure</string>
@@ -598,6 +598,7 @@
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
     <string name="side_nav_icon_alignment">Side navigation icon alignment</string>
     <string name="follow_system_theme">Follow system theme</string>
+    <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
     <string name="security">Security</string>

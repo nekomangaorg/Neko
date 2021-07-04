@@ -75,14 +75,16 @@
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
-    <style name="Theme.Tachiyomi.Amoled" />
 
-    <style name="Theme.Tachiyomi.Amoled.Standard" parent="Theme.Tachiyomi.Amoled">
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+    <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
+        <item name="colorPrimaryVariant">@color/app_color_primary</item>
+        <item name="colorSecondary">@color/app_color_primary</item>
+        <item name="actionBarTintColor">@color/md_white_1000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
-    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled"/>
-    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled"/>
+    <style name="ThemeOverlay.Tachiyomi.Amoled" parent=""/>
+    <style name="Theme.Tachiyomi.ChocolateStrawberries"/>
     <style name="Theme.Tachiyomi.FlatLime"/>
     <style name="Theme.Tachiyomi.Outrun"/>
     <style name="Theme.Tachiyomi.MidnightDusk">

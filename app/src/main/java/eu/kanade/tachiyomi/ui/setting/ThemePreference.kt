@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
+import android.graphics.Color
 import android.util.AttributeSet
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
@@ -22,6 +23,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ThemeItemBinding
 import eu.kanade.tachiyomi.databinding.ThemesPreferenceBinding
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
@@ -198,18 +200,32 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
                 }
                 binding.themeToolbar.setBackgroundColor(item.colors.appBar)
-                binding.themeAppBarText.imageTintList = ColorStateList.valueOf(item.colors.appBarText)
-                binding.themeHeroImage.imageTintList = ColorStateList.valueOf(item.colors.primaryText)
-                binding.themePrimaryText.imageTintList = ColorStateList.valueOf(item.colors.primaryText)
-                binding.themeAccentedButton.imageTintList = ColorStateList.valueOf(item.colors.colorAccent)
-                binding.themeSecondaryText.imageTintList = ColorStateList.valueOf(item.colors.secondaryText)
-                binding.themeSecondaryText2.imageTintList = ColorStateList.valueOf(item.colors.secondaryText)
+                binding.themeAppBarText.imageTintList =
+                    ColorStateList.valueOf(item.colors.appBarText)
+                binding.themeHeroImage.imageTintList =
+                    ColorStateList.valueOf(item.colors.primaryText)
+                binding.themePrimaryText.imageTintList =
+                    ColorStateList.valueOf(item.colors.primaryText)
+                binding.themeAccentedButton.imageTintList =
+                    ColorStateList.valueOf(item.colors.colorAccent)
+                binding.themeSecondaryText.imageTintList =
+                    ColorStateList.valueOf(item.colors.secondaryText)
+                binding.themeSecondaryText2.imageTintList =
+                    ColorStateList.valueOf(item.colors.secondaryText)
 
                 binding.themeBottomBar.setBackgroundColor(item.colors.bottomBar)
-                binding.themeItem1.imageTintList = ColorStateList.valueOf(item.colors.inactiveTab)
+                binding.themeItem1.imageTintList =
+                    ColorStateList.valueOf(item.colors.inactiveTab)
                 binding.themeItem2.imageTintList = ColorStateList.valueOf(item.colors.activeTab)
-                binding.themeItem3.imageTintList = ColorStateList.valueOf(item.colors.inactiveTab)
+                binding.themeItem3.imageTintList =
+                    ColorStateList.valueOf(item.colors.inactiveTab)
                 binding.themeLayout.setBackgroundColor(item.colors.colorBackground)
+                if (item.theme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+                    binding.themeLayout.setBackgroundColor(Color.BLACK)
+                    if (!ThemeUtil.isColoredTheme(item.theme)) {
+                        binding.themeBottomBar.setBackgroundColor(Color.BLACK)
+                    }
+                }
             }
 
             override fun unbindView(item: ThemeItem) {

@@ -75,10 +75,6 @@
     <color name="textPrimaryDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
-    <!-- Hot Pink Theme -->
-    <color name="colorAccentPink">#FF3399</color>
-    <color name="colorPrimaryPink">#FF57B3</color>
-
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>
     <color name="colorAccentLime">#4AF88A</color>
@@ -121,6 +117,9 @@
     <!-- Strawberry Daiquiri Theme -->
     <color name="colorAccentStrawberry">#ED4A65</color>
     <color name="colorAccentStrawberryText">#b62e45</color>
+
+    <color name="backgroundChocolateStrawberries">#1a1716</color>
+    <color name="secondaryChocolateStrawberries">#211b19</color>
 
     <!-- Yotsuba Theme -->
     <color name="colorAccentYotsuba">#FC8C5C</color>
