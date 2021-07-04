@@ -182,7 +182,8 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
             // Step 1: segment the pages and transition pages
             subItems.forEach {
                 if (it is ReaderPage) {
-                    if (pagedItems.last().lastOrNull()?.chapter?.chapter?.id != it.chapter.chapter.id) {
+                    if (pagedItems.last().lastOrNull() != null &&
+                        pagedItems.last().last()?.chapter?.chapter?.id != it.chapter.chapter.id) {
                         pagedItems.add(mutableListOf())
                     }
                     pagedItems.last().add(it)
