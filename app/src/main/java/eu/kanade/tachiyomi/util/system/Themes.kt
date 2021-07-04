@@ -200,6 +200,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val darkBottomBar: Int = Color.parseColor(
         when (styleRes) {
+            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#211b19"
             R.style.Theme_Tachiyomi -> "#292929"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
             R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"

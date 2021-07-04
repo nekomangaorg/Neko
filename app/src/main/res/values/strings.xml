@@ -188,6 +188,7 @@
     <string name="shift_double_pages">Shift double pages</string>
 
     <!-- Library update service notifications -->
+    <string name="checking_for_new_chapters">Checking for new chapters</string>
     <string name="new_chapters_found">New chapters found</string>
     <plurals name="for_n_titles">
         <item quantity="one">For %d title</item>
@@ -598,6 +599,7 @@
     <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
+    <string name="hide_notification_content">Hide notification content</string>
     <string name="security">Security</string>
     <string name="starting_screen">Starting screen</string>
     <string name="back_to_start">Back to start</string>
@@ -623,7 +625,6 @@
     <string name="automatic_backups">Automatic backups</string>
     <string name="backup_frequency">Backup frequency</string>
     <string name="max_auto_backups">Max automatic backups</string>
-    <string name="also_create_legacy_backup">Also create legacy backup</string>
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="file_is_missing_data">File is missing data.</string>
