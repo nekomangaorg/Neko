@@ -206,6 +206,10 @@ class PreferencesHelper(val context: Context) {
 
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
 
+    fun autoAddTrack() = prefs.getBoolean(Keys.autoAddTrack, true)
+
+    fun trackingsToAddOnline() = flowPrefs.getStringSet(Keys.trackingsToAddOnline, emptySet())
+
     fun lastUsedCatalogueSource() = flowPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
 
     fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
@@ -460,7 +464,7 @@ class PreferencesHelper(val context: Context) {
 
     fun addToLibraryAsPlannedToRead(): Boolean =
         prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
-    
+
     fun contentRatingSelections(): MutableSet<String> =
         prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
 

@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.track.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
@@ -37,6 +38,7 @@ import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -896,6 +898,15 @@ class ReaderPresenter(
             trackList.map { track ->
                 val service = trackManager.getService(track.sync_id)
                 if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
+                        if (!preferences.context.isOnline()) {
+                            val mangaId = manga.id ?: return@map
+                            val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
+                            val currentTracking = trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
+                            trackings.remove(currentTracking)
+                            trackings.add("$mangaId:${track.sync_id}:$chapterRead")
+                            preferences.trackingsToAddOnline().set(trackings)
+                            DelayedTrackingUpdateJob.setupTask(preferences.context)
+                        } else {
                     try {
                         track.last_chapter_read = chapterRead
                         service.update(track, true)
@@ -906,6 +917,7 @@ class ReaderPresenter(
                 }
             }
 
+            }
         }
     }
 
