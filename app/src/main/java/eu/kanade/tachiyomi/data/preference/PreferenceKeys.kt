@@ -193,6 +193,8 @@ object PreferenceKeys {
 
     const val secureScreen = "secure_screen"
 
+    const val hideNotificationContent = "hide_notification_content"
+
     const val removeArticles = "remove_articles"
 
     const val skipPreMigration = "skip_pre_migration"
