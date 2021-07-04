@@ -25,7 +25,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = with(screen) {
         titleRes = R.string.settings
-        
+
         preference {
             iconDrawable =
                 MaterialDesignDx.Icon.gmf_tune.create(context, colorAttr = R.attr.colorOnSurface)
@@ -64,9 +64,9 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconDrawable =
-                MaterialDesignDx.Icon.gmf_backup.create(context, colorAttr = R.attr.colorOnSurface)
-            titleRes = R.string.backup
+            iconRes = R.drawable.ic_backup_restore_24dp
+            iconTint = tintColor
+            titleRes = R.string.backup_and_restore
             onClick { navigateTo(SettingsBackupController()) }
         }
         preference {
