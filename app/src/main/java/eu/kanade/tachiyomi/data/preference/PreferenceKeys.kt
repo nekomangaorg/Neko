@@ -10,6 +10,7 @@ object PreferenceKeys {
     const val nightMode = "night_mode"
     const val lightTheme = "light_theme"
     const val darkTheme = "dark_theme"
+    const val themeDarkAmoled = "pref_theme_dark_amoled_key"
 
     const val startingTab = "starting_tab"
 
@@ -88,6 +89,10 @@ object PreferenceKeys {
 
     const val autoUpdateTrack = "pref_auto_update_manga_sync_key"
 
+    const val autoAddTrack = "pref_auto_add_track_key"
+
+    const val trackingsToAddOnline = "pref_tracking_for_online"
+
     const val lastUsedCatalogueSource = "last_catalogue_source"
 
     const val lastUsedCategory = "last_used_category"
@@ -127,6 +132,7 @@ object PreferenceKeys {
     const val libraryUpdateRestriction = "library_update_restriction"
 
     const val libraryUpdateCategories = "library_update_categories"
+    const val libraryUpdateCategoriesExclude = "library_update_categories_exclude"
 
     const val libraryUpdatePrioritization = "library_update_prioritization"
 
@@ -157,6 +163,7 @@ object PreferenceKeys {
     const val downloadNew = "download_new"
 
     const val downloadNewCategories = "download_new_categories"
+    const val downloadNewCategoriesExclude = "download_new_categories_exclude"
 
     const val libraryLayout = "pref_display_library_layout"
 
@@ -186,6 +193,8 @@ object PreferenceKeys {
 
     const val secureScreen = "secure_screen"
 
+    const val hideNotificationContent = "hide_notification_content"
+
     const val removeArticles = "remove_articles"
 
     const val skipPreMigration = "skip_pre_migration"
@@ -206,13 +215,17 @@ object PreferenceKeys {
 
     const val showLibraryUpdateErrors = "show_library_update_errors"
 
+    const val categoryNumberOfItems = "display_number_of_items"
+
     const val alwaysShowChapterTransition = "always_show_chapter_transition"
 
     const val hideBottomNavOnScroll = "hide_bottom_nav_on_scroll"
 
-    const val showSideNavOnBottom = "show_side_nav_on_bottom"
+    const val sideNavIconAlignment = "pref_side_nav_icon_alignment"
 
-    const val showMangaAppShortcuts = "show_manga_app_shortcuts"
+    const val showSeriesInShortcuts = "show_series_shortcuts"
+    const val showSourcesInShortcuts = "show_sources_shortcuts"
+    const val openChapterInShortcuts = "open_chapter_shortcuts"
 
     const val createLegacyBackup = "create_legacy_backup"
 
@@ -225,8 +238,6 @@ object PreferenceKeys {
     fun trackPassword(syncId: Int) = "pref_mangasync_password_$syncId"
 
     fun trackToken(syncId: Int) = "track_token_$syncId"
-
-    const val useCacheSource = "use_cache_source_new"
 
     const val sessionToken = "mangadex_session_token"
 

@@ -122,6 +122,8 @@ class PreferencesHelper(val context: Context) {
 
     fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
+    fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
+
     fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.PURE_WHITE)
     fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DARK)
 
@@ -206,6 +208,10 @@ class PreferencesHelper(val context: Context) {
 
     fun autoUpdateTrack() = prefs.getBoolean(Keys.autoUpdateTrack, true)
 
+    fun autoAddTrack() = prefs.getBoolean(Keys.autoAddTrack, true)
+
+    fun trackingsToAddOnline() = flowPrefs.getStringSet(Keys.trackingsToAddOnline, emptySet())
+
     fun lastUsedCatalogueSource() = flowPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
 
     fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
@@ -284,6 +290,7 @@ class PreferencesHelper(val context: Context) {
     fun libraryUpdateRestriction() = prefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
 
     fun libraryUpdateCategories() = flowPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
+    fun libraryUpdateCategoriesExclude() = flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
@@ -331,6 +338,7 @@ class PreferencesHelper(val context: Context) {
     fun downloadNew() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun downloadNewCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
+    fun downloadNewCategoriesExclude() = flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
 
     fun lang() = prefs.getString(Keys.lang, "")
 
@@ -349,6 +357,8 @@ class PreferencesHelper(val context: Context) {
     fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
 
     fun secureScreen() = rxPrefs.getBoolean(Keys.secureScreen, false)
+
+    fun hideNotificationContent() = prefs.getBoolean(Keys.hideNotificationContent, false)
 
     fun removeArticles() = rxPrefs.getBoolean(Keys.removeArticles, false)
 
@@ -394,6 +404,8 @@ class PreferencesHelper(val context: Context) {
 
     fun unreadBadgeType() = flowPrefs.getInt("unread_badge_type", 2)
 
+    fun categoryNumberOfItems() = flowPrefs.getBoolean(Keys.categoryNumberOfItems, false)
+
     fun hideStartReadingButton() = flowPrefs.getBoolean("hide_reading_button", false)
 
     fun alwaysShowChapterTransition() = flowPrefs.getBoolean(Keys.alwaysShowChapterTransition, true)
@@ -433,11 +445,14 @@ class PreferencesHelper(val context: Context) {
 
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
-    fun showSideNavOnBottom() = flowPrefs.getBoolean(Keys.showSideNavOnBottom, false)
+    fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 0)
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
-    fun appShortcuts() = prefs.getBoolean(Keys.showMangaAppShortcuts, true)
+
+    fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)
+    fun showSourcesInShortcuts() = prefs.getBoolean(Keys.showSourcesInShortcuts, true)
+    fun openChapterInShortcuts() = prefs.getBoolean(Keys.openChapterInShortcuts, true)
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 
@@ -453,8 +468,6 @@ class PreferencesHelper(val context: Context) {
 
     fun addToLibraryAsPlannedToRead(): Boolean =
         prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
-
-    fun useCacheSource(): Boolean = prefs.getBoolean(Keys.useCacheSource, false)
 
     fun contentRatingSelections(): MutableSet<String> =
         prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!

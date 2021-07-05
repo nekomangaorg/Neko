@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
@@ -35,6 +34,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -176,26 +176,35 @@ class LibraryUpdateService(
      * @return a list of manga to update
      */
     private fun getMangaToUpdate(categoryId: Int, target: Target): List<LibraryManga> {
+        val libraryManga = db.getLibraryMangaList().executeAsBlocking()
+
         var listToUpdate = if (categoryId != -1) {
             categoryIds.add(categoryId)
-            db.getLibraryMangaList().executeAsBlocking().filter { it.category == categoryId }
+            libraryManga.filter { it.category == categoryId }
         } else {
             val categoriesToUpdate =
                 preferences.libraryUpdateCategories().get().map(String::toInt)
             if (categoriesToUpdate.isNotEmpty()) {
                 categoryIds.addAll(categoriesToUpdate)
-                db.getLibraryMangaList().executeAsBlocking()
-                    .filter { it.category in categoriesToUpdate }.distinctBy { it.id }
+                libraryManga.filter { it.category in categoriesToUpdate }.distinctBy { it.id }
             } else {
                 categoryIds.addAll(db.getCategories().executeAsBlocking().mapNotNull { it.id } + 0)
-                db.getLibraryMangaList().executeAsBlocking().distinctBy { it.id }
+                libraryManga.distinctBy { it.id }
             }
         }
         if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
             listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
         }
 
-        return listToUpdate
+        val categoriesToExclude =
+            preferences.libraryUpdateCategoriesExclude().get().map(String::toInt)
+        val listToExclude = if (categoriesToExclude.isNotEmpty()) {
+            libraryManga.filter { it.category in categoriesToExclude }
+        } else {
+            emptyList()
+        }
+
+        return listToUpdate.minus(listToExclude)
     }
 
     private fun getMangaToUpdate(intent: Intent, target: Target): List<LibraryManga> {
@@ -286,7 +295,6 @@ class LibraryUpdateService(
         job = GlobalScope.launch(handler) {
             when (target) {
                 Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
-                else -> updateTrackings(mangaToAdd)
             }
         }
 
@@ -304,7 +312,7 @@ class LibraryUpdateService(
             val isDexUp = sourceManager.getMangadex().checkIfUp()
 
             jobCount.andIncrement
-            if (isDexUp || preferences.useCacheSource()) {
+            if (isDexUp) {
                 val results = mangaToUpdateMap.keys.map { source ->
                     try {
                         updateMangaInSource(source, downloadNew, categoriesToDownload)
@@ -338,7 +346,7 @@ class LibraryUpdateService(
                 errorFile.getUriCompat(this)
             )
         }
-        if (isDexUp.not() && !preferences.useCacheSource()) {
+        if (isDexUp.not()) {
             notifier.showUpdateErrorNotification(
                 listOf("Skipping library update"),
                 null
@@ -369,12 +377,12 @@ class LibraryUpdateService(
             }
 
             mangaList.map { libraryManga ->
-                async {
-                    val shouldDownload =
-                        downloadNew && (categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
-                            libraryManga).executeOnIO()
-                            .any { (it.id ?: -1) in categoriesToDownload })
+                val shouldDownload =
+                    downloadNew && (categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
+                        libraryManga).executeOnIO()
+                        .any { (it.id ?: -1) in categoriesToDownload })
 
+                logTimeTaken("library manga ${libraryManga.title}") {
                     val downloads =
                         updateMangaChapters(libraryManga, shouldDownload)
 
@@ -385,7 +393,8 @@ class LibraryUpdateService(
                     if (downloads) hasDownloads.set(true)
 
                 }
-            }.awaitAll()
+            }
+            
             val readingStatus = deferredReadingStatus.await()
             if (readingStatus.isNotEmpty() && job?.isCancelled == false) {
                 mangaList.map { libraryManga ->
@@ -456,7 +465,7 @@ class LibraryUpdateService(
 
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                            .getOrDefault() && preferences.useCacheSource().not()
+                            .getOrDefault()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl)
                         // load new covers in background
@@ -480,7 +489,6 @@ class LibraryUpdateService(
 
                 if (fetchedChapters.isNotEmpty()) {
                     val originalChapters = db.getChapters(manga).executeAsBlocking()
-                        .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
                     val newChapters =
                         syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
 
@@ -498,7 +506,7 @@ class LibraryUpdateService(
                                         .toSet()
 
                                 val results = newScanlators.subtract(originalScanlators)
-                      
+
                                 val scanlatorsToDownload =
                                     MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
 
@@ -563,7 +571,6 @@ class LibraryUpdateService(
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
         val allChaps = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters
@@ -576,37 +583,6 @@ class LibraryUpdateService(
         // We don't want to start downloading while the library is updating, because websites
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, chapters, false)
-    }
-
-    /**
-     * Method that updates the metadata of the connected tracking services. It's called in a
-     * background thread, so it's safe to do heavy operations or network calls here.
-     */
-
-    private suspend fun updateTrackings(mangaToUpdate: List<LibraryManga>) {
-        // Initialize the variables holding the progress of the updates.
-        var count = 0
-
-        val loggedServices = trackManager.services.filter { it.isLogged }
-
-        mangaToUpdate.forEach { manga ->
-            notifier.showProgressNotification(manga, count++, mangaToUpdate.size)
-
-            val tracks = db.getTracks(manga).executeAsBlocking()
-
-            tracks.forEach { track ->
-                val service = trackManager.getService(track.sync_id)
-                if (service != null && service in loggedServices) {
-                    try {
-                        val newTrack = service.refresh(track)
-                        db.insertTrack(newTrack).executeAsBlocking()
-                    } catch (e: Exception) {
-                        XLog.e(e)
-                    }
-                }
-            }
-        }
-        notifier.cancelProgressNotification()
     }
 
     /**
@@ -646,7 +622,6 @@ class LibraryUpdateService(
      */
     enum class Target {
         CHAPTERS, // Manga meta data and  chapters
-        TRACKING // Tracking metadata
     }
 
     companion object {

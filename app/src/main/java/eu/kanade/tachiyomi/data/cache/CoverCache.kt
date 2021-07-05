@@ -100,7 +100,6 @@ class CoverCache(val context: Context) {
     fun deleteAllCachedCovers() {
         GlobalScope.launch(Dispatchers.IO) {
             val directory = onlineCoverDirectory
-            val size = DiskUtil.getDirectorySize(directory)
             var deletedSize = 0L
             val files =
                 directory.listFiles()?.sortedBy { it.lastModified() }?.iterator() ?: return@launch
@@ -117,7 +116,10 @@ class CoverCache(val context: Context) {
                     )
                 )
             }
+            context.imageLoader.memoryCache.clear()
+
         }
+
         lastClean = System.currentTimeMillis()
     }
 

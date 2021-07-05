@@ -3,15 +3,25 @@ import java.time.LocalDateTime
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 
+object Configs {
+    const val applicationId = "tachiyomi.mangadex"
+    const val compileSdkVersion = 30
+    const val minSdkVersion = 24
+    const val targetSdkVersion = 30
+    const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    const val versionCode = 118
+    const val versionName = "2.5.1"
+}
+
 plugins {
-    id(Plugins.androidApplication)
-    kotlin(Plugins.kotlinAndroid)
-    kotlin(Plugins.kapt)
-    id(Plugins.kotlinParcelize)
-    id(Plugins.kotlinSerialization)
-    id(Plugins.aboutLibraries)
-    id(Plugins.firebaseCrashlytics)
-    id(Plugins.googleServices) apply false
+    id("com.android.application")
+    kotlin("android")
+    kotlin("kapt")
+    id("kotlin-parcelize")
+    id("org.jetbrains.kotlin.plugin.serialization")
+    id("com.mikepenz.aboutlibraries.plugin")
+    id("com.google.firebase.crashlytics")
+    id("com.google.gms.google-services") apply false
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
@@ -47,7 +57,7 @@ android {
         ndk {
             abiFilters += setOf("armeabi-v7a", "arm64-v8a", "x86")
         }
-        
+
     }
 
     buildTypes {
@@ -88,56 +98,59 @@ android {
 
 dependencies {
     // Modified dependencies
-    implementation(Libs.UI.subsamplingScaleImageView)
+    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43") {
+        exclude(module = "image-decoder")
+    }
+    implementation("com.github.tachiyomiorg:image-decoder:0e91111")
+
     // Source models and interfaces from Tachiyomi 1.x
     implementation("tachiyomi.sourceapi:source-api:1.1")
     // Android support library
-    implementation(Libs.Android.appCompat)
-    implementation(Libs.Android.cardView)
-    implementation(Libs.Android.material)
-    implementation(Libs.Android.recyclerView)
-    implementation(Libs.Android.preference)
-    implementation(Libs.Android.annotations)
-    implementation(Libs.Android.browser)
-    implementation(Libs.Android.biometric)
-    implementation(Libs.Android.palette)
-    implementation(Libs.Android.coreKtx)
-    implementation(Libs.Android.constraintLayout)
-    implementation(Libs.Android.multiDex)
+    implementation("androidx.appcompat:appcompat:1.3.0")
+    implementation("androidx.cardview:cardview:1.0.0")
+    implementation("com.google.android.material:material:1.4.0")
+    implementation("androidx.recyclerview:recyclerview:1.2.1")
+    implementation("androidx.preference:preference:1.1.1")
+    implementation("androidx.annotation:annotation:1.2.0")
+    implementation("androidx.browser:browser:1.3.0")
+    implementation("androidx.biometric:biometric:1.1.0")
+    implementation("androidx.palette:palette:1.0.0")
+    implementation("androidx.core:core-ktx:1.6.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    implementation("androidx.multidex:multidex:2.0.1")
 
-    // Databinding for autocomplete search
-    kapt(Libs.Android.dataBinding)
+    implementation("com.google.firebase:firebase-analytics-ktx:19.0.0")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.1.0")
 
-    implementation(Libs.Google.firebaseAnayltics)
-    implementation(Libs.Google.firebaseCrashltyics)
-    implementation(Libs.Google.firebaseCore)
-
-    implementation(Libs.Android.lifecycleExtensions)
-    implementation(Libs.Android.lifecycleCommonJava8)
-    implementation(Libs.Android.lifecycleRuntimeKtx)
+    val lifecycleVersion = "2.2.0"
+    implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-common-java8:$lifecycleVersion")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
     // ReactiveX
-    implementation(Libs.Rx.android)
-    implementation(Libs.Rx.java)
-    implementation(Libs.Rx.relay)
-    implementation(Libs.Rx.preferences)
-    implementation(Libs.Rx.network)
+    implementation("io.reactivex:rxandroid:1.2.1")
+    implementation("io.reactivex:rxjava:1.3.8")
+    implementation("com.jakewharton.rxrelay:rxrelay:1.2.0")
+    implementation("com.f2prateek.rx.preferences:rx-preferences:1.0.2")
+    implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
     // Coroutines
-    implementation(Libs.Kotlin.flowPreferences)
+    implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
 
     // Network client
-    implementation(Libs.Network.okhttp)
-    implementation(Libs.Network.okhttpDns)
-    implementation(Libs.Network.okhttpLoggingInterceptor)
-    implementation(Libs.IO.okio)
+    val okhttpVersion = "4.9.1"
+    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
+    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
+    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
+    implementation("com.squareup.okio:okio:2.10.0")
 
     // TLS 1.3 support for Android < 10
     implementation("org.conscrypt:conscrypt-android:2.5.2")
 
     // Chucker
-    debugImplementation(Libs.Network.chucker)
-    releaseImplementation(Libs.Network.chuckerNoOp)
+    val chuckerVersion = "3.2.0"
+    debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
+    releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
     // hyperion
     val hyperionVersion = "0.9.31"
@@ -148,25 +161,26 @@ dependencies {
     debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
 
     // REST
-    implementation(Libs.Network.retrofit)
-    implementation(Libs.Network.retrofitGsonConverter)
-    implementation(Libs.Network.retrofitKotlinxConverter)
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.7.0")
 
     // JSON
-    implementation(Libs.IO.gson)
-    implementation(Libs.IO.kotson)
-    implementation(Libs.IO.moshi)
+    implementation("com.google.code.gson:gson:2.8.7")
+    implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
+    implementation("com.squareup.moshi:moshi:1.9.3")
 
     // Serialization
-    implementation(Libs.Kotlin.serialization)
-    implementation(Libs.Kotlin.serializationProtobuf)
+    val kotlinSerialization = "1.2.1"
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
 
     // Disk
-    implementation(Libs.Disk.lrucache)
-    implementation(Libs.Disk.unifile)
+    implementation("com.jakewharton:disklrucache:2.0.2")
+    implementation("com.github.tachiyomiorg:unifile:17bec43")
 
     // HTML parser
-    implementation(Libs.Parsing.jsoup)
+    implementation("org.jsoup:jsoup:1.13.1")
 
     // Icons
     implementation("com.mikepenz:iconics-core:5.0.3")
@@ -178,92 +192,96 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.5.0")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
-    // Changelog
-    implementation(Libs.Util.changelog)
-
     // Database
-    implementation(Libs.Database.sqlite)
-    implementation(Libs.Database.storioCommon)
-    implementation(Libs.Database.storioSqlite)
-    implementation(Libs.Database.requerySqlite)
+    implementation("androidx.sqlite:sqlite:2.1.0")
+    implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
+    implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
+    implementation("io.requery:sqlite-android:3.31.0")
 
     // Model View Presenter
-    implementation(Libs.Navigation.nucleus)
-    implementation(Libs.Navigation.nucleusSupport)
+    val nucleusVersion = "3.0.0"
+    implementation("info.android15.nucleus:nucleus:$nucleusVersion")
+    implementation("info.android15.nucleus:nucleus-support-v7:$nucleusVersion")
 
     // Dependency injection
-    implementation(Libs.Util.injekt)
+    implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
     // Image library
-    implementation(Libs.Image.coil)
-    implementation(Libs.Image.coilGif)
-    implementation(Libs.Image.coilSvg)
+    val coilVersion = "1.2.1"
+    implementation("io.coil-kt:coil:$coilVersion")
+    implementation("io.coil-kt:coil-gif:$coilVersion")
+    implementation("io.coil-kt:coil-svg:$coilVersion")
 
     // Logging
-    implementation(Libs.Util.xlog)
+    implementation("com.elvishew:xlog:1.8.0")
 
     // UI
-    implementation(Libs.UI.materalDesignDimens)
-    implementation(Libs.UI.loadingButton)
-    implementation(Libs.UI.fastAdapter)
-    implementation(Libs.UI.fastAdapterBinding)
-    implementation(Libs.UI.flexibleAdapter)
-    implementation(Libs.UI.flexibleAdapterUi)
-    implementation(Libs.UI.filePicker)
-    implementation(Libs.UI.materialDialogsCore)
-    implementation(Libs.UI.materialDialogsInput)
-    implementation(Libs.UI.materialDateTime)
-    implementation(Libs.UI.systemUiHelper)
-    implementation(Libs.UI.viewStatePager)
-    implementation(Libs.UI.numberSlidingPicker)
+    implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
+    implementation("br.com.simplepass:loading-button-android:2.2.0")
+    val fastAdapterVersion = "5.4.1"
+    implementation("com.mikepenz:fastadapter:$fastAdapterVersion")
+    implementation("com.mikepenz:fastadapter-extensions-binding:$fastAdapterVersion")
+    implementation("eu.davidea:flexible-adapter:5.1.0")
+    implementation("eu.davidea:flexible-adapter-ui:1.0.0")
+    implementation("com.nononsenseapps:filepicker:2.5.2")
+    val materialDialogVersion = "3.1.1"
+    implementation("com.afollestad.material-dialogs:core:$materialDialogVersion")
+    implementation("com.afollestad.material-dialogs:input:$materialDialogVersion")
+    implementation("com.afollestad.material-dialogs:datetime:$materialDialogVersion")
 
-    implementation(Libs.UI.androidTagGroup)
-    implementation(Libs.UI.photoView)
-    implementation(Libs.UI.directionalPageView)
-    implementation(Libs.UI.viewToolTip)
-    implementation(Libs.UI.tapTargetView)
-    implementation(Libs.UI.cascade)
+    implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
+    implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
+    implementation("com.github.sephiroth74:NumberSlidingPicker:1.0.3")
+    implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
+    implementation("com.github.chrisbanes:PhotoView:2.3.0")
+    implementation("com.github.tachiyomiorg:DirectionalViewPager:1.0.0")
+    implementation("com.github.florent37:viewtooltip:1.2.2")
+    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
+    implementation("me.saket.cascade:cascade:1.3.0")
 
     // Conductor
-    implementation(Libs.Navigation.conductor)
-    implementation(Libs.Navigation.conductorSupportPreferences)
+    val conductorVersion = "3.0.0"
+    implementation("com.bluelinelabs:conductor:$conductorVersion")
+    implementation("com.github.tachiyomiorg:conductor-support-preference:$conductorVersion")
 
     // RxBindings
-    implementation(Libs.Rx.bindingAppcompat)
-    implementation(Libs.Rx.bindingKotlin)
-    implementation(Libs.Rx.bindingSupport)
-    implementation(Libs.Rx.bindingRecycler)
+    val rxBindingVersion = "1.0.1"
+    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxBindingVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxBindingVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxBindingVersion")
+    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxBindingVersion")
 
     // Tests
-    testImplementation(Libs.Test.junit4)
-    testImplementation(Libs.Test.assertJCore)
-    testImplementation(Libs.Test.mockito)
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.assertj:assertj-core:3.16.1")
+    testImplementation("org.mockito:mockito-core:1.10.19")
 
-    testImplementation(Libs.Test.roboElectric)
-    testImplementation(Libs.Test.roboElectricMultidex)
-    testImplementation(Libs.Test.roboElectricShadowPlayServices)
+    val roboElectricVersion = "3.1.4"
+    testImplementation("org.robolectric:robolectric:$roboElectricVersion")
+    testImplementation("org.robolectric:shadows-multidex:$roboElectricVersion")
+    testImplementation("org.robolectric:shadows-play-services:$roboElectricVersion")
 
-    implementation(Libs.Kotlin.stdLib)
-    implementation(Libs.Kotlin.reflection)
-    implementation(Libs.Kotlin.coroutines)
+    implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
+    implementation(kotlin("reflect", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.0")
 
     // Text distance
-    implementation(Libs.Util.stringSimilarity)
+    implementation("info.debatty:java-string-similarity:2.0.0")
 
     //  version comparison
-    implementation(Libs.Util.versionCompare)
+    implementation("com.g00fy2:versioncompare:1.3.4")
 
     // token bucket
-    implementation(Libs.Util.tokenBucket)
+    implementation("org.isomorphism:token-bucket:1.7")
     // needed to compile with token bucket
-    implementation(Libs.Util.listenableFutureConflictResolve)
+    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
 
     //helpers
     implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:3.0.5")
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.12")
 
 
-    implementation(Libs.Util.aboutLibraries)
+    implementation("com.mikepenz:aboutlibraries:8.3.0")
 
 }
 

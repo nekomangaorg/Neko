@@ -19,10 +19,17 @@ import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
 class XLogSetup(context: Context) {
+
+    private val defaultFolder =
+        context.getString(R.string.app_name) + when (BuildConfig.DEBUG) {
+            true -> "_DEBUG"
+            false -> ""
+        }
+
     init {
         XLogLevel.init(context)
 
-        val logLevel = if (XLogLevel.shouldLog(XLogLevel.EXTRA)) {
+        val logLevel = if (XLogLevel.shouldLog(XLogLevel.EXTRA) || BuildConfig.DEBUG) {
             LogLevel.ALL
         } else {
             LogLevel.WARN
@@ -36,9 +43,10 @@ class XLogSetup(context: Context) {
             .build()
 
         val printers = mutableListOf<Printer>(AndroidPrinter())
+
         val logFolder = File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
-                context.getString(R.string.app_name),
+                defaultFolder,
             "logs"
         )
         printers += FilePrinter

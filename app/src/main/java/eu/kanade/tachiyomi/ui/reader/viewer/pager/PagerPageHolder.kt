@@ -349,8 +349,8 @@ class PagerPageHolder(
 
                 val stream2 = if (extraPage != null) streamFn2?.invoke()?.buffered(16) else null
                 openStream = this@PagerPageHolder.mergePages(stream, stream2)
-                ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF ||
-                    if (stream2 != null) ImageUtil.findImageType(stream2) == ImageUtil.ImageType.GIF else false
+                ImageUtil.isAnimatedAndSupported(stream) ||
+                    if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
@@ -654,11 +654,11 @@ class PagerPageHolder(
     private fun mergePages(imageStream: InputStream, imageStream2: InputStream?): InputStream {
         imageStream2 ?: return imageStream
         if (page.fullPage) return imageStream
-        if (ImageUtil.findImageType(imageStream) == ImageUtil.ImageType.GIF) {
+        if (ImageUtil.isAnimatedAndSupported(imageStream)) {
             page.fullPage = true
             skipExtra = true
             return imageStream
-        } else if (ImageUtil.findImageType(imageStream2) == ImageUtil.ImageType.GIF) {
+        } else if (ImageUtil.isAnimatedAndSupported(imageStream)) {
             page.isolatedPage = true
             extraPage?.fullPage = true
             skipExtra = true

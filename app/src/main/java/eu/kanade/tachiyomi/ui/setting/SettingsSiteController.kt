@@ -6,10 +6,9 @@ import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.jobs.StatusSyncJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.similar.MangaCacheUpdateJob
+import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -57,23 +56,6 @@ class SettingsSiteController :
                 val ctrl = ChooseLanguagesDialog(preferences)
                 ctrl.targetController = this@SettingsSiteController
                 ctrl.showDialog(router)
-            }
-        }
-
-        switchPreference {
-            key = PreferenceKeys.useCacheSource
-            titleRes = R.string.use_cache_source
-            summaryRes = R.string.use_cache_source_summary
-            defaultValue = false
-            onClick {
-                if (isChecked) {
-                    MaterialDialog(activity!!).show {
-                        message(R.string.use_cache_source_dialog)
-                        positiveButton(android.R.string.ok) {
-                            MangaCacheUpdateJob.doWorkNow()
-                        }
-                    }
-                }
             }
         }
 
@@ -139,7 +121,7 @@ class SettingsSiteController :
                     ) { _, indices, _ ->
                         preferences.mangadexSyncToLibraryIndexes()
                             .set(indices.map { (it + 1).toString() }.toSet())
-                        StatusSyncJob.doWorkNow(context, false)
+                        StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
                     }
                     positiveButton(android.R.string.ok)
                     negativeButton(android.R.string.cancel)
@@ -152,7 +134,7 @@ class SettingsSiteController :
             summaryRes = R.string.push_favorites_to_mangadex_summary
 
             onClick {
-                StatusSyncJob.doWorkNow(context, true)
+                StatusSyncJob.doWorkNow(context, StatusSyncJob.entireLibraryToDex)
             }
         }
 

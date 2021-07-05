@@ -8,7 +8,6 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.DelayedLibrarySuggestionsJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -16,6 +15,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
@@ -23,7 +23,6 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
@@ -40,7 +39,6 @@ import eu.kanade.tachiyomi.util.lang.removeArticles
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withUIContext
-import eu.kanade.tachiyomi.util.view.snack
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
@@ -550,16 +548,6 @@ class LibraryPresenter(
                     else headerItems[it.category]
                     ) ?: return@mapNotNull null
                 categorySet.add(it.category)
-                if (preferences.useCacheSource()) {
-                    it.unread = db.getChaptersByMangaId(it.id!!).executeAsBlocking().asSequence()
-                        .filter { chp -> chp.read.not() }
-                        .filter { chp ->
-                            it.isMerged()
-                                .not() || chp.isMergedChapter() || downloadManager.isChapterDownloaded(
-                                chp,
-                                it)
-                        }.count()
-                }
                 LibraryItem(it, headerItem)
             }.toMutableList()
 
@@ -875,7 +863,6 @@ class LibraryPresenter(
     /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
         return chapters.sortedByDescending { it.source_order }.find { !it.read }
     }
 
@@ -1064,20 +1051,8 @@ class LibraryPresenter(
     fun syncMangaToDex(mangaList: List<Manga>) {
         presenterScope.launch {
             withContext(Dispatchers.IO) {
-                val isDexUp = source.checkIfUp()
-
-                if (isDexUp) {
-                    mangaList.forEach {
-                        source.updateFollowStatus(MdUtil.getMangaId(it.url), FollowStatus.READING)
-                    }
-                }
-                withContext(Dispatchers.Main) {
-                    if (isDexUp.not()) {
-                        view.view?.snack("502: MangaDex appears to be down")
-                    } else {
-                        view.view?.snack("Adding to MangaDex follows as reading")
-                    }
-                }
+                val mangaIds = mangaList.map { it.id }.filterNotNull().joinToString()
+                StatusSyncJob.doWorkNow(context, mangaIds)
             }
         }
     }

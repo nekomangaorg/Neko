@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.filterIfUsingCache
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -33,7 +32,6 @@ fun syncChaptersWithSource(
     val preferences: PreferencesHelper = Injekt.get()
     // Chapters from db.
     val dbChapters = db.getChapters(manga).executeAsBlocking()
-        .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
     // no need to handle cache in dedupe because rawsource already has the correct chapters
     val dedupedChapters = deduplicateChapters(rawSourceChapters, manga)
 
@@ -184,7 +182,6 @@ fun syncChaptersWithSource(
             db.insertChapters(toChange).executeAsBlocking()
         }
         val topChapters = db.getChapters(manga).executeAsBlocking()
-            .filterIfUsingCache(downloadManager, manga, preferences.useCacheSource())
             .sortedByDescending { it.date_upload }.take(4)
         // Recalculate next update since chapters were changed
         if (topChapters.size > 1) {

@@ -75,10 +75,6 @@
     <color name="textPrimaryDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
-    <!-- Hot Pink Theme -->
-    <color name="colorAccentPink">#FF3399</color>
-    <color name="colorPrimaryPink">#FF57B3</color>
-
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>
     <color name="colorAccentLime">#4AF88A</color>
@@ -104,7 +100,6 @@
     <color name="neko_variant">#2E2157</color>
 
 
-    <color name="mangadex_orange">#F79421</color>
     <color name="neko_green">#3DDA83</color>
     <color name="neko_green_complementary">#aa206c</color>
     <color name="neko_green_darker">#20aa5e</color>
@@ -117,4 +112,17 @@
     <color name="neko_miami_accent">#DB3EB1</color>
     <color name="neko_miami_dark_accent">#AFDB3EB1</color>
     <color name="neko_miami_badge_1">#F706CF</color>
+
+    <!-- Strawberry Daiquiri Theme -->
+    <color name="colorAccentStrawberry">#ED4A65</color>
+    <color name="colorAccentStrawberryText">#b62e45</color>
+
+    <color name="backgroundChocolateStrawberries">#1a1716</color>
+    <color name="secondaryChocolateStrawberries">#211b19</color>
+
+    <!-- MangaDex Theme -->
+    <color name="colorAccentMangaDex">#FF6740</color>
+
+    <color name="colorAccentYotsuba">#FC8C5C</color>
+    <color name="colorAccentYotsubaText">#d35b27</color>
 </resources>

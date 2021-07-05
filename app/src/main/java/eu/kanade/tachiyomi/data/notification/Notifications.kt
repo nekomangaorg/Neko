@@ -15,13 +15,20 @@ object Notifications {
 
     object Channel {
         const val Status = "status_channel"
+        const val Tracking = "tracking_channel"
     }
 
     object Id {
         object Status {
-            const val Progress = -1002
+            const val Progress = -1001
             const val Complete = -1002
             const val Error = -1003
+        }
+
+        object Tracking {
+            const val Progress = -2001
+            const val Complete = -2002
+            const val Error = -2003
         }
     }
 
@@ -56,14 +63,7 @@ object Notifications {
     const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
-
-    /**
-     * Notification channel and ids used for cache searching.
-     */
-    const val CHANNEL_CACHE = "cache_channel"
-    const val ID_CACHE_PROGRESS = -401
-    const val ID_CACHE_COMPLETE = -402
-
+    
     /**
      * Notification channel and ids used for backup and restore.
      */
@@ -185,8 +185,15 @@ object Notifications {
                 setSound(null, null)
             },
             NotificationChannel(
-                CHANNEL_CACHE,
-                context.getString(R.string.cache),
+                Channel.Status,
+                context.getString(R.string.sync_follows_to_library),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                Channel.Tracking,
+                context.getString(R.string.refresh_tracking_metadata),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
                 setShowBadge(false)

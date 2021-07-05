@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Context
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatDelegate
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 
 object ThemeUtil {
@@ -20,7 +21,6 @@ object ThemeUtil {
         preferences.lightTheme().set(Themes.PURE_WHITE)
         preferences.darkTheme().set(
             when (theme) {
-                3 -> Themes.AMOLED
                 else -> Themes.DARK
             }
         )
@@ -53,6 +53,10 @@ fun Activity.setThemeAndNight(preferences: PreferencesHelper) {
     AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
     val theme = getPrefTheme(preferences)
     setTheme(theme.styleRes)
+
+    if (theme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+        setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
+    }
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {

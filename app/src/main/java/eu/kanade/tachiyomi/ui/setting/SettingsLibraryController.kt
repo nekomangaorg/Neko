@@ -101,7 +101,7 @@ class SettingsLibraryController : SettingsController() {
         }
 
         preferenceCategory {
-            titleRes = R.string.updates
+            titleRes = R.string.global_updates
             intListPreference(activity) {
                 key = Keys.libraryUpdateInterval
                 titleRes = R.string.library_update_frequency
@@ -118,11 +118,11 @@ class SettingsLibraryController : SettingsController() {
 
                 onChange { newValue ->
                     // Always cancel the previous task, it seems that sometimes they are not updated.
-                    LibraryUpdateJob.setupTask(0)
+                    LibraryUpdateJob.setupTask(context, 0)
 
                     val interval = newValue as Int
                     if (interval > 0) {
-                        LibraryUpdateJob.setupTask(interval)
+                        LibraryUpdateJob.setupTask(context, interval)
                     }
                     true
                 }
@@ -139,7 +139,7 @@ class SettingsLibraryController : SettingsController() {
 
                 onChange {
                     // Post to event looper to allow the preference to be updated.
-                    Handler().post { LibraryUpdateJob.setupTask() }
+                    Handler().post { LibraryUpdateJob.setupTask(context) }
                     true
                 }
             }
@@ -165,9 +165,10 @@ class SettingsLibraryController : SettingsController() {
                 summaryRes = R.string.select_order_to_update
             }
 
-            multiSelectListPreferenceMat(activity) {
+            triStateListPreference(activity) {
                 key = Keys.libraryUpdateCategories
-                titleRes = R.string.categories_to_include_in_global_update
+                excludeKey = Keys.libraryUpdateCategoriesExclude
+                titleRes = R.string.categories
 
                 val categories = listOf(Category.createDefault(context)) + dbCategories
                 entries = categories.map { it.name }

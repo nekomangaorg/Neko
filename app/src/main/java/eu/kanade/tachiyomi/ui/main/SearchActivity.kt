@@ -10,16 +10,20 @@ import com.bluelinelabs.conductor.RouterTransaction
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
 import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class SearchActivity : MainActivity() {
 
@@ -114,6 +118,21 @@ class SearchActivity : MainActivity() {
             }
             SHORTCUT_MANGA, SHORTCUT_MANGA_BACK -> {
                 val extras = intent.extras ?: return false
+                if (intent.action == SHORTCUT_MANGA_BACK && preferences.openChapterInShortcuts()) {
+                    val mangaId = extras.getLong(MangaDetailsController.MANGA_EXTRA)
+                    if (mangaId != 0L) {
+                        val db = Injekt.get<DatabaseHelper>()
+                        val chapters = db.getChapters(mangaId).executeAsBlocking()
+                        val nextUnreadChapter = chapters.sortedByDescending { it.source_order }.find { !it.read }
+                        val manga = db.getManga(mangaId).executeAsBlocking()
+                        if (nextUnreadChapter != null && manga != null) {
+                            val activity = ReaderActivity.newIntent(this, manga, nextUnreadChapter)
+                            startActivity(activity)
+                            finish()
+                            return true
+                        }
+                    }
+                }
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailsController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())

@@ -20,7 +20,6 @@ class MdUtil {
         const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound =
             "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-        const val coverUrl = "$apiUrl/cover"
         const val chapterUrl = "$apiUrl/chapter/"
         const val chapterSuffix = "/chapter/"
         const val loginUrl = "$apiUrl/auth/login"

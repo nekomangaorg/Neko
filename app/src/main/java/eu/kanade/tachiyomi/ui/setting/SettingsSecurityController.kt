@@ -58,5 +58,10 @@ class SettingsSecurityController : SettingsController() {
                 true
             }
         }
+        switchPreference {
+            key = PreferenceKeys.hideNotificationContent
+            titleRes = R.string.hide_notification_content
+            defaultValue = false
+        }
     }
 }

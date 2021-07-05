@@ -27,9 +27,18 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
 
     val sourceManager by injectLazy<SourceManager>()
 
+    private val preferences: PreferencesHelper by injectLazy()
+
+    var showNumber = preferences.categoryNumberOfItems().get()
+
     init {
         setDisplayHeadersAtStartUp(true)
     }
+
+    /**
+     * The number of manga in each category.
+     */
+    var itemsPerCategory: Map<Int, Int> = emptyMap()
 
     /**
      * The list of manga in this category.
@@ -51,6 +60,12 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         mangaList = list.toList()
 
         performFilter()
+    }
+
+    fun setItemsPerCategoryMap() {
+        itemsPerCategory = headerItems.map { header ->
+            (header as LibraryHeaderItem).catId to getSectionItemPositions(header).size
+        }.toMap()
     }
 
     /**
@@ -118,6 +133,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
             updateDataSet(mangaList.filter { it.filter(s) })
         }
         isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
+        setItemsPerCategoryMap()
     }
 
     suspend fun performFilterAsync() {
@@ -132,6 +148,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
             updateDataSet(filteredManga)
         }
         isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
+        setItemsPerCategoryMap()
     }
 
     private fun getFirstLetter(name: String): String {

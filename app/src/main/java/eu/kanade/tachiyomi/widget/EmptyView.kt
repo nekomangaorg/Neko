@@ -46,10 +46,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
      * @param textResource text of information view
      */
     fun show(@DrawableRes drawable: Int, message: String, actions: List<Action>? = null) {
-        binding.imageView.setVectorCompat(
-            drawable,
-            context.getResourceColor(android.R.attr.textColorHint)
-        )
+        binding.imageView.setVectorCompat(drawable, android.R.attr.textColorHint)
         binding.textLabel.text = message
 
         binding.actionsContainer.removeAllViews()

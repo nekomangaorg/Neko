@@ -43,8 +43,11 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
             (contentView.parent as View).background = null
         }
         contentView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            leftMargin = insets.systemWindowInsetLeft
-            rightMargin = insets.systemWindowInsetRight
+            insets?.let {
+                leftMargin = it.systemWindowInsetLeft
+                rightMargin = it.systemWindowInsetRight
+            }
+
         }
         contentView.requestLayout()
     }

@@ -9,8 +9,11 @@ import android.graphics.Rect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
+import android.os.Build
 import androidx.annotation.ColorInt
 import eu.kanade.tachiyomi.R
+import tachiyomi.decoder.Format
+import tachiyomi.decoder.ImageDecoder
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
@@ -35,34 +38,59 @@ object ImageUtil {
 
     fun findImageType(stream: InputStream): ImageType? {
         try {
-            val bytes = ByteArray(8)
-
-            val length = if (stream.markSupported()) {
-                stream.mark(bytes.size)
-                stream.read(bytes, 0, bytes.size).also { stream.reset() }
-            } else {
-                stream.read(bytes, 0, bytes.size)
-            }
-
-            if (length == -1) {
-                return null
-            }
-
-            if (bytes.compareWith(charByteArrayOf(0xFF, 0xD8, 0xFF))) {
-                return ImageType.JPG
-            }
-            if (bytes.compareWith(charByteArrayOf(0x89, 0x50, 0x4E, 0x47))) {
-                return ImageType.PNG
-            }
-            if (bytes.compareWith("GIF8".toByteArray())) {
-                return ImageType.GIF
-            }
-            if (bytes.compareWith("RIFF".toByteArray())) {
-                return ImageType.WEBP
+            return when (getImageType(stream)?.format) {
+                Format.Avif -> ImageType.AVIF
+                Format.Gif -> ImageType.GIF
+                Format.Heif -> ImageType.HEIF
+                Format.Jpeg -> ImageType.JPEG
+                Format.Png -> ImageType.PNG
+                Format.Webp -> ImageType.WEBP
+                else -> null
             }
         } catch (e: Exception) {
         }
         return null
+    }
+
+    fun isAnimatedAndSupported(stream: InputStream): Boolean {
+        try {
+            val type = getImageType(stream) ?: return false
+            return when (type.format) {
+                Format.Gif -> true
+                // Coil supports animated WebP on Android 9.0+
+                // https://coil-kt.github.io/coil/getting_started/#supported-image-formats
+                Format.Webp -> type.isAnimated && Build.VERSION.SDK_INT >= Build.VERSION_CODES.P
+                else -> false
+            }
+        } catch (e: Exception) {
+        }
+        return false
+    }
+
+    enum class ImageType(val mime: String, val extension: String) {
+        AVIF("image/avif", "avif"),
+        GIF("image/gif", "gif"),
+        HEIF("image/heif", "heif"),
+        JPEG("image/jpeg", "jpg"),
+        PNG("image/png", "png"),
+        WEBP("image/webp", "webp"),
+    }
+
+    private fun getImageType(stream: InputStream): tachiyomi.decoder.ImageType? {
+        val bytes = ByteArray(32)
+
+        val length = if (stream.markSupported()) {
+            stream.mark(bytes.size)
+            stream.read(bytes, 0, bytes.size).also { stream.reset() }
+        } else {
+            stream.read(bytes, 0, bytes.size)
+        }
+
+        if (length == -1) {
+            return null
+        }
+
+        return ImageDecoder.findType(bytes)
     }
 
     fun autoSetBackground(image: Bitmap?, alwaysUseWhite: Boolean, context: Context): Drawable {
@@ -324,12 +352,5 @@ object ImageUtil {
                 set(i, bytes[i].toByte())
             }
         }
-    }
-
-    enum class ImageType(val mime: String, val extension: String) {
-        JPG("image/jpeg", "jpg"),
-        PNG("image/png", "png"),
-        GIF("image/gif", "gif"),
-        WEBP("image/webp", "webp")
     }
 }

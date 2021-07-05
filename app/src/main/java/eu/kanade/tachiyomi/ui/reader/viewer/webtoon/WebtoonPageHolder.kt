@@ -280,7 +280,7 @@ class WebtoonPageHolder(
                 val stream = streamFn().buffered(16)
                 openStream = stream
 
-                ImageUtil.findImageType(stream) == ImageUtil.ImageType.GIF
+                ImageUtil.isAnimatedAndSupported(stream)
             }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())

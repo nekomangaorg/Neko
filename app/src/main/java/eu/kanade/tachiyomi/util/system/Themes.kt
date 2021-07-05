@@ -13,16 +13,6 @@ import kotlin.math.roundToInt
 enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
     PURE_WHITE(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_NO, R.string.white_theme),
     DARK(R.style.Theme_Tachiyomi, AppCompatDelegate.MODE_NIGHT_YES, R.string.dark),
-    AMOLED(
-        R.style.Theme_Tachiyomi_Amoled,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.amoled_black
-    ),
-    OUTRUN(
-        R.style.Theme_Tachiyomi_Outrun,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.outrun
-    ),
     SPRING(
         R.style.Theme_Tachiyomi_MidnightDusk,
         AppCompatDelegate.MODE_NIGHT_NO,
@@ -33,21 +23,39 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.midnight_dusk
     ),
+    OUTRUN(
+        R.style.Theme_Tachiyomi_Outrun,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.outrun
+    ),
+    STRAWBERRY_DAIQUIRI(
+        R.style.Theme_Tachiyomi_StrawberryDaiquiri,
+        AppCompatDelegate.MODE_NIGHT_NO,
+        R.string.strawberry_daiquiri
+    ),
+    CHOCOLATE_STRAWBERRIES(
+        R.style.Theme_Tachiyomi_ChocolateStrawberries,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.chocolate_strawberries
+    ),
     LIME(
         R.style.Theme_Tachiyomi_FlatLime,
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.flat_lime
     ),
-    BLACK_N_RED(
-        R.style.Theme_Tachiyomi_BlackAndRed,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.black_and_red
+    MANGADEX_LIGHT(
+        R.style.Theme_Tachiyomi_MangaDex,
+        AppCompatDelegate.MODE_NIGHT_NO,
+        R.string.mangadex
     ),
-    HOT_PINK(
-        R.style.Theme_Tachiyomi_HotPink,
+    MANGADEX_DARK(
+        R.style.Theme_Tachiyomi_MangaDex,
         AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.hot_pink
+        R.string.mangadex
     );
+
+    val isDarkTheme: Boolean
+        get() = nightMode == AppCompatDelegate.MODE_NIGHT_YES
 
     fun getColors(mode: Int = AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM): Colors {
         return when (nightMode) {
@@ -125,10 +133,10 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val darkBackground: Int = Color.parseColor(
         when (styleRes) {
-            R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
+            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#1a1716"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
             R.style.Theme_Tachiyomi_FlatLime -> "#202125"
-            R.style.Theme_Tachiyomi -> "#292929"
+            R.style.Theme_Tachiyomi, R.style.Theme_Tachiyomi_MangaDex -> "#292929"
             R.style.Theme_Tachiyomi_Outrun -> "#170c32"
             else -> "#1C1C1D"
         }
@@ -139,6 +147,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     val lightAccent: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
+            R.style.Theme_Tachiyomi_StrawberryDaiquiri -> "#ED4A65"
+            R.style.Theme_Tachiyomi_MangaDex -> "#FF6740"
             R.style.Theme_Tachiyomi -> "#101820"
             else -> "#2979FF"
         }
@@ -149,10 +159,10 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     val darkAccent: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#F02475"
-            R.style.Theme_Tachiyomi_BlackAndRed -> "#AA2200"
-            R.style.Theme_Tachiyomi_HotPink -> "#FF3399"
+            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#AA2200"
             R.style.Theme_Tachiyomi_FlatLime -> "#4AF88A"
-            R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi -> "#20aa5e"
+            R.style.Theme_Tachiyomi -> "#20aa5e"
+            R.style.Theme_Tachiyomi_MangaDex -> "#FF6740"
             R.style.Theme_Tachiyomi_Outrun -> "#dd546e"
             else -> "#3399FF"
         }
@@ -196,8 +206,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     @ColorInt
     val darkBottomBar: Int = Color.parseColor(
         when (styleRes) {
-            R.style.Theme_Tachiyomi_Amoled, R.style.Theme_Tachiyomi_BlackAndRed, R.style.Theme_Tachiyomi_HotPink -> "#000000"
-            R.style.Theme_Tachiyomi -> "#292929"
+            R.style.Theme_Tachiyomi_ChocolateStrawberries -> "#211b19"
+            R.style.Theme_Tachiyomi, R.style.Theme_Tachiyomi_MangaDex -> "#292929"
             R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
             R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"
             R.style.Theme_Tachiyomi_Outrun -> "#201147"
@@ -217,13 +227,13 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         else -> Color.parseColor("#C2FFFFFF")
     }
 
-    /** Complies with tabBarIconColor */
+    /** Complies with tabBarIconColor or colorAccent */
     @ColorInt
     val lightActiveTab: Int = when (styleRes) {
         else -> lightAccent
     }
 
-    /** Complies with tabBarIconColor (probably night) */
+    /** Complies with tabBarIconColor or colorAccent (probably night) */
     @ColorInt
     val darkActiveTab: Int = when (styleRes) {
         else -> darkAccent
@@ -234,10 +244,15 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         @ColorInt val secondaryText: Int,
         @ColorInt val colorBackground: Int,
         @ColorInt val colorAccent: Int,
+        /** Complies with colorSecondary */
         @ColorInt val appBar: Int,
+        /** Complies with actionBarTintColor */
         @ColorInt val appBarText: Int,
+        /** Complies with colorPrimaryVariant */
         @ColorInt val bottomBar: Int,
+        /** Complies with tabBarIconInactive */
         @ColorInt val inactiveTab: Int,
+        /** Complies with tabBarIconColor */
         @ColorInt val activeTab: Int,
     )
 }

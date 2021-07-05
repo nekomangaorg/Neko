@@ -1,7 +1,7 @@
 plugins {
-    id(Plugins.kotlinter.name) version Plugins.kotlinter.version
-    id(Plugins.gradleVersions.name) version Plugins.gradleVersions.version
-    id(Plugins.jetbrainsKotlin) version Versions.kotlin apply false
+    id("org.jmailen.kotlinter") version "3.4.4"
+    id("com.github.ben-manes.versions") version "0.29.0"
+    id("org.jetbrains.kotlin.android") version "1.5.10" apply false
 }
 allprojects {
     repositories {
@@ -9,36 +9,37 @@ allprojects {
         mavenCentral()
         maven { setUrl("https://jitpack.io") }
         maven { setUrl("https://plugins.gradle.org/m2/") }
-        jcenter()
     }
 }
 
 subprojects {
-    apply(plugin = Plugins.kotlinter.name)
+    apply(plugin = "org.jmailen.kotlinter")
 
     kotlinter {
         experimentalRules = true
+        disabledRules = arrayOf("experimental:argument-list-wrapping")
     }
 }
 
 buildscript {
     dependencies {
-        classpath(LegacyPluginClassPath.fireBaseCrashlytics)
-        classpath(LegacyPluginClassPath.androidGradlePlugin)
-        classpath(LegacyPluginClassPath.googleServices)
-        classpath(LegacyPluginClassPath.kotlinExtensions)
-        classpath(LegacyPluginClassPath.kotlinPlugin)
-        classpath(LegacyPluginClassPath.aboutLibraries)
-        classpath(LegacyPluginClassPath.kotlinSerializations)
+        classpath("com.google.firebase:firebase-crashlytics-gradle:2.7.1")
+        classpath("com.android.tools.build:gradle:4.2.2")
+        classpath("com.google.gms:google-services:4.3.8")
+        val kotlinVersion = "1.5.10"
+        classpath("org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion")
+        classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
+        classpath("com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:8.8.6")
+        classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
     }
     repositories {
         gradlePluginPortal()
         google()
-        jcenter()
     }
 }
 
-tasks.named("dependencyUpdates", com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java).configure {
+tasks.named("dependencyUpdates",
+    com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java).configure {
     rejectVersionIf {
         isNonStable(candidate.version)
     }
@@ -47,6 +48,16 @@ tasks.named("dependencyUpdates", com.github.benmanes.gradle.versions.updates.Dep
     outputFormatter = "json"
     outputDir = "build/dependencyUpdates"
     reportfileName = "report"
+}
+
+fun isNonStable(version: String): Boolean {
+    val stableKeyword =
+        listOf("RELEASE", "FINAL", "GA").any {
+            version.toUpperCase(java.util.Locale.ROOT).contains(it)
+        }
+    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
+    val isStable = stableKeyword || regex.matches(version)
+    return isStable.not()
 }
 
 tasks.register("clean", Delete::class) {

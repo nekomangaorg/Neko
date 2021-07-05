@@ -64,4 +64,16 @@
         <item name="endIconTint">?attr/colorAccent</item>
     </style>
 
+    <style name="Neko.Toolbar.TitleText" parent="">
+        <item name="fontFamily">@font/montserrat_medium</item>
+        <item name="android:letterSpacing">-.023</item>
+        <item name="android:textSize">16sp</item>
+    </style>
+
+    <style name="Neko.Toolbar.SubTitleText" parent="">
+        <item name="fontFamily">@font/montserrat_regular</item>
+        <item name="android:letterSpacing">-.023</item>
+        <item name="android:textSize">14sp</item>
+    </style>
+
 </resources>

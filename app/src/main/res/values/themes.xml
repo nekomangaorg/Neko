@@ -57,9 +57,9 @@
 
         <!-- Material Dialog colors -->
         <item name="md_color_title">?android:attr/textColorPrimary</item>
-        <item name="md_color_content">@color/text_color_secondary</item>
+        <item name="md_color_content">?android:textColorSecondary</item>
         <item name="md_color_button_text">?colorAccent</item>
-        <item name="md_background_color">?colorPrimaryVariant</item>
+        <item name="md_background_color">?android:attr/colorBackground</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
 
@@ -69,30 +69,16 @@
 
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
-    //has normal badges
 
-    <style name="Theme.Tachiyomi.Standard" parent="Theme.Tachiyomi">
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-    </style>
+    <style name="ThemeOverlay.Tachiyomi.Amoled" parent="" />
 
-    <style name="Theme.Tachiyomi.Amoled" parent="Theme.Tachiyomi" />
+    <style name="Theme.Tachiyomi.ChocolateStrawberries" />
 
-    <style name="Theme.Tachiyomi.Amoled.Standard" parent="Theme.Tachiyomi.Amoled">
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-    </style>
+    <style name="Theme.Tachiyomi.FlatLime" />
 
-    <style name="Theme.Tachiyomi.BlackAndRed" parent="Theme.Tachiyomi.Amoled.Standard" />
+    <style name="Theme.Tachiyomi.Outrun" />
 
-    <style name="Theme.Tachiyomi.HotPink" parent="Theme.Tachiyomi.Amoled.Standard" />
-
-    <style name="Theme.Tachiyomi.FlatLime" parent="Theme.Tachiyomi.Standard" />
-
-    <style name="Theme.Tachiyomi.Outrun" parent="Theme.Tachiyomi.Standard" />
-
-
-    <style name="Theme.Tachiyomi.MidnightDusk" parent="Theme.Tachiyomi.Standard">
+    <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorAccent">@color/colorAccentDuskDawn</item>
         <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
@@ -101,10 +87,27 @@
         <item name="colorSecondaryVariant">@color/dialogDuskDawn</item>
         <item name="background">@color/backgroundDuskDawn</item>
         <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
         <item name="android:colorBackground">@color/backgroundDuskDawn</item>
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
 
+    <style name="Theme.Tachiyomi.StrawberryDaiquiri">
+        <item name="colorAccent">@color/colorAccentStrawberry</item>
+        <item name="colorAccentText">@color/colorAccentStrawberryText</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.MangaDex">
+        <item name="colorAccent">@color/colorAccentMangaDex</item>
+        <item name="colorAccentText">@color/md_white_1000</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+    </style>
+
+    <style name="Theme.Tachiyomi.Monet" />
 
     <!--===============-->
     <!-- Launch Screen -->

@@ -182,7 +182,7 @@
         android:layout_height="wrap_content"
         android:background="?colorPrimaryVariant"
         app:itemIconTint="@color/bottom_nav_item_selector"
-        app:itemRippleColor="@color/rippleColor"
+        app:itemRippleColor="@color/ripple_nav"
         app:itemTextColor="@color/bottom_nav_item_selector"
         app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"

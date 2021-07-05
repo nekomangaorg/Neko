@@ -67,7 +67,7 @@ class SetTrackReadingDatesDialog<T> : DialogController
                 listener.setReadingDate(item, dateToUpdate, date.timeInMillis)
             }
             .neutralButton(R.string.remove) {
-                listener.setReadingDate(item, dateToUpdate, 0L)
+                listener.setReadingDate(item, dateToUpdate, -1L)
             }.apply {
                 getSuggestedDate()?.let {
                     message(

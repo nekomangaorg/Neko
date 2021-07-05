@@ -143,7 +143,14 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val lightMode = !isInNightMode()
-        setTheme(getPrefTheme(preferences).styleRes)
+        val prefTheme = getPrefTheme(preferences)
+        setTheme(prefTheme.styleRes)
+        if (prefTheme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+            setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
+            /* if (ThemeUtil.isColoredTheme(prefTheme)) {
+                 setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
+             }*/
+        }
         window.statusBarColor = ColorUtils.setAlphaComponent(
             getResourceColor(
                 R.attr
@@ -204,6 +211,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
         }
     }
+
     override fun onBackPressed() {
         if (binding.webview.canGoBack()) binding.webview.goBack()
         else super.onBackPressed()

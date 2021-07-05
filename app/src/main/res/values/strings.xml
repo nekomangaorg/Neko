@@ -128,10 +128,12 @@
     <string name="no_matches_for_filters">No matches found for your current filters</string>
     <string name="show_all_categories">Show all categories</string>
     <string name="move_dynamic_to_bottom">Move collapsed dynamic categories to bottom</string>
+    <string name="show_number_of_items">Show number of items</string>
     <string name="when_grouping_by_sources_tags">When grouping library by sources, status, etc.</string>
     <string name="always_show_current_category">Always show current category</string>
     <string name="category_hopper_long_press">Category hopper long-press action</string>
     <string name="expand_collapse_all_categories">Expand/collapse all categories</string>
+    <string name="open_random_series">Open a random series</string>
     <string name="expand_all_categories">Expand all categories</string>
     <string name="collapse_all_categories">Collapse all categories</string>
     <string name="reorder_filters">Reorder filters</string>
@@ -186,6 +188,7 @@
     <string name="shift_double_pages">Shift double pages</string>
 
     <!-- Library update service notifications -->
+    <string name="checking_for_new_chapters">Checking for new chapters</string>
     <string name="new_chapters_found">New chapters found</string>
     <plurals name="for_n_titles">
         <item quantity="one">For %d title</item>
@@ -215,6 +218,7 @@
     <string name="auto_refresh_covers">Automatically refresh covers</string>
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
+    <string name="global_updates">Global updates</string>
     <string name="show_notification_error">Show a notification for errors</string>
     <string name="display_buttons_bottom_reader">Buttons at bottom of reader</string>
     <string name="certain_buttons_can_be_found">Certain buttons can be found in other places if disabled here</string>
@@ -566,17 +570,20 @@
 
     <!-- General settings -->
     <string name="app_theme">App theme</string>
-    <string name="dark">Neko 2x Dark</string>
-    <string name="amoled_black">Neko 2x Black</string>
+    <string name="light_theme">Light theme</string>
+    <string name="dark_theme">Dark theme</string>
+    <string name="dark">Neko Green</string>
     <string name="outrun">Outrun</string>
-
+    <string name="light_blue">Light Blue</string>
     <string name="dark_blue">Dark Blue</string>
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>
-    <string name="black_and_red">Black \'n\' Red</string>
+    <string name="strawberry_daiquiri">Strawberry Daiquiri</string>
+    <string name="chocolate_strawberries">Chocolate Strawberries</string>
+    <string name="mangadex">MangaDex</string>
     <string name="hot_pink">Hot Pink</string>
     <string name="flat_lime">Flat Lime</string>
-    <string name="white_theme">Neko 2X Pure</string>
+    <string name="white_theme">Neko Pure</string>
     <string name="locale">Locale</string>
     <string name="last_used_library_recents">Last used (Library or Recents)</string>
     <string name="language">Language</string>
@@ -587,16 +594,23 @@
     <string name="updated_to_">Updated to v%1$s</string>
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
-    <string name="move_side_nav_to_bottom">Move side navigation buttons to bottom</string>
-    <string name="app_shortcuts">App shortcuts</string>
-    <string name="show_recent_in_shortcuts">Show recent sources and series in app shortcuts</string>
+    <string name="side_nav_icon_alignment">Side navigation icon alignment</string>
     <string name="follow_system_theme">Follow system theme</string>
+    <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
+    <string name="hide_notification_content">Hide notification content</string>
     <string name="security">Security</string>
     <string name="starting_screen">Starting screen</string>
     <string name="back_to_start">Back to start</string>
     <string name="pressing_back_to_start">Pressing back to starting screen</string>
+
+    <string name="app_shortcuts">App shortcuts</string>
+    <string name="show_recent_sources">Show recently used sources</string>
+    <string name="show_recent_series">Show recent series</string>
+    <string name="includes_recently_read_updated_added">Includes recently read, updated, and added series</string>
+    <string name="series_opens_new_chapters">Series shortcuts opens new chapters</string>
+    <string name="no_new_chapters_open_details">When there\'s no new chapters, the series\' details will open instead</string>
 
     <!-- Backup -->
     <string name="backup">Backup</string>
@@ -611,7 +625,6 @@
     <string name="automatic_backups">Automatic backups</string>
     <string name="backup_frequency">Backup frequency</string>
     <string name="max_auto_backups">Max automatic backups</string>
-    <string name="also_create_legacy_backup">Also create legacy backup</string>
     <string name="invalid_backup_file">Invalid backup file</string>
     <string name="invalid_backup_file_type">Invalid backup file type: %1$s\nIt should end with ".proto.gz" or ".json".</string>
     <string name="file_is_missing_data">File is missing data.</string>
@@ -665,6 +678,7 @@
     <string name="refresh_library_metadata">Refresh library metadata</string>
     <string name="updates_covers_genres_desc">Updates covers, genres, description and manga status information</string>
     <string name="refresh_tracking_metadata">Refresh tracking metadata</string>
+    <string name="refresh_tracking_complete">Refresh tracking complete</string>
     <string name="updates_tracking_details">Updates status, score and last chapter read from the tracking services</string>
     <string name="clean_up_downloaded_chapters">Clean up downloaded chapters</string>
     <string name="delete_unused_chapters">Delete non-existent, partially downloaded,
@@ -827,12 +841,14 @@
     <string name="edit">Edit</string>
     <string name="enable">Enable</string>
     <string name="enabled">Enabled</string>
+    <string name="exclude_">Exclude: %s</string>
     <string name="fast">Fast</string>
     <string name="filter">Filter</string>
     <string name="forward">Forward</string>
     <string name="free">Free</string>
     <string name="hide">Hide</string>
     <string name="ignore">Ignore</string>
+    <string name="include_">Include: %s</string>
     <string name="install">Install</string>
     <string name="keep">Keep</string>
     <string name="left">Left</string>

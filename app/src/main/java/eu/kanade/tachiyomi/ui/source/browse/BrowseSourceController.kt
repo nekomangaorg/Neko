@@ -129,11 +129,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-
-        if (preferences.useCacheSource()) {
-            view.snack("Browsing Cached Source")
-        }
-
+        
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)

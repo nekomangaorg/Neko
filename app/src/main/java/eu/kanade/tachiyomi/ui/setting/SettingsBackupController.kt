@@ -43,35 +43,31 @@ class SettingsBackupController : SettingsController() {
     }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.backup
+        titleRes = R.string.backup_and_restore
 
-        preferenceCategory {
-            titleRes = R.string.backup
-
-            preference {
-                key = "pref_create_backup"
-                titleRes = R.string.create_backup
-                summaryRes = R.string.can_be_used_to_restore
+        preference {
+            key = "pref_create_backup"
+            titleRes = R.string.create_backup
+            summaryRes = R.string.can_be_used_to_restore
 
                 onClick { backup(context, BackupConst.BACKUP_TYPE_FULL) }
             }
 
-            preference {
-                key = "pref_restore_backup"
-                titleRes = R.string.restore_backup
-                summaryRes = R.string.restore_from_backup_file
+        preference {
+            key = "pref_restore_backup"
+            titleRes = R.string.restore_backup
+            summaryRes = R.string.restore_from_backup_file
 
-                onClick {
-                    if (!BackupRestoreService.isRunning(context)) {
-                        val intent = Intent(Intent.ACTION_GET_CONTENT)
-                        intent.addCategory(Intent.CATEGORY_OPENABLE)
-                        intent.type = "application/*"
-                        val title = resources?.getString(R.string.select_backup_file)
-                        val chooser = Intent.createChooser(intent, title)
-                        startActivityForResult(chooser, CODE_BACKUP_RESTORE)
-                    } else {
-                        context.toast(R.string.restore_in_progress)
-                    }
+            onClick {
+                if (!BackupRestoreService.isRunning(context)) {
+                    val intent = Intent(Intent.ACTION_GET_CONTENT)
+                    intent.addCategory(Intent.CATEGORY_OPENABLE)
+                    intent.type = "application/*"
+                    val title = resources?.getString(R.string.select_backup_file)
+                    val chooser = Intent.createChooser(intent, title)
+                    startActivityForResult(chooser, CODE_BACKUP_RESTORE)
+                } else {
+                    context.toast(R.string.restore_in_progress)
                 }
             }
         }
@@ -97,7 +93,7 @@ class SettingsBackupController : SettingsController() {
                     // Always cancel the previous task, it seems that sometimes they are not updated
 
                     val interval = newValue as Int
-                    BackupCreatorJob.setupTask(interval)
+                    BackupCreatorJob.setupTask(context, interval)
                     true
                 }
             }

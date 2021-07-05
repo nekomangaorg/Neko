@@ -811,13 +811,6 @@ class MangaDetailsController :
 
     private fun openChapter(chapter: Chapter) {
         val activity = activity ?: return
-        if (presenter.preferences.useCacheSource() && presenter.manga.isMerged()
-                .not() && presenter.downloadManager.isChapterDownloaded(chapter, presenter.manga)
-                .not()
-        ) {
-            view?.snack(R.string.using_cached_source_cant_open)
-            return
-        }
         val intent = ReaderActivity.newIntent(activity, manga!!, chapter)
         startActivity(intent)
     }

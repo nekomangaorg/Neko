@@ -46,19 +46,23 @@
         android:id="@+id/reader_menu"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="gone" >
+        android:visibility="gone">
 
         <FrameLayout
             android:id="@+id/app_bar"
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <androidx.appcompat.widget.Toolbar
+            <com.google.android.material.appbar.MaterialToolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
                 android:layout_height="?attr/actionBarSize"
                 app:titleTextColor="?actionBarTintColor"
-                app:subtitleTextColor="@color/tint_color_secondary"
+                app:titleCentered="true"
+                app:titleTextAppearance="@style/Neko.Toolbar.TitleText"
+                app:subtitleCentered="true"
+                app:subtitleTextAppearance="@style/Neko.Toolbar.SubTitleText"
+                app:subtitleTextColor="@color/text_color_high_emphasis"
                 android:background="@drawable/reader_toolbar_ripple" />
 
         </FrameLayout>
@@ -67,8 +71,7 @@
     <View
         android:id="@+id/touch_view"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        />
+        android:layout_height="match_parent" />
 
     <FrameLayout
         android:id="@+id/nav_layout"
@@ -79,14 +82,16 @@
         android:paddingBottom="6dp"
         app:layout_anchorGravity="top"
         android:layout_gravity="top"
-        app:layout_anchor="@id/chapters_sheet" >
+        app:layout_anchor="@id/chapters_sheet">
 
-        <include layout="@layout/reader_nav"
+        <include
+            layout="@layout/reader_nav"
             android:id="@+id/reader_nav" />
     </FrameLayout>
 
-    <include layout="@layout/reader_chapters_sheet"
-        android:id="@+id/chapters_sheet"/>
+    <include
+        layout="@layout/reader_chapters_sheet"
+        android:id="@+id/chapters_sheet" />
 
     <View
         android:id="@+id/brightness_overlay"

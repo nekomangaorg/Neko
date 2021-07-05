@@ -239,7 +239,7 @@ class MangaHeaderHolder(
         }
 
         with(binding.mergeButton) {
-            isVisible = (manga.status != SManga.COMPLETED || presenter.preferences.useCacheSource())
+            isVisible = (manga.status != SManga.COMPLETED)
             val iconics = when (manga.isMerged()) {
                 true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_decagram)
                 false -> context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_source_merge)
@@ -264,7 +264,7 @@ class MangaHeaderHolder(
                     if (nextChapter.isMergedChapter() || (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty())) {
                         nextChapter.chapter.name
                     } else {
-                        
+
                         val vol = if (nextChapter.chapter.vol.isNotEmpty()) {
                             "Vol. " + nextChapter.chapter.vol
                         } else {

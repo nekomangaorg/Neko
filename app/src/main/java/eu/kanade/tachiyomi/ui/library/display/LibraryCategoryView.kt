@@ -29,6 +29,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             dynamicToBottom.bindToPreference(preferences.collapsedDynamicAtBottom()) {
                 controller?.presenter?.getLibrary()
             }
+            showNumberOfItems.bindToPreference(preferences.categoryNumberOfItems())
             val hideHopper = min(
                 2,
                 preferences.hideHopper().get().toInt() * 2 + preferences.autohideHopper().get()

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.jobs
+package eu.kanade.tachiyomi.jobs.follows
 
 import android.content.Context
 import android.widget.Toast
@@ -42,14 +42,18 @@ class StatusSyncJob(
 
     override suspend fun doWork(): Result = coroutineScope {
 
-        val notification = progressNotification.build()
-        val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
-        setForeground(foregroundInfo)
+        withUIContext {
+            val notification = progressNotification.build()
+            val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
+            setForeground(foregroundInfo)
+        }
         try {
-            when (inputData.getBoolean(SYNC_TO_MANGADEX, false)) {
-                true -> {
+            val ids = inputData.getString(SYNC_TO_MANGADEX)
+            when (ids) {
+                null, "0" -> {
                     val total = followsSyncService.toMangaDex(::updateNotificationProgress,
-                        ::completeNotificationToDex)
+                        ::completeNotificationToDex,
+                        ids)
                     withUIContext {
                         applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
                             total),
@@ -57,11 +61,20 @@ class StatusSyncJob(
                     }
                 }
 
-                false -> {
+                "1" -> {
                     val total = followsSyncService.fromMangaDex(::updateNotificationProgress,
                         ::completeNotificationFromDex)
                     withUIContext {
                         applicationContext.toast(applicationContext.getString(R.string.sync_follows_to_library_toast,
+                            total),
+                            Toast.LENGTH_LONG)
+                    }
+                }
+                else -> {
+                    val total = followsSyncService.toMangaDex(::updateNotificationProgress,
+                        ::completeNotificationToDex, ids)
+                    withUIContext {
+                        applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
                             total),
                             Toast.LENGTH_LONG)
                     }
@@ -113,10 +126,13 @@ class StatusSyncJob(
 
         private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
 
-        fun doWorkNow(context: Context, syncToMangadex: Boolean) {
+        const val entireLibraryToDex = "0"
+        const val entireFollowsFromDex = "1"
+
+        fun doWorkNow(context: Context, syncToMangadex: String) {
             WorkManager.getInstance(context).enqueue(
                 OneTimeWorkRequestBuilder<StatusSyncJob>().apply {
-                    setInputData(Data.Builder().putBoolean(SYNC_TO_MANGADEX, syncToMangadex)
+                    setInputData(Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
                         .build())
                 }.build()
             )

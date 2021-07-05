@@ -10,6 +10,7 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -21,7 +22,8 @@ class SettingsGeneralController : SettingsController() {
 
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
 
-    var lastThemeX: Int? = null
+    var lastThemeXLight: Int? = null
+    var lastThemeXDark: Int? = null
     var themePreference: ThemePreference? = null
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.general
@@ -104,27 +106,27 @@ class SettingsGeneralController : SettingsController() {
             }
         }
 
-        switchPreference {
-            key = Keys.showSideNavOnBottom
-            titleRes = R.string.move_side_nav_to_bottom
-            defaultValue = false
+        intListPreference(activity) {
+            key = Keys.sideNavIconAlignment
+            titleRes = R.string.side_nav_icon_alignment
+            entriesRes = arrayOf(
+                R.string.top,
+                R.string.center,
+                R.string.bottom,
+            )
+            entryRange = 0..2
+            defaultValue = 0
             isVisible = activity?.isTablet() == true
         }
 
-        switchPreference {
-            key = Keys.showMangaAppShortcuts
-            titleRes = R.string.app_shortcuts
-            summaryRes = R.string.show_recent_in_shortcuts
-            defaultValue = true
-        }
-
         preferenceCategory {
-            titleRes = R.string.display
+            titleRes = R.string.app_theme
 
             themePreference = themePreference {
                 key = "theme_preference"
                 titleRes = R.string.app_theme
-                lastScrollPostion = lastThemeX
+                lastScrollPostionLight = lastThemeXLight
+                lastScrollPostionDark = lastThemeXDark
                 summary = if (preferences.nightMode()
                     .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
@@ -153,13 +155,56 @@ class SettingsGeneralController : SettingsController() {
                         activity?.recreate()
                     } else {
                         preferences.nightMode().set(context.appDelegateNightMode())
-                        themePreference?.fastAdapter?.notifyDataSetChanged()
+                        themePreference?.fastAdapterLight?.notifyDataSetChanged()
+                        themePreference?.fastAdapterDark?.notifyDataSetChanged()
                     }
                     true
                 }
                 preferences.nightMode().asImmediateFlow { mode ->
                     isChecked = mode == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 }.launchIn(viewScope)
+            }
+
+            switchPreference {
+                key = Keys.themeDarkAmoled
+                titleRes = R.string.pure_black_dark_mode
+                defaultValue = false
+
+                preferences.nightMode().asImmediateFlowIn(viewScope) { mode ->
+                    isVisible = mode != AppCompatDelegate.MODE_NIGHT_NO
+                }
+
+                onChange {
+                    if (context.isInNightMode()) {
+                        activity?.recreate()
+                    } else {
+                        themePreference?.fastAdapterDark?.notifyDataSetChanged()
+                    }
+                    true
+                }
+            }
+        }
+        preferenceCategory {
+            titleRes = R.string.app_shortcuts
+
+            switchPreference {
+                key = Keys.showSeriesInShortcuts
+                titleRes = R.string.show_recent_series
+                summaryRes = R.string.includes_recently_read_updated_added
+                defaultValue = true
+            }
+
+            switchPreference {
+                key = Keys.showSourcesInShortcuts
+                titleRes = R.string.show_recent_sources
+                defaultValue = true
+            }
+
+            switchPreference {
+                key = Keys.openChapterInShortcuts
+                titleRes = R.string.series_opens_new_chapters
+                summaryRes = R.string.no_new_chapters_open_details
+                defaultValue = true
             }
         }
     }
@@ -170,13 +215,16 @@ class SettingsGeneralController : SettingsController() {
     }
 
     override fun onSaveViewState(view: View, outState: Bundle) {
-        outState.putInt(::lastThemeX.name, themePreference?.lastScrollPostion ?: 0)
+        outState.putInt(::lastThemeXLight.name, themePreference?.lastScrollPostionLight ?: 0)
+        outState.putInt(::lastThemeXDark.name, themePreference?.lastScrollPostionDark ?: 0)
         super.onSaveInstanceState(outState)
     }
 
     override fun onRestoreViewState(view: View, savedViewState: Bundle) {
         super.onRestoreViewState(view, savedViewState)
-        lastThemeX = savedViewState.getInt(::lastThemeX.name)
-        themePreference?.lastScrollPostion = lastThemeX
+        lastThemeXLight = savedViewState.getInt(::lastThemeXLight.name)
+        lastThemeXDark = savedViewState.getInt(::lastThemeXDark.name)
+        themePreference?.lastScrollPostionLight = lastThemeXLight
+        themePreference?.lastScrollPostionDark = lastThemeXDark
     }
 }

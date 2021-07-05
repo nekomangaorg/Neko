@@ -30,6 +30,9 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
             .mapNotNull { it.id }
             .takeUnless { it.isEmpty() } ?: listOf(0)
 
+    val categoriesToExclude = prefs.downloadNewCategoriesExclude().get().map(String::toInt)
+    if (categoriesForManga.intersect(categoriesToExclude).isNotEmpty()) return false
+
     return categoriesForManga.intersect(categoriesToDownload).isNotEmpty()
 }
 
