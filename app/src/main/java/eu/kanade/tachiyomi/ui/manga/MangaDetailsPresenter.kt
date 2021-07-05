@@ -30,7 +30,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -427,8 +426,8 @@ class MangaDetailsPresenter(
 
         scope.launch {
             isLoading = true
-            var errorFromNetwork: java.lang.Exception? = null
-            var errorFromMerged: java.lang.Exception? = null
+            var errorFromNetwork: Throwable? = null
+            var errorFromMerged: Throwable? = null
             var error = false
             val thumbnailUrl = manga.thumbnail_url
 
@@ -439,72 +438,89 @@ class MangaDetailsPresenter(
                 return@launch
             }
             XLog.d("begin processing chapters and manga refresh")
-            val nPair = async(Dispatchers.IO) {
-                try {
-                    val result = source.fetchMangaAndChapterDetails(manga)
-                    if (manga.isMerged()) {
-                        try {
-                            val otherChapters = sourceManager.getMergeSource()
-                                .fetchChapters(manga.merge_manga_url!!)
-                            val list = result.second.toMutableList()
-                            list.addAll(otherChapters)
-                            Pair(result.first, list.toList())
-                        } catch (e: Exception) {
-                            XLog.e("error with mergedsource", e)
-                            error = true
-                            errorFromMerged = e
-                            result
-                        }
-                    } else {
-                        result
-                    }
-                } catch (e: Exception) {
-                    XLog.e("error with mangadex", e)
+
+            val deferredManga = async {
+                runCatching {
+                    source.fetchMangaDetails(manga)
+                }.getOrElse { e ->
+                    XLog.e("error with mangadex getting manga", e)
                     error = true
                     errorFromNetwork = e
-                    Pair(null, emptyList<SChapter>())
+                    null
                 }
             }
 
-            val networkPair = nPair.await()
-            val networkManga = networkPair.first
-            val mangaWasInitalized = manga.initialized
-            if (networkManga != null) {
-                // only copy if it had no data
-                manga.copyFrom(networkManga)
-                manga.initialized = true
-
-                // force new cover if it exists
-                if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
-                        .getOrDefault()
-                ) {
-                    coverCache.deleteFromCache(thumbnailUrl)
+            val deferredChapters = async {
+                runCatching {
+                    source.fetchChapterList(manga)
+                }.getOrElse { e ->
+                    XLog.e("error with mangadex getting chapters", e)
+                    error = true
+                    errorFromNetwork = e
+                    emptyList()
                 }
+            }
 
+            val deferredMergedChapters = async {
+                if (manga.isMerged()) {
+                    kotlin.runCatching {
+                        sourceManager.getMergeSource()
+                            .fetchChapters(manga.merge_manga_url!!)
+                    }.getOrElse { e ->
+                        XLog.e("error with mergedsource", e)
+                        error = true
+                        errorFromMerged = e
+                        emptyList()
+                    }
+                } else {
+                    emptyList()
+                }
+            }
 
-                db.insertManga(manga).executeAsBlocking()
+            val networkManga = deferredManga.await()
+            val mangaWasInitalized = manga.initialized
 
-                fetchExternalLinks()
-
+            if (networkManga != null) {
                 launchIO {
-                    val request =
-                        ImageRequest.Builder(preferences.context).data(manga)
-                            .memoryCachePolicy(CachePolicy.DISABLED)
-                            .parameters(
-                                Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true)
-                                    .build()
-                            )
-                            .build()
 
-                    if (Coil.imageLoader(preferences.context).execute(request) is SuccessResult) {
-                        preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
-                        withContext(Dispatchers.Main) {
-                            controller.setPaletteColor()
+                    // only copy if it had no data
+                    manga.copyFrom(networkManga)
+                    manga.initialized = true
+
+                    // force new cover if it exists
+                    if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
+                            .getOrDefault()
+                    ) {
+                        coverCache.deleteFromCache(thumbnailUrl)
+                    }
+
+
+                    db.insertManga(manga).executeOnIO()
+
+                    fetchExternalLinks()
+
+                    launchIO {
+                        val request =
+                            ImageRequest.Builder(preferences.context).data(manga)
+                                .memoryCachePolicy(CachePolicy.DISABLED)
+                                .parameters(
+                                    Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true)
+                                        .build()
+                                )
+                                .build()
+
+                        if (Coil.imageLoader(preferences.context)
+                                .execute(request) is SuccessResult
+                        ) {
+                            preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
+                            withContext(Dispatchers.Main) {
+                                controller.setPaletteColor()
+                            }
                         }
                     }
                 }
             }
-            val finChapters = networkPair.second
+            val finChapters = deferredChapters.await() + deferredMergedChapters.await()
             if (!error) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
@@ -539,21 +555,25 @@ class MangaDetailsPresenter(
             }
             getChapters()
 
-            withContext(Dispatchers.IO) {
-                val allChaps = db.getChapters(manga).executeAsBlocking()
-                updateScanlators(allChaps.map { it.toModel() })
-                manga.scanlator_filter?.let {
-                    filteredScanlators = MdUtil.getScanlators(it).toSet()
+            launchIO {
+                val allChaps = db.getChapters(manga).executeOnIO()
+                launch {
+                    updateScanlators(allChaps.map { it.toModel() })
+                    manga.scanlator_filter?.let {
+                        filteredScanlators = MdUtil.getScanlators(it).toSet()
+                    }
                 }
-                val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
-                if (missingChapters != manga.missing_chapters) {
-                    manga.missing_chapters = missingChapters
-                    db.insertManga(manga).executeOnIO()
+                launch {
+                    val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
+                    if (missingChapters != manga.missing_chapters) {
+                        manga.missing_chapters = missingChapters
+                        db.insertManga(manga).executeOnIO()
+                    }
                 }
                 refreshTracking(false)
                 syncChapterReadStatus()
             }
-            withContext(Dispatchers.IO) {
+            launchIO {
                 getChapters()
                 withContext(Dispatchers.Main) {
                     isLoading = false
@@ -599,7 +619,7 @@ class MangaDetailsPresenter(
         }
     }
 
-    private fun trimException(e: java.lang.Exception): String {
+    private fun trimException(e: Throwable): String {
         return (
             if (e.message?.contains(": ") == true) e.message?.split(": ")?.drop(1)
                 ?.joinToString(": ")

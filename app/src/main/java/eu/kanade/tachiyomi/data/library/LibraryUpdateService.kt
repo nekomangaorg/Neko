@@ -394,6 +394,7 @@ class LibraryUpdateService(
 
                 }
             }
+            
             val readingStatus = deferredReadingStatus.await()
             if (readingStatus.isNotEmpty() && job?.isCancelled == false) {
                 mangaList.map { libraryManga ->
