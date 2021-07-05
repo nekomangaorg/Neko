@@ -354,6 +354,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     binding.appBar.y = 0f
                     nav.translationY = 0f
                     showDLQueueTutorial()
+                    if (router.backstackSize == 1) {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
+                            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+                        }
+                    } else {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+                        }
+                    }
                 }
             }
         )
@@ -750,15 +759,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         if (onRoot) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
-                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-            }
             binding.toolbar.navigationIcon = searchDrawable
             binding.cardToolbar.navigationIcon = searchDrawable
         } else {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-            }
             binding.toolbar.navigationIcon = drawerArrow
             binding.cardToolbar.navigationIcon = drawerArrow
         }
