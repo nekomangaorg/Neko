@@ -31,7 +31,7 @@ class MangaHeaderHolder(
     view: View,
     private val adapter: MangaDetailsAdapter,
     startExpanded: Boolean,
-    isTablet: Boolean = false,
+    private val isTablet: Boolean = false
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     val binding: MangaHeaderItemBinding? = try {
