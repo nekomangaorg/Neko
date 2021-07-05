@@ -333,7 +333,7 @@
         android:focusable="true"
         android:textSize="16sp"
         android:maxLines="3"
-        android:textColor="@color/text_color_secondary"
+        android:textColor="@color/material_on_background_emphasis_medium"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
