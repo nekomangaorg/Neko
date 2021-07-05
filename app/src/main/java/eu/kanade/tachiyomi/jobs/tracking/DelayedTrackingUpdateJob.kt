@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.data.track
+package eu.kanade.tachiyomi.jobs.tracking
 
 import android.content.Context
 import androidx.work.BackoffPolicy
@@ -12,6 +12,7 @@ import androidx.work.WorkerParameters
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import timber.log.Timber
