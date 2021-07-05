@@ -135,6 +135,7 @@
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
         <item name="colorOnHopper">?attr/colorOnAccent</item>
     </style>
+    <style name="Theme.Tachiyomi.Monet"/>
 
     <style name="Theme.Tachiyomi.Monet" />
 

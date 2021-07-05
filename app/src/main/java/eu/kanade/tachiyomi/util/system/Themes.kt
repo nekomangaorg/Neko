@@ -10,12 +10,13 @@ import eu.kanade.tachiyomi.R
 import kotlin.math.roundToInt
 
 @Suppress("unused")
-enum class Themes(
-    @StyleRes val styleRes: Int,
-    val nightMode: Int,
-    @StringRes val nameRes: Int,
-    @StringRes altNameRes: Int? = null,
-) {
+enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int, @StringRes altNameRes: Int? = null) {
+    MONET(
+        R.style.Theme_Tachiyomi_Monet,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.a_brighter_you,
+        R.string.a_calmer_you
+    ),
     DEFAULT(
         R.style.Theme_Tachiyomi,
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
