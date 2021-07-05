@@ -96,31 +96,9 @@ internal class DownloadNotifier(private val context: Context) {
             show(Notifications.ID_DOWNLOAD_CHAPTER_COMPLETE)
         }
 
-            if (download != null && !preferences.hideNotificationContent()) {
-                val title = download.manga.title.chop(15)
-                val quotedTitle = Pattern.quote(title)
-                val chapter = download.chapter.name.replaceFirst(
-                    "$quotedTitle[\\s]*[-]*[\\s]*"
-                        .toRegex(RegexOption.IGNORE_CASE),
-                    ""
-                )
-                setContentTitle("$title - $chapter".chop(30))
-                setContentText(
-                    context.getString(R.string.downloading)
-                )
-            } else {
-                setContentTitle(
-                    context.getString(
-                        R.string.downloading
-                    )
-                )
-                setContentText(null)
-            }
-            setProgress(0, 0, true)
-            setStyle(null)
-        }
-        // Displays the progress bar on notification
-        notification.show()
+        // Reset states to default
+        errorThrown = false
+        isDownloading = false
     }
 
     /**
@@ -235,7 +213,7 @@ internal class DownloadNotifier(private val context: Context) {
     fun onError(
         error: String? = null,
         chapter: String? = null,
-        customIntent: Intent? = null
+        customIntent: Intent? = null,
     ) {
         // Create notification
         with(errorNotificationBuilder) {

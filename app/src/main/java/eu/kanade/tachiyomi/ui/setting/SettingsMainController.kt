@@ -64,8 +64,8 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsTrackingController()) }
         }
         preference {
-            iconRes = R.drawable.ic_backup_restore_24dp
-            iconTint = tintColor
+            iconDrawable = MaterialDesignDx.Icon.gmf_settings_backup_restore.create(context,
+                colorAttr = R.attr.colorOnSurface)
             titleRes = R.string.backup_and_restore
             onClick { navigateTo(SettingsBackupController()) }
         }

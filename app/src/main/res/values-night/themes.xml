@@ -30,6 +30,8 @@
         <item name="colorPrimaryVariant">@color/secondaryChocolateStrawberries</item>
         <item name="android:colorBackground">@color/backgroundChocolateStrawberries</item>
         <item name="colorSecondary">@color/backgroundChocolateStrawberries</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime">
@@ -44,6 +46,8 @@
         <item name="android:colorBackground">@color/backgroundLime</item>
         <item name="colorSurface">@color/colorAccentLimeText</item>
         <item name="colorOnAccent">@color/colorOnLime</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
 
     <style name="Theme.Tachiyomi.Outrun">
@@ -59,6 +63,7 @@
         <item name="colorSurface">@color/outrun_black</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/outrun_black</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
     </style>
 
 

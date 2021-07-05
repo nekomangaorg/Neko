@@ -63,7 +63,9 @@ class LibraryUpdateNotifier(private val context: Context) {
             setOngoing(true)
             setOnlyAlertOnce(true)
             color = ContextCompat.getColor(context, R.color.colorAccent)
-            addAction(R.drawable.ic_close_24dp, context.getString(android.R.string.cancel), cancelIntent)
+            addAction(R.drawable.ic_close_24dp,
+                context.getString(android.R.string.cancel),
+                cancelIntent)
         }
     }
 
@@ -74,7 +76,7 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param current the current progress.
      * @param total the total progress.
      */
-    fun showProgressNotification(manga: Manga, current: Int, total: Int) {
+    fun showProgressNotification(manga: SManga, current: Int, total: Int) {
         val title = if (preferences.hideNotificationContent()) {
             context.getString(R.string.checking_for_new_chapters)
         } else {
@@ -107,7 +109,9 @@ class LibraryUpdateNotifier(private val context: Context) {
                 if (uri == null) {
                     setContentTitle("502: MangaDex appears to be down")
                 } else {
-                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed, errors.size, errors.size))
+                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed,
+                        errors.size,
+                        errors.size))
                     addAction(
                         R.drawable.nnf_ic_file_folder,
                         context.getString(R.string.view_all_errors),
@@ -150,7 +154,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                     notifications.add(
                         Pair(
                             context.notification(Notifications.CHANNEL_NEW_CHAPTERS) {
-                            setSmallIcon(R.drawable.ic_neko_notification)
+                                setSmallIcon(R.drawable.ic_neko_notification)
                                 try {
                                     val request = ImageRequest.Builder(context).data(manga)
                                         .parameters(

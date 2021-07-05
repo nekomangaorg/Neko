@@ -7,26 +7,35 @@ import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
+import uy.kohesive.injekt.injectLazy
+import java.io.File
+import java.util.concurrent.TimeUnit
 
 internal class BackupNotifier(private val context: Context) {
 
-    private val progressNotificationBuilder = context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS) {
-        setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-        setSmallIcon(R.drawable.ic_neko_notification)
-        setAutoCancel(false)
-        color = context.contextCompatColor(R.color.neko_green_darker)
-        setOngoing(true)
-    }
+    val preferences: PreferencesHelper by injectLazy()
 
-    private val completeNotificationBuilder = context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
-        setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
-        setSmallIcon(R.drawable.ic_neko_notification)
-        color = context.contextCompatColor(R.color.neko_green_darker)
-        setAutoCancel(false)
-    }
+    private val progressNotificationBuilder =
+        context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_PROGRESS) {
+            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_neko_notification)
+            setAutoCancel(false)
+            color = context.contextCompatColor(R.color.neko_green_darker)
+            setOngoing(true)
+        }
+
+    private val completeNotificationBuilder =
+        context.notificationBuilder(Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE) {
+            setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
+            setSmallIcon(R.drawable.ic_neko_notification)
+            color = context.contextCompatColor(R.color.neko_green_darker)
+            setAutoCancel(false)
+        }
 
     private fun NotificationCompat.Builder.show(id: Int) {
         context.notificationManager.notify(id, build())
@@ -69,14 +78,20 @@ internal class BackupNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_share_24dp,
                 context.getString(R.string.share),
-                NotificationReceiver.shareBackupPendingBroadcast(context, unifile.uri, Notifications.ID_BACKUP_COMPLETE)
+                NotificationReceiver.shareBackupPendingBroadcast(context,
+                    unifile.uri,
+                    Notifications.ID_BACKUP_COMPLETE)
             )
 
             show(Notifications.ID_BACKUP_COMPLETE)
         }
     }
 
-    fun showRestoreProgress(content: String = "", progress: Int = 0, maxAmount: Int = 100): NotificationCompat.Builder {
+    fun showRestoreProgress(
+        content: String = "",
+        progress: Int = 0,
+        maxAmount: Int = 100,
+    ): NotificationCompat.Builder {
         val builder = with(progressNotificationBuilder) {
             setContentTitle(context.getString(R.string.restoring_backup))
 
@@ -93,7 +108,8 @@ internal class BackupNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.stop),
-                NotificationReceiver.cancelRestorePendingBroadcast(context, Notifications.ID_RESTORE_PROGRESS)
+                NotificationReceiver.cancelRestorePendingBroadcast(context,
+                    Notifications.ID_RESTORE_PROGRESS)
             )
         }
 
@@ -126,7 +142,10 @@ internal class BackupNotifier(private val context: Context) {
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.restore_completed))
-            setContentText(context.resources.getQuantityString(R.plurals.restore_completed_message, errorCount, timeString, errorCount))
+            setContentText(context.resources.getQuantityString(R.plurals.restore_completed_message,
+                errorCount,
+                timeString,
+                errorCount))
 
             // Clear old actions if they exist
             clearActions()
