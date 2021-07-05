@@ -100,7 +100,6 @@
     <color name="neko_variant">#2E2157</color>
 
 
-    <color name="mangadex_orange">#F79421</color>
     <color name="neko_green">#3DDA83</color>
     <color name="neko_green_complementary">#aa206c</color>
     <color name="neko_green_darker">#20aa5e</color>
@@ -121,7 +120,9 @@
     <color name="backgroundChocolateStrawberries">#1a1716</color>
     <color name="secondaryChocolateStrawberries">#211b19</color>
 
-    <!-- Yotsuba Theme -->
+    <!-- MangaDex Theme -->
+    <color name="colorAccentMangaDex">#FF6740</color>
+
     <color name="colorAccentYotsuba">#FC8C5C</color>
     <color name="colorAccentYotsubaText">#d35b27</color>
 </resources>

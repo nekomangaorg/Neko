@@ -9,6 +9,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import kotlinx.coroutines.Dispatchers
@@ -22,6 +23,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result {
+        XLog.d("Starting Delayed Tracking Update Job")
         val preferences = Injekt.get<PreferencesHelper>()
         val db = Injekt.get<DatabaseHelper>()
         val trackManager = Injekt.get<TrackManager>()

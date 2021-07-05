@@ -898,24 +898,26 @@ class ReaderPresenter(
             trackList.map { track ->
                 val service = trackManager.getService(track.sync_id)
                 if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
-                        if (!preferences.context.isOnline()) {
-                            val mangaId = manga.id ?: return@map
-                            val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
-                            val currentTracking = trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
-                            trackings.remove(currentTracking)
-                            trackings.add("$mangaId:${track.sync_id}:$chapterRead")
-                            preferences.trackingsToAddOnline().set(trackings)
-                            DelayedTrackingUpdateJob.setupTask(preferences.context)
-                        } else {
-                    try {
-                        track.last_chapter_read = chapterRead
-                        service.update(track, true)
-                        db.insertTrack(track).executeAsBlocking()
-                    } catch (e: Exception) {
-                        XLog.e(e)
+                    if (!preferences.context.isOnline()) {
+                        XLog.d("offline adding tracker info to update later")
+                        val mangaId = manga.id ?: return@map
+                        val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
+                        val currentTracking =
+                            trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
+                        trackings.remove(currentTracking)
+                        trackings.add("$mangaId:${track.sync_id}:$chapterRead")
+                        preferences.trackingsToAddOnline().set(trackings)
+                        DelayedTrackingUpdateJob.setupTask(preferences.context)
+                    } else {
+                        try {
+                            track.last_chapter_read = chapterRead
+                            service.update(track, true)
+                            db.insertTrack(track).executeAsBlocking()
+                        } catch (e: Exception) {
+                            XLog.e(e)
+                        }
                     }
                 }
-            }
 
             }
         }
