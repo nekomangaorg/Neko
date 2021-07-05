@@ -56,8 +56,8 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         selectExtensionLight = fastAdapterLight.getSelectExtension().setThemeListener()
         selectExtensionDark = fastAdapterDark.getSelectExtension().setThemeListener()
         val enumConstants = Themes.values()
-        itemAdapterLight.set(enumConstants.filter { it.nightMode == AppCompatDelegate.MODE_NIGHT_NO }.map(::ThemeItem))
-        itemAdapterDark.set(enumConstants.filter { it.nightMode == AppCompatDelegate.MODE_NIGHT_YES }.map(::ThemeItem))
+        itemAdapterLight.set(enumConstants.filter { !it.isDarkTheme }.map(::ThemeItem))
+        itemAdapterDark.set(enumConstants.filter { it.isDarkTheme }.map(::ThemeItem))
         isSelectable = false
     }
 
@@ -66,7 +66,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         multiSelect = true
         selectionListener = object : ISelectionListener<ThemeItem> {
             override fun onSelectionChanged(item: ThemeItem, selected: Boolean) {
-                if (item.theme.nightMode == AppCompatDelegate.MODE_NIGHT_YES) {
+                if (item.theme.isDarkTheme) {
                     preferences.darkTheme().set(item.theme)
                 } else {
                     preferences.lightTheme().set(item.theme)
@@ -192,9 +192,9 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
                 if (binding.checkbox.isVisible) {
                     val themeMatchesApp = if (context.isInNightMode()) {
-                        item.theme.nightMode == AppCompatDelegate.MODE_NIGHT_YES
+                        item.theme.isDarkTheme
                     } else {
-                        item.theme.nightMode == AppCompatDelegate.MODE_NIGHT_NO
+                        !item.theme.isDarkTheme
                     }
                     binding.themeSelected.alpha = if (themeMatchesApp) 1f else 0.5f
                     binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
