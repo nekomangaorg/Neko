@@ -253,7 +253,7 @@ dependencies {
 
     // Tests
     testImplementation("junit:junit:4.13.2")
-    testImplementation("org.assertj:assertj-core:3.16.1")
+    testImplementation("org.assertj:assertj-core:3.20.2")
     testImplementation("org.mockito:mockito-core:1.10.19")
 
     val roboElectricVersion = "3.1.4"
