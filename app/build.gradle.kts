@@ -255,7 +255,7 @@ dependencies {
     testImplementation("org.assertj:assertj-core:3.20.2")
     testImplementation("org.mockito:mockito-core:1.10.19")
 
-    val roboElectricVersion = "3.1.4"
+    val roboElectricVersion = "3.3.2"
     testImplementation("org.robolectric:robolectric:$roboElectricVersion")
     testImplementation("org.robolectric:shadows-multidex:$roboElectricVersion")
     testImplementation("org.robolectric:shadows-play-services:$roboElectricVersion")
