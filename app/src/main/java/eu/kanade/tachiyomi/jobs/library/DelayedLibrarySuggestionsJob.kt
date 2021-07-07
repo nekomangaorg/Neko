@@ -27,16 +27,17 @@ class DelayedLibrarySuggestionsJob(context: Context, workerParams: WorkerParamet
     companion object {
         private const val TAG = "DelayedLibrarySuggestions"
 
-        fun setupTask(enabled: Boolean) {
+        fun setupTask(context: Context, enabled: Boolean) {
             if (enabled) {
                 val request = OneTimeWorkRequestBuilder<DelayedLibrarySuggestionsJob>()
                     .setInitialDelay(1, TimeUnit.DAYS)
                     .addTag(TAG)
                     .build()
 
-                WorkManager.getInstance().enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+                WorkManager.getInstance(context)
+                    .enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
             } else {
-                WorkManager.getInstance().cancelAllWorkByTag(TAG)
+                WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
             }
         }
     }

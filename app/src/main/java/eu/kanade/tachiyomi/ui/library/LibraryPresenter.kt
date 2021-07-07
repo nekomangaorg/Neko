@@ -116,7 +116,7 @@ class LibraryPresenter(
         lastLibraryItems = null
         getLibrary()
         if (preferences.showLibrarySearchSuggestions().isNotSet()) {
-            DelayedLibrarySuggestionsJob.setupTask(true)
+            DelayedLibrarySuggestionsJob.setupTask(context, true)
         } else if (preferences.showLibrarySearchSuggestions().get() &&
             Date().time >= preferences.lastLibrarySuggestion().get() + TimeUnit.HOURS.toMillis(2)
         ) {
