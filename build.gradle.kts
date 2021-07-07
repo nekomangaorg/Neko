@@ -1,6 +1,5 @@
 plugins {
     id("org.jmailen.kotlinter") version "3.4.5"
-    id("com.github.ben-manes.versions") version "0.29.0"
     id("org.jetbrains.kotlin.android") version "1.5.10" apply false
 }
 allprojects {
@@ -38,27 +37,6 @@ buildscript {
     }
 }
 
-tasks.named("dependencyUpdates",
-    com.github.benmanes.gradle.versions.updates.DependencyUpdatesTask::class.java).configure {
-    rejectVersionIf {
-        isNonStable(candidate.version)
-    }
-    // optional parameters
-    checkForGradleUpdate = true
-    outputFormatter = "json"
-    outputDir = "build/dependencyUpdates"
-    reportfileName = "report"
-}
-
-fun isNonStable(version: String): Boolean {
-    val stableKeyword =
-        listOf("RELEASE", "FINAL", "GA").any {
-            version.toUpperCase(java.util.Locale.ROOT).contains(it)
-        }
-    val regex = "^[0-9,.v-]+(-r)?$".toRegex()
-    val isStable = stableKeyword || regex.matches(version)
-    return isStable.not()
-}
 
 tasks.register("clean", Delete::class) {
     delete(rootProject.buildDir)
