@@ -224,7 +224,7 @@ dependencies {
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
-    val materialDialogVersion = "3.1.1"
+    val materialDialogVersion = "3.3.0"
     implementation("com.afollestad.material-dialogs:core:$materialDialogVersion")
     implementation("com.afollestad.material-dialogs:input:$materialDialogVersion")
     implementation("com.afollestad.material-dialogs:datetime:$materialDialogVersion")
