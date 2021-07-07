@@ -235,7 +235,7 @@ dependencies {
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.tachiyomiorg:DirectionalViewPager:1.0.0")
     implementation("com.github.florent37:viewtooltip:1.2.2")
-    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.0")
+    implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.2")
     implementation("me.saket.cascade:cascade:1.3.0")
 
     // Conductor
