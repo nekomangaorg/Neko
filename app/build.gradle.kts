@@ -184,7 +184,7 @@ dependencies {
     // Icons
     implementation("com.mikepenz:iconics-core:5.2.8")
     implementation("com.mikepenz:iconics-views:5.2.8")
-    implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:5.8.55.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
 
     // Job scheduling
