@@ -199,7 +199,7 @@ dependencies {
     implementation("io.requery:sqlite-android:3.31.0")
 
     // Model View Presenter
-    val nucleusVersion = "3.0.0"
+    val nucleusVersion = "6.0.0"
     implementation("info.android15.nucleus:nucleus:$nucleusVersion")
     implementation("info.android15.nucleus:nucleus-support-v7:$nucleusVersion")
 
