@@ -39,7 +39,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
-            iconDrawable = CommunityMaterial.Icon.cmd_google_chrome.create(context,
+            iconDrawable = CommunityMaterial.Icon2.cmd_google_chrome.create(context,
                 colorAttr = R.attr.colorOnSurface)
             titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }

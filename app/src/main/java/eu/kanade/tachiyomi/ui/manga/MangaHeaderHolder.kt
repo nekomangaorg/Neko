@@ -242,13 +242,13 @@ class MangaHeaderHolder(
             isVisible = (manga.status != SManga.COMPLETED)
             val iconics = when (manga.isMerged()) {
                 true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_decagram)
-                false -> context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_source_merge)
+                false -> context.iconicsDrawableLarge(CommunityMaterial.Icon3.cmd_source_merge)
             }
             setImageDrawable(iconics)
         }
 
         with(binding.webviewButton) {
-            setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_web))
+            setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon3.cmd_web))
         }
         with(binding.shareButton) {
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_share))
