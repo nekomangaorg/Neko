@@ -1,5 +1,5 @@
 plugins {
-    id("org.jmailen.kotlinter") version "3.4.4"
+    id("org.jmailen.kotlinter") version "3.4.5"
     id("com.github.ben-manes.versions") version "0.29.0"
     id("org.jetbrains.kotlin.android") version "1.5.10" apply false
 }
