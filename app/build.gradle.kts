@@ -168,7 +168,7 @@ dependencies {
     // JSON
     implementation("com.google.code.gson:gson:2.8.7")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
-    implementation("com.squareup.moshi:moshi:1.9.3")
+    implementation("com.squareup.moshi:moshi:1.12.0")
 
     // Serialization
     val kotlinSerialization = "1.2.1"
