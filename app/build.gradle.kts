@@ -213,7 +213,7 @@ dependencies {
     implementation("io.coil-kt:coil-svg:$coilVersion")
 
     // Logging
-    implementation("com.elvishew:xlog:1.8.0")
+    implementation("com.elvishew:xlog:1.10.1")
 
     // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
