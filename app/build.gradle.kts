@@ -153,7 +153,7 @@ dependencies {
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
     // hyperion
-    val hyperionVersion = "0.9.31"
+    val hyperionVersion = "0.9.33"
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
