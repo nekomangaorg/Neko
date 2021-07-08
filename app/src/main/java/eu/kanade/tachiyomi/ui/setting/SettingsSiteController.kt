@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdLang
@@ -34,7 +33,7 @@ class SettingsSiteController :
     MangadexLoginDialog.Listener,
     MangadexLogoutDialog.Listener {
 
-    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() as HttpSource }
+    private val mdex by lazy { Injekt.get<SourceManager>().getMangadex() }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.site_specific_settings
@@ -161,7 +160,7 @@ class SettingsSiteController :
                                 db.deleteTrackForManga(it, trackManager.mdList)
                                     .executeAsBlocking()
                             }
-                            
+
                         }
                     }
                 }
