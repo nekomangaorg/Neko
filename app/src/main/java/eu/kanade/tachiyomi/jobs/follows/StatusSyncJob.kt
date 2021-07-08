@@ -13,6 +13,7 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationBuilder
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
@@ -48,17 +49,11 @@ class StatusSyncJob(
             setForeground(foregroundInfo)
         }
         try {
-            val ids = inputData.getString(SYNC_TO_MANGADEX)
-            when (ids) {
+            when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null, "0" -> {
-                    val total = followsSyncService.toMangaDex(::updateNotificationProgress,
+                    followsSyncService.toMangaDex(::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        ids)
-                    withUIContext {
-                        applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
-                            total),
-                            Toast.LENGTH_LONG)
-                    }
+                        null)
                 }
 
                 "1" -> {
@@ -71,13 +66,8 @@ class StatusSyncJob(
                     }
                 }
                 else -> {
-                    val total = followsSyncService.toMangaDex(::updateNotificationProgress,
+                    followsSyncService.toMangaDex(::updateNotificationProgress,
                         ::completeNotificationToDex, ids)
-                    withUIContext {
-                        applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
-                            total),
-                            Toast.LENGTH_LONG)
-                    }
                 }
             }
 
@@ -104,8 +94,13 @@ class StatusSyncJob(
         )
     }
 
-    private fun completeNotificationToDex() {
+    private fun completeNotificationToDex(total: Int) {
         completeNotification(R.string.sync_follows_complete)
+        launchUI {
+            applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
+                total),
+                Toast.LENGTH_LONG)
+        }
     }
 
     private fun completeNotificationFromDex() {
@@ -126,7 +121,7 @@ class StatusSyncJob(
 
         private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
 
-        const val entireLibraryToDex = "0"
+        const val entireLibraryToDex: String = "0"
         const val entireFollowsFromDex = "1"
 
         fun doWorkNow(context: Context, syncToMangadex: String) {

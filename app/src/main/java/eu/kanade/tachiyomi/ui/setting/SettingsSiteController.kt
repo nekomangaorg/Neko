@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
-import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -156,14 +155,13 @@ class SettingsSiteController :
                         val followsHandler = Injekt.get<FollowsHandler>()
                         val trackManager: TrackManager = Injekt.get()
                         db.getLibraryMangaList().executeAsBlocking().forEach {
-                            launch {
-                                followsHandler.updateFollowStatus(MdUtil.getMangaId(it.url),
-                                    FollowStatus.UNFOLLOWED)
-                                db.getMDList(it).executeOnIO()?.let { _ ->
-                                    db.deleteTrackForManga(it, trackManager.mdList)
-
-                                }
+                            followsHandler.updateFollowStatus(MdUtil.getMangaId(it.url),
+                                FollowStatus.UNFOLLOWED)
+                            db.getMDList(it).executeOnIO()?.let { _ ->
+                                db.deleteTrackForManga(it, trackManager.mdList)
+                                    .executeAsBlocking()
                             }
+                            
                         }
                     }
                 }
