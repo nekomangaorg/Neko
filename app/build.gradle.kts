@@ -281,6 +281,7 @@ dependencies {
 
 
     implementation("com.mikepenz:aboutlibraries:8.9.0")
+    //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
 

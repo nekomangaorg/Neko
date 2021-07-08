@@ -42,7 +42,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
@@ -368,14 +367,6 @@ class LibraryUpdateService(
 
         return withContext(Dispatchers.IO) {
 
-            val deferredReadingStatus = async {
-                if (sourceManager.getMangadex().isLogged()) {
-                    statusHandler.fetchReadingStatusForAllManga()
-                } else {
-                    emptyMap()
-                }
-            }
-
             mangaList.map { libraryManga ->
                 val shouldDownload =
                     downloadNew && (categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
@@ -383,36 +374,39 @@ class LibraryUpdateService(
                         .any { (it.id ?: -1) in categoriesToDownload })
 
                 logTimeTaken("library manga ${libraryManga.title}") {
-                    val downloads =
-                        updateMangaChapters(libraryManga, shouldDownload)
-
+                    XLog.d("Starting ${libraryManga.title}")
                     notifier.showProgressNotification(libraryManga,
                         count.andIncrement,
                         mangaToUpdate.size)
-
+                    val downloads =
+                        updateMangaChapters(libraryManga, shouldDownload)
+                    XLog.d("Finishing ${libraryManga.title}")
                     if (downloads) hasDownloads.set(true)
 
                 }
             }
-            
-            val readingStatus = deferredReadingStatus.await()
-            if (readingStatus.isNotEmpty() && job?.isCancelled == false) {
-                mangaList.map { libraryManga ->
-                    async {
+
+            if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
+                val readingStatus = statusHandler.fetchReadingStatusForAllManga()
+                if (readingStatus.isNotEmpty()) {
+                    XLog.d("Updating follow status")
+                    mangaList.map { libraryManga ->
                         runCatching {
                             db.getTracks(libraryManga).executeOnIO()
                                 .toMutableList()
                                 .firstOrNull { it.sync_id == trackManager.mdList.id }
                                 ?.apply {
                                     val result = readingStatus[MdUtil.getMangaId(libraryManga.url)]
-                                    this.status = FollowStatus.fromDex(result).int
-                                    db.insertTrack(this).executeOnIO()
+                                    if (this.status != FollowStatus.fromDex(result).int) {
+                                        this.status = FollowStatus.fromDex(result).int
+                                        db.insertTrack(this).executeOnIO()
+                                    }
                                 }
                         }.onFailure {
                             XLog.e("Error refreshing tracking", it)
                         }
                     }
-                }.awaitAll()
+                }
             }
 
             mangaToUpdateMap[source] = emptyList()
@@ -426,10 +420,10 @@ class LibraryUpdateService(
     ):
         Boolean {
         return withContext(Dispatchers.IO) {
-            try {
+            runCatching {
                 var hasDownloads = false
                 if (job?.isCancelled == true) {
-                    return@withContext false
+                    return@runCatching false
                 }
                 var errorFromMerged = false
 
@@ -444,10 +438,11 @@ class LibraryUpdateService(
                                 .fetchChapters(manga.merge_manga_url!!)
                             false -> emptyList()
                         }
-                    }.onFailure { e ->
+                    }.getOrElse { e ->
                         XLog.e("Error with mergedsource", e)
                         errorFromMerged = true
-                    }.getOrElse { emptyList() }
+                        emptyList()
+                    }
                 }
 
                 val details = detailsDelayed.await()
@@ -492,8 +487,6 @@ class LibraryUpdateService(
                     val newChapters =
                         syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
 
-                    manga.missing_chapters = updateMissingChapterCount(manga).missing_chapters
-
                     if (newChapters.first.isNotEmpty()) {
                         if (shouldDownload) {
                             var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
@@ -536,9 +529,12 @@ class LibraryUpdateService(
                     if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
                         manga
                     )
-                } else {
+                }
+
+                launch {
                     updateMissingChapterCount(manga)
                 }
+
                 // no reason to do this when using cache
                 /*if (preferences.markChaptersReadFromMDList() && preferences.useCacheSource().not()) {
                 tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
@@ -558,13 +554,13 @@ class LibraryUpdateService(
                     }
                 }
             }*/
-                return@withContext hasDownloads
-            } catch (e: Exception) {
+                hasDownloads
+            }.getOrElse { e ->
                 if (e !is CancellationException) {
                     failedUpdates[manga] = e.message ?: "unknown error"
                     XLog.e("Failed updating: ${manga.title}", e)
                 }
-                return@withContext false
+                false
             }
         }
     }
@@ -583,17 +579,6 @@ class LibraryUpdateService(
         // We don't want to start downloading while the library is updating, because websites
         // may don't like it and they could ban the user.
         downloadManager.downloadChapters(manga, chapters, false)
-    }
-
-    /**
-     * Shows the notification containing the currently updating manga and the progress.
-     *
-     * @param manga the manga that's being updated.
-     * @param current the current progress.
-     * @param total the total progress.
-     */
-    private fun showProgressNotification(manga: SManga, current: Int, total: Int) {
-        notifier.showProgressNotification(manga, current, total)
     }
 
     /**
