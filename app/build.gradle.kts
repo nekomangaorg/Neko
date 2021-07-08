@@ -291,6 +291,7 @@ tasks {
             "-Xopt-in=kotlin.Experimental",
             "-Xopt-in=kotlin.RequiresOptIn",
             "-Xopt-in=kotlin.time.ExperimentalTime",
+            "-Xopt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
             "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
             "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",
