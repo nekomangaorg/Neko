@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CancellationException
@@ -387,23 +388,26 @@ class LibraryUpdateService(
             }
 
             if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
-                val readingStatus = statusHandler.fetchReadingStatusForAllManga()
-                if (readingStatus.isNotEmpty()) {
-                    XLog.d("Updating follow status")
-                    mangaList.map { libraryManga ->
-                        runCatching {
-                            db.getTracks(libraryManga).executeOnIO()
-                                .toMutableList()
-                                .firstOrNull { it.sync_id == trackManager.mdList.id }
-                                ?.apply {
-                                    val result = readingStatus[MdUtil.getMangaId(libraryManga.url)]
-                                    if (this.status != FollowStatus.fromDex(result).int) {
-                                        this.status = FollowStatus.fromDex(result).int
-                                        db.insertTrack(this).executeOnIO()
+                GlobalScope.launchIO {
+                    val readingStatus = statusHandler.fetchReadingStatusForAllManga()
+                    if (readingStatus.isNotEmpty()) {
+                        XLog.d("Updating follow status")
+                        mangaList.map { libraryManga ->
+                            runCatching {
+                                db.getTracks(libraryManga).executeOnIO()
+                                    .toMutableList()
+                                    .firstOrNull { it.sync_id == trackManager.mdList.id }
+                                    ?.apply {
+                                        val result =
+                                            readingStatus[MdUtil.getMangaId(libraryManga.url)]
+                                        if (this.status != FollowStatus.fromDex(result).int) {
+                                            this.status = FollowStatus.fromDex(result).int
+                                            db.insertTrack(this).executeOnIO()
+                                        }
                                     }
-                                }
-                        }.onFailure {
-                            XLog.e("Error refreshing tracking", it)
+                            }.onFailure {
+                                XLog.e("Error refreshing tracking", it)
+                            }
                         }
                     }
                 }
