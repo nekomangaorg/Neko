@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
+import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
@@ -48,6 +49,8 @@ open class MangaDex : HttpSource() {
 
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 
+    private val latestChapterHandler: LatestChapterHandler by injectLazy()
+
     suspend fun updateFollowStatus(mangaID: String, followStatus: FollowStatus): Boolean {
         return followsHandler.updateFollowStatus(mangaID, followStatus)
     }
@@ -67,6 +70,10 @@ open class MangaDex : HttpSource() {
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return searchHandler.search(page, query, filters)
+    }
+
+    suspend fun latestChapters(page: Int): MangaListPage {
+        return latestChapterHandler.getPage(page)
     }
 
     suspend fun fetchFollowList(): MangaListPage {

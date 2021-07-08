@@ -37,6 +37,14 @@ interface MangaDexService : MangaDexImageService {
     ): Response<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
+    @GET("${MdApi.chapter}?order[publishAt]=desc")
+    suspend fun latestChapters(
+        @Query("limit") limit: Int,
+        @Query("offset") offset: Int,
+        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+    ): Response<ChapterListDto>
+
+    @Headers("Cache-Control: no-cache")
     @GET("${MdApi.chapter}/{id}")
     suspend fun viewChapter(@Path("id") id: String): Response<ChapterDto>
 

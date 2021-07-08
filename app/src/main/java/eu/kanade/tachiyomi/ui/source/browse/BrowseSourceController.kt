@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.source.LatestSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
@@ -129,7 +130,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        
+
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
@@ -360,6 +361,13 @@ open class BrowseSourceController(bundle: Bundle) :
                 router.pushController(FollowsController().withFadeTransaction())
             }
         }
+
+        sheet.onLatestChapterClicked = {
+            sheet.dismiss()
+            adapter?.clear()
+            router.pushController(LatestSourceController().withFadeTransaction())
+        }
+
         sheet.show()
     }
 

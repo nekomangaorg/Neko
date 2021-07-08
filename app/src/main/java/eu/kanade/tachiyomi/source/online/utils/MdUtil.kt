@@ -36,11 +36,17 @@ class MdUtil {
         const val similarCacheMangaList = "https://api.similarmanga.com/manga/"
 
         const val mangaLimit = 20
+        const val latestChapterLimit = 100
 
         /**
          * Get the manga offset pages are 1 based, so subtract 1
          */
         fun getMangaListOffset(page: Int): String = (mangaLimit * (page - 1)).toString()
+
+        /**
+         * Get the latest chapter  offset pages are 1 based, so subtract 1
+         */
+        fun getLatestChapterListOffset(page: Int): Int = (latestChapterLimit * (page - 1))
 
         val jsonParser =
             Json {

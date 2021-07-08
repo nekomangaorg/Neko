@@ -35,6 +35,8 @@ class SourceFilterSheet(val activity: Activity) :
 
     var onFollowsClicked = {}
 
+    var onLatestChapterClicked = {}
+
     override var recyclerView: RecyclerView? = binding.filtersRecycler
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -45,6 +47,7 @@ class SourceFilterSheet(val activity: Activity) :
         binding.resetBtn.setOnClickListener { onResetClicked() }
         binding.randomMangaBtn.setOnClickListener { onRandomClicked() }
         binding.followsBtn.setOnClickListener { onFollowsClicked() }
+        binding.latestChaptersBtn.setOnClickListener { onLatestChapterClicked() }
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
             OnGlobalLayoutListener {
