@@ -42,6 +42,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -292,6 +293,9 @@ class LibraryUpdateService(
         if (target == Target.CHAPTERS) {
             listener?.onUpdateManga(LibraryManga())
         }
+
+
+
         job = GlobalScope.launch(handler) {
             when (target) {
                 Target.CHAPTERS -> updateChaptersJob(mangaToAdd)
@@ -365,8 +369,9 @@ class LibraryUpdateService(
         mangaList ?: return false
 
         val hasDownloads = AtomicBoolean(false)
+        val superVisorJob = SupervisorJob()
 
-        return withContext(Dispatchers.IO) {
+        return withContext(Dispatchers.IO + superVisorJob) {
 
             mangaList.map { libraryManga ->
                 val shouldDownload =
@@ -389,26 +394,30 @@ class LibraryUpdateService(
 
             if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
                 GlobalScope.launchIO {
-                    val readingStatus = statusHandler.fetchReadingStatusForAllManga()
-                    if (readingStatus.isNotEmpty()) {
-                        XLog.d("Updating follow status")
-                        mangaList.map { libraryManga ->
-                            runCatching {
-                                db.getTracks(libraryManga).executeOnIO()
-                                    .toMutableList()
-                                    .firstOrNull { it.sync_id == trackManager.mdList.id }
-                                    ?.apply {
-                                        val result =
-                                            readingStatus[MdUtil.getMangaId(libraryManga.url)]
-                                        if (this.status != FollowStatus.fromDex(result).int) {
-                                            this.status = FollowStatus.fromDex(result).int
-                                            db.insertTrack(this).executeOnIO()
+                    runCatching {
+                        val readingStatus = statusHandler.fetchReadingStatusForAllManga()
+                        if (readingStatus.isNotEmpty()) {
+                            XLog.d("Updating follow statuses")
+                            mangaList.map { libraryManga ->
+                                runCatching {
+                                    db.getTracks(libraryManga).executeOnIO()
+                                        .toMutableList()
+                                        .firstOrNull { it.sync_id == trackManager.mdList.id }
+                                        ?.apply {
+                                            val result =
+                                                readingStatus[MdUtil.getMangaId(libraryManga.url)]
+                                            if (this.status != FollowStatus.fromDex(result).int) {
+                                                this.status = FollowStatus.fromDex(result).int
+                                                db.insertTrack(this).executeOnIO()
+                                            }
                                         }
-                                    }
-                            }.onFailure {
-                                XLog.e("Error refreshing tracking", it)
+                                }.onFailure {
+                                    XLog.e("Error refreshing tracking", it)
+                                }
                             }
                         }
+                    }.onFailure {
+                        XLog.e("error getting reading status", it)
                     }
                 }
             }
