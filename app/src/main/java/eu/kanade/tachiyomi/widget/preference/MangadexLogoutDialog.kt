@@ -32,18 +32,18 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
             .positiveButton(R.string.logout) {
                 launchNow {
                     runCatching {
-                        val loggedOut = source.logout()
+                        // val loggedOut = source.logout()
 
-                        if (loggedOut.loggedOut) {
-                            launch {
-                                preferences.setSourceCredentials(source, "", "")
-                                preferences.setTokens("", "")
-                            }
-                            activity?.toast(R.string.successfully_logged_out)
-                            (targetController as? Listener)?.siteLogoutDialogClosed(source)
-                        } else {
-                            activity?.toast(loggedOut.error)
+                        // if (loggedOut.loggedOut) {
+                        launch {
+                            preferences.setSourceCredentials(source, "", "")
+                            preferences.setTokens("", "")
                         }
+                        activity?.toast(R.string.successfully_logged_out)
+                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
+                        /* } else {
+                             activity?.toast(loggedOut.error)
+                         }*/
                     }.onFailure { e ->
                         XLog.e("error logging out", e)
                         activity?.toast(R.string.could_not_log_in)
