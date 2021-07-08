@@ -128,12 +128,13 @@ class SettingsGeneralController : SettingsController() {
                 lastScrollPostionLight = lastThemeXLight
                 lastScrollPostionDark = lastThemeXDark
                 summary = if (preferences.nightMode()
-                    .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+                        .get() == AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
                 ) {
                     val lightTheme = preferences.lightTheme().get().nameRes
                     val darkTheme = preferences.darkTheme().get().nameRes
                     val nightMode = context.isInNightMode()
-                    mutableListOf(context.getString(lightTheme), context.getString(darkTheme)).apply {
+                    mutableListOf(context.getString(lightTheme),
+                        context.getString(darkTheme)).apply {
                         if (nightMode) reverse()
                     }.joinToString(" / ")
                 } else {
@@ -193,13 +194,7 @@ class SettingsGeneralController : SettingsController() {
                 summaryRes = R.string.includes_recently_read_updated_added
                 defaultValue = true
             }
-
-            switchPreference {
-                key = Keys.showSourcesInShortcuts
-                titleRes = R.string.show_recent_sources
-                defaultValue = true
-            }
-
+            
             switchPreference {
                 key = Keys.openChapterInShortcuts
                 titleRes = R.string.series_opens_new_chapters
