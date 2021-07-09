@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 
 import android.net.Uri
 import androidx.core.net.toUri
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -25,7 +26,6 @@ import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody
-import timber.log.Timber
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -60,7 +60,11 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         }
     }
 
-    suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
+    suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch> {
         return withIOContext {
             if (manga.my_anime_list_id !== null && !wasPreviouslyTracked) {
                 listOf(getMangaDetails(manga.my_anime_list_id!!.toInt()))
@@ -90,7 +94,8 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return withIOContext {
             val url = "$baseApiUrl/manga".toUri().buildUpon()
                 .appendPath(id.toString())
-                .appendQueryParameter("fields", "id,title,synopsis,num_chapters,main_picture,status,media_type,start_date")
+                .appendQueryParameter("fields",
+                    "id,title,synopsis,num_chapters,main_picture,status,media_type,start_date")
                 .build()
             authClient.newCall(GET(url.toString()))
                 .await()
@@ -102,10 +107,13 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                         title = obj["title"]!!.jsonPrimitive.content
                         summary = obj["synopsis"]?.jsonPrimitive?.content ?: ""
                         total_chapters = obj["num_chapters"]!!.jsonPrimitive.int
-                        cover_url = obj["main_picture"]?.jsonObject?.get("large")?.jsonPrimitive?.content ?: ""
+                        cover_url =
+                            obj["main_picture"]?.jsonObject?.get("large")?.jsonPrimitive?.content
+                                ?: ""
                         tracking_url = "https://myanimelist.net/manga/$media_id"
                         publishing_status = obj["status"]!!.jsonPrimitive.content.replace("_", " ")
-                        publishing_type = obj["media_type"]!!.jsonPrimitive.content.replace("_", " ")
+                        publishing_type =
+                            obj["media_type"]!!.jsonPrimitive.content.replace("_", " ")
                         start_date = try {
                             val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
                             outputDf.format(obj["start_date"]!!)
@@ -151,7 +159,8 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return withIOContext {
             val uri = "$baseApiUrl/manga".toUri().buildUpon()
                 .appendPath(track.media_id.toString())
-                .appendQueryParameter("fields", "num_chapters,my_list_status{start_date,finish_date}")
+                .appendQueryParameter("fields",
+                    "num_chapters,my_list_status{start_date,finish_date}")
                 .build()
             authClient.newCall(GET(uri.toString()))
                 .await()
@@ -215,7 +224,8 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         val obj = response.jsonObject
         return track.apply {
             val isRereading = obj["is_rereading"]!!.jsonPrimitive.boolean
-            status = if (isRereading) MyAnimeList.REREADING else getStatus(obj["status"]!!.jsonPrimitive.content)
+            status =
+                if (isRereading) MyAnimeList.REREADING else getStatus(obj["status"]!!.jsonPrimitive.content)
             last_chapter_read = obj["num_chapters_read"]!!.jsonPrimitive.int
             score = obj["score"]!!.jsonPrimitive.int.toFloat()
             obj["start_date"]?.let {
@@ -253,7 +263,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 authClient.newCall(request).await()
                 true
             } catch (e: Exception) {
-                Timber.w(e)
+                XLog.w(e)
                 false
             }
         }

@@ -93,7 +93,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -268,9 +267,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.nav.selectedItemId = id
-                }
+                        continueSwitchingTabs = true
+                        this@MainActivity.nav.selectedItemId = id
+                    }
                 ) return@setOnItemSelectedListener false
             }
             continueSwitchingTabs = false
@@ -551,7 +550,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         }
                     }
                 } catch (error: Exception) {
-                    Timber.e(error)
+                    XLog.e(error)
                 }
             }
         }

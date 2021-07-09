@@ -4,6 +4,7 @@ import android.content.Context
 import android.text.format.Formatter
 import coil.imageLoader
 import coil.memory.MemoryCache
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -15,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
@@ -146,7 +146,7 @@ class CoverCache(val context: Context) {
                         }
                     }
                 } catch (e: Exception) {
-                    Timber.e(e)
+                    XLog.e(e)
                 }
             }
             lastClean = System.currentTimeMillis()

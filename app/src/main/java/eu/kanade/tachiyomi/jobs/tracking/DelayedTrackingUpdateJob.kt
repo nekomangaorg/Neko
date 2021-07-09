@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -54,7 +53,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
                             service.update(track, true)
                             db.insertTrack(track).executeAsBlocking()
                         } catch (e: Exception) {
-                            Timber.e(e)
+                            XLog.e(e)
                         }
                     }
                 }

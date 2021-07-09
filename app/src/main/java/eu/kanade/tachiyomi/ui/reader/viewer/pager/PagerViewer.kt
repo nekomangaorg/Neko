@@ -18,7 +18,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import timber.log.Timber
 
 /**
  * Implementation of a [BaseViewer] to display pages with a [ViewPager].
@@ -128,7 +127,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             val showOnStart = config.navigationOverlayForNewUser
             activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener = { activity.binding.navigationOverlay.showNavigationAgain() }
+        config.navigationModeInvertedListener =
+            { activity.binding.navigationOverlay.showNavigationAgain() }
     }
 
     /**
@@ -186,20 +186,24 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Called when a [ReaderPage] is marked as active. It notifies the
      * activity of the change and requests the preload of the next chapter if this is the last page.
      */
-    private fun onReaderPageSelected(page: ReaderPage, allowPreload: Boolean, hasExtraPage: Boolean) {
+    private fun onReaderPageSelected(
+        page: ReaderPage,
+        allowPreload: Boolean,
+        hasExtraPage: Boolean,
+    ) {
         activity.onPageSelected(page, hasExtraPage)
 
         val offset = if (hasExtraPage) 1 else 0
         val pages = page.chapter.pages ?: return
         if (hasExtraPage) {
-            Timber.d("onReaderPageSelected: ${page.number}-${page.number + offset}/${pages.size}")
+            XLog.d("onReaderPageSelected: ${page.number}-${page.number + offset}/${pages.size}")
         } else {
-            Timber.d("onReaderPageSelected: ${page.number}/${pages.size}")
+            XLog.d("onReaderPageSelected: ${page.number}/${pages.size}")
         }
         // Preload next chapter once we're within the last 5 pages of the current chapter
         val inPreloadRange = pages.size - page.number < 5
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
-            Timber.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
+            XLog.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
             adapter.nextTransition?.to?.let {
                 activity.requestPreloadChapter(it)
             }
@@ -214,7 +218,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         XLog.d("onTransitionSelected: %s", transition)
         val toChapter = transition.to
         if (toChapter != null) {
-            Timber.d("Request preload destination chapter because we're on the transition")
+            XLog.d("Request preload destination chapter because we're on the transition")
             activity.requestPreloadChapter(toChapter)
         } else if (transition is ChapterTransition.Next) {
             // No more chapters, show menu because the user is probably going to close the reader
@@ -254,7 +258,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Sets the active [chapters] on this pager.
      */
     private fun setChaptersInternal(chapters: ViewerChapters) {
-        Timber.d("setChaptersInternal")
+        XLog.d("setChaptersInternal")
         val forceTransition = config.alwaysShowChapterTransition || adapter.joinedItems.getOrNull(
             pager
                 .currentItem
@@ -275,7 +279,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
      * Tells this viewer to move to the given [page].
      */
     override fun moveToPage(page: ReaderPage, animated: Boolean) {
-        Timber.d("moveToPage ${page.number}")
+        XLog.d("moveToPage ${page.number}")
         val position = adapter.joinedItems.indexOfFirst { it.first == page || it.second == page }
         if (position != -1) {
             val currentPosition = pager.currentItem
@@ -286,7 +290,8 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
             } else {
                 // Call this since with double shift onPageChange wont get called (it shouldn't)
                 // Instead just update the page count in ui
-                val joinedItem = adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
+                val joinedItem =
+                    adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
                 activity.onPageSelected(
                     joinedItem?.first as? ReaderPage ?: page,
                     joinedItem?.second != null
