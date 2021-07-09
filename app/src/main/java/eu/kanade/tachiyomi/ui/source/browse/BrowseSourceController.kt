@@ -121,8 +121,10 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(args.getString(SEARCH_QUERY_KEY) ?: "",
-            args.getBoolean(DEEP_LINK))
+        return BrowseSourcePresenter(
+            args.getString(SEARCH_QUERY_KEY) ?: "",
+            args.getBoolean(DEEP_LINK)
+        )
     }
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -167,8 +169,10 @@ open class BrowseSourceController(bundle: Bundle) :
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
@@ -460,8 +464,10 @@ open class BrowseSourceController(bundle: Bundle) :
             val actions = emptyList<EmptyView.Action>().toMutableList()
 
             actions += EmptyView.Action(R.string.retry, retryAction)
-            actions += EmptyView.Action(R.string.open_in_webview,
-                View.OnClickListener { openInWebView() })
+            actions += EmptyView.Action(
+                R.string.open_in_webview,
+                View.OnClickListener { openInWebView() }
+            )
 
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_compass_off,

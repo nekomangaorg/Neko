@@ -39,7 +39,7 @@ interface MangaDexAuthService : MangaDexImageService {
     suspend fun refreshToken(@Body request: RefreshTokenDto): Response<LoginResponseDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.userFollows}?limit=100") //&includes[]=${MdConstants.Type.coverArt}
+    @GET("${MdApi.userFollows}?limit=100") // &includes[]=${MdConstants.Type.coverArt}
     suspend fun userFollowList(@Query("offset") offset: Int): Response<MangaListDto>
 
     @Headers("Cache-Control: no-cache")

@@ -52,7 +52,6 @@ class FollowsSyncService {
             val defaultCategoryId = preferences.defaultCategory()
             val defaultCategory = categories.find { it.id == defaultCategoryId }
 
-
             listManga.forEach { networkManga ->
                 updateNotification(networkManga.title, count.andIncrement, listManga.size)
 
@@ -112,7 +111,7 @@ class FollowsSyncService {
                 // Get this manga's trackers from the database
                 var mdListTrack = db.getMDList(manga).executeOnIO()
 
-                //create mdList if missing
+                // create mdList if missing
                 if (mdListTrack == null) {
                     mdListTrack = trackManager.mdList.createInitialTracker(manga)
                     db.insertTrack(mdListTrack).executeAsBlocking()
@@ -121,10 +120,11 @@ class FollowsSyncService {
                 val trackItem = TrackItem(mdListTrack, trackManager.mdList)
 
                 if (trackItem.track!!.status == FollowStatus.UNFOLLOWED.int) {
-
                     withIOContext {
-                        followsHandler.updateFollowStatus(MdUtil.getMangaId(manga.url),
-                            FollowStatus.READING)
+                        followsHandler.updateFollowStatus(
+                            MdUtil.getMangaId(manga.url),
+                            FollowStatus.READING
+                        )
 
                         trackItem.track.status = FollowStatus.READING.int
                         val returnedTracker = trackItem.service.update(trackItem.track)

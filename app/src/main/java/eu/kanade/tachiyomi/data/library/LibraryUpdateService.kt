@@ -225,8 +225,10 @@ class LibraryUpdateService(
             "LibraryUpdateService:WakeLock"
         )
         wakeLock.acquire(TimeUnit.MINUTES.toMillis(30))
-        startForeground(Notifications.ID_LIBRARY_PROGRESS,
-            notifier.progressNotificationBuilder.build())
+        startForeground(
+            Notifications.ID_LIBRARY_PROGRESS,
+            notifier.progressNotificationBuilder.build()
+        )
     }
 
     /**
@@ -293,8 +295,6 @@ class LibraryUpdateService(
         if (target == Target.CHAPTERS) {
             listener?.onUpdateManga(LibraryManga())
         }
-
-
 
         job = GlobalScope.launch(handler) {
             when (target) {
@@ -372,23 +372,26 @@ class LibraryUpdateService(
         val superVisorJob = SupervisorJob()
 
         return withContext(Dispatchers.IO + superVisorJob) {
-
             mangaList.map { libraryManga ->
                 val shouldDownload =
-                    downloadNew && (categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
-                        libraryManga).executeOnIO()
-                        .any { (it.id ?: -1) in categoriesToDownload })
+                    downloadNew && (
+                        categoriesToDownload.isEmpty() || libraryManga.category in categoriesToDownload || db.getCategoriesForManga(
+                            libraryManga
+                        ).executeOnIO()
+                            .any { (it.id ?: -1) in categoriesToDownload }
+                        )
 
                 logTimeTaken("library manga ${libraryManga.title}") {
                     XLog.d("Starting ${libraryManga.title}")
-                    notifier.showProgressNotification(libraryManga,
+                    notifier.showProgressNotification(
+                        libraryManga,
                         count.andIncrement,
-                        mangaToUpdate.size)
+                        mangaToUpdate.size
+                    )
                     val downloads =
                         updateMangaChapters(libraryManga, shouldDownload)
                     XLog.d("Finishing ${libraryManga.title}")
                     if (downloads) hasDownloads.set(true)
-
                 }
             }
 
@@ -470,10 +473,9 @@ class LibraryUpdateService(
                 manga.initialized = true
 
                 withIOContext {
-
                     // dont refresh covers while using cached source
                     if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                            .getOrDefault()
+                        .getOrDefault()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl)
                         // load new covers in background
@@ -482,7 +484,6 @@ class LibraryUpdateService(
                                 .memoryCachePolicy(CachePolicy.DISABLED).build()
                         Coil.imageLoader(this@LibraryUpdateService).enqueue(request)
                     }
-
                 }
                 db.insertManga(manga).executeOnIO()
                 // add mdlist tracker if manga in library has it missing
@@ -505,18 +506,19 @@ class LibraryUpdateService(
                             var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
 
                             if (manga.scanlator_filter != null) {
-
                                 val scanlatorsToDownload =
                                     MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
 
                                 val newScanlators =
-                                    manga.getNewScanlatorsConditionalResetFilter(db,
+                                    manga.getNewScanlatorsConditionalResetFilter(
+                                        db,
                                         originalChapters,
-                                        newChapters.first)
+                                        newChapters.first
+                                    )
 
                                 scanlatorsToDownload.addAll(newScanlators)
 
-                                //only download scanlators we have filtered, unless a new scanlator starts uploading
+                                // only download scanlators we have filtered, unless a new scanlator starts uploading
                                 chaptersToDl =
                                     chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
                             }

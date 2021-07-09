@@ -298,8 +298,10 @@ class Downloader(
         val availSpace = DiskUtil.getAvailableStorageSpace(mangaDir)
         if (availSpace != -1L && availSpace < MIN_DISK_SPACE) {
             download.status = Download.State.ERROR
-            notifier.onError(context.getString(R.string.couldnt_download_low_space),
-                download.chapter.name)
+            notifier.onError(
+                context.getString(R.string.couldnt_download_low_space),
+                download.chapter.name
+            )
             return@defer Observable.just(download)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
@@ -396,8 +398,12 @@ class Downloader(
         // If the image is already downloaded, do nothing. Otherwise download from network
         val pageObservable = when {
             imageFile != null -> Observable.just(imageFile)
-            chapterCache.isImageInCache(page.imageUrl!!) -> moveImageFromCache(chapterCache.getImageFile(
-                page.imageUrl!!), tmpDir, filename)
+            chapterCache.isImageInCache(page.imageUrl!!) -> moveImageFromCache(
+                chapterCache.getImageFile(
+                    page.imageUrl!!
+                ),
+                tmpDir, filename
+            )
             else -> downloadImage(page, download.source, tmpDir, filename)
         }
 
@@ -489,7 +495,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-        // Else guess from the uri.
+            // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime

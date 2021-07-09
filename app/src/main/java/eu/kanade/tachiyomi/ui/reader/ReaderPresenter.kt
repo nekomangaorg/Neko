@@ -218,9 +218,11 @@ class ReaderPresenter(
             val dbChapters = db.getChapters(manga).executeAsBlocking()
             val currentChapter = getCurrentChapter()?.chapter?.id
             val list =
-                chapterFilter.filterChaptersForReader(dbChapters,
+                chapterFilter.filterChaptersForReader(
+                    dbChapters,
                     manga,
-                    getCurrentChapter()?.chapter)
+                    getCurrentChapter()?.chapter
+                )
                     .sortedBy {
                         when (manga.sorting) {
                             Manga.SORTING_NUMBER -> it.chapter_number
@@ -918,7 +920,6 @@ class ReaderPresenter(
                         }
                     }
                 }
-
             }
         }
     }

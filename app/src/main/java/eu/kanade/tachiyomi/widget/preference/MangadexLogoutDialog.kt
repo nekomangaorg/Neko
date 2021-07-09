@@ -47,7 +47,6 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                     }.onFailure { e ->
                         XLog.e("error logging out", e)
                         activity?.toast(R.string.could_not_log_in)
-
                     }
                 }
             }

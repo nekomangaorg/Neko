@@ -72,8 +72,10 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
         val str = a.getString(R.styleable.MaterialSpinnerView_title) ?: ""
         title = str
 
-        val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries)
-            ?: emptyArray()).map { it.toString() }
+        val entries = (
+            a.getTextArray(R.styleable.MaterialSpinnerView_android_entries)
+                ?: emptyArray()
+            ).map { it.toString() }
         this.entries = entries
 
         val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, Int.MAX_VALUE)

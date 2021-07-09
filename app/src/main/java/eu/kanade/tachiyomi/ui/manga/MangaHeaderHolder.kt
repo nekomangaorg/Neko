@@ -234,8 +234,12 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(binding.trackButton) {
-            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_art_track,
-                size = 32))
+            setImageDrawable(
+                context.iconicsDrawable(
+                    MaterialDesignDx.Icon.gmf_art_track,
+                    size = 32
+                )
+            )
         }
 
         with(binding.similarButton) {
@@ -268,7 +272,6 @@ class MangaHeaderHolder(
                     if (nextChapter.isMergedChapter() || (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty())) {
                         nextChapter.chapter.name
                     } else {
-
                         val vol = if (nextChapter.chapter.vol.isNotEmpty()) {
                             "Vol. " + nextChapter.chapter.vol
                         } else {

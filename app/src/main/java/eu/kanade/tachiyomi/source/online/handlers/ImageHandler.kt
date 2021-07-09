@@ -103,8 +103,10 @@ class ImageHandler {
                 true -> data[0]
                 false -> {
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    service.getAtHomeServer(page.mangaDexChapterId,
-                        preferences.usePort443Only()).body()!!.baseUrl
+                    service.getAtHomeServer(
+                        page.mangaDexChapterId,
+                        preferences.usePort443Only()
+                    ).body()!!.baseUrl
                 }
             }
         XLog.d("Image server is $mdAtHomeServerUrl")

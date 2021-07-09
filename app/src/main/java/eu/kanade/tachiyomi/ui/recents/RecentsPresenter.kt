@@ -42,7 +42,9 @@ class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener,
+) : BaseCoroutinePresenter(),
+    DownloadQueue.DownloadListener,
+    LibraryServiceListener,
     DownloadServiceListener {
 
     val statusHandler: StatusHandler by injectLazy()

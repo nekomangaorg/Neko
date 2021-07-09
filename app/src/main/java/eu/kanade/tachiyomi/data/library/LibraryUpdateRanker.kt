@@ -23,8 +23,8 @@ object LibraryUpdateRanker {
     fun nextFirstRanking(): Comparator<Manga> {
         val time = System.currentTimeMillis()
         return Comparator {
-                mangaFirst: Manga,
-                mangaSecond: Manga,
+            mangaFirst: Manga,
+            mangaSecond: Manga,
             ->
             compareValues(abs(mangaSecond.next_update - time), abs(mangaFirst.next_update - time))
         }.reversed()
@@ -41,8 +41,8 @@ object LibraryUpdateRanker {
      */
     fun latestFirstRanking(): Comparator<Manga> {
         return Comparator {
-                mangaFirst: Manga,
-                mangaSecond: Manga,
+            mangaFirst: Manga,
+            mangaSecond: Manga,
             ->
             compareValues(mangaSecond.last_update, mangaFirst.last_update)
         }
@@ -56,8 +56,8 @@ object LibraryUpdateRanker {
      */
     fun lexicographicRanking(): Comparator<Manga> {
         return Comparator {
-                mangaFirst: Manga,
-                mangaSecond: Manga,
+            mangaFirst: Manga,
+            mangaSecond: Manga,
             ->
             compareValues(mangaFirst.title, mangaSecond.title)
         }

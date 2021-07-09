@@ -114,8 +114,12 @@ fun Manga.addOrRemoveToFavorites(
                 db.setMangaCategories(emptyList(), listOf(this))
                 onMangaMoved()
                 return if (categories.isNotEmpty()) {
-                    view.snack(activity.getString(R.string.added_to_,
-                        activity.getString(R.string.default_value))) {
+                    view.snack(
+                        activity.getString(
+                            R.string.added_to_,
+                            activity.getString(R.string.default_value)
+                        )
+                    ) {
                         setAction(R.string.change) {
                             moveCategories(db, activity, onMangaMoved)
                         }
@@ -145,8 +149,10 @@ fun Manga.addOrRemoveToFavorites(
         date_added = 0
         db.insertManga(this).executeAsBlocking()
         onMangaMoved()
-        return view.snack(view.context.getString(R.string.removed_from_library),
-            Snackbar.LENGTH_INDEFINITE) {
+        return view.snack(
+            view.context.getString(R.string.removed_from_library),
+            Snackbar.LENGTH_INDEFINITE
+        ) {
             setAction(R.string.undo) {
                 favorite = true
                 date_added = lastAddedDate
@@ -181,7 +187,7 @@ fun Manga.getNewScanlatorsConditionalResetFilter(
             newChapters.flatMap { it.scanlatorList() }.distinct()
                 .toSet()
 
-        //reset scanlator if new ones found.  To not hide new scanlators
+        // reset scanlator if new ones found.  To not hide new scanlators
         val result = newScanlators.subtract(existingScanlators)
         if (result.isNotEmpty()) {
             this.scanlator_filter = null

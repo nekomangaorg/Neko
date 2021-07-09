@@ -95,7 +95,7 @@ class MergeSource : ReducedHttpSource() {
 
                     name = json["ChapterName"].nullString.let {
                         if (it.isNullOrEmpty()) "$type ${
-                            chapterImage(indexChapter)
+                        chapterImage(indexChapter)
                         }" else it
                     }
 
@@ -149,8 +149,10 @@ class MergeSource : ReducedHttpSource() {
     fun pageListParse(response: Response): List<Page> {
         val document = response.asJsoup()
         val script = document.select("script:containsData(MainFunction)").first().data()
-        val curChapter = gson.fromJson<JsonElement>(script.substringAfter("vm.CurChapter = ")
-            .substringBefore(";"))
+        val curChapter = gson.fromJson<JsonElement>(
+            script.substringAfter("vm.CurChapter = ")
+                .substringBefore(";")
+        )
 
         val pageTotal = curChapter["Page"].string.toInt()
 

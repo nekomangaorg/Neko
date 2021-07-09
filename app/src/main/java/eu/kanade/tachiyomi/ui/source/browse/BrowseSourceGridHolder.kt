@@ -52,10 +52,11 @@ class BrowseSourceGridHolder(
         binding.title.text = manga.title
         binding.compactTitle.text = binding.title.text
         when (isFollows) {
-            true -> binding.unreadDownloadBadge.root.setStatus(manga.follow_status!!,
-                manga.favorite)
+            true -> binding.unreadDownloadBadge.root.setStatus(
+                manga.follow_status!!,
+                manga.favorite
+            )
             false -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
-
         }
 
         // Update the cover.

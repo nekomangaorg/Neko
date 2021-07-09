@@ -205,7 +205,6 @@ class SettingsAdvancedController : SettingsController() {
                 onClick {
                     TrackingSyncJob.doWorkNow(context)
                 }
-
             }
         }
         intListPreference(activity) {
@@ -215,8 +214,8 @@ class SettingsAdvancedController : SettingsController() {
                 context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${
-                    it.name.lowercase(Locale.ENGLISH)
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                it.name.lowercase(Locale.ENGLISH)
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
                 } (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
@@ -237,14 +236,17 @@ class SettingsAdvancedController : SettingsController() {
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             return MaterialDialog(activity!!).show {
                 title(R.string.clean_up_downloaded_chapters)
-                    .listItemsMultiChoice(R.array.clean_up_downloads,
+                    .listItemsMultiChoice(
+                        R.array.clean_up_downloads,
                         disabledIndices = intArrayOf(0),
-                        initialSelection = intArrayOf(0, 1, 2)) { _, selections, _ ->
+                        initialSelection = intArrayOf(0, 1, 2)
+                    ) { _, selections, _ ->
                         val deleteRead = selections.contains(1)
                         val deleteNonFavorite = selections.contains(2)
                         (targetController as? SettingsAdvancedController)?.cleanupDownloads(
                             deleteRead,
-                            deleteNonFavorite)
+                            deleteNonFavorite
+                        )
                     }
                 positiveButton(android.R.string.ok)
                 negativeButton(android.R.string.cancel)
@@ -276,11 +278,13 @@ class SettingsAdvancedController : SettingsController() {
                     continue
                 }
                 val chapterList = db.getChapters(manga).executeAsBlocking()
-                foldersCleared += downloadManager.cleanupChapters(chapterList,
+                foldersCleared += downloadManager.cleanupChapters(
+                    chapterList,
                     manga,
                     source,
                     removeRead,
-                    removeNonFavorite)
+                    removeNonFavorite
+                )
             }
             launchUI {
                 val activity = activity ?: return@launchUI

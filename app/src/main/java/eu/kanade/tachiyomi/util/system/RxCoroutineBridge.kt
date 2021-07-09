@@ -63,7 +63,7 @@ fun <T> runAsObservable(
     backpressureMode: Emitter.BackpressureMode = Emitter.BackpressureMode.NONE,
     block: suspend () -> T,
 
-    ): Observable<T> {
+): Observable<T> {
     return Observable.create(
         { emitter ->
             val job = scope.launch(CoroutineName("runAsObservable")) {

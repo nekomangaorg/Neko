@@ -37,7 +37,6 @@ class TrackingSyncJob(
             .setOnlyAlertOnce(true)
 
     override suspend fun doWork(): Result = coroutineScope {
-
         withUIContext {
             val notification = progressNotification.build()
             val foregroundInfo = ForegroundInfo(Notifications.Id.Tracking.Progress, notification)
@@ -45,8 +44,10 @@ class TrackingSyncJob(
         }
 
         try {
-            trackingSyncService.process(::updateNotificationProgress,
-                ::completeNotification)
+            trackingSyncService.process(
+                ::updateNotificationProgress,
+                ::completeNotification
+            )
 
             return@coroutineScope Result.success()
         } catch (e: Exception) {

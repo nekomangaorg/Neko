@@ -25,9 +25,11 @@ open class BaseChapterHolder(
         } else {
             downloadButton.post {
                 // Create a PopupMenu, giving it the clicked view for an anchor
-                val popup = CascadePopupMenu(downloadButton.context,
+                val popup = CascadePopupMenu(
+                    downloadButton.context,
                     downloadButton,
-                    styler = cascadeMenuStyler(downloadButton.context))
+                    styler = cascadeMenuStyler(downloadButton.context)
+                )
 
                 // Inflate our menu resource into the PopupMenu's Menu
                 popup.inflate(R.menu.chapter_download)
@@ -45,9 +47,11 @@ open class BaseChapterHolder(
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.action_delete -> adapter.baseDelegate.downloadChapter(
-                            flexibleAdapterPosition)
+                            flexibleAdapterPosition
+                        )
                         R.id.action_start -> adapter.baseDelegate.startDownloadNow(
-                            flexibleAdapterPosition)
+                            flexibleAdapterPosition
+                        )
                     }
                     true
                 }

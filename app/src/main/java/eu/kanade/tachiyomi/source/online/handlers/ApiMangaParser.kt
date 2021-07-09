@@ -40,7 +40,6 @@ class ApiMangaParser {
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
-
             manga.author = authors.joinToString()
             manga.artist = artists.joinToString()
             manga.lang_flag = mangaAttributesDto.originalLanguage

@@ -89,9 +89,11 @@ class NetworkHelper(val context: Context) {
                                     .d(message)
                             }
                         }
-                    addInterceptor(HttpLoggingInterceptor(logger).apply {
-                        level = HttpLoggingInterceptor.Level.BODY
-                    })
+                    addInterceptor(
+                        HttpLoggingInterceptor(logger).apply {
+                            level = HttpLoggingInterceptor.Level.BODY
+                        }
+                    )
                 }
             }.build()
     }

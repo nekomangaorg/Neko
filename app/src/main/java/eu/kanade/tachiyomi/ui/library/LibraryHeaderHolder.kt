@@ -85,9 +85,9 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
 
         binding.categoryTitle.text =
             if (category.isAlone && !category.isDynamic) { "" } else { category.name } +
-                if (adapter.showNumber && !category.isHidden) {
-                    " (${adapter.itemsPerCategory[item.catId]})"
-                } else { "" }
+            if (adapter.showNumber && !category.isHidden) {
+                " (${adapter.itemsPerCategory[item.catId]})"
+            } else { "" }
         binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
 
         val isAscending = category.isAscending()

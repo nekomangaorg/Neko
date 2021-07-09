@@ -117,7 +117,6 @@ class CoverCache(val context: Context) {
                 )
             }
             context.imageLoader.memoryCache.clear()
-
         }
 
         lastClean = System.currentTimeMillis()

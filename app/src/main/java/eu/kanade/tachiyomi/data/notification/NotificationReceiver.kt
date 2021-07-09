@@ -53,8 +53,10 @@ class NotificationReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         when (intent.action) {
             // Dismiss notification
-            ACTION_DISMISS_NOTIFICATION -> dismissNotification(context,
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1))
+            ACTION_DISMISS_NOTIFICATION -> dismissNotification(
+                context,
+                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+            )
             // Resume the download service
             ACTION_RESUME_DOWNLOADS -> DownloadService.start(context)
             // Pause the download service
@@ -504,7 +506,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-            Chapter,
+                Chapter,
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
@@ -530,8 +532,10 @@ class NotificationReceiver : BroadcastReceiver() {
         ):
             PendingIntent {
             val newIntent =
-                Intent(context,
-                    MainActivity::class.java).setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
+                Intent(
+                    context,
+                    MainActivity::class.java
+                ).setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     .putExtra(AboutController.NewUpdateDialogController.BODY_KEY, notes)
                     .putExtra(AboutController.NewUpdateDialogController.URL_KEY, downloadLink)
@@ -603,7 +607,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapters:
-            Array<Chapter>,
+                Array<Chapter>,
             groupId: Int,
         ):
             PendingIntent {
@@ -614,10 +618,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
                 putExtra(EXTRA_GROUP_ID, groupId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.FLAG_UPDATE_CURRENT
+            )
         }
 
         /**
@@ -632,7 +638,7 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
-        
+
         /**
          * Returns [PendingIntent] that starts a service which stops the library update
          *

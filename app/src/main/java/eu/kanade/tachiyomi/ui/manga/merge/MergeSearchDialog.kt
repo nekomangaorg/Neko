@@ -44,9 +44,11 @@ class MergeSearchDialog : DialogController {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val dialog = MaterialDialog(activity!!).apply {
-            customView(viewRes = R.layout.merge_search_dialog,
+            customView(
+                viewRes = R.layout.merge_search_dialog,
                 scrollable = false,
-                noVerticalPadding = true)
+                noVerticalPadding = true
+            )
             negativeButton(android.R.string.cancel)
         }
 
@@ -55,7 +57,6 @@ class MergeSearchDialog : DialogController {
         /* val width = ViewGroup.LayoutParams.MATCH_PARENT
          val height = ViewGroup.LayoutParams.WRAP_CONTENT
          dialog.window!!.setLayout(width, height)*/
-
 
         dialogView = dialog.view
         onViewCreated(dialog.view, savedViewState)

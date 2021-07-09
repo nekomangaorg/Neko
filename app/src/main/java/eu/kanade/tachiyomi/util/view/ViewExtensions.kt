@@ -46,7 +46,6 @@ import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.max
 import kotlin.math.pow
@@ -400,8 +399,8 @@ inline fun View.popupMenu(
             item.icon = when (item.itemId) {
                 selectedItemId -> ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)
                     ?.mutate()?.apply {
-                    setTint(blendedAccent)
-                }
+                        setTint(blendedAccent)
+                    }
                 else -> emptyIcon
             }
             if (item.itemId == selectedItemId) {

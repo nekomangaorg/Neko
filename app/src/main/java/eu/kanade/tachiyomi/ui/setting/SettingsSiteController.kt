@@ -154,13 +154,14 @@ class SettingsSiteController :
                         val followsHandler = Injekt.get<FollowsHandler>()
                         val trackManager: TrackManager = Injekt.get()
                         db.getLibraryMangaList().executeAsBlocking().forEach {
-                            followsHandler.updateFollowStatus(MdUtil.getMangaId(it.url),
-                                FollowStatus.UNFOLLOWED)
+                            followsHandler.updateFollowStatus(
+                                MdUtil.getMangaId(it.url),
+                                FollowStatus.UNFOLLOWED
+                            )
                             db.getMDList(it).executeOnIO()?.let { _ ->
                                 db.deleteTrackForManga(it, trackManager.mdList)
                                     .executeAsBlocking()
                             }
-
                         }
                     }
                 }

@@ -243,8 +243,10 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                     LibrarySort.DateAdded -> {
                         val added = item.manga.date_added
                         if (added > 0) {
-                            recyclerView.context.getString(R.string.added_,
-                                added.timeSpanFromNow(preferences.context))
+                            recyclerView.context.getString(
+                                R.string.added_,
+                                added.timeSpanFromNow(preferences.context)
+                            )
                         } else {
                             "N/A"
                         }

@@ -41,7 +41,7 @@ class MangaDexLoginHelper {
             XLog.e("error authenticating", e)
             false
         }
-        XLog.i("check token is authenticated ${authenticated}")
+        XLog.i("check token is authenticated $authenticated")
         return authenticated
     }
 
@@ -57,8 +57,10 @@ class MangaDexLoginHelper {
             val refreshTokenDto = refreshTokenResponse.body()!!
             val result = refreshTokenDto.result == "ok"
             if (result) {
-                preferences.setTokens(refreshTokenDto.token.refresh,
-                    refreshTokenDto.token.session)
+                preferences.setTokens(
+                    refreshTokenDto.token.refresh,
+                    refreshTokenDto.token.session
+                )
             }
             result
         }.getOrElse { e ->
@@ -77,8 +79,10 @@ class MangaDexLoginHelper {
 
             if (loginResponse.code() == 200) {
                 val loginResponseDto = loginResponse.body()!!
-                preferences.setTokens(loginResponseDto.token.refresh,
-                    loginResponseDto.token.session)
+                preferences.setTokens(
+                    loginResponseDto.token.refresh,
+                    loginResponseDto.token.session
+                )
                 preferences.setSourceCredentials(MangaDex(), username, password)
                 return@withContext true
             } else {

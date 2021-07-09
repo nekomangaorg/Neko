@@ -78,9 +78,11 @@ internal class BackupNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_share_24dp,
                 context.getString(R.string.share),
-                NotificationReceiver.shareBackupPendingBroadcast(context,
+                NotificationReceiver.shareBackupPendingBroadcast(
+                    context,
                     unifile.uri,
-                    Notifications.ID_BACKUP_COMPLETE)
+                    Notifications.ID_BACKUP_COMPLETE
+                )
             )
 
             show(Notifications.ID_BACKUP_COMPLETE)
@@ -108,8 +110,10 @@ internal class BackupNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.stop),
-                NotificationReceiver.cancelRestorePendingBroadcast(context,
-                    Notifications.ID_RESTORE_PROGRESS)
+                NotificationReceiver.cancelRestorePendingBroadcast(
+                    context,
+                    Notifications.ID_RESTORE_PROGRESS
+                )
             )
         }
 
@@ -142,10 +146,14 @@ internal class BackupNotifier(private val context: Context) {
 
         with(completeNotificationBuilder) {
             setContentTitle(context.getString(R.string.restore_completed))
-            setContentText(context.resources.getQuantityString(R.plurals.restore_completed_message,
-                errorCount,
-                timeString,
-                errorCount))
+            setContentText(
+                context.resources.getQuantityString(
+                    R.plurals.restore_completed_message,
+                    errorCount,
+                    timeString,
+                    errorCount
+                )
+            )
 
             // Clear old actions if they exist
             clearActions()

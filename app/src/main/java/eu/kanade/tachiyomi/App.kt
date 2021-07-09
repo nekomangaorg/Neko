@@ -31,12 +31,12 @@ open class App : Application(), LifecycleObserver {
     override fun onCreate() {
         super.onCreate()
         XLogSetup(this)
-        
+
         // TLS 1.3 support for Android < 10
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
             Security.insertProviderAt(Conscrypt.newProvider(), 1)
         }
-        
+
         Injekt = InjektScope(DefaultRegistrar())
         Injekt.importModule(AppModule(this))
 

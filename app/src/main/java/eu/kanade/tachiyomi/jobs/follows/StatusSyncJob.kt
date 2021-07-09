@@ -42,7 +42,6 @@ class StatusSyncJob(
             .setOnlyAlertOnce(true)
 
     override suspend fun doWork(): Result = coroutineScope {
-
         withUIContext {
             val notification = progressNotification.build()
             val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
@@ -51,23 +50,33 @@ class StatusSyncJob(
         try {
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null, "0" -> {
-                    followsSyncService.toMangaDex(::updateNotificationProgress,
+                    followsSyncService.toMangaDex(
+                        ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        null)
+                        null
+                    )
                 }
 
                 "1" -> {
-                    val total = followsSyncService.fromMangaDex(::updateNotificationProgress,
-                        ::completeNotificationFromDex)
+                    val total = followsSyncService.fromMangaDex(
+                        ::updateNotificationProgress,
+                        ::completeNotificationFromDex
+                    )
                     withUIContext {
-                        applicationContext.toast(applicationContext.getString(R.string.sync_follows_to_library_toast,
-                            total),
-                            Toast.LENGTH_LONG)
+                        applicationContext.toast(
+                            applicationContext.getString(
+                                R.string.sync_follows_to_library_toast,
+                                total
+                            ),
+                            Toast.LENGTH_LONG
+                        )
                     }
                 }
                 else -> {
-                    followsSyncService.toMangaDex(::updateNotificationProgress,
-                        ::completeNotificationToDex, ids)
+                    followsSyncService.toMangaDex(
+                        ::updateNotificationProgress,
+                        ::completeNotificationToDex, ids
+                    )
                 }
             }
 
@@ -97,9 +106,13 @@ class StatusSyncJob(
     private fun completeNotificationToDex(total: Int) {
         completeNotification(R.string.sync_follows_complete)
         launchUI {
-            applicationContext.toast(applicationContext.getString(R.string.push_favorites_to_mangadex_toast,
-                total),
-                Toast.LENGTH_LONG)
+            applicationContext.toast(
+                applicationContext.getString(
+                    R.string.push_favorites_to_mangadex_toast,
+                    total
+                ),
+                Toast.LENGTH_LONG
+            )
         }
     }
 
@@ -127,8 +140,10 @@ class StatusSyncJob(
         fun doWorkNow(context: Context, syncToMangadex: String) {
             WorkManager.getInstance(context).enqueue(
                 OneTimeWorkRequestBuilder<StatusSyncJob>().apply {
-                    setInputData(Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
-                        .build())
+                    setInputData(
+                        Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
+                            .build()
+                    )
                 }.build()
             )
         }

@@ -23,7 +23,6 @@ class LatestChapterHandler {
 
     suspend fun getPage(page: Int): MangaListPage {
         return withContext(Dispatchers.IO) {
-
             val limit = MdUtil.latestChapterLimit
             val offset = MdUtil.getLatestChapterListOffset(page)
 

@@ -5,6 +5,7 @@ import com.github.salomonbrys.kotson.get
 import com.github.salomonbrys.kotson.int
 import com.github.salomonbrys.kotson.jsonObject
 import com.github.salomonbrys.kotson.obj
+import com.github.salomonbrys.kotson.set
 import com.github.salomonbrys.kotson.string
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonObject
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
-import com.github.salomonbrys.kotson.set
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit

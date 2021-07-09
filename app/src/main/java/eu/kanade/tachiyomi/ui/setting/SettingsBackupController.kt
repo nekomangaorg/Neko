@@ -50,8 +50,8 @@ class SettingsBackupController : SettingsController() {
             titleRes = R.string.create_backup
             summaryRes = R.string.can_be_used_to_restore
 
-                onClick { backup(context, BackupConst.BACKUP_TYPE_FULL) }
-            }
+            onClick { backup(context, BackupConst.BACKUP_TYPE_FULL) }
+        }
 
         preference {
             key = "pref_restore_backup"
@@ -108,8 +108,10 @@ class SettingsBackupController : SettingsController() {
                         startActivityForResult(intent, CODE_BACKUP_DIR)
                     } catch (e: ActivityNotFoundException) {
                         // Fall back to custom picker on error
-                        startActivityForResult(preferences.context.getFilePicker(currentDir),
-                            CODE_BACKUP_DIR)
+                        startActivityForResult(
+                            preferences.context.getFilePicker(currentDir),
+                            CODE_BACKUP_DIR
+                        )
                     }
                 }
 
@@ -201,8 +203,12 @@ class SettingsBackupController : SettingsController() {
                                 ).showDialog(router)
                             }
                             else -> {
-                                activity.toast(activity.getString(R.string.invalid_backup_file_type,
-                                    fileName))
+                                activity.toast(
+                                    activity.getString(
+                                        R.string.invalid_backup_file_type,
+                                        fileName
+                                    )
+                                )
                             }
                         }
                     }
@@ -217,7 +223,7 @@ class SettingsBackupController : SettingsController() {
         val code = CODE_FULL_BACKUP_CREATE
 
         val fileName = BackupFull.getDefaultFilename()
-        //else -> Backup.getDefaultFilename()
+        // else -> Backup.getDefaultFilename()
 
         // Setup custom file picker intent
         // Get dirs
