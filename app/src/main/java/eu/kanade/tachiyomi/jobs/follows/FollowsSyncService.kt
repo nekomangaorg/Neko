@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.jobs.follows
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
@@ -47,6 +48,10 @@ class FollowsSyncService {
             }
             XLog.d("total number from mangadex is ${listManga.size}")
 
+            val categories = db.getCategories().executeAsBlocking()
+            val defaultCategoryId = preferences.defaultCategory()
+            val defaultCategory = categories.find { it.id == defaultCategoryId }
+
 
             listManga.forEach { networkManga ->
                 updateNotification(networkManga.title, count.andIncrement, listManga.size)
@@ -67,6 +72,10 @@ class FollowsSyncService {
                     countOfAdded.incrementAndGet()
                     dbManga.favorite = true
                     dbManga.copyFrom(networkManga)
+                    if (defaultCategory != null) {
+                        val mc = MangaCategory.create(dbManga, defaultCategory)
+                        db.setMangaCategories(listOf(mc), listOf(dbManga))
+                    }
 
                     db.insertManga(dbManga).executeAsBlocking()
                 }
