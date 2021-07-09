@@ -16,7 +16,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
@@ -32,6 +31,7 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.getNewScanlatorsConditionalResetFilter
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -503,28 +503,24 @@ class LibraryUpdateService(
                     if (newChapters.first.isNotEmpty()) {
                         if (shouldDownload) {
                             var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
-                            if (manga.scanlator_filter != null) {
-                                val originalScanlators =
-                                    originalChapters.flatMap { it.scanlatorList() }.distinct()
-                                        .toSet()
-                                val newScanlators =
-                                    newChapters.first.flatMap { it.scanlatorList() }.distinct()
-                                        .toSet()
 
-                                val results = newScanlators.subtract(originalScanlators)
+                            if (manga.scanlator_filter != null) {
 
                                 val scanlatorsToDownload =
                                     MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
 
-                                if (results.isNotEmpty()) {
-                                    scanlatorsToDownload.addAll(results)
-                                    manga.scanlator_filter = null
-                                    db.insertManga(manga).executeAsBlocking()
-                                }
+                                val newScanlators =
+                                    manga.getNewScanlatorsConditionalResetFilter(db,
+                                        originalChapters,
+                                        newChapters.first)
 
+                                scanlatorsToDownload.addAll(newScanlators)
+
+                                //only download scanlators we have filtered, unless a new scanlator starts uploading
                                 chaptersToDl =
                                     chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
                             }
+
                             downloadChapters(manga, chaptersToDl)
                             hasDownloads = true
                         }

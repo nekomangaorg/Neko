@@ -7,8 +7,10 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
+import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.util.view.snack
@@ -39,7 +41,7 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 fun Manga.moveCategories(
     db: DatabaseHelper,
     activity: Activity,
-    onMangaMoved: () -> Unit
+    onMangaMoved: () -> Unit,
 ) {
     val categories = db.getCategories().executeAsBlocking()
     val categoriesForManga = db.getCategoriesForManga(this).executeAsBlocking()
@@ -58,7 +60,7 @@ fun Manga.moveCategories(
 fun List<Manga>.moveCategories(
     db: DatabaseHelper,
     activity: Activity,
-    onMangaMoved: () -> Unit
+    onMangaMoved: () -> Unit,
 ) {
     if (this.isEmpty()) return
     val commonCategories = this
@@ -85,7 +87,7 @@ fun Manga.addOrRemoveToFavorites(
     activity: Activity,
     onMangaAdded: () -> Unit,
     onMangaMoved: () -> Unit,
-    onMangaDeleted: () -> Unit
+    onMangaDeleted: () -> Unit,
 ): Snackbar? {
     if (!favorite) {
         val categories = db.getCategories().executeAsBlocking()
@@ -112,7 +114,8 @@ fun Manga.addOrRemoveToFavorites(
                 db.setMangaCategories(emptyList(), listOf(this))
                 onMangaMoved()
                 return if (categories.isNotEmpty()) {
-                    view.snack(activity.getString(R.string.added_to_, activity.getString(R.string.default_value))) {
+                    view.snack(activity.getString(R.string.added_to_,
+                        activity.getString(R.string.default_value))) {
                         setAction(R.string.change) {
                             moveCategories(db, activity, onMangaMoved)
                         }
@@ -142,7 +145,8 @@ fun Manga.addOrRemoveToFavorites(
         date_added = 0
         db.insertManga(this).executeAsBlocking()
         onMangaMoved()
-        return view.snack(view.context.getString(R.string.removed_from_library), Snackbar.LENGTH_INDEFINITE) {
+        return view.snack(view.context.getString(R.string.removed_from_library),
+            Snackbar.LENGTH_INDEFINITE) {
             setAction(R.string.undo) {
                 favorite = true
                 date_added = lastAddedDate
@@ -162,4 +166,28 @@ fun Manga.addOrRemoveToFavorites(
         }
     }
     return null
+}
+
+fun Manga.getNewScanlatorsConditionalResetFilter(
+    db: DatabaseHelper,
+    existingChapters: List<Chapter>,
+    newChapters: List<Chapter>,
+): Set<String> {
+    if (this.scanlator_filter != null) {
+        val existingScanlators =
+            existingChapters.flatMap { it.scanlatorList() }.distinct()
+                .toSet()
+        val newScanlators =
+            newChapters.flatMap { it.scanlatorList() }.distinct()
+                .toSet()
+
+        //reset scanlator if new ones found.  To not hide new scanlators
+        val result = newScanlators.subtract(existingScanlators)
+        if (result.isNotEmpty()) {
+            this.scanlator_filter = null
+            db.insertManga(this).executeAsBlocking()
+        }
+        return result
+    }
+    return emptySet()
 }
