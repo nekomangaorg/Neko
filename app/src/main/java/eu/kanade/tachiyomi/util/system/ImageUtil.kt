@@ -43,6 +43,7 @@ object ImageUtil {
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
                 Format.Jpeg -> ImageType.JPEG
+                Format.Jxl -> ImageType.JXL
                 Format.Png -> ImageType.PNG
                 Format.Webp -> ImageType.WEBP
                 else -> null
@@ -72,6 +73,7 @@ object ImageUtil {
         GIF("image/gif", "gif"),
         HEIF("image/heif", "heif"),
         JPEG("image/jpeg", "jpg"),
+        JXL("image/jxl", "jxl"),
         PNG("image/png", "png"),
         WEBP("image/webp", "webp"),
     }
@@ -117,15 +119,22 @@ object ImageUtil {
         val botLeftIsDark = isDark(image.getPixel(left, bot))
         val botRightIsDark = isDark(image.getPixel(right, bot))
 
-        var darkBG = (topLeftIsDark && (botLeftIsDark || botRightIsDark || topRightIsDark || midLeftIsDark || topMidIsDark)) ||
-            (topRightIsDark && (botRightIsDark || botLeftIsDark || midRightIsDark || topMidIsDark))
+        var darkBG =
+            (topLeftIsDark && (botLeftIsDark || botRightIsDark || topRightIsDark || midLeftIsDark || topMidIsDark)) ||
+                (topRightIsDark && (botRightIsDark || botLeftIsDark || midRightIsDark || topMidIsDark))
 
-        if (!isWhite(image.getPixel(left, top)) && pixelIsClose(image.getPixel(left, top), image.getPixel(midX, top)) &&
-            !isWhite(image.getPixel(midX, top)) && pixelIsClose(image.getPixel(midX, top), image.getPixel(right, top)) &&
-            !isWhite(image.getPixel(right, top)) && pixelIsClose(image.getPixel(right, top), image.getPixel(right, bot)) &&
-            !isWhite(image.getPixel(right, bot)) && pixelIsClose(image.getPixel(right, bot), image.getPixel(midX, bot)) &&
-            !isWhite(image.getPixel(midX, bot)) && pixelIsClose(image.getPixel(midX, bot), image.getPixel(left, bot)) &&
-            !isWhite(image.getPixel(left, bot)) && pixelIsClose(image.getPixel(left, bot), image.getPixel(left, top))
+        if (!isWhite(image.getPixel(left, top)) && pixelIsClose(image.getPixel(left, top),
+                image.getPixel(midX, top)) &&
+            !isWhite(image.getPixel(midX, top)) && pixelIsClose(image.getPixel(midX, top),
+                image.getPixel(right, top)) &&
+            !isWhite(image.getPixel(right, top)) && pixelIsClose(image.getPixel(right, top),
+                image.getPixel(right, bot)) &&
+            !isWhite(image.getPixel(right, bot)) && pixelIsClose(image.getPixel(right, bot),
+                image.getPixel(midX, bot)) &&
+            !isWhite(image.getPixel(midX, bot)) && pixelIsClose(image.getPixel(midX, bot),
+                image.getPixel(left, bot)) &&
+            !isWhite(image.getPixel(left, bot)) && pixelIsClose(image.getPixel(left, bot),
+                image.getPixel(left, top))
         ) {
             return ColorDrawable(image.getPixel(left, top))
         }
@@ -162,7 +171,8 @@ object ImageUtil {
             val notOffset = x == left || x == right
             for ((index, y) in (0 until image.height step image.height / 25).withIndex()) {
                 val pixel = image.getPixel(x, y)
-                val pixelOff = image.getPixel(x + (if (x < image.width / 2) -offsetX else offsetX), y)
+                val pixelOff =
+                    image.getPixel(x + (if (x < image.width / 2) -offsetX else offsetX), y)
                 if (isWhite(pixel)) {
                     whitePixelsStreak++
                     whitePixels++
@@ -238,37 +248,46 @@ object ImageUtil {
         if (topIsBlackStreak && bottomIsBlackStreak) {
             darkBG = true
         }
-        val isLandscape = context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        val isLandscape =
+            context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (darkBG) {
-            return if (!isLandscape && isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(right, bot))) GradientDrawable(
+            return if (!isLandscape && isWhite(image.getPixel(left, bot)) && isWhite(image.getPixel(
+                    right,
+                    bot))
+            ) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
             )
-            else if (!isLandscape && isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(right, top))) GradientDrawable(
+            else if (!isLandscape && isWhite(image.getPixel(left, top)) && isWhite(image.getPixel(
+                    right,
+                    top))
+            ) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
             )
             else ColorDrawable(blackPixel)
         }
         if (!isLandscape && (
-            topIsBlackStreak || (
-                topLeftIsDark && topRightIsDark &&
-                    isDark(image.getPixel(left - offsetX, top)) && isDark(image.getPixel(right + offsetX, top)) &&
-                    (topMidIsDark || overallBlackPixels > 9)
+                topIsBlackStreak || (
+                    topLeftIsDark && topRightIsDark &&
+                        isDark(image.getPixel(left - offsetX,
+                            top)) && isDark(image.getPixel(right + offsetX, top)) &&
+                        (topMidIsDark || overallBlackPixels > 9)
+                    )
                 )
-            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
             )
         } else if (!isLandscape && (
-            bottomIsBlackStreak || (
-                botLeftIsDark && botRightIsDark &&
-                    isDark(image.getPixel(left - offsetX, bot)) && isDark(image.getPixel(right + offsetX, bot)) &&
-                    (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
+                bottomIsBlackStreak || (
+                    botLeftIsDark && botRightIsDark &&
+                        isDark(image.getPixel(left - offsetX,
+                            bot)) && isDark(image.getPixel(right + offsetX, bot)) &&
+                        (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
+                    )
                 )
-            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
@@ -283,14 +302,15 @@ object ImageUtil {
         imageBitmap2: Bitmap,
         isLTR: Boolean,
         @ColorInt background: Int = Color.WHITE,
-        progressCallback: ((Int) -> Unit)? = null
+        progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
         val height2 = imageBitmap2.height
         val width2 = imageBitmap2.width
         val maxHeight = max(height, height2)
-        val result = Bitmap.createBitmap(width + width2, max(height, height2), Bitmap.Config.ARGB_8888)
+        val result =
+            Bitmap.createBitmap(width + width2, max(height, height2), Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         canvas.drawColor(background)
         val upperPart = Rect(
