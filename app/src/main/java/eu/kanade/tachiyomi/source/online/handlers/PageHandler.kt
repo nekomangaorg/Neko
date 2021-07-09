@@ -23,6 +23,12 @@ class PageHandler {
             XLog.d("fetching page list")
             try {
                 val chapterResponse = network.service.viewChapter(chapter.mangadex_chapter_id)
+                if (chapterResponse.isSuccessful.not()) {
+                    XLog.e("error returned from chapterResponse ${
+                        chapterResponse.errorBody()?.string()
+                    }")
+                    throw Exception("error returned from chapterResponse")
+                }
 
 
                 if (chapter.scanlator.equals("mangaplus", true)) {
@@ -41,6 +47,13 @@ class PageHandler {
                         service.getAtHomeServer(chapter.mangadex_chapter_id,
                             preferences.usePort443Only())
 
+                    if (atHomeResponse.isSuccessful.not()) {
+                        XLog.e("error returned from atHomeResponse ${
+                            atHomeResponse.errorBody()?.string()
+                        }")
+                        throw Exception("error returned from atHomeResponse")
+                    }
+
 
                     pageListParse(chapterResponse.body()!!,
                         atHomeResponse.body()!!,
@@ -58,7 +71,7 @@ class PageHandler {
         atHomeDto: AtHomeDto,
         dataSaver: Boolean,
     ): List<Page> {
-        
+
         val hash = chapterDto.data.attributes.hash
         val pageArray = if (dataSaver) {
             chapterDto.data.attributes.dataSaver.map { "/data-saver/$hash/$it" }
