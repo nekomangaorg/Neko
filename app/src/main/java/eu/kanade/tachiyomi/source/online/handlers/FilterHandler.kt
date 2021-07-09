@@ -172,7 +172,7 @@ class FilterHandler {
     val sortableList = listOf(
         Pair("Number of follows", ""),
         Pair("Created at", "createdAt"),
-        //Pair("Manga inf", "updatedAt"),
+        Pair("Manga info updated", "updatedAt"),
     )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
