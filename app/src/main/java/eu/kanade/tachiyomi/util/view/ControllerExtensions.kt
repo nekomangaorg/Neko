@@ -30,7 +30,6 @@ import com.bluelinelabs.conductor.RouterTransaction
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
-import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
@@ -358,7 +357,6 @@ fun Controller.scrollViewWith(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
-                if (recyclerView.tag == MaterialFastScroll.noUpdate) return
                 if (router?.backstack?.lastOrNull()
                     ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                     activity != null && activityBinding!!.appBar.height > 0 &&

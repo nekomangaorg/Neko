@@ -118,8 +118,4 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             }
         }
     }
-
-    companion object {
-        const val noUpdate = "don't update scroll"
-    }
 }
