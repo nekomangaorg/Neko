@@ -76,7 +76,6 @@ import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
-import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -245,6 +244,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 left = insets.systemWindowInsetLeft,
                 right = insets.systemWindowInsetRight
             )
+            binding.sideNav?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                topMargin = insets.systemWindowInsetTop
+                topMargin = insets.systemWindowInsetBottom
+            }
             binding.bottomView?.isVisible = insets.systemWindowInsetBottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = insets.systemWindowInsetBottom
@@ -770,7 +773,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         drawerArrow?.progress = 1f
 
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
-        if (isTablet()) {
+        if (nav == binding.sideNav) {
             nav.isVisible = !hideBottomNav
             nav.alpha = 1f
         } else {

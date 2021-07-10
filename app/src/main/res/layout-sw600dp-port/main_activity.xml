@@ -9,92 +9,16 @@
 
     <com.bluelinelabs.conductor.ChangeHandlerFrameLayout
         android:id="@+id/controller_container"
-        android:layout_width="0dp"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@id/side_nav"
+        app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_bias="1.0">
 
     </com.bluelinelabs.conductor.ChangeHandlerFrameLayout>
-
-    <com.google.android.material.navigationrail.NavigationRailView
-        android:id="@+id/side_nav"
-        style="@style/Widget.MaterialComponents.NavigationRailView.Colored"
-        android:background="?android:colorBackground"
-        android:layout_width="wrap_content"
-        android:layout_height="0dp"
-        app:itemIconTint="@color/bottom_nav_item_selector"
-        app:itemRippleColor="@color/ripple_nav"
-        app:itemTextColor="@color/bottom_nav_item_selector"
-        app:labelVisibilityMode="labeled"
-        android:translationZ="-10dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/app_bar"
-        app:menu="@menu/bottom_navigation" />
-
-    <View
-        android:id="@+id/shadow_gap"
-        android:layout_width="1dp"
-        android:layout_height="16dp"
-        app:layout_constraintEnd_toEndOf="@id/side_nav"
-        app:layout_constraintBottom_toTopOf="@id/side_nav"  />
-
-    <View
-        android:id="@+id/side_shadow"
-        android:layout_width="6dp"
-        android:layout_height="0dp"
-        android:layout_gravity="bottom"
-        android:alpha="0.13"
-        android:translationZ="0dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="@id/side_nav"
-        app:layout_constraintTop_toTopOf="@id/shadow_gap"
-        android:background="@drawable/shape_gradient_start_shadow" />
-
-    <FrameLayout
-        android:id="@+id/tabs_frame_layout"
-        android:clickable="true"
-        android:visibility="gone"
-        android:layout_width="0dp"
-        android:background="?attr/colorSecondary"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/app_bar"
-        app:layout_constraintStart_toEndOf="@id/side_nav"
-        app:layout_constraintEnd_toEndOf="parent"
-        tools:visibility="visible"
-        tools:ignore="KeyboardInaccessibleWidget">
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/main_tabs"
-            style="@style/Theme.Widget.Tabs.Highlight"
-            android:background="?attr/colorSecondary"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginStart="6dp"
-            android:layout_marginEnd="6dp"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:tabGravity="fill"/>
-
-    </FrameLayout>
-
-    <View
-        android:id="@+id/tab_shadow"
-        android:layout_width="0dp"
-        android:visibility="gone"
-        android:layout_height="6dp"
-        android:rotation="180"
-        android:alpha="0.15"
-        android:background="@drawable/shape_gradient_top_shadow"
-        app:layout_constraintStart_toStartOf="@id/tabs_frame_layout"
-        app:layout_constraintEnd_toEndOf="@id/tabs_frame_layout"
-        app:layout_constraintTop_toBottomOf="@id/tabs_frame_layout"
-        android:paddingBottom="10dp" />
 
     <com.google.android.material.appbar.AppBarLayout
         android:id="@+id/app_bar"
@@ -216,5 +140,53 @@
                 </eu.kanade.tachiyomi.ui.base.FloatingToolbar>
             </androidx.cardview.widget.CardView>
         </FrameLayout>
+
+        <FrameLayout
+            android:id="@+id/tabs_frame_layout"
+            android:clickable="true"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="KeyboardInaccessibleWidget">
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/main_tabs"
+                style="@style/Theme.Widget.Tabs.Highlight"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:tabGravity="fill"/>
+        </FrameLayout>
     </com.google.android.material.appbar.AppBarLayout>
+
+    <View
+        android:id="@+id/bottom_view"
+        android:clickable="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        android:layout_width="match_parent"
+        android:visibility="gone"
+        android:layout_height="0dp"
+        tools:ignore="KeyboardInaccessibleWidget" />
+
+    <com.google.android.material.bottomnavigation.BottomNavigationView
+        android:id="@+id/bottom_nav"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?colorPrimaryVariant"
+        app:itemIconTint="@color/bottom_nav_item_selector"
+        app:itemRippleColor="@color/ripple_nav"
+        app:itemTextColor="@color/bottom_nav_item_selector"
+        app:labelVisibilityMode="labeled"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        app:menu="@menu/bottom_navigation"
+        app:tabRippleColor="@color/rippleColor"
+        app:tabTextColor="?attr/tabBarIconColor" />
 </androidx.constraintlayout.widget.ConstraintLayout>
