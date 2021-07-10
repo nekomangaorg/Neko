@@ -18,8 +18,6 @@ object PreferenceKeys {
 
     const val deniedA11FilePermission = "denied_a11_file_permission"
 
-    const val rotation = "pref_rotation_type_key"
-
     const val enableTransitions = "pref_enable_transitions_key"
 
     const val pagerCutoutBehavior = "pager_cutout_behavior"
@@ -44,7 +42,9 @@ object PreferenceKeys {
 
     const val colorFilterMode = "color_filter_mode"
 
-    const val defaultViewer = "pref_default_viewer_key"
+    const val defaultReadingMode = "pref_default_reading_mode_key"
+
+    const val defaultOrientationType = "pref_default_orientation_type_key"
 
     const val imageScaleType = "pref_image_scale_type_key"
 
@@ -234,6 +234,18 @@ object PreferenceKeys {
     const val dohProvider = "doh_provider"
 
     const val incognitoMode = "incognito_mode"
+
+    const val defaultChapterFilterByRead = "default_chapter_filter_by_read"
+
+    const val defaultChapterFilterByDownloaded = "default_chapter_filter_by_downloaded"
+
+    const val defaultChapterFilterByBookmarked = "default_chapter_filter_by_bookmarked"
+
+    const val defaultChapterSortBySourceOrNumber = "default_chapter_sort_by_source_or_number" // and upload date
+
+    const val defaultChapterSortByAscendingOrDescending = "default_chapter_sort_by_ascending_or_descending"
+
+    const val defaultChapterDisplayByNameOrNumber = "default_chapter_display_by_name_or_number"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 

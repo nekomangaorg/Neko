@@ -894,6 +894,8 @@
     <string name="retry">Retry</string>
     <string name="right">Right</string>
     <string name="rotation">Rotation</string>
+    <string name="default_orientation">Default orientation</string>
+    <string name="orientation">Orientation</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="search_">Search %1$s</string>

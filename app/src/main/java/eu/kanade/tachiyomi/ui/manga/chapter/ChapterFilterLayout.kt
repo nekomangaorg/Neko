@@ -40,10 +40,10 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     fun setCheckboxes(manga: Manga) {
-        binding.showRead.isChecked = manga.readFilter == Manga.SHOW_READ
-        binding.showUnread.isChecked = manga.readFilter == Manga.SHOW_UNREAD
-        binding.showDownload.isChecked = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
-        binding.showBookmark.isChecked = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
+        binding.showRead.isChecked = manga.readFilter == Manga.CHAPTER_SHOW_READ
+        binding.showUnread.isChecked = manga.readFilter == Manga.CHAPTER_SHOW_UNREAD
+        binding.showDownload.isChecked = manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED
+        binding.showBookmark.isChecked = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED
 
         binding.showAll.isChecked = !(
             binding.showRead.isChecked || binding.showUnread.isChecked ||

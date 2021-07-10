@@ -91,9 +91,9 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             }
         )
 
-        binding.hideTitles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
+        binding.hideTitles.isChecked = presenter.manga.displayMode != Manga.CHAPTER_DISPLAY_NAME
         binding.sortMethodGroup.check(
-            if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else {
+            if (presenter.manga.sorting == Manga.CHAPTER_SORTING_SOURCE) R.id.sort_by_source else {
                 R.id.sort_by_number
             }
         )

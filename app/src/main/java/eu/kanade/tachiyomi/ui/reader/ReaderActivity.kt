@@ -192,12 +192,6 @@ class ReaderActivity :
     private var lastCropRes = 0
 
     companion object {
-        @Suppress("unused")
-        const val LEFT_TO_RIGHT = 1
-        const val RIGHT_TO_LEFT = 2
-        const val VERTICAL = 3
-        const val WEBTOON = 4
-        const val VERTICAL_PLUS = 5
 
         const val SHIFT_DOUBLE_PAGES = "shiftingDoublePages"
         const val SHIFTED_PAGE_INDEX = "shiftedPageIndex"
@@ -377,7 +371,7 @@ class ReaderActivity :
             )
     }
 
-    private fun updateRotationShortcut(preference: Int) {
+    private fun updateOrientationShortcut(preference: Int) {
         val orientation = OrientationType.fromPreference(preference)
         binding.chaptersSheet.rotationSheetButton.setImageResource(orientation.iconRes)
     }
@@ -598,13 +592,15 @@ class ReaderActivity :
 
                 setOnClickListener {
                     popupMenu(
-                        items = OrientationType.values().map { it.prefValue to it.stringRes },
-                        selectedItemId = preferences.rotation().get(),
+                        items = OrientationType.values().map { it.flagValue to it.stringRes },
+                        selectedItemId = presenter.manga?.orientationType
+                            ?: preferences.defaultOrientationType().get(),
                     ) {
                         val newOrientation = OrientationType.fromPreference(itemId)
 
-                        preferences.rotation().set(newOrientation.prefValue)
-                        setOrientation(newOrientation.flag)
+                        presenter.setMangaOrientationType(newOrientation.flagValue)
+
+                        updateOrientationShortcut(newOrientation.flagValue)
                     }
                 }
             }
@@ -628,10 +624,10 @@ class ReaderActivity :
 
             readingMode.setOnClickListener { readingMode ->
                 readingMode.popupMenu(
-                    items = ReadingModeType.values().map { it.prefValue to it.stringRes },
-                    selectedItemId = presenter.manga?.viewer,
+                    items = ReadingModeType.values().map { it.flagValue to it.stringRes },
+                    selectedItemId = presenter.manga?.readingModeType,
                 ) {
-                    presenter.setMangaViewer(itemId)
+                    presenter.setMangaReadingMode(itemId)
                 }
             }
         }
@@ -642,7 +638,6 @@ class ReaderActivity :
                     .onEach { updateCropBordersShortcut() }
                     .launchIn(scope)
             }
-        preferences.rotation().asImmediateFlowIn(scope) { updateRotationShortcut(it) }
 
         binding.chaptersSheet.shiftPageButton.setOnClickListener {
             shiftDoublePages()
@@ -850,25 +845,25 @@ class ReaderActivity :
      */
     fun setManga(manga: Manga) {
         val prevViewer = viewer
-        val noDefault = manga.viewer == -1
-        val mangaViewer = presenter.getMangaViewer()
+        val noDefault = manga.viewer_flags == -1
+        val mangaViewer = presenter.getMangaReadingMode()
         val newViewer = when (mangaViewer) {
-            LEFT_TO_RIGHT -> L2RPagerViewer(this)
-            VERTICAL -> VerticalPagerViewer(this)
-            WEBTOON -> WebtoonViewer(this)
-            VERTICAL_PLUS -> WebtoonViewer(this, hasMargins = true)
+            ReadingModeType.LEFT_TO_RIGHT.flagValue -> L2RPagerViewer(this)
+            ReadingModeType.VERTICAL.flagValue -> VerticalPagerViewer(this)
+            ReadingModeType.WEBTOON.flagValue -> WebtoonViewer(this)
+            ReadingModeType.CONTINUOUS_VERTICAL.flagValue -> WebtoonViewer(this, hasMargins = true)
             else -> R2LPagerViewer(this)
         }
 
-        if (noDefault && presenter.manga?.viewer!! > 0) {
+        if (noDefault && presenter.manga?.readingModeType!! > 0) {
             snackbar = binding.readerLayout.snack(
                 getString(
                     R.string.reading_,
                     getString(
                         when (mangaViewer) {
-                            RIGHT_TO_LEFT -> R.string.right_to_left_viewer
-                            VERTICAL -> R.string.vertical_viewer
-                            WEBTOON -> R.string.webtoon_style
+                            ReadingModeType.RIGHT_TO_LEFT.flagValue -> R.string.right_to_left_viewer
+                            ReadingModeType.VERTICAL.flagValue -> R.string.vertical_viewer
+                            ReadingModeType.WEBTOON.flagValue -> R.string.webtoon_style
                             else -> R.string.left_to_right_viewer
                         }
                     ).toLowerCase(Locale.getDefault())
@@ -876,10 +871,12 @@ class ReaderActivity :
                 4000
             ) {
                 if (presenter.manga?.isLongStrip() != true) setAction(R.string.use_default) {
-                    presenter.setMangaViewer(0)
+                    presenter.setMangaReadingMode(0)
                 }
             }
         }
+
+        setOrientation(presenter.getMangaOrientationType())
 
         // Destroy previous viewer if there was one
         if (prevViewer != null) {
@@ -924,7 +921,7 @@ class ReaderActivity :
         invalidateOptionsMenu()
         updateCropBordersShortcut()
         updateBottomShortcuts()
-        val viewerMode = ReadingModeType.fromPreference(presenter?.manga?.viewer ?: 0)
+        val viewerMode = ReadingModeType.fromPreference(presenter?.manga?.readingModeType ?: 0)
         binding.chaptersSheet.readingMode.setImageResource(viewerMode.iconRes)
     }
 
@@ -1421,7 +1418,7 @@ class ReaderActivity :
     /**
      * Forces the user preferred [orientation] on the activity.
      */
-    private fun setOrientation(orientation: Int) {
+    fun setOrientation(orientation: Int) {
         val newOrientation = OrientationType.fromPreference(orientation)
         if (newOrientation.flag != requestedOrientation) {
             requestedOrientation = newOrientation.flag
@@ -1439,12 +1436,11 @@ class ReaderActivity :
          * Initializes the reader subscriptions.
          */
         init {
-            setOrientation(preferences.rotation().get())
-            preferences.rotation().asFlow()
+            preferences.defaultOrientationType().asFlow()
                 .drop(1)
                 .onEach {
                     delay(250)
-                    setOrientation(it)
+                    setOrientation(presenter.getMangaOrientationType())
                 }
                 .launchIn(scope)
 

@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
-import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.system.isTablet
@@ -23,15 +23,12 @@ class SettingsReaderController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.general
             intListPreference(activity) {
-                key = Keys.defaultViewer
+                key = Keys.defaultReadingMode
                 titleRes = R.string.default_reading_mode
-                entriesRes = arrayOf(
-                    R.string.left_to_right_viewer,
-                    R.string.right_to_left_viewer,
-                    R.string.vertical_viewer,
-                    R.string.webtoon
-                )
-                entryRange = 1..4
+                entriesRes = ReadingModeType.values().drop(1)
+                    .map { value -> value.stringRes }.toTypedArray()
+                entryValues = ReadingModeType.values().drop(1)
+                    .map { value -> value.flagValue }
                 defaultValue = 2
             }
             intListPreference(activity) {
@@ -91,12 +88,13 @@ class SettingsReaderController : SettingsController() {
             titleRes = R.string.display
 
             intListPreference(activity) {
-                key = Keys.rotation
-                titleRes = R.string.rotation
-                val enumConstants = OrientationType.values()
+                key = Keys.defaultOrientationType
+                titleRes = R.string.default_orientation
+                val enumConstants = OrientationType.values().drop(1)
                 entriesRes = enumConstants.map { it.stringRes }.toTypedArray()
-                entryRange = 1..enumConstants.size
-                defaultValue = 1
+                entryValues = OrientationType.values().drop(1)
+                    .map { value -> value.flagValue }
+                defaultValue = OrientationType.FREE.flagValue
             }
             intListPreference(activity) {
                 key = Keys.readerTheme

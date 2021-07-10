@@ -48,7 +48,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
             ) else null
 
             binding.chapterTitle.text = when (manga.displayMode) {
-                Manga.DISPLAY_NUMBER -> {
+                Manga.CHAPTER_DISPLAY_NUMBER -> {
                     val number = item.decimalFormat.format(item.chapter_number.toDouble())
                     itemView.context.getString(R.string.chapter_, number)
                 }

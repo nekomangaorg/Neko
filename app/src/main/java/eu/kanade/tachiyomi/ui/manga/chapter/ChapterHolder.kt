@@ -36,7 +36,7 @@ class ChapterHolder(
         val isLocked = item.isLocked
 
         binding.chapterTitle.text = when (manga.displayMode) {
-            Manga.DISPLAY_NUMBER -> {
+            Manga.CHAPTER_DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
                 itemView.context.getString(R.string.chapter_, number)
             }

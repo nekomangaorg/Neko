@@ -78,6 +78,7 @@
     </string-array>
 
     <string-array name="rotation_type">
+        <item>@string/default_value</item>
         <item>@string/free</item>
         <item>@string/portrait</item>
         <item>@string/landscape</item>

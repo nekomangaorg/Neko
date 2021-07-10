@@ -5,17 +5,21 @@ import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.recents.RecentMangaAdapter
 import eu.kanade.tachiyomi.util.system.Themes
@@ -129,8 +133,6 @@ class PreferencesHelper(val context: Context) {
     fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.PURE_WHITE)
     fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DARK)
 
-    fun rotation() = flowPrefs.getInt(Keys.rotation, 1)
-
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
     fun pagerCutoutBehavior() = flowPrefs.getInt(Keys.pagerCutoutBehavior, 0)
@@ -155,7 +157,9 @@ class PreferencesHelper(val context: Context) {
 
     fun colorFilterMode() = flowPrefs.getInt(Keys.colorFilterMode, 0)
 
-    fun defaultViewer() = prefs.getInt(Keys.defaultViewer, 2)
+    fun defaultReadingMode() = prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
+
+    fun defaultOrientationType() = flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
 
     fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
 
@@ -458,6 +462,29 @@ class PreferencesHelper(val context: Context) {
     fun openChapterInShortcuts() = prefs.getBoolean(Keys.openChapterInShortcuts, true)
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
+
+    fun filterChapterByRead() = prefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
+
+    fun filterChapterByDownloaded() = prefs.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
+
+    fun filterChapterByBookmarked() = prefs.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
+
+    fun sortChapterBySourceOrNumber() = prefs.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
+
+    fun displayChapterByNameOrNumber() = prefs.getInt(Keys.defaultChapterDisplayByNameOrNumber, Manga.CHAPTER_DISPLAY_NAME)
+
+    fun sortChapterByAscendingOrDescending() = prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
+
+    fun setChapterSettingsDefault(manga: Manga) {
+        prefs.edit {
+            putInt(Keys.defaultChapterFilterByRead, manga.readFilter)
+            putInt(Keys.defaultChapterFilterByDownloaded, manga.downloadedFilter)
+            putInt(Keys.defaultChapterFilterByBookmarked, manga.bookmarkedFilter)
+            putInt(Keys.defaultChapterSortBySourceOrNumber, manga.sorting)
+            putInt(Keys.defaultChapterDisplayByNameOrNumber, manga.displayMode)
+            putInt(Keys.defaultChapterSortByAscendingOrDescending, if (manga.sortDescending()) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
+        }
+    }
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 

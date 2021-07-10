@@ -267,8 +267,8 @@ class MangaDetailsPresenter(
      * @param hide set title to hidden
      */
     fun hideTitle(hide: Boolean) {
-        manga.displayMode = if (hide) Manga.DISPLAY_NUMBER else Manga.DISPLAY_NAME
-        db.updateFlags(manga).executeAsBlocking()
+        manga.displayMode = if (hide) Manga.CHAPTER_DISPLAY_NUMBER else Manga.CHAPTER_DISPLAY_NAME
+        db.updateChapterFlags(manga).executeAsBlocking()
         controller.refreshAdapter()
     }
 
@@ -290,11 +290,11 @@ class MangaDetailsPresenter(
         val chapters = chapterFilter.filterChapters(chapterList, manga)
 
         val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
-            Manga.SORTING_SOURCE -> when (sortDescending()) {
+            Manga.CHAPTER_SORTING_SOURCE -> when (sortDescending()) {
                 true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
                 false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
             }
-            Manga.SORTING_NUMBER -> when (sortDescending()) {
+            Manga.CHAPTER_SORTING_NUMBER -> when (sortDescending()) {
                 true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
                 false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
             }
@@ -695,7 +695,7 @@ class MangaDetailsPresenter(
      * Sets the sorting order and requests an UI update.
      */
     fun setSortOrder(descend: Boolean) {
-        manga.setChapterOrder(if (descend) Manga.SORT_DESC else Manga.SORT_ASC)
+        manga.setChapterOrder(if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
         asyncUpdateMangaAndChapters()
     }
 
@@ -711,7 +711,7 @@ class MangaDetailsPresenter(
      * Sets the sorting method and requests an UI update.
      */
     fun setSortMethod(bySource: Boolean) {
-        manga.sorting = if (bySource) Manga.SORTING_SOURCE else Manga.SORTING_NUMBER
+        manga.sorting = if (bySource) Manga.CHAPTER_SORTING_SOURCE else Manga.CHAPTER_SORTING_NUMBER
         asyncUpdateMangaAndChapters()
     }
 
@@ -720,20 +720,18 @@ class MangaDetailsPresenter(
      */
     fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
         manga.readFilter = when {
-            read -> Manga.SHOW_READ
-            unread -> Manga.SHOW_UNREAD
+            read -> Manga.CHAPTER_SHOW_READ
+            unread -> Manga.CHAPTER_SHOW_UNREAD
             else -> Manga.SHOW_ALL
         }
-        manga.downloadedFilter = if (downloaded) Manga.SHOW_DOWNLOADED else Manga.SHOW_ALL
-        manga.bookmarkedFilter = if (bookmarked) Manga.SHOW_BOOKMARKED else Manga.SHOW_ALL
+        manga.downloadedFilter = if (downloaded) Manga.CHAPTER_SHOW_DOWNLOADED else Manga.SHOW_ALL
+        manga.bookmarkedFilter = if (bookmarked) Manga.CHAPTER_SHOW_BOOKMARKED else Manga.SHOW_ALL
         asyncUpdateMangaAndChapters()
     }
 
     private fun asyncUpdateMangaAndChapters(justChapters: Boolean = false) {
         scope.launch {
-            if (!justChapters) {
-                db.insertManga(manga).executeAsBlocking()
-            }
+            if (!justChapters) db.updateChapterFlags(manga).executeOnIO()
             getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
         }
@@ -741,10 +739,10 @@ class MangaDetailsPresenter(
 
     fun currentFilters(): String {
         val filtersId = mutableListOf<Int?>()
-        filtersId.add(if (manga.readFilter == Manga.SHOW_READ) R.string.read else null)
-        filtersId.add(if (manga.readFilter == Manga.SHOW_UNREAD) R.string.unread else null)
-        filtersId.add(if (manga.downloadedFilter == Manga.SHOW_DOWNLOADED) R.string.downloaded else null)
-        filtersId.add(if (manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED) R.string.bookmarked else null)
+        filtersId.add(if (manga.readFilter == Manga.CHAPTER_SHOW_READ) R.string.read else null)
+        filtersId.add(if (manga.readFilter == Manga.CHAPTER_SHOW_UNREAD) R.string.unread else null)
+        filtersId.add(if (manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED) R.string.downloaded else null)
+        filtersId.add(if (manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED) R.string.bookmarked else null)
         filtersId.add(if (filteredScanlators.size != allChapterScanlators.size) R.string.scanlator_groups else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }

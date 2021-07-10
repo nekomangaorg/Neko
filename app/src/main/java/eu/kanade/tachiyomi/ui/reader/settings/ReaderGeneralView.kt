@@ -16,17 +16,31 @@ class ReaderGeneralView @JvmOverloads constructor(context: Context, attrs: Attri
     override fun inflateBinding() = ReaderGeneralLayoutBinding.bind(this)
     override fun initGeneralPreferences() {
         binding.viewerSeries.onItemSelectedListener = { position ->
-            activity.presenter.setMangaViewer(position)
+            val readingModeType = ReadingModeType.fromSpinner(position)
+            (context as ReaderActivity).presenter.setMangaReadingMode(readingModeType.flagValue)
 
-            val mangaViewer = activity.presenter.getMangaViewer()
-            if (mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS) {
+            val mangaViewer = activity.presenter.getMangaReadingMode()
+            if (mangaViewer == ReadingModeType.WEBTOON.flagValue || mangaViewer == ReadingModeType.CONTINUOUS_VERTICAL.flagValue) {
                 initWebtoonPreferences()
             } else {
                 initPagerPreferences()
             }
         }
-        binding.viewerSeries.setSelection((context as? ReaderActivity)?.presenter?.manga?.viewer ?: 0)
-        binding.rotationMode.bindToPreference(preferences.rotation(), 1)
+        binding.viewerSeries.setSelection(
+            (context as? ReaderActivity)?.presenter?.manga?.readingModeType?.let {
+                ReadingModeType.fromPreference(it).prefValue
+            } ?: 0
+        )
+        binding.rotationMode.onItemSelectedListener = { position ->
+            val rotationType = OrientationType.fromSpinner(position)
+            (context as ReaderActivity).presenter.setMangaOrientationType(rotationType.flagValue)
+        }
+        binding.rotationMode.setSelection(
+            (context as ReaderActivity).presenter.manga?.orientationType?.let {
+                OrientationType.fromPreference(it).prefValue
+            } ?: 0
+        )
+
         binding.backgroundColor.bindToPreference(preferences.readerTheme(), 0)
         binding.showPageNumber.bindToPreference(preferences.showPageNumber())
         binding.fullscreen.bindToPreference(preferences.fullscreen())
