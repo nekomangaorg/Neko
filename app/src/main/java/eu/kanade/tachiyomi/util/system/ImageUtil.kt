@@ -43,7 +43,7 @@ object ImageUtil {
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
                 Format.Jpeg -> ImageType.JPEG
-                Format.Jxl -> ImageType.JXL
+                //Format.Jxl -> ImageType.JXL
                 Format.Png -> ImageType.PNG
                 Format.Webp -> ImageType.WEBP
                 else -> null
@@ -73,7 +73,8 @@ object ImageUtil {
         GIF("image/gif", "gif"),
         HEIF("image/heif", "heif"),
         JPEG("image/jpeg", "jpg"),
-        JXL("image/jxl", "jxl"),
+
+        // JXL("image/jxl", "jxl"),
         PNG("image/png", "png"),
         WEBP("image/webp", "webp"),
     }
@@ -128,25 +129,25 @@ object ImageUtil {
                 image.getPixel(midX, top)
             ) &&
             !isWhite(image.getPixel(midX, top)) && pixelIsClose(
-                    image.getPixel(midX, top),
-                    image.getPixel(right, top)
-                ) &&
+                image.getPixel(midX, top),
+                image.getPixel(right, top)
+            ) &&
             !isWhite(image.getPixel(right, top)) && pixelIsClose(
-                    image.getPixel(right, top),
-                    image.getPixel(right, bot)
-                ) &&
+                image.getPixel(right, top),
+                image.getPixel(right, bot)
+            ) &&
             !isWhite(image.getPixel(right, bot)) && pixelIsClose(
-                    image.getPixel(right, bot),
-                    image.getPixel(midX, bot)
-                ) &&
+                image.getPixel(right, bot),
+                image.getPixel(midX, bot)
+            ) &&
             !isWhite(image.getPixel(midX, bot)) && pixelIsClose(
-                    image.getPixel(midX, bot),
-                    image.getPixel(left, bot)
-                ) &&
+                image.getPixel(midX, bot),
+                image.getPixel(left, bot)
+            ) &&
             !isWhite(image.getPixel(left, bot)) && pixelIsClose(
-                    image.getPixel(left, bot),
-                    image.getPixel(left, top)
-                )
+                image.getPixel(left, bot),
+                image.getPixel(left, top)
+            )
         ) {
             return ColorDrawable(image.getPixel(left, top))
         }
@@ -265,9 +266,9 @@ object ImageUtil {
         if (darkBG) {
             return if (!isLandscape && isWhite(image.getPixel(left, bot)) && isWhite(
                     image.getPixel(
-                            right,
-                            bot
-                        )
+                        right,
+                        bot
+                    )
                 )
             ) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
@@ -275,9 +276,9 @@ object ImageUtil {
             )
             else if (!isLandscape && isWhite(image.getPixel(left, top)) && isWhite(
                     image.getPixel(
-                            right,
-                            top
-                        )
+                        right,
+                        top
+                    )
                 )
             ) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
@@ -286,34 +287,34 @@ object ImageUtil {
             else ColorDrawable(blackPixel)
         }
         if (!isLandscape && (
-            topIsBlackStreak || (
-                topLeftIsDark && topRightIsDark &&
-                    isDark(
+                topIsBlackStreak || (
+                    topLeftIsDark && topRightIsDark &&
+                        isDark(
                             image.getPixel(
-                                    left - offsetX,
-                                    top
-                                )
+                                left - offsetX,
+                                top
+                            )
                         ) && isDark(image.getPixel(right + offsetX, top)) &&
-                    (topMidIsDark || overallBlackPixels > 9)
+                        (topMidIsDark || overallBlackPixels > 9)
+                    )
                 )
-            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
                 intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
             )
         } else if (!isLandscape && (
-            bottomIsBlackStreak || (
-                botLeftIsDark && botRightIsDark &&
-                    isDark(
+                bottomIsBlackStreak || (
+                    botLeftIsDark && botRightIsDark &&
+                        isDark(
                             image.getPixel(
-                                    left - offsetX,
-                                    bot
-                                )
+                                left - offsetX,
+                                bot
+                            )
                         ) && isDark(image.getPixel(right + offsetX, bot)) &&
-                    (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
+                        (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
+                    )
                 )
-            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
