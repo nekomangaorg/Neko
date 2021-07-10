@@ -892,7 +892,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val diffX = e2.x - e1.x
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
-                binding.bottomNav?.getGlobalVisibleRect(sheetRect)
+                nav.getGlobalVisibleRect(sheetRect)
                 if (sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
                     abs(diffY) > Companion.SWIPE_THRESHOLD &&
                     abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
@@ -901,6 +901,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     val bottomSheetController =
                         router.backstack.lastOrNull()?.controller as? BottomSheetController
                     bottomSheetController?.showSheet()
+                } else if (nav == binding.sideNav &&
+                    sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    abs(diffY) > Companion.SWIPE_THRESHOLD &&
+                    abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
+                    diffY > 0
+                ) {
+                    val bottomSheetController =
+                        router.backstack.lastOrNull()?.controller as? BottomSheetController
+                    bottomSheetController?.hideSheet()
                 }
                 result = true
             }
@@ -958,6 +967,7 @@ interface FloatingSearchInterface {
 
 interface BottomSheetController {
     fun showSheet()
+    fun hideSheet()
     fun toggleSheet()
     fun handleSheetBack(): Boolean
     fun sheetIsExpanded(): Boolean

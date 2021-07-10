@@ -48,7 +48,9 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
@@ -746,6 +748,15 @@ class RecentsController(bundle: Bundle? = null) :
         if (!isBindingInitialized) return
         if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == false || hasQueue()) {
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
+        }
+    }
+
+    override fun hideSheet() {
+        if (!isBindingInitialized) return
+        if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true) {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.hide()
+        } else {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.collapse()
         }
     }
 

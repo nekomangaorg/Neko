@@ -1527,10 +1527,19 @@ class LibraryController(
     //region sheet methods
     override fun showSheet() {
         closeTip()
+        val sheetBehavior = binding.filterBottomSheet.filterBottomSheet.sheetBehavior
         when {
-            binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.collapse()
-            !binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isExpanded() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.expand()
+            sheetBehavior.isHidden() -> sheetBehavior?.collapse()
+            !sheetBehavior.isExpanded() -> sheetBehavior?.expand()
             else -> showDisplayOptions()
+        }
+    }
+
+    override fun hideSheet() {
+        val sheetBehavior = binding.filterBottomSheet.filterBottomSheet.sheetBehavior
+        when {
+            sheetBehavior.isExpanded() -> sheetBehavior?.collapse()
+            !sheetBehavior.isHidden() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
         }
     }
 
