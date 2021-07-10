@@ -447,7 +447,7 @@ class PreferencesHelper(val context: Context) {
 
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
-    fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 0)
+    fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
 
     fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
