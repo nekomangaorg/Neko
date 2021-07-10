@@ -853,11 +853,11 @@ class ReaderActivity :
         val noDefault = manga.viewer == -1
         val mangaViewer = presenter.getMangaViewer()
         val newViewer = when (mangaViewer) {
-            RIGHT_TO_LEFT -> R2LPagerViewer(this)
+            LEFT_TO_RIGHT -> L2RPagerViewer(this)
             VERTICAL -> VerticalPagerViewer(this)
             WEBTOON -> WebtoonViewer(this)
             VERTICAL_PLUS -> WebtoonViewer(this, hasMargins = true)
-            else -> L2RPagerViewer(this)
+            else -> R2LPagerViewer(this)
         }
 
         if (noDefault && presenter.manga?.viewer!! > 0) {

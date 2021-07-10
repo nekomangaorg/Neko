@@ -105,14 +105,18 @@ class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     fun setSelection(selection: Int) {
-        popup?.menu?.get(selectedPosition)?.let {
-            it.icon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
-            it.title = entries[selectedPosition]
+        if (selectedPosition >= 0 && selectedPosition < popup?.menu?.size() ?: 0) {
+            popup?.menu?.get(selectedPosition)?.let {
+                it.icon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
+                it.title = entries[selectedPosition]
+            }
         }
         selectedPosition = selection
-        popup?.menu?.get(selectedPosition)?.let {
-            it.icon = tintedCheck()
-            it.title = it.title?.tintText(blendedAccent)
+        if (selectedPosition >= 0 && selectedPosition < popup?.menu?.size() ?: 0) {
+            popup?.menu?.get(selectedPosition)?.let {
+                it.icon = tintedCheck()
+                it.title = it.title?.tintText(blendedAccent)
+            }
         }
         binding.detailView.text = entries.getOrNull(selection).orEmpty()
     }
