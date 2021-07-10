@@ -42,7 +42,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
-import eu.kanade.tachiyomi.util.view.requestPermissionsSafe
+import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
@@ -144,7 +144,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         updateFab()
         binding.progress.isVisible = true
-        requestPermissionsSafe(arrayOf(Manifest.permission.WRITE_EXTERNAL_STORAGE), 301)
+        requestFilePermissionsSafe(301, preferences, presenter.source is LocalSource)
     }
 
     override fun onDestroyView(view: View) {

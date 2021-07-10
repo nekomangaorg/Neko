@@ -41,7 +41,7 @@ class SettingsBackupController : SettingsController() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestFilePermissionsSafe(500)
+        requestFilePermissionsSafe(500, preferences)
     }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {

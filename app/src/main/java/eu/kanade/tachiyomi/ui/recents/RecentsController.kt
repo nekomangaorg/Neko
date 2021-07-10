@@ -373,7 +373,7 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
-        requestFilePermissionsSafe(301)
+        requestFilePermissionsSafe(301, presenter.preferences)
     }
 
     fun updateTitleAndMenu() {

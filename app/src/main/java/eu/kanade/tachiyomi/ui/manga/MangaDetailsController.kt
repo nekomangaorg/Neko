@@ -209,7 +209,7 @@ class MangaDetailsController :
         presenter.onCreate()
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         binding.swipeRefresh.setOnRefreshListener { presenter.refreshAll() }
-        requestFilePermissionsSafe(301)
+        requestFilePermissionsSafe(301, presenter.preferences, presenter.manga.isLocal())
     }
 
     /** Check if device is tablet, and use a second recycler to hold the details header if so */

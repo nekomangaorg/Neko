@@ -492,7 +492,11 @@ fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: I
     }
 }
 
-fun Controller.requestFilePermissionsSafe(requestCode: Int) {
+fun Controller.requestFilePermissionsSafe(
+    requestCode: Int,
+    preferences: PreferencesHelper,
+    showA11PermissionAnyway: Boolean = false
+) {
     val activity = activity ?: return
     val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
     permissions.forEach { permission ->
@@ -504,9 +508,12 @@ fun Controller.requestFilePermissionsSafe(requestCode: Int) {
             requestPermissions(arrayOf(permission), requestCode)
         }
     }
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
-        !Environment.isExternalStorageManager()
+    if (
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.R &&
+        !Environment.isExternalStorageManager() &&
+        (!preferences.hasDeniedA11FilePermission().get() || showA11PermissionAnyway)
     ) {
+        preferences.hasDeniedA11FilePermission().set(true)
         MaterialDialog(activity)
             .title(R.string.all_files_permission_required)
             .message(R.string.external_storage_permission_notice)

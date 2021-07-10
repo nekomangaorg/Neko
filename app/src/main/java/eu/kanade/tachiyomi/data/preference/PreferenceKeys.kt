@@ -16,6 +16,8 @@ object PreferenceKeys {
 
     const val backToStart = "back_to_start"
 
+    const val deniedA11FilePermission = "denied_a11_file_permission"
+
     const val rotation = "pref_rotation_type_key"
 
     const val enableTransitions = "pref_enable_transitions_key"
