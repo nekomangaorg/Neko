@@ -50,7 +50,8 @@ class UpdaterService : Service() {
         super.onCreate()
         notifier = UpdaterNotifier(this)
 
-        startForeground(Notifications.ID_UPDATER, notifier.onDownloadStarted(getString(R.string.app_name)).build())
+        startForeground(Notifications.ID_UPDATER,
+            notifier.onDownloadStarted(getString(R.string.app_name)).build())
 
         wakeLock = acquireWakeLock(javaClass.name)
     }
@@ -154,8 +155,10 @@ class UpdaterService : Service() {
 
     companion object {
 
-        internal const val EXTRA_DOWNLOAD_URL = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
-        internal const val EXTRA_DOWNLOAD_TITLE = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
+        internal const val EXTRA_DOWNLOAD_URL =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
+        internal const val EXTRA_DOWNLOAD_TITLE =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
 
         /**
          * Returns the status of the service.
@@ -171,7 +174,11 @@ class UpdaterService : Service() {
          * @param context the application context.
          * @param url the url to the new update.
          */
-        fun start(context: Context, url: String, title: String = context.getString(R.string.app_name)) {
+        fun start(
+            context: Context,
+            url: String,
+            title: String = context.getString(R.string.app_name),
+        ) {
             if (!isRunning(context)) {
                 val intent = Intent(context, UpdaterService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
