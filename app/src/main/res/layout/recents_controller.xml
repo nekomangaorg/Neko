@@ -45,7 +45,7 @@
         android:id="@+id/shadow"
         android:layout_width="match_parent"
         android:layout_height="24dp"
-        android:alpha="0.5"
+        android:alpha="0.15"
         android:background="@drawable/shape_gradient_top_shadow"
         android:paddingBottom="10dp"
         app:layout_anchor="@id/download_bottom_sheet"
@@ -69,6 +69,6 @@
         android:layout_width="match_parent"
         android:layout_height="8dp"
         android:layout_gravity="bottom"
-        android:alpha="0.25"
+        android:alpha="0.05"
         android:background="@drawable/shape_gradient_top_shadow" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

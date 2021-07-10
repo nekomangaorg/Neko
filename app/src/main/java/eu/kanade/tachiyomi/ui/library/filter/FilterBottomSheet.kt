@@ -102,6 +102,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var libraryRecyler: View? = null
     var controller: LibraryController? = null
     var bottomBarHeight = 0
+    val shadowAlpha = 0.15f
+    val shadow2Alpha = 0.05f
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -128,8 +130,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     this@FilterBottomSheet.controller?.updateFilterSheetY()
                     binding.pill.alpha = (1 - max(0f, progress)) * 0.25f
-                    shadow2.alpha = (1 - max(0f, progress)) * 0.25f
-                    shadow.alpha = 1 + min(0f, progress)
+                    shadow2.alpha = (1 - max(0f, progress)) * shadow2Alpha
+                    shadow.alpha = (1 + min(0f, progress)) * shadowAlpha
                     updateRootPadding(progress)
                 }
 
@@ -165,7 +167,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     else -> 0f
                 }
             )
-            shadow.alpha = if (sheetBehavior.isHidden()) 0f else 1f
+            shadow.alpha = if (sheetBehavior.isHidden()) 0f else shadowAlpha
 
             if (binding.secondLayout.width + (binding.groupBy.width * 2) + 20.dpToPx < width) {
                 binding.secondLayout.removeView(binding.viewOptions)
@@ -197,11 +199,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         val shadow = controller?.binding?.shadow ?: return
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            shadow.alpha = 1f
-            libraryRecyler?.updatePaddingRelative(
-                bottom = sheetBehavior?.peekHeight
-                    ?: 0 + 10.dpToPx + bottomBarHeight
-            )
+            shadow.alpha = shadowAlpha
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f

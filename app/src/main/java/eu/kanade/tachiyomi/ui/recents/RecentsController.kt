@@ -106,6 +106,8 @@ class RecentsController(bundle: Bundle? = null) :
     private var lastChapterId: Long? = null
     private var showingDownloads = false
     var headerHeight = 0
+    val shadowAlpha = 0.15f
+    val shadow2Alpha = 0.05f
     private var query = ""
         set(value) {
             field = value
@@ -198,8 +200,8 @@ class RecentsController(bundle: Bundle? = null) :
                 (activity as? MainActivity)?.showTabBar(show = false, animate = false)
             }
             val isCollapsed = binding.downloadBottomSheet.root.sheetBehavior.isCollapsed()
-            binding.shadow2.alpha = if (isCollapsed) 0.25f else 0f
-            binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
+            binding.shadow2.alpha = if (isCollapsed) shadow2Alpha else 0f
+            binding.shadow.alpha = if (isCollapsed) shadowAlpha else 0f
             binding.fakeAppBar.alpha = if (isExpanded) 1f else 0f
             binding.downloadBottomSheet.dlRecycler.alpha = isExpanded.toInt().toFloat()
             binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
@@ -223,16 +225,16 @@ class RecentsController(bundle: Bundle? = null) :
         binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
 
         binding.shadow2.alpha =
-            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadow2Alpha else 0f
         binding.shadow.alpha =
-            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
 
         binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.addBottomSheetCallback(
             object :
                 BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    binding.shadow2.alpha = (1 - abs(progress)) * 0.25f
-                    binding.shadow.alpha = (1 - abs(progress)) * 0.5f
+                    binding.shadow2.alpha = (1 - abs(progress)) * shadow2Alpha
+                    binding.shadow.alpha = (1 - abs(progress)) * shadowAlpha
                     val height =
                         binding.root.height - binding.downloadBottomSheet.dlRecycler.paddingTop
                     // Doing some fun math to hide the tab bar just as the title text of the
@@ -321,9 +323,9 @@ class RecentsController(bundle: Bundle? = null) :
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
                         binding.shadow2.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) shadow2Alpha else 0f
                         binding.shadow.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
                     }
 
                     binding.downloadBottomSheet.sheetLayout.isClickable =
