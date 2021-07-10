@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 119
-    const val versionName = "2.5.2"
+    const val versionCode = 120
+    const val versionName = "2.5.3"
 }
 
 plugins {
@@ -153,12 +153,12 @@ dependencies {
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
     // hyperion
-    /*val hyperionVersion = "0.9.33"
+    val hyperionVersion = "0.9.33"
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")*/
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
 
     // REST
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
