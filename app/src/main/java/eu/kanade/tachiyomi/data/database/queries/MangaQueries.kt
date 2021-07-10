@@ -36,10 +36,12 @@ interface MangaQueries : DbProvider {
         .withQuery(
             RawQuery.builder()
                 .query(libraryQuery)
-                .observesTables(MangaTable.TABLE,
+                .observesTables(
+                    MangaTable.TABLE,
                     ChapterTable.TABLE,
                     MangaCategoryTable.TABLE,
-                    CategoryTable.TABLE)
+                    CategoryTable.TABLE
+                )
                 .build()
         )
         .withGetResolver(LibraryMangaGetResolver.INSTANCE)
@@ -182,6 +184,8 @@ interface MangaQueries : DbProvider {
         .prepare()
 
     fun getTotalChapterManga() = db.get().listOfObjects(Manga::class.java)
-        .withQuery(RawQuery.builder().query(getTotalChapterMangaQuery())
-            .observesTables(MangaTable.TABLE).build()).prepare()
+        .withQuery(
+            RawQuery.builder().query(getTotalChapterMangaQuery())
+                .observesTables(MangaTable.TABLE).build()
+        ).prepare()
 }

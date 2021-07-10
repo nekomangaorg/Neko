@@ -63,7 +63,7 @@ object Notifications {
     const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
-    
+
     /**
      * Notification channel and ids used for backup and restore.
      */
@@ -98,8 +98,10 @@ object Notifications {
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         listOf(
-            NotificationChannelGroup(GROUP_BACKUP_RESTORE,
-                context.getString(R.string.group_backup_restore)),
+            NotificationChannelGroup(
+                GROUP_BACKUP_RESTORE,
+                context.getString(R.string.group_backup_restore)
+            ),
             NotificationChannelGroup(GROUP_DOWNLOADER, context.getString(R.string.group_downloader))
         ).forEach(context.notificationManager::createNotificationChannelGroup)
 

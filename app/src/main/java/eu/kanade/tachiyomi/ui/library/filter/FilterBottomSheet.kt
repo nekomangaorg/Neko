@@ -118,8 +118,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                    ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
-                        ?: 0
+                ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
+                ?: 0
         }
         val shadow2: View = controller.binding.shadow2
         val shadow: View = controller.binding.shadow
@@ -198,8 +198,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = 1f
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight
-                ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(
+                bottom = sheetBehavior?.peekHeight
+                    ?: 0 + 10.dpToPx + bottomBarHeight
+            )
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -390,14 +392,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 filterItems.add(it)
             }
         }
-        listOfNotNull(unreadProgress,
+        listOfNotNull(
+            unreadProgress,
             unread,
             downloaded,
             completed,
             mangaType,
             tracked,
             missingChapters,
-            merged)
+            merged
+        )
             .forEach {
                 if (!filterItems.contains(it)) {
                     filterItems.add(it)
@@ -497,8 +501,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
-        androidx.transition.TransitionManager.beginDelayedTransition(binding.filterLayout,
-            transition)
+        androidx.transition.TransitionManager.beginDelayedTransition(
+            binding.filterLayout,
+            transition
+        )
         reorderFilters()
         filterItems.forEach {
             it.reset()

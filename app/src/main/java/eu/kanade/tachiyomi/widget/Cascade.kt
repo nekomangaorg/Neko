@@ -19,17 +19,20 @@ class RoundedRectDrawable(color: Int, radius: Float) : PaintDrawable(color) {
 }
 
 fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
-
     val rippleDrawable = {
-        RippleDrawable(ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent)),
+        RippleDrawable(
+            ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent)),
             null,
-            ColorDrawable(Color.BLACK))
+            ColorDrawable(Color.BLACK)
+        )
     }
 
     return CascadePopupMenu.Styler(
         background = {
-            RoundedRectDrawable(context.getResourceColor(R.attr.colorPrimaryVariant),
-                radius = 8f.dpToPx)
+            RoundedRectDrawable(
+                context.getResourceColor(R.attr.colorPrimaryVariant),
+                radius = 8f.dpToPx
+            )
         },
         menuTitle = {
             it.titleView.typeface =
@@ -41,7 +44,6 @@ fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
                 ResourcesCompat.getFont(context, R.font.montserrat_regular)
             it.contentView.background = rippleDrawable()
             it.setGroupDividerColor(context.getResourceColor(R.attr.colorAccent))
-
         },
     )
 }

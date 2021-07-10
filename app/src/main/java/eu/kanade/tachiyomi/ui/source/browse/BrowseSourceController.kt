@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.source.LatestSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
@@ -120,8 +121,10 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return BrowseSourcePresenter(args.getString(SEARCH_QUERY_KEY) ?: "",
-            args.getBoolean(DEEP_LINK))
+        return BrowseSourcePresenter(
+            args.getString(SEARCH_QUERY_KEY) ?: "",
+            args.getBoolean(DEEP_LINK)
+        )
     }
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -129,7 +132,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        
+
         // Initialize adapter, scroll listener and recycler views
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
@@ -166,8 +169,10 @@ open class BrowseSourceController(bundle: Bundle) :
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
-                layoutParams = RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT)
+                layoutParams = RecyclerView.LayoutParams(
+                    ViewGroup.LayoutParams.MATCH_PARENT,
+                    ViewGroup.LayoutParams.MATCH_PARENT
+                )
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
         } else {
@@ -360,6 +365,13 @@ open class BrowseSourceController(bundle: Bundle) :
                 router.pushController(FollowsController().withFadeTransaction())
             }
         }
+
+        sheet.onLatestChapterClicked = {
+            sheet.dismiss()
+            adapter?.clear()
+            router.pushController(LatestSourceController().withFadeTransaction())
+        }
+
         sheet.show()
     }
 
@@ -452,8 +464,10 @@ open class BrowseSourceController(bundle: Bundle) :
             val actions = emptyList<EmptyView.Action>().toMutableList()
 
             actions += EmptyView.Action(R.string.retry, retryAction)
-            actions += EmptyView.Action(R.string.open_in_webview,
-                View.OnClickListener { openInWebView() })
+            actions += EmptyView.Action(
+                R.string.open_in_webview,
+                View.OnClickListener { openInWebView() }
+            )
 
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_compass_off,

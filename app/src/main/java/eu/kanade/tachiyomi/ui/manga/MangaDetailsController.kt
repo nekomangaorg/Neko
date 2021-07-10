@@ -409,8 +409,10 @@ class MangaDetailsController :
         val activity = activity as? MainActivity ?: return
         val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
-        if (ThemeUtil.hasDarkActionBarInLight(activity,
-                activity.getPrefTheme(presenter.preferences))
+        if (ThemeUtil.hasDarkActionBarInLight(
+                activity,
+                activity.getPrefTheme(presenter.preferences)
+            )
         ) {
             if (forThis) activityBinding.appBar.context.setTheme(
                 R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
@@ -669,17 +671,19 @@ class MangaDetailsController :
         return false
     }
 
-    //create chapter popup on long click
+    // create chapter popup on long click
     override fun onItemLongClick(position: Int) {
         val adapter = adapter ?: return
         val item = (adapter.getItem(position) as? ChapterItem) ?: return
         val itemView = getHolder(item)?.itemView ?: return
-        val popup = CascadePopupMenu(binding.root.context,
+        val popup = CascadePopupMenu(
+            binding.root.context,
             itemView,
-            styler = cascadeMenuStyler(binding.root.context))
+            styler = cascadeMenuStyler(binding.root.context)
+        )
         val isDexChapter = item.chapter.isMergedChapter().not()
 
-        //wrapper to reduce some boilerplate on menu click
+        // wrapper to reduce some boilerplate on menu click
         fun menuClick(click: () -> (Unit)) = MenuItem.OnMenuItemClickListener {
             click()
             chapterPopupMenu = null
@@ -689,10 +693,12 @@ class MangaDetailsController :
         chapterPopupMenu = position to popup
         popup.menu.apply {
             if (isDexChapter) {
-                add(R.string.comments).setOnMenuItemClickListener(menuClick {
-                    activity?.toast(R.string.comments_unavailable_dex)
-                    //viewComments(item)  })
-                })
+                add(R.string.comments).setOnMenuItemClickListener(
+                    menuClick {
+                        activity?.toast(R.string.comments_unavailable_dex)
+                        // viewComments(item)  })
+                    }
+                )
             }
             addSubMenu(R.string.mark_previous_as).also { sub ->
                 sub.add(R.string.read)
@@ -701,16 +707,23 @@ class MangaDetailsController :
                     .setOnMenuItemClickListener(menuClick { markPreviousAs(item, false) })
             }
             addSubMenu(R.string.mark_range_as).also { sub ->
-                sub.add(R.string.read).setOnMenuItemClickListener(menuClick {
-                    startReadRange(position,
-                        RangeMode.Read)
-                })
-                sub.add(R.string.unread).setOnMenuItemClickListener(menuClick {
-                    startReadRange(position,
-                        RangeMode.Unread)
-                })
+                sub.add(R.string.read).setOnMenuItemClickListener(
+                    menuClick {
+                        startReadRange(
+                            position,
+                            RangeMode.Read
+                        )
+                    }
+                )
+                sub.add(R.string.unread).setOnMenuItemClickListener(
+                    menuClick {
+                        startReadRange(
+                            position,
+                            RangeMode.Unread
+                        )
+                    }
+                )
             }
-
         }
 
         popup.show()
@@ -956,8 +969,12 @@ class MangaDetailsController :
     }
 
     override fun openSimilar() {
-        router.pushController(SimilarController(presenter.manga,
-            presenter.source).withFadeTransaction())
+        router.pushController(
+            SimilarController(
+                presenter.manga,
+                presenter.source
+            ).withFadeTransaction()
+        )
     }
 
     override fun openMerge() {
@@ -1076,12 +1093,12 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.seriesType
-                (view.context).toLowerCase(Locale.ROOT)
+            (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
-                snack == null ||
-                    snack?.getText() != text
-                )
+            snack == null ||
+                snack?.getText() != text
+            )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {

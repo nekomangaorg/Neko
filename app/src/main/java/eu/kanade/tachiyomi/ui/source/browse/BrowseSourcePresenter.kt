@@ -174,7 +174,7 @@ open class BrowseSourcePresenter(
         }
         this.appliedFilters = filters
 
-        //subscribeToMangaInitializer()
+        // subscribeToMangaInitializer()
 
         // Create a new pager.
         pager = createPager(query, filters)
@@ -192,10 +192,12 @@ open class BrowseSourcePresenter(
             .doOnNext { initializeMangaList(it.second) }
             .map {
                 it.first to it.second.map { manga ->
-                    BrowseSourceItem(manga,
+                    BrowseSourceItem(
+                        manga,
                         browseAsList,
                         sourceListType,
-                        isFollows)
+                        isFollows
+                    )
                 }
                     .filter { manga -> isDeepLink || isLibraryVisible || !manga.manga.favorite }
             }.observeOn(AndroidSchedulers.mainThread())

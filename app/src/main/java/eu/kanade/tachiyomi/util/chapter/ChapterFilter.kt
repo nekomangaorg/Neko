@@ -30,8 +30,10 @@ class ChapterFilter(
                     (unreadEnabled && it.read) ||
                     (bookmarkEnabled && it.bookmark.not()) ||
                     (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
-                    (scanlatorEnabled && it.scanlatorList()
-                        .none { group -> listValidScanlators.contains(group) })
+                    (
+                        scanlatorEnabled && it.scanlatorList()
+                            .none { group -> listValidScanlators.contains(group) }
+                        )
                 ) {
                     return@filter false
                 }

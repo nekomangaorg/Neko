@@ -27,7 +27,6 @@ class MangaHandler {
 
         return withContext(Dispatchers.IO) {
             logTimeTaken("Chapter and Manga Details for  ${manga.title}") {
-
                 val chapterList = async {
                     fetchChapterList(manga)
                 }
@@ -55,15 +54,17 @@ class MangaHandler {
     suspend fun fetchMangaDetails(manga: SManga): SManga {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Manga Detail for  ${manga.title}") {
-
                 val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
                 if (response.isSuccessful.not()) {
-                    throw(Exception("Error from MangaDex ${response.code()} error body: ${
-                        response.errorBody()?.string()
-                    }"))
+                    throw(
+                        Exception(
+                            "Error from MangaDex ${response.code()} error body: ${
+                            response.errorBody()?.string()
+                            }"
+                        )
+                        )
                 }
                 apiMangaParser.mangaDetailsParse(response.body()!!)
-
             }
         }
     }

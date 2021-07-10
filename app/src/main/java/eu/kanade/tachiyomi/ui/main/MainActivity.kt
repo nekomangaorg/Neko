@@ -93,7 +93,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import me.saket.cascade.CascadePopupMenu
 import me.saket.cascade.overrideAllPopupMenus
-import timber.log.Timber
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -354,6 +353,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     binding.appBar.y = 0f
                     nav.translationY = 0f
                     showDLQueueTutorial()
+                    if (router.backstackSize == 1) {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
+                            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
+                        }
+                    } else {
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
+                        }
+                    }
                 }
             }
         )
@@ -389,8 +397,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     else -> Gravity.TOP
                 }
             }
-        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller),
-            changeBG = false)
+        setFloatingToolbar(
+            canShowFloatingToolbar(router.backstack.lastOrNull()?.controller),
+            changeBG = false
+        )
     }
 
     open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false, changeBG: Boolean = true) {
@@ -540,7 +550,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         }
                     }
                 } catch (error: Exception) {
-                    Timber.e(error)
+                    XLog.e(error)
                 }
             }
         }
@@ -750,15 +760,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         if (onRoot) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
-                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
-            }
             binding.toolbar.navigationIcon = searchDrawable
             binding.cardToolbar.navigationIcon = searchDrawable
         } else {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-            }
             binding.toolbar.navigationIcon = drawerArrow
             binding.cardToolbar.navigationIcon = drawerArrow
         }

@@ -278,6 +278,7 @@ class ReaderActivity :
     override fun onDestroy() {
         super.onDestroy()
         viewer?.destroy()
+        binding.viewerContainer.removeAllViews()
         binding.chaptersSheet.chaptersBottomSheet.adapter = null
         viewer = null
         config = null
@@ -319,8 +320,10 @@ class ReaderActivity :
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
         val splitItem = menu?.findItem(R.id.action_shift_double_page)
-        splitItem?.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !canShowSplitAtBottom()
-        binding.chaptersSheet.shiftPageButton.isVisible = ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
+        splitItem?.isVisible =
+            ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !canShowSplitAtBottom()
+        binding.chaptersSheet.shiftPageButton.isVisible =
+            ((viewer as? PagerViewer)?.config?.doublePages ?: false) && canShowSplitAtBottom()
         (viewer as? PagerViewer)?.config?.let { config ->
             val icon = ContextCompat.getDrawable(
                 this,
@@ -333,8 +336,10 @@ class ReaderActivity :
         (binding.toolbar.background as? LayerDrawable)?.let { layerDrawable ->
             val isDoublePage = splitItem?.isVisible ?: false
             // Shout out to Google for not fixing setVisible https://issuetracker.google.com/issues/127538945
-            layerDrawable.findDrawableByLayerId(R.id.layer_full_width).alpha = if (!isDoublePage) 255 else 0
-            layerDrawable.findDrawableByLayerId(R.id.layer_one_item).alpha = if (isDoublePage) 255 else 0
+            layerDrawable.findDrawableByLayerId(R.id.layer_full_width).alpha =
+                if (!isDoublePage) 255 else 0
+            layerDrawable.findDrawableByLayerId(R.id.layer_one_item).alpha =
+                if (isDoublePage) 255 else 0
         }
         return super.onPrepareOptionsMenu(menu)
     }
@@ -410,7 +415,7 @@ class ReaderActivity :
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -454,7 +459,9 @@ class ReaderActivity :
             config.shiftDoublePage = !config.shiftDoublePage
             presenter.viewerChapters?.let {
                 (viewer as? PagerViewer)?.updateShifting()
+                XLog.d("about to shiftDoublePages")
                 (viewer as? PagerViewer)?.setChaptersDoubleShift(it)
+                XLog.d("finished shiftDoublePages")
                 invalidateOptionsMenu()
             }
         }
@@ -827,7 +834,8 @@ class ReaderActivity :
                     }
                 )
                 binding.appBar.startAnimation(toolbarAnimation)
-                BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable = true
+                BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable =
+                    true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else {
                 binding.readerMenu.isVisible = false
@@ -945,7 +953,10 @@ class ReaderActivity :
                 ) % 2 != 0
         }
         presenter.viewerChapters?.let {
+            XLog.d("about to reloadChapter call set chaptersDoubleShift")
             pViewer.setChaptersDoubleShift(it)
+            XLog.d("finished reloadChapter call set chaptersDoubleShift")
+
         }
         invalidateOptionsMenu()
     }
@@ -957,9 +968,10 @@ class ReaderActivity :
     fun setChapters(viewerChapters: ViewerChapters) {
         binding.pleaseWait.isVisible = false
         if (indexChapterToShift != null && indexPageToShift != null) {
-            viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }?.let {
-                (viewer as? PagerViewer)?.updateShifting(it)
-            }
+            viewerChapters.currChapter.pages?.find { it.index == indexPageToShift && it.chapter.chapter.id == indexChapterToShift }
+                ?.let {
+                    (viewer as? PagerViewer)?.updateShifting(it)
+                }
             indexChapterToShift = null
             indexPageToShift = null
         } else if (lastShiftDoubleState != null) {
@@ -978,11 +990,15 @@ class ReaderActivity :
         intentPageNumber = null
         binding.toolbar.subtitle = viewerChapters.currChapter.chapter.name
         if (viewer is R2LPagerViewer) {
-            binding.readerNav.leftChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.rightChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
+            binding.readerNav.leftChapter.alpha =
+                if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha =
+                if (viewerChapters.prevChapter != null) 1f else 0.5f
         } else {
-            binding.readerNav.rightChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.leftChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha =
+                if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.leftChapter.alpha =
+                if (viewerChapters.prevChapter != null) 1f else 0.5f
         }
     }
 
@@ -1052,7 +1068,8 @@ class ReaderActivity :
         }
 
         val totalPages = pages.size.toString()
-        binding.pageNumber.text = if (resources.isLTR) "$currentPage/$totalPages" else "$totalPages/$currentPage"
+        binding.pageNumber.text =
+            if (resources.isLTR) "$currentPage/$totalPages" else "$totalPages/$currentPage"
         if (viewer is R2LPagerViewer) {
             binding.readerNav.rightPageText.text = currentPage
             binding.readerNav.leftPageText.text = totalPages
@@ -1067,7 +1084,8 @@ class ReaderActivity :
         binding.readerNav.pageSeekbar.max = pages.lastIndex
         val progress = page.index + if (hasExtraPage) 1 else 0
         // For a double page, show the last 2 pages as if it was the final part of the seekbar
-        binding.readerNav.pageSeekbar.progress = if (progress == pages.lastIndex) progress else page.index
+        binding.readerNav.pageSeekbar.progress =
+            if (progress == pages.lastIndex) progress else page.index
     }
 
     /**
@@ -1223,15 +1241,16 @@ class ReaderActivity :
             DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
 
         val pageNumber = if (secondPage != null) {
-            getString(R.string.pages_, if (resources.isLTR) "${page.number}-${page.number + 1}" else "${page.number + 1}-${page.number}")
+            getString(R.string.pages_,
+                if (resources.isLTR) "${page.number}-${page.number + 1}" else "${page.number + 1}-${page.number}")
         } else {
             getString(R.string.page_, page.number)
         }
         val text = "${manga.title}: ${
-        getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number)
-        )
+            getString(
+                R.string.chapter_,
+                decimalFormat.format(chapter.chapter_number)
+            )
         }, $pageNumber"
 
         val stream = file.getUriCompat(this)
@@ -1285,7 +1304,10 @@ class ReaderActivity :
             }
 
             val intent =
-                WebViewActivity.newIntent(this, presenter.manga!!.source, url, currentChapter.chapter.name)
+                WebViewActivity.newIntent(this,
+                    presenter.manga!!.source,
+                    url,
+                    currentChapter.chapter.name)
             startActivity(intent)
         }
     }

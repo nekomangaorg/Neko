@@ -185,7 +185,7 @@ class RecentsController(bundle: Bundle? = null) :
         activityBinding?.root?.post {
             val height =
                 activityBinding?.bottomNav?.height ?: view.rootWindowInsets?.systemWindowInsetBottom
-                ?: 0
+                    ?: 0
             binding.recycler.updatePaddingRelative(bottom = height)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
                 bottom = height

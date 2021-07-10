@@ -65,6 +65,16 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <com.google.android.material.button.MaterialButton
+            android:id="@+id/latest_chapters_btn"
+            style="@style/Neko.Button.TextButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/latest"
+            app:layout_constraintStart_toEndOf="@id/random_manga_btn"
+            app:layout_constraintEnd_toStartOf="@id/follows_btn"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/follows_btn"
             style="@style/Neko.Button.TextButton"
             android:layout_width="wrap_content"

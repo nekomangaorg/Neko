@@ -39,8 +39,10 @@ class BackupRestoreService : Service() {
      */
     override fun onCreate() {
         super.onCreate()
-        startForeground(Notifications.ID_RESTORE_PROGRESS,
-            restoreHelper.progressNotification.build())
+        startForeground(
+            Notifications.ID_RESTORE_PROGRESS,
+            restoreHelper.progressNotification.build()
+        )
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "BackupRestoreService:WakeLock"
@@ -86,9 +88,11 @@ class BackupRestoreService : Service() {
         }
         job = GlobalScope.launch(handler) {
             when {
-                mode == BackupConst.BACKUP_TYPE_FULL -> FullRestore(this@BackupRestoreService,
-                    job).restoreBackup(uri)
-                //else -> LegacyRestore(this@BackupRestoreService, job).restoreBackup(uri)
+                mode == BackupConst.BACKUP_TYPE_FULL -> FullRestore(
+                    this@BackupRestoreService,
+                    job
+                ).restoreBackup(uri)
+                // else -> LegacyRestore(this@BackupRestoreService, job).restoreBackup(uri)
             }
         }
         job?.invokeOnCompletion { stopSelf(startId) }

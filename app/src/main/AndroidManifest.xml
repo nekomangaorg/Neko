@@ -3,6 +3,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="eu.kanade.tachiyomi">
 
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
@@ -23,6 +24,7 @@
         android:name=".App"
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_rules"
+        android:preserveLegacyExternalStorage="true"
         android:hasFragileUserData="true"
         android:hardwareAccelerated="true"
         android:usesCleartextTraffic="true"

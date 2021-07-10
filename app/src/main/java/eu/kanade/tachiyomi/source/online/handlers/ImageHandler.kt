@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
 import okhttp3.Request
 import okhttp3.Response
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import kotlin.time.Duration
@@ -84,7 +83,7 @@ class ImageHandler {
             runCatching {
                 network.service.atHomeImageReport(atHomeImageReportDto)
             }.onFailure { e ->
-                Timber.e(e, "error trying to post to dex@home")
+                XLog.e("error trying to post to dex@home", e)
             }
         }
     }
@@ -103,8 +102,10 @@ class ImageHandler {
                 true -> data[0]
                 false -> {
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    service.getAtHomeServer(page.mangaDexChapterId,
-                        preferences.usePort443Only()).body()!!.baseUrl
+                    service.getAtHomeServer(
+                        page.mangaDexChapterId,
+                        preferences.usePort443Only()
+                    ).body()!!.baseUrl
                 }
             }
         XLog.d("Image server is $mdAtHomeServerUrl")

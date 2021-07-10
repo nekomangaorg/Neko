@@ -172,7 +172,7 @@ class FilterHandler {
     val sortableList = listOf(
         Pair("Number of follows", ""),
         Pair("Created at", "createdAt"),
-        Pair("Updated at", "updatedAt"),
+        Pair("Manga info updated", "updatedAt"),
     )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
@@ -180,12 +180,14 @@ class FilterHandler {
     fun getQueryMap(filters: FilterList): Map<String, Any> {
         val queryMap = mutableMapOf<String, Any>()
 
-        val originalLanguageList = mutableListOf<String>() //originalLanguage[]
-        val contentRatingList = mutableListOf<String>() //contentRating[]
-        val demographicList = mutableListOf<String>()//publicationDemographic[]
-        val statusList = mutableListOf<String>()//status[]
-        val includeTagList = mutableListOf<String>()//includedTags[]
-        val excludeTagList = mutableListOf<String>()//excludedTags[]
+        val originalLanguageList = mutableListOf<String>() // originalLanguage[]
+        val contentRatingList = mutableListOf<String>() // contentRating[]
+        val demographicList = mutableListOf<String>() // publicationDemographic[]
+        val statusList = mutableListOf<String>() // status[]
+        val includeTagList = mutableListOf<String>() // includedTags[]
+        val excludeTagList = mutableListOf<String>() // excludedTags[]
+
+        // if (filters.fin)
 
         // add filters
         filters.forEach { filter ->
@@ -237,10 +239,12 @@ class FilterHandler {
                     }
                 }
                 is TagInclusionMode -> {
-                    queryMap["includedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
+                    queryMap["includedTagsMode"] =
+                        filter.values[filter.state].uppercase(Locale.US)
                 }
                 is TagExclusionMode -> {
-                    queryMap["excludedTagsMode"] = filter.values[filter.state].uppercase(Locale.US)
+                    queryMap["excludedTagsMode"] =
+                        filter.values[filter.state].uppercase(Locale.US)
                 }
             }
         }

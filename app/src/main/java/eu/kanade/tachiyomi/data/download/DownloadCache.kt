@@ -124,7 +124,8 @@ class DownloadCache(
                 if (!it.contains(MergeSource.name)) {
                     val mangadexId = it.substringAfterLast("- ")
                     if (mangadexId.isNotBlank() && mangadexId.isDigitsOnly() && !ids.contains(
-                            mangadexId)
+                            mangadexId
+                        )
                     ) {
                         count++
                     }
@@ -184,7 +185,8 @@ class DownloadCache(
                     findManga(sourceMangaPair.first, mangaDir.key, sourceValue.key) ?: findManga(
                         sourceMangaPair.second,
                         mangaDir.key,
-                        sourceValue.key)
+                        sourceValue.key
+                    )
                 val id = manga?.id ?: return@mapNotNull null
 
                 val mangadexIds = mangaDir.value.files.map { it.substringAfterLast("- ", "") }

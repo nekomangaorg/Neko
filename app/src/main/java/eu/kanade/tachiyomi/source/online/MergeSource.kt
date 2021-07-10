@@ -83,7 +83,7 @@ class MergeSource : ReducedHttpSource() {
 
     suspend fun fetchChapters(mergeMangaUrl: String): List<SChapter> {
         return withContext(Dispatchers.IO) {
-            val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).execute()
+            val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).await()
             val vmChapters =
                 response.asJsoup().select("script:containsData(MainFunction)").first().data()
                     .substringAfter("vm.Chapters = ").substringBefore(";")
@@ -95,7 +95,7 @@ class MergeSource : ReducedHttpSource() {
 
                     name = json["ChapterName"].nullString.let {
                         if (it.isNullOrEmpty()) "$type ${
-                            chapterImage(indexChapter)
+                        chapterImage(indexChapter)
                         }" else it
                     }
 
@@ -149,8 +149,10 @@ class MergeSource : ReducedHttpSource() {
     fun pageListParse(response: Response): List<Page> {
         val document = response.asJsoup()
         val script = document.select("script:containsData(MainFunction)").first().data()
-        val curChapter = gson.fromJson<JsonElement>(script.substringAfter("vm.CurChapter = ")
-            .substringBefore(";"))
+        val curChapter = gson.fromJson<JsonElement>(
+            script.substringAfter("vm.CurChapter = ")
+                .substringBefore(";")
+        )
 
         val pageTotal = curChapter["Page"].string.toInt()
 
@@ -191,8 +193,13 @@ class MergeSource : ReducedHttpSource() {
         if (1 != t) {
             index = "-index-$t"
         }
-        val n = e.substring(1, e.length - 1)
-
+        val dgt = when {
+            e.toInt() < 100100 -> 4
+            e.toInt() < 101000 -> 3
+            e.toInt() < 110000 -> 2
+            else -> 1
+        }
+        val n = e.substring(dgt, e.length - 1)
         var suffix = ""
         val path = e.substring(e.length - 1).toInt()
         if (0 != path) {

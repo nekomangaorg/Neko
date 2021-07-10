@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.source.online.handlers.ApiMangaParser
 import eu.kanade.tachiyomi.source.online.handlers.FilterHandler
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
+import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
@@ -76,6 +77,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(ImageHandler())
 
         addSingleton(SimilarHandler())
+
+        addSingleton(LatestChapterHandler())
 
         addSingleton(MangaDexLoginHelper())
 

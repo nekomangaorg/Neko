@@ -34,7 +34,7 @@ class ChapterHolder(
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
         val isLocked = item.isLocked
-        
+
         binding.chapterTitle.text = when (manga.displayMode) {
             Manga.DISPLAY_NUMBER -> {
                 val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
@@ -67,8 +67,6 @@ class ChapterHolder(
                 )
             )
         }
-
-
 
         if (chapter.language.isNullOrBlank() || chapter.language.equals("en", true)) {
             binding.flag.isVisible = false

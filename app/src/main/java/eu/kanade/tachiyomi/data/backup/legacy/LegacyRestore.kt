@@ -118,7 +118,8 @@ class LegacyRestore(val context: Context, val job: Job?) {
         errors.addAll(tmpErrors)
 
         val logFile = restoreHelper.writeErrorLog(errors, skippedAmount, skippedTitles)
-        restoreHelper.showResultNotification(logFile.parent,
+        restoreHelper.showResultNotification(
+            logFile.parent,
             logFile.name,
             categoriesAmount,
             restoreProgress,
@@ -127,7 +128,8 @@ class LegacyRestore(val context: Context, val job: Job?) {
             totalAmount,
             cancelled,
             errors,
-            trackingErrors)
+            trackingErrors
+        )
     }
 
     /**Restore categories if they were backed up
@@ -150,8 +152,10 @@ class LegacyRestore(val context: Context, val job: Job?) {
      */
     private suspend fun restoreManga(obj: JsonObject) {
         val manga = backupManager.parser.fromJson<MangaImpl>(obj.get(Backup.MANGA))
-        val chapters = backupManager.parser.fromJson<List<ChapterImpl>>(obj.get(Backup.CHAPTERS)
-            ?: JsonArray())
+        val chapters = backupManager.parser.fromJson<List<ChapterImpl>>(
+            obj.get(Backup.CHAPTERS)
+                ?: JsonArray()
+        )
         val categories =
             backupManager.parser.fromJson<List<String>>(obj.get(Backup.CATEGORIES) ?: JsonArray())
         val history =
@@ -224,12 +228,18 @@ class LegacyRestore(val context: Context, val job: Job?) {
                     errors.add("${manga.title} - ${e.message}")
                 }
             } else {
-                errors.add("${manga.title} - ${
-                    context.getString(R.string.not_logged_into_,
-                        context.getString(service?.nameRes()!!))
-                }")
-                val notLoggedIn = context.getString(R.string.not_logged_into_,
-                    context.getString(service?.nameRes()!!))
+                errors.add(
+                    "${manga.title} - ${
+                    context.getString(
+                        R.string.not_logged_into_,
+                        context.getString(service?.nameRes()!!)
+                    )
+                    }"
+                )
+                val notLoggedIn = context.getString(
+                    R.string.not_logged_into_,
+                    context.getString(service?.nameRes()!!)
+                )
                 trackingErrors.add(notLoggedIn)
             }
         }

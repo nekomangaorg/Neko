@@ -110,14 +110,16 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     fun onRefreshDone() {
         for (i in adapter!!.items.indices) {
             (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(
-                false)
+                false
+            )
         }
     }
 
     fun onRefreshError(error: Throwable) {
         for (i in adapter!!.items.indices) {
             (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(
-                false)
+                false
+            )
         }
         activity.toast(error.message)
     }
@@ -236,7 +238,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     fun refreshItem(index: Int) {
         (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(
-            true)
+            true
+        )
     }
 
     fun refreshTrack(item: TrackService?) {
@@ -270,10 +273,12 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         when (type) {
             SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(
                 item,
-                date)
+                date
+            )
             SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(
                 item,
-                date)
+                date
+            )
         }
     }
 

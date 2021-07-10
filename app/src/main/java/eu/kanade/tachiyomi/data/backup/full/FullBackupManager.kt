@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.backup.full
 
 import android.content.Context
 import android.net.Uri
+import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY_MASK
@@ -35,7 +36,6 @@ import kotlinx.serialization.protobuf.ProtoBuf
 import okio.buffer
 import okio.gzip
 import okio.sink
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
 
@@ -95,7 +95,7 @@ class FullBackupManager(val context: Context) {
             file.openOutputStream().sink().gzip().buffer().use { it.write(byteArray) }
             return file.uri.toString()
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             throw e
         }
     }

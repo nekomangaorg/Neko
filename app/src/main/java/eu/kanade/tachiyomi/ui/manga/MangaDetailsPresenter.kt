@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.getNewScanlatorsConditionalResetFilter
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -184,7 +185,8 @@ class MangaDetailsPresenter(
     private fun updateScanlators(chapters: List<ChapterItem>) {
         allChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.toSet()
         if (filteredScanlators.contains(MergeSource.name) && !allChapterScanlators.contains(
-                MergeSource.name)
+                MergeSource.name
+            )
         ) {
             val tempSet = filteredScanlators.toMutableSet()
             tempSet.remove(MergeSource.name)
@@ -482,18 +484,16 @@ class MangaDetailsPresenter(
 
             if (networkManga != null) {
                 launchIO {
-
                     // only copy if it had no data
                     manga.copyFrom(networkManga)
                     manga.initialized = true
 
                     // force new cover if it exists
                     if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
-                            .getOrDefault()
+                        .getOrDefault()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl)
                     }
-
 
                     db.insertManga(manga).executeOnIO()
 
@@ -510,7 +510,7 @@ class MangaDetailsPresenter(
                                 .build()
 
                         if (Coil.imageLoader(preferences.context)
-                                .execute(request) is SuccessResult
+                            .execute(request) is SuccessResult
                         ) {
                             preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
                             withContext(Dispatchers.Main) {
@@ -522,6 +522,7 @@ class MangaDetailsPresenter(
             }
             val finChapters = deferredChapters.await() + deferredMergedChapters.await()
             if (!error) {
+                val originalChapters = db.getChapters(manga).executeAsBlocking()
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     val downloadNew = preferences.downloadNew().get()
@@ -538,6 +539,16 @@ class MangaDetailsPresenter(
                         }
                     }
                     mangaShortcutManager.updateShortcuts()
+
+                    val allChaps = db.getChapters(manga).executeOnIO()
+                    launch {
+                        manga.getNewScanlatorsConditionalResetFilter(
+                            db,
+                            originalChapters,
+                            newChapters.first
+                        )
+                        updateScanlators(allChaps.map { it.toModel() })
+                    }
                 }
                 if (newChapters.second.isNotEmpty()) {
                     val removedChaptersId = newChapters.second.map { it.id }
@@ -556,14 +567,8 @@ class MangaDetailsPresenter(
             getChapters()
 
             launchIO {
-                val allChaps = db.getChapters(manga).executeOnIO()
                 launch {
-                    updateScanlators(allChaps.map { it.toModel() })
-                    manga.scanlator_filter?.let {
-                        filteredScanlators = MdUtil.getScanlators(it).toSet()
-                    }
-                }
-                launch {
+                    val allChaps = db.getChapters(manga).executeOnIO()
                     val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
                     if (missingChapters != manga.missing_chapters) {
                         manga.missing_chapters = missingChapters
@@ -663,7 +668,7 @@ class MangaDetailsPresenter(
                     it.pages_left = pagesLeft ?: 0
                 }
                 if (preferences.readingSync() && it.chapter.isMergedChapter()
-                        .not() && skipReadingSync.not()
+                    .not() && skipReadingSync.not()
                 ) {
                     launchIO {
                         when (read) {
@@ -680,8 +685,6 @@ class MangaDetailsPresenter(
             if (read && deleteNow && preferences.removeAfterMarkedAsRead() && numberOfNonBookmarkedChapters.size > 0) {
                 deleteChapters(numberOfNonBookmarkedChapters, false)
             }
-
-
 
             getChapters()
             withContext(Dispatchers.Main) { controller.updateChapters(chapters) }
@@ -944,7 +947,6 @@ class MangaDetailsPresenter(
                                     }
                                 }
 
-
                                 if (trackItem.total_chapters == 0 && manga.last_chapter_number != null && manga.last_chapter_number != 0) {
                                     trackItem.total_chapters = manga.last_chapter_number!!
                                 }
@@ -971,7 +973,6 @@ class MangaDetailsPresenter(
                     .toList()
                 markChaptersRead(chaptersToMark, true, skipReadingSync = true)
             }
-
         }
     }
 

@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
@@ -28,7 +29,8 @@ class ApiMangaParser {
 
             val manga = mangaDto.toBasicManga()
 
-            manga.description = MdUtil.cleanDescription(mangaAttributesDto.description["en"]!!)
+            manga.description =
+                MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap()["en"] ?: "")
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
@@ -37,7 +39,6 @@ class ApiMangaParser {
             val artists = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
-
 
             manga.author = authors.joinToString()
             manga.artist = artists.joinToString()
@@ -52,7 +53,7 @@ class ApiMangaParser {
                 manga.users = it.users
             }*/
 
-            mangaAttributesDto.links?.let { linkMap ->
+            mangaAttributesDto.links?.asMdMap()?.let { linkMap ->
                 linkMap["al"]?.let { id -> manga.anilist_id = id }
                 linkMap["kt"]?.let { id -> manga.kitsu_id = id }
                 linkMap["mal"]?.let { id -> manga.my_anime_list_id = id }

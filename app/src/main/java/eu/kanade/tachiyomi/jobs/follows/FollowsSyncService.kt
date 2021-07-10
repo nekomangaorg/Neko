@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.jobs.follows
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
@@ -11,11 +12,8 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.util.system.executeOnIO
-import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -29,7 +27,6 @@ class FollowsSyncService {
     val sourceManager: SourceManager = Injekt.get()
     val trackManager: TrackManager = Injekt.get()
     val followsHandler: FollowsHandler = Injekt.get()
-    private val requestSemaphore = Semaphore(5)
 
     /**
      * Syncs follows list manga into library based off the preference
@@ -51,6 +48,9 @@ class FollowsSyncService {
             }
             XLog.d("total number from mangadex is ${listManga.size}")
 
+            val categories = db.getCategories().executeAsBlocking()
+            val defaultCategoryId = preferences.defaultCategory()
+            val defaultCategory = categories.find { it.id == defaultCategoryId }
 
             listManga.forEach { networkManga ->
                 updateNotification(networkManga.title, count.andIncrement, listManga.size)
@@ -71,6 +71,10 @@ class FollowsSyncService {
                     countOfAdded.incrementAndGet()
                     dbManga.favorite = true
                     dbManga.copyFrom(networkManga)
+                    if (defaultCategory != null) {
+                        val mc = MangaCategory.create(dbManga, defaultCategory)
+                        db.setMangaCategories(listOf(mc), listOf(dbManga))
+                    }
 
                     db.insertManga(dbManga).executeAsBlocking()
                 }
@@ -85,10 +89,11 @@ class FollowsSyncService {
      */
     suspend fun toMangaDex(
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
-        completeNotification: () -> Unit,
+        completeNotification: (total: Int) -> Unit,
         ids: String? = null,
-    ): Int {
-        return withContext(Dispatchers.IO) {
+    ) {
+        withContext(Dispatchers.IO) {
+            XLog.d("Starting to MangaDex sync")
             val count = AtomicInteger(0)
             val countNew = AtomicInteger(0)
 
@@ -101,41 +106,34 @@ class FollowsSyncService {
             // only add if the current tracker is not set to reading
 
             listManga.forEach { manga ->
-                launchIO {
-                    requestSemaphore.withPermit {
+                updateNotification(manga.title, count.andIncrement, listManga.size)
 
-                        updateNotification(manga.title, count.andIncrement, listManga.size)
+                // Get this manga's trackers from the database
+                var mdListTrack = db.getMDList(manga).executeOnIO()
 
-                        // Get this manga's trackers from the database
-                        var mdListTrack = db.getMDList(manga).executeOnIO()
-
-                        //create mdList if missing
-                        if (mdListTrack == null) {
-                            mdListTrack = trackManager.mdList.createInitialTracker(manga)
-                            db.insertTrack(mdListTrack).executeAsBlocking()
-                        }
-
-                        val trackItem = TrackItem(mdListTrack, trackManager.mdList)
-
-                        if (trackItem.track!!.status == FollowStatus.UNFOLLOWED.int) {
-
-                            withIOContext {
-                                followsHandler.updateFollowStatus(MdUtil.getMangaId(manga.url),
-                                    FollowStatus.READING)
-                            }
-
-                            trackItem.track.status = FollowStatus.READING.int
-                            val returnedTracker = trackItem.service.update(trackItem.track)
-                            db.insertTrack(returnedTracker).executeOnIO()
-                            countNew.incrementAndGet()
-                        }
-                    }
+                // create mdList if missing
+                if (mdListTrack == null) {
+                    mdListTrack = trackManager.mdList.createInitialTracker(manga)
+                    db.insertTrack(mdListTrack).executeAsBlocking()
                 }
 
-            }
-            completeNotification()
+                val trackItem = TrackItem(mdListTrack, trackManager.mdList)
 
-            countNew.get()
+                if (trackItem.track!!.status == FollowStatus.UNFOLLOWED.int) {
+                    withIOContext {
+                        followsHandler.updateFollowStatus(
+                            MdUtil.getMangaId(manga.url),
+                            FollowStatus.READING
+                        )
+
+                        trackItem.track.status = FollowStatus.READING.int
+                        val returnedTracker = trackItem.service.update(trackItem.track)
+                        db.insertTrack(returnedTracker).executeOnIO()
+                    }
+                    countNew.incrementAndGet()
+                }
+            }
+            completeNotification(countNew.get())
         }
     }
 }

@@ -12,8 +12,8 @@ import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.database.models.MangaSimilarImpl
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_ID
-import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_DATA
+import eu.kanade.tachiyomi.data.database.tables.SimilarTable.COL_MANGA_ID
 import eu.kanade.tachiyomi.data.database.tables.SimilarTable.TABLE
 
 class SimilarTypeMapping : SQLiteTypeMapping<MangaSimilar>(

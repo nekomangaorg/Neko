@@ -44,7 +44,7 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
             }
         }
         return when {
-            validated -> "bearer: ${loginHelper.preferences.sessionToken()!!}"
+            validated -> "Bearer ${loginHelper.preferences.sessionToken()!!}"
             else -> ""
         }
     }

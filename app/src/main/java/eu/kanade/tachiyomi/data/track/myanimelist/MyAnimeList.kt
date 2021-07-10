@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track.myanimelist
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -12,7 +13,6 @@ import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
@@ -99,7 +99,11 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return api.remove(track)
     }
 
-    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
+    override suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch> {
         if (query.startsWith(SEARCH_ID_PREFIX)) {
             query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
                 return listOf(api.getMangaDetails(id))
@@ -129,7 +133,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             saveCredentials(username, oauth.access_token)
             true
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
             logout()
             false
         }
@@ -152,6 +156,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
             null
         }
     }
+
     companion object {
         const val READING = 1
         const val COMPLETED = 2

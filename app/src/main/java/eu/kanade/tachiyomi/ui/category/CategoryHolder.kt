@@ -10,7 +10,6 @@ import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
-
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.CategoriesItemBinding

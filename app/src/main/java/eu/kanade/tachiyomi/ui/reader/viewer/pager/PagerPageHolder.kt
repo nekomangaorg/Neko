@@ -25,6 +25,7 @@ import coil.loadAny
 import coil.request.CachePolicy
 import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.elvishew.xlog.XLog
 import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -50,7 +51,6 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -63,7 +63,7 @@ import kotlin.math.roundToInt
 class PagerPageHolder(
     val viewer: PagerViewer,
     val page: ReaderPage,
-    private var extraPage: ReaderPage? = null
+    private var extraPage: ReaderPage? = null,
 ) : FrameLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**
@@ -362,7 +362,8 @@ class PagerPageHolder(
                     if (viewer.config.readerTheme >= 2) {
                         val imageView = initSubsamplingImageView()
                         if (page.bg != null &&
-                            page.bgType == getBGType(viewer.config.readerTheme, context) + item.hashCode()
+                            page.bgType == getBGType(viewer.config.readerTheme,
+                                context) + item.hashCode()
                         ) {
                             imageView.setImage(ImageSource.inputStream(openStream!!))
                             imageView.background = page.bg
@@ -378,7 +379,7 @@ class PagerPageHolder(
                                 try {
                                     imageView.background = setBG(bytesArray)
                                 } catch (e: Exception) {
-                                    Timber.e(e.localizedMessage)
+                                    XLog.e(e.localizedMessage)
                                     imageView.background = ColorDrawable(Color.WHITE)
                                 } finally {
                                     page.bg = imageView.background
@@ -406,12 +407,16 @@ class PagerPageHolder(
             .doOnUnsubscribe {
                 try {
                     openStream?.close()
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                    XLog.e(e)
+                }
             }
             .doOnError {
                 try {
                     openStream?.close()
-                } catch (e: Exception) {}
+                } catch (e: Exception) {
+                    XLog.e(e)
+                }
             }
             .subscribe({}, {})
     }
@@ -487,11 +492,13 @@ class PagerPageHolder(
             setCropBorders(config.imageCropBorders)
             val topInsets =
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetTop?.toFloat() ?: 0f
+                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetTop?.toFloat()
+                        ?: 0f
                 } else 0f
             val bottomInsets =
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetBottom?.toFloat() ?: 0f
+                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetBottom?.toFloat()
+                        ?: 0f
                 } else 0f
             setExtendPastCutout(config.cutoutBehavior == CUTOUT_START_EXTENDED && config.scaleTypeIsFullFit() && topInsets + bottomInsets > 0)
             if ((config.cutoutBehavior != CUTOUT_IGNORE || !config.scaleTypeIsFullFit()) &&
@@ -528,7 +535,8 @@ class PagerPageHolder(
                         ) {
                             setScaleAndCenter(
                                 scale,
-                                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f))
+                                PointF(centerV,
+                                    (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f))
                             )
                         }
                         onImageDecoded()
@@ -672,7 +680,7 @@ class PagerPageHolder(
             imageStream.close()
             page.fullPage = true
             skipExtra = true
-            Timber.e("Cannot combine pages ${e.message}")
+            XLog.e("Cannot combine pages ${e.message}")
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(96) }
@@ -696,7 +704,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             skipExtra = true
             page.isolatedPage = true
-            Timber.e("Cannot combine pages ${e.message}")
+            XLog.e("Cannot combine pages ${e.message}")
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(97) }

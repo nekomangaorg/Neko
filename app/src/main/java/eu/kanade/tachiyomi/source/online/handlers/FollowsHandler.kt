@@ -34,7 +34,6 @@ class FollowsHandler {
      */
     suspend fun fetchFollows(): MangaListPage {
         return withContext(Dispatchers.IO) {
-
             val readingFuture = async { service.readingStatusAllManga().body()!!.statuses }
 
             val response = async { service.userFollowList(0) }

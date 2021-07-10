@@ -12,7 +12,6 @@ import com.mikepenz.iconics.typeface.IIcon
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.CommonViewEmptyBinding
 import eu.kanade.tachiyomi.util.system.create
-import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setVectorCompat
 
 class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -59,9 +58,9 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                         null
                     ) as MaterialButton
                     ).apply {
-                        setText(it.resId)
-                        setOnClickListener(it.listener)
-                    }
+                    setText(it.resId)
+                    setOnClickListener(it.listener)
+                }
 
                 binding.actionsContainer.addView(button)
             }
@@ -119,9 +118,9 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                         null
                     ) as MaterialButton
                     ).apply {
-                        setText(it.resId)
-                        setOnClickListener(it.listener)
-                    }
+                    setText(it.resId)
+                    setOnClickListener(it.listener)
+                }
 
                 binding.actionsContainer.addView(button)
             }

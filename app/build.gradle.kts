@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 118
-    const val versionName = "2.5.1"
+    const val versionCode = 120
+    const val versionName = "2.5.3"
 }
 
 plugins {
@@ -101,7 +101,7 @@ dependencies {
     implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43") {
         exclude(module = "image-decoder")
     }
-    implementation("com.github.tachiyomiorg:image-decoder:0e91111")
+    implementation("com.github.tachiyomiorg:image-decoder:7481a4a")
 
     // Source models and interfaces from Tachiyomi 1.x
     implementation("tachiyomi.sourceapi:source-api:1.1")
@@ -182,9 +182,9 @@ dependencies {
     implementation("org.jsoup:jsoup:1.13.1")
 
     // Icons
-    implementation("com.mikepenz:iconics-core:5.2.8")
-    implementation("com.mikepenz:iconics-views:5.2.8")
-    implementation("com.mikepenz:community-material-typeface:5.0.45.1-kotlin@aar")
+    implementation("com.mikepenz:iconics-core:5.3.0-b01")
+    implementation("com.mikepenz:iconics-views:5.3.0-b01")
+    implementation("com.mikepenz:community-material-typeface:5.8.55.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
 
     // Job scheduling
@@ -281,6 +281,7 @@ dependencies {
 
 
     implementation("com.mikepenz:aboutlibraries:8.9.0")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
 
@@ -291,6 +292,7 @@ tasks {
             "-Xopt-in=kotlin.Experimental",
             "-Xopt-in=kotlin.RequiresOptIn",
             "-Xopt-in=kotlin.time.ExperimentalTime",
+            "-Xopt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-Xuse-experimental=kotlin.ExperimentalStdlibApi",
             "-Xuse-experimental=kotlinx.coroutines.FlowPreview",
             "-Xuse-experimental=kotlinx.coroutines.ExperimentalCoroutinesApi",

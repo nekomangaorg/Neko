@@ -10,9 +10,9 @@ import com.pushtorefresh.storio.sqlite.queries.DeleteQuery
 import com.pushtorefresh.storio.sqlite.queries.InsertQuery
 import com.pushtorefresh.storio.sqlite.queries.UpdateQuery
 import eu.kanade.tachiyomi.data.database.models.CachedManga
+import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_RATING
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_TITLE
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_UUID
-import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.COL_MANGA_RATING
 import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.TABLE_FTS
 
 class CacheMangaTypeMapping : SQLiteTypeMapping<CachedManga>(

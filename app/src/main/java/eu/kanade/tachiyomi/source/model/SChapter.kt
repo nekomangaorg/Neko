@@ -29,7 +29,7 @@ interface SChapter : Serializable {
     var mangadex_chapter_id: String
 
     var old_mangadex_id: String?
-    
+
     fun chapterLog(): String {
         return "$name - $scanlator"
     }

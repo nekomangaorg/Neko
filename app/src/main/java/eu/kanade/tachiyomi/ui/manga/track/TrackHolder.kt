@@ -92,7 +92,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
 
     private fun starIcon(track: Track): Int {
         return if (track.score == 0f || binding.trackScore.text.toString()
-                .toFloatOrNull() != null
+            .toFloatOrNull() != null
         ) {
             R.drawable.ic_star_12dp
         } else {

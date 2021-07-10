@@ -63,9 +63,11 @@ class LibraryUpdateNotifier(private val context: Context) {
             setOngoing(true)
             setOnlyAlertOnce(true)
             color = ContextCompat.getColor(context, R.color.colorAccent)
-            addAction(R.drawable.ic_close_24dp,
+            addAction(
+                R.drawable.ic_close_24dp,
                 context.getString(android.R.string.cancel),
-                cancelIntent)
+                cancelIntent
+            )
         }
     }
 
@@ -109,9 +111,13 @@ class LibraryUpdateNotifier(private val context: Context) {
                 if (uri == null) {
                     setContentTitle("502: MangaDex appears to be down")
                 } else {
-                    setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed,
-                        errors.size,
-                        errors.size))
+                    setContentTitle(
+                        context.resources.getQuantityString(
+                            R.plurals.notification_update_failed,
+                            errors.size,
+                            errors.size
+                        )
+                    )
                     addAction(
                         R.drawable.nnf_ic_file_folder,
                         context.getString(R.string.view_all_errors),

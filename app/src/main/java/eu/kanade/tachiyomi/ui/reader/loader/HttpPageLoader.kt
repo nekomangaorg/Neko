@@ -125,7 +125,8 @@ class HttpPageLoader(
 
             // Check if the image has been deleted
             if (page.status == Page.READY && imageUrl != null && !chapterCache.isImageInCache(
-                    imageUrl)
+                    imageUrl
+                )
             ) {
                 page.status = Page.QUEUE
             }

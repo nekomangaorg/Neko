@@ -111,7 +111,6 @@ interface SManga : Serializable {
             last_chapter_number = other.last_chapter_number
         }
 
-
         missing_chapters = other.missing_chapters
 
         status = other.status

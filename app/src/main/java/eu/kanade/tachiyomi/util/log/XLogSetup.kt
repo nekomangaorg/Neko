@@ -55,8 +55,10 @@ class XLogSetup(context: Context) {
             )
             .fileNameGenerator(object : DateFileNameGenerator() {
                 override fun generateFileName(logLevel: Int, timestamp: Long): String {
-                    return super.generateFileName(logLevel,
-                        timestamp) + "-${BuildConfig.BUILD_TYPE}.txt"
+                    return super.generateFileName(
+                        logLevel,
+                        timestamp
+                    ) + "-${BuildConfig.BUILD_TYPE}.txt"
                 }
             })
             .cleanStrategy(FileLastModifiedCleanStrategy(Duration.days(1).inWholeMilliseconds))

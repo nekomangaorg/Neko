@@ -41,13 +41,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
-import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
-import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.math.max
 import kotlin.math.pow
@@ -77,8 +75,7 @@ fun View.snack(
     if (f != null) {
         snack.f()
     }
-    val theme = context.getPrefTheme(Injekt.get())
-    if (ThemeUtil.isPitchBlack(context, theme)) {
+    if (ThemeUtil.isPitchBlack(context)) {
         val textView: TextView =
             snack.view.findViewById(com.google.android.material.R.id.snackbar_text)
         val button: Button? =
@@ -402,8 +399,8 @@ inline fun View.popupMenu(
             item.icon = when (item.itemId) {
                 selectedItemId -> ContextCompat.getDrawable(context, R.drawable.ic_check_24dp)
                     ?.mutate()?.apply {
-                    setTint(blendedAccent)
-                }
+                        setTint(blendedAccent)
+                    }
                 else -> emptyIcon
             }
             if (item.itemId == selectedItemId) {

@@ -81,7 +81,8 @@ class FullRestore(val context: Context, val job: Job?) {
         errors.addAll(tmpErrors)
 
         val logFile = restoreHelper.writeErrorLog(errors, skippedAmount, skippedTitles)
-        restoreHelper.showResultNotification(logFile.parent,
+        restoreHelper.showResultNotification(
+            logFile.parent,
             logFile.name,
             categoriesAmount,
             restoreProgress,
@@ -90,7 +91,8 @@ class FullRestore(val context: Context, val job: Job?) {
             totalAmount,
             cancelled,
             errors,
-            trackingErrors)
+            trackingErrors
+        )
     }
 
     private fun restoreCategories(backupCategories: List<BackupCategory>) {
@@ -105,9 +107,11 @@ class FullRestore(val context: Context, val job: Job?) {
     private fun restoreManga(backupManga: BackupManga, backupCategories: List<BackupCategory>) {
         try {
             if (job?.isCancelled == false) {
-                restoreHelper.showProgressNotification(restoreProgress,
+                restoreHelper.showProgressNotification(
+                    restoreProgress,
                     totalAmount,
-                    backupManga.title)
+                    backupManga.title
+                )
                 restoreProgress += 1
             } else {
                 throw java.lang.Exception("Job was cancelled")

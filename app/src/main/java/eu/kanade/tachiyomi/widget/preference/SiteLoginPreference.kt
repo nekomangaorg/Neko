@@ -32,9 +32,11 @@ class SiteLoginPreference @JvmOverloads constructor(
         (holder.findViewById(R.id.image_view) as? ImageView)?.setImageDrawable(
             when (source.isLogged()) {
                 true -> CommunityMaterial.Icon.cmd_account_circle.create(context, 24f)
-                false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(context,
+                false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
+                    context,
                     24f,
-                    R.color.material_on_surface_disabled)
+                    R.color.material_on_surface_disabled
+                )
             }
         )
     }

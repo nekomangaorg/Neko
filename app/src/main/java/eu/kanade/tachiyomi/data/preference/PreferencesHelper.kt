@@ -290,7 +290,8 @@ class PreferencesHelper(val context: Context) {
     fun libraryUpdateRestriction() = prefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
 
     fun libraryUpdateCategories() = flowPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
-    fun libraryUpdateCategoriesExclude() = flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
+    fun libraryUpdateCategoriesExclude() =
+        flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
 
     fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
 
@@ -338,7 +339,8 @@ class PreferencesHelper(val context: Context) {
     fun downloadNew() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun downloadNewCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
-    fun downloadNewCategoriesExclude() = flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
+    fun downloadNewCategoriesExclude() =
+        flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
 
     fun lang() = prefs.getString(Keys.lang, "")
 
@@ -451,7 +453,6 @@ class PreferencesHelper(val context: Context) {
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 
     fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)
-    fun showSourcesInShortcuts() = prefs.getBoolean(Keys.showSourcesInShortcuts, true)
     fun openChapterInShortcuts() = prefs.getBoolean(Keys.openChapterInShortcuts, true)
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)

@@ -58,8 +58,10 @@ class V5MigrationService(
     override fun onCreate() {
         super.onCreate()
         notifier = V5MigrationNotifier(this)
-        startForeground(Notifications.ID_V5_MIGRATION_PROGRESS,
-            notifier.progressNotificationBuilder.build())
+        startForeground(
+            Notifications.ID_V5_MIGRATION_PROGRESS,
+            notifier.progressNotificationBuilder.build()
+        )
         wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
             PowerManager.PARTIAL_WAKE_LOCK,
             "V5MigrationService:WakeLock"
@@ -129,9 +131,12 @@ class V5MigrationService(
             // We skip mangaList which have already been converted (non-numeric ids)
             var mangaErroredOut = false
             if (isNumericId) {
-
-                val responseDto = networkHelper.service.legacyMapping(LegacyIdDto(type = "manga",
-                    listOf(oldMangaId.toInt())))
+                val responseDto = networkHelper.service.legacyMapping(
+                    LegacyIdDto(
+                        type = "manga",
+                        listOf(oldMangaId.toInt())
+                    )
+                )
 
                 if (responseDto.isSuccessful) {
                     val newId = responseDto.body()!!.first().data.attributes.newId
@@ -155,7 +160,6 @@ class V5MigrationService(
             val chapters = db.getChapters(manga).executeAsBlocking()
             val chapterErrors = mutableListOf<String>()
             if (!mangaErroredOut) {
-
                 val chapterMap = chapters.filter { it.isMergedChapter().not() }
                     .filter { it.mangadex_chapter_id.isDigitsOnly() }
                     .map { it.mangadex_chapter_id.toInt() to it }
@@ -180,7 +184,6 @@ class V5MigrationService(
                             chapter.url = MdUtil.chapterSuffix + newId
                             chapter.old_mangadex_id = oldId.toString()
                             db.insertChapter(chapter).executeAsBlocking()
-
                         }
                     } else {
                         legacyIds.forEach {

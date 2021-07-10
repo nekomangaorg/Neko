@@ -6,6 +6,7 @@ object MdConstants {
     const val baseUrl = "https://mangadex.org"
     const val cdnUrl = "https://uploads.mangadex.org"
     const val atHomeReportUrl = "https://api.mangadex.network/report"
+    const val noCoverUrl = "https://mangadex.org/_nuxt/img/cover-placeholder.d12c3c5.jpg"
 
     object Types {
         const val author = "author"

@@ -47,7 +47,6 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
                 leftMargin = it.systemWindowInsetLeft
                 rightMargin = it.systemWindowInsetRight
             }
-
         }
         contentView.requestLayout()
     }

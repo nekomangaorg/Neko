@@ -160,7 +160,9 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
         // The listener may be removed when we split a page, so the ui may not have updated properly
         // This case usually happens when we load a new chapter and the first 2 pages need to split og
         viewer.pager.post {
+            XLog.d("about to on page change from splitDoublePages")
             viewer.onPageChange(viewer.pager.currentItem)
+            XLog.d("finished on page change from splitDoublePages")
         }
     }
 

@@ -31,7 +31,7 @@ class MangaHeaderHolder(
     view: View,
     private val adapter: MangaDetailsAdapter,
     startExpanded: Boolean,
-    isTablet: Boolean = false,
+    private val isTablet: Boolean = false,
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     val binding: MangaHeaderItemBinding? = try {
@@ -129,17 +129,20 @@ class MangaHeaderHolder(
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
             if (startExpanded) expandDesc()
             else collapseDesc()
-            if (isTablet) chapterLayout.isVisible = false
+            if (isTablet) {
+                chapterLayout.isVisible = false
+                expandDesc()
+            }
         }
     }
 
     private fun expandDesc() {
         binding ?: return
-        if (binding.moreButton.visibility == View.VISIBLE) {
+        if (binding.moreButton.visibility == View.VISIBLE || isTablet) {
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
             binding.mangaGenresTags.isVisible = true
-            binding.lessButton.isVisible = true
+            binding.lessButton.isVisible = !isTablet
             binding.moreButtonGroup.isVisible = false
             binding.title.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.requestFocus()
@@ -148,12 +151,13 @@ class MangaHeaderHolder(
 
     private fun collapseDesc() {
         binding ?: return
+        if (isTablet) return
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
-        binding.mangaGenresTags.isVisible = false
+        binding.mangaGenresTags.isVisible = isTablet
         binding.lessButton.isVisible = false
-        binding.moreButtonGroup.isVisible = true
+        binding.moreButtonGroup.isVisible = !isTablet
         binding.title.maxLines = 4
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
@@ -230,8 +234,12 @@ class MangaHeaderHolder(
         val tracked = presenter.isTracked() && !item.isLocked
 
         with(binding.trackButton) {
-            setImageDrawable(context.iconicsDrawable(MaterialDesignDx.Icon.gmf_art_track,
-                size = 32))
+            setImageDrawable(
+                context.iconicsDrawable(
+                    MaterialDesignDx.Icon.gmf_art_track,
+                    size = 32
+                )
+            )
         }
 
         with(binding.similarButton) {
@@ -242,13 +250,13 @@ class MangaHeaderHolder(
             isVisible = (manga.status != SManga.COMPLETED)
             val iconics = when (manga.isMerged()) {
                 true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_decagram)
-                false -> context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_source_merge)
+                false -> context.iconicsDrawableLarge(CommunityMaterial.Icon3.cmd_source_merge)
             }
             setImageDrawable(iconics)
         }
 
         with(binding.webviewButton) {
-            setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon2.cmd_web))
+            setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon3.cmd_web))
         }
         with(binding.shareButton) {
             setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_share))
@@ -264,7 +272,6 @@ class MangaHeaderHolder(
                     if (nextChapter.isMergedChapter() || (nextChapter.chapter.vol.isEmpty() && nextChapter.chapter.chapter_txt.isEmpty())) {
                         nextChapter.chapter.name
                     } else {
-
                         val vol = if (nextChapter.chapter.vol.isNotEmpty()) {
                             "Vol. " + nextChapter.chapter.vol
                         } else {
@@ -362,10 +369,10 @@ class MangaHeaderHolder(
         binding.subItemGroup.isVisible = false
         binding.startReadingButton.isVisible = false
         if (binding.moreButton.isVisible || binding.moreButton.isInvisible) {
-            binding.moreButtonGroup.isInvisible = true
+            binding.moreButtonGroup.isInvisible = !isTablet
         } else {
             binding.lessButton.isVisible = false
-            binding.mangaGenresTags.isVisible = false
+            binding.mangaGenresTags.isVisible = isTablet
         }
     }
 
@@ -398,10 +405,10 @@ class MangaHeaderHolder(
         binding.subItemGroup.isVisible = true
         if (!showMoreButton) binding.moreButtonGroup.isVisible = false
         else {
-            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) binding.moreButtonGroup.isVisible =
-                true
-            else {
-                binding.lessButton.isVisible = true
+            if (binding.mangaSummary.maxLines != Integer.MAX_VALUE) {
+                binding.moreButtonGroup.isVisible = !isTablet
+            } else {
+                binding.lessButton.isVisible = !isTablet
                 binding.mangaGenresTags.isVisible = true
             }
         }

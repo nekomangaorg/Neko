@@ -131,7 +131,8 @@ class DownloadProvider(private val context: Context) {
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(
-                        afterScanlatorCheck)
+                        afterScanlatorCheck
+                    )
                 }
             }
             return@filter false
@@ -169,7 +170,8 @@ class DownloadProvider(private val context: Context) {
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(
-                        afterScanlatorCheck)
+                        afterScanlatorCheck
+                    )
                 }
             }
             // everything else is considered true
