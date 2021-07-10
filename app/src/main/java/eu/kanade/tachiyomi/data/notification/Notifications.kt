@@ -38,6 +38,7 @@ object Notifications {
     const val CHANNEL_COMMON = "common_channel"
     const val ID_UPDATER = 1
     const val ID_DOWNLOAD_IMAGE = 2
+    const val ID_INSTALL = 3
 
     /**
      * Notification channel and ids used by the library updater.

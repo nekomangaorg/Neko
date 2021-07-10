@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationManager
 
 /**
@@ -149,13 +148,11 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_INSTALL)
             )
             addReleasePageAction()
         }
-        launchUI {
-            notificationBuilder.show()
-        }
+        notificationBuilder.show(Notifications.ID_INSTALL)
     }
 
     /**
