@@ -37,7 +37,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -206,6 +205,7 @@ class ReaderPresenter(
             .doOnNext { init(it, initialChapterId) }
             .subscribeFirst(
                 { _, _ ->
+
                     // Ignore onNext event
                 },
                 ReaderActivity::setInitialChapterError
@@ -335,7 +335,7 @@ class ReaderPresenter(
     }
 
     suspend fun loadChapterURL(urlChapterId: String) {
-        val dbChapter = db.getChapter(MdUtil.chapterSuffix + urlChapterId).executeOnIO()
+        val dbChapter = db.getChapter(MdUtil.chapterSuffix + urlChapterId).executeAsBlocking()
         if (dbChapter?.manga_id != null) {
             val dbManga = db.getManga(dbChapter.manga_id!!).executeAsBlocking()
             if (dbManga != null) {

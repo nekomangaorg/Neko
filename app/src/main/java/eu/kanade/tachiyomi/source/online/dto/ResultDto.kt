@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class ResultDto(
-    val result: String,
+    val result: String? = null,
 )

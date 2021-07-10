@@ -153,12 +153,12 @@ dependencies {
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
     // hyperion
-    val hyperionVersion = "0.9.33"
+    /*val hyperionVersion = "0.9.33"
     debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
     debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
+    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")*/
 
     // REST
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -281,7 +281,7 @@ dependencies {
 
 
     implementation("com.mikepenz:aboutlibraries:8.9.0")
-    //debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
+    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
 
