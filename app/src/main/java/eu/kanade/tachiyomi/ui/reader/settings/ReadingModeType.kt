@@ -5,18 +5,22 @@ import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.next
 
-enum class ReadingModeType(val prefValue: Int, @StringRes val stringRes: Int, @DrawableRes val iconRes: Int, val flagValue: Int) {
-    DEFAULT(0, R.string.default_value, R.drawable.ic_reader_default_24dp, 0x00000000),
-    LEFT_TO_RIGHT(1, R.string.left_to_right_viewer, R.drawable.ic_reader_ltr_24dp, 0x00000001),
-    RIGHT_TO_LEFT(2, R.string.right_to_left_viewer, R.drawable.ic_reader_rtl_24dp, 0x00000002),
-    VERTICAL(3, R.string.vertical_viewer, R.drawable.ic_reader_vertical_24dp, 0x00000003),
-    WEBTOON(4, R.string.webtoon, R.drawable.ic_reader_webtoon_24dp, 0x00000004),
-    CONTINUOUS_VERTICAL(5, R.string.continuous_vertical, R.drawable.ic_reader_continuous_vertical_24dp, 0x00000005),
+enum class ReadingModeType(val prefValue: Int, @StringRes val stringRes: Int, @DrawableRes val iconRes: Int) {
+    DEFAULT(0, R.string.default_value, R.drawable.ic_reader_default_24dp),
+    LEFT_TO_RIGHT(1, R.string.left_to_right_viewer, R.drawable.ic_reader_ltr_24dp),
+    RIGHT_TO_LEFT(2, R.string.right_to_left_viewer, R.drawable.ic_reader_rtl_24dp),
+    VERTICAL(3, R.string.vertical_viewer, R.drawable.ic_reader_vertical_24dp),
+    WEBTOON(4, R.string.webtoon, R.drawable.ic_reader_webtoon_24dp),
+    CONTINUOUS_VERTICAL(5, R.string.continuous_vertical, R.drawable.ic_reader_continuous_vertical_24dp),
     ;
+
+    @Suppress("RemoveRedundantQualifierName")
+    val flagValue = prefValue shl ReadingModeType.SHIFT
 
     companion object {
         fun fromPreference(preference: Int): ReadingModeType = values().find { it.flagValue == preference } ?: DEFAULT
-        const val MASK = 0x00000007
+        private const val SHIFT = 0x00000000
+        const val MASK = 7 shl SHIFT
 
         fun getNextReadingMode(preference: Int): ReadingModeType {
             val current = fromPreference(preference)
