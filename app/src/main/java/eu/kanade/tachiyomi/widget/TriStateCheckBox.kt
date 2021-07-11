@@ -100,7 +100,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                     setAnimVectorCompat(
                         when (oldState) {
                             State.INVERSED -> R.drawable.anim_check_box_x_to_blank_24dp
-                            else -> R.drawable.anim_checkbox_checked_to_blank_24dp
+                            else -> R.drawable.anim_check_box_checked_to_blank_24dp
                         },
                         R.attr.colorControlNormal
                     )

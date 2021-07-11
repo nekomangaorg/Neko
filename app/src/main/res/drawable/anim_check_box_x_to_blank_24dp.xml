@@ -33,11 +33,11 @@
                 <objectAnimator
                     android:propertyName="pathData"
                     android:startOffset="150"
-                    android:duration="150"
+                    android:duration="300"
                     android:valueFrom="M 19 3 L 5 3 C 3.9 3 3 3.9 3 5 L 3 19 C 3 19.559 3.232 20.066 3.605 20.43 C 3.966 20.782 4.459 21 5 21 L 19 21 C 19.507 21 19.971 20.809 20.324 20.496 C 20.738 20.128 21 19.593 21 19 L 21 5 C 21 3.9 20.1 3 19 3 M 12.7 11.3 L 12.7 12.7 L 11.3 12.7 L 11.3 11.3 L 12.7 11.3 Z"
                     android:valueTo="M 19 3 L 5 3 C 3.89 3 3 3.89 3 5 L 3 19 C 3 19.53 3.211 20.039 3.586 20.414 C 3.961 20.789 4.47 21 5 21 L 19 21 C 19.53 21 20.039 20.789 20.414 20.414 C 20.789 20.039 21 19.53 21 19 L 21 5 C 21 3.89 20.1 3 19 3 M 19 5 L 19 19 L 5 19 L 5 5 L 19 5 Z"
                     android:valueType="pathType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                    android:interpolator="@android:interpolator/linear_out_slow_in"/>
             </set>
         </aapt:attr>
     </target>
@@ -61,19 +61,19 @@
                 <objectAnimator
                     android:propertyName="scaleX"
                     android:startOffset="150"
-                    android:duration="150"
+                    android:duration="300"
                     android:valueFrom="0.9"
                     android:valueTo="1"
                     android:valueType="floatType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                    android:interpolator="@android:interpolator/linear_out_slow_in"/>
                 <objectAnimator
                     android:propertyName="scaleY"
                     android:startOffset="150"
-                    android:duration="150"
+                    android:duration="1300"
                     android:valueFrom="0.9"
                     android:valueTo="1"
                     android:valueType="floatType"
-                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                    android:interpolator="@android:interpolator/linear_out_slow_in"/>
             </set>
         </aapt:attr>
     </target>

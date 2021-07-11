@@ -18,7 +18,7 @@ class QuadStateCheckBox @JvmOverloads constructor(context: Context, attrs: Attri
             State.UNCHECKED -> setAnimVectorCompat(
                 when (this.state) {
                     State.INVERSED -> R.drawable.anim_check_box_x_to_blank_24dp
-                    else -> R.drawable.anim_checkbox_checked_to_blank_24dp
+                    else -> R.drawable.anim_check_box_checked_to_blank_24dp
                 },
                 R.attr.colorControlNormal
             )
