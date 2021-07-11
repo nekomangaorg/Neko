@@ -16,12 +16,12 @@ class ChapterFilter(
 
     // filters chapters based on the manga values
     fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
-        val readEnabled = manga.readFilter == Manga.CHAPTER_SHOW_READ
-        val unreadEnabled = manga.readFilter == Manga.CHAPTER_SHOW_UNREAD
-        val downloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED
-        val notDownloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
-        val bookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED
-        val notBookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+        val readEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_READ
+        val unreadEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_UNREAD
+        val downloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_DOWNLOADED
+        val notDownloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+        val bookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED
+        val notBookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
         val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
         val scanlatorEnabled = listValidScanlators.isNotEmpty()
 

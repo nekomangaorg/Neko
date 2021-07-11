@@ -245,7 +245,7 @@ object PreferenceKeys {
 
     const val defaultChapterSortByAscendingOrDescending = "default_chapter_sort_by_ascending_or_descending"
 
-    const val defaultChapterDisplayByNameOrNumber = "default_chapter_display_by_name_or_number"
+    const val hideChapterTitles = "hide_chapter_titles"
 
     fun trackUsername(syncId: Int) = "pref_mangasync_username_$syncId"
 

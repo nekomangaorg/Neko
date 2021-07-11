@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.LinearLayout
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ChapterFilterLayoutBinding
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 
@@ -11,6 +12,7 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
     LinearLayout(context, attrs) {
 
     lateinit var binding: ChapterFilterLayoutBinding
+    private var mOnCheckedChangeListener: OnCheckedChangeListener? = null
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -41,20 +43,21 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
         ) {
             binding.showAll.animateDrawableToState(TriStateCheckBox.State.CHECKED)
         }
+        mOnCheckedChangeListener?.onCheckedChanged(this)
     }
 
-    fun setCheckboxes(manga: Manga) {
-        binding.showUnread.state = when (manga.readFilter) {
+    fun setCheckboxes(manga: Manga, preferences: PreferencesHelper) {
+        binding.showUnread.state = when (manga.readFilter(preferences)) {
             Manga.CHAPTER_SHOW_UNREAD -> TriStateCheckBox.State.CHECKED
             Manga.CHAPTER_SHOW_READ -> TriStateCheckBox.State.INVERSED
             else -> TriStateCheckBox.State.UNCHECKED
         }
-        binding.showDownload.state = when (manga.downloadedFilter) {
+        binding.showDownload.state = when (manga.downloadedFilter(preferences)) {
             Manga.CHAPTER_SHOW_DOWNLOADED -> TriStateCheckBox.State.CHECKED
             Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> TriStateCheckBox.State.INVERSED
             else -> TriStateCheckBox.State.UNCHECKED
         }
-        binding.showBookmark.state = when (manga.bookmarkedFilter) {
+        binding.showBookmark.state = when (manga.bookmarkedFilter(preferences)) {
             Manga.CHAPTER_SHOW_BOOKMARKED -> TriStateCheckBox.State.CHECKED
             Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> TriStateCheckBox.State.INVERSED
             else -> TriStateCheckBox.State.UNCHECKED
@@ -63,5 +66,28 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
         binding.showAll.isChecked = binding.showUnread.isUnchecked &&
             binding.showDownload.isUnchecked &&
             binding.showBookmark.isUnchecked
+    }
+
+    /**
+     * Register a callback to be invoked when the checked state of this button
+     * changes.
+     *
+     * @param listener the callback to call on checked state change
+     */
+    fun setOnCheckedChangeListener(listener: OnCheckedChangeListener?) {
+        mOnCheckedChangeListener = listener
+    }
+
+    /**
+     * Interface definition for a callback to be invoked when one of the check states in this view
+     * changes
+     */
+    fun interface OnCheckedChangeListener {
+        /**
+         * Called when the checked state of a compound button has changed.
+         *
+         * @param filterLayout The view containing the changed state
+         */
+        fun onCheckedChanged(filterLayout: ChapterFilterLayout)
     }
 }

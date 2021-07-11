@@ -34,14 +34,10 @@ class ChapterHolder(
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
         val isLocked = item.isLocked
-
-        binding.chapterTitle.text = when (manga.displayMode) {
-            Manga.CHAPTER_DISPLAY_NUMBER -> {
-                val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
-                itemView.context.getString(R.string.chapter_, number)
-            }
-            else -> chapter.name
-        }
+        binding.chapterTitle.text = if (manga.hideChapterTitle(adapter.preferences)) {
+            val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
+            itemView.context.getString(R.string.chapter_, number)
+        } else chapter.name
 
         ChapterUtil.setTextViewForChapter(binding.chapterTitle, item, hideStatus = isLocked)
 

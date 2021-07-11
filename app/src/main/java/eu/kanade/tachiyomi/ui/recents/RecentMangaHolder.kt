@@ -81,9 +81,13 @@ class RecentMangaHolder(
             }
         }
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
+        val chapterName = if (item.mch.manga.hideChapterTitle(adapter.preferences)) {
+            val number = adapter.decimalFormat.format(item.chapter.chapter_number.toDouble())
+            itemView.context.getString(R.string.chapter_, number)
+        } else item.chapter.name
         binding.title.apply {
             text = if (!showTitleFirst) {
-                item.chapter.name
+                chapterName
             } else {
                 item.mch.manga.title
             }
@@ -93,7 +97,7 @@ class RecentMangaHolder(
             text = if (!showTitleFirst) {
                 item.mch.manga.title
             } else {
-                item.chapter.name
+                chapterName
             }
             setTextColor(ChapterUtil.readColor(context, item))
         }
