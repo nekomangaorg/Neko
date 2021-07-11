@@ -103,7 +103,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         binding.setAsDefaultSort.setOnClickListener {
             presenter.setGlobalChapterSort(
                 presenter.manga.sorting,
-                presenter.manga.sortDescending()
+                presenter.manga.sortDescending
             )
             binding.setAsDefaultSort.isInvisible = true
             binding.resetAsDefaultSort.isInvisible = true

@@ -59,48 +59,35 @@ interface Manga : SManga {
         viewer_flags = viewer_flags and mask.inv() or (flag and mask)
     }
 
-    fun sortDescending(): Boolean = chapter_flags and CHAPTER_SORT_MASK == CHAPTER_SORT_DESC
-    fun hideChapterTitles(): Boolean = displayMode == CHAPTER_DISPLAY_NUMBER
+    val sortDescending: Boolean
+        get() = chapter_flags and CHAPTER_SORT_MASK == CHAPTER_SORT_DESC
 
-    fun usesLocalSort(): Boolean = chapter_flags and CHAPTER_SORT_LOCAL_MASK == CHAPTER_SORT_LOCAL
+    val hideChapterTitles: Boolean
+        get() = displayMode == CHAPTER_DISPLAY_NUMBER
 
-    fun usesLocalFilter(): Boolean = chapter_flags and CHAPTER_FILTER_LOCAL_MASK == CHAPTER_FILTER_LOCAL
+    val usesLocalSort: Boolean
+        get() = chapter_flags and CHAPTER_SORT_LOCAL_MASK == CHAPTER_SORT_LOCAL
 
-    fun sortDescending(defaultDesc: Boolean): Boolean {
-        return if (usesLocalSort()) sortDescending() else defaultDesc
-    }
+    val usesLocalFilter: Boolean
+        get() = chapter_flags and CHAPTER_FILTER_LOCAL_MASK == CHAPTER_FILTER_LOCAL
 
-    fun chapterOrder(defaultOrder: Int): Int {
-        return if (usesLocalSort()) sorting else defaultOrder
-    }
+    fun sortDescending(preferences: PreferencesHelper): Boolean =
+        if (usesLocalSort) sortDescending else preferences.chaptersDescAsDefault().get()
+
+    fun chapterOrder(preferences: PreferencesHelper): Int =
+        if (usesLocalSort) sorting else preferences.sortChapterOrder().get()
 
     fun readFilter(preferences: PreferencesHelper): Int =
-        readFilter(preferences.filterChapterByRead().get())
-
-    fun readFilter(defaultFilter: Int): Int {
-        return if (usesLocalFilter()) readFilter else defaultFilter
-    }
+        if (usesLocalFilter) readFilter else preferences.filterChapterByRead().get()
 
     fun downloadedFilter(preferences: PreferencesHelper): Int =
-        downloadedFilter(preferences.filterChapterByDownloaded().get())
-
-    fun downloadedFilter(defaultFilter: Int): Int {
-        return if (usesLocalFilter()) downloadedFilter else defaultFilter
-    }
+        if (usesLocalFilter) downloadedFilter else preferences.filterChapterByDownloaded().get()
 
     fun bookmarkedFilter(preferences: PreferencesHelper): Int =
-        bookmarkedFilter(preferences.filterChapterByBookmarked().get())
-
-    fun bookmarkedFilter(defaultFilter: Int): Int {
-        return if (usesLocalFilter()) bookmarkedFilter else defaultFilter
-    }
+        if (usesLocalFilter) bookmarkedFilter else preferences.filterChapterByBookmarked().get()
 
     fun hideChapterTitle(preferences: PreferencesHelper): Boolean =
-        hideChapterTitle(preferences.hideChapterTitlesByDefault().get())
-
-    fun hideChapterTitle(default: Boolean): Boolean {
-        return if (usesLocalFilter()) hideChapterTitles() else default
-    }
+        if (usesLocalFilter) hideChapterTitles else preferences.hideChapterTitlesByDefault().get()
 
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
 

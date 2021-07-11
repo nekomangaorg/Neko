@@ -120,7 +120,7 @@ class ReaderPresenter(
         val chaptersForReader =
             chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
 
-        when (manga.chapterOrder(preferences.sortChapterOrder().get())) {
+        when (manga.chapterOrder(preferences)) {
             Manga.CHAPTER_SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
             Manga.CHAPTER_SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
             Manga.CHAPTER_SORTING_UPLOAD_DATE -> ChapterLoadByDate().get(chaptersForReader)

@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -25,8 +24,6 @@ class ChapterSort(val manga: Manga, val chapterFilter: ChapterFilter = Injekt.ge
             else -> rawChapters
         }
 
-        val sortDescending =
-            manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())
         return chapters.sortedWith(sortComparator())
     }
 
@@ -40,9 +37,9 @@ class ChapterSort(val manga: Manga, val chapterFilter: ChapterFilter = Injekt.ge
 
     fun <T : Chapter> sortComparator(ignoreAsc: Boolean = false): Comparator<T> {
         val sortDescending = !ignoreAsc &&
-            manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())
+            manga.sortDescending(preferences)
         val sortFunction: (T, T) -> Int =
-            when (manga.chapterOrder(preferences.sortChapterOrder().get())) {
+            when (manga.chapterOrder(preferences)) {
                 Manga.CHAPTER_SORTING_SOURCE -> when (sortDescending) {
                     true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
                     false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }

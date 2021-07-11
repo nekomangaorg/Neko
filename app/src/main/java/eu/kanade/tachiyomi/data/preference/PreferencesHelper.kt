@@ -471,7 +471,7 @@ class PreferencesHelper(val context: Context) {
 
     fun hideChapterTitlesByDefault() = flowPrefs.getBoolean(Keys.hideChapterTitles, false)
 
-    fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
+    fun chaptersDescAsDefault() = flowPrefs.getBoolean(Keys.chaptersDescAsDefault, true)
 
     fun sortChapterByAscendingOrDescending() = prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
 
