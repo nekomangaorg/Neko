@@ -38,12 +38,13 @@ interface Manga : SManga {
 
     fun isHidden() = status == -1
 
-    fun setChapterOrder(order: Int) {
+    fun setChapterOrder(sorting: Int, order: Int) {
+        setChapterFlags(sorting, CHAPTER_SORTING_MASK)
         setChapterFlags(order, CHAPTER_SORT_MASK)
-        setChapterFlags(CHAPTER_SORT_LOCAL, CHAPTER_SORT_SELF_MASK)
+        setChapterFlags(CHAPTER_SORT_LOCAL, CHAPTER_SORT_LOCAL_MASK)
     }
 
-    fun setSortToGlobal() = setChapterFlags(CHAPTER_SORT_GLOBAL, CHAPTER_SORT_SELF_MASK)
+    fun setSortToGlobal() = setChapterFlags(CHAPTER_SORT_FILTER_GLOBAL, CHAPTER_SORT_LOCAL_MASK)
 
     private fun setChapterFlags(flag: Int, mask: Int) {
         chapter_flags = chapter_flags and mask.inv() or (flag and mask)
@@ -55,11 +56,14 @@ interface Manga : SManga {
 
     fun sortDescending(): Boolean = chapter_flags and CHAPTER_SORT_MASK == CHAPTER_SORT_DESC
 
-    fun usesLocalSort(): Boolean = chapter_flags and CHAPTER_SORT_SELF_MASK == CHAPTER_SORT_LOCAL
+    fun usesLocalSort(): Boolean = chapter_flags and CHAPTER_SORT_LOCAL_MASK == CHAPTER_SORT_LOCAL
 
     fun sortDescending(defaultDesc: Boolean): Boolean {
-        return if (chapter_flags and CHAPTER_SORT_SELF_MASK == CHAPTER_SORT_GLOBAL) defaultDesc
-        else sortDescending()
+        return if (usesLocalSort()) sortDescending() else defaultDesc
+    }
+
+    fun chapterOrder(defaultOrder: Int): Int {
+        return if (usesLocalSort()) sorting else defaultOrder
     }
 
     fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
@@ -167,16 +171,16 @@ interface Manga : SManga {
 
     companion object {
 
+        // Generic filter that does not filter anything
+        const val SHOW_ALL = 0x00000000
+
         const val CHAPTER_SORT_DESC = 0x00000000
         const val CHAPTER_SORT_ASC = 0x00000001
         const val CHAPTER_SORT_MASK = 0x00000001
 
-        const val CHAPTER_SORT_GLOBAL = 0x00000000
+        const val CHAPTER_SORT_FILTER_GLOBAL = 0x00000000
         const val CHAPTER_SORT_LOCAL = 0x00001000
-        const val CHAPTER_SORT_SELF_MASK = 0x00001000
-
-        // Generic filter that does not filter anything
-        const val SHOW_ALL = 0x00000000
+        const val CHAPTER_SORT_LOCAL_MASK = 0x00001000
 
         const val CHAPTER_SHOW_UNREAD = 0x00000002
         const val CHAPTER_SHOW_READ = 0x00000004
@@ -192,7 +196,8 @@ interface Manga : SManga {
 
         const val CHAPTER_SORTING_SOURCE = 0x00000000
         const val CHAPTER_SORTING_NUMBER = 0x00000100
-        const val CHAPTER_SORTING_MASK = 0x00000100
+        const val CHAPTER_SORTING_UPLOAD_DATE = 0x00000200
+        const val CHAPTER_SORTING_MASK = 0x00000300
 
         const val CHAPTER_DISPLAY_NAME = 0x00000000
         const val CHAPTER_DISPLAY_NUMBER = 0x00100000

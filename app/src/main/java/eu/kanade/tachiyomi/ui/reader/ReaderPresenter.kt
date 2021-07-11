@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
@@ -36,6 +35,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
@@ -120,9 +120,10 @@ class ReaderPresenter(
         val chaptersForReader =
             chapterFilter.filterChaptersForReader(dbChapters, manga, selectedChapter)
 
-        when (manga.sorting) {
+        when (manga.chapterOrder(preferences.sortChapterOrder().get())) {
             Manga.CHAPTER_SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
             Manga.CHAPTER_SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
+            Manga.CHAPTER_SORTING_UPLOAD_DATE -> ChapterLoadByDate().get(chaptersForReader)
             else -> error("Unknown sorting method")
         }.map(::ReaderChapter)
     }
@@ -217,30 +218,14 @@ class ReaderPresenter(
     suspend fun getChapters(): List<ReaderChapterItem> {
         val manga = manga ?: return emptyList()
         chapterItems = withContext(Dispatchers.IO) {
+            val chapterSort = ChapterSort(manga, chapterFilter, preferences)
             val dbChapters = db.getChapters(manga).executeAsBlocking()
-            val currentChapter = getCurrentChapter()?.chapter?.id
-            val list =
-                chapterFilter.filterChaptersForReader(
-                    dbChapters,
+            chapterSort.getChaptersSorted(dbChapters, filterForReader = true, currentChapter = getCurrentChapter()?.chapter).map {
+                ReaderChapterItem(
+                    it,
                     manga,
-                    getCurrentChapter()?.chapter
-                )
-                    .sortedBy {
-                        when (manga.sorting) {
-                            Manga.CHAPTER_SORTING_NUMBER -> it.chapter_number
-                            else -> it.source_order.toFloat()
-                        }
-                    }.map {
-                        ReaderChapterItem(
-                            it,
-                            manga,
                             it.id == currentChapter ?: chapterId
-                        )
-                    }
-            if (!manga.sortDescending(preferences.chaptersDescAsDefault().getOrDefault())) {
-                list.reversed()
-            } else {
-                list
+                )
             }
         }
 

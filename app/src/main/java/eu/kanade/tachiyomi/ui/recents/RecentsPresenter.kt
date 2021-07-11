@@ -18,6 +18,8 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -42,10 +44,8 @@ class RecentsPresenter(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     private val db: DatabaseHelper = Injekt.get(),
-) : BaseCoroutinePresenter(),
-    DownloadQueue.DownloadListener,
-    LibraryServiceListener,
-    DownloadServiceListener {
+    private val chapterFilter: ChapterFilter = Injekt.get()
+) : BaseCoroutinePresenter(), DownloadQueue.DownloadListener, LibraryServiceListener, DownloadServiceListener {
 
     val statusHandler: StatusHandler by injectLazy()
     private var recentsJob: Job? = null
@@ -326,12 +326,12 @@ class RecentsPresenter(
 
     private fun getNextChapter(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-        return chapters.sortedByDescending { it.source_order }.find { !it.read }
+        return ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters, false)
     }
 
     private fun getFirstUpdatedChapter(manga: Manga, chapter: Chapter): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-        return chapters.sortedByDescending { it.source_order }.find {
+        return chapters.sortedWith(ChapterSort(manga, chapterFilter, preferences).sortComparator(true)).find {
             !it.read && abs(it.date_fetch - chapter.date_fetch) <= TimeUnit.HOURS.toMillis(12)
         }
     }

@@ -43,6 +43,7 @@ import eu.kanade.tachiyomi.ui.manga.track.SetTrackReadingDatesDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.getNewScanlatorsConditionalResetFilter
@@ -86,6 +87,8 @@ class MangaDetailsPresenter(
     private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
+
+    private val chapterSort by lazy { ChapterSort(manga, chapterFilter, preferences) }
 
     val source = sourceManager.getMangadex()
 
@@ -278,6 +281,8 @@ class MangaDetailsPresenter(
      */
     fun sortDescending() = manga.sortDescending(globalSort())
 
+    fun sortingOrder() = manga.chapterOrder(globalSorting())
+
     /**
      * Applies the view filters to the list of chapters obtained from the database.
      * @param chapterList the list of chapters from the database
@@ -287,22 +292,8 @@ class MangaDetailsPresenter(
         if (isLockedFromSearch) {
             return chapterList
         }
-
-        val chapters = chapterFilter.filterChapters(chapterList, manga)
-
-        val sortFunction: (Chapter, Chapter) -> Int = when (manga.sorting) {
-            Manga.CHAPTER_SORTING_SOURCE -> when (sortDescending()) {
-                true -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
-                false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
-            }
-            Manga.CHAPTER_SORTING_NUMBER -> when (sortDescending()) {
-                true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
-                false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
-            }
-            else -> { c1, c2 -> c1.source_order.compareTo(c2.source_order) }
-        }
-        getScrollType(chapters)
-        return chapters.sortedWith(Comparator(sortFunction))
+        getScrollType(chapterList)
+        return chapterSort.getChaptersSorted(chapterList)
     }
 
     private fun getScrollType(chapters: List<ChapterItem>) {
@@ -318,7 +309,7 @@ class MangaDetailsPresenter(
      * Returns the next unread chapter or null if everything is read.
      */
     fun getNextUnreadChapter(): ChapterItem? {
-        return chapters.sortedByDescending { it.source_order }.find { !it.read }
+        return chapterSort.getNextUnreadChapter(chapters)
     }
 
     fun anyRead(): Boolean = allChapters.any { it.read }
@@ -326,9 +317,8 @@ class MangaDetailsPresenter(
     fun hasDownloads(): Boolean = allChapters.any { it.isDownloaded }
 
     fun getUnreadChaptersSorted() =
-        allChapters.filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }
-            .distinctBy { it.name }
-            .sortedByDescending { it.source_order }
+        allChapters.filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }.distinctBy { it.name }
+            .sortedWith(chapterSort.sortComparator(true))
 
     fun startDownloadingNow(chapter: Chapter) {
         downloadManager.startDownloadNow(chapter)
@@ -695,24 +685,31 @@ class MangaDetailsPresenter(
     /**
      * Sets the sorting order and requests an UI update.
      */
-    fun setSortOrder(descend: Boolean) {
-        manga.setChapterOrder(if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
+    fun setSortOrder(sort: Int, descend: Boolean) {
+        manga.setChapterOrder(sort, if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
+        if (mangaSortMatchesDefault()) {
+            manga.setSortToGlobal()
+        }
         asyncUpdateMangaAndChapters()
     }
 
-    fun globalSort(): Boolean = preferences.chaptersDescAsDefault().getOrDefault()
+    private fun globalSort(): Boolean = preferences.chaptersDescAsDefault().getOrDefault()
 
-    fun setGlobalChapterSort(descend: Boolean) {
+    private fun globalSorting(): Int = preferences.sortChapterOrder().get()
+
+    fun mangaSortMatchesDefault(): Boolean {
+        return (manga.sortDescending() == globalSort() && manga.sorting == globalSorting()) || !manga.usesLocalSort()
+    }
+
+    fun setGlobalChapterSort(sort: Int, descend: Boolean) {
+        preferences.sortChapterOrder().set(sort)
         preferences.chaptersDescAsDefault().set(descend)
         manga.setSortToGlobal()
         asyncUpdateMangaAndChapters()
     }
 
-    /**
-     * Sets the sorting method and requests an UI update.
-     */
-    fun setSortMethod(bySource: Boolean) {
-        manga.sorting = if (bySource) Manga.CHAPTER_SORTING_SOURCE else Manga.CHAPTER_SORTING_NUMBER
+    fun resetSortingToDefault() {
+        manga.setSortToGlobal()
         asyncUpdateMangaAndChapters()
     }
 

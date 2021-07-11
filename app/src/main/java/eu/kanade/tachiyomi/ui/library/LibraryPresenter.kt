@@ -33,6 +33,8 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_E
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_IGNORE
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_INCLUDE
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
+import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -64,6 +66,7 @@ class LibraryPresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
+    private val chapterFilter: ChapterFilter = Injekt.get()
 ) : BaseCoroutinePresenter() {
 
     private val context = preferences.context
@@ -863,7 +866,7 @@ class LibraryPresenter(
     /** Returns first unread chapter of a manga */
     fun getFirstUnread(manga: Manga): Chapter? {
         val chapters = db.getChapters(manga).executeAsBlocking()
-        return chapters.sortedByDescending { it.source_order }.find { !it.read }
+        return ChapterSort(manga, chapterFilter, preferences).getNextUnreadChapter(chapters, false)
     }
 
     /** Update a category's sorting */

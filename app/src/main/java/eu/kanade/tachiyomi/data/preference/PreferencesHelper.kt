@@ -307,8 +307,6 @@ class PreferencesHelper(val context: Context) {
 
     fun uniformGrid() = flowPrefs.getBoolean(Keys.uniformGrid, true)
 
-    fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
-
     fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
 
     fun filterDownloaded() = rxPrefs.getInteger(Keys.filterDownloaded, 0)
@@ -469,9 +467,11 @@ class PreferencesHelper(val context: Context) {
 
     fun filterChapterByBookmarked() = prefs.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
 
-    fun sortChapterBySourceOrNumber() = prefs.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
+    fun sortChapterOrder() = flowPrefs.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
 
     fun displayChapterByNameOrNumber() = prefs.getInt(Keys.defaultChapterDisplayByNameOrNumber, Manga.CHAPTER_DISPLAY_NAME)
+
+    fun chaptersDescAsDefault() = rxPrefs.getBoolean("chapters_desc_as_default", true)
 
     fun sortChapterByAscendingOrDescending() = prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
 
