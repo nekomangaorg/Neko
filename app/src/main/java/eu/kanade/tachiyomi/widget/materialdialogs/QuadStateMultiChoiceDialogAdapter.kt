@@ -95,6 +95,7 @@ internal class QuadStateMultiChoiceDialogAdapter(
         holder.isEnabled = !disabledIndices.contains(position)
 
         holder.controlView.state = states[currentSelection[position]]
+        holder.controlView.updateDrawable()
         holder.titleView.text = items[position]
         holder.itemView.background = dialog.getItemSelector()
 
@@ -110,15 +111,15 @@ internal class QuadStateMultiChoiceDialogAdapter(
     ) {
         when (payloads.firstOrNull()) {
             CheckPayload -> {
-                holder.controlView.state = QuadStateCheckBox.State.CHECKED
+                holder.controlView.animateDrawableToState(QuadStateCheckBox.State.CHECKED)
                 return
             }
             InverseCheckPayload -> {
-                holder.controlView.state = QuadStateCheckBox.State.INVERSED
+                holder.controlView.animateDrawableToState(QuadStateCheckBox.State.INVERSED)
                 return
             }
             UncheckPayload -> {
-                holder.controlView.state = QuadStateCheckBox.State.UNCHECKED
+                holder.controlView.animateDrawableToState(QuadStateCheckBox.State.UNCHECKED)
                 return
             }
         }
