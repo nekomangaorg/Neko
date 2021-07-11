@@ -73,10 +73,9 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
         setOnDismissListener {
             presenter.setFilters(
-                binding.chapterFilterLayout.showRead.isChecked,
-                binding.chapterFilterLayout.showUnread.isChecked,
-                binding.chapterFilterLayout.showDownload.isChecked,
-                binding.chapterFilterLayout.showBookmark.isChecked
+                binding.chapterFilterLayout.showUnread.state,
+                binding.chapterFilterLayout.showDownload.state,
+                binding.chapterFilterLayout.showBookmark.state
             )
         }
     }

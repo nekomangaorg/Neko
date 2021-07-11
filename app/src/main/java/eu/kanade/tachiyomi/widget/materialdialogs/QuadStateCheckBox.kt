@@ -13,6 +13,7 @@ class QuadStateCheckBox @JvmOverloads constructor(context: Context, attrs: Attri
     var state: State = State.UNCHECKED
 
     fun animateDrawableToState(state: State) {
+        if (state == this.state) return
         when (state) {
             State.UNCHECKED -> setAnimVectorCompat(
                 when (this.state) {

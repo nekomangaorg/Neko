@@ -19,17 +19,21 @@ class ChapterFilter(
         val readEnabled = manga.readFilter == Manga.CHAPTER_SHOW_READ
         val unreadEnabled = manga.readFilter == Manga.CHAPTER_SHOW_UNREAD
         val downloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED
+        val notDownloadEnabled = manga.downloadedFilter == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
         val bookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED
+        val notBookmarkEnabled = manga.bookmarkedFilter == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
         val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
         val scanlatorEnabled = listValidScanlators.isNotEmpty()
 
         // if none of the filters are enabled skip the filtering of them
-        return if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled || scanlatorEnabled) {
+        return if (readEnabled || unreadEnabled || downloadEnabled || notDownloadEnabled || bookmarkEnabled || notBookmarkEnabled || scanlatorEnabled) {
             chapters.filter {
                 if (readEnabled && it.read.not() ||
                     (unreadEnabled && it.read) ||
                     (bookmarkEnabled && it.bookmark.not()) ||
+                    (notBookmarkEnabled && it.bookmark) ||
                     (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
+                    (notDownloadEnabled && downloadManager.isChapterDownloaded(it, manga)) ||
                     (
                         scanlatorEnabled && it.scanlatorList()
                             .none { group -> listValidScanlators.contains(group) }

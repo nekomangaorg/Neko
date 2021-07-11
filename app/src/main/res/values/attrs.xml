@@ -30,6 +30,11 @@
         <attr name="summary" format="reference|string" />
     </declare-styleable>
 
+    <declare-styleable name="TriStateCheckBox">
+        <attr name="android:text" format="reference|string"/>
+        <attr name="android:maxLines"/>
+    </declare-styleable>
+
     <declare-styleable name="MenuSheetItemView">
         <attr name="android:text" />
         <attr name="android:maxLines" />

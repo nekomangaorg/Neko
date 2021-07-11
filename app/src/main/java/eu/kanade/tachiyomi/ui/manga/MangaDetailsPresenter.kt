@@ -52,6 +52,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -718,14 +719,26 @@ class MangaDetailsPresenter(
     /**
      * Removes all filters and requests an UI update.
      */
-    fun setFilters(read: Boolean, unread: Boolean, downloaded: Boolean, bookmarked: Boolean) {
-        manga.readFilter = when {
-            read -> Manga.CHAPTER_SHOW_READ
-            unread -> Manga.CHAPTER_SHOW_UNREAD
+    fun setFilters(
+        unread: TriStateCheckBox.State,
+        downloaded: TriStateCheckBox.State,
+        bookmarked: TriStateCheckBox.State
+    ) {
+        manga.readFilter = when (unread) {
+            TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_UNREAD
+            TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_READ
             else -> Manga.SHOW_ALL
         }
-        manga.downloadedFilter = if (downloaded) Manga.CHAPTER_SHOW_DOWNLOADED else Manga.SHOW_ALL
-        manga.bookmarkedFilter = if (bookmarked) Manga.CHAPTER_SHOW_BOOKMARKED else Manga.SHOW_ALL
+        manga.downloadedFilter = when (downloaded) {
+            TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_DOWNLOADED
+            TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+            else -> Manga.SHOW_ALL
+        }
+        manga.bookmarkedFilter = when (bookmarked) {
+            TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_BOOKMARKED
+            TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+            else -> Manga.SHOW_ALL
+        }
         asyncUpdateMangaAndChapters()
     }
 
@@ -742,7 +755,9 @@ class MangaDetailsPresenter(
         filtersId.add(if (manga.readFilter == Manga.CHAPTER_SHOW_READ) R.string.read else null)
         filtersId.add(if (manga.readFilter == Manga.CHAPTER_SHOW_UNREAD) R.string.unread else null)
         filtersId.add(if (manga.downloadedFilter == Manga.CHAPTER_SHOW_DOWNLOADED) R.string.downloaded else null)
+        filtersId.add(if (manga.downloadedFilter == Manga.CHAPTER_SHOW_NOT_DOWNLOADED) R.string.not_downloaded else null)
         filtersId.add(if (manga.bookmarkedFilter == Manga.CHAPTER_SHOW_BOOKMARKED) R.string.bookmarked else null)
+        filtersId.add(if (manga.bookmarkedFilter == Manga.CHAPTER_SHOW_NOT_BOOKMARKED) R.string.not_bookmarked else null)
         filtersId.add(if (filteredScanlators.size != allChapterScanlators.size) R.string.scanlator_groups else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
