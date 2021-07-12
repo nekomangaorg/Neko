@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
@@ -172,6 +173,9 @@ class RecentsController(bundle: Bundle? = null) :
                 binding.recentsEmptyView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = headerHeight
                     bottomMargin = activityBinding?.bottomNav?.height ?: it.systemWindowInsetBottom
+                }
+                if (activityBinding?.bottomNav == null) {
+                    setBottomPadding()
                 }
             },
             onBottomNavUpdate = {
@@ -374,6 +378,8 @@ class RecentsController(bundle: Bundle? = null) :
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
         requestFilePermissionsSafe(301, presenter.preferences)
+
+        binding.downloadBottomSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
     }
 
     fun updateTitleAndMenu() {
@@ -384,13 +390,11 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     private fun setBottomPadding() {
-        val bottomBar = activityBinding?.bottomNav ?: return
-        val pad = bottomBar.translationY - bottomBar.height
+        val bottomBar = activityBinding?.bottomNav
+        val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
         val padding = max(
             (-pad).toInt(),
-            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()) 0 else {
-                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
-            }
+            view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
         )
         binding.shadow2.translationY = pad
         binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight = 48.spToPx + padding
