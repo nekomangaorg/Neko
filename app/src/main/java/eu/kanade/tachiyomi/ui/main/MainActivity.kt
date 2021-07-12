@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
@@ -241,18 +242,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             )
             binding.bottomNav?.updatePadding(bottom = insets.systemWindowInsetBottom)
             binding.sideNav?.updatePadding(
-                left = insets.systemWindowInsetLeft,
-                right = insets.systemWindowInsetRight
+                left = 0,
+                right = 0,
+                bottom = insets.systemWindowInsetBottom,
+                top = insets.systemWindowInsetTop
             )
-            binding.sideNav?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.systemWindowInsetTop
-                topMargin = insets.systemWindowInsetBottom
-            }
             binding.bottomView?.isVisible = insets.systemWindowInsetBottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = insets.systemWindowInsetBottom
             }
         }
+        // Set this as nav view will try to set its own insets and they're hilariously bad
+        ViewCompat.setOnApplyWindowInsetsListener(nav) { _, insets -> insets }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
 
