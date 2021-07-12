@@ -1,5 +1,4 @@
-## 🚀  -- Additions --
-## 🆕️ --Changes --
-## 🛠️ -- Fixes --
-## 💬 -- Behind the scenes --
-
+## 🥳 New
+## 🏗️ Changes
+## 🐜 Fixes
+## 🛠️ Other
