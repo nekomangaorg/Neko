@@ -101,7 +101,8 @@ class MangaDetailsPresenter(
 
     private val trackManager: TrackManager by injectLazy()
 
-    private val loggedServices by lazy { trackManager.services.filter { it.isLogged || it.isMdList() } }
+    private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
+    
     var tracks = emptyList<Track>()
 
     var trackList: List<TrackItem> = emptyList()
@@ -1104,7 +1105,9 @@ class MangaDetailsPresenter(
                 val binding = try {
                     service.bind(item)
                 } catch (e: Exception) {
-                    trackError(e)
+                    if (e.message != null && !e.message!!.contains("Not Logged in to MangaDex")) {
+                        trackError(e)
+                    }
                     null
                 }
                 withContext(Dispatchers.IO) {

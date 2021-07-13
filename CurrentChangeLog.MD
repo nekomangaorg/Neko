@@ -10,6 +10,8 @@
 - Lighten shadows on bottom sheets (@Jays2Kings)
 - Using nav rail only for landscape (phone + tablet) (@Jays2Kings)
 - Laxing on the all files permission for a11 (@Jays2Kings)
+- Hide MDList tracker card if user is not logged in
+- Error out if user is not logged in when trying to sync follows
 
 ## 🐜 Fixes
 - Reader issue causing chapters to not load

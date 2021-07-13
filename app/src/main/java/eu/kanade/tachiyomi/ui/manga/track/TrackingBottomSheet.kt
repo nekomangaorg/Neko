@@ -89,7 +89,11 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     fun onNextTrackings(trackings: List<TrackItem>) {
         onRefreshDone()
-        adapter?.items = trackings
+        adapter?.items = if (!presenter.source.isLogged()) {
+            trackings.drop(1)
+        } else {
+            trackings
+        }
         controller.refreshTracker()
     }
 
