@@ -11,6 +11,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -34,12 +35,16 @@ class StatusSyncJob(
     val followsSyncService: FollowsSyncService by injectLazy()
 
     private val progressNotification =
-        applicationContext.notificationBuilder(Notifications.Channel.Status)
-            .setContentTitle(context.getString(R.string.syncing_follows))
-            .setSmallIcon(R.drawable.ic_neko_notification)
-            .setOngoing(true)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
+        applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
+            setContentTitle(context.getString(R.string.syncing_follows))
+            setSmallIcon(R.drawable.ic_neko_notification)
+            setAutoCancel(true)
+            addAction(
+                R.drawable.ic_close_24dp,
+                context.getString(R.string.cancel),
+                NotificationReceiver.cancelFollowSyncPendingIntent(context)
+            )
+        }
 
     override suspend fun doWork(): Result = coroutineScope {
         withUIContext {
@@ -132,6 +137,7 @@ class StatusSyncJob(
 
     companion object {
 
+        val TAG = "follow_sync_job"
         private const val SYNC_TO_MANGADEX = "sync_to_mangadex"
 
         const val entireLibraryToDex: String = "0"
@@ -140,6 +146,7 @@ class StatusSyncJob(
         fun doWorkNow(context: Context, syncToMangadex: String) {
             WorkManager.getInstance(context).enqueue(
                 OneTimeWorkRequestBuilder<StatusSyncJob>().apply {
+                    addTag(TAG)
                     setInputData(
                         Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
                             .build()

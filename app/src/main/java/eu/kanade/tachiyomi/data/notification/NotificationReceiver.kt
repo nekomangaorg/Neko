@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdaterService
+import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -84,6 +85,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
             ACTION_CANCEL_V5_MIGRATION -> cancelV5Migration(context)
             ACTION_CANCEL_TRACKING_SYNC -> cancelTrackingSync(context)
+            ACTION_CANCEL_FOLLOW_SYNC -> cancelFollowSync(context)
             ACTION_CANCEL_UPDATE_DOWNLOAD -> cancelDownloadUpdate(context)
             ACTION_CANCEL_RESTORE -> cancelRestoreUpdate(context)
             // Share backup file
@@ -253,10 +255,15 @@ class NotificationReceiver : BroadcastReceiver() {
         V5MigrationService.stop(context)
         Handler().post { dismissNotification(context, Notifications.ID_V5_MIGRATION_PROGRESS) }
     }
-    
+
     private fun cancelTrackingSync(context: Context) {
         WorkManager.getInstance(context).cancelAllWorkByTag(TrackingSyncJob.TAG)
         Handler().post { dismissNotification(context, Notifications.Id.Tracking.Progress) }
+    }
+
+    private fun cancelFollowSync(context: Context) {
+        WorkManager.getInstance(context).cancelAllWorkByTag(StatusSyncJob.TAG)
+        Handler().post { dismissNotification(context, Notifications.Id.Status.Progress) }
     }
 
     /**
@@ -319,6 +326,9 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Called to cancel tracking sync update.
         private const val ACTION_CANCEL_TRACKING_SYNC = "$ID.$NAME.CANCEL_TRACKING_SYNC"
+
+        // Called to cancel follow sync update.
+        private const val ACTION_CANCEL_FOLLOW_SYNC = "$ID.$NAME.CANCEL_FOLLOW_SYNC"
 
         // Called to cancel library v5 migration update.
         private const val ACTION_CANCEL_V5_MIGRATION = "$ID.$NAME.CANCEL_V5_MIGRATION"
@@ -659,6 +669,19 @@ class NotificationReceiver : BroadcastReceiver() {
         internal fun cancelTrackingSyncPendingIntent(context: Context): PendingIntent {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_TRACKING_SYNC
+            }
+            return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
+        }
+
+        /**
+         * Returns [PendingIntent] that starts a service which stops the follow sync
+         *
+         * @param context context of application
+         * @return [PendingIntent]
+         */
+        internal fun cancelFollowSyncPendingIntent(context: Context): PendingIntent {
+            val intent = Intent(context, NotificationReceiver::class.java).apply {
+                action = ACTION_CANCEL_FOLLOW_SYNC
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)
         }
