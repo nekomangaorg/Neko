@@ -66,7 +66,7 @@ class LibraryPresenter(
     private val coverCache: CoverCache = Injekt.get(),
     private val sourceManager: SourceManager = Injekt.get(),
     private val downloadManager: DownloadManager = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get()
+    private val chapterFilter: ChapterFilter = Injekt.get(),
 ) : BaseCoroutinePresenter() {
 
     private val context = preferences.context
@@ -304,8 +304,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-            } else {
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) return false
@@ -563,9 +563,9 @@ class LibraryPresenter(
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
                     if (catId > 0 && !categorySet.contains(catId) && (
-                        catId !in categoriesHidden ||
-                            !showAll
-                        )
+                            catId !in categoriesHidden ||
+                                !showAll
+                            )
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
@@ -1025,28 +1025,27 @@ class LibraryPresenter(
     }
 
     fun markReadStatus(mangaList: List<Manga>, markRead: Boolean) {
-        presenterScope.launchIO {
-            mangaList.forEach {
-                withContext(Dispatchers.IO) {
-                    val chapters = db.getChapters(it).executeAsBlocking()
-                    chapters.forEach { chapter ->
-                        chapter.read = markRead
-                        chapter.last_page_read = 0
-                        if (preferences.readingSync() && chapter.isMergedChapter().not()) {
-                            when (markRead) {
-                                true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
-                                false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
-                            }
+        mangaList.forEach {
+            val chapters = db.getChapters(it).executeAsBlocking()
+            chapters.forEach { chapter ->
+                chapter.read = markRead
+                chapter.last_page_read = 0
+                if (preferences.readingSync() && chapter.isMergedChapter().not()) {
+                    presenterScope.launch {
+                        when (markRead) {
+                            true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                            false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
                         }
-                    }
-                    db.updateChaptersProgress(chapters).executeAsBlocking()
-                    if (markRead && preferences.removeAfterMarkedAsRead()) {
-                        deleteChapters(it, chapters)
                     }
                 }
             }
-            getLibrary()
+            db.updateChaptersProgress(chapters).executeAsBlocking()
+            if (markRead && preferences.removeAfterMarkedAsRead()) {
+                deleteChapters(it, chapters)
+            }
         }
+
+        getLibrary()
     }
 
     /** sync selected manga to mangadex follows */

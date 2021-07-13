@@ -15,6 +15,7 @@
 - Two view error log buttons showing in notification when library update error'd out
 - library manga error stopped the entire update
 - queuing multiple categories for update was not adding to the same notification
+- Marking as read/unread from library view was not working correctly
 
 ## 🛠️ Other
 - Added a release action to automate app release after a tag
