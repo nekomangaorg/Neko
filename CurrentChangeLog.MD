@@ -5,6 +5,7 @@
 
 ## 🏗️ Changes
 - Refresh tracking metadata in advanced settings is faster and can be cancelled
+- Syncing follow notification can now be cancelled
 - Option to hide bottom sheets in controller by swiping down the side nav for tablet mode (@Jays2Kings)
 - Lighten shadows on bottom sheets (@Jays2Kings)
 - Using nav rail only for landscape (phone + tablet) (@Jays2Kings)
