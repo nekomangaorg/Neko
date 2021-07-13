@@ -20,6 +20,7 @@
 - queuing multiple categories for update was not adding to the same notification
 - Marking as read/unread from library view was not working correctly
 - Filtering library by not tracked and clicking MDList would hide Unfollowed Manga
+- Category hopper icon color now matches the text color of the unread badge
 
 ## 🛠️ Other
 - Added a release action to automate app release after a tag
