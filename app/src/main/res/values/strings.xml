@@ -994,6 +994,7 @@
     <string name="syncing_follows">Begin syncing follows</string>
     <string name="sync_follows_complete">Syncing follows complete</string>
     <string name="sync_to_follows_complete">Syncing Manga to Follows List complete</string>
+    <string name="not_logged_into_mangadex_cannot_sync">Not logged into MangaDex cannot sync</string>
 
     <string name="sync_follows_failed">Syncing follows failed</string>
     <string name="follows">My follows</string>

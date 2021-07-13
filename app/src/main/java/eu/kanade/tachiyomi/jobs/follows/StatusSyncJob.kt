@@ -13,6 +13,7 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -33,6 +34,7 @@ class StatusSyncJob(
 ) : CoroutineWorker(context, params) {
 
     val followsSyncService: FollowsSyncService by injectLazy()
+    val source: SourceManager by injectLazy()
 
     private val progressNotification =
         applicationContext.notificationBuilder(Notifications.Channel.Status).apply {
@@ -52,7 +54,13 @@ class StatusSyncJob(
             val foregroundInfo = ForegroundInfo(Notifications.Id.Status.Progress, notification)
             setForeground(foregroundInfo)
         }
+        if (source.getMangadex().isLogged().not()) {
+            context.notificationManager.cancel(Notifications.Id.Status.Complete)
+            errorNotification()
+            return@coroutineScope Result.failure()
+        }
         try {
+
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null, "0" -> {
                     followsSyncService.toMangaDex(
@@ -128,6 +136,19 @@ class StatusSyncJob(
     private fun completeNotification(@StringRes title: Int) {
         val notification = progressNotification
             .setContentTitle(context.getString(R.string.sync_follows_complete))
+            .build()
+        context.applicationContext.notificationManager.notify(
+            Notifications.Id.Status.Complete,
+            notification
+        )
+    }
+
+    private fun errorNotification() {
+        val notification = progressNotification
+            .setContentTitle(context.getString(R.string.not_logged_into_mangadex_cannot_sync))
+
+            .setOngoing(true)
+            .setAutoCancel(true)
             .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Complete,
