@@ -120,8 +120,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
-                ?: 0
+                    ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
+                        ?: 0
         }
         val shadow2: View = controller.binding.shadow2
         val shadow: View = controller.binding.shadow
@@ -200,7 +200,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
             shadow.alpha = shadowAlpha
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight
+                ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -361,7 +362,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
             if (filterItems.contains(tracked)) {
                 val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
-                if (loggedServices.size > 1) {
+                if (loggedServices.isNotEmpty()) {
                     val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
                     withContext(Dispatchers.Main) {
                         trackers = inflate(R.layout.filter_tag_group) as FilterTagGroup
