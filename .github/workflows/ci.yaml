@@ -35,7 +35,7 @@ jobs:
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.0
         with:
-          path: app/google-services.json
+          path: debug/google-services.json
           contents: ${{ secrets.GOOGLE_SERVICE_JSON_DEBUG }}
           write-mode: overwrite # optional, default is preserve
 

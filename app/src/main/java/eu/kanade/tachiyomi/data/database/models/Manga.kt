@@ -7,12 +7,10 @@ import eu.kanade.tachiyomi.data.external.Dex
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.external.MangaUpdates
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import tachiyomi.source.model.MangaInfo
 import java.util.Locale
 
@@ -89,7 +87,8 @@ interface Manga : SManga {
     fun hideChapterTitle(preferences: PreferencesHelper): Boolean =
         if (usesLocalFilter) hideChapterTitles else preferences.hideChapterTitlesByDefault().get()
 
-    fun showChapterTitle(defaultShow: Boolean): Boolean = chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
+    fun showChapterTitle(defaultShow: Boolean): Boolean =
+        chapter_flags and CHAPTER_DISPLAY_MASK == CHAPTER_DISPLAY_NUMBER
 
     fun seriesType(context: Context): String {
         return context.getString(
@@ -132,14 +131,14 @@ interface Manga : SManga {
             { tag ->
                 tag == "long strip" || tag == "manhwa" || tag.contains("webtoon")
             } == true -> {
-                ReaderActivity.WEBTOON.flagValue
+                ReadingModeType.WEBTOON.flagValue
             }
             currentTags?.any
             { tag ->
                 tag == "chinese" || tag == "manhua" ||
                     tag.startsWith("english") || tag == "comic"
             } == true -> {
-                ReaderActivity.LEFT_TO_RIGHT.flagValue
+                ReadingModeType.LEFT_TO_RIGHT.flagValue
             }
             else -> 0
         }

@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import android.Manifest
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -144,7 +143,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         updateFab()
         binding.progress.isVisible = true
-        requestFilePermissionsSafe(301, preferences, presenter.source is LocalSource)
+        requestFilePermissionsSafe(301, preferences)
     }
 
     override fun onDestroyView(view: View) {

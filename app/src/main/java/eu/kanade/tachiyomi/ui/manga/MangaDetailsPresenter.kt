@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
@@ -306,7 +307,8 @@ class MangaDetailsPresenter(
     fun hasDownloads(): Boolean = allChapters.any { it.isDownloaded }
 
     fun getUnreadChaptersSorted() =
-        allChapters.filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }.distinctBy { it.name }
+        allChapters.filter { !it.read && it.status == Download.State.NOT_DOWNLOADED }
+            .distinctBy { it.name }
             .sortedWith(chapterSort.sortComparator(true))
 
     fun startDownloadingNow(chapter: Chapter) {
@@ -470,7 +472,7 @@ class MangaDetailsPresenter(
 
                     // force new cover if it exists
                     if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
-                        .getOrDefault()
+                            .getOrDefault()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl)
                     }
@@ -490,7 +492,7 @@ class MangaDetailsPresenter(
                                 .build()
 
                         if (Coil.imageLoader(preferences.context)
-                            .execute(request) is SuccessResult
+                                .execute(request) is SuccessResult
                         ) {
                             preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
                             withContext(Dispatchers.Main) {
@@ -648,7 +650,7 @@ class MangaDetailsPresenter(
                     it.pages_left = pagesLeft ?: 0
                 }
                 if (preferences.readingSync() && it.chapter.isMergedChapter()
-                    .not() && skipReadingSync.not()
+                        .not() && skipReadingSync.not()
                 ) {
                     launchIO {
                         when (read) {
@@ -675,7 +677,8 @@ class MangaDetailsPresenter(
      * Sets the sorting order and requests an UI update.
      */
     fun setSortOrder(sort: Int, descend: Boolean) {
-        manga.setChapterOrder(sort, if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
+        manga.setChapterOrder(sort,
+            if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
         if (mangaSortMatchesDefault()) {
             manga.setSortToGlobal()
         }
@@ -716,7 +719,7 @@ class MangaDetailsPresenter(
     fun setFilters(
         unread: TriStateCheckBox.State,
         downloaded: TriStateCheckBox.State,
-        bookmarked: TriStateCheckBox.State
+        bookmarked: TriStateCheckBox.State,
     ) {
         manga.readFilter = when (unread) {
             TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_UNREAD
@@ -762,7 +765,7 @@ class MangaDetailsPresenter(
     fun setGlobalChapterFilters(
         unread: TriStateCheckBox.State,
         downloaded: TriStateCheckBox.State,
-        bookmarked: TriStateCheckBox.State
+        bookmarked: TriStateCheckBox.State,
     ) {
         preferences.filterChapterByRead().set(
             when (unread) {

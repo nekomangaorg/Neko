@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
-import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.v5.job.V5MigrationJob
@@ -75,8 +74,6 @@ object Migrations {
                         remove("enable_doh")
                     }
                 }
-                // Reset rotation to Free after replacing Lock
-                preferences.rotation().set(1)
                 // Handle removed every 1 or 2, 3 hour library updates
                 val updateInterval = preferences.libraryUpdateInterval().get()
                 if (updateInterval == 1 || updateInterval == 2 || updateInterval == 3) {
@@ -86,7 +83,7 @@ object Migrations {
             }
 
 
-            if(oldVersion < 120){
+            if (oldVersion < 120) {
                 // Migrate Rotation and Viewer values to default values for viewer_flags
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
                 val newOrientation = when (prefs.getInt("pref_rotation_type_key", 1)) {

@@ -16,20 +16,24 @@
             style="@style/BottomSheetDialogTheme"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:background="@android:color/transparent"
             android:orientation="vertical"
             android:paddingTop="12dp"
             app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-            <LinearLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/sort_title_bar"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal">
+                android:layout_height="wrap_content">
 
                 <com.google.android.material.textview.MaterialTextView
-                    style="@style/Neko.Headline5"
+                    android:id="@+id/sort_title"
+                    style="@style/Neko.Headline6"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     android:paddingStart="16dp"
                     android:paddingEnd="12dp"
                     android:text="@string/sort" />
@@ -38,33 +42,46 @@
                     android:id="@+id/set_as_default_sort"
                     style="@style/Neko.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/set_as_default_for_all" />
-            </LinearLayout>
+                    android:layout_height="38sp"
+                    android:padding="4dp"
+                    android:layout_marginStart="6dp"
+                    android:layout_gravity="center_vertical"
+                    app:layout_constraintBaseline_toBaselineOf="@id/sort_title"
+                    app:layout_constraintStart_toEndOf="@id/sort_title"
+                    android:text="@string/set_as_default" />
 
-            <RadioGroup
-                android:id="@+id/sort_group"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp">
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/sort_newest"
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/reset_as_default_sort"
+                    style="@style/Neko.Button.TextButton"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="@string/newest_first" />
+                    android:layout_height="38sp"
+                    android:padding="4dp"
+                    android:layout_marginEnd="6dp"
+                    android:layout_gravity="center_vertical"
+                    app:layout_constraintStart_toEndOf="@id/set_as_default_sort"
+                    app:layout_constraintHorizontal_bias="1.0"
+                    app:layout_constraintBaseline_toBaselineOf="@id/sort_title"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    android:text="@string/reset" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/sort_oldest"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginStart="12dp"
-                    android:layout_weight="1"
-                    android:text="@string/oldest_first" />
-            </RadioGroup>
+            <eu.kanade.tachiyomi.widget.SortTextView
+                android:id="@+id/by_source"
+                android:layout_width="match_parent"
+                android:text="@string/by_source_order"
+                android:layout_height="wrap_content" />
+
+            <eu.kanade.tachiyomi.widget.SortTextView
+                android:id="@+id/by_chapter_number"
+                android:layout_width="match_parent"
+                android:text="@string/by_chapter_number"
+                android:layout_height="wrap_content" />
+
+            <eu.kanade.tachiyomi.widget.SortTextView
+                android:id="@+id/by_upload_date"
+                android:layout_width="match_parent"
+                android:text="@string/by_update_date"
+                android:layout_height="wrap_content" />
 
             <include
                 layout="@layout/chapter_filter_layout"
@@ -74,7 +91,7 @@
 
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/filter_groups_button"
-                style="@style/Neko.Button.RoundedOutline"
+                style="@style/Neko.Button.Rounded.Alternative"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
@@ -84,40 +101,10 @@
                 android:textAlignment="center"
                 android:text="@string/filter_groups" />
 
-            <com.google.android.material.textview.MaterialTextView
-                style="@style/Neko.Body1.Medium"
-                android:textSize="14sp"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:paddingStart="16dp"
-                android:paddingEnd="12dp"
-                android:text="@string/more" />
-
-            <RadioGroup
-                android:id="@+id/sort_method_group"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:paddingStart="12dp"
-                android:paddingEnd="12dp">
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/sort_by_source"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sort_by_source_s_order" />
-
-                <com.google.android.material.radiobutton.MaterialRadioButton
-                    android:id="@+id/sort_by_number"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/sort_by_chapter_number" />
-            </RadioGroup>
-
             <com.google.android.material.checkbox.MaterialCheckBox
                 android:id="@+id/hide_titles"
                 android:layout_width="match_parent"
+                android:layout_marginTop="6dp"
                 android:layout_height="wrap_content"
                 android:layout_marginStart="12dp"
                 android:layout_marginEnd="12dp"
@@ -136,18 +123,4 @@
         android:contentDescription="@string/drag_handle"
         android:src="@drawable/draggable_pill"
         app:tint="?android:attr/textColorPrimary" />
-
-    <ImageView
-        android:id="@+id/close_button"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:layout_gravity="end"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="12dp"
-        android:background="@drawable/round_ripple"
-        android:clickable="true"
-        android:contentDescription="@string/close"
-        android:focusable="true"
-        android:src="@drawable/ic_close_24dp"
-        app:tint="@color/gray_button" />
 </FrameLayout>

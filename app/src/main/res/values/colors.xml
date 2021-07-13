@@ -114,6 +114,9 @@
     <color name="neko_miami_badge_1">#F706CF</color>
 
     <!-- Strawberry Daiquiri Theme -->
+    <!-- Hot Pink Theme -->
+    <color name="colorAccentPink">#FF3399</color>
+    <color name="colorPrimaryPink">#FF57B3</color>
     <color name="colorAccentStrawberry">#ED4A65</color>
     <color name="colorAccentStrawberryText">#b62e45</color>
 

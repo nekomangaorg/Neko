@@ -85,7 +85,7 @@ class MergeSource : ReducedHttpSource() {
         return withContext(Dispatchers.IO) {
             val response = client.newCall(GET("$baseUrl$mergeMangaUrl", headers)).await()
             val vmChapters =
-                response.asJsoup().select("script:containsData(MainFunction)").first().data()
+                response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
                     .substringAfter("vm.Chapters = ").substringBefore(";")
 
             return@withContext gson.fromJson<JsonArray>(vmChapters).map { json ->
@@ -95,7 +95,7 @@ class MergeSource : ReducedHttpSource() {
 
                     name = json["ChapterName"].nullString.let {
                         if (it.isNullOrEmpty()) "$type ${
-                        chapterImage(indexChapter)
+                            chapterImage(indexChapter)
                         }" else it
                     }
 
@@ -148,7 +148,7 @@ class MergeSource : ReducedHttpSource() {
 
     fun pageListParse(response: Response): List<Page> {
         val document = response.asJsoup()
-        val script = document.select("script:containsData(MainFunction)").first().data()
+        val script = document.select("script:containsData(MainFunction)").first()!!.data()
         val curChapter = gson.fromJson<JsonElement>(
             script.substringAfter("vm.CurChapter = ")
                 .substringBefore(";")
@@ -172,7 +172,7 @@ class MergeSource : ReducedHttpSource() {
 
     // don't use ";" for substringBefore() !
     private fun directoryFromResponse(response: Response): String {
-        return response.asJsoup().select("script:containsData(MainFunction)").first().data()
+        return response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
             .substringAfter("vm.Directory = ").substringBefore("vm.GetIntValue").trim()
             .replace(";", " ")
     }

@@ -122,7 +122,8 @@ class ReaderPresenter(
 
         when (manga.chapterOrder(preferences)) {
             Manga.CHAPTER_SORTING_SOURCE -> ChapterLoadBySource().get(chaptersForReader)
-            Manga.CHAPTER_SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader, selectedChapter)
+            Manga.CHAPTER_SORTING_NUMBER -> ChapterLoadByNumber().get(chaptersForReader,
+                selectedChapter)
             Manga.CHAPTER_SORTING_UPLOAD_DATE -> ChapterLoadByDate().get(chaptersForReader)
             else -> error("Unknown sorting method")
         }.map(::ReaderChapter)
@@ -220,11 +221,13 @@ class ReaderPresenter(
         chapterItems = withContext(Dispatchers.IO) {
             val chapterSort = ChapterSort(manga, chapterFilter, preferences)
             val dbChapters = db.getChapters(manga).executeAsBlocking()
-            chapterSort.getChaptersSorted(dbChapters, filterForReader = true, currentChapter = getCurrentChapter()?.chapter).map {
+            chapterSort.getChaptersSorted(dbChapters,
+                filterForReader = true,
+                currentChapter = getCurrentChapter()?.chapter).map {
                 ReaderChapterItem(
                     it,
                     manga,
-                            it.id == currentChapter ?: chapterId
+                    it.id == getCurrentChapter()?.chapter?.id ?: chapterId
                 )
             }
         }
@@ -556,12 +559,12 @@ class ReaderPresenter(
             manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
             db.updateViewerFlags(manga).asRxObservable().subscribe()
         }
-        val viewer =  if (manga.readingModeType == 0) default else manga.readingModeType
+        val viewer = if (manga.readingModeType == 0) default else manga.readingModeType
 
-        return when{
-            !manga.isLongStrip() && viewer == ReaderActivity.WEBTOON.value -> ReaderActivity.VERTICAL_PLUS
+        return when {
+            !manga.isLongStrip() && viewer == ReadingModeType.WEBTOON.flagValue -> ReadingModeType.CONTINUOUS_VERTICAL.flagValue
+            else -> viewer
         }
-
     }
 
     /**
@@ -606,7 +609,7 @@ class ReaderPresenter(
         manga.orientationType = rotationType
         db.updateViewerFlags(manga).executeAsBlocking()
 
-        Timber.i("Manga orientation is ${manga.orientationType}")
+        XLog.i("Manga orientation is ${manga.orientationType}")
 
         Observable.timer(250, TimeUnit.MILLISECONDS, AndroidSchedulers.mainThread())
             .subscribeFirst({ view, _ ->
