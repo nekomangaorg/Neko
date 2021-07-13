@@ -327,7 +327,9 @@ class LibraryPresenter(
 
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
-                    if (service.isMdList() && it.status == FollowStatus.UNFOLLOWED.int) {
+                    if (service.isMdList() && (source.isLogged()
+                            .not() || it.status == FollowStatus.UNFOLLOWED.int)
+                    ) {
                         false
                     } else {
                         it.sync_id == service.id
