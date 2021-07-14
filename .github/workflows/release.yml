@@ -65,8 +65,8 @@ jobs:
       - name: Prep build artifacts for release
         run: |
           echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
-          cp ${{ env.SIGNED_RELEASE_FILE }} neko-${{ env.VERSION_TAG }}.apk
-          md5=`md5sum neko-${{ env.VERSION_TAG }}.apk | awk '{ print $1 }'`
+          cp ${{ env.SIGNED_RELEASE_FILE }} neko.apk
+          md5=`md5sum neko.apk | awk '{ print $1 }'`
           echo " #### MD5: $md5" >> CurrentChangeLog.MD
 
       - name: Create Release
@@ -76,5 +76,5 @@ jobs:
           bodyFile: "CurrentChangeLog.MD"
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
-          replaceArtifacts: true
-          artifacts: "neko-${{ env.VERSION_TAG }}.apk"
+          replacesArtifacts: true
+          artifacts: "neko.apk"
