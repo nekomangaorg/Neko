@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.settings.ReaderBottomButton
+import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.util.lang.addBetaTag
 import eu.kanade.tachiyomi.util.system.isTablet
@@ -23,15 +24,12 @@ class SettingsReaderController : SettingsController() {
         preferenceCategory {
             titleRes = R.string.general
             intListPreference(activity) {
-                key = Keys.defaultViewer
+                key = Keys.defaultReadingMode
                 titleRes = R.string.default_reading_mode
-                entriesRes = arrayOf(
-                    R.string.left_to_right_viewer,
-                    R.string.right_to_left_viewer,
-                    R.string.vertical_viewer,
-                    R.string.webtoon
-                )
-                entryRange = 1..4
+                entriesRes = ReadingModeType.values().drop(1).dropLast(1)
+                    .map { value -> value.stringRes }.toTypedArray()
+                entryValues = ReadingModeType.values().drop(1)
+                    .map { value -> value.flagValue }
                 defaultValue = 2
             }
             intListPreference(activity) {
@@ -65,7 +63,11 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.preloadSize
                 titleRes = R.string.page_preload_amount
                 entryValues = listOf(4, 6, 8, 10, 12, 14, 16, 20)
-                entries = entryValues.map { context.resources.getQuantityString(R.plurals.pages_plural, it, it) }
+                entries = entryValues.map {
+                    context.resources.getQuantityString(R.plurals.pages_plural,
+                        it,
+                        it)
+                }
                 defaultValue = 6
                 summaryRes = R.string.amount_of_pages_to_preload
             }
@@ -91,12 +93,13 @@ class SettingsReaderController : SettingsController() {
             titleRes = R.string.display
 
             intListPreference(activity) {
-                key = Keys.rotation
-                titleRes = R.string.rotation
-                val enumConstants = OrientationType.values()
+                key = Keys.defaultOrientationType
+                titleRes = R.string.default_orientation
+                val enumConstants = OrientationType.values().drop(1)
                 entriesRes = enumConstants.map { it.stringRes }.toTypedArray()
-                entryRange = 1..enumConstants.size
-                defaultValue = 1
+                entryValues = OrientationType.values().drop(1)
+                    .map { value -> value.flagValue }
+                defaultValue = OrientationType.FREE.flagValue
             }
             intListPreference(activity) {
                 key = Keys.readerTheme
@@ -254,13 +257,15 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = PageLayout.AUTOMATIC.value
             }
             infoPreference(R.string.automatic_can_still_switch).apply {
-                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC.value }
+                preferences.pageLayout()
+                    .asImmediateFlowIn(viewScope) { isVisible = it == PageLayout.AUTOMATIC.value }
             }
             switchPreference {
                 key = Keys.invertDoublePages
                 titleRes = R.string.invert_double_pages
                 defaultValue = false
-                preferences.pageLayout().asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
+                preferences.pageLayout()
+                    .asImmediateFlowIn(viewScope) { isVisible = it != PageLayout.SINGLE_PAGE.value }
             }
         }
         preferenceCategory {
@@ -341,7 +346,8 @@ class SettingsReaderController : SettingsController() {
                 titleRes = R.string.invert_volume_keys
                 defaultValue = false
 
-                preferences.readWithVolumeKeys().asImmediateFlow { isVisible = it }.launchIn(viewScope)
+                preferences.readWithVolumeKeys().asImmediateFlow { isVisible = it }
+                    .launchIn(viewScope)
             }
         }
 

@@ -79,7 +79,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_LAST_UPDATE, obj.last_update)
         put(COL_NEXT_UPDATE, obj.next_update)
         put(COL_INITIALIZED, obj.initialized)
-        put(COL_VIEWER, obj.viewer)
+        put(COL_VIEWER, obj.viewer_flags)
         put(COL_CHAPTER_FLAGS, obj.chapter_flags)
         put(COL_DATE_ADDED, obj.date_added)
         put(COL_LANG_FLAG, obj.lang_flag)
@@ -115,7 +115,7 @@ interface BaseMangaGetResolver {
         last_update = cursor.getLong(cursor.getColumnIndex(COL_LAST_UPDATE))
         next_update = cursor.getLong(cursor.getColumnIndex(COL_NEXT_UPDATE))
         initialized = cursor.getInt(cursor.getColumnIndex(COL_INITIALIZED)) == 1
-        viewer = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
+        viewer_flags = cursor.getInt(cursor.getColumnIndex(COL_VIEWER))
         chapter_flags = cursor.getInt(cursor.getColumnIndex(COL_CHAPTER_FLAGS))
         date_added = cursor.getLong(cursor.getColumnIndex(COL_DATE_ADDED))
         lang_flag = cursor.getString(cursor.getColumnIndex(COL_LANG_FLAG))

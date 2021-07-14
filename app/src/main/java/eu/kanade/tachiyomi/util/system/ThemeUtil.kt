@@ -1,11 +1,14 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.coroutineScope
+import androidx.core.content.edit
+import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.injectLazy
 
@@ -20,12 +23,34 @@ object ThemeUtil {
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
             }
         )
-        preferences.lightTheme().set(Themes.PURE_WHITE)
-        preferences.darkTheme().set(
-            when (theme) {
-                else -> Themes.DARK
-            }
-        )
+        preferences.lightTheme().set(Themes.DEFAULT)
+        preferences.darkTheme().set(Themes.DEFAULT)
+    }
+
+    /** Migration method */
+    fun convertNewThemes(context: Context) {
+        val prefs = PreferenceManager.getDefaultSharedPreferences(context)
+        val lightTheme = prefs.getString(PreferenceKeys.lightTheme, "DEFAULT")
+        val darkTheme = prefs.getString(PreferenceKeys.darkTheme, "DEFAULT")
+
+        prefs.edit {
+            putString(
+                PreferenceKeys.lightTheme,
+                when (lightTheme) {
+                    "SPRING" -> Themes.SPRING_AND_DUSK
+                    "STRAWBERRY_DAIQUIRI" -> Themes.STRAWBERRIES
+                    else -> Themes.DEFAULT
+                }.name
+            )
+            putString(
+                PreferenceKeys.darkTheme,
+                when (darkTheme) {
+                    "DUSK" -> Themes.SPRING_AND_DUSK
+                    "CHOCOLATE_STRAWBERRIES" -> Themes.STRAWBERRIES
+                    else -> Themes.DEFAULT
+                }.name
+            )
+        }
     }
 
     fun isColoredTheme(theme: Themes): Boolean {
@@ -38,7 +63,7 @@ object ThemeUtil {
     }
 
     fun hasDarkActionBarInLight(context: Context, theme: Themes): Boolean {
-        return !context.isInNightMode() && isColoredTheme(theme)
+        return !context.isInNightMode()
     }
 
     fun readerBackgroundColor(theme: Int): Int {
@@ -53,31 +78,37 @@ fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
     if (preferences.nightMode().isNotSet()) {
         ThemeUtil.convertTheme(preferences, preferences.oldTheme())
     }
-    val theme = getPrefTheme(preferences)
-    setTheme(theme.styleRes)
-
-    if (theme.isDarkTheme && preferences.themeDarkAmoled().get()) {
-        setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
-    }
-    lifecycle.coroutineScope.launchWhenCreated {
+    if (AppCompatDelegate.getDefaultNightMode() != preferences.nightMode().get()) {
         AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
     }
+    val theme = getPrefTheme(preferences)
+    setTheme(theme.styleRes)
+}
+
+fun AppCompatActivity.getThemeWithExtras(
+    theme: Resources.Theme,
+    preferences: PreferencesHelper,
+): Resources.Theme {
+    val prefTheme = getPrefTheme(preferences)
+    if ((isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+        preferences.themeDarkAmoled().get()
+    ) {
+        theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)
+    }
+    return theme
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
         (
-            if ((
-                applicationContext.isInNightMode() || preferences.nightMode()
-                    .get() == AppCompatDelegate.MODE_NIGHT_YES
-                ) &&
+            if ((applicationContext.isInNightMode() || preferences.nightMode()
+                    .get() == AppCompatDelegate.MODE_NIGHT_YES) &&
                 preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
             ) preferences.darkTheme() else preferences.lightTheme()
             ).get()
     } catch (e: Exception) {
-        preferences.lightTheme().set(Themes.PURE_WHITE)
-        preferences.darkTheme().set(Themes.DARK)
-        Themes.PURE_WHITE
+        ThemeUtil.convertNewThemes(preferences.context)
+        getPrefTheme(preferences)
     }
 }

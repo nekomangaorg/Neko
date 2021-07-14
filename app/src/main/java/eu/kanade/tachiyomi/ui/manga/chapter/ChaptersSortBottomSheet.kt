@@ -4,7 +4,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -12,9 +11,11 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
+import eu.kanade.tachiyomi.widget.SortTextView
 import kotlin.math.max
 
 class ChaptersSortBottomSheet(controller: MangaDetailsController) :
@@ -28,6 +29,8 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         ChapterSortBottomSheetBinding.inflate(inflater)
 
     init {
+        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        sheetBehavior.peekHeight = 460.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -61,66 +64,96 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         super.onCreate(savedInstanceState)
         initGeneralPreferences()
         setBottomEdge(binding.hideTitles, activity)
-        binding.closeButton.setOnClickListener { dismiss() }
         binding.settingsScrollView.viewTreeObserver.addOnGlobalLayoutListener {
             val isScrollable =
                 binding.settingsScrollView.height < binding.sortLayout.height +
                     binding.settingsScrollView.paddingTop + binding.settingsScrollView.paddingBottom
-            binding.closeButton.isVisible = isScrollable
             // making the view gone somehow breaks the layout so lets make it invisible
             binding.pill.isInvisible = isScrollable
-        }
-
-        setOnDismissListener {
-            presenter.setFilters(
-                binding.chapterFilterLayout.showRead.isChecked,
-                binding.chapterFilterLayout.showUnread.isChecked,
-                binding.chapterFilterLayout.showDownload.isChecked,
-                binding.chapterFilterLayout.showBookmark.isChecked
-            )
         }
     }
 
     private fun initGeneralPreferences() {
-        binding.chapterFilterLayout.root.setCheckboxes(presenter.manga)
+        binding.chapterFilterLayout.root.setCheckboxes(presenter.manga, presenter.preferences)
+        checkIfFilterMatchesDefault(binding.chapterFilterLayout.root)
+        binding.chapterFilterLayout.root.setOnCheckedChangeListener(::setFilters)
 
-        var defPref = presenter.globalSort()
-        binding.sortGroup.check(
-            if (presenter.manga.sortDescending(defPref)) R.id.sort_newest else {
-                R.id.sort_oldest
-            }
-        )
+        binding.byChapterNumber.state = SortTextView.State.NONE
+        binding.byUploadDate.state = SortTextView.State.NONE
+        binding.bySource.state = SortTextView.State.NONE
 
-        binding.hideTitles.isChecked = presenter.manga.displayMode != Manga.DISPLAY_NAME
-        binding.sortMethodGroup.check(
-            if (presenter.manga.sorting == Manga.SORTING_SOURCE) R.id.sort_by_source else {
-                R.id.sort_by_number
-            }
-        )
-
-        binding.setAsDefaultSort.isInvisible = defPref == presenter.manga.sortDescending() ||
-            !presenter.manga.usesLocalSort()
-        binding.sortGroup.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setSortOrder(checkedId == R.id.sort_newest)
-            binding.setAsDefaultSort.isInvisible = (
-                defPref == presenter.manga.sortDescending() ||
-                    !presenter.manga.usesLocalSort()
-                )
+        val sortItem = when (presenter.sortingOrder()) {
+            Manga.CHAPTER_SORTING_NUMBER -> binding.byChapterNumber
+            Manga.CHAPTER_SORTING_UPLOAD_DATE -> binding.byUploadDate
+            else -> binding.bySource
         }
+
+        sortItem.state = if (presenter.sortDescending()) {
+            SortTextView.State.DESCENDING
+        } else {
+            SortTextView.State.ASCENDING
+        }
+
+        checkIfSortMatchesDefault()
+        binding.byChapterNumber.setOnSortChangeListener(::sortChanged)
+        binding.byUploadDate.setOnSortChangeListener(::sortChanged)
+        binding.bySource.setOnSortChangeListener(::sortChanged)
+
+        binding.hideTitles.isChecked = presenter.manga.hideChapterTitle(presenter.preferences)
 
         binding.setAsDefaultSort.setOnClickListener {
-            val desc = binding.sortGroup.checkedRadioButtonId == R.id.sort_newest
-            presenter.setGlobalChapterSort(desc)
-            defPref = desc
+            presenter.setGlobalChapterSort(
+                presenter.manga.sorting,
+                presenter.manga.sortDescending
+            )
             binding.setAsDefaultSort.isInvisible = true
+            binding.resetAsDefaultSort.isInvisible = true
         }
 
-        binding.sortMethodGroup.setOnCheckedChangeListener { _, checkedId ->
-            presenter.setSortMethod(checkedId == R.id.sort_by_source)
+        binding.resetAsDefaultSort.setOnClickListener {
+            presenter.resetSortingToDefault()
+
+            binding.byChapterNumber.state = SortTextView.State.NONE
+            binding.byUploadDate.state = SortTextView.State.NONE
+            binding.bySource.state = SortTextView.State.NONE
+
+            val sortItemNew = when (presenter.sortingOrder()) {
+                Manga.CHAPTER_SORTING_NUMBER -> binding.byChapterNumber
+                Manga.CHAPTER_SORTING_UPLOAD_DATE -> binding.byUploadDate
+                else -> binding.bySource
+            }
+
+            sortItemNew.state = if (presenter.sortDescending()) {
+                SortTextView.State.DESCENDING
+            } else {
+                SortTextView.State.ASCENDING
+            }
+            binding.setAsDefaultSort.isInvisible = true
+            binding.resetAsDefaultSort.isInvisible = true
         }
 
         binding.hideTitles.setOnCheckedChangeListener { _, isChecked ->
             presenter.hideTitle(isChecked)
+            checkIfFilterMatchesDefault(binding.chapterFilterLayout.root)
+        }
+
+        binding.chapterFilterLayout.setAsDefaultFilter.setOnClickListener {
+            presenter.setGlobalChapterFilters(
+                binding.chapterFilterLayout.showUnread.state,
+                binding.chapterFilterLayout.showDownload.state,
+                binding.chapterFilterLayout.showBookmark.state
+            )
+            binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
+            binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
+        }
+
+        binding.chapterFilterLayout.resetAsDefaultFilter.setOnClickListener {
+            presenter.resetFilterToDefault()
+
+            binding.chapterFilterLayout.root.setCheckboxes(presenter.manga, presenter.preferences)
+            binding.hideTitles.isChecked = presenter.manga.hideChapterTitle(presenter.preferences)
+            binding.chapterFilterLayout.setAsDefaultFilter.isInvisible = true
+            binding.chapterFilterLayout.resetAsDefaultFilter.isInvisible = true
         }
 
         binding.filterGroupsButton.setOnClickListener {
@@ -143,5 +176,47 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                 .positiveButton(android.R.string.ok)
                 .show()
         }
+    }
+
+    private fun setFilters(filterLayout: ChapterFilterLayout) {
+        presenter.setFilters(
+            binding.chapterFilterLayout.showUnread.state,
+            binding.chapterFilterLayout.showDownload.state,
+            binding.chapterFilterLayout.showBookmark.state
+        )
+        checkIfFilterMatchesDefault(filterLayout)
+    }
+
+    private fun checkIfFilterMatchesDefault(filterLayout: ChapterFilterLayout) {
+        val matches = presenter.mangaFilterMatchesDefault()
+        filterLayout.binding.setAsDefaultFilter.isInvisible = matches
+        filterLayout.binding.resetAsDefaultFilter.isInvisible = matches
+    }
+
+    private fun checkIfSortMatchesDefault() {
+        val matches = presenter.mangaSortMatchesDefault()
+        binding.setAsDefaultSort.isInvisible = matches
+        binding.resetAsDefaultSort.isInvisible = matches
+    }
+
+    private fun sortChanged(sortTextView: SortTextView, state: SortTextView.State) {
+        if (sortTextView != binding.byChapterNumber) {
+            binding.byChapterNumber.state = SortTextView.State.NONE
+        }
+        if (sortTextView != binding.byUploadDate) {
+            binding.byUploadDate.state = SortTextView.State.NONE
+        }
+        if (sortTextView != binding.bySource) {
+            binding.bySource.state = SortTextView.State.NONE
+        }
+        presenter.setSortOrder(
+            when (sortTextView) {
+                binding.byChapterNumber -> Manga.CHAPTER_SORTING_NUMBER
+                binding.byUploadDate -> Manga.CHAPTER_SORTING_UPLOAD_DATE
+                else -> Manga.CHAPTER_SORTING_SOURCE
+            },
+            state == SortTextView.State.DESCENDING
+        )
+        checkIfSortMatchesDefault()
     }
 }

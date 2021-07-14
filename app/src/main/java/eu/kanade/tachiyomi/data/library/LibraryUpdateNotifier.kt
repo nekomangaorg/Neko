@@ -132,11 +132,6 @@ class LibraryUpdateNotifier(private val context: Context) {
                     )
                 )
                 setSmallIcon(R.drawable.ic_neko_notification)
-                addAction(
-                    R.drawable.nnf_ic_file_folder,
-                    context.getString(R.string.view_all_errors),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri)
-                )
             }
                 .build()
         )

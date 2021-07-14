@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsReaderController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -123,13 +124,15 @@ class SearchActivity : MainActivity() {
                     if (mangaId != 0L) {
                         val db = Injekt.get<DatabaseHelper>()
                         val chapters = db.getChapters(mangaId).executeAsBlocking()
-                        val nextUnreadChapter = chapters.sortedByDescending { it.source_order }.find { !it.read }
-                        val manga = db.getManga(mangaId).executeAsBlocking()
-                        if (nextUnreadChapter != null && manga != null) {
-                            val activity = ReaderActivity.newIntent(this, manga, nextUnreadChapter)
-                            startActivity(activity)
-                            finish()
-                            return true
+                        db.getManga(mangaId).executeAsBlocking()?.let { manga ->
+                            val nextUnreadChapter = ChapterSort(manga).getNextUnreadChapter(chapters, false)
+                            if (nextUnreadChapter != null) {
+                                val activity =
+                                    ReaderActivity.newIntent(this, manga, nextUnreadChapter)
+                                startActivity(activity)
+                                finish()
+                                return true
+                            }
                         }
                     }
                 }

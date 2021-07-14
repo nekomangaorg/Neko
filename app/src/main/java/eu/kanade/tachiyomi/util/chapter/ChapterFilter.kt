@@ -16,20 +16,24 @@ class ChapterFilter(
 
     // filters chapters based on the manga values
     fun <T : Chapter> filterChapters(chapters: List<T>, manga: Manga): List<T> {
-        val readEnabled = manga.readFilter == Manga.SHOW_READ
-        val unreadEnabled = manga.readFilter == Manga.SHOW_UNREAD
-        val downloadEnabled = manga.downloadedFilter == Manga.SHOW_DOWNLOADED
-        val bookmarkEnabled = manga.bookmarkedFilter == Manga.SHOW_BOOKMARKED
+        val readEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_READ
+        val unreadEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_UNREAD
+        val downloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_DOWNLOADED
+        val notDownloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+        val bookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED
+        val notBookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
         val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
         val scanlatorEnabled = listValidScanlators.isNotEmpty()
 
         // if none of the filters are enabled skip the filtering of them
-        return if (readEnabled || unreadEnabled || downloadEnabled || bookmarkEnabled || scanlatorEnabled) {
+        return if (readEnabled || unreadEnabled || downloadEnabled || notDownloadEnabled || bookmarkEnabled || notBookmarkEnabled || scanlatorEnabled) {
             chapters.filter {
                 if (readEnabled && it.read.not() ||
                     (unreadEnabled && it.read) ||
                     (bookmarkEnabled && it.bookmark.not()) ||
+                    (notBookmarkEnabled && it.bookmark) ||
                     (downloadEnabled && downloadManager.isChapterDownloaded(it, manga).not()) ||
+                    (notDownloadEnabled && downloadManager.isChapterDownloaded(it, manga)) ||
                     (
                         scanlatorEnabled && it.scanlatorList()
                             .none { group -> listValidScanlators.contains(group) }
@@ -45,11 +49,7 @@ class ChapterFilter(
     }
 
     // filter chapters for the reader
-    fun filterChaptersForReader(
-        chapters: List<Chapter>,
-        manga: Manga,
-        selectedChapter: Chapter? = null,
-    ): List<Chapter> {
+    fun <T : Chapter> filterChaptersForReader(chapters: List<T>, manga: Manga, selectedChapter: T? = null): List<T> {
         // if neither preference is enabled don't even filter
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
             return chapters

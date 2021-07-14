@@ -8,6 +8,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import androidx.core.net.toUri
 import androidx.core.os.bundleOf
 import androidx.documentfile.provider.DocumentFile
@@ -24,6 +25,7 @@ import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.getFilePicker
+import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import kotlinx.coroutines.flow.launchIn
@@ -39,7 +41,7 @@ class SettingsBackupController : SettingsController() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        requestFilePermissionsSafe(500)
+        requestFilePermissionsSafe(500, preferences)
     }
 
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
@@ -59,6 +61,11 @@ class SettingsBackupController : SettingsController() {
             summaryRes = R.string.restore_from_backup_file
 
             onClick {
+                if (MiuiUtil.isMiui() && MiuiUtil.isMiuiOptimizationDisabled()) {
+                    context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
+                    return@onClick
+                }
+
                 if (!BackupRestoreService.isRunning(context)) {
                     val intent = Intent(Intent.ACTION_GET_CONTENT)
                     intent.addCategory(Intent.CATEGORY_OPENABLE)

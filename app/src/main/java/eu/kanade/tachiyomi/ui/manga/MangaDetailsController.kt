@@ -209,7 +209,7 @@ class MangaDetailsController :
         presenter.onCreate()
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         binding.swipeRefresh.setOnRefreshListener { presenter.refreshAll() }
-        requestFilePermissionsSafe(301)
+        requestFilePermissionsSafe(301, presenter.preferences)
     }
 
     /** Check if device is tablet, and use a second recycler to hold the details header if so */
@@ -1093,12 +1093,12 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.seriesType
-            (view.context).toLowerCase(Locale.ROOT)
+                (view.context).toLowerCase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
-            snack == null ||
-                snack?.getText() != text
-            )
+                snack == null ||
+                    snack?.getText() != text
+                )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {

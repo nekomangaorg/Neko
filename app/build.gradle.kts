@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 120
-    const val versionName = "2.5.3"
+    const val versionCode = 121
+    const val versionName = "2.5.4"
 }
 
 plugins {
@@ -181,7 +181,7 @@ dependencies {
     implementation("com.github.tachiyomiorg:unifile:17bec43")
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.13.1")
+    implementation("org.jsoup:jsoup:1.14.1")
 
     // Icons
     implementation("com.mikepenz:iconics-core:5.3.0-b01")

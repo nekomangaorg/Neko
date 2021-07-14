@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Request
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
@@ -25,27 +26,30 @@ class ImageHandler {
     private val tokenTracker = hashMapOf<String, Long>()
 
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
-        if (page.imageUrl!!.contains("mangaplus", true)) {
-            return mangaPlusHandler.client.newCall(GET(page.imageUrl!!, mangaPlusHandler.headers))
-                .await()
-        } else {
-            val request = imageRequest(page, isLogged)
-            val response = try {
-                network.nonRateLimitedClient.newCallWithProgress(request, page)
+        return withIOContext {
+            if (page.imageUrl!!.contains("mangaplus", true)) {
+                return@withIOContext mangaPlusHandler.client.newCall(GET(page.imageUrl!!,
+                    mangaPlusHandler.headers))
                     .await()
-            } catch (e: Exception) {
-                XLog.e("error getting images", e)
-                reportFailedImage(request.url.toString())
-                throw (e)
-            }
+            } else {
+                val request = imageRequest(page, isLogged)
+                val response = try {
+                    network.nonRateLimitedClient.newCallWithProgress(request, page)
+                        .await()
+                } catch (e: Exception) {
+                    XLog.e("error getting images", e)
+                    reportFailedImage(request.url.toString())
+                    throw (e)
+                }
 
-            reportImageWithResponse(response)
+                reportImageWithResponse(response)
 
-            if (!response.isSuccessful) {
-                response.close()
-                throw Exception("HTTP error ${response.code}")
+                if (!response.isSuccessful) {
+                    response.close()
+                    throw Exception("HTTP error ${response.code}")
+                }
+                return@withIOContext response
             }
-            return response
         }
     }
 

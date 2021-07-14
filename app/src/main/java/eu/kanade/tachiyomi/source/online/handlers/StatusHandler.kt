@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -57,18 +58,22 @@ class StatusHandler {
      }.flowOn(Dispatchers.IO)*/
 
     suspend fun markChapterRead(chapterId: String) {
-        runCatching {
-            network.authService.markChapterRead(chapterId)
-        }.onFailure {
-            XLog.e("error trying to mark chapter read", it)
+        withIOContext {
+            runCatching {
+                network.authService.markChapterRead(chapterId)
+            }.onFailure {
+                XLog.e("error trying to mark chapter read", it)
+            }
         }
     }
 
     suspend fun markChapterUnRead(chapterId: String) {
-        runCatching {
-            network.authService.markChapterUnRead(chapterId)
-        }.onFailure {
-            XLog.e("error trying to mark chapter unread", it)
+        withIOContext {
+            runCatching {
+                network.authService.markChapterUnRead(chapterId)
+            }.onFailure {
+                XLog.e("error trying to mark chapter unread", it)
+            }
         }
     }
 

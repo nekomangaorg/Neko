@@ -228,17 +228,23 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 if (isRereading) MyAnimeList.REREADING else getStatus(obj["status"]!!.jsonPrimitive.content)
             last_chapter_read = obj["num_chapters_read"]!!.jsonPrimitive.int
             score = obj["score"]!!.jsonPrimitive.int.toFloat()
-            obj["start_date"]?.let {
-                started_reading_date = parseDate(it.jsonPrimitive.content)
+            val startedDate = parseDate(obj["start_date"]?.jsonPrimitive?.content ?: "")
+            if (track.started_reading_date <= 0L || startedDate > 0) {
+                track.started_reading_date = startedDate
             }
-            obj["finish_date"]?.let {
-                finished_reading_date = parseDate(it.jsonPrimitive.content)
+            val finishedDate = parseDate(obj["finish_date"]?.jsonPrimitive?.content ?: "")
+            if (track.finished_reading_date <= 0L || finishedDate > 0) {
+                track.finished_reading_date = finishedDate
             }
         }
     }
 
     private fun parseDate(isoDate: String): Long {
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
+        return try {
+            SimpleDateFormat("yyyy-MM-dd", Locale.US).parse(isoDate)?.time ?: 0L
+        } catch (_: Exception) {
+            0L
+        }
     }
 
     private fun convertToIsoDate(epochTime: Long): String? {

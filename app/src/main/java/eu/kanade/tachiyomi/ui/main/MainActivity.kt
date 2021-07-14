@@ -29,6 +29,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
+import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
@@ -76,7 +77,6 @@ import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
-import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -242,14 +242,18 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             )
             binding.bottomNav?.updatePadding(bottom = insets.systemWindowInsetBottom)
             binding.sideNav?.updatePadding(
-                left = insets.systemWindowInsetLeft,
-                right = insets.systemWindowInsetRight
+                left = 0,
+                right = 0,
+                bottom = insets.systemWindowInsetBottom,
+                top = insets.systemWindowInsetTop
             )
             binding.bottomView?.isVisible = insets.systemWindowInsetBottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
                 height = insets.systemWindowInsetBottom
             }
         }
+        // Set this as nav view will try to set its own insets and they're hilariously bad
+        ViewCompat.setOnApplyWindowInsetsListener(nav) { _, insets -> insets }
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
 
@@ -770,7 +774,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         drawerArrow?.progress = 1f
 
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
-        if (isTablet()) {
+        if (nav == binding.sideNav) {
             nav.isVisible = !hideBottomNav
             nav.alpha = 1f
         } else {
@@ -892,7 +896,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val diffX = e2.x - e1.x
             if (abs(diffX) <= abs(diffY)) {
                 val sheetRect = Rect()
-                binding.bottomNav?.getGlobalVisibleRect(sheetRect)
+                nav.getGlobalVisibleRect(sheetRect)
                 if (sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
                     abs(diffY) > Companion.SWIPE_THRESHOLD &&
                     abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
@@ -901,6 +905,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     val bottomSheetController =
                         router.backstack.lastOrNull()?.controller as? BottomSheetController
                     bottomSheetController?.showSheet()
+                } else if (nav == binding.sideNav &&
+                    sheetRect.contains(e1.x.toInt(), e1.y.toInt()) &&
+                    abs(diffY) > Companion.SWIPE_THRESHOLD &&
+                    abs(velocityY) > Companion.SWIPE_VELOCITY_THRESHOLD &&
+                    diffY > 0
+                ) {
+                    val bottomSheetController =
+                        router.backstack.lastOrNull()?.controller as? BottomSheetController
+                    bottomSheetController?.hideSheet()
                 }
                 result = true
             }
@@ -958,6 +971,7 @@ interface FloatingSearchInterface {
 
 interface BottomSheetController {
     fun showSheet()
+    fun hideSheet()
     fun toggleSheet()
     fun handleSheetBack(): Boolean
     fun sheetIsExpanded(): Boolean

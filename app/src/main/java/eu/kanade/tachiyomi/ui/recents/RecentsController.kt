@@ -10,6 +10,7 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
+import android.view.WindowInsets
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -44,11 +45,14 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
@@ -104,6 +108,8 @@ class RecentsController(bundle: Bundle? = null) :
     private var lastChapterId: Long? = null
     private var showingDownloads = false
     var headerHeight = 0
+    val shadowAlpha = 0.15f
+    val shadow2Alpha = 0.05f
     private var query = ""
         set(value) {
             field = value
@@ -169,6 +175,9 @@ class RecentsController(bundle: Bundle? = null) :
                     topMargin = headerHeight
                     bottomMargin = activityBinding?.bottomNav?.height ?: it.systemWindowInsetBottom
                 }
+                if (activityBinding?.bottomNav == null) {
+                    setBottomPadding()
+                }
             },
             onBottomNavUpdate = {
                 setBottomPadding()
@@ -196,8 +205,8 @@ class RecentsController(bundle: Bundle? = null) :
                 (activity as? MainActivity)?.showTabBar(show = false, animate = false)
             }
             val isCollapsed = binding.downloadBottomSheet.root.sheetBehavior.isCollapsed()
-            binding.shadow2.alpha = if (isCollapsed) 0.25f else 0f
-            binding.shadow.alpha = if (isCollapsed) 0.5f else 0f
+            binding.shadow2.alpha = if (isCollapsed) shadow2Alpha else 0f
+            binding.shadow.alpha = if (isCollapsed) shadowAlpha else 0f
             binding.fakeAppBar.alpha = if (isExpanded) 1f else 0f
             binding.downloadBottomSheet.dlRecycler.alpha = isExpanded.toInt().toFloat()
             binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
@@ -221,16 +230,16 @@ class RecentsController(bundle: Bundle? = null) :
         binding.downloadBottomSheet.dlBottomSheet.onCreate(this)
 
         binding.shadow2.alpha =
-            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadow2Alpha else 0f
         binding.shadow.alpha =
-            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
 
         binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.addBottomSheetCallback(
             object :
                 BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
-                    binding.shadow2.alpha = (1 - abs(progress)) * 0.25f
-                    binding.shadow.alpha = (1 - abs(progress)) * 0.5f
+                    binding.shadow2.alpha = (1 - abs(progress)) * shadow2Alpha
+                    binding.shadow.alpha = (1 - abs(progress)) * shadowAlpha
                     val height =
                         binding.root.height - binding.downloadBottomSheet.dlRecycler.paddingTop
                     // Doing some fun math to hide the tab bar just as the title text of the
@@ -319,9 +328,9 @@ class RecentsController(bundle: Bundle? = null) :
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN || state == BottomSheetBehavior.STATE_COLLAPSED) {
                         binding.shadow2.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.25f else 0f
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) shadow2Alpha else 0f
                         binding.shadow.alpha =
-                            if (state == BottomSheetBehavior.STATE_COLLAPSED) 0.5f else 0f
+                            if (state == BottomSheetBehavior.STATE_COLLAPSED) shadowAlpha else 0f
                     }
 
                     binding.downloadBottomSheet.sheetLayout.isClickable =
@@ -369,7 +378,9 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
-        requestFilePermissionsSafe(301)
+        requestFilePermissionsSafe(301, presenter.preferences)
+
+        binding.downloadBottomSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
     }
 
     fun updateTitleAndMenu() {
@@ -380,13 +391,11 @@ class RecentsController(bundle: Bundle? = null) :
     }
 
     private fun setBottomPadding() {
-        val bottomBar = activityBinding?.bottomNav ?: return
-        val pad = bottomBar.translationY - bottomBar.height
+        val bottomBar = activityBinding?.bottomNav
+        val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
         val padding = max(
             (-pad).toInt(),
-            if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()) 0 else {
-                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
-            }
+            view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
         )
         binding.shadow2.translationY = pad
         binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight = 48.spToPx + padding
@@ -401,6 +410,7 @@ class RecentsController(bundle: Bundle? = null) :
             bottomMargin =
                 max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) + 16.dpToPx
         }
+        setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
     }
 
     fun setRefreshing(refresh: Boolean) {
@@ -428,11 +438,16 @@ class RecentsController(bundle: Bundle? = null) :
         return false
     }
 
-    fun setPadding(sheetIsHidden: Boolean) {
-        binding.recycler.updatePaddingRelative(bottom = if (sheetIsHidden) 0 else 20.dpToPx)
-        binding.recycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin = if (sheetIsHidden) 0 else 30.dpToPx
-        }
+    fun setPadding(sheetIsHidden: Boolean, insets: WindowInsets? = null) {
+        val peekHeight = binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight ?: 0
+        val cInsets = insets ?: view?.rootWindowInsets ?: return
+        binding.recycler.updatePaddingRelative(
+            bottom = if (sheetIsHidden) {
+                activityBinding?.bottomNav?.height ?: cInsets.systemWindowInsetBottom
+            } else {
+                peekHeight
+            }
+        )
     }
 
     override fun onActivityResumed(activity: Activity) {
@@ -746,6 +761,15 @@ class RecentsController(bundle: Bundle? = null) :
         if (!isBindingInitialized) return
         if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == false || hasQueue()) {
             binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
+        }
+    }
+
+    override fun hideSheet() {
+        if (!isBindingInitialized) return
+        if (binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true) {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.hide()
+        } else {
+            binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.collapse()
         }
     }
 

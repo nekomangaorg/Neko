@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import eu.kanade.tachiyomi.data.database.models.Chapter
+import uy.kohesive.injekt.api.get
 
 /**
  * Load strategy using the source order. This is the default ordering.
@@ -33,5 +34,14 @@ class ChapterLoadByNumber {
             chapters.add(preferredChapter)
         }
         return chapters.sortedBy { it.chapter_number }
+    }
+}
+
+/**
+ * Load strategy using the source order. This is the default ordering.
+ */
+class ChapterLoadByDate {
+    fun get(allChapters: List<Chapter>): List<Chapter> {
+        return allChapters.sortedBy { it.date_upload }
     }
 }

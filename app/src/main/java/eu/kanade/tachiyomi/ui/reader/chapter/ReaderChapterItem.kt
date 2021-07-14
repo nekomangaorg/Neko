@@ -10,8 +10,10 @@ import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.ReaderChapterItemBinding
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
@@ -21,6 +23,8 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
     val decimalFormat =
         DecimalFormat("#.###", DecimalFormatSymbols().apply { decimalSeparator = '.' })
+
+    val preferences: PreferencesHelper by injectLazy()
 
     /** defines the type defining this item. must be unique. preferably an id */
     override val type: Int = R.id.reader_chapter_layout
@@ -47,13 +51,10 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
                 R.font.montserrat_black
             ) else null
 
-            binding.chapterTitle.text = when (manga.displayMode) {
-                Manga.DISPLAY_NUMBER -> {
-                    val number = item.decimalFormat.format(item.chapter_number.toDouble())
-                    itemView.context.getString(R.string.chapter_, number)
-                }
-                else -> item.name
-            }
+            binding.chapterTitle.text = if (manga.hideChapterTitle(item.preferences)) {
+                val number = item.decimalFormat.format(item.chapter_number.toDouble())
+                itemView.context.getString(R.string.chapter_, number)
+            } else item.name
 
             val statuses = mutableListOf<String>()
             ChapterUtil.relativeDate(item)?.let { statuses.add(it) }

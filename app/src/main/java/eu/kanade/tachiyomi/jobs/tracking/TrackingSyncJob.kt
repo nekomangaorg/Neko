@@ -2,12 +2,14 @@ package eu.kanade.tachiyomi.jobs.tracking
 
 import android.content.Context
 import androidx.work.CoroutineWorker
+import androidx.work.ExistingWorkPolicy
 import androidx.work.ForegroundInfo
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationBuilder
@@ -29,12 +31,16 @@ class TrackingSyncJob(
     val trackingSyncService: TrackingSyncService by injectLazy()
 
     private val progressNotification =
-        applicationContext.notificationBuilder(Notifications.Channel.Tracking)
-            .setContentTitle(context.getString(R.string.refresh_tracking_metadata))
-            .setSmallIcon(R.drawable.ic_neko_notification)
-            .setOngoing(true)
-            .setAutoCancel(true)
-            .setOnlyAlertOnce(true)
+        with(applicationContext.notificationBuilder(Notifications.Channel.Tracking)) {
+            setContentTitle(context.getString(R.string.refresh_tracking_metadata))
+            setSmallIcon(R.drawable.ic_neko_notification)
+            setAutoCancel(true)
+            addAction(
+                R.drawable.ic_close_24dp,
+                context.getString(R.string.cancel),
+                NotificationReceiver.cancelTrackingSyncPendingIntent(context)
+            )
+        }
 
     override suspend fun doWork(): Result = coroutineScope {
         withUIContext {
@@ -63,7 +69,7 @@ class TrackingSyncJob(
 
     private fun updateNotificationProgress(title: String, progress: Int, total: Int) {
         val notification = progressNotification
-            .setContentTitle(title)
+            .setContentText(title)
             .setProgress(total, progress, false)
             .build()
         applicationContext.notificationManager.notify(
@@ -84,10 +90,17 @@ class TrackingSyncJob(
 
     companion object {
 
+        val TAG = "tracking_sync_job"
+
         fun doWorkNow(context: Context) {
-            WorkManager.getInstance(context).enqueue(
-                OneTimeWorkRequestBuilder<TrackingSyncJob>().build()
-            )
+
+            val request = OneTimeWorkRequestBuilder<TrackingSyncJob>()
+                .addTag(TAG)
+
+                .build()
+
+            WorkManager.getInstance(context)
+                .enqueueUniqueWork(TAG, ExistingWorkPolicy.REPLACE, request)
         }
     }
 }

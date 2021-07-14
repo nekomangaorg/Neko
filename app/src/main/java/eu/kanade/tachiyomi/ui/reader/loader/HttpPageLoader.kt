@@ -260,7 +260,7 @@ class HttpPageLoader(
      */
     private fun HttpSource.cacheImage(page: ReaderPage): Observable<ReaderPage> {
         page.status = Page.DOWNLOAD_IMAGE
-        return runAsObservable {
+        return runAsObservable(scope) {
             fetchImage(page)
         }.doOnNext { chapterCache.putImageToCache(page.imageUrl!!, it) }
             .map { page }

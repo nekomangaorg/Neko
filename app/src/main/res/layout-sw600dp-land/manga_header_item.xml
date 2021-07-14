@@ -493,7 +493,6 @@
             android:padding="5dp"
             android:textAlignment="textEnd"
             android:textColor="?android:textColorHint"
-            app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
             app:layout_constraintEnd_toStartOf="@id/filter_button"
             app:layout_constraintStart_toEndOf="@+id/chapters_title"

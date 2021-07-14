@@ -48,6 +48,7 @@
     <string name="chapter_x_of_y">Chapter %1$d of %2$d</string>
     <string name="all_chapters_read">All chapters read</string>
     <string name="bookmarked">Bookmarked</string>
+    <string name="not_bookmarked">Not bookmarked</string>
     <string name="marked_as_read">Marked as read</string>
     <string name="marked_as_unread">Marked as unread</string>
     <string name="removed_bookmark">Removed bookmark</string>
@@ -57,6 +58,9 @@
     <string name="no_pages_found">No pages found</string>
     <string name="remove_all_downloads">Remove all downloads?</string>
     <string name="no_chapters_to_delete">No chapters to delete</string>
+    <string name="by_source_order">By source\'s order</string>
+    <string name="by_chapter_number">By chapter number</string>
+    <string name="by_update_date">By upload date</string>
 
     <plurals name="remove_n_chapters">
         <item quantity="one">Remove %1$d downloaded chapter?</item>
@@ -474,6 +478,8 @@
     <string name="cover_saved">Cover saved</string>
     <string name="error_saving_cover">Error saving cover</string>
     <string name="error_sharing_cover">Error sharing cover</string>
+    <string name="custom_manga_info">Custom manga info</string>
+    <string name="set_as_default">Set as default</string>
     <plurals name="deleted_chapters">
         <item quantity="one">A chapter has been removed from the source:\n%2$s\nDelete
             its download?</item>
@@ -642,6 +648,7 @@
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restore_duration">%02d min, %02d sec</string>
+    <string name="restore_miui_warning">MIUI Optimization must be enabled for restore to work correctly.</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>
     <plurals name="restore_completed_message">
@@ -893,6 +900,8 @@
     <string name="retry">Retry</string>
     <string name="right">Right</string>
     <string name="rotation">Rotation</string>
+    <string name="default_orientation">Default orientation</string>
+    <string name="orientation">Orientation</string>
     <string name="save">Save</string>
     <string name="search">Search</string>
     <string name="search_">Search %1$s</string>
@@ -985,6 +994,7 @@
     <string name="syncing_follows">Begin syncing follows</string>
     <string name="sync_follows_complete">Syncing follows complete</string>
     <string name="sync_to_follows_complete">Syncing Manga to Follows List complete</string>
+    <string name="not_logged_into_mangadex_cannot_sync">Not logged into MangaDex cannot sync</string>
 
     <string name="sync_follows_failed">Syncing follows failed</string>
     <string name="follows">My follows</string>

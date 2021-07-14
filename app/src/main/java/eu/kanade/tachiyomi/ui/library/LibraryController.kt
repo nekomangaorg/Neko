@@ -80,7 +80,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -307,13 +306,13 @@ class LibraryController(
             binding.filterBottomSheet.filterBottomSheet.updatePaddingRelative(
                 bottom = max(
                     (-pad).toInt(),
-                    view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                    view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
                 )
             )
 
             val padding = max(
                 (-pad).toInt(),
-                view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
             )
             binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight =
                 60.dpToPx + padding
@@ -323,7 +322,7 @@ class LibraryController(
             }
         } else {
             binding.filterBottomSheet.filterBottomSheet.updatePaddingRelative(
-                bottom = view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+                bottom = view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
             )
             updateHopperY()
         }
@@ -1527,10 +1526,19 @@ class LibraryController(
     //region sheet methods
     override fun showSheet() {
         closeTip()
+        val sheetBehavior = binding.filterBottomSheet.filterBottomSheet.sheetBehavior
         when {
-            binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.collapse()
-            !binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isExpanded() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.expand()
+            sheetBehavior.isHidden() -> sheetBehavior?.collapse()
+            !sheetBehavior.isExpanded() -> sheetBehavior?.expand()
             else -> showDisplayOptions()
+        }
+    }
+
+    override fun hideSheet() {
+        val sheetBehavior = binding.filterBottomSheet.filterBottomSheet.sheetBehavior
+        when {
+            sheetBehavior.isExpanded() -> sheetBehavior?.collapse()
+            !sheetBehavior.isHidden() -> binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.hide()
         }
     }
 

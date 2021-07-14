@@ -36,9 +36,9 @@ class TabbedReaderSettingsSheet(
         null
     ) as ReaderFilterView
 
-    var showWebview: Boolean = run {
-        val mangaViewer = readerActivity.presenter.getMangaViewer()
-        mangaViewer == ReaderActivity.WEBTOON || mangaViewer == ReaderActivity.VERTICAL_PLUS
+    var showWebtoonView: Boolean = run {
+        val mangaViewer = readerActivity.presenter.getMangaReadingMode()
+        ReadingModeType.isWebtoonType(mangaViewer)
     }
 
     override var offset = 0
@@ -51,7 +51,7 @@ class TabbedReaderSettingsSheet(
 
     override fun getTabTitles(): List<Int> = listOf(
         R.string.general,
-        if (showWebview) R.string.webtoon else R.string.paged,
+        if (showWebtoonView) R.string.webtoon else R.string.paged,
         R.string.filter
     )
 
@@ -130,7 +130,7 @@ class TabbedReaderSettingsSheet(
     }
 
     fun updateTabs(isWebtoon: Boolean) {
-        showWebview = isWebtoon
+        showWebtoonView = isWebtoon
         binding.pager.adapter?.notifyDataSetChanged()
         pagedView.updatePrefs()
     }

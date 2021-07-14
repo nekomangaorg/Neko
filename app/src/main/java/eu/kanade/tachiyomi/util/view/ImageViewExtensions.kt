@@ -21,11 +21,11 @@ fun ImageView.setVectorCompat(@DrawableRes drawable: Int, @AttrRes tint: Int? = 
     setImageDrawable(vector)
 }
 
-fun ImageView.setAnimVectorCompat(@DrawableRes drawable: Int, tint: Int? = null) {
+fun ImageView.setAnimVectorCompat(@DrawableRes drawable: Int, @AttrRes tint: Int? = null) {
     val vector = AnimatedVectorDrawableCompat.create(context, drawable)
     if (tint != null) {
         vector?.mutate()
-        vector?.setTint(tint)
+        vector?.setTint(context.getResourceColor(tint))
     }
     setImageDrawable(vector)
     vector?.start()

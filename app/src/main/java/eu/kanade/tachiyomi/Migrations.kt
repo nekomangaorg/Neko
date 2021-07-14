@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
+import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 import uy.kohesive.injekt.Injekt
@@ -73,8 +74,6 @@ object Migrations {
                         remove("enable_doh")
                     }
                 }
-                // Reset rotation to Free after replacing Lock
-                preferences.rotation().set(1)
                 // Handle removed every 1 or 2, 3 hour library updates
                 val updateInterval = preferences.libraryUpdateInterval().get()
                 if (updateInterval == 1 || updateInterval == 2 || updateInterval == 3) {
@@ -82,15 +81,28 @@ object Migrations {
                     LibraryUpdateJob.setupTask(context, 6)
                 }
             }
-            if (oldVersion < 75) {
+
+
+            if (oldVersion < 120) {
+                // Migrate Rotation and Viewer values to default values for viewer_flags
                 val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-                val wasShortcutsDisabled = !prefs.getBoolean("show_manga_app_shortcuts", true)
-                if (wasShortcutsDisabled) {
-                    prefs.edit {
-                        putBoolean(PreferenceKeys.showSourcesInShortcuts, false)
-                        putBoolean(PreferenceKeys.showSeriesInShortcuts, false)
-                        remove("show_manga_app_shortcuts")
-                    }
+                val newOrientation = when (prefs.getInt("pref_rotation_type_key", 1)) {
+                    1 -> OrientationType.FREE.flagValue
+                    2 -> OrientationType.PORTRAIT.flagValue
+                    3 -> OrientationType.LANDSCAPE.flagValue
+                    4 -> OrientationType.LOCKED_PORTRAIT.flagValue
+                    5 -> OrientationType.LOCKED_LANDSCAPE.flagValue
+                    else -> OrientationType.FREE.flagValue
+                }
+
+                // Reading mode flag and prefValue is the same value
+                val newReadingMode = prefs.getInt("pref_default_viewer_key", 1)
+
+                prefs.edit {
+                    putInt("pref_default_orientation_type_key", newOrientation)
+                    remove("pref_rotation_type_key")
+                    putInt("pref_default_reading_mode_key", newReadingMode)
+                    remove("pref_default_viewer_key")
                 }
             }
             return true

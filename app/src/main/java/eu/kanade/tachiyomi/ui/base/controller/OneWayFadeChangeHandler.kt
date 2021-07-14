@@ -3,11 +3,11 @@ package eu.kanade.tachiyomi.ui.base.controller
 import android.animation.Animator
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.res.Configuration
 import android.view.View
 import android.view.ViewGroup
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.changehandler.FadeChangeHandler
-import eu.kanade.tachiyomi.util.system.isTablet
 
 /**
  * A variation of [FadeChangeHandler] that only fades in.
@@ -34,8 +34,9 @@ class OneWayFadeChangeHandler : FadeChangeHandler {
             animator.play(ObjectAnimator.ofFloat(to, View.ALPHA, start, 1f))
         }
 
+        val hasSideNav = container.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (from != null && (!isPush || removesFromViewOnPush())) {
-            if (!container.context.isTablet()) {
+            if (!hasSideNav) {
                 animator.play(ObjectAnimator.ofFloat(from, View.ALPHA, 0f))
             } else {
                 container.removeView(from)

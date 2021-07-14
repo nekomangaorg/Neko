@@ -16,7 +16,7 @@ import java.text.DecimalFormatSymbols
 class RecentMangaAdapter(val delegate: RecentsInterface) :
     BaseChapterAdapter<IFlexible<*>>(delegate) {
 
-    private val preferences: PreferencesHelper by injectLazy()
+    val preferences: PreferencesHelper by injectLazy()
 
     var showDownloads = preferences.showRecentsDownloads().get()
     var showRemoveHistory = preferences.showRecentsRemHistory().get()
