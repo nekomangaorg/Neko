@@ -130,8 +130,8 @@ class PreferencesHelper(val context: Context) {
 
     fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
 
-    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.PURE_WHITE)
-    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DARK)
+    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.DEFAULT)
+    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DEFAULT)
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 

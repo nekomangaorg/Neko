@@ -145,7 +145,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         val lightMode = !isInNightMode()
         val prefTheme = getPrefTheme(preferences)
         setTheme(prefTheme.styleRes)
-        if (prefTheme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+        if (!lightMode && preferences.themeDarkAmoled().get()) {
             setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
             /* if (ThemeUtil.isColoredTheme(prefTheme)) {
                  setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
