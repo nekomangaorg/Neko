@@ -164,7 +164,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         }
     }
 
-    inner class ThemeItem(val theme: Themes, val darkTheme: Boolean) : AbstractItem<FastAdapter.ViewHolder<ThemeItem>>() {
+    inner class ThemeItem(val theme: Themes, val isDarkTheme: Boolean) : AbstractItem<FastAdapter.ViewHolder<ThemeItem>>() {
 
         /** defines the type defining this item. must be unique. preferably an id */
         override val type: Int = R.id.theme_card_view
@@ -178,15 +178,29 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             return ViewHolder(v)
         }
 
-        val colors = theme.getColors(if (darkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
+        val colors = theme.getColors(if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
 
         @Suppress("UNUSED_PARAMETER")
         override var isSelected: Boolean
-            get() = when (preferences.nightMode().get()) {
-                AppCompatDelegate.MODE_NIGHT_YES -> preferences.darkTheme().get() == theme && darkTheme
-                AppCompatDelegate.MODE_NIGHT_NO -> preferences.lightTheme().get() == theme && !darkTheme
-                else -> (preferences.darkTheme().get() == theme && darkTheme) ||
-                    (preferences.lightTheme().get() == theme && !darkTheme)
+            get() {
+                val darkTheme = try {
+                    preferences.darkTheme().get()
+                } catch (_: Exception) {
+                    ThemeUtil.convertNewThemes(preferences.context)
+                    preferences.darkTheme().get()
+                }
+                val lightTheme = try {
+                    preferences.lightTheme().get()
+                } catch (_: Exception) {
+                    ThemeUtil.convertNewThemes(preferences.context)
+                    preferences.lightTheme().get()
+                }
+                return when (preferences.nightMode().get()) {
+                    AppCompatDelegate.MODE_NIGHT_YES -> darkTheme == theme && isDarkTheme
+                    AppCompatDelegate.MODE_NIGHT_NO -> lightTheme == theme && !isDarkTheme
+                    else -> (darkTheme == theme && isDarkTheme) ||
+                        (lightTheme == theme && !isDarkTheme)
+                }
             }
             set(value) {}
 
@@ -195,7 +209,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             val binding = ThemeItemBinding.bind(view)
             override fun bindView(item: ThemeItem, payloads: List<Any>) {
                 binding.themeNameText.setText(
-                    if (item.darkTheme) {
+                    if (item.isDarkTheme) {
                         item.theme.darkNameRes
                     } else {
                         item.theme.nameRes
@@ -207,9 +221,9 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
                 if (binding.checkbox.isVisible) {
                     val themeMatchesApp = if (context.isInNightMode()) {
-                        item.darkTheme
+                        item.isDarkTheme
                     } else {
-                        !item.darkTheme
+                        !item.isDarkTheme
                     }
                     binding.themeSelected.alpha = if (themeMatchesApp) 1f else 0.5f
                     binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
@@ -235,7 +249,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                 binding.themeItem3.imageTintList =
                     ColorStateList.valueOf(item.colors.inactiveTab)
                 binding.themeLayout.setBackgroundColor(item.colors.colorBackground)
-                if (item.darkTheme && preferences.themeDarkAmoled().get()) {
+                if (item.isDarkTheme && preferences.themeDarkAmoled().get()) {
                     binding.themeLayout.setBackgroundColor(Color.BLACK)
                     if (!ThemeUtil.isColoredTheme(item.theme)) {
                         binding.themeBottomBar.setBackgroundColor(Color.BLACK)
