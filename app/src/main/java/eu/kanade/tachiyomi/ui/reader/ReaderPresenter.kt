@@ -623,7 +623,12 @@ class ReaderPresenter(
     /**
      * Saves the image of this [page] in the given [directory] and returns the file location.
      */
-    private fun saveImage(page: ReaderPage, directory: File, manga: Manga): File {
+    private fun saveImage(
+        page: ReaderPage,
+        directory: File,
+        manga: Manga,
+        prefix: String = "",
+    ): File {
         val stream = page.stream!!
         val type = ImageUtil.findImageType(stream) ?: throw Exception("Not an image")
 
@@ -634,7 +639,7 @@ class ReaderPresenter(
         // create chapter name so its always sorted correctly  max character is 75
         val pageName = parseChapterName(chapter.name, page.number.toString(), chapter.scanlator)
         // take only 150 characters so this file maxes at 225
-        val trimmedTitle = manga.title.take(150)
+        val trimmedTitle = (prefix + manga.title).take(150)
 
         // Build destination file
         val filename =
@@ -809,7 +814,7 @@ class ReaderPresenter(
         val destDir = File(context.cacheDir, "shared_image")
 
         Observable.fromCallable { destDir.deleteRecursively() } // Keep only the last shared file
-            .map { saveImage(page, destDir, manga) }
+            .map { saveImage(page, destDir, manga, "SPOILER_") }
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeFirst(

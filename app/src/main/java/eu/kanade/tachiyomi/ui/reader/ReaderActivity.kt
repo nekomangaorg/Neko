@@ -1243,12 +1243,13 @@ class ReaderActivity :
         } else {
             getString(R.string.page_, page.number)
         }
+
         val text = "${manga.title}: ${
             getString(
                 R.string.chapter_,
                 decimalFormat.format(chapter.chapter_number)
             )
-        }, $pageNumber"
+        }, $pageNumber, <${MdUtil.baseUrl + manga.url}>"
 
         val stream = file.getUriCompat(this)
         val intent = Intent(Intent.ACTION_SEND).apply {

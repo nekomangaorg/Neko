@@ -2,6 +2,8 @@
 - Set default for chapter sorting method + ui updates + sort by upload date (@Jays2Kings)
 - Manga-wised rotation mode settings (@Jays2Kings / @GhostBear)
 - Filter chapters by not d/l'd, not bookmarked (@Jays2Kings)
+- Sharing an image directly now prepends SPOILER_ (@loocool2)
+- Sharing an image now adds the Manga Url in the text
 
 ## 🏗️ Changes
 - Refresh tracking metadata in advanced settings is faster and can be cancelled
