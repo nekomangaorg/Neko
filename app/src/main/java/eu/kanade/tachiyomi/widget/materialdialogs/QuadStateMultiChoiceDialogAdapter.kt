@@ -94,7 +94,7 @@ internal class QuadStateMultiChoiceDialogAdapter(
     ) {
         holder.isEnabled = !disabledIndices.contains(position)
 
-        holder.controlView.state = states[currentSelection[position]]
+        holder.controlView.state = states.getOrNull(currentSelection[position]) ?: QuadStateCheckBox.State.UNCHECKED
         holder.controlView.updateDrawable()
         holder.titleView.text = items[position]
         holder.itemView.background = dialog.getItemSelector()
