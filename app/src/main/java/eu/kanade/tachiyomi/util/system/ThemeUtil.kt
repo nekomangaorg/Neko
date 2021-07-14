@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.content.Context
+import android.content.res.Resources
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.lifecycle.coroutineScope
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.injectLazy
@@ -53,19 +53,19 @@ fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
     if (preferences.nightMode().isNotSet()) {
         ThemeUtil.convertTheme(preferences, preferences.oldTheme())
     }
+    if (AppCompatDelegate.getDefaultNightMode() != preferences.nightMode().get()) {
+        AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
+    }
     val theme = getPrefTheme(preferences)
     setTheme(theme.styleRes)
+}
 
-    if (theme.isDarkTheme && preferences.themeDarkAmoled().get()) {
-        setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
-    if (!isInNightMode()) {
-        lifecycle.coroutineScope.launchWhenCreated {
-            AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
-        }
-        return
+fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: PreferencesHelper): Resources.Theme {
+    val prefTheme = getPrefTheme(preferences)
+    if (prefTheme.isDarkTheme && preferences.themeDarkAmoled().get()) {
+        theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)
     }
-        }
-    AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
+    return theme
 }
 
 fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
