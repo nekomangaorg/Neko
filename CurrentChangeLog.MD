@@ -26,6 +26,7 @@
 - Marking as read/unread from library view was not working correctly
 - Filtering library by not tracked and clicking MDList would hide Unfollowed Manga
 - Incognito mode does not update tracker, mark chapters read after reading, update pages left, or update  MangaDex read status anymore
+- Status/nav bar were not matching splash screen green
 
 ## 🛠️ Other
 - Added a release action to automate app release after a tag

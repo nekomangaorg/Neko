@@ -8,6 +8,7 @@
         <item name="colorAccentText">@color/neko_green</item>
         <item name="unreadBadgeColor">@color/neko_green</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
+        <item name="colorOnHopper">@color/md_black_1000</item>
 
     </style>
 
@@ -31,6 +32,7 @@
         <item name="android:colorBackground">@color/backgroundChocolateStrawberries</item>
         <item name="colorSecondary">@color/backgroundChocolateStrawberries</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnHopper">@attr/colorOnAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
 
@@ -47,6 +49,7 @@
         <item name="colorSurface">@color/colorAccentLimeText</item>
         <item name="colorOnAccent">@color/colorOnLime</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnHopper">@attr/colorOnAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
     </style>
 
@@ -63,6 +66,7 @@
         <item name="colorSurface">@color/outrun_black</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/outrun_black</item>
+        <item name="colorOnHopper">@attr/colorOnAccent</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
     </style>
 
