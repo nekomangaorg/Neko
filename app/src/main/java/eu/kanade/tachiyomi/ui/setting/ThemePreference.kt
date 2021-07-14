@@ -59,7 +59,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
         selectExtensionLight = fastAdapterLight.getSelectExtension().setThemeListener(false)
         selectExtensionDark = fastAdapterDark.getSelectExtension().setThemeListener(true)
         val enumConstants = Themes.values()
-        val isOnA12 = Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT >= 31
+        val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
         itemAdapterLight.set(
             enumConstants
                 .filter { (!it.isDarkTheme || it.followsSystem) && (it.styleRes != R.style.Theme_Tachiyomi_Monet || isOnA12) }
