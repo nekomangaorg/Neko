@@ -14,6 +14,7 @@
 - Laxing on the all files permission for a11 (@Jays2Kings)
 - Hide MDList tracker card if user is not logged in
 - Error out if user is not logged in when trying to sync follows
+- Category hopper icon color now matches the text color of the unread badge
 
 ## 🐜 Fixes
 - Reader issue causing chapters to not load
@@ -22,7 +23,7 @@
 - queuing multiple categories for update was not adding to the same notification
 - Marking as read/unread from library view was not working correctly
 - Filtering library by not tracked and clicking MDList would hide Unfollowed Manga
-- Category hopper icon color now matches the text color of the unread badge
+- Incognito mode does not update tracker, mark chapters read after reading, update pages left, or update  MangaDex read status anymore
 
 ## 🛠️ Other
 - Added a release action to automate app release after a tag
