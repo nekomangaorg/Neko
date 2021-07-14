@@ -10,7 +10,12 @@ import eu.kanade.tachiyomi.R
 import kotlin.math.roundToInt
 
 @Suppress("unused")
-enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes val nameRes: Int) {
+enum class Themes(
+    @StyleRes val styleRes: Int,
+    val nightMode: Int,
+    @StringRes val nameRes: Int,
+    @StringRes altNameRes: Int? = null,
+) {
     DEFAULT(
         R.style.Theme_Tachiyomi,
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
@@ -143,7 +148,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
             R.style.Theme_Tachiyomi_MidnightDusk -> "#c43c97"
             R.style.Theme_Tachiyomi_Strawberries -> "#ED4A65"
             R.style.Theme_Tachiyomi_MangaDex -> "#FF6740"
-            R.style.Theme_Tachiyomi -> "#101820"            else -> "#2979FF"
+            R.style.Theme_Tachiyomi -> "#101820"
+            else -> "#2979FF"
         }
     )
 
