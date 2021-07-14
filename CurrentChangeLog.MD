@@ -4,6 +4,7 @@
 - Filter chapters by not d/l'd, not bookmarked (@Jays2Kings)
 - Sharing an image directly now prepends SPOILER_ (@loocool2)
 - Sharing an image now adds the Manga Url in the text
+- Kitsu now defaults to plan to read for new unread entries (@Jays2Kings)
 
 ## 🏗️ Changes
 - Refresh tracking metadata in advanced settings is faster and can be cancelled
@@ -18,6 +19,7 @@
 
 ## 🐜 Fixes
 - Reader issue causing chapters to not load
+- Amoled theming issue causing biometric issues (@Jays@Kings)
 - Two view error log buttons showing in notification when library update error'd out
 - library manga error stopped the entire update
 - queuing multiple categories for update was not adding to the same notification
