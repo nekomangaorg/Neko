@@ -118,7 +118,7 @@
         <item name="colorAccentText">@color/colorAccentStrawberryText</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-        <item name="colorOnHopper">@attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnAccent</item>
 
     </style>
 
@@ -127,7 +127,7 @@
         <item name="colorAccentText">@color/md_white_1000</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-        <item name="colorOnHopper">@attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnAccent</item>
     </style>
 
     <style name="Theme.Tachiyomi.Monet" />
