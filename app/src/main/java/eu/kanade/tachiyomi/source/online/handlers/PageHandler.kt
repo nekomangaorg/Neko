@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.dto.ChapterDto
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 
@@ -19,7 +20,7 @@ class PageHandler {
     val imageHandler: ImageHandler by injectLazy()
 
     suspend fun fetchPageList(chapter: SChapter, isLogged: Boolean): List<Page> {
-        return with(Dispatchers.IO) {
+        return withContext(Dispatchers.IO) {
             XLog.d("fetching page list")
             try {
                 val chapterResponse = network.service.viewChapter(chapter.mangadex_chapter_id)
