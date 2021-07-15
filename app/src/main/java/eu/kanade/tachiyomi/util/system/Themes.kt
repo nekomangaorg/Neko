@@ -32,6 +32,7 @@ enum class Themes(
         R.style.Theme_Tachiyomi_Strawberries,
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         R.string.strawberry_daiquiri,
+        R.string.chocolate_strawberries
     ),
     OUTRUN(
         R.style.Theme_Tachiyomi_Outrun,
