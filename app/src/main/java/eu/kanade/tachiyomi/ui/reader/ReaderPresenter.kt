@@ -452,9 +452,13 @@ class ReaderPresenter(
         val selectedChapter = page.chapter
 
         // Save last page read and mark as read if needed
-
+        if (preferences.incognitoMode().get().not()) {
+            selectedChapter.chapter.last_page_read = page.index
+            selectedChapter.chapter.pages_left =
+                (selectedChapter.pages?.size ?: page.index) - page.index
+        }
         val shouldTrack =
-            preferences.incognitoMode().get().not() || hasTrackers || preferences.readingSync()
+            !preferences.incognitoMode().get() || hasTrackers || preferences.readingSync()
         if (shouldTrack &&
             // For double pages, check if the second to last page is doubled up
             (
@@ -463,9 +467,6 @@ class ReaderPresenter(
                 )
         ) {
             if (preferences.incognitoMode().get().not()) {
-                selectedChapter.chapter.last_page_read = page.index
-                selectedChapter.chapter.pages_left =
-                    (selectedChapter.pages?.size ?: page.index) - page.index
                 selectedChapter.chapter.read = true
                 updateTrackChapterRead(selectedChapter)
                 updateReadingStatus(selectedChapter)
