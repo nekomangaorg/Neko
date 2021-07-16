@@ -32,6 +32,7 @@
 
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
+    <color name="splashIcon">@color/md_black_1000</color>
 
     <color name="elevated_dark_background">#121212</color>
 

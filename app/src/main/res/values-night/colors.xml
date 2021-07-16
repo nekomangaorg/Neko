@@ -18,7 +18,7 @@
     <color name="divider">@color/md_white_1000_12</color>
     <color name="download">@color/material_green_700</color>
     <color name="holo_red">#cc4444</color>
-
+    <color name="splashIcon">@color/md_white_1000</color>
 
     <color name="background">#292929</color>
     <color name="dialog">#292929</color>
