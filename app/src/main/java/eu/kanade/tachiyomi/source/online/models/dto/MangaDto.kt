@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.source.online.dto
+package eu.kanade.tachiyomi.source.online.models.dto
 
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement

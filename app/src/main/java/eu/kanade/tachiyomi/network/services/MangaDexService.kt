@@ -1,14 +1,14 @@
 package eu.kanade.tachiyomi.network.services
 
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
-import eu.kanade.tachiyomi.source.online.dto.AtHomeImageReportDto
-import eu.kanade.tachiyomi.source.online.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.dto.ChapterListDto
-import eu.kanade.tachiyomi.source.online.dto.LegacyIdDto
-import eu.kanade.tachiyomi.source.online.dto.LegacyMappingDto
-import eu.kanade.tachiyomi.source.online.dto.MangaDto
-import eu.kanade.tachiyomi.source.online.dto.MangaListDto
-import eu.kanade.tachiyomi.source.online.dto.ResultDto
+import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
+import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
+import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.Response

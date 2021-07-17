@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source.online.utils
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import org.jsoup.parser.Parser

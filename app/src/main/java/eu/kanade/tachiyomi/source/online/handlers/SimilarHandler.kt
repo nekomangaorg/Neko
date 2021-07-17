@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.model.MangaListPage
-import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import kotlinx.serialization.decodeFromString

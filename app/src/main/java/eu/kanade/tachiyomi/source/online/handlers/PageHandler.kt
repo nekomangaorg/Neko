@@ -5,8 +5,8 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.online.dto.AtHomeDto
-import eu.kanade.tachiyomi.source.online.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -27,7 +27,7 @@ class PageHandler {
                 if (chapterResponse.isSuccessful.not()) {
                     XLog.e(
                         "error returned from chapterResponse ${
-                        chapterResponse.errorBody()?.string()
+                            chapterResponse.errorBody()?.string()
                         }"
                     )
                     throw Exception("error returned from chapterResponse")
@@ -53,7 +53,7 @@ class PageHandler {
                     if (atHomeResponse.isSuccessful.not()) {
                         XLog.e(
                             "error returned from atHomeResponse ${
-                            atHomeResponse.errorBody()?.string()
+                                atHomeResponse.errorBody()?.string()
                             }"
                         )
                         throw Exception("error returned from atHomeResponse")

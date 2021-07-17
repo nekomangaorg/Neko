@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.logTimeTaken
@@ -59,7 +59,7 @@ class MangaHandler {
                     throw(
                         Exception(
                             "Error from MangaDex ${response.code()} error body: ${
-                            response.errorBody()?.string()
+                                response.errorBody()?.string()
                             }"
                         )
                         )

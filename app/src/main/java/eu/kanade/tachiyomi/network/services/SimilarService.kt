@@ -1,6 +1,6 @@
 package eu.kanade.tachiyomi.network.services
 
-import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
 import retrofit2.Response
 import retrofit2.http.GET
 import retrofit2.http.Path
