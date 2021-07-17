@@ -29,6 +29,7 @@ class SimilarPresenter(
     var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     override fun createPager(query: String, filters: FilterList): Pager {
+        this.isSimilar = true
         this.manga = db.getManga(mangaId).executeAsBlocking()
         return SimilarPager(this.manga!!, source)
     }

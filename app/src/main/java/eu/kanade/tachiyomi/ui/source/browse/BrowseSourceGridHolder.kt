@@ -28,6 +28,7 @@ class BrowseSourceGridHolder(
     private val adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     compact: Boolean,
     private val isFollows: Boolean = false,
+    private val isSimilar: Boolean = false,
 ) : BrowseSourceHolder(view, adapter) {
 
     private val binding = MangaGridItemBinding.bind(view)
@@ -56,7 +57,10 @@ class BrowseSourceGridHolder(
                 manga.follow_status!!,
                 manga.favorite
             )
-            false -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
+            false -> when(isSimilar) {
+                true -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite, manga.similar_type_string)
+                false -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite, "")
+            }
         }
 
         // Update the cover.

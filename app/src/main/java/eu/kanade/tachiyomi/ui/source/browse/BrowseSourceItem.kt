@@ -23,7 +23,8 @@ class BrowseSourceItem(
     val manga: Manga,
     private val catalogueAsList: Preference<Boolean>,
     private val catalogueListType: Preference<Int>,
-    private val isFollows: Boolean = false
+    private val isFollows: Boolean = false,
+    private val isSimilar: Boolean = false
 ) :
     AbstractFlexibleItem<BrowseSourceHolder>() {
 
@@ -71,7 +72,7 @@ class BrowseSourceItem(
                     (parent.itemWidth / 3f * 3.7f).toInt()
                 )
             }
-            BrowseSourceGridHolder(view, adapter, listType == 1, isFollows = isFollows)
+            BrowseSourceGridHolder(view, adapter, listType == 1, isFollows = isFollows, isSimilar = isSimilar)
         } else {
             BrowseSourceListHolder(view, adapter)
         }

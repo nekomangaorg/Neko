@@ -72,6 +72,8 @@ open class BrowseSourcePresenter(
 
     var isFollows = false
 
+    var isSimilar = false
+
     /**
      * Modifiable list of filters.
      */
@@ -196,7 +198,8 @@ open class BrowseSourcePresenter(
                         manga,
                         browseAsList,
                         sourceListType,
-                        isFollows
+                        isFollows,
+                        isSimilar
                     )
                 }
                     .filter { manga -> isDeepLink || isLibraryVisible || !manga.manga.favorite }
@@ -306,7 +309,7 @@ open class BrowseSourcePresenter(
             localManga.title = sManga.title
             db.insertManga(localManga).executeAsBlocking()
         }
-
+        localManga.similar_type_string = sManga.similar_type_string
         return localManga
     }
 

@@ -103,6 +103,7 @@ class SimilarHandler {
         // Convert to lookup array
         // TODO: also append here the related manga?
         // TODO: filter recommended based on if they have supported lang
+        // TODO: set the next page to false, and then for page 2,3 call anilist?
         val idsToManga = hashMapOf<String, SManga>()
         similarMangaListDto.results.forEach {
             idsToManga[it.data.id] = it.toBasicManga()
@@ -110,7 +111,9 @@ class SimilarHandler {
 
         // Loop through our *sorted* related array and list in that order
         val mangaList = similarMangaDto.matches.map {
-            idsToManga[it.id]!!
+            val manga = idsToManga[it.id]!!
+            manga.similar_type_string = "Algo"
+            manga
         }
         return MangaListPage(mangaList, false)
     }

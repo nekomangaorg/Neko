@@ -70,6 +70,8 @@ open class MangaImpl : Manga {
 
     override var last_chapter_number: Int? = null
 
+    override var similar_type_string: String = ""
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl &&
             other.title.isNotBlank() && other.title != title
