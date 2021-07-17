@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.request.CachePolicy
+import com.google.android.material.chip.Chip
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -99,9 +101,7 @@ class MangaHeaderHolder(
                 moreBgGradient.rotation = 180f
             }
             lessButton.setOnClickListener { collapseDesc() }
-            mangaGenresTags.setOnTagClickListener {
-                adapter.delegate.tagClicked(it)
-            }
+
             webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
             similarButton.setOnClickListener { adapter.delegate.openSimilar() }
             mergeButton.setOnClickListener { adapter.delegate.openMerge() }
@@ -192,10 +192,8 @@ class MangaHeaderHolder(
         }
         binding.title.text = manga.title
 
-        if (manga.genre.isNullOrBlank().not()) binding.mangaGenresTags.setTags(
-            manga.genre?.split(",")?.map(String::trim)
-        )
-        else binding.mangaGenresTags.setTags(emptyList())
+        setGenreTags(binding, manga)
+
 
         if (manga.author == manga.artist || manga.artist.isNullOrBlank()) {
             binding.mangaAuthor.text = manga.author?.trim()
@@ -340,6 +338,29 @@ class MangaHeaderHolder(
 
         if (!manga.initialized) return
         updateCover(manga)
+    }
+
+    private fun setGenreTags(binding: MangaHeaderItemBinding, manga: Manga) {
+        with(binding.mangaGenresTags) {
+            removeAllViews()
+            if (manga.genre.isNullOrBlank().not()) {
+                (manga.getGenres() ?: emptyList()).map { genreText ->
+                    val chip = LayoutInflater.from(binding.root.context).inflate(
+                        R.layout.genre_chip,
+                        this,
+                        false
+                    ) as Chip
+                    val id = View.generateViewId()
+                    chip.id = id
+                    chip.text = genreText
+                    chip.setOnClickListener {
+                        adapter.delegate.tagClicked(genreText)
+                    }
+
+                    this.addView(chip)
+                }
+            }
+        }
     }
 
     fun clearDescFocus() {
