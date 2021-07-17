@@ -560,6 +560,9 @@ class ReaderPresenter(
                     readerType == ReadingModeType.LEFT_TO_RIGHT.flagValue &&
                         default != ReadingModeType.RIGHT_TO_LEFT.flagValue
                     )
+            if (manga.viewer_flags == -1) {
+                manga.viewer_flags = 0
+            }
             manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
             db.updateViewerFlags(manga).asRxObservable().subscribe()
         }
