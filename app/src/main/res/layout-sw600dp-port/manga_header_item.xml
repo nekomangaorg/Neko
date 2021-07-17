@@ -395,6 +395,7 @@
         android:id="@+id/manga_genres_tags"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
+        app:chipSpacingVertical="-12dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="16dp"
