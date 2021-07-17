@@ -3,6 +3,12 @@ package eu.kanade.tachiyomi.source.online.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class SimilarMangaDatabaseDto(
+    val similarApi: SimilarMangaDto,
+    val mangadexApi: MangaListDto,
+)
+
+@Serializable
 data class SimilarMangaDto(
     val id: String,
     val title: Map<String, String>,
