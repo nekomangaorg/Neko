@@ -4,7 +4,6 @@ import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
 import com.elvishew.xlog.XLog
-import com.google.gson.Gson
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -12,6 +11,10 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 
@@ -31,19 +34,17 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     @StringRes
     override fun nameRes() = R.string.kitsu
 
-    private val gson: Gson by injectLazy()
+    override val supportsReadingDates: Boolean = true
 
-    private val interceptor by lazy { KitsuInterceptor(this, gson) }
+    private val json: Json by injectLazy()
+
+    private val interceptor by lazy { KitsuInterceptor(this) }
 
     private val api by lazy { KitsuApi(client, interceptor) }
 
-    override fun getLogo(): Int {
-        return R.drawable.ic_tracker_kitsu
-    }
+    override fun getLogo() = R.drawable.ic_tracker_kitsu
 
-    override fun getLogoColor(): Int {
-        return Color.rgb(51, 37, 50)
-    }
+    override fun getLogoColor() = Color.rgb(51, 37, 50)
 
     override fun getStatusList(): List<Int> {
         return listOf(READING, PLAN_TO_READ, COMPLETED, ON_HOLD, DROPPED)
@@ -136,15 +137,15 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     }
 
     override suspend fun login(username: String, password: String): Boolean {
-        try {
+        return try {
             val oauth = api.login(username, password)
             interceptor.newAuth(oauth)
             val userId = api.getCurrentUser()
             saveCredentials(username, userId)
-            return true
+            true
         } catch (e: Exception) {
             XLog.e(e)
-            return false
+            false
         }
     }
 
@@ -158,13 +159,12 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
     }
 
     fun saveToken(oauth: OAuth?) {
-        val json = gson.toJson(oauth)
-        preferences.trackToken(this).set(json)
+        preferences.trackToken(this).set(json.encodeToString(oauth))
     }
 
     fun restoreToken(): OAuth? {
         return try {
-            gson.fromJson(preferences.trackToken(this).get(), OAuth::class.java)
+            json.decodeFromString<OAuth>(preferences.trackToken(this).get())
         } catch (e: Exception) {
             null
         }

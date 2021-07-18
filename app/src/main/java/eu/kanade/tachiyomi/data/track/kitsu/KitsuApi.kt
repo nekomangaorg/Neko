@@ -275,9 +275,9 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             "${loginUrl}oauth/token",
             body = FormBody.Builder()
                 .add("grant_type", "refresh_token")
+                .add("refresh_token", token)
                 .add("client_id", clientId)
                 .add("client_secret", clientSecret)
-                .add("refresh_token", token)
                 .build()
         )
     }
