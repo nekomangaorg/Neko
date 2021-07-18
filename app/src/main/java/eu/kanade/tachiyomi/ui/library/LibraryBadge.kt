@@ -81,22 +81,12 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         setUnreadDownload(chapters ?: 0, 0, chapters != null)
     }
 
-    fun setInLibrary(inLibrary: Boolean, overrideText: String="") {
-        if(overrideText == "") {
-            this.isVisible = inLibrary
-            binding.unreadAngle.isVisible = false
-            binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
-            binding.unreadText.isVisible = inLibrary
-            binding.unreadText.text = resources.getText(R.string.in_library)
-        } else {
-            this.isVisible = true
-            binding.unreadAngle.isVisible = inLibrary
-            binding.downloadText.isVisible = true
-            binding.downloadText.text = overrideText
-            binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
-            binding.unreadText.isVisible = inLibrary
-            binding.unreadText.text = resources.getText(R.string.in_library)
-        }
+    fun setInLibrary(inLibrary: Boolean) {
+        this.isVisible = inLibrary
+        binding.unreadAngle.isVisible = false
+        binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
+        binding.unreadText.isVisible = inLibrary
+        binding.unreadText.text = resources.getText(R.string.in_library)
     }
 
     fun setStatus(status: FollowStatus, inLibrary: Boolean) {
