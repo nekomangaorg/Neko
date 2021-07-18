@@ -4,8 +4,12 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SimilarMangaDatabaseDto(
-    val similarApi: SimilarMangaDto,
-    val mangadexApi: MangaListDto,
+    var similarApi: SimilarMangaDto? = null,
+    var similarMdexApi: MangaListDto? = null,
+    var anilistApi: AnilistMangaRecommendationsDto? = null,
+    var anilistMdexApi: MangaListDto? = null,
+    var myanimelistApi: MalMangaRecommendationsDto? = null,
+    var myanimelistMdexApi: MangaListDto? = null,
 )
 
 @Serializable
@@ -24,8 +28,6 @@ data class SimilarMangaMatchListDto(
     val contentRating: String,
     val score: Double,
 )
-
-
 
 
 @Serializable

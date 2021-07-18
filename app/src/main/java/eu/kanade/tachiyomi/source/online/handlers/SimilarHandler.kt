@@ -31,18 +31,22 @@ class SimilarHandler {
      * fetch our similar mangaList
      */
     suspend fun fetchSimilarManga(manga: Manga, refresh: Boolean): MangaListPage {
+        // Get cache from database if we have it
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if (mangaDb != null && !refresh) {
             try {
                 val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
                 val idsToManga = hashMapOf<String, SManga>()
-                dbDto.mangadexApi.results.forEach {
+                dbDto.similarMdexApi!!.results.forEach {
                     idsToManga[it.data.id] = it.toBasicManga()
                 }
-                val mangaList = dbDto.similarApi.matches.map { idsToManga[it.id]!! }
+                val mangaList = dbDto.similarApi!!.matches.map { idsToManga[it.id]!! }
                 return MangaListPage(mangaList, true)
-            } catch (e : Exception) { }
+            } catch (e : Exception) {
+                XLog.e(e)
+            }
         }
+        // Main network request
         val response = network.similarService.getSimilarManga(MdUtil.getMangaId(manga.url))
         return similarMangaParse(manga, response)
     }
@@ -73,15 +77,25 @@ class SimilarHandler {
         val mangaPages = MangaListPage(mangaList, true)
 
         // Convert to a database type that has both images and similar api response
-        val similarDatabaseDto = SimilarMangaDatabaseDto(similarApi = similarDto, mangadexApi = mangaListDto)
-        val similarDatabaseDtoString = MdUtil.jsonParser.encodeToString(similarDatabaseDto)
+        // We will get the latest database info and the update the contents with our new content
+        val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
+        var dbDto = SimilarMangaDatabaseDto()
+        if (mangaDb != null) {
+            try {
+                dbDto = MdUtil.jsonParser.decodeFromString(mangaDb.data)
+            } catch (e: Exception) {
+                XLog.e(e)
+            }
+        }
+        dbDto.similarApi = similarDto
+        dbDto.similarMdexApi = mangaListDto
 
         // If we have the manga in our database, then we should update it, otherwise insert as new
+        val similarDatabaseDtoString = MdUtil.jsonParser.encodeToString(dbDto)
         val mangaSimilar = MangaSimilar.create().apply {
             manga_id = MdUtil.getMangaId(manga.url)
             data = similarDatabaseDtoString
         }
-        val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if(mangaDb != null) {
             mangaSimilar.id = mangaDb.id
         }
@@ -89,47 +103,39 @@ class SimilarHandler {
         return mangaPages
     }
 
-    private suspend fun similarGetMangadexMangaList(
-        mangaIds: List<String>,
-    ): MangaListDto {
-        val queryMap = mutableMapOf(
-            "limit" to mangaIds.size,
-            "ids[]" to mangaIds
-        )
-        val response = network.service.search(ProxyRetrofitQueryMap(queryMap))
-        if (response.isSuccessful.not()) {
-            XLog.e("error ", response.errorBody()!!.string())
-            throw Exception("Error getting manga http code: ${response.code()}")
-        }
-        val responseBody = response.body()!!
-        if (responseBody.results.size != mangaIds.size) {
-            throw Exception("Unable to complete response ${responseBody.results.size} of ${mangaIds.size} returned")
-        }
-        return responseBody
-    }
-
-
-
     /**
      * fetch our similar mangaList from external service Anilist
      */
     suspend fun fetchSimilarExternalAnilistManga(manga: Manga, refresh: Boolean): MangaListPage {
-        // TODO: we should also try to cache this process...
-        //val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
-        //if (mangaDb != null && !refresh) {
-        //    try {
-        //        val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
-        //        return similarDtoToMangaListPage(dbDto.similarApi, dbDto.mangadexApi)
-        //    } catch (e : Exception) { }
-        //}
-        // See if we have a valid mapping for our MAL service
+        // See if we have a valid mapping for our Anlist service
         val anilistId = mappings.getExternalID(MdUtil.getMangaId(manga.url), "al")
             ?: return MangaListPage(emptyList(), false)
-        // Request and parse!
-        // Else lets get the anilist
-        XLog.e(anilistId)
+        // Get the cache if we have it
+        val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
+        if (mangaDb != null && !refresh) {
+            try {
+                val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
+                val idsToManga = hashMapOf<String, SManga>()
+                dbDto.anilistMdexApi!!.results.forEach {
+                    idsToManga[it.data.id] = it.toBasicManga()
+                }
+                val ids = dbDto.anilistApi!!.data.Media.recommendations.edges.map {
+                    if(it.node.mediaRecommendation.format != "MANGA")
+                        return@map null
+                    mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+                }.filterNotNull()
+                val mangaList = ids.map {
+                    val tmp = idsToManga[it]!!
+                    tmp.external_source_icon = "al"
+                    tmp
+                }
+                return MangaListPage(mangaList, true)
+            } catch (e : Exception) {
+                XLog.e(e)
+            }
+        }
+        // Main network request
         val graphql = """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-        XLog.e(graphql)
         val response = network.similarService.getAniListGraphql(graphql)
         return similarMangaExternalAnilistParse(manga, response)
     }
@@ -147,7 +153,6 @@ class SimilarHandler {
         }
 
         // Get our page of mangaList
-        // TODO: append this to the database for cached responses
         val similarDto = response.body()!!
         val ids = similarDto.data.Media.recommendations.edges.map {
             if(it.node.mediaRecommendation.format != "MANGA")
@@ -170,7 +175,33 @@ class SimilarHandler {
             tmp.external_source_icon = "al"
             tmp
         }
-        return MangaListPage(mangaList, true)
+        val mangaPages = MangaListPage(mangaList, true)
+
+        // Convert to a database type that has both images and similar api response
+        // We will get the latest database info and the update the contents with our new content
+        val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
+        var dbDto = SimilarMangaDatabaseDto()
+        if (mangaDb != null) {
+            try {
+                dbDto = MdUtil.jsonParser.decodeFromString(mangaDb.data)
+            } catch (e: Exception) {
+                XLog.e(e)
+            }
+        }
+        dbDto.anilistApi = similarDto
+        dbDto.anilistMdexApi = mangaListDto
+
+        // If we have the manga in our database, then we should update it, otherwise insert as new
+        val similarDatabaseDtoString = MdUtil.jsonParser.encodeToString(dbDto)
+        val mangaSimilar = MangaSimilar.create().apply {
+            manga_id = MdUtil.getMangaId(manga.url)
+            data = similarDatabaseDtoString
+        }
+        if(mangaDb != null) {
+            mangaSimilar.id = mangaDb.id
+        }
+        db.insertSimilar(mangaSimilar).executeAsBlocking()
+        return mangaPages
 
     }
 
@@ -178,18 +209,32 @@ class SimilarHandler {
      * fetch our similar mangaList from external service myanimelist
      */
     suspend fun fetchSimilarExternalMalManga(manga: Manga, refresh: Boolean): MangaListPage {
-        // TODO: we should also try to cache this process...
-        //val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
-        //if (mangaDb != null && !refresh) {
-        //    try {
-        //        val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
-        //        return similarDtoToMangaListPage(dbDto.similarApi, dbDto.mangadexApi)
-        //    } catch (e : Exception) { }
-        //}
         // See if we have a valid mapping for our MAL service
         val malId = mappings.getExternalID(MdUtil.getMangaId(manga.url), "mal")
             ?: return MangaListPage(emptyList(), false)
-        // Request and parse!
+        // Get the cache if we have it
+        val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
+        if (mangaDb != null && !refresh) {
+            try {
+                val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
+                val idsToManga = hashMapOf<String, SManga>()
+                dbDto.myanimelistMdexApi!!.results.forEach {
+                    idsToManga[it.data.id] = it.toBasicManga()
+                }
+                val ids = dbDto.myanimelistApi!!.recommendations.map {
+                    mappings.getMangadexID(it.mal_id.toString(), "mal")
+                }.filterNotNull()
+                val mangaList = ids.map {
+                    val tmp = idsToManga[it]!!
+                    tmp.external_source_icon = "mal"
+                    tmp
+                }
+                return MangaListPage(mangaList, true)
+            } catch (e : Exception) {
+                XLog.e(e)
+            }
+        }
+        // Main network request
         val response = network.similarService.getSimilarMalManga(malId)
         return similarMangaExternalMalParse(manga, response)
     }
@@ -207,7 +252,6 @@ class SimilarHandler {
         }
 
         // Get our page of mangaList
-        // TODO: append this to the database for cached responses
         val similarDto = response.body()!!
         val ids = similarDto.recommendations.map {
             mappings.getMangadexID(it.mal_id.toString(), "mal")
@@ -228,10 +272,56 @@ class SimilarHandler {
             tmp.external_source_icon = "mal"
             tmp
         }
-        return MangaListPage(mangaList, true)
+        val mangaPages = MangaListPage(mangaList, true)
+
+        // Convert to a database type that has both images and similar api response
+        // We will get the latest database info and the update the contents with our new content
+        val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
+        var dbDto = SimilarMangaDatabaseDto()
+        if (mangaDb != null) {
+            try {
+                dbDto = MdUtil.jsonParser.decodeFromString(mangaDb.data)
+            } catch (e: Exception) {
+                XLog.e(e)
+            }
+        }
+        dbDto.myanimelistApi = similarDto
+        dbDto.myanimelistMdexApi = mangaListDto
+
+        // If we have the manga in our database, then we should update it, otherwise insert as new
+        val similarDatabaseDtoString = MdUtil.jsonParser.encodeToString(dbDto)
+        val mangaSimilar = MangaSimilar.create().apply {
+            manga_id = MdUtil.getMangaId(manga.url)
+            data = similarDatabaseDtoString
+        }
+        if(mangaDb != null) {
+            mangaSimilar.id = mangaDb.id
+        }
+        db.insertSimilar(mangaSimilar).executeAsBlocking()
+        return mangaPages
 
     }
 
-
+    /**
+     * this will get the manga objects with cover_art for all the specified ids
+     */
+    private suspend fun similarGetMangadexMangaList(
+        mangaIds: List<String>,
+    ): MangaListDto {
+        val queryMap = mutableMapOf(
+            "limit" to mangaIds.size,
+            "ids[]" to mangaIds
+        )
+        val response = network.service.search(ProxyRetrofitQueryMap(queryMap))
+        if (response.isSuccessful.not()) {
+            XLog.e("error ", response.errorBody()!!.string())
+            throw Exception("Error getting manga http code: ${response.code()}")
+        }
+        val responseBody = response.body()!!
+        if (responseBody.results.size != mangaIds.size) {
+            throw Exception("Unable to complete response ${responseBody.results.size} of ${mangaIds.size} returned")
+        }
+        return responseBody
+    }
 
 }
