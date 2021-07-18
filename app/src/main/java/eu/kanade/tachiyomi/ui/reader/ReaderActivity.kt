@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
+import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.LayerDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -1260,6 +1262,18 @@ class ReaderActivity :
             type = "image/*"
         }
         startActivity(Intent.createChooser(intent, getString(R.string.share)))
+    }
+
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+        val manga = presenter.manga ?: return
+        val source = presenter.source as? HttpSource ?: return
+        val url = try {
+            source.mangaDetailsRequest(manga).url.toString()
+        } catch (e: Exception) {
+            return
+        }
+        outContent.webUri = Uri.parse(url)
     }
 
     /**

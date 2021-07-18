@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi.ui.main
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Dialog
+import android.app.assist.AssistContent
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -622,6 +624,25 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             else -> return false
         }
         return true
+    }
+
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+        when (val controller = router.backstack.lastOrNull()?.controller) {
+            is MangaDetailsController -> {
+                val source = controller.presenter.source as? HttpSource ?: return
+                val url = try {
+                    source.mangaDetailsRequest(controller.presenter.manga).url.toString()
+                } catch (e: Exception) {
+                    return
+                }
+                outContent.webUri = Uri.parse(url)
+            }
+            is BrowseSourceController -> {
+                val source = controller.presenter.source as? HttpSource ?: return
+                outContent.webUri = Uri.parse(source.baseUrl)
+            }
+        }
     }
 
     override fun onDestroy() {
