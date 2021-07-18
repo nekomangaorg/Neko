@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -61,6 +62,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
+
+        addSingletonFactory { MangaMappings(app.applicationContext) }
 
         addSingleton(FilterHandler())
 

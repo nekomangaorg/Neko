@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDatabaseDto
 import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.manga.MangaMappings
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import retrofit2.Response
@@ -22,6 +23,7 @@ class SimilarHandler {
 
     private val network: NetworkHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
+    private val mappings: MangaMappings by injectLazy()
 
     /**
      * fetch our similar mangaList
