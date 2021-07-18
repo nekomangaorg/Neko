@@ -105,6 +105,8 @@
     <color name="neko_green_darker">#20aa5e</color>
     <color name="gold">#D4AF37</color>
 
+    <color name="splash_background">#FF6784</color>
+
 
     <color name="neko_miami_primary">#41B6E6</color>
     <color name="neko_miami_primary_variant">#000000</color>
