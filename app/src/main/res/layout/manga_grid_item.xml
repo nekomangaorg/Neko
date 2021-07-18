@@ -72,7 +72,7 @@
                 android:foreground="?selectableItemBackgroundBorderless"
                 android:layout_gravity="end"
                 android:orientation="vertical"
-                android:padding="4dp"
+                android:padding="1dp"
                 android:layout_margin="5dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.5"

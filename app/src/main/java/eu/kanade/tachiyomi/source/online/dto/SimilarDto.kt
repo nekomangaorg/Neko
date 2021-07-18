@@ -25,6 +25,47 @@ data class SimilarMangaMatchListDto(
     val score: Double,
 )
 
+
+
+
+@Serializable
+data class AnilistMangaRecommendationsDto(
+    val data: AnilistMangaSimilarMedia,
+)
+
+@Serializable
+data class AnilistMangaSimilarMedia(
+    val Media: AnilistMangaSimilarRecommendations,
+)
+
+@Serializable
+data class AnilistMangaSimilarRecommendations(
+    val recommendations: AnilistMangaSimilarEdges,
+)
+
+@Serializable
+data class AnilistMangaSimilarEdges(
+    val edges: List<AnilistMangaSimilarEdge>,
+)
+
+@Serializable
+data class AnilistMangaSimilarEdge(
+    val node: AnilistMangaSimilarNode,
+)
+
+@Serializable
+data class AnilistMangaSimilarNode(
+    val mediaRecommendation: AnilistMangaSimilarMediaRecommend,
+    val rating: Int,
+)
+
+@Serializable
+data class AnilistMangaSimilarMediaRecommend(
+    val id: Long,
+    val format: String,
+)
+
+
 @Serializable
 data class MalMangaRecommendationsDto(
     val request_hash: String,

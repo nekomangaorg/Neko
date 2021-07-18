@@ -130,11 +130,18 @@ open class MangaDex : HttpSource() {
         return similarHandler.fetchSimilarManga(manga, refresh)
     }
 
-    suspend fun fetchSimilarExternalManga(
+    suspend fun fetchSimilarExternalAnilistManga(
         manga: Manga,
         refresh: Boolean,
     ): MangaListPage {
-        return similarHandler.fetchSimilarExternalManga(manga, refresh)
+        return similarHandler.fetchSimilarExternalAnilistManga(manga, refresh)
+    }
+
+    suspend fun fetchSimilarExternalMalManga(
+        manga: Manga,
+        refresh: Boolean,
+    ): MangaListPage {
+        return similarHandler.fetchSimilarExternalMalManga(manga, refresh)
     }
 
     override fun isLogged(): Boolean {

@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.dto.AnilistMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.dto.MalMangaRecommendationsDto
 import eu.kanade.tachiyomi.source.online.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDatabaseDto
@@ -107,10 +108,76 @@ class SimilarHandler {
         return responseBody
     }
 
+
+
     /**
-     * fetch our similar mangaList from external services
+     * fetch our similar mangaList from external service Anilist
      */
-    suspend fun fetchSimilarExternalManga(manga: Manga, refresh: Boolean): MangaListPage {
+    suspend fun fetchSimilarExternalAnilistManga(manga: Manga, refresh: Boolean): MangaListPage {
+        // TODO: we should also try to cache this process...
+        //val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
+        //if (mangaDb != null && !refresh) {
+        //    try {
+        //        val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
+        //        return similarDtoToMangaListPage(dbDto.similarApi, dbDto.mangadexApi)
+        //    } catch (e : Exception) { }
+        //}
+        // See if we have a valid mapping for our MAL service
+        val anilistId = mappings.getExternalID(MdUtil.getMangaId(manga.url), "al")
+            ?: return MangaListPage(emptyList(), false)
+        // Request and parse!
+        // Else lets get the anilist
+        XLog.e(anilistId)
+        val graphql = """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
+        XLog.e(graphql)
+        val response = network.similarService.getAniListGraphql(graphql)
+        return similarMangaExternalAnilistParse(manga, response)
+    }
+
+    private suspend fun similarMangaExternalAnilistParse(
+        manga: Manga,
+        response: Response<AnilistMangaRecommendationsDto>,
+    ): MangaListPage {
+        // Error check http response
+        if (response.code() == 404) {
+            return MangaListPage(emptyList(), false)
+        }
+        if (response.isSuccessful.not() || response.code() != 200) {
+            throw Exception("Error getting Anilist http code: ${response.code()}")
+        }
+
+        // Get our page of mangaList
+        // TODO: append this to the database for cached responses
+        val similarDto = response.body()!!
+        val ids = similarDto.data.Media.recommendations.edges.map {
+            if(it.node.mediaRecommendation.format != "MANGA")
+                return@map null
+            mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+        }.filterNotNull()
+        val mangaListDto = similarGetMangadexMangaList(ids)
+
+        // Convert to lookup array
+        // TODO: We should probably sort this based on score from MAL!!!
+        // TODO: Also filter out manga here that are already presented
+        val idsToManga = hashMapOf<String, SManga>()
+        mangaListDto.results.forEach {
+            idsToManga[it.data.id] = it.toBasicManga()
+        }
+
+        // Loop through our *sorted* related array and list in that order
+        val mangaList = ids.map {
+            val tmp = idsToManga[it]!!
+            tmp.external_source_icon = "al"
+            tmp
+        }
+        return MangaListPage(mangaList, true)
+
+    }
+
+    /**
+     * fetch our similar mangaList from external service myanimelist
+     */
+    suspend fun fetchSimilarExternalMalManga(manga: Manga, refresh: Boolean): MangaListPage {
         // TODO: we should also try to cache this process...
         //val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         //if (mangaDb != null && !refresh) {
@@ -136,7 +203,7 @@ class SimilarHandler {
             return MangaListPage(emptyList(), false)
         }
         if (response.isSuccessful.not() || response.code() != 200) {
-            throw Exception("Error getting similar manga http code: ${response.code()}")
+            throw Exception("Error getting MyAnimeList http code: ${response.code()}")
         }
 
         // Get our page of mangaList
@@ -161,7 +228,7 @@ class SimilarHandler {
             tmp.external_source_icon = "mal"
             tmp
         }
-        return MangaListPage(mangaList, false)
+        return MangaListPage(mangaList, true)
 
     }
 
