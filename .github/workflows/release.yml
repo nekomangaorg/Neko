@@ -37,7 +37,6 @@ jobs:
         run: |
           mkdir -p ~/.gradle
           cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
-
       - name: Write google-services.json
         uses: DamianReeves/write-file-action@v1.0
         with:
@@ -64,11 +63,9 @@ jobs:
 
       - name: Prep build artifacts for release
         run: |
-          echo "VERSION_TAG=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_ENV
           cp ${{ env.SIGNED_RELEASE_FILE }} neko.apk
           md5=`md5sum neko.apk | awk '{ print $1 }'`
           echo " #### MD5: $md5" >> CurrentChangeLog.MD
-
       - name: Create Release
         uses: ncipollo/release-action@v1.8.6
         with:
