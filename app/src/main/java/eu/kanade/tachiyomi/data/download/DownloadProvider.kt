@@ -50,12 +50,16 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga to query.
      * @param source the source of the manga.
      */
+    @Synchronized
     internal fun getMangaDir(manga: Manga, source: Source): UniFile {
         try {
-            return downloadsDir.createDirectory(getSourceDirName(source))
-                .createDirectory(getMangaDirName(manga))
+            val mangaDirName = getMangaDirName(manga)
+            val sourceDirName = getSourceDirName(source)
+            XLog.d("creating directory for $sourceDirName : $mangaDirName")
+            return downloadsDir.createDirectory(sourceDirName)
+                .createDirectory(mangaDirName)
         } catch (e: Exception) {
-            XLog.e(e)
+            XLog.e("error getting download folder for ${manga.title}", e)
             throw Exception(context.getString(R.string.invalid_download_location))
         }
     }

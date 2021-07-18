@@ -56,7 +56,7 @@ class PageHandler {
                                 atHomeResponse.errorBody()?.string()
                             }"
                         )
-                        throw Exception("error returned from atHomeResponse")
+                        throw Exception("error returned from atHomeResponse: Error code ${atHomeResponse.code()}")
                     }
 
                     pageListParse(
