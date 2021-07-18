@@ -28,7 +28,6 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
-import kotlin.math.abs
 import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
@@ -356,11 +355,10 @@ class MangaHeaderHolder(
                     floatArrayOf(
                         accentArray[0],
                         accentArray[1],
-                        // fun math just for good contrast
-                        ((if (dark) 0.35f else 0.87f) + (abs(onAccentArray[2] - 0.5f) * .7f)) / 2f
+                        (if (dark) 0.3f else 0.85f)
                     )
                 ),
-                165
+                199
             )
             val textColor = ColorUtils.HSLToColor(
                 floatArrayOf(
