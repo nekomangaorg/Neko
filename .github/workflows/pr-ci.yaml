@@ -1,9 +1,6 @@
 name: Pull Request CI
 
 on:
-  push:
-    branches:
-      - '*'
   pull_request:
 
 jobs:
