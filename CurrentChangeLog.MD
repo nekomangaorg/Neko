@@ -5,6 +5,7 @@
 ## 🏗️ Changes
 - tweak to genre chip ui (with help from @Jays2Kings)
 ## 🐜 Fixes
+- Merge search results were not clearing on new search
 - Reader background not following amoled (@Jays2Kings)
 - new series orientation not being set as default (@Jays2Kings)
 - Attempt ??? to fix chapter infinite load
