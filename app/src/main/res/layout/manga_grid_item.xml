@@ -65,6 +65,32 @@
 
             </FrameLayout>
 
+            <FrameLayout
+                android:id="@+id/external_logo_container"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:foreground="?selectableItemBackgroundBorderless"
+                android:layout_gravity="end"
+                android:orientation="vertical"
+                android:padding="1dp"
+                android:layout_margin="5dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.5"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                tools:background="#2E51A2">
+
+                <ImageView
+                    android:id="@+id/external_logo"
+                    android:layout_width="23dp"
+                    android:layout_height="23dp"
+                    android:layout_gravity="center"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:src="@drawable/ic_tracker_anilist" />
+
+            </FrameLayout>
+
             <View
                 android:id="@+id/gradient"
                 android:layout_width="match_parent"

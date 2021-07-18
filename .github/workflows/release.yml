@@ -38,16 +38,12 @@ jobs:
           mkdir -p ~/.gradle
           cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
 
-      - name: Decode google services json
-        id: write_google_service_json
-        uses: timheuer/base64-to-file@v1
+      - name: Write google-services.json
+        uses: DamianReeves/write-file-action@v1.0
         with:
-          fileName: 'google-services.json'
-          encodedString: ${{ secrets.GOOGLE_SERVICE_JSON }}
-
-      - name: copy google-services.json to app folder
-        run: |
-          cp ${{ steps.write_google_service_json.outputs.filePath }} app/google-services.json
+          path: app/google-services.json
+          contents: ${{ secrets.GOOGLE_SERVICE_JSON }}
+          write-mode: overwrite # optional, default is preserve
 
       - name: Build app
         uses: eskatos/gradle-command-action@v1

@@ -8,7 +8,7 @@ import rx.Observable
 /**
  * A general pager for source requests (latest updates, popular, search)
  */
-abstract class Pager(var currentPage: Int = 1) {
+abstract class Pager(var currentPage: Int = 1, var checkForEmpty: Boolean = true) {
 
     var hasNextPage = true
         private set
@@ -24,7 +24,7 @@ abstract class Pager(var currentPage: Int = 1) {
     fun onPageReceived(mangaListPage: MangaListPage) {
         val page = currentPage
         currentPage++
-        hasNextPage = mangaListPage.hasNextPage && mangaListPage.manga.isNotEmpty()
+        hasNextPage = mangaListPage.hasNextPage && (!checkForEmpty || mangaListPage.manga.isNotEmpty())
         results.call(Pair(page, mangaListPage.manga))
     }
 }

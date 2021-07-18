@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
 import android.app.Activity
+import android.graphics.Color
 import android.view.View
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
@@ -9,6 +10,7 @@ import coil.clear
 import coil.request.ImageRequest
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
@@ -57,6 +59,30 @@ class BrowseSourceGridHolder(
                 manga.favorite
             )
             false -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
+        }
+
+        // Update our source / external icon if needed
+        binding.externalLogo.isVisible = false
+        binding.externalLogoContainer.isVisible = false
+        if(manga.external_source_icon != null) {
+            if (manga.external_source_icon!!.lowercase() == "al") {
+                binding.externalLogo.isVisible = true
+                binding.externalLogoContainer.isVisible = true
+                binding.externalLogo.setImageResource(R.drawable.ic_tracker_anilist_logo)
+                binding.externalLogoContainer.setBackgroundColor(Color.rgb(18, 25, 35))
+            }
+            if (manga.external_source_icon!!.lowercase() == "kt") {
+                binding.externalLogo.isVisible = true
+                binding.externalLogoContainer.isVisible = true
+                binding.externalLogo.setImageResource(R.drawable.ic_tracker_kitsu_logo)
+                binding.externalLogoContainer.setBackgroundColor(Color.rgb(51, 37, 50))
+            }
+            if (manga.external_source_icon!!.lowercase() == "mal") {
+                binding.externalLogo.isVisible = true
+                binding.externalLogoContainer.isVisible = true
+                binding.externalLogo.setImageResource(R.drawable.ic_tracker_mal_logo)
+                binding.externalLogoContainer.setBackgroundColor(Color.rgb(46, 81, 162))
+            }
         }
 
         // Update the cover.
