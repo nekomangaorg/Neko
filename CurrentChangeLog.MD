@@ -1,6 +1,7 @@
 ## 🥳 New
 - New Icon and color
 - New Sapphire Dusk theme
+- Change sorting of recommended manga, add mal/anilist recommendations at the bottom (@goldbattle)
 ## 🏗️ Changes
 - tweak to genre chip ui (with help from @Jays2Kings)
 ## 🐜 Fixes
