@@ -13,6 +13,9 @@
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
 
+    <color name="gray">#404040</color>
+
+
     <color name="read_chapter">@color/text_color_hint</color>
 
     <color name="total_badge">@color/neko_green_complementary</color>
@@ -74,6 +77,13 @@
     <color name="primaryDuskDawn">#efe3f3</color>
     <color name="textPrimaryDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
+
+    <!-- Sapphire Dusk Theme -->
+    --
+    <color name="colorAccentSapphire">#589ab8</color>
+    <color name="colorAccentSapphireText">#79aec6</color>
+    <color name="primarySapphire">#3e6c81</color>
+    <!-- Sapphire Dusk -->
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>

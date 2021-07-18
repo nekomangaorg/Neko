@@ -113,6 +113,12 @@
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
 
+    <style name="Theme.Tachiyomi.SapphireDusk" parent="Theme.Tachiyomi.MidnightDusk">
+        <item name="colorPrimary">@color/primarySapphire</item>
+        <item name="colorAccent">@color/colorAccentSapphire</item>
+        <item name="colorAccentText">@color/colorAccentSapphireText</item>
+    </style>
+
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorAccent">@color/colorAccentStrawberry</item>
         <item name="colorAccentText">@color/colorAccentStrawberryText</item>

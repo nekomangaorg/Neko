@@ -296,7 +296,7 @@
     <style name="Theme.Widget.Chip.Outline" parent="Widget.MaterialComponents.Chip.Action">
         <item name="chipBackgroundColor">@color/accent_alpha</item>
         <item name="chipMinHeight">28dp</item>
-        <item name="android:textColor">?colorAccentText</item>
+        <item name="android:textColor">?colorOnAccent</item>
         <item name="android:textAppearance">@style/Theme.TextAppearance.Chip</item>
         <item name="chipStrokeWidth">0dp</item>
         <item name="android:checkable">false</item>
@@ -305,6 +305,7 @@
 
     <style name="Theme.TextAppearance.Chip" parent="TextAppearance.MaterialComponents.Chip">
         <item name="android:textSize">13sp</item>
+        <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
     <!--===-->

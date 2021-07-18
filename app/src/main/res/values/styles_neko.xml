@@ -47,16 +47,6 @@
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
-    <style name="Neko.Manga.Header.Chip.Outline" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">?attr/colorSecondary</item>
-        <item name="android:textColor">?attr/colorAccent</item>
-        <item name="chipStrokeColor">?attr/colorAccent</item>
-        <item name="chipStrokeWidth">1.25dp</item>
-        <item name="android:checkable">false</item>
-        <item name="android:textAppearance">@style/chipText</item>
-    </style>
-
-
     <style name="Neko.NumberPicker" parent="NumberPicker.EditTextStyle">
         <item name="android:textAppearance">@style/Neko.Headline5</item>
     </style>

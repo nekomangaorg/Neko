@@ -22,11 +22,26 @@ enum class Themes(
         R.string.white_theme,
         R.string.dark
     ),
+    OUTRUN(
+        R.style.Theme_Tachiyomi_Outrun,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.outrun
+    ),
     SPRING_AND_DUSK(
         R.style.Theme_Tachiyomi_MidnightDusk,
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
         R.string.spring_blossom,
         R.string.midnight_dusk
+    ),
+    SAPPHIRE(
+        R.style.Theme_Tachiyomi_SapphireDusk,
+        AppCompatDelegate.MODE_NIGHT_YES,
+        R.string.sapphire_dusk
+    ),
+    MANGADEX(
+        R.style.Theme_Tachiyomi_MangaDex,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.mangadex
     ),
     STRAWBERRIES(
         R.style.Theme_Tachiyomi_Strawberries,
@@ -34,21 +49,10 @@ enum class Themes(
         R.string.strawberry_daiquiri,
         R.string.chocolate_strawberries
     ),
-    OUTRUN(
-        R.style.Theme_Tachiyomi_Outrun,
-        AppCompatDelegate.MODE_NIGHT_YES,
-        R.string.outrun
-    ),
-
     LIME(
         R.style.Theme_Tachiyomi_FlatLime,
         AppCompatDelegate.MODE_NIGHT_YES,
         R.string.flat_lime
-    ),
-    MANGADEX(
-        R.style.Theme_Tachiyomi_MangaDex,
-        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
-        R.string.mangadex
     );
 
     val isDarkTheme = nightMode == AppCompatDelegate.MODE_NIGHT_YES
@@ -134,7 +138,7 @@ enum class Themes(
     val darkBackground: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_Strawberries -> "#1a1716"
-            R.style.Theme_Tachiyomi_MidnightDusk -> "#16151D"
+            R.style.Theme_Tachiyomi_MidnightDusk, R.style.Theme_Tachiyomi_SapphireDusk -> "#16151D"
             R.style.Theme_Tachiyomi_FlatLime -> "#202125"
             R.style.Theme_Tachiyomi, R.style.Theme_Tachiyomi_MangaDex -> "#292929"
             R.style.Theme_Tachiyomi_Outrun -> "#170c32"
@@ -159,6 +163,7 @@ enum class Themes(
     val darkAccent: Int = Color.parseColor(
         when (styleRes) {
             R.style.Theme_Tachiyomi_MidnightDusk -> "#F02475"
+            R.style.Theme_Tachiyomi_SapphireDusk -> "#589ab8"
             R.style.Theme_Tachiyomi_Strawberries -> "#AA2200"
             R.style.Theme_Tachiyomi_FlatLime -> "#4AF88A"
             R.style.Theme_Tachiyomi -> "#20aa5e"
@@ -208,7 +213,7 @@ enum class Themes(
         when (styleRes) {
             R.style.Theme_Tachiyomi_Strawberries -> "#211b19"
             R.style.Theme_Tachiyomi, R.style.Theme_Tachiyomi_MangaDex -> "#292929"
-            R.style.Theme_Tachiyomi_MidnightDusk -> "#201F27"
+            R.style.Theme_Tachiyomi_MidnightDusk, R.style.Theme_Tachiyomi_SapphireDusk -> "#201F27"
             R.style.Theme_Tachiyomi_FlatLime -> "#282A2E"
             R.style.Theme_Tachiyomi_Outrun -> "#201147"
             else -> "#212121"

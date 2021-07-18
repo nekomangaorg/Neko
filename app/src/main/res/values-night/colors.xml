@@ -7,8 +7,6 @@
     <color name="app_color_primary">#636363</color>
     <color name="colorAccent">@color/neko_green_darker</color>
     <color name="colorAccentText">#cce5ff</color>
-    <color name="download_badge">@color/neko_primary</color>
-    <color name="download_badge_text">@color/md_white_1000</color>
 
     <color name="rippleColor">@color/md_white_1000_20</color>
     <color name="fullRippleColor">#707070</color>
