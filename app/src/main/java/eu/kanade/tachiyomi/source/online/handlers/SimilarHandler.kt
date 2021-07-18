@@ -8,11 +8,11 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.AnilistMangaRecommendationsDto
-import eu.kanade.tachiyomi.source.online.dto.MalMangaRecommendationsDto
-import eu.kanade.tachiyomi.source.online.dto.MangaListDto
-import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDatabaseDto
-import eu.kanade.tachiyomi.source.online.dto.SimilarMangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.AnilistMangaRecommendationsDto
+import eu.kanade.tachiyomi.source.online.models.dto.MalMangaRecommendationsDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDatabaseDto
+import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.manga.MangaMappings

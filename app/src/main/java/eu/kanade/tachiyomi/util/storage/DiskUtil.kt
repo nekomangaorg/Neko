@@ -128,7 +128,7 @@ object DiskUtil {
             return false
         }
         return when (c) {
-            '\'', '"', '*', '/', ':', '<', '>', '?', '\\', '|', 0x7f.toChar() -> false
+            '\'', '"', '*', '/', ':', '<', '>', '?', '\\', '|', '~', 0x7f.toChar() -> false
             else -> true
         }
     }

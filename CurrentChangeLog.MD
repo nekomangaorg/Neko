@@ -1,8 +1,9 @@
-See 2.5.4 for the bigger changes
-
+## 🥳 New
+- New Icon and color
+## 🏗️ Changes
 ## 🐜 Fixes
-- PageHander was not using IO context (might fix the infinite load for non download chapters)
-- chocolate strawberries was misnamed
-- firebase wasn't reporting
-
-
+- Reader background not following amoled (@Jays2Kings)
+- Attempt ??? to fix chapter infinite load
+- Invalid download location notification showing in some cases
+## 🛠️ Other
+- Remove tags library and switch to Material Chips
