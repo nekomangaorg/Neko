@@ -24,3 +24,22 @@ data class SimilarMangaMatchListDto(
     val contentRating: String,
     val score: Double,
 )
+
+@Serializable
+data class MalMangaRecommendationsDto(
+    val request_hash: String,
+    val request_cached: Boolean,
+    val request_cache_expiry: Long,
+    val recommendations: List<MalMangaRecommendationDto>,
+)
+
+@Serializable
+data class MalMangaRecommendationDto(
+    val mal_id: Long,
+    val url: String,
+    val image_url: String,
+    val recommendation_url: String,
+    val title: String,
+    val recommendation_count: Int,
+)
+

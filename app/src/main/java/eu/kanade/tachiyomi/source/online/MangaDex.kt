@@ -130,6 +130,13 @@ open class MangaDex : HttpSource() {
         return similarHandler.fetchSimilarManga(manga, refresh)
     }
 
+    suspend fun fetchSimilarExternalManga(
+        manga: Manga,
+        refresh: Boolean,
+    ): MangaListPage {
+        return similarHandler.fetchSimilarExternalManga(manga, refresh)
+    }
+
     override fun isLogged(): Boolean {
         return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(
             this

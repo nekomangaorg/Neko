@@ -40,6 +40,7 @@ class SimilarPresenter(
                 try {
                     val manga = db.getManga(mangaId).executeAsBlocking()
                     source.fetchSimilarManga(manga!!, true)
+                    source.fetchSimilarExternalManga(manga, true)
                     isRefreshing = false
                     withContext(Dispatchers.Main) {
                         controller.showUserMessage("Updated Similar Manga")

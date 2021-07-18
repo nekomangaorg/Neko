@@ -19,14 +19,11 @@ class SimilarPager(val manga: Manga, val source: MangaDex) : Pager() {
         return runAsObservable {
             val page = currentPage
             currentPage++
-//            if(page == 1) {
-//                val page = source.fetchSimilarManga(manga, false)
-//                MangaListPage(page.manga, true)
-//            } else {
-//                source.fetchSimilarManga(manga, false)
-//            }
-            source.fetchSimilarManga(manga, false)
-
+            if(page == 1) {
+                source.fetchSimilarManga(manga, false)
+            } else {
+                source.fetchSimilarExternalManga(manga, false)
+            }
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
