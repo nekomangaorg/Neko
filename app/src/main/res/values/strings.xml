@@ -116,6 +116,8 @@
     <string name="no_new_updates_available">No new updates available</string>
     <string name="searching_for_updates">Searching for updates…</string>
     <string name="release_page">Release page</string>
+    <string name="could_not_install_update">Could not install update</string>
+    <string name="update_completed">Update completed</string>
 
     <!-- Main Screens -->
 

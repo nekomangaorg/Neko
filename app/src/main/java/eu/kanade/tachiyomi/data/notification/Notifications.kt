@@ -16,6 +16,7 @@ object Notifications {
     object Channel {
         const val Status = "status_channel"
         const val Tracking = "tracking_channel"
+        const val Updated = "updated_channel"
     }
 
     object Id {
@@ -29,6 +30,10 @@ object Notifications {
             const val Progress = -2001
             const val Complete = -2002
             const val Error = -2003
+        }
+
+        object Updated {
+            const val installed = -6
         }
     }
 
@@ -165,6 +170,14 @@ object Notifications {
                 setShowBadge(false)
                 setSound(null, null)
             },
+                    NotificationChannel(
+                        Channel.Updated,
+                        context.getString(R.string.update_completed),
+                        NotificationManager.IMPORTANCE_DEFAULT
+                    ).apply {
+                        setShowBadge(false)
+                    },
+
             NotificationChannel(
                 CHANNEL_BACKUP_RESTORE_ERROR,
                 context.getString(R.string.restore_error),

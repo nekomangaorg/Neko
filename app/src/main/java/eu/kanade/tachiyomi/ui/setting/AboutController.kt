@@ -201,7 +201,7 @@ class AboutController : SettingsController() {
                     if (appContext != null) {
                         // Start download
                         val url = args.getString(URL_KEY) ?: ""
-                        UpdaterService.start(appContext, url)
+                        UpdaterService.start(appContext, url, true)
                     }
                 }
                 .negativeButton(R.string.ignore)
