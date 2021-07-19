@@ -349,22 +349,35 @@ class MangaHeaderHolder(
             removeAllViews()
             val dark = context.isInNightMode()
             val amoled = adapter.delegate.mangaPresenter().preferences.themeDarkAmoled().get()
-            val baseTagColor =
-                if (dark) context.getResourceColor(R.attr.background) else context.getColor(R.color.gray)
+            val baseTagColor = context.getResourceColor(R.attr.background)
+            val bgArray = FloatArray(3)
             val accentArray = FloatArray(3)
 
-            ColorUtils.colorToHSL(baseTagColor, accentArray)
+            ColorUtils.colorToHSL(baseTagColor, bgArray)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
-                        accentArray[0],
-                        accentArray[1],
-                        (if (amoled && dark) 0.1f else if (dark) 0.25f else 0.85f)
+                        bgArray[0],
+                        bgArray[1],
+                        (
+                            when {
+                                amoled && dark -> 0.1f
+                                dark -> 0.225f
+                                else -> 0.85f
+                            }
+                            )
                     )
                 ),
                 199
             )
-
+            val textColor = ColorUtils.HSLToColor(
+                floatArrayOf(
+                    accentArray[0],
+                    accentArray[1],
+                    if (dark) 0.945f else 0.175f
+                )
+            )
             if (manga.genre.isNullOrBlank().not()) {
                 (manga.getGenres() ?: emptyList()).map { genreText ->
                     val chip = LayoutInflater.from(binding.root.context).inflate(
