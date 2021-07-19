@@ -983,16 +983,23 @@ class ReaderActivity :
                         )
                 ) % 2 != 0
         }
+        val currentChapterPageCount = viewerChapters.currChapter.pages?.size ?: 1
+        binding.readerNav.root.visibility = when {
+            currentChapterPageCount == 1 -> View.GONE
+            binding.chaptersSheet.root.sheetBehavior.isCollapsed() -> View.VISIBLE
+            else -> View.INVISIBLE
+        }
         lastShiftDoubleState = null
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
         binding.toolbar.subtitle = viewerChapters.currChapter.chapter.name
-        if (viewer is R2LPagerViewer) {
-            binding.readerNav.leftChapter.alpha =
-                if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.rightChapter.alpha =
-                if (viewerChapters.prevChapter != null) 1f else 0.5f
+        if (viewerChapters.nextChapter == null && viewerChapters.prevChapter == null) {
+            binding.readerNav.leftChapter.isVisible = false
+            binding.readerNav.rightChapter.isVisible = false
+        } else if (viewer is R2LPagerViewer) {
+            binding.readerNav.leftChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
         } else {
             binding.readerNav.rightChapter.alpha =
                 if (viewerChapters.nextChapter != null) 1f else 0.5f
