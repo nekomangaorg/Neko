@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
@@ -234,7 +233,8 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
                 }
                 if (item.theme.styleRes == R.style.Theme_Tachiyomi_Monet &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+                ) {
                     val nightMode = item.isDarkTheme
                     val appBar = context.contextCompatColor(
                         if (nightMode) android.R.color.system_neutral1_900
