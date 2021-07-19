@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
-import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -68,7 +67,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             binding.chapterRecycler.alpha = if (sheetBehavior.isExpanded()) 1f else 0f
             binding.chapterRecycler.isClickable = sheetBehavior.isExpanded()
             binding.chapterRecycler.isFocusable = sheetBehavior.isExpanded()
-            if (!activity.binding.readerNav.root.isGone) {
+            val canShowNav = presenter.getCurrentChapter()?.pages?.size ?: 1 > 1
+            if (canShowNav) {
                 activity.binding.readerNav.root.isVisible = sheetBehavior.isCollapsed()
             }
         }
@@ -89,24 +89,25 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
+                    val canShowNav = presenter.getCurrentChapter()?.pages?.size ?: 1 > 1
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         sheetBehavior?.isHideable = false
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                             adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
                             binding.chapterRecycler.height / 2 - 30.dpToPx
                         )
-                        if (!activity.binding.readerNav.root.isGone) {
+                        if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
                         }
                         activity.binding.readerNav.root.alpha = 1f
                     }
                     if (state == BottomSheetBehavior.STATE_DRAGGING || state == BottomSheetBehavior.STATE_SETTLING) {
-                        if (!activity.binding.readerNav.root.isGone) {
+                        if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
                         }
                     }
                     if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        if (!activity.binding.readerNav.root.isGone) {
+                        if (canShowNav) {
                             activity.binding.readerNav.root.isInvisible = true
                         }
                         activity.binding.readerNav.root.alpha = 0f
@@ -115,7 +116,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         activity.binding.readerNav.root.alpha = 0f
-                        if (!activity.binding.readerNav.root.isGone) {
+                        if (canShowNav) {
                             activity.binding.readerNav.root.isInvisible = true
                         }
                     }
