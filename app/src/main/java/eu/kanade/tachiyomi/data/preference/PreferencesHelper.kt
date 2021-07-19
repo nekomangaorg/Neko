@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.preference
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
@@ -131,8 +132,9 @@ class PreferencesHelper(val context: Context) {
 
     fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
 
-    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.DEFAULT)
-    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DEFAULT)
+    val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
