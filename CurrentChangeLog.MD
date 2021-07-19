@@ -6,6 +6,7 @@
 - tweak to genre chip ui (with help from @Jays2Kings)
 ## 🐜 Fixes
 - Merge search results were not clearing on new search
+- Light themes action menu icon/text was blending into backgroun
 - Reader background not following amoled (@Jays2Kings)
 - new series orientation not being set as default (@Jays2Kings)
 - Attempt ??? to fix chapter infinite load

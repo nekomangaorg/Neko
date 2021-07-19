@@ -49,7 +49,7 @@
         <item name="preferenceTheme">@style/Neko.Preference</item>
 
         <!-- Custom Attributes-->
-        <item name="actionBarTintColor">?android:textColorPrimary</item>
+        <item name="actionBarTintColor">?attr/colorOnSurface</item>
         <item name="tabBarIconColor">?colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/status_bar</item>
