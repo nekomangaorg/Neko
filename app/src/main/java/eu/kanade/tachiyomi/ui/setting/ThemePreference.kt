@@ -212,7 +212,6 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
             val binding = ThemeItemBinding.bind(view)
 
-            @SuppressLint("InlinedApi")
             override fun bindView(item: ThemeItem, payloads: List<Any>) {
                 binding.themeNameText.setText(
                     if (item.isDarkTheme) {
@@ -234,7 +233,8 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     binding.themeSelected.alpha = if (themeMatchesApp) 1f else 0.5f
                     binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
                 }
-                if (item.theme.styleRes == R.style.Theme_Tachiyomi_Monet) {
+                if (item.theme.styleRes == R.style.Theme_Tachiyomi_Monet &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                     val nightMode = item.isDarkTheme
                     val appBar = context.contextCompatColor(
                         if (nightMode) android.R.color.system_neutral1_900
