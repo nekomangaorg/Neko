@@ -4,6 +4,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
@@ -58,10 +59,11 @@ internal class UpdaterNotifier(private val context: Context) {
             setSmallIcon(android.R.drawable.stat_sys_download_done)
             color = context.getResourceColor(R.attr.colorAccent)
             clearActions()
+            val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
             // Download action
             addAction(
                 android.R.drawable.stat_sys_download_done,
-                context.getString(R.string.download),
+                context.getString(if (isOnA12) R.string.update else R.string.download),
                 PendingIntent.getService(
                     context,
                     0,

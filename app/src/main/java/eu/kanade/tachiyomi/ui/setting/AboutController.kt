@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
@@ -193,10 +194,11 @@ class AboutController : SettingsController() {
         )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
+            val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
             return MaterialDialog(activity!!)
                 .title(R.string.new_version_available)
                 .message(text = args.getString(BODY_KEY) ?: "")
-                .positiveButton(R.string.download) {
+                .positiveButton(if (isOnA12) R.string.update else R.string.download) {
                     val appContext = applicationContext
                     if (appContext != null) {
                         // Start download
