@@ -13,6 +13,8 @@ import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -1478,9 +1480,11 @@ class MangaDetailsController :
                 rightMargin = defMargin
                 bottomMargin = defMargin + binding.recycler.paddingBottom
             }
-            val shortAnimationDuration = resources?.getInteger(
-                android.R.integer.config_shortAnimTime
-            ) ?: 0
+            val shortAnimationDuration = (
+                resources?.getInteger(
+                    android.R.integer.config_shortAnimTime
+                ) ?: 0
+                ).toLong()
 
             // TransitionSet for the full cover because using animation for this SUCKS
             val transitionSet = TransitionSet()
@@ -1488,7 +1492,7 @@ class MangaDetailsController :
             transitionSet.addTransition(bound)
             val changeImageTransform = ChangeImageTransform()
             transitionSet.addTransition(changeImageTransform)
-            transitionSet.duration = shortAnimationDuration.toLong()
+            transitionSet.duration = shortAnimationDuration
             TransitionManager.beginDelayedTransition(binding.frameLayout, transitionSet)
 
             // AnimationSet for backdrop because idk how to use TransitionSet
@@ -1496,7 +1500,18 @@ class MangaDetailsController :
                 play(
                     ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f, 0.5f)
                 )
-                duration = shortAnimationDuration.toLong()
+
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                    binding.swipeRefresh.setRenderEffect(
+                        RenderEffect.createBlurEffect(
+                            15f,
+                            15f,
+                            Shader.TileMode.MIRROR
+                        )
+                    )
+                }
+
+                duration = shortAnimationDuration
                 interpolator = DecelerateInterpolator()
                 addListener(
                     object : AnimatorListenerAdapter() {
@@ -1537,13 +1552,16 @@ class MangaDetailsController :
                 transitionSet2.addTransition(bound2)
                 val changeImageTransform2 = ChangeImageTransform()
                 transitionSet2.addTransition(changeImageTransform2)
-                transitionSet2.duration = shortAnimationDuration.toLong()
+                transitionSet2.duration = shortAnimationDuration
                 TransitionManager.beginDelayedTransition(binding.frameLayout, transitionSet2)
 
                 // Animation to remove backdrop and hide the full cover
                 currentAnimator = AnimatorSet().apply {
                     play(ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f))
-                    duration = shortAnimationDuration.toLong()
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                        binding.swipeRefresh.setRenderEffect(null)
+                    }
+                    duration = shortAnimationDuration
                     interpolator = DecelerateInterpolator()
 
                     if (!activity.isInNightMode()) {

@@ -27,6 +27,7 @@ import android.webkit.WebView
 import androidx.annotation.IdRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -81,6 +82,7 @@ import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
@@ -726,9 +728,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 if (overflowDialog != null) return false
                 val overflowDialog = OverflowDialog(this)
                 this.overflowDialog = overflowDialog
-                overflowDialog.setOnDismissListener {
-                    this.overflowDialog = null
-                }
+                overflowDialog.blurBehindWindow(
+                    window,
+                    onDismiss = {
+                        this.overflowDialog = null
+                    }
+                )
                 overflowDialog.show()
             }
             else -> return super.onOptionsItemSelected(item)

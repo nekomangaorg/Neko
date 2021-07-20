@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.app.Dialog
 import android.graphics.Color
+import android.os.Build
 import android.view.View
 import android.view.ViewGroup
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
@@ -25,7 +26,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
         setContentView(binding.root)
 
         binding.touchOutside.setOnClickListener {
-            dismiss()
+            cancel()
         }
         val incogText = context.getString(R.string.incognito_mode)
         with(binding.incognitoModeItem) {
@@ -83,7 +84,7 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
             window.decorView.fitsSystemWindows = true
             window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                 .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
                     .rem(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
             }

@@ -2,31 +2,42 @@
 
 package eu.kanade.tachiyomi.util.view
 
+import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.Dialog
+import android.content.DialogInterface
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.os.Build
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
+import android.view.Window
 import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
 import androidx.annotation.ColorRes
+import androidx.annotation.FloatRange
 import androidx.annotation.IdRes
 import androidx.annotation.Px
+import androidx.annotation.RequiresApi
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.forEach
+import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
 import androidx.recyclerview.widget.RecyclerView
@@ -416,4 +427,55 @@ inline fun View.popupMenu(
 
     popup.show()
     return popup
+}
+
+fun Dialog.blurBehindWindow(
+    window: Window?,
+    blurAmount: Float = 20f,
+    onShow: DialogInterface.OnShowListener? = null,
+    onDismiss: DialogInterface.OnDismissListener? = null,
+    onCancel: DialogInterface.OnCancelListener? = null
+) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        setOnShowListener {
+            onShow?.onShow(it)
+            window?.decorView?.animateBlur(1f, blurAmount, 50)?.start()
+        }
+        setOnDismissListener {
+            onDismiss?.onDismiss(it)
+            window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
+        }
+        setOnCancelListener {
+            onCancel?.onCancel(it)
+            window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
+        }
+    }
+}
+
+@RequiresApi(31)
+fun View.animateBlur(
+    @FloatRange(from = 0.1) from: Float,
+    @FloatRange(from = 0.1) to: Float,
+    duration: Long,
+    removeBlurAtEnd: Boolean = false
+): ValueAnimator {
+    return ValueAnimator.ofFloat(from, to).apply {
+        interpolator = FastOutLinearInInterpolator()
+        this.duration = duration
+        addUpdateListener { animator ->
+            val amount = animator.animatedValue as Float
+            try {
+                setRenderEffect(
+                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP)
+                )
+            } catch (_: Exception) {}
+        }
+        if (removeBlurAtEnd) {
+            addListener(
+                onEnd = {
+                    setRenderEffect(null)
+                }
+            )
+        }
+    }
 }
