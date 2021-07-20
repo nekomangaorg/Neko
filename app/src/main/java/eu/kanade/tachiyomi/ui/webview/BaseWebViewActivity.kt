@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.webview
 
+import android.app.assist.AssistContent
 import android.content.res.Configuration
 import android.graphics.Color
 import android.os.Build
@@ -11,6 +12,7 @@ import android.webkit.WebChromeClient
 import android.webkit.WebView
 import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.net.toUri
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
@@ -133,6 +135,11 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 binding.webview.restoreState(it)
             }
         }
+    }
+
+    override fun onProvideAssistContent(outContent: AssistContent?) {
+        super.onProvideAssistContent(outContent)
+        binding.webview.url?.let { outContent?.webUri = it.toUri() }
     }
 
     private fun refreshPage() {
