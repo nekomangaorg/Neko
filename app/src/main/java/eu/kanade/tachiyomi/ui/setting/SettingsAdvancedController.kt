@@ -33,6 +33,8 @@ import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.system.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.openInBrowser
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
@@ -81,6 +83,7 @@ class SettingsAdvancedController : SettingsController() {
                 CrashLogUtil(context).dumpLogs()
             }
         }
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
             if (pm != null) preference {
@@ -102,6 +105,17 @@ class SettingsAdvancedController : SettingsController() {
                 }
             }
         }
+
+        preference {
+            key = "pref_dont_kill_my_app"
+            title = "Don't kill my app!"
+            summaryRes = R.string.about_dont_kill_my_app
+
+            onClick {
+                openInBrowser("https://dontkillmyapp.com/")
+            }
+        }
+
         preferenceCategory {
             titleRes = R.string.data_management
             preference {
