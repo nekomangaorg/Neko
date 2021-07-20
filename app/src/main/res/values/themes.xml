@@ -121,6 +121,7 @@
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
 
+
     <style name="Theme.Tachiyomi.SapphireDusk" parent="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primarySapphire</item>
         <item name="colorAccent">@color/colorAccentSapphire</item>
@@ -135,6 +136,25 @@
         <item name="colorOnHopper">?attr/colorOnAccent</item>
 
     </style>
+
+    <!--== Tako Theme ==-->
+    <style name="Theme.Tachiyomi.Tako">
+        <item name="colorAccent">@color/accentTako</item>
+        <item name="colorOnAccent">@color/colorOnAccentTako</item>
+        <item name="colorPrimaryVariant">@color/surfaceTako</item>
+        <item name="tabBarIconColor">@color/colorOnTertiaryTako</item>
+        <item name="colorControlHighlight">@color/rippleColoredTako</item>
+        <item name="colorSecondary">@color/backgroundTako</item>
+        <item name="actionBarTintColor">@color/actionTintTako</item>
+        <item name="android:colorBackground">@color/backgroundTako</item>
+        <item name="colorAccentText">@color/colorAccentTextTako</item>
+        <item name="tabBarIconInactive">@color/inactiveTabTako</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnAccent</item>
+
+    </style>
+
 
     <style name="Theme.Tachiyomi.MangaDex">
         <item name="colorAccent">@color/colorAccentMangaDex</item>

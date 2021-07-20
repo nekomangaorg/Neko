@@ -24,6 +24,18 @@
     <color name="dialog">#292929</color>
     <color name="gray_button">#BFBFBF</color>
 
+    <!-- Tako Theme -->
+    <color name="accentTako">#F3B375</color>
+    <color name="colorOnAccentTako">#242431</color>
+    <color name="tertiaryTako">@color/colorOnAccentTako</color>
+    <color name="colorOnTertiaryTako">@color/accentTako</color>
+    <color name="rippleColoredTako">#1FF3B375</color>
+    <color name="surfaceTako">#2A2A3C</color>
+    <color name="backgroundTako">#21212E</color>
+    <color name="actionTintTako">#f4ece5</color>
+    <color name="inactiveTabTako">#C2f4ece5</color>
+    <color name="colorAccentTextTako">#f4d1af</color>
+
     <!-- Midnight Dusk Theme -->
     <color name="colorAccentDuskDawn">#F02475</color>
     <color name="colorAccentDuskDawnText">#f091b7</color>

@@ -136,6 +136,18 @@
     <color name="backgroundChocolateStrawberries">#1a1716</color>
     <color name="secondaryChocolateStrawberries">#211b19</color>
 
+    <!-- Tako Theme -->
+    <color name="accentTako">#66577E</color>
+    <color name="colorOnAccentTako">#F3B375</color>
+    <color name="tertiaryTako">@color/colorOnAccentTako</color>
+    <color name="colorOnTertiaryTako">#574360</color>
+    <color name="rippleColoredTako">#1F66577E</color>
+    <color name="surfaceTako">#F7F5FF</color>
+    <color name="backgroundTako">#F2EDF7</color>
+    <color name="actionTintTako">#221b28</color>
+    <color name="inactiveTabTako">#C2221b28</color>
+    <color name="colorAccentTextTako">#2b1f31</color>
+
     <!-- MangaDex Theme -->
     <color name="colorAccentMangaDex">#FF6740</color>
 
