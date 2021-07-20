@@ -1,6 +1,6 @@
 ---
 name: "\U0001F31F Feature request"
-about: Suggest a feature to improve Tachiyomi
+about: Suggest a feature to improve Neko
 title: ""
 labels: enhancement
 assignees: ''
