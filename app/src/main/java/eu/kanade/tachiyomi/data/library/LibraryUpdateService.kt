@@ -39,6 +39,7 @@ import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
@@ -579,14 +580,20 @@ class LibraryUpdateService(
     private fun writeErrorFile(errors: Map<Manga, String?>): File {
         try {
             if (errors.isNotEmpty()) {
-                val destFile = File(externalCacheDir, "neko_update_errors.txt")
-
-                destFile.bufferedWriter().use { out ->
-                    errors.forEach { (manga, error) ->
-                        out.write("${manga.title}: $error\n")
+                val file = createFileInCacheDir("neko_update_errors.txt")
+                file.bufferedWriter().use { out ->
+                    // Error file format:
+                    // ! Error
+                    //   # Source
+                    //     - Manga
+                    errors.toList().groupBy({ it.second }, { it.first }).forEach { (error, mangaList) ->
+                        out.write("! ${error}\n")
+                        mangaList.forEach {
+                                out.write("    - ${it.title}\n")
+                            }
                     }
                 }
-                return destFile
+                return file
             }
         } catch (e: Exception) {
             // Empty
