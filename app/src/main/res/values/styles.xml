@@ -201,6 +201,16 @@
         <item name="android:windowExitAnimation">@anim/fade_out_short</item>
     </style>
 
+    <style name="FullCoverDialogTheme" parent="BottomSheetDialogTheme">
+        <item name="android:windowAnimationStyle">@style/Theme.Widget.Animation.Static</item>
+    </style>
+
+    <style name="Theme.Widget.Animation.Static" parent="android:Animation">
+        <item name="android:windowEnterAnimation">@null</item>
+        <item name="android:windowExitAnimation">@null</item>
+        <item name="android:exitFadeDuration">0</item>
+    </style>
+
     <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/text_input_stroke</item>
         <item name="hintTextColor">?colorAccent</item>
@@ -239,6 +249,20 @@
     <!--==============-->
     <!--Widgets.Button-->
     <!--==============-->
+    <style name="Widget.Tachiyomi.Button.ActionButton" parent="Widget.MaterialComponents.Button.TextButton.Icon">
+        <item name="iconGravity">top</item>
+        <item name="iconTint">@color/button_action_selector</item>
+        <item name="iconPadding">4dp</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:textColor">@color/button_action_selector</item>
+        <item name="android:textSize">12sp</item>
+    </style>
+
+    <style name="Widget.Tachiyomi.Button.ActionButton.White">
+        <item name="iconTint">@color/md_white_1000</item>
+        <item name="android:textColor">@color/md_white_1000</item>
+    </style>
+
     <style name="Theme.Widget.Button" parent="Widget.AppCompat.Button" />
 
     <style name="Theme.Widget.Button.Colored" parent="Widget.MaterialComponents.Button">

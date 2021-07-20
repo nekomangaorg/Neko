@@ -1,9 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga
 
-import android.animation.Animator
-import android.animation.AnimatorListenerAdapter
-import android.animation.AnimatorSet
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
 import android.content.ClipData
@@ -12,9 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Color
-import android.graphics.Rect
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.os.Bundle
@@ -25,7 +18,6 @@ import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
-import android.view.animation.DecelerateInterpolator
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
@@ -36,10 +28,6 @@ import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import androidx.transition.ChangeBounds
-import androidx.transition.ChangeImageTransform
-import androidx.transition.TransitionManager
-import androidx.transition.TransitionSet
 import coil.Coil
 import coil.imageLoader
 import coil.request.ImageRequest
@@ -91,11 +79,9 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
-import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -180,9 +166,6 @@ class MangaDetailsController :
     private var adapter: MangaDetailsAdapter? = null
 
     private var actionMode: ActionMode? = null
-
-    // Hold a reference to the current animator, so that it can be canceled mid-way.
-    private var currentAnimator: Animator? = null
 
     var headerHeight = 0
     var fullCoverActive = false
@@ -522,14 +505,6 @@ class MangaDetailsController :
             activityBinding?.root?.clearFocus()
         }
     }
-
-    override fun handleBack(): Boolean {
-        if (binding.mangaCoverFull.visibility == View.VISIBLE) {
-            binding.mangaCoverFull.performClick()
-            return true
-        }
-        return super.handleBack()
-    }
     //endregion
 
     fun isNotOnline(showSnackbar: Boolean = true): Boolean {
@@ -832,15 +807,6 @@ class MangaDetailsController :
 
     //region action bar menu methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (fullCoverActive) {
-            colorToolbar(isColor = false)
-            activityBinding?.toolbar?.navigationIcon =
-                view?.context?.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
-                    setTint(Color.WHITE)
-                }
-            inflater.inflate(R.menu.manga_details_cover, menu)
-            return
-        }
         colorToolbar(binding.recycler.canScrollVertically(-1))
         activityBinding?.toolbar?.navigationIcon =
             activityBinding?.toolbar?.navigationIcon?.mutate()?.apply {
@@ -903,34 +869,36 @@ class MangaDetailsController :
             R.id.download_next, R.id.download_next_5, R.id.download_next_10, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
                 item.itemId
             )
-            R.id.save -> {
-                if (presenter.saveCover()) {
-                    activity?.toast(R.string.cover_saved)
-                } else {
-                    activity?.toast(R.string.error_saving_cover)
-                }
-            }
-            R.id.share -> {
-                val cover = presenter.shareCover()
-                if (cover != null) {
-                    val stream = cover.getUriCompat(activity!!)
-                    val intent = Intent(Intent.ACTION_SEND).apply {
-                        putExtra(Intent.EXTRA_STREAM, stream)
-                        flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-                        clipData = ClipData.newRawUri(null, stream)
-                        type = "image/*"
-                    }
-                    startActivity(Intent.createChooser(intent, activity?.getString(R.string.share)))
-                } else {
-                    activity?.toast(R.string.error_sharing_cover)
-                }
-            }
             else -> return super.onOptionsItemSelected(item)
         }
         return true
     }
     //endregion
+
+    fun saveCover() {
+        if (presenter.saveCover()) {
+            activity?.toast(R.string.cover_saved)
+        } else {
+            activity?.toast(R.string.error_saving_cover)
+        }
+    }
+
+    fun shareCover() {
+        val cover = presenter.shareCover()
+        if (cover != null) {
+            val stream = cover.getUriCompat(activity!!)
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                putExtra(Intent.EXTRA_STREAM, stream)
+                        flags =
+                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                clipData = ClipData.newRawUri(null, stream)
+                type = "image/*"
+            }
+            startActivity(Intent.createChooser(intent, activity?.getString(R.string.share)))
+        } else {
+            activity?.toast(R.string.error_sharing_cover)
+        }
+    }
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
@@ -1423,185 +1391,22 @@ class MangaDetailsController :
     }
 
     override fun zoomImageFromThumb(thumbView: View) {
-        // If there's an animation in progress, cancel it immediately and proceed with this one.
-        currentAnimator?.cancel()
-
-        // Load the high-resolution "zoomed-in" image.
-        val expandedImageView = binding.mangaCoverFull
-        val fullBackdrop = binding.fullBackdrop
-
-        // Hide the thumbnail and show the zoomed-in view. When the animation
-        // begins, it will position the zoomed-in view in the place of the
-        // thumbnail.
-        thumbView.alpha = 0f
-        expandedImageView.visibility = View.VISIBLE
-        fullBackdrop.visibility = View.VISIBLE
-
-        // Set the pivot point to 0 to match thumbnail
-
-        binding.swipeRefresh.isEnabled = false
-
-        val rect = Rect()
-        thumbView.getGlobalVisibleRect(rect)
-        expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            height = thumbView.height
-            width = thumbView.width
-            topMargin = rect.top
-            leftMargin = rect.left
-            rightMargin = rect.right
-            bottomMargin = rect.bottom
-        }
-        expandedImageView.requestLayout()
-
-        val activity = activity as? MainActivity ?: return
-        val currColor = activity.drawerArrow?.color
-        if (!activity.isInNightMode()) {
-            activityBinding?.appBar?.context?.setTheme(R.style.ThemeOverlay_AppCompat_Dark_ActionBar)
-
-            val iconPrimary = Color.WHITE
-            activityBinding?.toolbar?.setTitleTextColor(iconPrimary)
-            activity.drawerArrow?.color = iconPrimary
-            activityBinding?.toolbar?.overflowIcon?.setTint(iconPrimary)
-            activity.window.decorView.systemUiVisibility =
-                activity.window.decorView.systemUiVisibility.rem(
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                )
-        }
+        if (fullCoverActive) return
         fullCoverActive = true
-        activity.invalidateOptionsMenu()
-
-        expandedImageView.post {
-            val defMargin = 16.dpToPx
-            expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                height = ViewGroup.LayoutParams.MATCH_PARENT
-                width = ViewGroup.LayoutParams.MATCH_PARENT
-                topMargin = defMargin + headerHeight
-                leftMargin = defMargin
-                rightMargin = defMargin
-                bottomMargin = defMargin + binding.recycler.paddingBottom
-            }
-            val shortAnimationDuration = (
-                resources?.getInteger(
-                    android.R.integer.config_shortAnimTime
-                ) ?: 0
-                ).toLong()
-
-            // TransitionSet for the full cover because using animation for this SUCKS
-            val transitionSet = TransitionSet()
-            val bound = ChangeBounds()
-            transitionSet.addTransition(bound)
-            val changeImageTransform = ChangeImageTransform()
-            transitionSet.addTransition(changeImageTransform)
-            transitionSet.duration = shortAnimationDuration
-            TransitionManager.beginDelayedTransition(binding.frameLayout, transitionSet)
-
-            // AnimationSet for backdrop because idk how to use TransitionSet
-            currentAnimator = AnimatorSet().apply {
-                play(
-                    ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f, 0.5f)
-                )
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    binding.swipeRefresh.setRenderEffect(
-                        RenderEffect.createBlurEffect(
-                            15f,
-                            15f,
-                            Shader.TileMode.MIRROR
-                        )
-                    )
-                }
-
-                duration = shortAnimationDuration
-                interpolator = DecelerateInterpolator()
-                addListener(
-                    object : AnimatorListenerAdapter() {
-
-                        override fun onAnimationEnd(animation: Animator) {
-                            TransitionManager.endTransitions(binding.frameLayout)
-                            currentAnimator = null
-                        }
-
-                        override fun onAnimationCancel(animation: Animator) {
-                            TransitionManager.endTransitions(binding.frameLayout)
-                            currentAnimator = null
-                        }
-                    }
-                )
-                start()
-            }
-
-            expandedImageView.setOnClickListener {
-                currentAnimator?.cancel()
-
-                fullCoverActive = false
-                activity.invalidateOptionsMenu()
-                val rect2 = Rect()
-                thumbView.getGlobalVisibleRect(rect2)
-                expandedImageView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    height = thumbView.height
-                    width = thumbView.width
-                    topMargin = rect2.top
-                    leftMargin = rect2.left
-                    rightMargin = rect2.right
-                    bottomMargin = rect2.bottom
-                }
-
-                // Zoom out back to tc thumbnail
-                val transitionSet2 = TransitionSet()
-                val bound2 = ChangeBounds()
-                transitionSet2.addTransition(bound2)
-                val changeImageTransform2 = ChangeImageTransform()
-                transitionSet2.addTransition(changeImageTransform2)
-                transitionSet2.duration = shortAnimationDuration
-                TransitionManager.beginDelayedTransition(binding.frameLayout, transitionSet2)
-
-                // Animation to remove backdrop and hide the full cover
-                currentAnimator = AnimatorSet().apply {
-                    play(ObjectAnimator.ofFloat(fullBackdrop, View.ALPHA, 0f))
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                        binding.swipeRefresh.setRenderEffect(null)
-                    }
-                    duration = shortAnimationDuration
-                    interpolator = DecelerateInterpolator()
-
-                    if (!activity.isInNightMode()) {
-                        activityBinding?.appBar?.context?.setTheme(
-                            activity.getPrefTheme(presenter.preferences).styleRes
-                        )
-
-                        val iconPrimary = currColor ?: Color.WHITE
-                        activityBinding?.toolbar?.setTitleTextColor(iconPrimary)
-                        activity.drawerArrow?.color = iconPrimary
-                        activityBinding?.toolbar?.overflowIcon?.setTint(iconPrimary)
-                        activity.window.decorView.systemUiVisibility =
-                            activity.window.decorView.systemUiVisibility.or(
-                                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                            )
-                    }
-                    addListener(
-                        object : AnimatorListenerAdapter() {
-
-                            override fun onAnimationEnd(animation: Animator) {
-                                thumbView.alpha = 1f
-                                expandedImageView.visibility = View.GONE
-                                fullBackdrop.visibility = View.GONE
-                                binding.swipeRefresh.isEnabled = true
-                                currentAnimator = null
-                            }
-
-                            override fun onAnimationCancel(animation: Animator) {
-                                thumbView.alpha = 1f
-                                expandedImageView.visibility = View.GONE
-                                fullBackdrop.visibility = View.GONE
-                                binding.swipeRefresh.isEnabled = true
-                                currentAnimator = null
-                            }
-                        }
-                    )
-                    start()
-                }
-            }
+        val expandedImageView = binding.mangaCoverFull
+        val fullCoverDialog = FullCoverDialog(
+            this,
+            expandedImageView.drawable,
+            thumbView
+        )
+        fullCoverDialog.setOnDismissListener {
+            fullCoverActive = false
         }
+        fullCoverDialog.setOnCancelListener {
+            fullCoverActive = false
+        }
+        fullCoverDialog.show()
+        return
     }
 
     companion object {
