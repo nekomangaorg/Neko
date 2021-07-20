@@ -17,7 +17,7 @@ class UpdaterBroadcast : BroadcastReceiver() {
             when (val status = extras.getInt(PackageInstaller.EXTRA_STATUS)) {
                 PackageInstaller.STATUS_PENDING_USER_ACTION -> {
                     val confirmIntent = extras[Intent.EXTRA_INTENT] as? Intent
-                    context.startActivity(confirmIntent)
+                    context.startActivity(confirmIntent?.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK))
                 }
                 PackageInstaller.STATUS_SUCCESS -> {
                     val prefs = PreferenceManager.getDefaultSharedPreferences(context)

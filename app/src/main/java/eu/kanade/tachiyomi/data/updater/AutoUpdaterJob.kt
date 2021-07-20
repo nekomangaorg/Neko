@@ -4,6 +4,7 @@ import android.app.ActivityManager
 import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
 import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
 import android.content.Context
+import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -24,6 +25,12 @@ class AutoUpdaterJob(private val context: Context, workerParams: WorkerParameter
 
     override suspend fun doWork(): Result = coroutineScope {
         try {
+            if (
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
+                !context.packageManager.canRequestPackageInstalls()
+            ) {
+                return@coroutineScope Result.failure()
+            }
             val result = UpdateChecker.getUpdateChecker().checkForUpdate()
             if (result is UpdateResult.NewUpdate<*> && !UpdaterService.isRunning()) {
                 UpdaterNotifier(context).cancel()
