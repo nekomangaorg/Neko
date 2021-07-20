@@ -282,7 +282,7 @@ dependencies {
     implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.12")
 
 
-    implementation("com.mikepenz:aboutlibraries:8.9.0")
+    implementation("com.mikepenz:aboutlibraries:8.9.1")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
