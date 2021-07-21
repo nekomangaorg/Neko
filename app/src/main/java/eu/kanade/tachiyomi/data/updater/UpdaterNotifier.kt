@@ -82,7 +82,10 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_new_releases_24dp,
                 context.getString(R.string.release_page),
-                PendingIntent.getActivity(context, releaseUrl.hashCode(), releaseIntent, PendingIntent.FLAG_UPDATE_CURRENT)
+                PendingIntent.getActivity(context,
+                    releaseUrl.hashCode(),
+                    releaseIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT)
             )
         }
     }
@@ -150,7 +153,8 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_INSTALL)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context,
+                    Notifications.ID_INSTALL)
             )
             addReleasePageAction()
         }
@@ -163,9 +167,9 @@ internal class UpdaterNotifier(private val context: Context) {
      * @param uri path location of apk.
      */
     fun onInstallFinished() {
-        with(NotificationCompat.Builder(context, Notifications.CHANNEL_UPDATED)) {
+        with(NotificationCompat.Builder(context, Notifications.Channel.Updated)) {
             setContentTitle(context.getString(R.string.updated_to_, BuildConfig.VERSION_NAME))
-            setSmallIcon(R.drawable.ic_tachij2k)
+            setSmallIcon(R.drawable.ic_neko_notification)
             setAutoCancel(true)
             setOngoing(false)
             setProgress(0, 0, false)
@@ -178,7 +182,7 @@ internal class UpdaterNotifier(private val context: Context) {
             setContentIntent(pendingIntent)
             clearActions()
             addReleasePageAction()
-            show(Notifications.ID_INSTALLED)
+            show(Notifications.Id.Updated.Installed)
         }
     }
 
@@ -206,7 +210,8 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context,
+                    Notifications.ID_UPDATER)
             )
             addReleasePageAction()
         }
@@ -232,7 +237,8 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.dismissNotificationPendingBroadcast(context, Notifications.ID_UPDATER)
+                NotificationReceiver.dismissNotificationPendingBroadcast(context,
+                    Notifications.ID_UPDATER)
             )
             addReleasePageAction()
         }

@@ -1267,7 +1267,7 @@ class ReaderActivity :
     override fun onProvideAssistContent(outContent: AssistContent) {
         super.onProvideAssistContent(outContent)
         val manga = presenter.manga ?: return
-        val source = presenter.source as? HttpSource ?: return
+        val source = presenter.source ?: return
         val url = try {
             source.mangaDetailsRequest(manga).url.toString()
         } catch (e: Exception) {

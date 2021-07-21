@@ -8,8 +8,9 @@ import android.content.pm.PackageInstaller
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
-import com.elvishew.xlog.XLog
 import androidx.core.content.edit
+import androidx.preference.PreferenceManager
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -192,7 +193,10 @@ class UpdaterService : Service() {
                 .putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
                 .putExtra(EXTRA_FILE_URI, file.getUriCompat(this).toString())
 
-            val pendingIntent = PendingIntent.getBroadcast(this, -10053, newIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+            val pendingIntent = PendingIntent.getBroadcast(this,
+                -10053,
+                newIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             data.close()
@@ -207,10 +211,13 @@ class UpdaterService : Service() {
 
         const val PACKAGE_INSTALLED_ACTION =
             "${BuildConfig.APPLICATION_ID}.SESSION_SELF_API_PACKAGE_INSTALLED"
-        internal const val EXTRA_NOTIFY_ON_INSTALL = "${BuildConfig.APPLICATION_ID}.UpdaterService.ACTION_ON_INSTALL"
-        internal const val EXTRA_DOWNLOAD_URL = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
+        internal const val EXTRA_NOTIFY_ON_INSTALL =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.ACTION_ON_INSTALL"
+        internal const val EXTRA_DOWNLOAD_URL =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_URL"
         internal const val EXTRA_FILE_URI = "${BuildConfig.APPLICATION_ID}.UpdaterService.FILE_URI"
-        internal const val EXTRA_DOWNLOAD_TITLE = "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
+        internal const val EXTRA_DOWNLOAD_TITLE =
+            "${BuildConfig.APPLICATION_ID}.UpdaterService.DOWNLOAD_TITLE"
 
         internal const val NOTIFY_ON_INSTALL_KEY = "notify_on_install_complete"
 
@@ -260,7 +267,11 @@ class UpdaterService : Service() {
          * @param url the url to the new update.
          * @return [PendingIntent]
          */
-        internal fun downloadApkPendingService(context: Context, url: String, notifyOnInstall: Boolean = false): PendingIntent {
+        internal fun downloadApkPendingService(
+            context: Context,
+            url: String,
+            notifyOnInstall: Boolean = false,
+        ): PendingIntent {
             val intent = Intent(context, UpdaterService::class.java).apply {
                 putExtra(EXTRA_DOWNLOAD_URL, url)
                 putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)

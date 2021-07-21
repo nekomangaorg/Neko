@@ -33,7 +33,7 @@ object Notifications {
         }
 
         object Updated {
-            const val installed = -6
+            const val Installed = -6
         }
     }
 
@@ -170,13 +170,13 @@ object Notifications {
                 setShowBadge(false)
                 setSound(null, null)
             },
-                    NotificationChannel(
-                        Channel.Updated,
-                        context.getString(R.string.update_completed),
-                        NotificationManager.IMPORTANCE_DEFAULT
-                    ).apply {
-                        setShowBadge(false)
-                    },
+            NotificationChannel(
+                Channel.Updated,
+                context.getString(R.string.update_completed),
+                NotificationManager.IMPORTANCE_DEFAULT
+            ).apply {
+                setShowBadge(false)
+            },
 
             NotificationChannel(
                 CHANNEL_BACKUP_RESTORE_ERROR,
