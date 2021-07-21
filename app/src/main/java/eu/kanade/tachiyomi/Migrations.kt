@@ -36,13 +36,13 @@ object Migrations {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
             if (oldVersion < 38) {
                 if (preferences.automaticUpdates()) {
-                    UpdaterJob.setupTask()
+                    UpdaterJob.setupTask(context)
                 }
             }
             if (oldVersion < 39) {
                 // Restore jobs after migrating from Evernote's job scheduler to WorkManager.
                 if (BuildConfig.INCLUDE_UPDATER && preferences.automaticUpdates()) {
-                    UpdaterJob.setupTask()
+                    UpdaterJob.setupTask(context)
                 }
             }
             if (oldVersion < 53) {
