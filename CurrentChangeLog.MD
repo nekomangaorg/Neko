@@ -13,12 +13,14 @@
 - tweak to genre chip ui (with help from @Jays2Kings)
 ## 🐜 Fixes
 - Latest view was missing manga, and showing out of order
+- Chapters with no group were causing issues with filtering scanlators
 - Merge search results were not clearing on new search
-- Light themes action menu icon/text was blending into backgroun
-- Reader background not following amoled (@Jays2Kings)
-- new series orientation not being set as default (@Jays2Kings)
+- Light themes action menu icon/text was blending into background
 - Attempt ??? to fix chapter infinite load
 - Invalid download location notification showing in some cases
+- One shot manga tracking was throwing 400 error (@Jays2Kings)
+- Reader background not following amoled (@Jays2Kings)
+- new series orientation not being set as default (@Jays2Kings)
 - General bug fixes from Upstream (@Jays2Kings)
 ## 🛠️ Other
 - Remove tags library and switch to Material Chips

@@ -5,6 +5,7 @@ import android.view.Menu
 import android.view.MenuInflater
 import android.view.View
 import androidx.core.view.isVisible
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
 
@@ -14,6 +15,10 @@ class LatestSourceController(bundle: Bundle) : BrowseSourceController(bundle) {
             putBoolean(APPLY_INSET, false)
         }
     )
+
+    override fun getTitle(): String? {
+        return view?.context?.getString(R.string.latest)
+    }
 
     override fun createPresenter(): BrowseSourcePresenter {
         return LatestSourcePresenter()
