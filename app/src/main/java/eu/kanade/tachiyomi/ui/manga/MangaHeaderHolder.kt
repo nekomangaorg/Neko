@@ -2,14 +2,18 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Color
 import android.view.LayoutInflater
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
 import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.request.CachePolicy
@@ -133,10 +137,11 @@ class MangaHeaderHolder(
                 true
             }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                backdrop.alpha = 0.2f
                 backdrop.setRenderEffect(
                     RenderEffect.createBlurEffect(
-                        10f,
-                        10f,
+                        20f,
+                        20f,
                         Shader.TileMode.MIRROR
                     )
                 )
@@ -466,6 +471,21 @@ class MangaHeaderHolder(
                 error(drawable)
                 if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
                 diskCachePolicy(CachePolicy.READ_ONLY)
+                target(
+                    onSuccess = {
+                        val bitmap = (it as? BitmapDrawable)?.bitmap
+                        if (bitmap == null) {
+                            binding.backdrop.setImageDrawable(it)
+                            return@target
+                        }
+                        val yOffset = (bitmap.height / 2 * 0.33).toInt()
+
+                        binding.backdrop.setImageDrawable(
+                            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height - yOffset)
+                                .toDrawable(itemView.resources)
+                        )
+                    }
+                )
             }
         )
     }
