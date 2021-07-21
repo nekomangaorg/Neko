@@ -669,7 +669,7 @@
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restore_duration">%02d min, %02d sec</string>
-    <string name="restore_miui_warning">MIUI Optimization must be enabled for restore to work correctly.</string>
+    <string name="restore_miui_warning">Backup/restore may not function properly if MIUI Optimization is disabled.</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>
     <plurals name="restore_completed_message">

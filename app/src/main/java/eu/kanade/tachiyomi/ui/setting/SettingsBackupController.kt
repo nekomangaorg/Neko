@@ -52,7 +52,19 @@ class SettingsBackupController : SettingsController() {
             titleRes = R.string.create_backup
             summaryRes = R.string.can_be_used_to_restore
 
-            onClick { backup(context, BackupConst.BACKUP_TYPE_FULL) }
+            onClick {
+                if (MiuiUtil.isMiui() && MiuiUtil.isMiuiOptimizationDisabled()) {
+                    context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
+                }
+
+                if (!BackupCreateService.isRunning(context)) {
+                    val ctrl = CreateBackupDialog()
+                    ctrl.targetController = this@SettingsBackupController
+                    ctrl.showDialog(router)
+                } else {
+                    context.toast(R.string.backup_in_progress)
+                }
+                backup(context, BackupConst.BACKUP_TYPE_FULL) }
         }
 
         preference {
@@ -63,7 +75,6 @@ class SettingsBackupController : SettingsController() {
             onClick {
                 if (MiuiUtil.isMiui() && MiuiUtil.isMiuiOptimizationDisabled()) {
                     context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
-                    return@onClick
                 }
 
                 if (!BackupRestoreService.isRunning(context)) {
