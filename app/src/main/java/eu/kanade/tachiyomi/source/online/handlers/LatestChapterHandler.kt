@@ -43,16 +43,18 @@ class LatestChapterHandler {
 
         val chapterListDto = response.body()!!
 
-        val mangaIds = chapterListDto.results.map { it.relationships }.flatten()
-            .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct()
+        val mangaIds = chapterListDto.results.asSequence().map { it.relationships }.flatten()
+            .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct().toList()
 
         val queryParamters = mutableMapOf("ids[]" to mangaIds, "limit" to mangaIds.size)
 
-        val mangaListResponse = service.search(ProxyRetrofitQueryMap(queryParamters))
+        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParamters))
 
         val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
 
-        val mangaList = mangaListResponse.body()!!.results.map {
+        val mangaDtoMap = mangaListDto.body()!!.results.associateBy({ it.data.id }, { it })
+
+        val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }.map {
             it.toBasicManga()
         }
 
