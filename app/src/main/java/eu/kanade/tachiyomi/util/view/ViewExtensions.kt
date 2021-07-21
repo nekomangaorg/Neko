@@ -436,17 +436,21 @@ fun Dialog.blurBehindWindow(
     onDismiss: DialogInterface.OnDismissListener? = null,
     onCancel: DialogInterface.OnCancelListener? = null
 ) {
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-        setOnShowListener {
-            onShow?.onShow(it)
+    setOnShowListener {
+        onShow?.onShow(it)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(1f, blurAmount, 50)?.start()
         }
-        setOnDismissListener {
-            onDismiss?.onDismiss(it)
+    }
+    setOnDismissListener {
+        onDismiss?.onDismiss(it)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
         }
-        setOnCancelListener {
-            onCancel?.onCancel(it)
+    }
+    setOnCancelListener {
+        onCancel?.onCancel(it)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
         }
     }
