@@ -630,7 +630,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         super.onProvideAssistContent(outContent)
         when (val controller = router.backstack.lastOrNull()?.controller) {
             is MangaDetailsController -> {
-                val source = controller.presenter.source as? HttpSource ?: return
+                val source = controller.presenter.source
                 val url = try {
                     source.mangaDetailsRequest(controller.presenter.manga).url.toString()
                 } catch (e: Exception) {
@@ -639,7 +639,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 outContent.webUri = Uri.parse(url)
             }
             is BrowseSourceController -> {
-                val source = controller.presenter.source as? HttpSource ?: return
+                val source = controller.presenter.source
                 outContent.webUri = Uri.parse(source.baseUrl)
             }
         }

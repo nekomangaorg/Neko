@@ -11,9 +11,13 @@
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="android:layoutDirection">ltr</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/colorPrimary</item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/anim_tachij2k_splash</item>
-        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">775</item>
+        <!--     <item name="android:windowSplashScreenBackground" tools:targetApi="31">
+                 @color/splash_background
+             </item>
+             <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">
+                 @drawable/anim_tachij2k_splash
+                 <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">775</item>
+             </item>-->
         <item name="colorPrimary">@color/app_color_primary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
@@ -138,7 +142,6 @@
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
         <item name="colorOnHopper">?attr/colorOnAccent</item>
     </style>
-    <style name="Theme.Tachiyomi.Monet"/>
 
     <style name="Theme.Tachiyomi.Monet" />
 
