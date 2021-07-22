@@ -95,9 +95,11 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="12dp"
-                android:layout_marginStart="12dp"
-                android:background="@color/background"
-                android:layout_marginEnd="12dp"
+                android:layout_marginStart="16dp"
+                android:textColor="?attr/colorOnUnreadBadge"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                android:layout_marginEnd="16dp"
                 android:textAlignment="center"
                 android:text="@string/filter_groups" />
 
