@@ -102,7 +102,7 @@ class MangaDetailsPresenter(
     private val trackManager: TrackManager by injectLazy()
 
     private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
-    
+
     var tracks = emptyList<Track>()
 
     var trackList: List<TrackItem> = emptyList()
@@ -141,10 +141,10 @@ class MangaDetailsPresenter(
             refreshAll()
         } else {
             runBlocking {
-                getChapters()
                 manga.scanlator_filter?.let {
                     filteredScanlators = MdUtil.getScanlators(it).toSet()
                 }
+                getChapters()
             }
             controller.updateChapters(this.chapters)
         }
@@ -214,6 +214,7 @@ class MangaDetailsPresenter(
         } else {
             manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
         }
+        db.insertManga(manga).executeAsBlocking()
         asyncUpdateMangaAndChapters()
     }
 
