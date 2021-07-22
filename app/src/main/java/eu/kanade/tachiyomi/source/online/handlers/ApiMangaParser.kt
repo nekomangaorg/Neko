@@ -243,7 +243,11 @@ class ApiMangaParser {
             scanlatorName.remove("no group")
             scanlatorName.add("No Group")
         }
-        
+        /* if (scanlatorName.isEmpty()) {
+             scanlatorName.add("No Group")
+         }*/
+
+
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 
         chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)

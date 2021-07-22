@@ -889,8 +889,8 @@ class MangaDetailsController :
             val stream = cover.getUriCompat(activity!!)
             val intent = Intent(Intent.ACTION_SEND).apply {
                 putExtra(Intent.EXTRA_STREAM, stream)
-                        flags =
-                            Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                flags =
+                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
                 clipData = ClipData.newRawUri(null, stream)
                 type = "image/*"
             }
@@ -1362,6 +1362,10 @@ class MangaDetailsController :
         adapter?.mode = SelectableAdapter.Mode.IDLE
         adapter?.clearSelection()
         return
+    }
+
+    fun updatingScanlatorFilters() {
+        activity?.toast("New Scanlators added, adding them to scanlator filter, if enabled")
     }
 
     private fun viewComments(chapter: ChapterItem) {

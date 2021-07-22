@@ -42,17 +42,18 @@ import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.SetTrackReadingDatesDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.addNewScanlatorsToFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.getNewScanlatorsConditionalResetFilter
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -79,7 +80,7 @@ class MangaDetailsPresenter(
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
-    private val chapterFilter: ChapterFilter = Injekt.get(),
+    chapterFilter: ChapterFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
 ) : DownloadQueue.DownloadListener, LibraryServiceListener {
@@ -524,14 +525,8 @@ class MangaDetailsPresenter(
                     }
                     mangaShortcutManager.updateShortcuts()
 
-                    val allChaps = db.getChapters(manga).executeOnIO()
                     launch {
-                        manga.getNewScanlatorsConditionalResetFilter(
-                            db,
-                            originalChapters,
-                            newChapters.first
-                        )
-                        updateScanlators(allChaps.map { it.toModel() })
+                        checkIfShouldUpdateScanlatorFilters(originalChapters, newChapters.first)
                     }
                 }
                 if (newChapters.second.isNotEmpty()) {
@@ -577,6 +572,26 @@ class MangaDetailsPresenter(
                     }
                 }
             }
+        }
+    }
+
+    suspend fun checkIfShouldUpdateScanlatorFilters(
+        originalChapters: List<Chapter>,
+        newChapters: List<Chapter>,
+    ) {
+        val newScanlators = manga.addNewScanlatorsToFilter(
+            db,
+            originalChapters,
+            newChapters
+        )
+        if (newScanlators.isNotEmpty()) {
+            filteredScanlators = filteredScanlators + newScanlators
+            launchUI {
+                controller.updatingScanlatorFilters()
+            }
+            val allChaps = db.getChapters(manga).executeOnIO()
+
+            updateScanlators(allChaps.map { it.toModel() })
         }
     }
 

@@ -7,12 +7,13 @@
   - Added bluring to some background items
   - Recents Url sharing
   - App will be able to auto install after download  and install silently in background if enabled
-  - 
 - Change sorting of recommended manga, add mal/anilist recommendations at the bottom (@goldbattle)
 ## 🏗️ Changes
+- When a new scanlator for a manga is added, scanlator filter now updates and adds so it's not mistakenly hidden
 - tweak to genre chip ui (with help from @Jays2Kings)
 ## 🐜 Fixes
 - Latest view was missing manga, and showing out of order
+- Setting a scanlator filter, was not being saved
 - Chapters with no group were causing issues with filtering scanlators
 - Merge search results were not clearing on new search
 - Light themes action menu icon/text was blending into background
