@@ -108,7 +108,7 @@ dependencies {
     // Source models and interfaces from Tachiyomi 1.x
     implementation("tachiyomi.sourceapi:source-api:1.1")
     // Android support library
-    implementation("androidx.appcompat:appcompat:1.3.0")
+    implementation("androidx.appcompat:appcompat:1.3.1")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
