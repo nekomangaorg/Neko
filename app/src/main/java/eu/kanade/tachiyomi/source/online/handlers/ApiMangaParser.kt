@@ -239,11 +239,11 @@ class ApiMangaParser {
             networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
                 .mapNotNull { groups[it.id] }.toMutableSet()
 
-        if (scanlatorName.isEmpty()) {
+        if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {
+            scanlatorName.remove("no group")
             scanlatorName.add("No Group")
         }
-
-
+        
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 
         chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
