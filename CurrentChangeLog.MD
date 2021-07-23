@@ -23,6 +23,7 @@
 - One shot manga tracking was throwing 400 error (@Jays2Kings)
 - Reader background not following amoled (@Jays2Kings)
 - new series orientation not being set as default (@Jays2Kings)
+- optimized pure black themes (@Jays2Kings)
 - General bug fixes from Upstream (@Jays2Kings)
 ## 🛠️ Other
 - Remove tags library and switch to Material Chips
