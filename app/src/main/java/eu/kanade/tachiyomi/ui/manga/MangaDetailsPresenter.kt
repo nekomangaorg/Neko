@@ -526,7 +526,9 @@ class MangaDetailsPresenter(
                     mangaShortcutManager.updateShortcuts()
 
                     launch {
-                        checkIfShouldUpdateScanlatorFilters(originalChapters, newChapters.first)
+                        checkIfShouldUpdateScanlatorFilters(originalChapters,
+                            newChapters.first,
+                            mangaWasInitalized)
                     }
                 }
                 if (newChapters.second.isNotEmpty()) {
@@ -578,20 +580,23 @@ class MangaDetailsPresenter(
     suspend fun checkIfShouldUpdateScanlatorFilters(
         originalChapters: List<Chapter>,
         newChapters: List<Chapter>,
+        mangaWasInitialized: Boolean,
     ) {
-        val newScanlators = manga.addNewScanlatorsToFilter(
-            db,
-            originalChapters,
-            newChapters
-        )
-        if (newScanlators.isNotEmpty()) {
-            filteredScanlators = filteredScanlators + newScanlators
-            launchUI {
-                controller.updatingScanlatorFilters()
-            }
-            val allChaps = db.getChapters(manga).executeOnIO()
+        if (mangaWasInitialized) {
+            val newScanlators = manga.addNewScanlatorsToFilter(
+                db,
+                originalChapters,
+                newChapters
+            )
+            if (newScanlators.isNotEmpty()) {
+                filteredScanlators = filteredScanlators + newScanlators
+                launchUI {
+                    controller.updatingScanlatorFilters()
+                }
+                val allChaps = db.getChapters(manga).executeOnIO()
 
-            updateScanlators(allChaps.map { it.toModel() })
+                updateScanlators(allChaps.map { it.toModel() })
+            }
         }
     }
 
