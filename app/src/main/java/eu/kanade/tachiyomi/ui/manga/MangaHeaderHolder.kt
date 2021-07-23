@@ -1,12 +1,23 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.annotation.SuppressLint
+import android.content.res.ColorStateList
+import android.graphics.Bitmap
+import android.graphics.Color
+import android.view.LayoutInflater
+import android.graphics.RenderEffect
+import android.graphics.Shader
+import android.graphics.drawable.BitmapDrawable
+import android.os.Build
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.toDrawable
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.request.CachePolicy
+import com.google.android.material.chip.Chip
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
@@ -20,8 +31,10 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.create
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import java.util.Locale
@@ -99,9 +112,7 @@ class MangaHeaderHolder(
                 moreBgGradient.rotation = 180f
             }
             lessButton.setOnClickListener { collapseDesc() }
-            mangaGenresTags.setOnTagClickListener {
-                adapter.delegate.tagClicked(it)
-            }
+
             webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
             similarButton.setOnClickListener { adapter.delegate.openSimilar() }
             mergeButton.setOnClickListener { adapter.delegate.openMerge() }
@@ -124,6 +135,16 @@ class MangaHeaderHolder(
                     R.string.author
                 )
                 true
+            }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                backdrop.alpha = 0.2f
+                backdrop.setRenderEffect(
+                    RenderEffect.createBlurEffect(
+                        20f,
+                        20f,
+                        Shader.TileMode.MIRROR
+                    )
+                )
             }
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
@@ -192,10 +213,8 @@ class MangaHeaderHolder(
         }
         binding.title.text = manga.title
 
-        if (manga.genre.isNullOrBlank().not()) binding.mangaGenresTags.setTags(
-            manga.genre?.split(",")?.map(String::trim)
-        )
-        else binding.mangaGenresTags.setTags(emptyList())
+        setGenreTags(binding, manga)
+
 
         if (manga.author == manga.artist || manga.artist.isNullOrBlank()) {
             binding.mangaAuthor.text = manga.author?.trim()
@@ -342,6 +361,62 @@ class MangaHeaderHolder(
         updateCover(manga)
     }
 
+    private fun setGenreTags(binding: MangaHeaderItemBinding, manga: Manga) {
+        with(binding.mangaGenresTags) {
+            removeAllViews()
+            val dark = context.isInNightMode()
+            val amoled = adapter.delegate.mangaPresenter().preferences.themeDarkAmoled().get()
+            val baseTagColor = context.getResourceColor(R.attr.background)
+            val bgArray = FloatArray(3)
+            val accentArray = FloatArray(3)
+
+            ColorUtils.colorToHSL(baseTagColor, bgArray)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
+            val downloadedColor = ColorUtils.setAlphaComponent(
+                ColorUtils.HSLToColor(
+                    floatArrayOf(
+                        bgArray[0],
+                        bgArray[1],
+                        (
+                            when {
+                                amoled && dark -> 0.1f
+                                dark -> 0.225f
+                                else -> 0.85f
+                            }
+                            )
+                    )
+                ),
+                199
+            )
+            val textColor = ColorUtils.HSLToColor(
+                floatArrayOf(
+                    accentArray[0],
+                    accentArray[1],
+                    if (dark) 0.945f else 0.175f
+                )
+            )
+            if (manga.genre.isNullOrBlank().not()) {
+                (manga.getGenres() ?: emptyList()).map { genreText ->
+                    val chip = LayoutInflater.from(binding.root.context).inflate(
+                        R.layout.genre_chip,
+                        this,
+                        false
+                    ) as Chip
+                    val id = View.generateViewId()
+                    chip.id = id
+                    chip.chipBackgroundColor = ColorStateList.valueOf(downloadedColor)
+                    chip.setTextColor(context.getColor(R.color.material_on_surface_emphasis_medium))
+                    chip.text = genreText
+                    chip.setOnClickListener {
+                        adapter.delegate.tagClicked(genreText)
+                    }
+
+                    this.addView(chip)
+                }
+            }
+        }
+    }
+
     fun clearDescFocus() {
         binding ?: return
         binding.mangaSummary.setTextIsSelectable(false)
@@ -396,6 +471,21 @@ class MangaHeaderHolder(
                 error(drawable)
                 if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
                 diskCachePolicy(CachePolicy.READ_ONLY)
+                target(
+                    onSuccess = {
+                        val bitmap = (it as? BitmapDrawable)?.bitmap
+                        if (bitmap == null) {
+                            binding.backdrop.setImageDrawable(it)
+                            return@target
+                        }
+                        val yOffset = (bitmap.height / 2 * 0.33).toInt()
+
+                        binding.backdrop.setImageDrawable(
+                            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height - yOffset)
+                                .toDrawable(itemView.resources)
+                        )
+                    }
+                )
             }
         )
     }

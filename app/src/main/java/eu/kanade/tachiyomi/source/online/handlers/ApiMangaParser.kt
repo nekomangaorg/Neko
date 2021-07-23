@@ -4,9 +4,9 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.dto.MangaDto
-import eu.kanade.tachiyomi.source.online.dto.asMdMap
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
@@ -235,8 +235,18 @@ class ApiMangaParser {
         // Convert from unix time
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
-        val scanlatorName = networkChapter.relationships.filter { it.type == "scanlation_group" }
-            .mapNotNull { groups[it.id] }.toSet()
+        val scanlatorName =
+            networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
+                .mapNotNull { groups[it.id] }.toMutableSet()
+
+        if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {
+            scanlatorName.remove("no group")
+            scanlatorName.add("No Group")
+        }
+        /* if (scanlatorName.isEmpty()) {
+             scanlatorName.add("No Group")
+         }*/
+
 
         chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
 

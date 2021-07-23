@@ -4,8 +4,8 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
-import eu.kanade.tachiyomi.source.online.dto.LoginRequestDto
-import eu.kanade.tachiyomi.source.online.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
+import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt

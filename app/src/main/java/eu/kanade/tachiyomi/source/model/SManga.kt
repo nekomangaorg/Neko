@@ -51,6 +51,8 @@ interface SManga : Serializable {
 
     var last_chapter_number: Int?
 
+    var external_source_icon: String?
+
     fun copyFrom(other: SManga) {
         if (other.author != null) {
             author = other.author
@@ -112,6 +114,7 @@ interface SManga : Serializable {
         }
 
         missing_chapters = other.missing_chapters
+        external_source_icon = other.external_source_icon
 
         status = other.status
 

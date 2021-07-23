@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.preference
 import android.content.Context
 import android.content.SharedPreferences
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.content.edit
@@ -15,6 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -124,14 +126,15 @@ class PreferencesHelper(val context: Context) {
 
     fun clear() = prefs.edit().clear().apply()
 
-    fun oldTheme() = prefs.getInt(Keys.theme, 5)
+    fun oldTheme() = flowPrefs.getInt(Keys.theme, 5)
 
     fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
     fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
 
-    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, Themes.DEFAULT)
-    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, Themes.DEFAULT)
+    val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
+    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
@@ -460,6 +463,8 @@ class PreferencesHelper(val context: Context) {
     fun openChapterInShortcuts() = prefs.getBoolean(Keys.openChapterInShortcuts, true)
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
+
+    fun shouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
 
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 

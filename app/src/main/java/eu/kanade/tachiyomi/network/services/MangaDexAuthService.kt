@@ -1,15 +1,15 @@
 package eu.kanade.tachiyomi.network.services
 
-import eu.kanade.tachiyomi.source.online.dto.CheckTokenDto
-import eu.kanade.tachiyomi.source.online.dto.LoginRequestDto
-import eu.kanade.tachiyomi.source.online.dto.LoginResponseDto
-import eu.kanade.tachiyomi.source.online.dto.LogoutDto
-import eu.kanade.tachiyomi.source.online.dto.MangaListDto
-import eu.kanade.tachiyomi.source.online.dto.ReadChapterDto
-import eu.kanade.tachiyomi.source.online.dto.ReadingStatusDto
-import eu.kanade.tachiyomi.source.online.dto.ReadingStatusMapDto
-import eu.kanade.tachiyomi.source.online.dto.RefreshTokenDto
-import eu.kanade.tachiyomi.source.online.dto.ResultDto
+import eu.kanade.tachiyomi.source.online.models.dto.CheckTokenDto
+import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
+import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
+import eu.kanade.tachiyomi.source.online.models.dto.LogoutDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
+import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
+import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
+import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import retrofit2.Response
 import retrofit2.http.Body

@@ -11,6 +11,7 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.getPrefTheme
@@ -188,6 +189,19 @@ class SettingsGeneralController : SettingsController() {
                 titleRes = R.string.series_opens_new_chapters
                 summaryRes = R.string.no_new_chapters_open_details
                 defaultValue = true
+            }
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && isUpdaterEnabled) {
+            preferenceCategory {
+                titleRes = R.string.auto_updates
+
+                intListPreference(activity) {
+                    key = Keys.shouldAutoUpdate
+                    titleRes = R.string.auto_update_app
+                    entryRange = 0..2
+                    entriesRes = arrayOf(R.string.over_any_network, R.string.over_wifi_only, R.string.dont_auto_update)
+                    defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
+                }
             }
         }
     }

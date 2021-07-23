@@ -5,12 +5,12 @@ import java.time.format.DateTimeFormatter
 
 object Configs {
     const val applicationId = "tachiyomi.mangadex"
-    const val compileSdkVersion = 30
+    const val compileSdkVersion = 31
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 122
-    const val versionName = "2.5.4.1"
+    const val versionCode = 123
+    const val versionName = "2.5.5"
 }
 
 plugins {
@@ -233,7 +233,6 @@ dependencies {
     implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.sephiroth74:NumberSlidingPicker:1.0.3")
-    implementation("com.github.kizitonwose:AndroidTagGroup:1.6.0")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
     implementation("com.github.tachiyomiorg:DirectionalViewPager:1.0.0")
     implementation("com.github.florent37:viewtooltip:1.2.2")

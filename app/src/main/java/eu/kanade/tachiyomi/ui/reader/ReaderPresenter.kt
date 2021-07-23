@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
@@ -77,6 +78,9 @@ class ReaderPresenter(
      */
     var manga: Manga? = null
         private set
+
+    val source: MangaDex?
+        get() = sourceManager.getMangadex()
 
     /**
      * The chapter id of the currently loaded chapter. Used to restore from process kill.
@@ -560,6 +564,9 @@ class ReaderPresenter(
                     readerType == ReadingModeType.LEFT_TO_RIGHT.flagValue &&
                         default != ReadingModeType.RIGHT_TO_LEFT.flagValue
                     )
+            if (manga.viewer_flags == -1) {
+                manga.viewer_flags = 0
+            }
             manga.readingModeType = if (cantSwitchToLTR) 0 else readerType
             db.updateViewerFlags(manga).asRxObservable().subscribe()
         }

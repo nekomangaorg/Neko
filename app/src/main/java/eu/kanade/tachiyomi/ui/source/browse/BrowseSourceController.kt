@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
+import android.app.Activity
 import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -433,6 +434,17 @@ open class BrowseSourceController(bundle: Bundle) :
             resetProgressItem()
         }
         adapter.onLoadMoreComplete(mangaList)
+    }
+
+    override fun onActivityResumed(activity: Activity) {
+        super.onActivityResumed(activity)
+
+        val searchItem = (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as? SearchView ?: return
+        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
+            searchWithQuery(it ?: "")
+            true
+        }
     }
 
     /**

@@ -43,6 +43,9 @@
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>
 
+    <style name="chipText" parent="TextAppearance.MaterialComponents.Chip">
+        <item name="fontFamily">@font/montserrat_medium</item>
+    </style>
 
     <style name="Neko.NumberPicker" parent="NumberPicker.EditTextStyle">
         <item name="android:textAppearance">@style/Neko.Headline5</item>

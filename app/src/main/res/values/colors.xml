@@ -13,6 +13,9 @@
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
 
+    <color name="gray">#404040</color>
+
+
     <color name="read_chapter">@color/text_color_hint</color>
 
     <color name="total_badge">@color/neko_green_complementary</color>
@@ -29,6 +32,7 @@
 
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
+    <color name="splashIcon">@color/md_black_1000</color>
 
     <color name="elevated_dark_background">#121212</color>
 
@@ -75,6 +79,13 @@
     <color name="textPrimaryDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
+    <!-- Sapphire Dusk Theme -->
+    --
+    <color name="colorAccentSapphire">#589ab8</color>
+    <color name="colorAccentSapphireText">#79aec6</color>
+    <color name="primarySapphire">#3e6c81</color>
+    <!-- Sapphire Dusk -->
+
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>
     <color name="colorAccentLime">#4AF88A</color>
@@ -105,6 +116,8 @@
     <color name="neko_green_darker">#20aa5e</color>
     <color name="gold">#D4AF37</color>
 
+    <color name="splash_background">#FF6784</color>
+
 
     <color name="neko_miami_primary">#41B6E6</color>
     <color name="neko_miami_primary_variant">#000000</color>
@@ -122,6 +135,18 @@
 
     <color name="backgroundChocolateStrawberries">#1a1716</color>
     <color name="secondaryChocolateStrawberries">#211b19</color>
+
+    <!-- Tako Theme -->
+    <color name="accentTako">#66577E</color>
+    <color name="colorOnAccentTako">#F3B375</color>
+    <color name="tertiaryTako">@color/colorOnAccentTako</color>
+    <color name="colorOnTertiaryTako">#574360</color>
+    <color name="rippleColoredTako">#1F66577E</color>
+    <color name="surfaceTako">#F7F5FF</color>
+    <color name="backgroundTako">#F2EDF7</color>
+    <color name="actionTintTako">#221b28</color>
+    <color name="inactiveTabTako">#C2221b28</color>
+    <color name="colorAccentTextTako">#2b1f31</color>
 
     <!-- MangaDex Theme -->
     <color name="colorAccentMangaDex">#FF6740</color>

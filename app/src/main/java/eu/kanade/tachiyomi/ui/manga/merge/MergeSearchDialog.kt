@@ -102,6 +102,7 @@ class MergeSearchDialog : DialogController {
         val view = dialogView ?: return
         binding.progress.visibility = View.VISIBLE
         binding.mergeRecycler.visibility = View.INVISIBLE
+        itemAdapter.clear()
         presenter.mergeSearch(query)
     }
 

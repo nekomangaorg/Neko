@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi.ui.main
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Dialog
+import android.app.assist.AssistContent
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
 import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -25,6 +27,7 @@ import android.webkit.WebView
 import androidx.annotation.IdRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
+import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -79,6 +82,7 @@ import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
@@ -624,6 +628,25 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         return true
     }
 
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+        when (val controller = router.backstack.lastOrNull()?.controller) {
+            is MangaDetailsController -> {
+                val source = controller.presenter.source
+                val url = try {
+                    source.mangaDetailsRequest(controller.presenter.manga).url.toString()
+                } catch (e: Exception) {
+                    return
+                }
+                outContent.webUri = Uri.parse(url)
+            }
+            is BrowseSourceController -> {
+                val source = controller.presenter.source
+                outContent.webUri = Uri.parse(source.baseUrl)
+            }
+        }
+    }
+
     override fun onDestroy() {
         super.onDestroy()
         overflowDialog?.dismiss()
@@ -705,9 +728,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 if (overflowDialog != null) return false
                 val overflowDialog = OverflowDialog(this)
                 this.overflowDialog = overflowDialog
-                overflowDialog.setOnDismissListener {
-                    this.overflowDialog = null
-                }
+                overflowDialog.blurBehindWindow(
+                    window,
+                    onDismiss = {
+                        this.overflowDialog = null
+                    }
+                )
                 overflowDialog.show()
             }
             else -> return super.onOptionsItemSelected(item)

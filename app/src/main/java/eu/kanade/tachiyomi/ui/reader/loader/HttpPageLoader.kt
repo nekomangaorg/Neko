@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.runAsObservable
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -261,8 +262,9 @@ class HttpPageLoader(
     private fun HttpSource.cacheImage(page: ReaderPage): Observable<ReaderPage> {
         page.status = Page.DOWNLOAD_IMAGE
         return runAsObservable(scope) {
-            fetchImage(page)
-        }.doOnNext { chapterCache.putImageToCache(page.imageUrl!!, it) }
-            .map { page }
+            val image = fetchImage(page)
+            withIOContext { chapterCache.putImageToCache(page.imageUrl!!, image) }
+            image
+        }.map { page }
     }
 }

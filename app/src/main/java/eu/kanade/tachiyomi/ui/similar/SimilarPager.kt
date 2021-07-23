@@ -11,17 +11,25 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 
 /**
- * LatestUpdatesPager inherited from the general Pager.
+ * SimilarPager inherited from the general Pager.
  */
-class SimilarPager(val manga: Manga, val source: MangaDex) : Pager() {
+class SimilarPager(val manga: Manga, val source: MangaDex) : Pager(1, false) {
 
     override fun requestNext(): Observable<MangaListPage> {
         return runAsObservable {
-            source.fetchSimilarManga(manga, false)
+            if(currentPage == 1) {
+                source.fetchSimilarManga(manga, false)
+            } else if(currentPage == 2) {
+                source.fetchSimilarExternalAnilistManga(manga, false)
+            } else if(currentPage == 3) {
+                source.fetchSimilarExternalMalManga(manga, false)
+            } else {
+                MangaListPage(emptyList(), false)
+            }
         }.subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext {
-                if (it.manga.isNotEmpty()) {
+                if (it.manga.isNotEmpty() || currentPage < 5) {
                     onPageReceived(it)
                 } else {
                     throw NoResultsException()

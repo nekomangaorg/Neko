@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
+import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
 import android.content.Intent
@@ -9,6 +10,7 @@ import android.content.res.Configuration
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.drawable.LayerDrawable
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.view.KeyEvent
@@ -981,16 +983,23 @@ class ReaderActivity :
                         )
                 ) % 2 != 0
         }
+        val currentChapterPageCount = viewerChapters.currChapter.pages?.size ?: 1
+        binding.readerNav.root.visibility = when {
+            currentChapterPageCount == 1 -> View.GONE
+            binding.chaptersSheet.root.sheetBehavior.isCollapsed() -> View.VISIBLE
+            else -> View.INVISIBLE
+        }
         lastShiftDoubleState = null
         viewer?.setChapters(viewerChapters)
         intentPageNumber?.let { moveToPageIndex(it) }
         intentPageNumber = null
         binding.toolbar.subtitle = viewerChapters.currChapter.chapter.name
-        if (viewer is R2LPagerViewer) {
-            binding.readerNav.leftChapter.alpha =
-                if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.rightChapter.alpha =
-                if (viewerChapters.prevChapter != null) 1f else 0.5f
+        if (viewerChapters.nextChapter == null && viewerChapters.prevChapter == null) {
+            binding.readerNav.leftChapter.isVisible = false
+            binding.readerNav.rightChapter.isVisible = false
+        } else if (viewer is R2LPagerViewer) {
+            binding.readerNav.leftChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
         } else {
             binding.readerNav.rightChapter.alpha =
                 if (viewerChapters.nextChapter != null) 1f else 0.5f
@@ -1260,6 +1269,18 @@ class ReaderActivity :
             type = "image/*"
         }
         startActivity(Intent.createChooser(intent, getString(R.string.share)))
+    }
+
+    override fun onProvideAssistContent(outContent: AssistContent) {
+        super.onProvideAssistContent(outContent)
+        val manga = presenter.manga ?: return
+        val source = presenter.source ?: return
+        val url = try {
+            source.mangaDetailsRequest(manga).url.toString()
+        } catch (e: Exception) {
+            return
+        }
+        outContent.webUri = Uri.parse(url)
     }
 
     /**

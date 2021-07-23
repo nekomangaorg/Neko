@@ -116,6 +116,8 @@
     <string name="no_new_updates_available">No new updates available</string>
     <string name="searching_for_updates">Searching for updates…</string>
     <string name="release_page">Release page</string>
+    <string name="could_not_install_update">Could not install update</string>
+    <string name="update_completed">Update completed</string>
 
     <!-- Main Screens -->
 
@@ -580,11 +582,18 @@
     <string name="dark_theme">Dark theme</string>
     <string name="dark">Neko Green</string>
     <string name="outrun">Outrun</string>
+    <string name="sapphire_dusk">Sapphire Dusk</string>
     <string name="light_blue">Light Blue</string>
     <string name="dark_blue">Dark Blue</string>
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>
     <string name="strawberry_daiquiri">Strawberry Daiquiri</string>
+    <string name="a_brighter_you">A Brighter You</string>
+    <string name="a_calmer_you">A Calmer You</string>
+    <string name="yotsuba">Yotsuba</string>
+    <string name="tako">Tako</string>
+    <string name="yin">Yin</string>
+    <string name="yang">Yang</string>
     <string name="chocolate_strawberries">Chocolate Strawberries</string>
     <string name="mangadex">MangaDex</string>
     <string name="hot_pink">Hot Pink</string>
@@ -610,6 +619,11 @@
     <string name="starting_screen">Starting screen</string>
     <string name="back_to_start">Back to start</string>
     <string name="pressing_back_to_start">Pressing back to starting screen</string>
+    <string name="auto_updates">Auto-updates</string>
+    <string name="auto_update_app">Auto-update app</string>
+    <string name="over_wifi_only">Over Wi-Fi only</string>
+    <string name="over_any_network">Over any network</string>
+    <string name="dont_auto_update">Don\'t auto-update</string>
 
     <string name="app_shortcuts">App shortcuts</string>
     <string name="show_recent_sources">Show recently used sources</string>
@@ -663,6 +677,7 @@
     <string name="crash_logs">Crash logs</string>
     <string name="dump_crash_logs">Dump crash logs</string>
     <string name="saves_error_logs">Saves error logs to a file for sharing with the developers</string>
+    <string name="about_dont_kill_my_app">Some manufacturers have additional app restrictions that kill background services. This website has more info on how to fix it.</string>
     <string name="crash_log_saved">Crash logs saved</string>
     <string name="network">Network</string>
     <string name="doh">DNS over HTTPS</string>

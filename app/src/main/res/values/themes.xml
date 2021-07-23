@@ -11,6 +11,14 @@
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="android:layoutDirection">ltr</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">
+            @color/splash_background
+        </item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">
+            @drawable/ic_launcher_foreground
+        </item>
+        <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">775</item>
+
         <item name="colorPrimary">@color/app_color_primary</item>
         <item name="colorPrimaryVariant">@color/colorPrimary</item>
         <item name="colorSecondary">@color/background</item>
@@ -49,7 +57,7 @@
         <item name="preferenceTheme">@style/Neko.Preference</item>
 
         <!-- Custom Attributes-->
-        <item name="actionBarTintColor">?android:textColorPrimary</item>
+        <item name="actionBarTintColor">?attr/colorOnSurface</item>
         <item name="tabBarIconColor">?colorAccent</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/status_bar</item>
@@ -113,6 +121,13 @@
         <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
     </style>
 
+
+    <style name="Theme.Tachiyomi.SapphireDusk" parent="Theme.Tachiyomi.MidnightDusk">
+        <item name="colorPrimary">@color/primarySapphire</item>
+        <item name="colorAccent">@color/colorAccentSapphire</item>
+        <item name="colorAccentText">@color/colorAccentSapphireText</item>
+    </style>
+
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorAccent">@color/colorAccentStrawberry</item>
         <item name="colorAccentText">@color/colorAccentStrawberryText</item>
@@ -121,6 +136,25 @@
         <item name="colorOnHopper">?attr/colorOnAccent</item>
 
     </style>
+
+    <!--== Tako Theme ==-->
+    <style name="Theme.Tachiyomi.Tako">
+        <item name="colorAccent">@color/accentTako</item>
+        <item name="colorOnAccent">@color/colorOnAccentTako</item>
+        <item name="colorPrimaryVariant">@color/surfaceTako</item>
+        <item name="tabBarIconColor">@color/colorOnTertiaryTako</item>
+        <item name="colorControlHighlight">@color/rippleColoredTako</item>
+        <item name="colorSecondary">@color/backgroundTako</item>
+        <item name="actionBarTintColor">@color/actionTintTako</item>
+        <item name="android:colorBackground">@color/backgroundTako</item>
+        <item name="colorAccentText">@color/colorAccentTextTako</item>
+        <item name="tabBarIconInactive">@color/inactiveTabTako</item>
+        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnAccent</item>
+
+    </style>
+
 
     <style name="Theme.Tachiyomi.MangaDex">
         <item name="colorAccent">@color/colorAccentMangaDex</item>
@@ -137,8 +171,8 @@
     <!--===============-->
     <style name="Theme.Splash" parent="Theme.Tachiyomi">
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/neko_green_darker</item>
-        <item name="android:navigationBarColor">@color/neko_green_darker</item>
+        <item name="android:statusBarColor">@color/splash_background</item>
+        <item name="android:navigationBarColor">@color/splash_background</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>

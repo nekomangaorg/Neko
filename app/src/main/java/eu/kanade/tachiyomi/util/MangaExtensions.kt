@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.util.view.snack
 import java.util.Date
@@ -174,26 +175,28 @@ fun Manga.addOrRemoveToFavorites(
     return null
 }
 
-fun Manga.getNewScanlatorsConditionalResetFilter(
+fun Manga.addNewScanlatorsToFilter(
     db: DatabaseHelper,
     existingChapters: List<Chapter>,
     newChapters: List<Chapter>,
 ): Set<String> {
-    if (this.scanlator_filter != null) {
-        val existingScanlators =
-            existingChapters.flatMap { it.scanlatorList() }.distinct()
-                .toSet()
-        val newScanlators =
-            newChapters.flatMap { it.scanlatorList() }.distinct()
-                .toSet()
+    val existingScanlators =
+        existingChapters.flatMap { it.scanlatorList() }.distinct()
+            .toSet()
+    val newScanlators =
+        newChapters.flatMap { it.scanlatorList() }.distinct()
+            .toSet()
 
-        // reset scanlator if new ones found.  To not hide new scanlators
-        val result = newScanlators.subtract(existingScanlators)
-        if (result.isNotEmpty()) {
-            this.scanlator_filter = null
-            db.insertManga(this).executeAsBlocking()
+    //Add new scanlators to the existing filter just so they aren't hidden
+    val result = newScanlators.subtract(existingScanlators)
+    if (result.isNotEmpty()) {
+        if (this.scanlator_filter != null) {
+            val scanlators = MdUtil.getScanlators(this.scanlator_filter!!).toSet() + newScanlators
+            this.scanlator_filter = MdUtil.getScanlatorString(scanlators)
+        } else {
+            this.scanlator_filter = MdUtil.getScanlatorString(existingScanlators + newScanlators)
         }
-        return result
+        db.insertManga(this).executeAsBlocking()
     }
-    return emptySet()
+    return result
 }

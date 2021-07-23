@@ -81,8 +81,8 @@ fun String.truncateCenter(count: Int, replacement: String = "..."): String {
 }
 
 fun String.capitalizeWords(): String {
-    val firstReplace = split(" ").joinToString(" ") { it.capitalize() }
-    return firstReplace.split("-").joinToString("-") { it.capitalize() }
+    val firstReplace = split(" ").joinToString(" ") { it.replaceFirstChar(Char::uppercase) }
+    return firstReplace.split("-").joinToString("-") { it.replaceFirstChar(Char::uppercase) }
 }
 
 /**
@@ -102,7 +102,10 @@ fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {
     val wordToSpan: Spannable = SpannableString(this)
     if (highlight.isBlank()) return wordToSpan
     indexesOf(highlight).forEach {
-        wordToSpan.setSpan(BackgroundColorSpan(color), it, it + highlight.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        wordToSpan.setSpan(BackgroundColorSpan(color),
+            it,
+            it + highlight.length,
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     }
     return wordToSpan
 }
@@ -138,10 +141,22 @@ fun String.withSubtitle(context: Context, subtitle: String): Spanned {
 fun String.addBetaTag(context: Context): Spanned {
     val betaText = context.getString(R.string.beta)
     val betaSpan = SpannableStringBuilder(this + betaText)
-    betaSpan.setSpan(SuperscriptSpan(), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(RelativeSizeSpan(0.75f), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(StyleSpan(Typeface.BOLD), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorAccent)), length, length + betaText.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(SuperscriptSpan(),
+        length,
+        length + betaText.length,
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(RelativeSizeSpan(0.75f),
+        length,
+        length + betaText.length,
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(StyleSpan(Typeface.BOLD),
+        length,
+        length + betaText.length,
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorAccent)),
+        length,
+        length + betaText.length,
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
     return betaSpan
 }
 

@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.NetworkHelper
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import okhttp3.OkHttpClient
 import uy.kohesive.injekt.injectLazy
@@ -88,13 +87,16 @@ abstract class TrackService(val id: Int) {
 }
 
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
-    val allRead = db.getManga(track.manga_id).executeOnIO()?.status == SManga.COMPLETED &&
+    val manga = db.getManga(track.manga_id).executeOnIO()
+    val allRead = manga?.isOneShotOrCompleted(db) == true &&
         db.getChapters(track.manga_id).executeOnIO().all { it.read }
     if (supportsReadingDates) {
         track.started_reading_date = getStartDate(track)
         track.finished_reading_date = getCompletedDate(track, allRead)
     }
-    track.last_chapter_read = getLastChapterRead(track)
+    track.last_chapter_read = getLastChapterRead(track).takeUnless {
+        it == 0 && allRead
+    } ?: 1
     if (track.last_chapter_read == 0) {
         track.status = planningStatus
     }
@@ -123,5 +125,6 @@ suspend fun TrackService.getCompletedDate(track: Track, allRead: Boolean): Long 
 
 suspend fun TrackService.getLastChapterRead(track: Track): Int {
     val chapters = db.getChapters(track.manga_id).executeOnIO()
-    return chapters.filter { it.read }.minByOrNull { it.source_order }?.chapter_number?.toInt() ?: 0
+    val lastChapterRead = chapters.filter { it.read }.minByOrNull { it.source_order }
+    return lastChapterRead?.takeIf { it.isRecognizedNumber }?.chapter_number?.toInt() ?: 0
 }

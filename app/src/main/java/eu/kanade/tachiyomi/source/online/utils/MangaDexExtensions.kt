@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 
 fun MangaDto.toBasicManga(): SManga {
     return SManga.create().apply {

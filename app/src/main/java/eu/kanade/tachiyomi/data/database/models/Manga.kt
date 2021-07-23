@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.AnimePlanet
 import eu.kanade.tachiyomi.data.external.Dex
 import eu.kanade.tachiyomi.data.external.ExternalLink
@@ -142,6 +143,20 @@ interface Manga : SManga {
             }
             else -> 0
         }
+    }
+
+    fun isOneShotOrCompleted(db: DatabaseHelper): Boolean {
+        val tags by lazy { genre?.split(",")?.map { it.trim().lowercase(Locale.US) } }
+        val chapters by lazy { db.getChapters(this).executeAsBlocking() }
+        val firstChapterName by lazy { chapters.firstOrNull()?.name?.lowercase() ?: "" }
+        return status == SManga.COMPLETED || tags?.contains("oneshot") == true ||
+            (
+                chapters.size == 1 &&
+                    (
+                        Regex("one.?shot").containsMatchIn(firstChapterName) ||
+                            firstChapterName.contains("oneshot")
+                        )
+                )
     }
 
     fun key(): String {

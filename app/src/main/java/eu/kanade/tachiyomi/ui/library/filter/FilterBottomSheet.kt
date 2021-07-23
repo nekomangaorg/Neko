@@ -153,6 +153,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             onGroupClicked(ACTION_DISPLAY)
         }
 
+        sheetBehavior?.isGestureInsetBottomIgnored = true
+
         val activeFilters = hasActiveFiltersFromPref()
         if (activeFilters && sheetBehavior.isHidden() && sheetBehavior?.skipCollapsed == false) {
             sheetBehavior?.collapse()
