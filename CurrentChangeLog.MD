@@ -11,6 +11,7 @@
 ## 🏗️ Changes
 - When a new scanlator for a manga is added, scanlator filter now updates and adds so it's not mistakenly hidden
 - tweak to genre chip ui (with help from @Jays2Kings)
+- Add support for Start/End Date for Kitsu (@Ghostbear)
 ## 🐜 Fixes
 - Latest view was missing manga, and showing out of order
 - Setting a scanlator filter, was not being saved

@@ -1,22 +1,25 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
 import com.elvishew.xlog.XLog
-import com.github.salomonbrys.kotson.array
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.int
-import com.github.salomonbrys.kotson.jsonObject
-import com.github.salomonbrys.kotson.obj
-import com.github.salomonbrys.kotson.set
-import com.github.salomonbrys.kotson.string
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonObject
-import com.google.gson.JsonParser
+import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.network.POST
 import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.network.parseAs
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.buildJsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.int
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.put
+import kotlinx.serialization.json.putJsonObject
 import okhttp3.FormBody
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
@@ -36,70 +39,98 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
+    val jsonBuilder = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
+    }.asConverterFactory("application/json".toMediaType())
+
     private val rest = Retrofit.Builder()
         .baseUrl(baseUrl)
         .client(authClient)
-        .addConverterFactory(GsonConverterFactory.create(GsonBuilder().serializeNulls().create()))
+        .addConverterFactory(jsonBuilder)
         .build()
-        .create(KitsuApi.Rest::class.java)
+        .create(Rest::class.java)
 
     private val searchRest = Retrofit.Builder()
         .baseUrl(algoliaKeyUrl)
         .client(authClient)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(jsonBuilder)
         .build()
-        .create(KitsuApi.SearchKeyRest::class.java)
+        .create(SearchKeyRest::class.java)
 
     private val algoliaRest = Retrofit.Builder()
         .baseUrl(algoliaUrl)
         .client(client)
-        .addConverterFactory(GsonConverterFactory.create())
+        .addConverterFactory(jsonBuilder)
         .build()
-        .create(KitsuApi.AgoliaSearchRest::class.java)
+        .create(AgoliaSearchRest::class.java)
 
     suspend fun addLibManga(track: Track, userId: String): Track {
-        // @formatter:off
-        val data = jsonObject(
-            "type" to "libraryEntries",
-            "attributes" to jsonObject(
-                "status" to track.toKitsuStatus(),
-                "progress" to track.last_chapter_read
-            ),
-            "relationships" to jsonObject(
-                "user" to jsonObject(
-                    "data" to jsonObject(
-                        "id" to userId,
-                        "type" to "users"
-                    )
-                ),
-                "media" to jsonObject(
-                    "data" to jsonObject(
-                        "id" to track.media_id,
-                        "type" to "manga"
-                    )
-                )
-            )
-        )
+        val data = buildJsonObject {
+            putJsonObject("data") {
+                put("type", "libraryEntries")
+                putJsonObject("attributes") {
+                    put("status", track.toKitsuStatus())
+                    put("progress", track.last_chapter_read)
+                }
+                putJsonObject("relationships") {
+                    putJsonObject("user") {
+                        putJsonObject("data") {
+                            put("id", userId)
+                            put("type", "users")
+                        }
+                    }
+                    putJsonObject("media") {
+                        putJsonObject("data") {
+                            put("id", track.media_id)
+                            put("type", "manga")
+                        }
+                    }
+                }
+            }
+        }
 
-        val json = rest.addLibManga(jsonObject("data" to data))
-        track.media_id = json["data"]["id"].int
+        val result = rest.addLibManga(data)
+
+        track.media_id = result["data"]!!.jsonObject["id"]!!.jsonPrimitive.int
         return track
     }
 
     suspend fun updateLibManga(track: Track): Track {
         // @formatter:off
-        val data = jsonObject(
-            "type" to "libraryEntries",
-            "id" to track.media_id,
-            "attributes" to jsonObject(
-                "status" to track.toKitsuStatus(),
-                "progress" to track.last_chapter_read,
-                "ratingTwenty" to track.toKitsuScore()
-            )
-        )
+        val data = buildJsonObject {
+            putJsonObject("data") {
+                put("type", "libraryEntries")
+                put("id", track.media_id)
+                putJsonObject("attributes") {
+                    put("status", track.toKitsuStatus())
+                    put("progress", track.last_chapter_read)
+                    put("ratingTwenty", track.toKitsuScore())
+                    put("startedAt", KitsuDateHelper.convert(track.started_reading_date))
+                    put("finishedAt", KitsuDateHelper.convert(track.finished_reading_date))
+                }
+            }
+        }
         // @formatter:on
 
-        rest.updateLibManga(track.media_id, jsonObject("data" to data))
+        rest.updateLibManga(track.media_id, data).let {
+            val manga = it["data"]?.jsonObject
+            if (manga != null) {
+                val startedAt =
+                    manga["attributes"]!!.jsonObject["startedAt"]?.jsonPrimitive?.contentOrNull
+                val finishedAt =
+                    manga["attributes"]!!.jsonObject["finishedAt"]?.jsonPrimitive?.contentOrNull
+                val startedDate = KitsuDateHelper.parse(startedAt)
+                if (track.started_reading_date <= 0L || startedDate > 0) {
+                    track.started_reading_date = startedDate
+                }
+                val finishedDate = KitsuDateHelper.parse(finishedAt)
+                if (track.finished_reading_date <= 0L || finishedDate > 0) {
+                    track.finished_reading_date = finishedDate
+                }
+            }
+
+        }
         return track
     }
 
@@ -119,50 +150,55 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         if (manga.kitsu_id !== null && !wasPreviouslyTracked) {
-            val response =
-                client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
-                    .await()
-            val jsonData = response.body!!.string()
-            var json = JsonParser.parseString(jsonData).asJsonObject
-            json["data"][0]["attributes"]["id"] = json["data"][0]["id"]
-
-            return listOf<TrackSearch>(KitsuSearchManga(json["data"][0]["attributes"].obj,
-                true).toTrack())
+            client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
+                .await().parseAs<JsonObject>().let {
+                    val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
+                    val map =
+                        it["data"]!!.jsonArray[0].jsonObject["attributes"]!!.jsonObject.toMutableMap()
+                    map["id"] = id
+                    return listOf(KitsuSearchManga(JsonObject(map), true).toTrack())
+                }
         } else {
-            val key = searchRest.getKey()["media"].asJsonObject["key"].string
-
-            return algoliaSearch(key, query)
+            searchRest.getKey().let {
+                val key = it["media"]!!.jsonObject["key"]!!.jsonPrimitive.content
+                return algoliaSearch(key, query)
+            }
         }
     }
 
     private suspend fun algoliaSearch(key: String, query: String): List<TrackSearch> {
-        val jsonObject = jsonObject("params" to "query=$query$algoliaFilter")
-        val json = algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject)
-        val data = json["hits"].array
-        return data.map { KitsuSearchManga(it.obj) }
-            .filter { it.subType != "novel" }
-            .map { it.toTrack() }
+        val jsonObject = buildJsonObject {
+            put("params", "query=$query$algoliaFilter")
+        }
+        return algoliaRest.getSearchQuery(algoliaAppId, key, jsonObject).let {
+            it["hits"]!!.jsonArray
+                .map { KitsuSearchManga(it.jsonObject) }
+                .filter { it.subType != "novel" }
+                .map { it.toTrack() }
+        }
     }
 
     suspend fun findLibManga(track: Track, userId: String): Track? {
-        val json = rest.findLibManga(track.media_id, userId)
-        val data = json["data"].array
-        return if (data.size() > 0) {
-            val manga = json["included"].array[0].obj
-            KitsuLibManga(data[0].obj, manga).toTrack()
-        } else {
-            null
+        return rest.findLibManga(track.media_id, userId).let {
+            val data = it["data"]!!.jsonArray
+            if (data.size > 0) {
+                val manga = it["included"]!!.jsonArray[0].jsonObject
+                KitsuLibManga(data[0].jsonObject, manga).toTrack()
+            } else {
+                null
+            }
         }
     }
 
     suspend fun getLibManga(track: Track): Track {
-        val json = rest.getLibManga(track.media_id)
-        val data = json["data"].array
-        if (data.size() > 0) {
-            val manga = json["included"].array[0].obj
-            return KitsuLibManga(data[0].obj, manga).toTrack()
-        } else {
-            throw Exception("Could not find manga kitsu tracking")
+        return rest.getLibManga(track.media_id).let {
+            val data = it["data"]!!.jsonArray
+            if (data.size > 0) {
+                val manga = it["included"]!!.jsonArray[0].jsonObject
+                KitsuLibManga(data[0].jsonObject, manga).toTrack()
+            } else {
+                throw Exception("Could not find manga kitsu tracking")
+            }
         }
     }
 
@@ -172,13 +208,14 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
             .client(client)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
-            .create(KitsuApi.LoginRest::class.java)
+            .create(LoginRest::class.java)
             .requestAccessToken(username, password)
     }
 
     suspend fun getCurrentUser(): String {
-        val currentUser = rest.getCurrentUser()
-        return currentUser["data"].array[0]["id"].string
+        return rest.getCurrentUser().let {
+            it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive.content
+        }
     }
 
     private interface Rest {
