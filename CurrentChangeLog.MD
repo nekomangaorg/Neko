@@ -1,9 +1,9 @@
-## 🥳 New
-
-## 🏗️ Changes
+Bug fix release see
+https://github.com/CarlosEsco/Neko/releases/tag/2.5.5 for the actual changes
 
 ## 🐜 Fixes
-- add colon on Next section for transition page
+- Dont show "adding scanlator" toast if manga was not intialized
+- cleaned up some inconsistencies on transition page between chapters
 - Fix amoled theme resetting on relaunch for older devices/system light theme (@Jays2Kings)
 ## 🛠️ Other
 - Update some libraries
