@@ -99,7 +99,16 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
-    <style name="ThemeOverlay.Tachiyomi.Amoled" parent="" />
+    <style name="ThemeOverlay.Tachiyomi.Amoled" parent="">
+        <item name="colorSecondary">@color/md_black_1000</item>
+        <item name="colorPrimaryVariant">@color/md_black_1000</item>
+        <item name="colorOnPrimary">@color/md_black_1000</item>
+        <item name="android:colorBackground">@color/md_black_1000</item>
+        <item name="readerBackground">@color/md_black_1000</item>
+
+        <!-- Material Dialog colors -->
+        <item name="md_background_color">@color/md_black_1000</item>
+    </style>
 
     <style name="Theme.Tachiyomi.FlatLime" />
 

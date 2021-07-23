@@ -12,13 +12,17 @@ import uy.kohesive.injekt.injectLazy
 abstract class BaseThemedActivity : AppCompatActivity() {
 
     val preferences: PreferencesHelper by injectLazy()
+    private var updatedTheme: Resources.Theme? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        updatedTheme = null
         setThemeAndNight(preferences)
         super.onCreate(savedInstanceState)
     }
 
     override fun getTheme(): Resources.Theme {
-        return getThemeWithExtras(super.getTheme(), preferences)
+        val newTheme = getThemeWithExtras(super.getTheme(), preferences, updatedTheme)
+        updatedTheme = newTheme
+        return newTheme
     }
 }

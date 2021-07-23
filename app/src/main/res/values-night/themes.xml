@@ -12,18 +12,6 @@
 
     </style>
 
-    <!--== AMOLED theme overlay ==-->
-    <style name="ThemeOverlay.Tachiyomi.Amoled" parent="">
-        <item name="colorSecondary">@color/colorAmoledPrimary</item>
-        <item name="colorPrimaryVariant">@color/colorAmoledPrimary</item>
-        <item name="colorOnPrimary">@color/colorAmoledPrimary</item>
-        <item name="android:colorBackground">@color/colorAmoledPrimary</item>
-        <item name="readerBackground">@color/colorAmoledPrimary</item>
-
-        <!-- Material Dialog colors -->
-        <item name="md_background_color">@color/colorAmoledPrimary</item>
-    </style>
-
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorPrimary">@color/primaryRed</item>
         <item name="colorAccent">@color/holo_red</item>
