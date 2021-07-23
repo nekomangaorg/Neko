@@ -34,7 +34,7 @@ import rx.android.schedulers.AndroidSchedulers
 @SuppressLint("ViewConstructor")
 class PagerTransitionHolder(
     val viewer: PagerViewer,
-    val transition: ChapterTransition
+    val transition: ChapterTransition,
 ) : LinearLayout(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**
@@ -100,7 +100,7 @@ class PagerTransitionHolder(
         textView.text = if (nextChapter != null) {
             SpannableStringBuilder().append(context.getString(R.string.finished_chapter))
                 .bold { append("\n${transition.from.chapter.name}\n\n") }
-                .append(context.getString(R.string.next))
+                .append(context.getString(R.string.next_))
                 .bold { append("\n${nextChapter.chapter.name}\n\n") }
         } else {
             val d = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_account_tree)
@@ -133,7 +133,10 @@ class PagerTransitionHolder(
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
                 append(context.getString(R.string.previous_title))
-                setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                setSpan(StyleSpan(Typeface.BOLD),
+                    currSize,
+                    length,
+                    Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
                 append("\n${prevChapter.chapter.name}\n\n")
             }
         } else {
