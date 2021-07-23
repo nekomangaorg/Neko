@@ -75,8 +75,9 @@ object ThemeUtil {
 }
 
 fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
-    if (preferences.nightMode().isNotSet()) {
-        ThemeUtil.convertTheme(preferences, preferences.oldTheme())
+    if (preferences.nightMode().isNotSet() && preferences.oldTheme().isSet()) {
+        ThemeUtil.convertTheme(preferences, preferences.oldTheme().get())
+        preferences.oldTheme().delete()
     }
     if (AppCompatDelegate.getDefaultNightMode() != preferences.nightMode().get()) {
         AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())

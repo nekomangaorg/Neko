@@ -126,7 +126,7 @@ class PreferencesHelper(val context: Context) {
 
     fun clear() = prefs.edit().clear().apply()
 
-    fun oldTheme() = prefs.getInt(Keys.theme, 5)
+    fun oldTheme() = flowPrefs.getInt(Keys.theme, 5)
 
     fun nightMode() = flowPrefs.getInt(Keys.nightMode, AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
 
