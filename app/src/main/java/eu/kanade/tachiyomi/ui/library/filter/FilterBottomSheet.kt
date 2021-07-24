@@ -363,7 +363,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             }
 
             if (filterItems.contains(tracked)) {
-                val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged }
+                val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged() }
                 if (loggedServices.isNotEmpty()) {
                     val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
                     withContext(Dispatchers.Main) {

@@ -60,7 +60,7 @@ object Migrations {
                 // v67: switched from scraping to WebView
                 // v68: switched from WebView to OAuth
                 val trackManager = Injekt.get<TrackManager>()
-                if (trackManager.myAnimeList.isLogged) {
+                if (trackManager.myAnimeList.isLogged()) {
                     trackManager.myAnimeList.logout()
                     context.toast(R.string.myanimelist_relogin)
                 }

@@ -44,7 +44,7 @@ class LegacyBackupRestoreValidator : AbstractBackupRestoreValidator() {
             .distinct()
         val missingTrackers = trackers
             .mapNotNull { trackManager.getService(it) }
-            .filter { !it.isLogged }
+            .filter { !it.isLogged() }
             .map { context.getString(it.nameRes()) }
             .sorted()
 

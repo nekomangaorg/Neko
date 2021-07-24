@@ -405,7 +405,7 @@ class LegacyBackupManager(val context: Context, version: Int = CURRENT_VERSION) 
 
         for (track in tracks) {
             val service = trackManager.getService(track.sync_id)
-            if (service != null && service.isLogged) {
+            if (service != null && service.isLogged()) {
                 var isInDatabase = false
                 for (dbTrack in dbTracks) {
                     if (track.sync_id == dbTrack.sync_id) {

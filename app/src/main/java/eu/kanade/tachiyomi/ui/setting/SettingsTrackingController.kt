@@ -33,7 +33,8 @@ class SettingsTrackingController :
             titleRes = R.string.services
 
             trackPreference(trackManager.myAnimeList) {
-                activity?.openInBrowser(MyAnimeListApi.authUrl(), trackManager.myAnimeList.getLogoColor())
+                activity?.openInBrowser(MyAnimeListApi.authUrl(),
+                    trackManager.myAnimeList.getLogoColor())
             }
             trackPreference(trackManager.aniList) {
                 activity?.openInBrowser(AnilistApi.authUrl(), trackManager.aniList.getLogoColor())
@@ -48,7 +49,7 @@ class SettingsTrackingController :
 
     private inline fun PreferenceScreen.trackPreference(
         service: TrackService,
-        crossinline login: () -> Unit
+        crossinline login: () -> Unit,
     ): LoginPreference {
         return initThenAdd(
             LoginPreference(context).apply {
@@ -57,7 +58,7 @@ class SettingsTrackingController :
             },
             {
                 onClick {
-                    if (service.isLogged) {
+                    if (service.isLogged()) {
                         val dialog = TrackLogoutDialog(service)
                         dialog.targetController = this@SettingsTrackingController
                         dialog.showDialog(router)
