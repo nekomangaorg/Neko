@@ -154,14 +154,6 @@ dependencies {
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
-    // hyperion
-    val hyperionVersion = "0.9.33"
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
-
     // REST
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")
