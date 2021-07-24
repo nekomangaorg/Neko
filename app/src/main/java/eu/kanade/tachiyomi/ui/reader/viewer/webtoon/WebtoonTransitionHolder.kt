@@ -1,12 +1,9 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import android.graphics.Color
-import android.graphics.Typeface
 import android.text.SpannableStringBuilder
-import android.text.Spanned
 import android.text.style.DynamicDrawableSpan
 import android.text.style.ImageSpan
-import android.text.style.StyleSpan
 import android.view.Gravity
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
@@ -18,6 +15,7 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.text.bold
 import androidx.core.text.inSpans
 import androidx.core.view.isVisible
+import com.crazylegend.kotlinextensions.views.setFont
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
@@ -32,7 +30,7 @@ import rx.android.schedulers.AndroidSchedulers
  */
 class WebtoonTransitionHolder(
     val layout: LinearLayout,
-    viewer: WebtoonViewer
+    viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(layout, viewer) {
 
     /**
@@ -46,6 +44,8 @@ class WebtoonTransitionHolder(
     private var textView = TextView(context).apply {
         textSize = 17.5F
         setTextColor(Color.WHITE)
+        setFont(R.font.montserrat_regular)
+
         wrapContent()
     }
 
@@ -100,10 +100,10 @@ class WebtoonTransitionHolder(
         val nextChapter = transition.to
 
         textView.text = if (nextChapter != null) {
-            SpannableStringBuilder().append(context.getString(R.string.finished_chapter))
-                .bold { append("\n${transition.from.chapter.name}\n\n") }
-                .append(context.getString(R.string.next))
-                .bold { append("\n${nextChapter.chapter.name}\n\n") }
+            SpannableStringBuilder().bold { append(context.getString(R.string.finished_chapter)) }
+                .append("\n${transition.from.chapter.name}\n\n")
+                .bold { append(context.getString(R.string.next_)) }
+                .append("\n${nextChapter.chapter.name}\n\n")
         } else {
             val d = context.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_account_tree)
             SpannableStringBuilder().append(context.getString(R.string.theres_no_next_chapter))
@@ -130,12 +130,10 @@ class WebtoonTransitionHolder(
 
         textView.text = if (prevChapter != null) {
             SpannableStringBuilder().apply {
-                append(context.getString(R.string.current_chapter))
-                setSpan(StyleSpan(Typeface.BOLD), 0, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                bold { append(context.getString(R.string.current_chapter)) }
                 append("\n${transition.from.chapter.name}\n\n")
                 val currSize = length
-                append(context.getString(R.string.previous_title))
-                setSpan(StyleSpan(Typeface.BOLD), currSize, length, Spanned.SPAN_INCLUSIVE_EXCLUSIVE)
+                bold { append(context.getString(R.string.previous_title)) }
                 append("\n${prevChapter.chapter.name}\n\n")
             }
         } else {

@@ -220,7 +220,7 @@ class LegacyRestore(val context: Context, val job: Job?) {
 
         validTracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
-            if (service != null && service.isLogged) {
+            if (service != null && service.isLogged()) {
                 try {
                     service.refresh(track)
                     db.insertTrack(track).executeAsBlocking()
@@ -230,10 +230,10 @@ class LegacyRestore(val context: Context, val job: Job?) {
             } else {
                 errors.add(
                     "${manga.title} - ${
-                    context.getString(
-                        R.string.not_logged_into_,
-                        context.getString(service?.nameRes()!!)
-                    )
+                        context.getString(
+                            R.string.not_logged_into_,
+                            context.getString(service?.nameRes()!!)
+                        )
                     }"
                 )
                 val notLoggedIn = context.getString(

@@ -58,7 +58,11 @@ abstract class TrackService(val id: Int) {
 
     abstract suspend fun bind(track: Track): Track
 
-    abstract suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch>
+    abstract suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch>
 
     abstract suspend fun refresh(track: Track): Track
 
@@ -73,9 +77,7 @@ abstract class TrackService(val id: Int) {
         preferences.setTrackCredentials(this, "", "")
     }
 
-    open val isLogged: Boolean
-        get() = getUsername().isNotEmpty() &&
-            getPassword().isNotEmpty()
+    open fun isLogged(): Boolean = getUsername().isNotEmpty() && getPassword().isNotEmpty()
 
     fun getUsername() = preferences.trackUsername(this)!!
 
@@ -107,7 +109,8 @@ suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
 
 suspend fun TrackService.getStartDate(track: Track): Long {
     if (db.getChapters(track.manga_id).executeOnIO().any { it.read }) {
-        val chapters = db.getHistoryByMangaId(track.manga_id).executeOnIO().filter { it.last_read > 0 }
+        val chapters =
+            db.getHistoryByMangaId(track.manga_id).executeOnIO().filter { it.last_read > 0 }
         val date = chapters.minOfOrNull { it.last_read } ?: return 0L
         return if (date <= 0L) 0L else date
     }

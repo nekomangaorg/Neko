@@ -27,5 +27,5 @@ class TrackManager(context: Context) {
 
     fun getService(id: Int) = services.find { it.id == id }
 
-    fun hasLoggedServices() = services.any { it.isLogged }
+    fun hasLoggedServices() = services.any { it.isLogged() }
 }

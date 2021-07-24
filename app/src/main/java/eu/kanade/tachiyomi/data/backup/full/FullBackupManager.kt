@@ -316,7 +316,7 @@ class FullBackupManager(val context: Context) {
 
         validTracks.forEach { track ->
             val service = trackManager.getService(track.sync_id)
-            if (service != null && service.isLogged) {
+            if (service != null && service.isLogged()) {
                 var isInDatabase = false
                 for (dbTrack in dbTracks) {
                     if (track.sync_id == dbTrack.sync_id) {

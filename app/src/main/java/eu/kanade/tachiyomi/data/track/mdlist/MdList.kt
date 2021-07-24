@@ -72,12 +72,14 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 if (followStatus != FollowStatus.UNFOLLOWED) {
                     if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
                         track.status = FollowStatus.COMPLETED.int
-                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), FollowStatus.COMPLETED)
+                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url),
+                            FollowStatus.COMPLETED)
                     }
                     if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
                         val newFollowStatus = FollowStatus.READING
                         track.status = FollowStatus.READING.int
-                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), newFollowStatus)
+                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url),
+                            newFollowStatus)
                         manga.follow_status = newFollowStatus
                         db.insertManga(manga).executeAsBlocking()
                     }
@@ -121,14 +123,19 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         return track
     }
 
-    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> = throw Exception("not used")
+    override suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch> = throw Exception("not used")
 
-    override suspend fun login(username: String, password: String): Boolean = throw Exception("not used")
+    override suspend fun login(username: String, password: String): Boolean =
+        throw Exception("not used")
 
     @SuppressLint("MissingSuperCall")
     override fun logout() = throw Exception("not used")
 
-    override val isLogged = mdex.isLogged()
+    override fun isLogged() = mdex.isLogged()
 
     override fun isMdList() = true
 }

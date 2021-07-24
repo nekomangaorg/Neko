@@ -102,7 +102,7 @@ class MangaDetailsPresenter(
 
     private val trackManager: TrackManager by injectLazy()
 
-    private val loggedServices by lazy { trackManager.services.filter { it.isLogged } }
+    private val loggedServices by lazy { trackManager.services.filter { it.isLogged() } }
 
     var tracks = emptyList<Track>()
 
@@ -526,7 +526,9 @@ class MangaDetailsPresenter(
                     mangaShortcutManager.updateShortcuts()
 
                     launch {
-                        checkIfShouldUpdateScanlatorFilters(originalChapters, newChapters.first)
+                        checkIfShouldUpdateScanlatorFilters(originalChapters,
+                            newChapters.first,
+                            mangaWasInitalized)
                     }
                 }
                 if (newChapters.second.isNotEmpty()) {
@@ -578,20 +580,23 @@ class MangaDetailsPresenter(
     suspend fun checkIfShouldUpdateScanlatorFilters(
         originalChapters: List<Chapter>,
         newChapters: List<Chapter>,
+        mangaWasInitialized: Boolean,
     ) {
-        val newScanlators = manga.addNewScanlatorsToFilter(
-            db,
-            originalChapters,
-            newChapters
-        )
-        if (newScanlators.isNotEmpty()) {
-            filteredScanlators = filteredScanlators + newScanlators
-            launchUI {
-                controller.updatingScanlatorFilters()
-            }
-            val allChaps = db.getChapters(manga).executeOnIO()
+        if (mangaWasInitialized) {
+            val newScanlators = manga.addNewScanlatorsToFilter(
+                db,
+                originalChapters,
+                newChapters
+            )
+            if (newScanlators.isNotEmpty()) {
+                filteredScanlators = filteredScanlators + newScanlators
+                launchUI {
+                    controller.updatingScanlatorFilters()
+                }
+                val allChaps = db.getChapters(manga).executeOnIO()
 
-            updateScanlators(allChaps.map { it.toModel() })
+                updateScanlators(allChaps.map { it.toModel() })
+            }
         }
     }
 
@@ -837,13 +842,15 @@ class MangaDetailsPresenter(
             true -> {
                 manga.date_added = Date().time
                 if (preferences.addToLibraryAsPlannedToRead()) {
-                    val mdTrack = trackList.firstOrNull { it.service.isMdList() }?.track
-
-                    mdTrack?.let {
-                        if (FollowStatus.fromInt(it.status) == FollowStatus.UNFOLLOWED) {
-                            it.status = FollowStatus.PLAN_TO_READ.int
-                            scope.launch {
-                                trackManager.getService(TrackManager.MDLIST)!!.update(it)
+                    val trackHolder = trackList.firstOrNull { it.service.isMdList() }
+                    if (trackHolder?.service?.isLogged() == true) {
+                        val mdTrack = trackHolder.track
+                        mdTrack?.let {
+                            if (FollowStatus.fromInt(it.status) == FollowStatus.UNFOLLOWED) {
+                                it.status = FollowStatus.PLAN_TO_READ.int
+                                scope.launch {
+                                    trackManager.getService(TrackManager.MDLIST)!!.update(it)
+                                }
                             }
                         }
                     }
@@ -981,6 +988,7 @@ class MangaDetailsPresenter(
         scope.launch {
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
+
             }
         }
     }
@@ -1019,7 +1027,7 @@ class MangaDetailsPresenter(
                             null
                         }
                         if (trackItem != null) {
-                            if (item.service.isMdList()) {
+                            if (item.service.isMdList() && item.service.isLogged()) {
                                 if (manga.favorite && preferences.addToLibraryAsPlannedToRead() && trackItem.status == FollowStatus.UNFOLLOWED.int) {
                                     trackItem.status = FollowStatus.PLAN_TO_READ.int
                                     scope.launch {

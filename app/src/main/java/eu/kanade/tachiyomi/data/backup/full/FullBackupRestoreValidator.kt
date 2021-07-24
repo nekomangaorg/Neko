@@ -19,7 +19,8 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
     override fun validate(context: Context, uri: Uri): Results {
         val backupManager = FullBackupManager(context)
 
-        val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer().use { it.readByteArray() }
+        val backupString = context.contentResolver.openInputStream(uri)!!.source().gzip().buffer()
+            .use { it.readByteArray() }
         val backup = backupManager.parser.decodeFromByteArray(BackupSerializer, backupString)
 
         if (backup.backupManga.isEmpty()) {
@@ -38,7 +39,7 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
             .distinct()
         val missingTrackers = trackers
             .mapNotNull { trackManager.getService(it) }
-            .filter { !it.isLogged }
+            .filter { !it.isLogged() }
             .map { context.getString(it.nameRes()) }
             .sorted()
 

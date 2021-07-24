@@ -922,7 +922,7 @@ class ReaderPresenter(
             val trackList = db.getTracks(manga).executeAsBlocking()
             trackList.map { track ->
                 val service = trackManager.getService(track.sync_id)
-                if (service != null && service.isLogged && chapterRead > track.last_chapter_read) {
+                if (service != null && service.isLogged() && chapterRead > track.last_chapter_read) {
                     if (!preferences.context.isOnline()) {
                         XLog.d("offline adding tracker info to update later")
                         val mangaId = manga.id ?: return@map

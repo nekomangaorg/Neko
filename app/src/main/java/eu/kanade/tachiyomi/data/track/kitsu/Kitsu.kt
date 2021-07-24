@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.data.track.updateNewTrackInfo
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.text.DecimalFormat
 
@@ -125,7 +124,11 @@ class Kitsu(private val context: Context, id: Int) : TrackService(id) {
         return api.remove(track)
     }
 
-    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
+    override suspend fun search(
+        query: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch> {
         return api.search(query, manga, wasPreviouslyTracked)
     }
 

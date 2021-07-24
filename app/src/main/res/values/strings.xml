@@ -893,6 +893,7 @@
     <string name="never">Never</string>
     <string name="newest">Newest</string>
     <string name="next">Next</string>
+    <string name="next_">Next:</string>
     <string name="no_animation">No animation</string>
     <string name="normal">Normal</string>
     <string name="oldest">Oldest</string>

@@ -171,7 +171,8 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return api.remove(track)
     }
 
-    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean) = api.search(query, manga, wasPreviouslyTracked)
+    override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean) =
+        api.search(query, manga, wasPreviouslyTracked)
 
     override suspend fun refresh(track: Track): Track {
         val remoteTrack = api.getLibManga(track, getUsername().toInt())
