@@ -228,9 +228,7 @@ object PreferenceKeys {
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val showSourcesInShortcuts = "show_sources_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
-
-    const val createLegacyBackup = "create_legacy_backup"
-
+    
     const val dohProvider = "doh_provider"
 
     const val incognitoMode = "incognito_mode"
@@ -243,9 +241,11 @@ object PreferenceKeys {
 
     const val defaultChapterFilterByBookmarked = "default_chapter_filter_by_bookmarked"
 
-    const val defaultChapterSortBySourceOrNumber = "default_chapter_sort_by_source_or_number" // and upload date
+    const val defaultChapterSortBySourceOrNumber =
+        "default_chapter_sort_by_source_or_number" // and upload date
 
-    const val defaultChapterSortByAscendingOrDescending = "default_chapter_sort_by_ascending_or_descending"
+    const val defaultChapterSortByAscendingOrDescending =
+        "default_chapter_sort_by_ascending_or_descending"
 
     const val hideChapterTitles = "hide_chapter_titles"
 

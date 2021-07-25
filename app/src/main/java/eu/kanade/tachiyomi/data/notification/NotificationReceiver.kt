@@ -377,8 +377,6 @@ class NotificationReceiver : BroadcastReceiver() {
         // Value containing chapter url.
         private const val EXTRA_CHAPTER_URL = "$ID.$NAME.EXTRA_CHAPTER_URL"
 
-        private const val EXTRA_IS_LEGACY_BACKUP = "$ID.$NAME.EXTRA_IS_LEGACY_BACKUP"
-
         /**
          * Returns a [PendingIntent] that resumes the download of a chapter
          *
@@ -750,7 +748,6 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_SHARE_BACKUP
                 putExtra(EXTRA_URI, uri)
-                putExtra(EXTRA_IS_LEGACY_BACKUP, isLegacyFormat)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)

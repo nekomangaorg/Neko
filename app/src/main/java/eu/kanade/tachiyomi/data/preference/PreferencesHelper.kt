@@ -6,7 +6,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.content.edit
 import androidx.preference.PreferenceManager
 import com.f2prateek.rx.preferences.Preference
 import com.f2prateek.rx.preferences.RxSharedPreferences
@@ -15,8 +14,8 @@ import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
+import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -133,8 +132,11 @@ class PreferencesHelper(val context: Context) {
     fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
 
     val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
-    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+    fun lightTheme() =
+        flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+
+    fun darkTheme() =
+        flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
@@ -160,9 +162,11 @@ class PreferencesHelper(val context: Context) {
 
     fun colorFilterMode() = flowPrefs.getInt(Keys.colorFilterMode, 0)
 
-    fun defaultReadingMode() = prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
+    fun defaultReadingMode() =
+        prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
 
-    fun defaultOrientationType() = flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
+    fun defaultOrientationType() =
+        flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
 
     fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
 
@@ -456,7 +460,6 @@ class PreferencesHelper(val context: Context) {
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
 
-    fun createLegacyBackup() = flowPrefs.getBoolean(Keys.createLegacyBackup, true)
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 
     fun showSeriesInShortcuts() = prefs.getBoolean(Keys.showSeriesInShortcuts, true)
@@ -468,17 +471,21 @@ class PreferencesHelper(val context: Context) {
 
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 
-    fun filterChapterByDownloaded() = flowPrefs.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
+    fun filterChapterByDownloaded() =
+        flowPrefs.getInt(Keys.defaultChapterFilterByDownloaded, Manga.SHOW_ALL)
 
-    fun filterChapterByBookmarked() = flowPrefs.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
+    fun filterChapterByBookmarked() =
+        flowPrefs.getInt(Keys.defaultChapterFilterByBookmarked, Manga.SHOW_ALL)
 
-    fun sortChapterOrder() = flowPrefs.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
+    fun sortChapterOrder() =
+        flowPrefs.getInt(Keys.defaultChapterSortBySourceOrNumber, Manga.CHAPTER_SORTING_SOURCE)
 
     fun hideChapterTitlesByDefault() = flowPrefs.getBoolean(Keys.hideChapterTitles, false)
 
     fun chaptersDescAsDefault() = flowPrefs.getBoolean(Keys.chaptersDescAsDefault, true)
 
-    fun sortChapterByAscendingOrDescending() = prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
+    fun sortChapterByAscendingOrDescending() =
+        prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
 
     fun lowQualityCovers() = prefs.getBoolean(Keys.lowQualityCovers, false)
 
