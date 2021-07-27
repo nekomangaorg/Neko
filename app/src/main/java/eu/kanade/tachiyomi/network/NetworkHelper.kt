@@ -126,9 +126,7 @@ class NetworkHelper(val context: Context) {
     val headers = Headers.Builder().apply {
         add("User-Agent", "Neko " + System.getProperty("http.agent"))
         add("Referer", MdUtil.baseUrl)
-        add("X-Requested-With", "XMLHttpRequest")
         add("Content-Type", "application/json")
-        add("Referer", MdUtil.baseUrl)
     }.build()
 
     private val jsonRetrofitClient = Retrofit.Builder().addConverterFactory(
