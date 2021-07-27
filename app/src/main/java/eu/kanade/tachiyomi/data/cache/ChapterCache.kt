@@ -219,7 +219,6 @@ class ChapterCache(private val context: Context) {
      * @param response http response from page.
      * @throws IOException image error.
      */
-    @Throws(IOException::class)
     fun putImageToCache(imageUrl: String, response: Response) {
         // Initialize editor (edits the values for an entry).
         var editor: DiskLruCache.Editor? = null
