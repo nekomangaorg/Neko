@@ -1062,6 +1062,12 @@
     <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
+    <string name="thumbnail_quality">Thumbnail quality</string>
+    <string name="original_thumb">Original</string>
+    <string name="medium_thumb">Medium</string>
+    <string name="low_thumb">Low</string>
+
+
     <string name="sync_follows_to_library">Sync MangaDex Follows</string>
     <string name="sync_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
     <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>

@@ -108,6 +108,19 @@ class SettingsSiteController :
             defaultValue = false
         }
 
+        intListPreference(activity) {
+            key = PreferenceKeys.thumbnailQuality
+            titleRes = R.string.thumbnail_quality
+            entriesRes = arrayOf(
+                R.string.original_thumb,
+                R.string.medium_thumb,
+                R.string.low_thumb,
+            )
+            entryRange = 0..2
+            defaultValue = 0
+        }
+
+
         switchPreference {
             key = PreferenceKeys.readingSync
             titleRes = R.string.reading_sync

@@ -491,6 +491,8 @@ class PreferencesHelper(val context: Context) {
 
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)
 
+    fun thumbnailQuality() = prefs.getInt(Keys.thumbnailQuality, 0)
+
     fun usePort443Only() = prefs.getBoolean(Keys.enablePort443Only, false)
 
     fun logLevel() = prefs.getInt(Keys.logLevel, 0)

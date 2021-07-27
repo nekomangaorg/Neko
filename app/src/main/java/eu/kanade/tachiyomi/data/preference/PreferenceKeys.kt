@@ -228,7 +228,7 @@ object PreferenceKeys {
     const val showSeriesInShortcuts = "show_series_shortcuts"
     const val showSourcesInShortcuts = "show_sources_shortcuts"
     const val openChapterInShortcuts = "open_chapter_shortcuts"
-    
+
     const val dohProvider = "doh_provider"
 
     const val incognitoMode = "incognito_mode"
@@ -284,4 +284,6 @@ object PreferenceKeys {
     const val addToLibraryAsPlannedToRead = "add_to_libray_as_planned_to_read"
 
     const val mangadexSyncToLibraryIndexes = "pref_mangadex_sync_to_library_indexes"
+
+    const val thumbnailQuality = "mangadex_thumbnail_quality"
 }

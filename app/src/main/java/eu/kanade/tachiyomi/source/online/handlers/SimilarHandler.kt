@@ -4,6 +4,7 @@ import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.model.MangaListPage
@@ -26,6 +27,7 @@ class SimilarHandler {
     private val network: NetworkHelper by injectLazy()
     private val db: DatabaseHelper by injectLazy()
     private val mappings: MangaMappings by injectLazy()
+    private val preferencesHelper: PreferencesHelper by injectLazy()
 
     /**
      * fetch our similar mangaList
@@ -35,14 +37,17 @@ class SimilarHandler {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if (mangaDb != null && !refresh) {
             try {
-                val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
+                val dbDto =
+                    MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
                 val idsToManga = hashMapOf<String, SManga>()
+                val thumbQuality = preferencesHelper.thumbnailQuality()
+
                 dbDto.similarMdexApi!!.results.forEach {
-                    idsToManga[it.data.id] = it.toBasicManga()
+                    idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
                 }
                 val mangaList = dbDto.similarApi!!.matches.map { idsToManga[it.id]!! }
                 return MangaListPage(mangaList, true)
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 XLog.e(e)
             }
         }
@@ -70,8 +75,10 @@ class SimilarHandler {
 
         // Loop through our *sorted* related array and list in that order
         val idsToManga = hashMapOf<String, SManga>()
+        val thumbQuality = preferencesHelper.thumbnailQuality()
+
         mangaListDto.results.forEach {
-            idsToManga[it.data.id] = it.toBasicManga()
+            idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
         }
         val mangaList = ids.map { idsToManga[it]!! }
         val mangaPages = MangaListPage(mangaList, true)
@@ -96,7 +103,7 @@ class SimilarHandler {
             manga_id = MdUtil.getMangaId(manga.url)
             data = similarDatabaseDtoString
         }
-        if(mangaDb != null) {
+        if (mangaDb != null) {
             mangaSimilar.id = mangaDb.id
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
@@ -114,13 +121,14 @@ class SimilarHandler {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if (mangaDb != null && !refresh) {
             try {
-                val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
+                val dbDto =
+                    MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
                 val idsToManga = hashMapOf<String, SManga>()
                 dbDto.anilistMdexApi!!.results.forEach {
                     idsToManga[it.data.id] = it.toBasicManga()
                 }
                 val ids = dbDto.anilistApi!!.data.Media.recommendations.edges.map {
-                    if(it.node.mediaRecommendation.format != "MANGA")
+                    if (it.node.mediaRecommendation.format != "MANGA")
                         return@map null
                     mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
                 }.filterNotNull()
@@ -130,12 +138,13 @@ class SimilarHandler {
                     tmp
                 }
                 return MangaListPage(mangaList, true)
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 XLog.e(e)
             }
         }
         // Main network request
-        val graphql = """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
+        val graphql =
+            """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
         val response = network.similarService.getAniListGraphql(graphql)
         return similarMangaExternalAnilistParse(manga, response)
     }
@@ -155,7 +164,7 @@ class SimilarHandler {
         // Get our page of mangaList
         val similarDto = response.body()!!
         val ids = similarDto.data.Media.recommendations.edges.map {
-            if(it.node.mediaRecommendation.format != "MANGA")
+            if (it.node.mediaRecommendation.format != "MANGA")
                 return@map null
             mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
         }.filterNotNull()
@@ -165,8 +174,10 @@ class SimilarHandler {
         // TODO: We should probably sort this based on score from MAL!!!
         // TODO: Also filter out manga here that are already presented
         val idsToManga = hashMapOf<String, SManga>()
+        val thumbQuality = preferencesHelper.thumbnailQuality()
+
         mangaListDto.results.forEach {
-            idsToManga[it.data.id] = it.toBasicManga()
+            idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
         }
 
         // Loop through our *sorted* related array and list in that order
@@ -197,12 +208,11 @@ class SimilarHandler {
             manga_id = MdUtil.getMangaId(manga.url)
             data = similarDatabaseDtoString
         }
-        if(mangaDb != null) {
+        if (mangaDb != null) {
             mangaSimilar.id = mangaDb.id
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
         return mangaPages
-
     }
 
     /**
@@ -216,10 +226,13 @@ class SimilarHandler {
         val mangaDb = db.getSimilar(MdUtil.getMangaId(manga.url)).executeAsBlocking()
         if (mangaDb != null && !refresh) {
             try {
-                val dbDto = MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
+                val dbDto =
+                    MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(mangaDb.data)
                 val idsToManga = hashMapOf<String, SManga>()
+                val thumbQuality = preferencesHelper.thumbnailQuality()
+
                 dbDto.myanimelistMdexApi!!.results.forEach {
-                    idsToManga[it.data.id] = it.toBasicManga()
+                    idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
                 }
                 val ids = dbDto.myanimelistApi!!.recommendations.map {
                     mappings.getMangadexID(it.mal_id.toString(), "mal")
@@ -230,7 +243,7 @@ class SimilarHandler {
                     tmp
                 }
                 return MangaListPage(mangaList, true)
-            } catch (e : Exception) {
+            } catch (e: Exception) {
                 XLog.e(e)
             }
         }
@@ -262,8 +275,10 @@ class SimilarHandler {
         // TODO: We should probably sort this based on score from MAL!!!
         // TODO: Also filter out manga here that are already presented
         val idsToManga = hashMapOf<String, SManga>()
+        val thumbQuality = preferencesHelper.thumbnailQuality()
+
         mangaListDto.results.forEach {
-            idsToManga[it.data.id] = it.toBasicManga()
+            idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
         }
 
         // Loop through our *sorted* related array and list in that order
@@ -294,12 +309,11 @@ class SimilarHandler {
             manga_id = MdUtil.getMangaId(manga.url)
             data = similarDatabaseDtoString
         }
-        if(mangaDb != null) {
+        if (mangaDb != null) {
             mangaSimilar.id = mangaDb.id
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
         return mangaPages
-
     }
 
     /**
@@ -323,5 +337,4 @@ class SimilarHandler {
         }
         return responseBody
     }
-
 }
