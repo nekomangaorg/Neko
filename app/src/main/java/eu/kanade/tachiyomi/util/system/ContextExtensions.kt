@@ -68,7 +68,10 @@ fun Context.toast(text: String?, duration: Int = Toast.LENGTH_SHORT) {
  * @param func the function that will execute inside the builder.
  * @return a notification to be displayed or updated.
  */
-inline fun Context.notification(channelId: String, func: NotificationCompat.Builder.() -> Unit): Notification {
+inline fun Context.notification(
+    channelId: String,
+    func: NotificationCompat.Builder.() -> Unit,
+): Notification {
     val builder = NotificationCompat.Builder(this, channelId)
     builder.func()
     return builder.build()
@@ -165,10 +168,10 @@ fun Context.isTablet() = resources.getBoolean(R.bool.isTablet)
  */
 fun Context.notificationBuilder(
     channelId: String,
-    block: (NotificationCompat.Builder.() -> Unit)? = null
+    block: (NotificationCompat.Builder.() -> Unit)? = null,
 ): NotificationCompat.Builder {
     val builder = NotificationCompat.Builder(this, channelId)
-        .setColor(ContextCompat.getColor(this, R.color.colorAccent))
+        .setColor(ContextCompat.getColor(this, R.color.splash_background))
     if (block != null) {
         builder.block()
     }
@@ -219,9 +222,10 @@ fun Context.sendLocalBroadcast(intent: Intent) {
  * @param intent intent that contains broadcast information
  */
 fun Context.sendLocalBroadcastSync(intent: Intent) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcastSync(
-        intent
-    )
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+        .sendBroadcastSync(
+            intent
+        )
 }
 
 /**
@@ -242,9 +246,10 @@ fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFil
  * @param receiver receiver that gets unregistered.
  */
 fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
-    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).unregisterReceiver(
-        receiver
-    )
+    androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
+        .unregisterReceiver(
+            receiver
+        )
 }
 
 /**
@@ -367,7 +372,12 @@ fun Context.createFileInCacheDir(name: String): File {
  * @param resource the attribute.
  */
 @SuppressLint("ResourceType")
-fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
+fun Context.iconicsDrawableLarge(
+    icon: IIcon,
+    size: Int = 24,
+    color: Int = R.attr.colorAccent,
+    attributeColor: Boolean = true,
+): IconicsDrawable {
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }
 
@@ -375,12 +385,22 @@ fun Context.iconicsDrawableLarge(icon: IIcon, size: Int = 24, color: Int = R.att
  * default tinted to actionbar
  */
 @SuppressLint("ResourceType")
-fun Context.iconicsDrawableMedium(icon: IIcon, size: Int = 18, color: Int = R.attr.actionBarTintColor, attributeColor: Boolean = true): IconicsDrawable {
+fun Context.iconicsDrawableMedium(
+    icon: IIcon,
+    size: Int = 18,
+    color: Int = R.attr.actionBarTintColor,
+    attributeColor: Boolean = true,
+): IconicsDrawable {
     return this.iconicsDrawable(icon, size, color, attributeColor)
 }
 
 @SuppressLint("ResourceType")
-fun Context.iconicsDrawable(icon: IIcon, size: Int = 15, color: Int = R.attr.colorAccent, attributeColor: Boolean = true): IconicsDrawable {
+fun Context.iconicsDrawable(
+    icon: IIcon,
+    size: Int = 15,
+    color: Int = R.attr.colorAccent,
+    attributeColor: Boolean = true,
+): IconicsDrawable {
     return IconicsDrawable(this, icon).apply {
         sizeDp = size
         colorInt = when {

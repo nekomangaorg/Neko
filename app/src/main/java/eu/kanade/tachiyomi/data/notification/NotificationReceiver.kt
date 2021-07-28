@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -35,7 +36,6 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.v5.job.V5MigrationService
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -252,8 +252,8 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param notificationId id of notification
      */
     private fun cancelV5Migration(context: Context) {
-        V5MigrationService.stop(context)
-        Handler().post { dismissNotification(context, Notifications.ID_V5_MIGRATION_PROGRESS) }
+        WorkManager.getInstance(context).cancelAllWorkByTag(V5MigrationJob.TAG)
+        Handler().post { dismissNotification(context, Notifications.Id.V5.Progress) }
     }
 
     private fun cancelTrackingSync(context: Context) {

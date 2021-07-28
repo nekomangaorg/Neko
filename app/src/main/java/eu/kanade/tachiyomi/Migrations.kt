@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -64,10 +63,6 @@ object Migrations {
                     trackManager.myAnimeList.logout()
                     context.toast(R.string.myanimelist_relogin)
                 }
-            }
-            if (oldVersion < 114 && oldVersion != 0) {
-                // Force migrate all manga to the new V5 ids
-                V5MigrationJob.doWorkNow()
             }
             if (oldVersion < 115) {
                 // Migrate DNS over HTTPS setting
