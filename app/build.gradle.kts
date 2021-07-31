@@ -38,11 +38,11 @@ fun runCommand(command: String): String {
 }
 
 android {
-    compileSdkVersion(Configs.compileSdkVersion)
+    compileSdk = Configs.compileSdkVersion
 
     defaultConfig {
-        minSdkVersion(Configs.minSdkVersion)
-        targetSdkVersion(Configs.targetSdkVersion)
+        minSdk = Configs.minSdkVersion
+        targetSdk = Configs.targetSdkVersion
         applicationId = Configs.applicationId
         versionCode = Configs.versionCode
         versionName = Configs.versionName
