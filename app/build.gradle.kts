@@ -70,18 +70,19 @@ android {
         viewBinding = true
     }
 
-    flavorDimensions("default")
+    flavorDimensions.add("default")
 
     productFlavors {
         create("standard") {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
         create("dev") {
-            resConfig("en")
+
+            resourceConfigurations.add("en")
         }
     }
 
-    lintOptions {
+    lint {
         disable("MissingTranslation")
         isAbortOnError = false
         isCheckReleaseBuilds = false
