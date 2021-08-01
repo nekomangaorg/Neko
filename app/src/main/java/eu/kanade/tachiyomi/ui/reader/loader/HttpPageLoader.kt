@@ -235,23 +235,23 @@ class HttpPageLoader(
      *
      * @param page the page.
      */
-    private fun HttpSource.getCachedImage(page: ReaderPage): Observable<ReaderPage> {
-        val imageUrl = page.imageUrl ?: return Observable.just(page)
+    private fun HttpSource.getCachedImage(initialPage: ReaderPage): Observable<ReaderPage> {
+        val imageUrl = initialPage.imageUrl ?: return Observable.just(initialPage)
 
-        return Observable.just(page)
-            .flatMap {
-                if (!chapterCache.isImageInCache(imageUrl)) {
-                    cacheImage(page)
-                } else {
-                    Observable.just(page)
+        return runAsObservable(scope) {
+            runCatching {
+                val page = when (chapterCache.isImageInCache(imageUrl)) {
+                    true -> initialPage
+                    false -> cacheImage(initialPage)
                 }
-            }
-            .doOnNext {
                 page.stream = { chapterCache.getImageFile(imageUrl).inputStream() }
                 page.status = Page.READY
+                page
+            }.getOrElse {
+                XLog.e("error getting page", it)
+                initialPage.apply { status = Page.ERROR }
             }
-            .doOnError { page.status = Page.ERROR }
-            .onErrorReturn { page }
+        }
     }
 
     /**
@@ -259,12 +259,12 @@ class HttpPageLoader(
      *
      * @param page the page.
      */
-    private fun HttpSource.cacheImage(page: ReaderPage): Observable<ReaderPage> {
-        page.status = Page.DOWNLOAD_IMAGE
-        return runAsObservable(scope) {
+    suspend fun HttpSource.cacheImage(page: ReaderPage): ReaderPage {
+        return withIOContext {
+            page.status = Page.DOWNLOAD_IMAGE
             val image = fetchImage(page)
-            withIOContext { chapterCache.putImageToCache(page.imageUrl!!, image) }
-            image
-        }.map { page }
+            chapterCache.putImageToCache(page.imageUrl!!, image)
+            page
+        }
     }
 }

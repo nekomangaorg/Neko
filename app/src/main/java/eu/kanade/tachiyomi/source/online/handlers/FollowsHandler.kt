@@ -67,7 +67,7 @@ class FollowsHandler {
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
 
         val result = response.map { mangaDto ->
-            mangaDto.toBasicManga().apply {
+            mangaDto.toBasicManga(preferences.thumbnailQuality()).apply {
                 this.follow_status = FollowStatus.fromDex(readingStatusMap[mangaDto.data.id])
             }
         }.sortedWith(comparator)

@@ -209,6 +209,8 @@
         <item quantity="other">%1$d updates failed</item>
     </plurals>
 
+    <string name="number_of_migrated">only %d manga needed to be migrated</string>
+
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
@@ -1062,6 +1064,12 @@
     <string name="data_saver_summary">View/Download compressed Chapter Images</string>
     <string name="data_saver_disabled">Disabled</string>
     <string name="data_saver_enabled">Enabled</string>
+    <string name="thumbnail_quality">Thumbnail quality</string>
+    <string name="original_thumb">Original</string>
+    <string name="medium_thumb">Medium</string>
+    <string name="low_thumb">Low</string>
+
+
     <string name="sync_follows_to_library">Sync MangaDex Follows</string>
     <string name="sync_follows_to_library_summary">Pulls Manga from your MangaDex Follows List into your Neko library if they are not already added.</string>
     <string name="sync_follows_to_library_toast">Synced %d new manga from MangaDex</string>
@@ -1114,5 +1122,6 @@
 
     <!-- v5 migration -->
     <string name="v5_migration_service">V5 Migration</string>
+    <string name="v5_migration_complete">V5 Migration Complete</string>
     <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.</string>
 </resources>

@@ -3,17 +3,17 @@ package eu.kanade.tachiyomi.ui.manga
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
-import android.graphics.Color
-import android.view.LayoutInflater
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
+import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
+import androidx.core.text.isDigitsOnly
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import coil.request.CachePolicy
@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -222,9 +223,11 @@ class MangaHeaderHolder(
             binding.mangaAuthor.text =
                 listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
-        binding.mangaSummary.text =
-            if (manga.description.isNullOrBlank()) itemView.context.getString(R.string.no_description)
-            else manga.description?.trim()
+        binding.mangaSummary.text = when {
+            MdUtil.getMangaId(manga.url).isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
+            manga.description.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
+            else -> manga.description?.trim()
+        }
 
         binding.mangaSummary.post {
 //            if (binding.subItemGroup.isVisible) {

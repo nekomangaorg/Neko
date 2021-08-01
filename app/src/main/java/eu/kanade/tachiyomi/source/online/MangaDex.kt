@@ -58,7 +58,8 @@ open class MangaDex : HttpSource() {
     fun getRandomManga(): Flow<SManga?> {
         return flow {
             if (network.service.randomManga().isSuccessful) {
-                emit(network.service.randomManga().body()!!.toBasicManga())
+                emit(network.service.randomManga().body()!!
+                    .toBasicManga(preferences.thumbnailQuality()))
             } else {
                 emit(null)
             }

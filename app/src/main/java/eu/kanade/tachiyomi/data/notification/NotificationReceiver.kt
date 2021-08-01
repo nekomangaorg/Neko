@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -35,7 +36,6 @@ import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.notificationManager
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.v5.job.V5MigrationService
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -252,8 +252,8 @@ class NotificationReceiver : BroadcastReceiver() {
      * @param notificationId id of notification
      */
     private fun cancelV5Migration(context: Context) {
-        V5MigrationService.stop(context)
-        Handler().post { dismissNotification(context, Notifications.ID_V5_MIGRATION_PROGRESS) }
+        WorkManager.getInstance(context).cancelAllWorkByTag(V5MigrationJob.TAG)
+        Handler().post { dismissNotification(context, Notifications.Id.V5.Progress) }
     }
 
     private fun cancelTrackingSync(context: Context) {
@@ -376,8 +376,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
         // Value containing chapter url.
         private const val EXTRA_CHAPTER_URL = "$ID.$NAME.EXTRA_CHAPTER_URL"
-
-        private const val EXTRA_IS_LEGACY_BACKUP = "$ID.$NAME.EXTRA_IS_LEGACY_BACKUP"
 
         /**
          * Returns a [PendingIntent] that resumes the download of a chapter
@@ -750,7 +748,6 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_SHARE_BACKUP
                 putExtra(EXTRA_URI, uri)
-                putExtra(EXTRA_IS_LEGACY_BACKUP, isLegacyFormat)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
             return PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT)

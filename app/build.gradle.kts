@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 124
-    const val versionName = "2.5.5.1"
+    const val versionCode = 125
+    const val versionName = "2.5.6"
 }
 
 plugins {
@@ -70,18 +70,19 @@ android {
         viewBinding = true
     }
 
-    flavorDimensions("default")
+    flavorDimensions.add("default")
 
     productFlavors {
         create("standard") {
             buildConfigField("Boolean", "INCLUDE_UPDATER", "true")
         }
         create("dev") {
-            resConfig("en")
+
+            resourceConfigurations.add("en")
         }
     }
 
-    lintOptions {
+    lint {
         disable("MissingTranslation")
         isAbortOnError = false
         isCheckReleaseBuilds = false
@@ -153,14 +154,6 @@ dependencies {
     val chuckerVersion = "3.2.0"
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
-
-    // hyperion
-    val hyperionVersion = "0.9.33"
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-core:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-attr:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-crash:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-shared-preferences:$hyperionVersion")
-    debugImplementation("com.willowtreeapps.hyperion:hyperion-timber:$hyperionVersion")
 
     // REST
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
@@ -278,8 +271,7 @@ dependencies {
 
     //helpers
     implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:3.0.5")
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.12")
-
+    implementation("com.github.skydoves:sandwich:1.2.1")
 
     implementation("com.mikepenz:aboutlibraries:8.9.1")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")

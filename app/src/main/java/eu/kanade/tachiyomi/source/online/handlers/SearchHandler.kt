@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.network.services.MangaDexService
@@ -19,6 +20,7 @@ class SearchHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
     private val filterHandler: FilterHandler by injectLazy()
     private val apiMangaParser: ApiMangaParser by injectLazy()
+    private val preferencesHelper: PreferencesHelper by injectLazy()
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return withContext(Dispatchers.IO) {
@@ -56,8 +58,10 @@ class SearchHandler {
 
         val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
+        val thumbQuality = preferencesHelper.thumbnailQuality()
+        
         val mangaList = mangaListDto.results.map {
-            it.toBasicManga()
+            it.toBasicManga(thumbQuality)
         }
 
         return MangaListPage(mangaList, hasMoreResults)

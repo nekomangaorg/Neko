@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -106,10 +108,22 @@ class ImageHandler {
                 true -> data[0]
                 false -> {
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    service.getAtHomeServer(
-                        page.mangaDexChapterId,
-                        preferences.usePort443Only()
-                    ).body()!!.baseUrl
+                    val atHomeResponse = service.getAtHomeServer(page.mangaDexChapterId,
+                        preferences.usePort443Only())
+
+                    when (atHomeResponse) {
+                        is ApiResponse.Success -> {
+                            updateTokenTracker(page.mangaDexChapterId, currentTime)
+                            XLog.d("Successfully refresh page")
+                            atHomeResponse.getOrThrow().baseUrl
+                        }
+                        is ApiResponse.Failure.Error -> {
+                            throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
+                        }
+                        is ApiResponse.Failure.Exception<*> -> {
+                            throw Exception("Error getting image ${atHomeResponse.message}")
+                        }
+                    }
                 }
             }
         XLog.d("Image server is $mdAtHomeServerUrl")

@@ -57,11 +57,9 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 val followStatus = FollowStatus.fromInt(track.status)
 
                 // allow follow status to update
-                if (manga.follow_status != followStatus) {
-                    mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
-                    manga.follow_status = followStatus
-                    db.insertManga(manga).executeAsBlocking()
-                }
+                mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
+                manga.follow_status = followStatus
+                db.insertManga(manga).executeAsBlocking()
 
                 if (track.score.toInt() > 0) {
                     mdex.updateRating(track)

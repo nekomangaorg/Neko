@@ -87,13 +87,10 @@ class BackupRestoreService : Service() {
             stopSelf(startId)
         }
         job = GlobalScope.launch(handler) {
-            when {
-                mode == BackupConst.BACKUP_TYPE_FULL -> FullRestore(
-                    this@BackupRestoreService,
-                    job
-                ).restoreBackup(uri)
-                // else -> LegacyRestore(this@BackupRestoreService, job).restoreBackup(uri)
-            }
+            FullRestore(
+                this@BackupRestoreService,
+                job
+            ).restoreBackup(uri)
         }
         job?.invokeOnCompletion { stopSelf(startId) }
 

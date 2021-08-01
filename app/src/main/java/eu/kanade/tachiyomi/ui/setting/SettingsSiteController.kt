@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
@@ -21,7 +22,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.v5.job.V5MigrationJob
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
@@ -108,6 +108,19 @@ class SettingsSiteController :
             defaultValue = false
         }
 
+        intListPreference(activity) {
+            key = PreferenceKeys.thumbnailQuality
+            titleRes = R.string.thumbnail_quality
+            entriesRes = arrayOf(
+                R.string.original_thumb,
+                R.string.medium_thumb,
+                R.string.low_thumb,
+            )
+            entryRange = 0..2
+            defaultValue = 0
+        }
+
+
         switchPreference {
             key = PreferenceKeys.readingSync
             titleRes = R.string.reading_sync
@@ -182,7 +195,7 @@ class SettingsSiteController :
                 MaterialDialog(activity!!).show {
                     title(text = "This will start legacy id migration (Note: This uses data)")
                     positiveButton(android.R.string.ok) {
-                        V5MigrationJob.doWorkNow()
+                        V5MigrationJob.doWorkNow(activity!!)
                     }
                 }
             }

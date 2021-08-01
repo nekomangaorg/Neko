@@ -5,6 +5,7 @@ import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
@@ -126,9 +127,7 @@ class NetworkHelper(val context: Context) {
     val headers = Headers.Builder().apply {
         add("User-Agent", "Neko " + System.getProperty("http.agent"))
         add("Referer", MdUtil.baseUrl)
-        add("X-Requested-With", "XMLHttpRequest")
         add("Content-Type", "application/json")
-        add("Referer", MdUtil.baseUrl)
     }.build()
 
     private val jsonRetrofitClient = Retrofit.Builder().addConverterFactory(
@@ -138,6 +137,7 @@ class NetworkHelper(val context: Context) {
         }.asConverterFactory("application/json".toMediaType())
     )
         .baseUrl(MdConstants.baseUrl)
+        .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory.create())
         .client(client)
 
     val service: MangaDexService = jsonRetrofitClient.baseUrl(MdApi.baseUrl).client(client).build()

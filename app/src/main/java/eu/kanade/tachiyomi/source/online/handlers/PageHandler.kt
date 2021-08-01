@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -50,18 +52,28 @@ class PageHandler {
                             preferences.usePort443Only()
                         )
 
-                    if (atHomeResponse.isSuccessful.not()) {
-                        XLog.e(
-                            "error returned from atHomeResponse ${
-                                atHomeResponse.errorBody()?.string()
-                            }"
-                        )
-                        throw Exception("error returned from atHomeResponse: Error code ${atHomeResponse.code()}")
+                    when (atHomeResponse) {
+                        is ApiResponse.Success -> {
+                            XLog.d("successfully got at home host")
+                        }
+                        is ApiResponse.Failure.Error -> {
+                            XLog.e("error returned from atHomeResponse ${
+                                atHomeResponse.response.errorBody()?.string()
+                            }")
+                            throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
+                        }
+                        is ApiResponse.Failure.Exception<*> -> {
+                            XLog.e("error returned from atHomeResponse ${atHomeResponse.message}")
+                            throw Exception("Error getting image ${atHomeResponse.message}")
+                        }
                     }
+
+                    val atHomeDto = atHomeResponse.getOrThrow()
+
 
                     pageListParse(
                         chapterResponse.body()!!,
-                        atHomeResponse.body()!!,
+                        atHomeDto,
                         preferences.dataSaver()
                     )
                 }

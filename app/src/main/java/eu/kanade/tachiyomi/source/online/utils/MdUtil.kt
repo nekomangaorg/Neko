@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import kotlinx.serialization.json.Json
-import okhttp3.Headers
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -268,15 +267,16 @@ class MdUtil {
             }
         }
 
-        fun cdnCoverUrl(dexId: String, fileName: String): String {
-            return "$cdnUrl/covers/$dexId/$fileName"
+        fun cdnCoverUrl(dexId: String, fileName: String, quality: Int): String {
+            val coverQualitySuffix = when (quality) {
+                1 -> ".512.jpg"
+                2 -> ".256.jpg"
+                else -> ""
+            }
+            return "$cdnUrl/covers/$dexId/$fileName$coverQualitySuffix"
         }
 
         fun getLangsToShow(preferences: PreferencesHelper) =
             preferences.langsToShow().get().split(",")
-
-        fun getAuthHeaders(headers: Headers, preferences: PreferencesHelper) =
-            headers.newBuilder().add("Authorization", "Bearer ${preferences.sessionToken()!!}")
-                .build()
     }
 }

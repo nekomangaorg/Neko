@@ -54,8 +54,9 @@ class LatestChapterHandler {
 
         val mangaDtoMap = mangaListDto.body()!!.results.associateBy({ it.data.id }, { it })
 
+        val thumbQuality = preferencesHelper.thumbnailQuality()
         val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }.map {
-            it.toBasicManga()
+            it.toBasicManga(thumbQuality)
         }
 
         return MangaListPage(mangaList, hasMoreResults)

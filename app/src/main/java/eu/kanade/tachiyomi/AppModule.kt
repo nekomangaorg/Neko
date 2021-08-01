@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.FollowsSyncService
+import eu.kanade.tachiyomi.jobs.migrate.V5MigrationService
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncService
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.SourceManager
@@ -90,6 +91,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(StatusHandler())
 
         addSingleton(FollowsSyncService())
+
+        addSingleton(V5MigrationService())
 
         addSingleton(TrackingSyncService())
 
