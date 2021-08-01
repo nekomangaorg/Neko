@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.track.kitsu
 
+import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -149,7 +150,9 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
-        if (manga.kitsu_id !== null && !wasPreviouslyTracked) {
+        if (manga.kitsu_id.isNullOrBlank()
+                .not() && !wasPreviouslyTracked && manga.kitsu_id!!.isDigitsOnly()
+        ) {
             client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
                 .await().parseAs<JsonObject>().let {
                     val id = it["data"]!!.jsonArray[0].jsonObject["id"]!!.jsonPrimitive
