@@ -48,13 +48,13 @@ fun Controller.setOnQueryTextChangeListener(
     searchView: SearchView,
     onlyOnSubmit: Boolean = false,
     hideKbOnSubmit: Boolean = true,
-    f: (text: String?) -> Boolean
+    f: (text: String?) -> Boolean,
 ) {
     searchView.setOnQueryTextListener(
         object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!onlyOnSubmit && router.backstack.lastOrNull()
-                    ?.controller == this@setOnQueryTextChangeListener
+                        ?.controller == this@setOnQueryTextChangeListener
                 ) {
                     return f(newText)
                 }
@@ -78,8 +78,10 @@ fun Controller.setOnQueryTextChangeListener(
 }
 
 fun Controller.removeQueryListener() {
-    val searchView = activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
-    val searchView2 = activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    val searchView =
+        activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
+    val searchView2 =
+        activityBinding?.toolbar?.menu?.findItem(R.id.action_search)?.actionView as? SearchView
     searchView?.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
         override fun onQueryTextSubmit(query: String?) = true
         override fun onQueryTextChange(newText: String?) = true
@@ -161,7 +163,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
-                    ?.controller == this@liftAppbarWith && activity != null
+                        ?.controller == this@liftAppbarWith && activity != null
                 ) {
                     val notAtTop = recycler.canScrollVertically(-1)
                     if (notAtTop != elevate) elevateFunc(notAtTop)
@@ -180,13 +182,14 @@ fun Controller.scrollViewWith(
     liftOnScroll: ((Boolean) -> Unit)? = null,
     onLeavingController: (() -> Unit)? = null,
     onBottomNavUpdate: (() -> Unit)? = null,
-    includeTabView: Boolean = false
+    includeTabView: Boolean = false,
 ): ((Boolean) -> Unit) {
     var statusBarHeight = -1
     val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
     activityBinding?.tabsFrameLayout?.elevation = 0f
-    val isSideNavWithTabs = activityBinding?.sideNav != null && includeTabView && recycler.context.isTablet()
+    val isSideNavWithTabs =
+        activityBinding?.sideNav != null && includeTabView && recycler.context.isTablet()
     activityBinding?.tabShadow?.isVisible = isSideNavWithTabs
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
@@ -197,9 +200,11 @@ fun Controller.scrollViewWith(
     array.recycle()
     swipeRefreshLayout?.setDistanceToTriggerSync(150.dpToPx)
     activityBinding!!.toolbar.post {
-        if (toolbarHeight!! > 0) {
-            appBarHeight = toolbarHeight!! + if (includeTabView) tabBarHeight else 0
-            recycler.requestApplyInsets()
+        toolbarHeight?.let {
+            if (toolbarHeight!! > 0) {
+                appBarHeight = toolbarHeight!! + if (includeTabView) tabBarHeight else 0
+                recycler.requestApplyInsets()
+            }
         }
     }
     val updateViewsNearBottom = {
@@ -282,7 +287,7 @@ fun Controller.scrollViewWith(
             override fun onChangeStart(
                 controller: Controller,
                 changeHandler: ControllerChangeHandler,
-                changeType: ControllerChangeType
+                changeType: ControllerChangeType,
             ) {
                 super.onChangeStart(controller, changeHandler, changeType)
                 isInView = changeType.isEnter
@@ -311,11 +316,11 @@ fun Controller.scrollViewWith(
                 } else {
                     activityBinding?.tabShadow?.isVisible = false
                     if (!customPadding && lastY == 0f && (
-                        (
-                            this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
-                                ?.controller is MangaDetailsController
-                            ) || includeTabView
-                        )
+                            (
+                                this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
+                                    ?.controller is MangaDetailsController
+                                ) || includeTabView
+                            )
                     ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val v = View(activity)
@@ -343,7 +348,8 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                     }
                     elevationAnim?.cancel()
-                    if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(null)
+                    if (activityBinding!!.toolbar.tag == randomTag) activityBinding!!.toolbar.setOnClickListener(
+                        null)
                 }
             }
         }
@@ -353,13 +359,14 @@ fun Controller.scrollViewWith(
     recycler.post {
         elevateFunc(recycler.canScrollVertically(-1))
     }
-    val isTablet = recycler.context.isTablet() && recycler.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+    val isTablet =
+        recycler.context.isTablet() && recycler.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
     recycler.addOnScrollListener(
         object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
-                    ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
+                        ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                     activity != null && activityBinding!!.appBar.height > 0 &&
                     recycler.translationY == 0f
                 ) {
@@ -408,12 +415,12 @@ fun Controller.scrollViewWith(
                             }
 
                             if (!elevate && (
-                                dy == 0 ||
-                                    (
-                                        activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
-                                            dy == 0 && activityBinding!!.appBar.y == 0f
-                                        )
-                                )
+                                    dy == 0 ||
+                                        (
+                                            activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
+                                                dy == 0 && activityBinding!!.appBar.y == 0f
+                                            )
+                                    )
                             ) {
                                 elevateFunc(true)
                             }
@@ -433,7 +440,7 @@ fun Controller.scrollViewWith(
                         return
                     }
                     if (router?.backstack?.lastOrNull()
-                        ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
+                            ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
                         activity != null && activityBinding!!.appBar.height > 0 &&
                         recycler.translationY == 0f
                     ) {
@@ -442,8 +449,10 @@ fun Controller.scrollViewWith(
                             android.R.integer.config_shortAnimTime
                         ) ?: 0
                         val closerToTop = abs(activityBinding!!.appBar.y) > halfWay
-                        val halfWayBottom = (activityBinding!!.bottomNav?.height?.toFloat() ?: 0f) / 2
-                        val closerToBottom = activityBinding!!.bottomNav?.translationY ?: 0f > halfWayBottom
+                        val halfWayBottom =
+                            (activityBinding!!.bottomNav?.height?.toFloat() ?: 0f) / 2
+                        val closerToBottom =
+                            activityBinding!!.bottomNav?.translationY ?: 0f > halfWayBottom
                         val atTop = !recycler.canScrollVertically(-1)
                         val closerToEdge =
                             if (activityBinding!!.bottomNav?.isVisible == true &&
@@ -486,7 +495,9 @@ fun Controller.scrollViewWith(
 fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: Int) {
     val activity = activity ?: return
     permissions.forEach { permission ->
-        if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
+        if (ContextCompat.checkSelfPermission(activity,
+                permission) != PackageManager.PERMISSION_GRANTED
+        ) {
             requestPermissions(arrayOf(permission), requestCode)
         }
     }
@@ -495,7 +506,7 @@ fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: I
 fun Controller.requestFilePermissionsSafe(
     requestCode: Int,
     preferences: PreferencesHelper,
-    showA11PermissionAnyway: Boolean = false
+    showA11PermissionAnyway: Boolean = false,
 ) {
     val activity = activity ?: return
     val permissions = mutableListOf(Manifest.permission.WRITE_EXTERNAL_STORAGE)
