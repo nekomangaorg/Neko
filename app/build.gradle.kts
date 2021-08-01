@@ -271,9 +271,8 @@ dependencies {
 
     //helpers
     implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:3.0.5")
-    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.12")
-
-
+    implementation("com.github.skydoves:sandwich:1.2.1")
+    
     implementation("com.mikepenz:aboutlibraries:8.9.1")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
