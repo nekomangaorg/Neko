@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 object MdApi {
-    const val baseUrl = "http://api.mangadex.org"
+    const val baseUrl = "https://api.mangadex.org"
     const val login = "/auth/login"
     const val checkToken = "/auth/check"
     const val refreshToken = "/auth/refresh"
