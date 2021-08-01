@@ -835,26 +835,30 @@ class MangaDetailsPresenter(
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
     }
 
+    fun afterFavorited() {
+        if (preferences.addToLibraryAsPlannedToRead()) {
+            val trackHolder = trackList.firstOrNull { it.service.isMdList() }
+            if (trackHolder?.service?.isLogged() == true) {
+                val mdTrack = trackHolder.track
+                mdTrack?.let {
+                    if (FollowStatus.fromInt(it.status) == FollowStatus.UNFOLLOWED) {
+                        it.status = FollowStatus.PLAN_TO_READ.int
+                        scope.launch {
+                            trackManager.getService(TrackManager.MDLIST)!!.update(it)
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     fun toggleFavorite(): Boolean {
         manga.favorite = !manga.favorite
 
         when (manga.favorite) {
             true -> {
                 manga.date_added = Date().time
-                if (preferences.addToLibraryAsPlannedToRead()) {
-                    val trackHolder = trackList.firstOrNull { it.service.isMdList() }
-                    if (trackHolder?.service?.isLogged() == true) {
-                        val mdTrack = trackHolder.track
-                        mdTrack?.let {
-                            if (FollowStatus.fromInt(it.status) == FollowStatus.UNFOLLOWED) {
-                                it.status = FollowStatus.PLAN_TO_READ.int
-                                scope.launch {
-                                    trackManager.getService(TrackManager.MDLIST)!!.update(it)
-                                }
-                            }
-                        }
-                    }
-                }
+                afterFavorited()
             }
             false -> manga.date_added = 0
         }

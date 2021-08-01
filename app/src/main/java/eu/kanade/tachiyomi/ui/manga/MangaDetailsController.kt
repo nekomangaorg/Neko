@@ -1063,7 +1063,7 @@ class MangaDetailsController :
         val text = view.context.getString(
             R.string.add_x_to_library,
             presenter.manga.seriesType
-                (view.context).toLowerCase(Locale.ROOT)
+                (view.context).lowercase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
                 snack == null ||
@@ -1215,7 +1215,9 @@ class MangaDetailsController :
             activity,
             onMangaAdded = {
                 updateHeader()
+                presenter.afterFavorited()
                 showAddedSnack()
+
             },
             onMangaMoved = { updateHeader() },
             onMangaDeleted = { presenter.confirmDeletion() }

@@ -1,10 +1,15 @@
-Bug fix release see
-https://github.com/CarlosEsco/Neko/releases/tag/2.5.5 for the actual changes
-
+## 🥳 New
+- ability to set cover quality for browse
+## 🏗️ Changes
+- use https for api url
+- if a manga in library is not v5 show a warning in the description
+- more clear notifications when using v5 migrate
 ## 🐜 Fixes
-- Logging out of MD was hiding tracker, but logging back in was not reshowing
-- Dont show "adding scanlator" toast if manga was not intialized
-- cleaned up some inconsistencies on transition page between chapters
-- Fix amoled theme resetting on relaunch for older devices/system light theme (@Jays2Kings)
+- option to add manga as Plan to Read on MangaDex was not working when favoriting in manga header view
+- faint square was showing when long pressing manga in library
+- add missing permission for a12 silent install
 ## 🛠️ Other
-- Update some libraries
+- Update to gradle 7.1
+- update readme icon
+- removed code for legacy backup
+- fix pr-ci.yml
