@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 124
-    const val versionName = "2.5.5.1"
+    const val versionCode = 125
+    const val versionName = "2.5.6"
 }
 
 plugins {
@@ -272,7 +272,7 @@ dependencies {
     //helpers
     implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:3.0.5")
     implementation("com.github.skydoves:sandwich:1.2.1")
-    
+
     implementation("com.mikepenz:aboutlibraries:8.9.1")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
