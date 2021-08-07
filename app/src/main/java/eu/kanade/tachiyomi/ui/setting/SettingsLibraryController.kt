@@ -134,7 +134,8 @@ class SettingsLibraryController : SettingsController() {
                 titleRes = R.string.library_update_restriction
                 entriesRes = arrayOf(R.string.wifi, R.string.charging)
                 entryValues = listOf("wifi", "ac")
-                summaryRes = R.string.library_update_restriction_summary
+                preSummaryRes = R.string.restrictions_
+                noSelectionRes = R.string.none
 
                 preferences.libraryUpdateInterval().asObservable()
                     .subscribeUntilDestroy { isVisible = it > 0 }
@@ -164,7 +165,6 @@ class SettingsLibraryController : SettingsController() {
                 )
                 entryRange = 0..2
                 defaultValue = 0
-                summaryRes = R.string.select_order_to_update
             }
 
             triStateListPreference(activity) {

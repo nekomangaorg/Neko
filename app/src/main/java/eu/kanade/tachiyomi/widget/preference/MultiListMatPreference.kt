@@ -21,6 +21,7 @@ class MultiListMatPreference @JvmOverloads constructor(
     ListMatPreference(activity, context, attrs) {
 
     var allSelectionRes: Int? = null
+    var noSelectionRes: Int? = null
 
     /** All item is always selected and uncheckabele */
     var allIsAlwaysSelected = false
@@ -55,6 +56,9 @@ class MultiListMatPreference @JvmOverloads constructor(
                         listOf(context.getString(allRes)) + values
                 allIsAlwaysSelected -> values = values + context.getString(allRes)
             }
+        }
+        if (values.isEmpty()) {
+            noSelectionRes?.let { values = listOf(context.getString(it)) }
         }
         values.joinToString()
     }
