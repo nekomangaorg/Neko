@@ -19,6 +19,8 @@
     <color name="download">@color/material_green_700</color>
     <color name="holo_red">#cc4444</color>
     <color name="splashIcon">@color/md_white_1000</color>
+    <color name="downloadBadgeDayNight">@color/download_badge_light</color>
+    <color name="colorOnDownloadBadgeDayNight">@color/md_white_1000</color>
 
     <color name="background">#292929</color>
     <color name="dialog">#292929</color>
@@ -27,8 +29,7 @@
     <!-- Tako Theme -->
     <color name="accentTako">#F3B375</color>
     <color name="colorOnAccentTako">#242431</color>
-    <color name="tertiaryTako">@color/colorOnAccentTako</color>
-    <color name="colorOnTertiaryTako">@color/accentTako</color>
+        <color name="tabBarIconColorTako">@color/accentTako</color>
     <color name="rippleColoredTako">#1FF3B375</color>
     <color name="surfaceTako">#2A2A3C</color>
     <color name="backgroundTako">#21212E</color>

@@ -13,7 +13,7 @@
 
     <attr name="unreadBadgeColor" format="color" />
     <attr name="colorOnUnreadBadge" format="color" />
-    <attr name="downloadBadgeColor" format="color" />
+    <attr name="colorDownloadBadge" format="color" />
     <attr name="colorOnDownloadBadge" format="color" />
     <attr name="actionBarTintColor" format="color" />
     <attr name="colorOnHopper" format="color" />
