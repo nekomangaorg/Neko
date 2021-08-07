@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.category
 import android.app.Activity
 import android.app.Dialog
 import android.os.Bundle
-import android.widget.CompoundButton
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import com.afollestad.materialdialogs.MaterialDialog
@@ -21,6 +20,7 @@ import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibrarySort
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import uy.kohesive.injekt.injectLazy
 
 class ManageCategoryDialog(bundle: Bundle? = null) :
@@ -98,15 +98,25 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 return false
             }
         }
-        when (updatePref(preferences.downloadNewCategories(), binding.downloadNew)) {
+        when (
+            updatePref(
+                preferences.downloadNewCategories(),
+                preferences.downloadNewCategoriesExclude(),
+                binding.downloadNew
+            )
+        ) {
             true -> preferences.downloadNew().set(true)
             false -> preferences.downloadNew().set(false)
         }
         if (preferences.libraryUpdateInterval().getOrDefault() > 0 &&
-            updatePref(preferences.libraryUpdateCategories(), binding.includeGlobal) == false
+            updatePref(
+                    preferences.libraryUpdateCategories(),
+                    preferences.libraryUpdateCategoriesExclude(),
+                    binding.includeGlobal
+                ) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
-            LibraryUpdateJob.setupTask(binding.root.context, 0)
+            LibraryUpdateJob.setupTask(preferences.context, 0)
         }
         updateLibrary?.invoke(category.id)
         return true
@@ -140,6 +150,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         setCheckbox(
             binding.downloadNew,
             preferences.downloadNewCategories(),
+            preferences.downloadNewCategoriesExclude(),
             true
         )
         if (downloadNew && preferences.downloadNewCategories().get().isEmpty()) {
@@ -147,37 +158,59 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         } else if (!downloadNew) {
             binding.downloadNew.isVisible = true
         }
-        binding.downloadNew.isChecked =
-            preferences.downloadNew().get() && binding.downloadNew.isChecked
+        if (!downloadNew) {
+            binding.downloadNew.isChecked = false
+        }
         setCheckbox(
             binding.includeGlobal,
             preferences.libraryUpdateCategories(),
+            preferences.libraryUpdateCategoriesExclude(),
             preferences.libraryUpdateInterval().getOrDefault() > 0
         )
     }
 
     /** Update a pref based on checkbox, and return if the pref is not empty */
-    private fun updatePref(categories: Preference<Set<String>>, box: CompoundButton): Boolean? {
+    private fun updatePref(
+        categories: Preference<Set<String>>,
+        excludeCategories: Preference<Set<String>>,
+        box: TriStateCheckBox
+    ): Boolean? {
         val categoryId = category?.id ?: return null
         if (!box.isVisible) return null
         val updateCategories = categories.get().toMutableSet()
-        if (box.isChecked) {
-            updateCategories.add(categoryId.toString())
-        } else {
-            updateCategories.remove(categoryId.toString())
+        val excludeUpdateCategories = excludeCategories.get().toMutableSet()
+        when (box.state) {
+            TriStateCheckBox.State.CHECKED -> {
+                updateCategories.add(categoryId.toString())
+                excludeUpdateCategories.remove(categoryId.toString())
+            }
+            TriStateCheckBox.State.INVERSED -> {
+                updateCategories.remove(categoryId.toString())
+                excludeUpdateCategories.add(categoryId.toString())
+            }
+            TriStateCheckBox.State.UNCHECKED -> {
+                updateCategories.remove(categoryId.toString())
+                excludeUpdateCategories.remove(categoryId.toString())
+            }
         }
         categories.set(updateCategories)
+        excludeCategories.set(excludeUpdateCategories)
         return updateCategories.isNotEmpty()
     }
 
     private fun setCheckbox(
-        box: CompoundButton,
+        box: TriStateCheckBox,
         categories: Preference<Set<String>>,
-        shouldShow: Boolean,
+        excludeCategories: Preference<Set<String>>,
+        shouldShow: Boolean
     ) {
         val updateCategories = categories.get()
-        box.isVisible = updateCategories.isNotEmpty() && shouldShow
-        if (updateCategories.isNotEmpty() && shouldShow) box.isChecked =
-            updateCategories.any { category?.id == it.toIntOrNull() }
+        val excludeUpdateCategories = excludeCategories.get()
+        box.isVisible = (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
+        if (shouldShow) box.state = when {
+            updateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.CHECKED
+            excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.INVERSED
+            else -> TriStateCheckBox.State.UNCHECKED
+        }
     }
 }
