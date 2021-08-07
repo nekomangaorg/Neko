@@ -14,9 +14,11 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import kotlinx.coroutines.flow.launchIn
+import kotlin.math.max
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -117,7 +119,7 @@ class SettingsGeneralController : SettingsController() {
             )
             entryRange = 0..2
             defaultValue = 0
-            isVisible = (activity as? MainActivity)?.binding?.sideNav != null
+            isVisible = max(context.resources.displayMetrics.widthPixels, context.resources.displayMetrics.heightPixels) > 720.dpToPx
         }
 
         preferenceCategory {
