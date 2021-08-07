@@ -325,6 +325,8 @@ class LibraryController(
                 bottom = view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
             )
             updateHopperY()
+            binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight = 60.dpToPx +
+                (view?.rootWindowInsets?.systemWindowInsetBottom ?: 0)
         }
     }
 
@@ -560,6 +562,7 @@ class LibraryController(
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                         topMargin = insets.systemWindowInsetTop + 4.dpToPx
                     }
+                    updateFilterSheetY()
                 },
                 onLeavingController = {
                     binding.headerCard.isVisible = false
