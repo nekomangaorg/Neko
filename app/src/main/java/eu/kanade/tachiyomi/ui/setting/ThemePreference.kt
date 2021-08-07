@@ -245,12 +245,12 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                         else android.R.color.system_accent2_800
                     )
                     val colorAccent = context.contextCompatColor(
-                        if (nightMode) android.R.color.system_accent1_300
-                        else android.R.color.system_accent1_500
+                        if (nightMode) android.R.color.system_accent1_100
+                        else android.R.color.system_accent1_600
                     )
                     val bottomBar = context.contextCompatColor(
                         if (nightMode) android.R.color.system_neutral1_800
-                        else android.R.color.system_accent2_100
+                        else android.R.color.system_accent2_50
                     )
                     val colorBackground = context.contextCompatColor(
                         if (nightMode) android.R.color.system_neutral1_900
