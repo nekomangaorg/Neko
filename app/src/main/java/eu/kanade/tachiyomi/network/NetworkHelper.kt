@@ -147,7 +147,8 @@ class NetworkHelper(val context: Context) {
         .create(MangaDexAuthService::class.java)
 
     val similarService =
-        jsonRetrofitClient.client(client)
+        jsonRetrofitClient.client(client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
+            .readTimeout(2, TimeUnit.SECONDS).build())
             .build()
             .create(SimilarService::class.java)
 }

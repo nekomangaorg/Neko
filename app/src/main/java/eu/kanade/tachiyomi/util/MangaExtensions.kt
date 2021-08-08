@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.util.view.snack
@@ -199,4 +200,27 @@ fun Manga.addNewScanlatorsToFilter(
         db.insertManga(this).executeAsBlocking()
     }
     return result
+}
+
+/**
+ * Returns a manga from the database for the given manga from network. It creates a new entry
+ * if the manga is not yet in the database.
+ *
+ * @param sManga the manga from the source.
+ * @return a manga from the database.
+ */
+fun SManga.toLocalManga(db: DatabaseHelper, sourceId: Long): Manga {
+    var localManga = db.getManga(this.url, sourceId).executeAsBlocking()
+    if (localManga == null) {
+        val newManga = Manga.create(this.url, this.title, sourceId)
+        newManga.copyFrom(this)
+        val result = db.insertManga(newManga).executeAsBlocking()
+        newManga.id = result.insertedId()
+        localManga = newManga
+    } else if (localManga.title.isBlank()) {
+        localManga.title = this.title
+        db.insertManga(localManga).executeAsBlocking()
+    }
+    localManga.external_source_icon = this.external_source_icon
+    return localManga
 }

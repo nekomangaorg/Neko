@@ -566,3 +566,4 @@ val Controller.activityBinding: MainActivityBinding?
 
 val Controller.toolbarHeight: Int?
     get() = (activity as? MainActivity)?.toolbarHeight
+

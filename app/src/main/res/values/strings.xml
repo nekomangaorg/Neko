@@ -1027,6 +1027,7 @@
     <string name="follows_re_reading">Re Reading</string>
 
     <!-- Similar -->
+    <string name="similar_type">Similar</string>
     <string name="similar">Similar manga</string>
     <string name="similar_settings">Similar Manga Settings</string>
     <string name="similar_screen_summary_message">

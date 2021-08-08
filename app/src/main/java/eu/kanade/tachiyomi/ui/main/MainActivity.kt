@@ -27,7 +27,6 @@ import android.webkit.WebView
 import androidx.annotation.IdRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
-import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
@@ -73,7 +72,7 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.ui.similar.SimilarController
+import eu.kanade.tachiyomi.ui.similar.NewSimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -430,7 +429,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         currentToolbar?.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (rootSearchController is RootSearchInterface && rootSearchController !is FollowsController && rootSearchController !is SimilarController) {
+            if (rootSearchController is RootSearchInterface && rootSearchController !is FollowsController && rootSearchController !is NewSimilarController) {
                 rootSearchController.expandSearch()
             } else onBackPressed()
         }

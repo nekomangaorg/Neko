@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -123,28 +122,7 @@ open class MangaDex : HttpSource() {
         }
         return followsHandler.fetchTrackingInfo(url)
     }
-
-    suspend fun fetchSimilarManga(
-        manga: Manga,
-        refresh: Boolean,
-    ): MangaListPage {
-        return similarHandler.fetchSimilarManga(manga, refresh)
-    }
-
-    suspend fun fetchSimilarExternalAnilistManga(
-        manga: Manga,
-        refresh: Boolean,
-    ): MangaListPage {
-        return similarHandler.fetchSimilarExternalAnilistManga(manga, refresh)
-    }
-
-    suspend fun fetchSimilarExternalMalManga(
-        manga: Manga,
-        refresh: Boolean,
-    ): MangaListPage {
-        return similarHandler.fetchSimilarExternalMalManga(manga, refresh)
-    }
-
+   
     override fun isLogged(): Boolean {
         return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(
             this

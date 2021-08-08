@@ -73,7 +73,7 @@ import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.ui.similar.SimilarController
+import eu.kanade.tachiyomi.ui.similar.NewSimilarController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.moveCategories
@@ -940,10 +940,7 @@ class MangaDetailsController :
 
     override fun openSimilar() {
         router.pushController(
-            SimilarController(
-                presenter.manga,
-                presenter.source
-            ).withFadeTransaction()
+            NewSimilarController(manga!!).withFadeTransaction()
         )
     }
 

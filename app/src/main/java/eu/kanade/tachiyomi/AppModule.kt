@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -95,6 +96,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(V5MigrationService())
 
         addSingleton(TrackingSyncService())
+
+        addSingleton(SimilarRepository())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

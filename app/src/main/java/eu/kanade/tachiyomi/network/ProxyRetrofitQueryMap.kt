@@ -3,10 +3,10 @@ package eu.kanade.tachiyomi.network
 /**
  * Allow retrofit to handle multi values for same query https://github.com/square/retrofit/issues/1324
  */
-class ProxyRetrofitQueryMap(m: MutableMap<String, Any>) : HashMap<String, Any>(m) {
+class ProxyRetrofitQueryMap(val m: MutableMap<String, Any>) : HashMap<String, Any>(m) {
     override val entries: MutableSet<MutableMap.MutableEntry<String, Any>>
         get() {
-            val originSet: Set<Map.Entry<String?, Any?>> = super.entries
+            val originSet: Set<Map.Entry<String?, Any?>> = m.entries
             val newSet: MutableSet<MutableMap.MutableEntry<String, Any>> = HashSet()
             for ((key, entryValue) in originSet) {
                 val entryKey =
