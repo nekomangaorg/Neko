@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.manga.similar.NewSimilarPresenter
+import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
@@ -29,8 +29,8 @@ import kotlinx.coroutines.launch
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
  */
-class NewSimilarController(bundle: Bundle? = null) :
-    BaseCoroutineController<SimilarControllerBinding, NewSimilarPresenter>(bundle) {
+class SimilarController(bundle: Bundle? = null) :
+    BaseCoroutineController<SimilarControllerBinding, SimilarPresenter>(bundle) {
 
     constructor(manga: Manga) : this(
         Bundle().apply {
@@ -38,7 +38,7 @@ class NewSimilarController(bundle: Bundle? = null) :
         }
     )
 
-    override var presenter = NewSimilarPresenter(bundle!!.getLong(BrowseSourceController.MANGA_ID))
+    override var presenter = SimilarPresenter(bundle!!.getLong(BrowseSourceController.MANGA_ID))
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.similar)

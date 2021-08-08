@@ -17,7 +17,7 @@ import uy.kohesive.injekt.api.get
 /**
  * Presenter of [SimilarController]. Inherit BrowseSourcePresenter.
  */
-class NewSimilarPresenter(
+class SimilarPresenter(
     val mangaId: Long = 0L,
     val preferences: PreferencesHelper = Injekt.get(),
     val repo: SimilarRepository = Injekt.get(),
