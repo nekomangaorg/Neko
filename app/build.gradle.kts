@@ -123,11 +123,11 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.6.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:19.0.0")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.0")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.1")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
