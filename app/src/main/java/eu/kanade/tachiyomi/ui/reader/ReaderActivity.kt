@@ -573,36 +573,18 @@ class ReaderActivity :
             with(doublePage) {
                 compatToolTipText = getString(R.string.page_layout)
                 setOnClickListener {
-                    val config = (viewer as? PagerViewer)?.config
-                    val selectedId = when {
-                        config?.doublePages == true -> PageLayout.DOUBLE_PAGES
-                        config?.splitPages == true -> PageLayout.SPLIT_PAGES
-                        else -> PageLayout.SINGLE_PAGE
-                    }
-                    popupMenu(
-                        items = listOf(
-                            PageLayout.SINGLE_PAGE,
-                            PageLayout.DOUBLE_PAGES,
-                            PageLayout.SPLIT_PAGES,
-                        ).map { it.value to it.stringRes },
-                        selectedItemId = selectedId.value,
-                    ) {
-                        val newLayout = PageLayout.fromPreference(itemId)
-
-                        if (preferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
-                            (viewer as? PagerViewer)?.config?.let { config ->
-                                config.doublePages = newLayout == PageLayout.DOUBLE_PAGES
-                                if (newLayout == PageLayout.SINGLE_PAGE) {
-                                    preferences.automaticSplitsPage().set(false)
-                                } else if (newLayout == PageLayout.SPLIT_PAGES) {
-                                    preferences.automaticSplitsPage().set(true)
-                                }
-                                reloadChapters(config.doublePages, true)
-                            }
-                        } else {
-                            preferences.pageLayout().set(newLayout.value)
+                    if (preferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
+                        (viewer as? PagerViewer)?.config?.let { config ->
+                            config.doublePages = !config.doublePages
+                            reloadChapters(config.doublePages, true)
                         }
+                    } else {
+                        showPageLayoutMenu()
                     }
+                }
+                setOnLongClickListener {
+                    showPageLayoutMenu()
+                    true
                 }
             }
             cropBordersSheetButton.setOnClickListener {
@@ -806,6 +788,41 @@ class ReaderActivity :
                 peek + insets.getBottomGestureInsets()
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
             binding.viewerContainer.requestLayout()
+        }
+    }
+
+    fun showPageLayoutMenu() {
+        with(binding.chaptersSheet.doublePage) {
+            val config = (viewer as? PagerViewer)?.config
+            val selectedId = when {
+                config?.doublePages == true -> PageLayout.DOUBLE_PAGES
+                config?.splitPages == true -> PageLayout.SPLIT_PAGES
+                else -> PageLayout.SINGLE_PAGE
+            }
+            popupMenu(
+                items = listOf(
+                    PageLayout.SINGLE_PAGE,
+                    PageLayout.DOUBLE_PAGES,
+                    PageLayout.SPLIT_PAGES,
+                ).map { it.value to it.stringRes },
+                selectedItemId = selectedId.value,
+            ) {
+                val newLayout = PageLayout.fromPreference(itemId)
+
+                if (preferences.pageLayout().get() == PageLayout.AUTOMATIC.value) {
+                    (viewer as? PagerViewer)?.config?.let { config ->
+                        config.doublePages = newLayout == PageLayout.DOUBLE_PAGES
+                        if (newLayout == PageLayout.SINGLE_PAGE) {
+                            preferences.automaticSplitsPage().set(false)
+                        } else if (newLayout == PageLayout.SPLIT_PAGES) {
+                            preferences.automaticSplitsPage().set(true)
+                        }
+                        reloadChapters(config.doublePages, true)
+                    }
+                } else {
+                    preferences.pageLayout().set(newLayout.value)
+                }
+            }
         }
     }
 
