@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.databinding.TriStateCheckBoxBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.setAnimVectorCompat
 import eu.kanade.tachiyomi.util.view.setVectorCompat
+import eu.kanade.tachiyomi.util.view.updateLayoutParams
 
 class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
@@ -56,6 +57,18 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
 
         val maxLines = a.getInt(R.styleable.TriStateCheckBox_android_maxLines, Int.MAX_VALUE)
         binding.textView.maxLines = maxLines
+
+        val resourceId = a.getResourceId(R.styleable.TriStateCheckBox_android_textAppearance, 0)
+        if (resourceId != 0) {
+            binding.textView.setTextAppearance(resourceId)
+        }
+
+        val drawablePadding = a.getDimensionPixelSize(R.styleable.TriStateCheckBox_android_drawablePadding, 0)
+        if (drawablePadding != 0) {
+            binding.textView.updateLayoutParams<MarginLayoutParams> {
+                marginStart = drawablePadding
+            }
+        }
 
         a.recycle()
 
