@@ -19,11 +19,6 @@
 
 ---
 
-## Screenshots:
-<p align="center">
-<img src="./.github/readme-images/screenshots.png" align="center" height="350" />
-</p>
-
 ## About:
 This is a <a href="https://mangadex.org/">MangaDex</a> specific fork of <a href="https://github.com/inorichi/tachiyomi">Tachiyomi</a> and <a href="https://github.com/Jays2Kings/tachiyomiJ2K">TachiyomiJ2K</a>. This contains features specific to Mangadex
  that those versions cannot offer. It also features almost every feature that J2K has except for other sources,local sources, and editting manga.
