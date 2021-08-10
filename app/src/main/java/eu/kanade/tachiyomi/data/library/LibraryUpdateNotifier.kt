@@ -168,7 +168,7 @@ class LibraryUpdateNotifier(private val context: Context) {
 
                                     Coil.imageLoader(context)
                                         .execute(request).drawable?.let { drawable ->
-                                            setLargeIcon((drawable as BitmapDrawable).bitmap)
+                                            setLargeIcon((drawable as? BitmapDrawable)?.bitmap)
                                         }
                                 } catch (e: Exception) {
                                 }
