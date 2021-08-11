@@ -5,7 +5,6 @@ import android.animation.ValueAnimator
 import android.app.Dialog
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Build
 import android.view.LayoutInflater
@@ -13,7 +12,6 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
-import androidx.core.view.isVisible
 import androidx.transition.ChangeBounds
 import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
@@ -66,9 +64,6 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
                 .build()
 
         expandedImageView.setImageDrawable(drawable)
-        if (drawable !is BitmapDrawable) {
-            binding.buttonContainer.isVisible = false
-        }
 
         val rect = Rect()
         thumbView.getGlobalVisibleRect(rect)

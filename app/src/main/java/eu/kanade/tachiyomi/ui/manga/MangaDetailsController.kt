@@ -28,7 +28,6 @@ import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import coil.Coil
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
@@ -906,15 +905,7 @@ class MangaDetailsController :
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val request = ImageRequest.Builder(activity!!).data(manga).target(
-                onError = {
-                    shareManga()
-                },
-                onSuccess = {
-                    presenter.shareManga((it as BitmapDrawable).bitmap)
-                }
-            ).build()
-            Coil.imageLoader(activity!!).enqueue(request)
+            presenter.shareManga()
         } else {
             shareManga()
         }
