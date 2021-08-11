@@ -708,6 +708,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         nav.selectedItemId = startingTab()
     }
 
+    fun goToTab(@IdRes id: Int) {
+        nav.selectedItemId = id
+    }
+
     private fun setRoot(controller: Controller, id: Int) {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
