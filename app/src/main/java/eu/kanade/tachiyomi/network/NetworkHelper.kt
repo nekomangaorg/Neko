@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.network
 
 import android.content.Context
+import coil.util.CoilUtils
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
@@ -77,6 +78,7 @@ class NetworkHelper(val context: Context) {
                 when (preferences.dohProvider()) {
                     PREF_DOH_CLOUDFLARE -> dohCloudflare()
                     PREF_DOH_GOOGLE -> dohGoogle()
+                    PREF_DOH_ADGUARD -> dohAdGuard()
                 }
                 if (XLogLevel.shouldLog(XLogLevel.EXTREME)) {
                     val logger: HttpLoggingInterceptor.Logger =
@@ -121,6 +123,8 @@ class NetworkHelper(val context: Context) {
     val cloudFlareClient = buildCloudFlareClient()
 
     val client = buildRateLimitedClient()
+
+    val coilClient by lazy { buildNonRateLimitedClient().newBuilder().cache(CoilUtils.createDefaultCache(context)).build() }
 
     val authClient = buildRateLimitedAuthenticatedClient()
 

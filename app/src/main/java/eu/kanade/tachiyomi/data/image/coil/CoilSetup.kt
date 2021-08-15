@@ -7,6 +7,9 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
+import eu.kanade.tachiyomi.network.NetworkHelper
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import eu.kanade.tachiyomi.BuildConfig
 import okhttp3.OkHttpClient
@@ -34,6 +37,7 @@ class CoilSetup(context: Context) {
                     }
                 }.build()
             }
+            .okHttpClient(Injekt.get<NetworkHelper>().coilClient)
             .build()
 
         Coil.setImageLoader(imageLoader)
