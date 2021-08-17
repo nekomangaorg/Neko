@@ -47,7 +47,7 @@
 
         <item name="unreadBadgeColor">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
-        <item name="downloadBadgeColor">@color/md_black_1000</item>
+        <item name="colorDownloadBadge">@color/md_black_1000</item>
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
 
 
@@ -151,7 +151,7 @@
         <item name="colorAccent">@color/accentTako</item>
         <item name="colorOnAccent">@color/colorOnAccentTako</item>
         <item name="colorPrimaryVariant">@color/surfaceTako</item>
-        <item name="tabBarIconColor">@color/colorOnTertiaryTako</item>
+        <item name="tabBarIconColor">@color/tabBarIconColorTako</item>
         <item name="colorControlHighlight">@color/rippleColoredTako</item>
         <item name="colorSecondary">@color/backgroundTako</item>
         <item name="actionBarTintColor">@color/actionTintTako</item>
@@ -167,7 +167,7 @@
 
     <style name="Theme.Tachiyomi.MangaDex">
         <item name="colorAccent">@color/colorAccentMangaDex</item>
-        <item name="colorAccentText">@color/md_white_1000</item>
+        <item name="colorAccentText">@color/md_black_1000</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
         <item name="colorOnHopper">?attr/colorOnAccent</item>

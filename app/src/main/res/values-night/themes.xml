@@ -39,8 +39,6 @@
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnHopper">?attr/colorOnAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-        <item name="colorDownloadBadge">@color/download_badge_light</item>
-        <item name="colorOnDownloadBadge">@color/md_white_1000</item>
 
     </style>
 

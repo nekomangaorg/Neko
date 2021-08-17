@@ -58,14 +58,15 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 downloads.toString()
             }
             setTextColor(context.getResourceColor(R.attr.colorOnDownloadBadge))
-            setBackgroundColor(context.getResourceColor(R.attr.downloadBadgeColor))
+            setBackgroundColor(context.getResourceColor(R.attr.colorDownloadBadge))
         }
 
         // Show the badge card if unread or downloads exists
         isVisible = binding.downloadText.isVisible || binding.unreadText.isVisible
 
         // Show the angles divider if both unread and downloads exists
-        binding.unreadAngle.isVisible = binding.downloadText.isVisible && binding.unreadText.isVisible
+        binding.unreadAngle.isVisible =
+            binding.downloadText.isVisible && binding.unreadText.isVisible
 
         binding.unreadAngle.setColorFilter(unreadBadgeBackground)
         if (binding.unreadAngle.isVisible) {
