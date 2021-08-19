@@ -38,7 +38,7 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.view.resetStrokeColor
+import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(

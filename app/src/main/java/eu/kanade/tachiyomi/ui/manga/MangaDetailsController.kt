@@ -75,6 +75,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.similar.SimilarController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.moveCategories
@@ -1152,10 +1153,8 @@ class MangaDetailsController :
                 controller.search(text)
             }
             is BrowseSourceController -> {
-                if (presenter.source is HttpSource) {
-                    router.handleBack()
-                    previousController.searchWithGenre(text)
-                }
+                router.handleBack()
+                previousController.searchWithGenre(text)
             }
         }
     }

@@ -523,6 +523,7 @@ class PagerPageHolder(
                             this@PagerPageHolder.page.longPage = true
                         }
                     }
+
                     override fun onReady() {
                         var centerV = 0f
                         when (config.imageZoomType) {
@@ -668,14 +669,17 @@ class PagerPageHolder(
         return decodeLayout
     }
 
-    private fun mergeOrSplitPages(imageStream: InputStream, imageStream2: InputStream?): InputStream {
+    private fun mergeOrSplitPages(
+        imageStream: InputStream,
+        imageStream2: InputStream?,
+    ): InputStream {
         if (page.longPage == true && viewer.config.splitPages) {
             val imageBytes = imageStream.readBytes()
             val imageBitmap = try {
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             } catch (e: Exception) {
                 imageStream.close()
-                Timber.e("Cannot split page ${e.message}")
+                XLog.e("Cannot split page ${e.message}")
                 return imageBytes.inputStream()
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
@@ -698,7 +702,7 @@ class PagerPageHolder(
                     imageStream.close()
                     page.longPage = true
                     skipExtra = true
-                    Timber.e("Cannot split page ${e.message}")
+                    XLog.e("Cannot split page ${e.message}")
                     return imageBytes.inputStream()
                 }
                 val height = imageBitmap.height

@@ -15,21 +15,23 @@ open class MatPreference @JvmOverloads constructor(
     val activity: Activity?,
     context: Context,
     attrs:
-        AttributeSet? =
-            null
+    AttributeSet? =
+        null,
 ) :
     Preference(context, attrs) {
 
-    protected val prefs: PreferencesHelper = Injekt.get()
+    val prefs: PreferencesHelper = Injekt.get()
 
-    @StringRes var preSummaryRes: Int? = null
+    @StringRes
+    var preSummaryRes: Int? = null
         set(value) {
             field = value
             notifyChanged()
         }
     private var isShowing = false
 
-    @StringRes var dialogTitleRes: Int? = null
+    @StringRes
+    var dialogTitleRes: Int? = null
 
     override fun onClick() {
         if (!isShowing) {
