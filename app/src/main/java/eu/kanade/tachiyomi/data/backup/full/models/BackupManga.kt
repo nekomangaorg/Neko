@@ -39,11 +39,12 @@ data class BackupManga(
     // Neko Values
     @ProtoNumber(900) var mergedMangaUrl: String? = null,
     @ProtoNumber(902) var mergedMangaImageUrl: String? = null,
-    @ProtoNumber(901) var scanlatorFilter: String? = null
+    @ProtoNumber(901) var scanlatorFilter: String? = null,
 ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
-            url = this@BackupManga.url
+            url = this@BackupManga.url.replace("/manga/",
+                "/title/") //tachiyomi extension uses /manga/
             title = this@BackupManga.title
             artist = this@BackupManga.artist
             author = this@BackupManga.author
@@ -81,7 +82,7 @@ data class BackupManga(
     companion object {
         fun copyFrom(manga: Manga): BackupManga {
             return BackupManga(
-                url = manga.url,
+                url = manga.url.replace("/title/", "/manga/"), // tachiyomi extension uses /manga/
                 title = manga.title,
                 artist = manga.artist,
                 author = manga.author,

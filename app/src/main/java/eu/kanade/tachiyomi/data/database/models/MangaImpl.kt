@@ -69,9 +69,7 @@ open class MangaImpl : Manga {
     override var merge_manga_image_url: String? = null
 
     override var last_chapter_number: Int? = null
-
-    override var external_source_icon: String? = null
-
+    
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl &&
             other.title.isNotBlank() && other.title != title
