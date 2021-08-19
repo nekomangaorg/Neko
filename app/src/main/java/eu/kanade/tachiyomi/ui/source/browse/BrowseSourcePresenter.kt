@@ -306,7 +306,6 @@ open class BrowseSourcePresenter(
             localManga.title = sManga.title
             db.insertManga(localManga).executeAsBlocking()
         }
-        localManga.external_source_icon = sManga.external_source_icon
         return localManga
     }
 

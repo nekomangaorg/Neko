@@ -221,6 +221,5 @@ fun SManga.toLocalManga(db: DatabaseHelper, sourceId: Long): Manga {
         localManga.title = this.title
         db.insertManga(localManga).executeAsBlocking()
     }
-    localManga.external_source_icon = this.external_source_icon
     return localManga
 }

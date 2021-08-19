@@ -135,7 +135,6 @@ class SimilarHandler {
                 }.filterNotNull()
                 val mangaList = ids.map {
                     val tmp = idsToManga[it]!!
-                    tmp.external_source_icon = "al"
                     tmp
                 }
                 return mangaList
@@ -184,7 +183,6 @@ class SimilarHandler {
         // Loop through our *sorted* related array and list in that order
         val mangaList = ids.map {
             val tmp = idsToManga[it]!!
-            tmp.external_source_icon = "al"
             tmp
         }
 
@@ -242,7 +240,6 @@ class SimilarHandler {
                 }
                 val mangaList = ids.map {
                     val tmp = idsToManga[it]!!
-                    tmp.external_source_icon = "mal"
                     tmp
                 }
                 return mangaList
@@ -287,7 +284,6 @@ class SimilarHandler {
         // Loop through our *sorted* related array and list in that order
         val mangaList = ids.map {
             val tmp = idsToManga[it]!!
-            tmp.external_source_icon = "mal"
             tmp
         }
 
