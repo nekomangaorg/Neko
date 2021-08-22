@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.network.services
 
+import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.CheckTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
@@ -32,11 +33,11 @@ interface MangaDexAuthService : MangaDexImageService {
 
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.checkToken)
-    suspend fun checkToken(): Response<CheckTokenDto>
+    suspend fun checkToken(): ApiResponse<CheckTokenDto>
 
     @Headers("Cache-Control: no-cache")
     @POST(MdApi.refreshToken)
-    suspend fun refreshToken(@Body request: RefreshTokenDto): Response<LoginResponseDto>
+    suspend fun refreshToken(@Body request: RefreshTokenDto): ApiResponse<LoginResponseDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.userFollows}?limit=100") // &includes[]=${MdConstants.Type.coverArt}
