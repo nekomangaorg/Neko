@@ -35,7 +35,6 @@ import coil.transform.RoundedCornersTransformation
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.source.online.utils.MdConstants
 
 val montserrat = FontFamily(
     Font(R.font.montserrat_thin, FontWeight.Thin),
@@ -52,7 +51,7 @@ val montserrat = FontFamily(
 fun MangaCover(manga: Manga, modifier: Modifier) {
     Box {
         Image(painter = rememberImagePainter(
-            data = manga.thumbnail_url ?: MdConstants.noCoverUrl,
+            data = manga,
             builder = {
                 transformations(RoundedCornersTransformation(12f))
                 placeholder(Pastel.getColorLight())
@@ -132,17 +131,17 @@ fun MangaListWithHeader(
         .padding(bottom = 48.dp)) {
         groupedManga.forEach { (text, mangaList) ->
             stickyHeader {
-                Card(shape = RoundedCornerShape(24.dp),
+                Card(shape = RoundedCornerShape(4.dp),
                     modifier = Modifier.fillMaxWidth(),
                     elevation = 8.dp,
-                    backgroundColor = MaterialTheme.colors.primary) {
+                    backgroundColor = MaterialTheme.colors.secondary) {
                     Text(
                         text = text,
                         fontSize = 18.sp,
                         fontFamily = montserrat,
                         fontWeight = FontWeight.Medium,
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colors.onPrimary,
+                        color = MaterialTheme.colors.onSecondary,
                         modifier = Modifier.padding(all = 8.dp)
                     )
                 }
