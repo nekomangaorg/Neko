@@ -278,5 +278,9 @@ class MdUtil {
 
         fun getLangsToShow(preferences: PreferencesHelper) =
             preferences.langsToShow().get().split(",")
+
+        fun getTitle(titleMap: Map<String, String?>): String {
+            return titleMap["en"] ?: titleMap["jp"] ?: titleMap["ja"] ?: titleMap["kr"] ?: ""
+        }
     }
 }

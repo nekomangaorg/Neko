@@ -26,7 +26,7 @@ data class MangaDataDto(val id: String, val type: String, val attributes: MangaA
 
 @Serializable
 data class MangaAttributesDto(
-    val title: Map<String, String>,
+    val title: Map<String, String?>,
     val altTitles: List<JsonElement>,
     val description: JsonElement,
     val links: JsonElement?,
