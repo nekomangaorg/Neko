@@ -24,6 +24,8 @@ class ImageHandler {
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
 
+    val log = XLog.tag("||ImageHandler").disableStackTrace().build()
+
     // chapter id and last request time
     private val tokenTracker = hashMapOf<String, Long>()
 
@@ -39,7 +41,7 @@ class ImageHandler {
                     network.nonRateLimitedClient.newCallWithProgress(request, page)
                         .await()
                 } catch (e: Exception) {
-                    XLog.e("error getting images", e)
+                    log.e("error getting images", e)
                     reportFailedImage(request.url.toString())
                     throw (e)
                 }
@@ -75,21 +77,22 @@ class ImageHandler {
             cache,
             duration
         )
+        log.d(atHomeImageReportDto)
         sendReport(atHomeImageReportDto)
     }
 
     fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
         launchIO {
-            XLog.d("Image to report $atHomeImageReportDto")
+            log.d("Image to report $atHomeImageReportDto")
 
             if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
-                XLog.d("image is at CDN don't report to md@home node")
+                log.d("image is at CDN don't report to md@home node")
                 return@launchIO
             }
             runCatching {
                 network.service.atHomeImageReport(atHomeImageReportDto)
             }.onFailure { e ->
-                XLog.e("error trying to post to dex@home", e)
+                log.e("error trying to post to dex@home", e)
             }
         }
     }
@@ -107,6 +110,8 @@ class ImageHandler {
             when (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
+                    log
+                        .d("Time has expired get new at home url isLogged $isLogged")
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
                     val atHomeResponse = service.getAtHomeServer(page.mangaDexChapterId,
                         preferences.usePort443Only())
@@ -114,7 +119,7 @@ class ImageHandler {
                     when (atHomeResponse) {
                         is ApiResponse.Success -> {
                             updateTokenTracker(page.mangaDexChapterId, currentTime)
-                            XLog.d("Successfully refresh page")
+                            log.d("Successfully refresh page")
                             atHomeResponse.getOrThrow().baseUrl
                         }
                         is ApiResponse.Failure.Error -> {
@@ -126,8 +131,8 @@ class ImageHandler {
                     }
                 }
             }
-        XLog.d("Image server is $mdAtHomeServerUrl")
-        XLog.d("page url is ${page.imageUrl}")
+        log.d("Image server is $mdAtHomeServerUrl")
+        log.d("page url is ${page.imageUrl}")
         return GET(mdAtHomeServerUrl + page.imageUrl, network.headers)
     }
 
