@@ -1139,22 +1139,42 @@ class MangaDetailsController :
             return
         }
 
+        val controller =
+            when (val previousController = router.backstack[router.backstackSize - 2].controller) {
+                is LibraryController, is RecentsController -> {
+                    // Manually navigate to LibraryController
+                    router.handleBack()
+                    (activity as? MainActivity)?.goToTab(R.id.nav_browse)
+                    router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseSourceController
+                }
+                is BrowseSourceController -> {
+                    router.handleBack()
+                    previousController
+                }
+                else -> null
+            }
+        controller?.let {
+            controller.searchWithGenre(text)
+        }
+    }
+
+    override fun tagLongClicked(text: String) {
+        if (router.backstackSize < 2) {
+            return
+        }
+
         when (val previousController = router.backstack[router.backstackSize - 2].controller) {
             is LibraryController -> {
                 router.handleBack()
                 previousController.search(text)
             }
-            is RecentsController -> {
+            is BrowseSourceController, is RecentsController -> {
                 // Manually navigate to LibraryController
                 router.handleBack()
                 (activity as? MainActivity)?.goToTab(R.id.nav_library)
                 val controller =
                     router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
                 controller.search(text)
-            }
-            is BrowseSourceController -> {
-                router.handleBack()
-                previousController.searchWithGenre(text)
             }
         }
     }

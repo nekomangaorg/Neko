@@ -13,7 +13,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 
 class MangaDetailsAdapter(
-    val controller: MangaDetailsController
+    val controller: MangaDetailsController,
 ) : BaseChapterAdapter<IFlexible<*>>(controller) {
 
     val preferences: PreferencesHelper by injectLazy()
@@ -123,6 +123,7 @@ class MangaDetailsAdapter(
         fun readNextChapter()
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
+        fun tagLongClicked(text: String)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int)

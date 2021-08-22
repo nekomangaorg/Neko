@@ -413,6 +413,10 @@ class MangaHeaderHolder(
                     chip.setOnClickListener {
                         adapter.delegate.tagClicked(genreText)
                     }
+                    chip.setOnLongClickListener {
+                        adapter.delegate.tagLongClicked(genreText)
+                        true
+                    }
 
                     this.addView(chip)
                 }
