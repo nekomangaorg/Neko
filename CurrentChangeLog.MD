@@ -14,7 +14,8 @@
 - Restoring from Tachiyomi backup caused duplicates when searching for manga that was in library
 - General J2K bug fixes ( @Jays2Kings)
 - Browse Fab not aligning itself correctly (@Jays2Kings)
-- App crashing when expanding an animated cover ( @Jays2Kings)
+- App crashing when expanding an animated cover (@Jays2Kings)
+- Excluding a category was causing app to crash (@Zurkei)
 - Some manga that don't have titles because they weren't using en title as main title
 ## 🛠️ Other
 - added jetpack compose
