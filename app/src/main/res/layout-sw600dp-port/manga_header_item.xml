@@ -344,21 +344,43 @@
         android:id="@+id/more_bg_gradient"
         android:layout_width="60dp"
         android:layout_height="16sp"
-        android:layout_marginEnd="30dp"
         android:background="@drawable/full_gradient"
         android:backgroundTint="?android:attr/colorBackground"
         app:layout_constraintBottom_toBottomOf="@id/manga_summary"
-        app:layout_constraintEnd_toEndOf="@id/more_button" />
+        app:layout_constraintEnd_toEndOf="@id/more_end_guide" />
+
+    <View
+        android:id="@+id/more_end_guide"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="@+id/more_button_template"
+        app:layout_constraintTop_toTopOf="@id/more_button"
+        app:layout_constraintBottom_toBottomOf="@id/more_button"/>
 
     <View
         android:id="@+id/more_bg_solid"
         android:layout_width="0dp"
         android:layout_height="16sp"
-        android:layout_marginStart="45dp"
         android:background="?android:attr/colorBackground"
         app:layout_constraintBottom_toBottomOf="@id/manga_summary"
+        app:layout_constraintEnd_toEndOf="@id/more_button_template"
+        app:layout_constraintStart_toStartOf="@id/more_button_template" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/more_button_template"
+        style="@style/Theme.Widget.Button.TextButton"
+        android:minWidth="0dp"
+        android:paddingStart="0dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/more"
+        android:textAlignment="viewEnd"
+        app:layout_constraintBottom_toBottomOf="@id/more_guide"
         app:layout_constraintEnd_toEndOf="@id/more_button"
-        app:layout_constraintStart_toStartOf="@id/more_button" />
+        app:layout_constraintTop_toTopOf="@id/more_button"
+        android:visibility="invisible"
+        app:rippleColor="@null"
+        tools:ignore="RtlSymmetry" />
 
     <View
         android:id="@+id/more_guide"
