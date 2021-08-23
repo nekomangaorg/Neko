@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.network.services
 
+import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -26,7 +28,13 @@ interface MangaDexService : MangaDexImageService {
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): Response<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
-    suspend fun viewManga(@Path("id") id: String): Response<MangaDto>
+    suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
+
+    @GET("${MdApi.manga}/{id}/aggregate")
+    suspend fun aggregateChapters(
+        @Path("id") mangaId: String,
+        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+    ): ApiResponse<AggregateDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")

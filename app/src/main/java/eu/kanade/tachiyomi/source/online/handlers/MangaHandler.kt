@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -13,12 +15,10 @@ import eu.kanade.tachiyomi.util.system.logTimeTaken
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
-import okhttp3.Request
 import uy.kohesive.injekt.injectLazy
 
 class MangaHandler {
     val network: NetworkHelper by injectLazy()
-    val filterHandler: FilterHandler by injectLazy()
     val preferencesHelper: PreferencesHelper by injectLazy()
     val apiMangaParser: ApiMangaParser by injectLazy()
 
@@ -27,6 +27,7 @@ class MangaHandler {
 
         return withContext(Dispatchers.IO) {
             logTimeTaken("Chapter and Manga Details for  ${manga.title}") {
+
                 val chapterList = async {
                     fetchChapterList(manga)
                 }
@@ -55,16 +56,13 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Manga Detail for  ${manga.title}") {
                 val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
-                if (response.isSuccessful.not()) {
-                    throw(
-                        Exception(
-                            "Error from MangaDex ${response.code()} error body: ${
-                                response.errorBody()?.string()
-                            }"
-                        )
-                        )
-                }
-                apiMangaParser.mangaDetailsParse(response.body()!!)
+                    .onError {
+                        throw(Exception("Error from MangaDex ${this.statusCode.code} error body: ${this.errorBody}"))
+                    }.onException {
+                        throw(Exception("Error from MangaDex ${this.message}"))
+                    }.getOrNull()!!
+
+                apiMangaParser.mangaDetailsParse(response)
             }
         }
     }
@@ -119,10 +117,5 @@ class MangaHandler {
             .filter { it.type == MdConstants.Types.scanlator }
             .map { it.id to it.attributes!!.name!! }
             .toMap()
-    }
-
-    private fun groupIdRequest(id: List<String>, offset: Int): Request {
-        val urlSuffix = id.joinToString("&ids[]=", "?limit=100&offset=$offset&ids[]=")
-        return GET(MdUtil.groupUrl + urlSuffix, network.headers)
     }
 }

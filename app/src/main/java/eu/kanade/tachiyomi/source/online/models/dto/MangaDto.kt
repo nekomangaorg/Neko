@@ -116,6 +116,25 @@ data class CoverAttributesDto(
     val fileName: String,
 )
 
+@Serializable
+data class AggregateDto(
+    val result: String,
+    val volumes: Map<String, AggregateVolume>,
+)
+
+@Serializable
+data class AggregateVolume(
+    val volume: String,
+    val count: String,
+    val chapters: Map<String, AggregateChapter>,
+)
+
+@Serializable
+data class AggregateChapter(
+    val chapter: String,
+    val count: String,
+)
+
 fun JsonElement.asMdMap(): Map<String, String> {
     return runCatching {
         (this as JsonObject).map { it.key to (it.value.jsonPrimitive.contentOrNull ?: "") }.toMap()
