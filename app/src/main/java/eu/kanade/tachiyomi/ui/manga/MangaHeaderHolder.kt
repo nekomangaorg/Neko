@@ -167,6 +167,7 @@ class MangaHeaderHolder(
             binding.lessButton.isVisible = !isTablet
             binding.moreButtonGroup.isVisible = false
             binding.title.maxLines = Integer.MAX_VALUE
+            binding.mangaAuthor.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.requestFocus()
         }
     }
@@ -181,6 +182,7 @@ class MangaHeaderHolder(
         binding.lessButton.isVisible = false
         binding.moreButtonGroup.isVisible = !isTablet
         binding.title.maxLines = 4
+        binding.mangaAuthor.maxLines = 2
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
         }
