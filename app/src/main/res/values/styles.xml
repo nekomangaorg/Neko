@@ -258,6 +258,10 @@
         <item name="android:textSize">12sp</item>
     </style>
 
+    <style name="Widget.Tachiyomi.Button.ActionButton.White.Landscape">
+        <item name="iconGravity">start</item>
+    </style>
+
     <style name="Widget.Tachiyomi.Button.ActionButton.White">
         <item name="iconTint">@color/md_white_1000</item>
         <item name="android:textColor">@color/md_white_1000</item>
