@@ -43,13 +43,12 @@
         <item name="fontFamily">@font/montserrat_regular</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
         <item name="colorOnHopper">@color/md_white_1000</item>
-
-
+        <item name="colorControlHighlight">@color/accent_highlight</item>
+        <item name="android:colorControlHighlight">@color/accent_highlight</item>
         <item name="unreadBadgeColor">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
         <item name="colorDownloadBadge">@color/md_black_1000</item>
         <item name="colorOnDownloadBadge">@color/md_white_1000</item>
-
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
