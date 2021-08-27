@@ -7,7 +7,7 @@
 ## 🏗️ Changes
 - Added more Browse Sort options
 - Show unreleased Chapters
-
+- Use color accented ripples (@Soitora)
 ## 🐜 Fixes
 - Back button not working in latest chapter view
 - ContentRating chapters were blocked by MangaDex Api change (@Zurkei)

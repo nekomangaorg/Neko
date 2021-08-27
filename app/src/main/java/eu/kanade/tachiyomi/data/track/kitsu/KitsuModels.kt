@@ -27,12 +27,14 @@ class KitsuSearchManga(obj: JsonObject, api: Boolean = false) {
     }
     private val synopsis = obj["synopsis"]?.jsonPrimitive?.contentOrNull
     private var startDate = obj["startDate"]?.jsonPrimitive?.contentOrNull?.let {
+        if (!api) {
             val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
             outputDf.format(Date(it.toLong() * 1000))
         } else {
             it
         }
     }
+
     private val endDate = obj["endDate"]?.jsonPrimitive?.contentOrNull
 
     @CallSuper
@@ -55,17 +57,24 @@ class KitsuSearchManga(obj: JsonObject, api: Boolean = false) {
 
 class KitsuLibManga(obj: JsonObject, manga: JsonObject) {
     val id = manga["id"]!!.jsonPrimitive.int
-    private val canonicalTitle = manga["attributes"]!!.jsonObject["canonicalTitle"]!!.jsonPrimitive.content
-    private val chapterCount = manga["attributes"]!!.jsonObject["chapterCount"]?.jsonPrimitive?.intOrNull
+    private val canonicalTitle =
+        manga["attributes"]!!.jsonObject["canonicalTitle"]!!.jsonPrimitive.content
+    private val chapterCount =
+        manga["attributes"]!!.jsonObject["chapterCount"]?.jsonPrimitive?.intOrNull
     val type = manga["attributes"]!!.jsonObject["mangaType"]?.jsonPrimitive?.contentOrNull.orEmpty()
-    val original = manga["attributes"]!!.jsonObject["posterImage"]!!.jsonObject["original"]!!.jsonPrimitive.content
+    val original =
+        manga["attributes"]!!.jsonObject["posterImage"]!!.jsonObject["original"]!!.jsonPrimitive.content
     private val synopsis = manga["attributes"]!!.jsonObject["synopsis"]!!.jsonPrimitive.content
-    private val startDate = manga["attributes"]!!.jsonObject["startDate"]?.jsonPrimitive?.contentOrNull.orEmpty()
-    private val startedAt = obj["attributes"]!!.jsonObject["startedAt"]?.jsonPrimitive?.contentOrNull
-    private val finishedAt = obj["attributes"]!!.jsonObject["finishedAt"]?.jsonPrimitive?.contentOrNull
+    private val startDate =
+        manga["attributes"]!!.jsonObject["startDate"]?.jsonPrimitive?.contentOrNull.orEmpty()
+    private val startedAt =
+        obj["attributes"]!!.jsonObject["startedAt"]?.jsonPrimitive?.contentOrNull
+    private val finishedAt =
+        obj["attributes"]!!.jsonObject["finishedAt"]?.jsonPrimitive?.contentOrNull
     private val libraryId = obj["id"]!!.jsonPrimitive.int
     val status = obj["attributes"]!!.jsonObject["status"]!!.jsonPrimitive.content
-    private val ratingTwenty = obj["attributes"]!!.jsonObject["ratingTwenty"]?.jsonPrimitive?.contentOrNull
+    private val ratingTwenty =
+        obj["attributes"]!!.jsonObject["ratingTwenty"]?.jsonPrimitive?.contentOrNull
     val progress = obj["attributes"]!!.jsonObject["progress"]!!.jsonPrimitive.int
 
     fun toTrack() = TrackSearch.create(TrackManager.KITSU).apply {
