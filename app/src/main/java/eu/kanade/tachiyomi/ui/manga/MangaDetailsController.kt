@@ -1303,7 +1303,7 @@ class MangaDetailsController :
 
     //region Tracking methods
     fun refreshTracking(trackings: List<TrackItem>) {
-        trackingBottomSheet?.onNextTrackings(trackings)
+        trackingBottomSheet?.onNextTrackersUpdate(trackings)
     }
 
     fun onTrackSearchResults(results: List<TrackSearch>) {
