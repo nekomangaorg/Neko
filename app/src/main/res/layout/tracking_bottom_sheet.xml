@@ -175,6 +175,7 @@
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/track_search"
                 android:layout_width="match_parent"
+                android:imeOptions="actionSearch"
                 android:layout_height="wrap_content"
                 android:hint="@string/title"
                 android:inputType="text" />
