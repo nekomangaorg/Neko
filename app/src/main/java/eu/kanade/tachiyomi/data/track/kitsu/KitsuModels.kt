@@ -25,9 +25,8 @@ class KitsuSearchManga(obj: JsonObject, api: Boolean = false) {
         // posterImage is sometimes a jsonNull object instead
         null
     }
-    private val synopsis = obj["synopsis"]!!.jsonPrimitive.content
-    private var startDate = obj["startDate"]?.jsonPrimitive?.contentOrNull?.let{
-        if (!api) {
+    private val synopsis = obj["synopsis"]?.jsonPrimitive?.contentOrNull
+    private var startDate = obj["startDate"]?.jsonPrimitive?.contentOrNull?.let {
             val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
             outputDf.format(Date(it.toLong() * 1000))
         } else {
@@ -42,7 +41,7 @@ class KitsuSearchManga(obj: JsonObject, api: Boolean = false) {
         title = canonicalTitle
         total_chapters = chapterCount ?: 0
         cover_url = original ?: ""
-        summary = synopsis
+        summary = synopsis ?: ""
         tracking_url = KitsuApi.mangaUrl(media_id)
         publishing_status = if (endDate == null) {
             "Publishing"
