@@ -119,7 +119,7 @@ class SettingsGeneralController : SettingsController() {
             )
             entryRange = 0..2
             defaultValue = 0
-            isVisible = max(context.resources.displayMetrics.widthPixels, context.resources.displayMetrics.heightPixels) > 720.dpToPx
+            isVisible = max(context.resources.displayMetrics.widthPixels, context.resources.displayMetrics.heightPixels) >= 720.dpToPx
         }
 
         preferenceCategory {
