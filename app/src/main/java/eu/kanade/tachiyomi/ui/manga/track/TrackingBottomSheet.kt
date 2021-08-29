@@ -94,7 +94,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         }
 
         binding.trackSearch.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE) {
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val text = binding.trackSearch.text?.toString() ?: ""
                 if (text.isNotBlank()) {
                     startTransition()
