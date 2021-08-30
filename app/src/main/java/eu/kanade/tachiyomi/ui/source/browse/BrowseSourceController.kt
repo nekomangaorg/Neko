@@ -3,13 +3,11 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.app.Activity
 import android.os.Build
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsAnimationCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -53,6 +51,8 @@ import eu.kanade.tachiyomi.widget.EmptyView
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
+import kotlin.math.max
+import kotlin.math.min
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -193,20 +193,51 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.clipToPadding = false
         recycler.setHasFixedSize(true)
         recycler.adapter = adapter
+        var handleInsets = true
 
         scrollViewWith(
             recycler,
             true,
             afterInsets = { insets ->
-                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                    binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        bottomMargin = insets.systemWindowInsetBottom + 16.dpToPx
-                    }
+                if (handleInsets) {
+                    updateFab(insets)
                 }
+            },
+            onBottomNavUpdate = {
+                updateFab()
             }
         )
 
-        binding.fab.applyBottomAnimatedInsets(16.dpToPx)
+        ViewCompat.setWindowInsetsAnimationCallback(view,  object : WindowInsetsAnimationCompat.Callback(
+            DISPATCH_MODE_STOP
+        ) {
+            override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+                handleInsets = false
+                super.onPrepare(animation)
+            }
+
+            override fun onStart(
+                animation: WindowInsetsAnimationCompat,
+                bounds: WindowInsetsAnimationCompat.BoundsCompat,
+            ): WindowInsetsAnimationCompat.BoundsCompat {
+                handleInsets = false
+                updateFab()
+                return bounds
+            }
+
+            override fun onProgress(
+                insets: WindowInsetsCompat,
+                runningAnimations: List<WindowInsetsAnimationCompat>,
+            ): WindowInsetsCompat {
+                updateFab(insets.toWindowInsets())
+                return insets
+            }
+
+            override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                handleInsets = true
+                updateFab()
+            }
+        })
 
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
@@ -652,9 +683,19 @@ open class BrowseSourceController(bundle: Bundle) :
         }
     }
 
-    fun updateFab() {
-        binding.fab.y =
-            -((activityBinding!!.bottomNav?.height?.pxToDp?.toFloat() ?: 0f) + 25f.dpToPx)
+    fun updateFab(windowInsets: WindowInsets? = null) {
+        val view = view ?: return
+        val insets = windowInsets ?: view.rootWindowInsets
+        binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+            bottomMargin = max(
+                (activityBinding!!.bottomNav?.height ?: 0) - (activityBinding!!.bottomNav?.translationY ?: 0f).toInt(),
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    insets?.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())?.bottom ?: 0
+                } else {
+                    insets?.systemWindowInsetBottom ?: 0
+                }
+            ) + 16.dpToPx
+        }
     }
 
     companion object {
