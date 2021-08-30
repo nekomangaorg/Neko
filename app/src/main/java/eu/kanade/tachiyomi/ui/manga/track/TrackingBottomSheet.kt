@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
-import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,6 +40,7 @@ import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsDivider
 import eu.kanade.tachiyomi.util.lang.indexesOf
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.expand
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
@@ -178,7 +178,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         if (track.tracking_url.isBlank()) {
             activity.toast(R.string.url_not_set_click_again)
         } else {
-            activity.startActivity(Intent(Intent.ACTION_VIEW, track.tracking_url.toUri()))
+            activity.openInBrowser(track.tracking_url.toUri())
             controller.refreshTracker = position
         }
     }
