@@ -30,7 +30,7 @@ class TrackSearchItem(val trackSearch: TrackSearch) : AbstractItem<TrackSearchIt
 
     class ViewHolder(view: View) : FastAdapter.ViewHolder<TrackSearchItem>(view) {
 
-        private val binding = TrackSearchItemBinding.bind(view)
+        val binding = TrackSearchItemBinding.bind(view)
 
         init {
             binding.trackSearchCover.shapeAppearanceModel =

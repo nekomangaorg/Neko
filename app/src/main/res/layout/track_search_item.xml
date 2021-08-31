@@ -30,7 +30,7 @@
         android:maxLines="3"
         android:textSize="18sp"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/link_button"
         app:layout_constraintStart_toEndOf="@id/track_search_cover"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="One Piece"/>
@@ -141,15 +141,32 @@
 
     <ImageView
         android:id="@+id/checkbox"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
+        android:layout_width="20dp"
+        android:layout_height="20dp"
+        android:background="@drawable/oval"
+        android:backgroundTint="?colorOnAccent"
         android:contentDescription="@string/selection"
         android:src="@drawable/ic_check_circle_24dp"
         app:tint="?attr/colorAccent"
-        android:layout_marginEnd="12dp"
+        android:layout_marginStart="20dp"
         android:layout_marginTop="12dp"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"/>
+        app:layout_constraintStart_toStartOf="parent"/>
+
+    <ImageButton
+        android:id="@+id/link_button"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintWidth_max="wrap"
+        android:background="?selectableItemBackgroundBorderless"
+        android:contentDescription="@string/stop"
+        android:padding="12dp"
+        android:tooltipText="@string/open_in_browser"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_chainStyle="spread"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_open_in_new_24dp"
+        app:tint="?android:textColorPrimary" />
 
     <androidx.constraintlayout.widget.Barrier
         android:id="@+id/cover_barrier"

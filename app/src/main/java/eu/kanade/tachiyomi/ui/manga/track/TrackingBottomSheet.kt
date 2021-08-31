@@ -38,6 +38,7 @@ import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItems
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
+import com.mikepenz.fastadapter.listeners.addClickListener
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsDivider
 import eu.kanade.tachiyomi.util.lang.indexesOf
 import eu.kanade.tachiyomi.util.system.openInBrowser
@@ -91,6 +92,10 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         searchAdapter.onClickListener = { _, _, _, position ->
             trackItem(position)
             true
+        }
+
+        searchAdapter.addClickListener<TrackSearchItem.ViewHolder, TrackSearchItem>({ it.binding.linkButton }) { _, _, _, item ->
+            activity.openInBrowser(item.trackSearch.tracking_url)
         }
 
         binding.trackSearch.setOnEditorActionListener { _, actionId, _ ->
