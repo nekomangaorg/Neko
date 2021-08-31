@@ -134,6 +134,7 @@
     <string name="library_is_empty_add_from_browse">Your library is empty, add series to your
         library from the browse tab.</string>
     <string name="no_matches_for_filters">No matches found for your current filters</string>
+    <string name="getting_started_guide">Getting started guide</string>
     <string name="show_all_categories">Show all categories</string>
     <string name="move_dynamic_to_bottom">Move collapsed dynamic categories to bottom</string>
     <string name="show_number_of_items">Show number of items</string>
