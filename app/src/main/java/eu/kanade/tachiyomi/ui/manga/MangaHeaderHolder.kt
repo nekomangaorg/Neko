@@ -163,6 +163,7 @@ class MangaHeaderHolder(
         if (binding.moreButton.visibility == View.VISIBLE || isTablet) {
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
+            setDescription()
             binding.mangaGenresTags.isVisible = true
             binding.lessButton.isVisible = !isTablet
             binding.moreButtonGroup.isVisible = false
@@ -178,6 +179,7 @@ class MangaHeaderHolder(
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
+        setDescription()
         binding.mangaGenresTags.isVisible = isTablet
         binding.lessButton.isVisible = false
         binding.moreButtonGroup.isVisible = !isTablet
@@ -185,6 +187,23 @@ class MangaHeaderHolder(
         binding.mangaAuthor.maxLines = 2
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
+        }
+    }
+
+    private fun setDescription() {
+        if (binding != null) {
+            val desc = adapter.controller.mangaPresenter().manga.description
+            binding.mangaSummary.text = when {
+                desc.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
+                binding.mangaSummary.maxLines != Int.MAX_VALUE -> desc.replace(
+                    Regex(
+                        "[\\r\\n]{2,}",
+                        setOf(RegexOption.MULTILINE)
+                    ),
+                    "\n"
+                )
+                else -> desc.trim()
+            }
         }
     }
 
@@ -225,11 +244,14 @@ class MangaHeaderHolder(
             binding.mangaAuthor.text =
                 listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
-        binding.mangaSummary.text = when {
-            MdUtil.getMangaId(manga.url).isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
-            manga.description.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
-            else -> manga.description?.trim()
+
+        if(MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+            manga.description ="THIS MANGA IS NOT MIGRATED TO V5"
         }
+
+        setDescription()
+
+
 
         binding.mangaSummary.post {
 //            if (binding.subItemGroup.isVisible) {
