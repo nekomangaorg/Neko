@@ -676,7 +676,15 @@ class LibraryController(
         }
         binding.roundedCategoryHopper.categoryButton.setOnClickListener {
             val items = presenter.categories.map { category ->
-                MaterialMenuSheet.MenuSheetItem(category.order, text = category.name)
+                MaterialMenuSheet.MenuSheetItem(
+                    category.order,
+                    text = category.name +
+                        if (adapter.showNumber && !category.isHidden) {
+                            " (${adapter.itemsPerCategory[category.id]})"
+                        } else {
+                            ""
+                        }
+                )
             }
             MaterialMenuSheet(
                 activity!!,
@@ -1029,7 +1037,14 @@ class LibraryController(
 
         binding.categoryHopperFrame.isVisible = !singleCategory && !preferences.hideHopper().get()
         adapter.isLongPressDragEnabled = canDrag()
-        binding.categoryRecycler.setCategories(presenter.categories)
+        binding.categoryRecycler.setCategories(
+            presenter.categories,
+            if (adapter.showNumber) {
+                adapter.itemsPerCategory
+            } else {
+                emptyMap()
+            }
+        )
         with(binding.filterBottomSheet.root) {
             updateGroupTypeButton(presenter.groupType)
             setExpandText(canCollapseOrExpandCategory())
