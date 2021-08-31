@@ -31,6 +31,9 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
 
     var showNumber = preferences.categoryNumberOfItems().get()
 
+    val hasActiveFilters: Boolean
+        get() = controller.hasActiveFilters
+
     init {
         setDisplayHeadersAtStartUp(true)
     }

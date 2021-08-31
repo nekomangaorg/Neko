@@ -104,6 +104,24 @@ class LibraryPresenter(
     private val libraryIsGrouped
         get() = groupType != UNGROUPED
 
+    var hasActiveFilters: Boolean = run {
+        val filterDownloaded = preferences.filterDownloaded().getOrDefault()
+
+        val filterUnread = preferences.filterUnread().getOrDefault()
+
+        val filterCompleted = preferences.filterCompleted().getOrDefault()
+
+        val filterTracked = preferences.filterTracked().getOrDefault()
+
+        val filterMangaType = preferences.filterMangaType().getOrDefault()
+
+        val filterMissingChapters = preferences.filterMissingChapters().getOrDefault()
+
+        val filterMerged = preferences.filterMerged().getOrDefault()
+
+        !(filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0 && filterMissingChapters == 0 && filterMerged == 0)
+    }
+
     /** Save the current list to speed up loading later */
     override fun onDestroy() {
         super.onDestroy()
@@ -235,6 +253,8 @@ class LibraryPresenter(
 
         val filterMangaType = preferences.filterMangaType().getOrDefault()
 
+        val showEmptyCategoriesWhileFiltering = preferences.showEmptyCategoriesWhileFiltering().get()
+
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
         val filterMerged = preferences.filterMerged().getOrDefault()
@@ -242,10 +262,11 @@ class LibraryPresenter(
         val filterMissingChapters = preferences.filterMissingChapters().getOrDefault()
 
         val filtersOff =
-            filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0 && filterMangaType == 0 &&
-                filterMerged == 0 && filterMissingChapters == 0
-        return items.filter f@{ item ->
-            if (item.manga.status == -1) {
+            filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
+        hasActiveFilters = !filtersOff
+        val missingCategorySet = categories.mapNotNull { it.id }.toMutableSet()
+        val filteredItems = items.filter f@{ item ->
+            if (!showEmptyCategoriesWhileFiltering && item.manga.isHidden()) {
                 val subItems = sectionedLibraryItems[item.manga.category]
                 if (subItems.isNullOrEmpty()) return@f filtersOff
                 else {
@@ -263,14 +284,15 @@ class LibraryPresenter(
                         )
                     }
                 }
-            } else if (item.manga.isBlank()) {
+            } else if (item.manga.isBlank() || item.manga.isHidden()) {
+                missingCategorySet.remove(item.manga.category)
                 return@f if (showAllCategories) {
-                    filtersOff
+                    filtersOff || showEmptyCategoriesWhileFiltering
                 } else {
                     true
                 }
             }
-            matchesFilters(
+            val matches = matchesFilters(
                 item,
                 filterDownloaded,
                 filterUnread,
@@ -281,7 +303,17 @@ class LibraryPresenter(
                 filterMerged,
                 filterMissingChapters,
             )
+            if (matches) {
+                missingCategorySet.remove(item.manga.category)
+            }
+            matches
+        }.toMutableList()
+        if (showEmptyCategoriesWhileFiltering) {
+            missingCategorySet.forEach {
+                filteredItems.add(blankItem(it).first())
+            }
         }
+        return filteredItems
     }
 
     private fun matchesFilters(
@@ -647,22 +679,20 @@ class LibraryPresenter(
                     }
                 }
                 BY_TRACK_STATUS -> {
-                    val status: String = {
-                        val tracks = db.getTracks(manga).executeAsBlocking()
-                        val track = tracks.find { track ->
-                            loggedServices.any { it.id == track?.sync_id }
-                        }
-                        val service = loggedServices.find { it.id == track?.sync_id }
-                        if (track != null && service != null) {
-                            if (loggedServices.size > 1) {
-                                service.getGlobalStatus(track.status)
-                            } else {
-                                service.getStatus(track.status)
-                            }
+                    val tracks = db.getTracks(manga).executeAsBlocking()
+                    val track = tracks.find { track ->
+                        loggedServices.any { it.id == track?.sync_id }
+                    }
+                    val service = loggedServices.find { it.id == track?.sync_id }
+                    val status: String = if (track != null && service != null) {
+                        if (loggedServices.size > 1) {
+                            service.getGlobalStatus(track.status)
                         } else {
-                            context.getString(R.string.not_tracked)
+                            service.getStatus(track.status)
                         }
-                    }()
+                    } else {
+                        context.getString(R.string.not_tracked)
+                    }
                     listOf(LibraryItem(manga, makeOrGetHeader(status)))
                 }
                 else -> listOf(LibraryItem(manga, makeOrGetHeader(mapStatus(manga.status))))

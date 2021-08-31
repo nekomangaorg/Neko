@@ -178,6 +178,9 @@ class LibraryController(
     private var textAnim: ViewPropertyAnimator? = null
     private var hasExpanded = false
 
+    val hasActiveFilters: Boolean
+        get() = presenter.hasActiveFilters
+
     var hopperGravity: Int = preferences.hopperGravity().get()
         @SuppressLint("RtlHardcoded")
         set(value) {
@@ -1264,8 +1267,7 @@ class LibraryController(
     }
 
     override fun canDrag(): Boolean {
-        val filterOff =
-            !binding.filterBottomSheet.filterBottomSheet.hasActiveFilters() && presenter.groupType == BY_DEFAULT
+        val filterOff = !hasActiveFilters && presenter.groupType == BY_DEFAULT
         return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
     }
 

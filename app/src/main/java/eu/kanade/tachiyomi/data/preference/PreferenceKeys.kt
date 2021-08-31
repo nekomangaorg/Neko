@@ -154,6 +154,8 @@ object PreferenceKeys {
 
     const val filterMissingChapters = "pref_filter_missing_chapters_key"
 
+    const val showEmptyCategoriesFiltering = "show_empty_categories_filtering"
+
     const val librarySortingMode = "library_sorting_mode"
 
     const val automaticUpdates = "automatic_updates"

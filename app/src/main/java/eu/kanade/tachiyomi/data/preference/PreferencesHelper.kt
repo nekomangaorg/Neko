@@ -328,6 +328,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
 
+    fun showEmptyCategoriesWhileFiltering() = flowPrefs.getBoolean(Keys.showEmptyCategoriesFiltering, false)
+
     fun filterMerged() = rxPrefs.getInteger(Keys.filterMerged, 0)
 
     fun filterMissingChapters() = rxPrefs.getInteger(Keys.filterMissingChapters, 0)
