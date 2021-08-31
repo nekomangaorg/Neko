@@ -41,6 +41,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
+                android:progressTint="@color/md_white_1000"
+                android:indeterminateTint="@color/md_white_1000"
                 android:padding="4dp"
                 android:visibility="gone" />
 
@@ -65,7 +67,7 @@
                 android:maxLines="1"
                 android:paddingStart="16dp"
                 android:paddingTop="16dp"
-                android:paddingEnd="30dp"
+                android:paddingEnd="44dp"
                 android:paddingBottom="16dp"
                 android:text="@string/title"
                 android:textSize="14sp"
@@ -73,7 +75,7 @@
                 app:layout_constraintEnd_toEndOf="@id/status_container"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
-                tools:text="Tracking name that is really long so i can see the padding" />
+                tools:text="Tracking name that is really long so i can see the padding in work like so here" />
 
             <com.mikepenz.iconics.view.IconicsImageView
                 android:id="@+id/track_remove"
@@ -85,7 +87,7 @@
                 app:iiv_padding="2dp"
                 app:iiv_icon="cmd_close_circle"
                 android:contentDescription="@string/open_in_webview"
-                app:iiv_color="?attr/colorAccent"
+                app:iiv_color="@color/text_color_secondary"
                 android:tooltipText="@string/remove_tracking"
                 app:layout_constraintBottom_toBottomOf="parent"
                 tools:background="@color/neko_green"
@@ -182,6 +184,7 @@
                 app:layout_constraintTop_toTopOf="parent" />
 
             <View
+                android:id="@+id/vert_divider_2"
                 android:layout_width="1dp"
                 android:layout_height="0dp"
                 android:layout_marginTop="10dp"
@@ -201,7 +204,7 @@
                 android:background="@color/strong_divider"
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/score_container" />
+                app:layout_constraintTop_toBottomOf="@+id/track_chapters" />
 
             <TextView
                 android:id="@+id/track_start_date"
