@@ -62,9 +62,12 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         performFilter()
     }
 
-    fun setItemsPerCategoryMap() {
+    private fun setItemsPerCategoryMap() {
         itemsPerCategory = headerItems.map { header ->
-            (header as LibraryHeaderItem).catId to getSectionItemPositions(header).size
+            (header as LibraryHeaderItem).catId to getSectionItems(header).filter {
+                val manga = (it as? LibraryItem)?.manga ?: return@filter false
+                !manga.isHidden() && !manga.isBlank()
+            }.size
         }.toMap()
     }
 
