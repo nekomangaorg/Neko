@@ -52,7 +52,7 @@
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
-        <item name="actionBarTheme">@style/ThemeOverlay.AppCompat.DayNight.ActionBar</item>
+        <item name="actionBarTheme">@style/Theme.ActionBar.DayNight</item>
         <item name="preferenceTheme">@style/Neko.Preference</item>
 
         <!-- Custom Attributes-->

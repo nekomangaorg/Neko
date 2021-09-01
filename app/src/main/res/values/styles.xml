@@ -9,6 +9,10 @@
         <item name="popupTheme">@style/ThemeOverlay.MaterialComponents.Light</item>
     </style>
 
+    <style name="Theme.ActionBar.DayNight" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
+        <item name="colorControlHighlight">@color/accent_highlight</item>
+    </style>
+
     <!--====-->
     <!--Tabs-->
     <!--====-->
