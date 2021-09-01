@@ -1132,7 +1132,12 @@ class ReaderActivity :
         val pages = page.chapter.pages ?: return
 
         val currentPage = if (hasExtraPage) {
-            if (resources.isLTR) "${page.number}-${page.number + 1}" else "${page.number + 1}-${page.number}"
+            val invertDoublePage = (viewer as? PagerViewer)?.config?.invertDoublePages ?: false
+            if (!binding.readerNav.pageSeekbar.isRTL.xor(invertDoublePage)) {
+                "${page.number}-${page.number + 1}"
+            } else {
+                "${page.number + 1}-${page.number}"
+            }
         } else {
             "${page.number}${if (page.firstHalf == false) "*" else ""}"
         }
