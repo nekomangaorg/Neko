@@ -246,6 +246,26 @@
         <item name="tabIndicatorFullWidth">true</item>
     </style>
 
+    <style name="Theme.Widget.Slider" parent="Widget.MaterialComponents.Slider">
+        <item name="trackColorInactive">@color/accent_alpha</item>
+        <item name="trackColorActive">?colorAccent</item>
+        <item name="thumbColor">?colorAccent</item>
+        <item name="labelStyle">@style/Theme.Widget.Tooltip</item>
+        <item name="tickColorActive">?colorOnAccent</item>
+        <item name="tickColorInactive">?android:textColorSecondary</item>
+        <item name="haloColor">?colorControlHighlight</item>
+    </style>
+
+
+    <style name="Theme.Widget.Tooltip" parent="Widget.MaterialComponents.Tooltip">
+        <item name="backgroundTint">?colorAccent</item>
+        <item name="android:textAppearance">@style/Theme.TextAppearance.Tooltip</item>
+    </style>
+
+    <style name="Theme.TextAppearance.Tooltip" parent="@style/TextAppearance.MaterialComponents.Tooltip">
+        <item name="android:textColor">?colorOnAccent</item>
+    </style>
+
     <!--==============-->
     <!--Widgets.Button-->
     <!--==============-->
