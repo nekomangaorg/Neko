@@ -22,7 +22,6 @@ import android.view.ViewGroup
 import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
-import android.widget.SeekBar
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -38,6 +37,7 @@ import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
@@ -102,7 +102,6 @@ import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
-import eu.kanade.tachiyomi.widget.SimpleSeekBarListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -120,6 +119,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 /**
  * Activity containing the reader of Tachiyomi. This activity is mostly a container of the
@@ -660,7 +660,7 @@ class ReaderActivity :
                 presenter.loadPreviousChapter()
             }
             if (result) {
-                binding.readerNav.leftChapter.isVisible = false
+                binding.readerNav.leftChapter.isInvisible = true
                 binding.readerNav.leftProgress.isVisible = true
             } else {
                 toast(
@@ -683,7 +683,7 @@ class ReaderActivity :
                 presenter.loadPreviousChapter()
             }
             if (result) {
-                binding.readerNav.rightChapter.isVisible = false
+                binding.readerNav.rightChapter.isInvisible = true
                 binding.readerNav.rightProgress.isVisible = true
             } else {
                 toast(
@@ -707,13 +707,21 @@ class ReaderActivity :
         val readerNavGestureDetector = ReaderNavGestureDetector(this)
         val gestureDetector = GestureDetectorCompat(this, readerNavGestureDetector)
         with(binding.readerNav) {
+            binding.readerNav.pageSeekbar.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+                override fun onStartTrackingTouch(slider: Slider) {
+                    readerNavGestureDetector.lockVertical = false
+                    readerNavGestureDetector.hasScrollHorizontal = true
+                }
+
+                override fun onStopTrackingTouch(slider: Slider) {
+                }
+            })
             listOf(root, leftChapter, rightChapter, pageSeekbar).forEach {
                 it.setOnTouchListener { _, event ->
                     val result = gestureDetector.onTouchEvent(event)
                     if (event?.action == MotionEvent.ACTION_UP) {
                         if (!result) {
                             val sheetBehavior = binding.chaptersSheet.root.sheetBehavior
-                            binding.chaptersSheet.root.dispatchTouchEvent(event)
                             if (sheetBehavior?.state != BottomSheetBehavior.STATE_SETTLING && !sheetBehavior.isCollapsed()) {
                                 sheetBehavior?.collapse()
                             }
@@ -727,7 +735,7 @@ class ReaderActivity :
                         return@setOnTouchListener false
                     }
                     if (it == pageSeekbar) {
-                        readerNavGestureDetector.lockVertical || (!readerNavGestureDetector.hasScrollHorizontal && event?.action != MotionEvent.ACTION_UP)
+                        readerNavGestureDetector.lockVertical
                     } else {
                         result
                     }
@@ -736,15 +744,27 @@ class ReaderActivity :
         }
 
         // Init listeners on bottom menu
-        binding.readerNav.pageSeekbar.setOnSeekBarChangeListener(
-            object : SimpleSeekBarListener() {
-                override fun onProgressChanged(seekBar: SeekBar, value: Int, fromUser: Boolean) {
-                    if (viewer != null && fromUser) {
-                        moveToPageIndex(value)
+        binding.readerNav.pageSeekbar.addOnChangeListener { _, value, fromUser ->
+            if (viewer != null && fromUser) {
+                moveToPageIndex(value.roundToInt())
+            }
+        }
+
+        binding.readerNav.pageSeekbar.setLabelFormatter { value ->
+            val pageNumber = (value + 1).roundToInt()
+            (viewer as? PagerViewer)?.let {
+                if (it.config.doublePages || it.config.splitPages) {
+                    if (it.hasExtraPage(value.roundToInt(), presenter.getCurrentChapter())) {
+                        return@setLabelFormatter if (resources.isLTR) {
+                            "$pageNumber-${pageNumber + 1}"
+                        } else {
+                            "${pageNumber + 1}-$pageNumber"
+                        }
                     }
                 }
             }
-        )
+            pageNumber.toString()
+        }
 
         // Set initial visibility
         setMenuVisibility(menuVisible)
@@ -988,9 +1008,9 @@ class ReaderActivity :
         if (doublePages) {
             // If we're moving from singe to double, we want the current page to be the first page
             pViewer.config.shiftDoublePage = (
-                binding.readerNav.pageSeekbar.progress +
+                binding.readerNav.pageSeekbar.value.roundToInt() +
                     (
-                        currentChapter?.pages?.take(binding.readerNav.pageSeekbar.progress)
+                        currentChapter?.pages?.take(binding.readerNav.pageSeekbar.value.roundToInt())
                             ?.count { it.fullPage == true || it.isolatedPage } ?: 0
                         )
                 ) % 2 != 0
@@ -1131,11 +1151,10 @@ class ReaderActivity :
             binding.chaptersSheet.chaptersBottomSheet.refreshList()
         }
         // Set seekbar progress
-        binding.readerNav.pageSeekbar.max = pages.lastIndex
+        binding.readerNav.pageSeekbar.valueTo = pages.lastIndex.toFloat()
         val progress = page.index + if (hasExtraPage) 1 else 0
         // For a double page, show the last 2 pages as if it was the final part of the seekbar
-        binding.readerNav.pageSeekbar.progress =
-            if (progress == pages.lastIndex) progress else page.index
+        binding.readerNav.pageSeekbar.value = (if (progress == pages.lastIndex) progress else page.index).toFloat()
     }
 
     /**

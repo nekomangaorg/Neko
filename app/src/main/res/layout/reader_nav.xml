@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<eu.kanade.tachiyomi.ui.reader.ReaderNavView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/reader_nav"
     android:background="@drawable/chapter_nav"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingStart="4dp"
-    android:paddingEnd="4dp"
+    android:paddingStart="12dp"
+    android:paddingEnd="12dp"
     android:layout_gravity="top"
     android:paddingBottom="6dp"
     android:paddingTop="6dp"
@@ -19,18 +19,25 @@
     <ProgressBar
         android:id="@+id/left_progress"
         style="?android:attr/progressBarStyleSmall"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/reader_seekbar"
         android:visibility="gone"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:layout_marginStart="56dp" />
+        android:layout_gravity="center" />
 
     <ImageButton
         android:id="@+id/left_chapter"
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginStart="56dp"
+        android:visibility="visible"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/reader_seekbar"
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/previous_chapter"
         android:padding="@dimen/material_layout_keylines_screen_edge_margin"
@@ -39,31 +46,42 @@
 
     <LinearLayout
         android:id="@+id/reader_seekbar"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="0dp"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/left_chapter"
+        app:layout_constraintEnd_toStartOf="@id/right_chapter"
+        android:layout_height="wrap_content">
 
         <TextView
             android:id="@+id/left_page_text"
             android:layout_width="32sp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:gravity="center"
             android:textColor="?actionBarTintColor"
             android:textSize="15sp"
             tools:text="1-2" />
 
-        <eu.kanade.tachiyomi.ui.reader.ReaderSeekBar
+        <eu.kanade.tachiyomi.ui.reader.ReaderSlider
             android:id="@+id/page_seekbar"
+            style="@style/Theme.Widget.Slider"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="40dp"
             android:layout_weight="1"
-            android:progressBackgroundTint="@color/tint_color_secondary"
             android:maxHeight="?attr/actionBarSize"
-            android:minHeight="?attr/actionBarSize" />
+            android:minHeight="?attr/actionBarSize"
+            android:progressBackgroundTint="@color/tint_color_secondary"
+            android:stepSize="1"
+            tools:value="4"
+            tools:valueTo="10"
+            tools:ignore="SpeakableTextPresentCheck" />
 
         <TextView
             android:id="@+id/right_page_text"
             android:layout_width="32sp"
-            android:layout_height="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
             android:gravity="center"
             android:textColor="?actionBarTintColor"
             android:textSize="15sp"
@@ -76,7 +94,10 @@
         android:layout_width="40dp"
         android:layout_height="40dp"
         android:layout_gravity="center"
-        android:layout_marginEnd="56dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/reader_seekbar"
         android:background="?selectableItemBackgroundBorderless"
         android:contentDescription="@string/next_chapter"
         android:padding="@dimen/material_layout_keylines_screen_edge_margin"
@@ -86,10 +107,13 @@
     <ProgressBar
         android:id="@+id/right_progress"
         style="?android:attr/progressBarStyleSmall"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toEndOf="@id/reader_seekbar"
         android:visibility="gone"
         android:layout_width="40dp"
         android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:layout_marginEnd="56dp" />
+        android:layout_gravity="center" />
 
-</LinearLayout>
+</eu.kanade.tachiyomi.ui.reader.ReaderNavView>
