@@ -755,7 +755,8 @@ class ReaderActivity :
             (viewer as? PagerViewer)?.let {
                 if (it.config.doublePages || it.config.splitPages) {
                     if (it.hasExtraPage(value.roundToInt(), presenter.getCurrentChapter())) {
-                        return@setLabelFormatter if (resources.isLTR) {
+                        val invertDoublePage = (viewer as? PagerViewer)?.config?.invertDoublePages ?: false
+                        return@setLabelFormatter if (!binding.readerNav.pageSeekbar.isRTL.xor(invertDoublePage)) {
                             "$pageNumber-${pageNumber + 1}"
                         } else {
                             "${pageNumber + 1}-$pageNumber"
