@@ -24,7 +24,7 @@
         android:layout_marginTop="15dp"
         android:hint="@string/username"
         app:boxStrokeColor="@color/text_box_stroke_selector"
-        app:hintTextColor="?attr/colorAccent">
+        app:hintTextColor="?attr/colorSecondary" >
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/username"
@@ -40,7 +40,7 @@
         android:hint="@string/password"
         app:boxStrokeColor="@color/text_box_stroke_selector"
         app:endIconMode="password_toggle"
-        app:hintTextColor="?attr/colorAccent">
+        app:hintTextColor="?attr/colorSecondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/password"
