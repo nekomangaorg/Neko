@@ -76,7 +76,6 @@
                     android:valueTo="7"
                     tools:value="3"
                     android:stepSize="1"
-                    app:tickVisible="false"
                     app:layout_constraintStart_toEndOf="@id/grid_size_text"
                     app:layout_constraintTop_toTopOf="parent"
                     app:layout_constraintBottom_toBottomOf="parent"

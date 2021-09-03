@@ -37,9 +37,11 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.Companion.CUTOUT_S
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.bottomCutoutInset
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -490,16 +492,8 @@ class PagerPageHolder(
             setMinimumDpi(90)
             setMinimumTileDpi(180)
             setCropBorders(config.imageCropBorders)
-            val topInsets =
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetTop?.toFloat()
-                        ?: 0f
-                } else 0f
-            val bottomInsets =
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetBottom?.toFloat()
-                        ?: 0f
-                } else 0f
+            val topInsets = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
+            val bottomInsets = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
             setExtendPastCutout(config.cutoutBehavior == CUTOUT_START_EXTENDED && config.scaleTypeIsFullFit() && topInsets + bottomInsets > 0)
             if ((config.cutoutBehavior != CUTOUT_IGNORE || !config.scaleTypeIsFullFit()) &&
                 android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q

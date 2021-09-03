@@ -7,6 +7,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.customview.customView
+import com.afollestad.materialdialogs.utils.MDUtil.isLandscape
 import com.google.android.material.slider.Slider
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.kanade.tachiyomi.R
@@ -15,7 +16,11 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.library.filter.ManageFilterItem
 import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.util.lang.withSubtitle
+import eu.kanade.tachiyomi.util.system.bottomCutoutInset
+import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.checkHeightThen
+import eu.kanade.tachiyomi.util.view.numberOfRowsForValue
 import eu.kanade.tachiyomi.util.view.rowsForValue
 import eu.kanade.tachiyomi.widget.BaseLibraryDisplayView
 import kotlin.math.roundToInt
@@ -29,7 +34,6 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         binding.displayGroup.bindToPreference(preferences.libraryLayout())
         binding.uniformGrid.bindToPreference(preferences.uniformGrid())
         binding.gridSeekbar.value = ((preferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
-        binding.gridSeekbar.isTickVisible = false
         binding.resetGridSize.setOnClickListener {
             binding.gridSeekbar.value = 3f
         }
@@ -64,7 +68,33 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
         }
 
         binding.gridSeekbar.setLabelFormatter {
-            (mainView ?: this@LibraryDisplayView).rowsForValue(it).toString()
+            val view = controller?.activity?.window?.decorView ?: mainView ?: this@LibraryDisplayView
+            val mainText = (mainView ?: this@LibraryDisplayView).rowsForValue(it).toString()
+            val mainOrientation = context.getString(
+                if (context.isLandscape()) {
+                    R.string.landscape
+                } else {
+                    R.string.portrait
+                }
+            )
+            val alt = (
+                if (view.measuredHeight >= 720.dpToPx) {
+                    view.measuredHeight - 72.dpToPx
+                } else {
+                    view.measuredHeight
+                }
+                ) -
+                (view.rootWindowInsets?.topCutoutInset() ?: 0) -
+                (view.rootWindowInsets?.bottomCutoutInset() ?: 0)
+            val altText = alt.numberOfRowsForValue(it).toString()
+            val altOrientation = context.getString(
+                if (context.isLandscape()) {
+                    R.string.portrait
+                } else {
+                    R.string.landscape
+                }
+            )
+            "$mainOrientation: $mainText • $altOrientation: $altText"
         }
         binding.gridSeekbar.addOnChangeListener { _, value, fromUser ->
             if (!fromUser) {
