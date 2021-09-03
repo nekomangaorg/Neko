@@ -266,7 +266,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         @ColorInt val secondaryText: Int,
         @ColorInt val background: Int,
         @ColorInt val colorSecondary: Int,
-        /** Complies with colorSecondary */
+        /** Complies with colorSurface */
         @ColorInt val appBar: Int,
         /** Complies with actionBarTintColor */
         @ColorInt val appBarText: Int,
