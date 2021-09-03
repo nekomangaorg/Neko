@@ -582,6 +582,7 @@
     <string name="settings">Settings</string>
     <string name="general">General</string>
     <string name="reader">Reader</string>
+    <string name="appearance">Appearance</string>
     <string name="advanced">Advanced</string>
     <string name="about">About</string>
     <string name="help">Help</string>

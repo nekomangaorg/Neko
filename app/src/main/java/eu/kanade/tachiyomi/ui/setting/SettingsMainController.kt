@@ -32,6 +32,14 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
+
+        preference {
+            iconRes = R.drawable.ic_appearance_outline_24dp
+            iconTint = tintColor
+            titleRes = R.string.appearance
+            onClick { navigateTo(SettingsAppearanceController()) }
+        }
+
         preference {
             iconDrawable =
                 MaterialDesignDx.Icon.gmf_book.create(context, colorAttr = R.attr.colorOnSurface)
