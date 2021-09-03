@@ -46,6 +46,12 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         R.string.strawberry_daiquiri,
         R.string.chocolate_strawberries
     ),
+    TEAL_AND_SAPPHIRE(
+        R.style.Theme_Tachiyomi_SapphireDusk,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.teal_ocean,
+        R.string.sapphire_dusk
+    ),
     TAKO(
         R.style.Theme_Tachiyomi_Tako,
         AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,

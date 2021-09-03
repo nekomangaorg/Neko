@@ -144,6 +144,21 @@
         <item name="colorSecondary">@color/secondaryDuskDawn</item>
     </style>
 
+    <style name="Theme.Tachiyomi.SapphireDusk">
+        <item name="colorPrimary">@color/primaryTealSapphire</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantTealSapphire</item>
+        <item name="colorSecondary">@color/secondaryTealSapphire</item>
+        <item name="tabBarIconColor">@color/tabBarIconColorTealSapphire</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantTealSapphire</item>
+        <item name="colorOnSecondary">@color/colorOnDownloadBadgeDayNight</item>
+        <item name="background">@color/backgroundTealSapphire</item>
+        <item name="colorSurface">@color/backgroundTealSapphire</item>
+        <item name="colorOnBackground">@color/colorOnBackgroundTealSapphire</item>
+        <item name="actionBarTintColor">@color/appBarTextTealSapphire</item>
+        <item name="colorDownloadBadge">@color/downloadBadgeDayNightInverse</item>
+        <item name="colorOnDownloadBadge">?android:textColorPrimaryInverse</item>
+    </style>
+
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorSecondary">@color/secondaryStrawberry</item>
         <item name="colorSecondaryVariant">@color/secondaryAlternativeStrawberry</item>

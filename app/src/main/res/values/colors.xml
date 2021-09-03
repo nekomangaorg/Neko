@@ -53,7 +53,6 @@
     <color name="md_grey_50">#FAFAFA</color>
 
     <color name="md_blue_A400">#2979FF</color>
-    <color name="md_blue_A400_38">#612979FF</color>
 
     <color name="md_red_500">#F44336</color>
     <color name="holo_red">#AA2200</color>
@@ -76,12 +75,15 @@
     <color name="colorOnBackgroundDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
-    <!-- Sapphire Dusk Theme -->
-    --
-    <color name="secondarySapphire">#589ab8</color>
-    <color name="secondaryVariantSapphire">#79aec6</color>
-    <color name="primarySapphire">#3e6c81</color>
-    <!-- Sapphire Dusk -->
+    <!-- Teal/Sapphire Theme -->
+    <color name="secondaryTealSapphire">#15a197</color>
+    <color name="secondaryVariantTealSapphire">#22786f</color>
+    <color name="primaryTealSapphire">#5f9c96</color>
+    <color name="primaryVariantTealSapphire">#d4f1e6</color>
+    <color name="backgroundTealSapphire">#f0f7f7</color>
+    <color name="colorOnBackgroundTealSapphire">#DE072926</color>
+    <color name="tabBarIconColorTealSapphire">#DE072927</color>
+    <color name="appBarTextTealSapphire">#DE0a302e</color>
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>
