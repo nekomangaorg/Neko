@@ -338,6 +338,12 @@
         <item name="rippleColor">?colorControlHighlight</item>
     </style>
 
+    <style name="Theme.Widget.ImageBorderless.Secondary">
+        <item name="android:background">@drawable/item_background_borderless_on_secondary</item>
+        <item name="android:tint">?attr/colorOnSecondary</item>
+        <item name="rippleColor">@color/on_secondary_highlight</item>
+    </style>
+
     <style name="Theme.Widget.CustomImageButton">
         <item name="android:background">@drawable/round_ripple</item>
         <item name="android:clickable">true</item>
