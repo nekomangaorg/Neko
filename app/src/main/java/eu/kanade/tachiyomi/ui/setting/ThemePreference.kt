@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Activity
 import android.content.Context
 import android.content.res.ColorStateList
+import android.content.res.Configuration
+import android.content.res.Configuration.UI_MODE_NIGHT_NO
+import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.graphics.Color
 import android.os.Build
 import android.util.AttributeSet
@@ -27,8 +30,8 @@ import eu.kanade.tachiyomi.databinding.ThemesPreferenceBinding
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.Themes
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
-import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
@@ -181,8 +184,6 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
             return ViewHolder(v)
         }
 
-        val colors = theme.getColors(if (isDarkTheme) AppCompatDelegate.MODE_NIGHT_YES else AppCompatDelegate.MODE_NIGHT_NO)
-
         @Suppress("UNUSED_PARAMETER")
         override var isSelected: Boolean
             get() {
@@ -232,75 +233,33 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
                     binding.themeSelected.alpha = if (themeMatchesApp) 1f else 0.5f
                     binding.checkbox.alpha = if (themeMatchesApp) 1f else 0.5f
                 }
-                if (item.theme.styleRes == R.style.Theme_Tachiyomi_Monet &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-                ) {
-                    val nightMode = item.isDarkTheme
-                    val appBar = context.contextCompatColor(
-                        if (nightMode) android.R.color.system_neutral1_900
-                        else android.R.color.system_neutral1_50
-                    )
-                    val appBarText = context.contextCompatColor(
-                        if (nightMode) android.R.color.system_accent2_10
-                        else android.R.color.system_accent2_800
-                    )
-                    val colorSecondary = context.contextCompatColor(
-                        if (nightMode) android.R.color.system_accent1_100
-                        else android.R.color.system_accent1_600
-                    )
-                    val bottomBar = context.contextCompatColor(
-                        if (nightMode) android.R.color.system_neutral1_800
-                        else android.R.color.system_accent2_50
-                    )
-                    val background = context.contextCompatColor(
-                        if (nightMode) android.R.color.system_neutral1_900
-                        else android.R.color.system_neutral1_50
-                    )
-
-                    binding.themeToolbar.setBackgroundColor(appBar)
-                    binding.themeAppBarText.imageTintList =
-                        ColorStateList.valueOf(appBarText)
-                    binding.themeHeroImage.imageTintList =
-                        ColorStateList.valueOf(item.colors.primaryText)
-                    binding.themePrimaryText.imageTintList =
-                        ColorStateList.valueOf(item.colors.primaryText)
-                    binding.themeAccentedButton.imageTintList =
-                        ColorStateList.valueOf(colorSecondary)
-                    binding.themeSecondaryText.imageTintList =
-                        ColorStateList.valueOf(item.colors.secondaryText)
-                    binding.themeSecondaryText2.imageTintList =
-                        ColorStateList.valueOf(item.colors.secondaryText)
-
-                    binding.themeBottomBar.setBackgroundColor(bottomBar)
-                    binding.themeItem1.imageTintList =
-                        ColorStateList.valueOf(item.colors.inactiveTab)
-                    binding.themeItem2.imageTintList = ColorStateList.valueOf(colorSecondary)
-                    binding.themeItem3.imageTintList =
-                        ColorStateList.valueOf(item.colors.inactiveTab)
-                    binding.themeLayout.setBackgroundColor(background)
-                } else {
-                    binding.themeToolbar.setBackgroundColor(item.colors.appBar)
-                    binding.themeAppBarText.imageTintList =
-                        ColorStateList.valueOf(item.colors.appBarText)
-                    binding.themeHeroImage.imageTintList =
-                        ColorStateList.valueOf(item.colors.primaryText)
-                    binding.themePrimaryText.imageTintList =
-                        ColorStateList.valueOf(item.colors.primaryText)
-                    binding.themeAccentedButton.imageTintList =
-                        ColorStateList.valueOf(item.colors.colorSecondary)
-                    binding.themeSecondaryText.imageTintList =
-                        ColorStateList.valueOf(item.colors.secondaryText)
-                    binding.themeSecondaryText2.imageTintList =
-                        ColorStateList.valueOf(item.colors.secondaryText)
-
-                    binding.themeBottomBar.setBackgroundColor(item.colors.bottomBar)
-                    binding.themeItem1.imageTintList =
-                        ColorStateList.valueOf(item.colors.inactiveTab)
-                    binding.themeItem2.imageTintList = ColorStateList.valueOf(item.colors.activeTab)
-                    binding.themeItem3.imageTintList =
-                        ColorStateList.valueOf(item.colors.inactiveTab)
-                    binding.themeLayout.setBackgroundColor(item.colors.background)
-                }
+                val configuration = Configuration(context.resources.configuration)
+                configuration.uiMode = if (item.isDarkTheme) UI_MODE_NIGHT_YES else UI_MODE_NIGHT_NO
+                val themeContext = context.createConfigurationContext(configuration)
+                themeContext.setTheme(item.theme.styleRes)
+                val primaryText = themeContext.getResourceColor(android.R.attr.textColorPrimary)
+                val secondaryText = themeContext.getResourceColor(android.R.attr.textColorSecondary)
+                val background = themeContext.getResourceColor(R.attr.background)
+                val colorSecondary = themeContext.getResourceColor(R.attr.colorSecondary)
+                val appBar = themeContext.getResourceColor(R.attr.colorSurface)
+                val appBarText = themeContext.getResourceColor(R.attr.actionBarTintColor)
+                val bottomBar = themeContext.getResourceColor(R.attr.colorPrimaryVariant)
+                val inactiveTab = themeContext.getResourceColor(R.attr.tabBarIconInactive)
+                val activeTab = themeContext.getResourceColor(R.attr.tabBarIconColor)
+                binding.themeToolbar.setBackgroundColor(appBar)
+                binding.themeAppBarText.imageTintList = ColorStateList.valueOf(appBarText)
+                binding.themeHeroImage.imageTintList = ColorStateList.valueOf(primaryText)
+                binding.themePrimaryText.imageTintList = ColorStateList.valueOf(primaryText)
+                binding.themeAccentedButton.imageTintList = ColorStateList.valueOf(colorSecondary)
+                binding.themeSecondaryText.imageTintList = ColorStateList.valueOf(secondaryText)
+                binding.themeSecondaryText2.imageTintList = ColorStateList.valueOf(secondaryText)
+                binding.themeBottomBar.setBackgroundColor(bottomBar)
+                binding.themeItem1.imageTintList =
+                    ColorStateList.valueOf(inactiveTab)
+                binding.themeItem2.imageTintList = ColorStateList.valueOf(activeTab)
+                binding.themeItem3.imageTintList =
+                    ColorStateList.valueOf(inactiveTab)
+                binding.themeLayout.setBackgroundColor(background)
                 if (item.isDarkTheme && preferences.themeDarkAmoled().get()) {
                     binding.themeLayout.setBackgroundColor(Color.BLACK)
                     if (!ThemeUtil.isColoredTheme(item.theme)) {
