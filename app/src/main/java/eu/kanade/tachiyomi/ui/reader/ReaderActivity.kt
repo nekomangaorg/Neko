@@ -75,12 +75,11 @@ import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.GLUtil
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
-import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.hasColoredActionBar
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
@@ -262,7 +261,7 @@ class ReaderActivity :
         }
 
         binding.chaptersSheet.chaptersBottomSheet.setup(this)
-        if (ThemeUtil.isColoredTheme(getPrefTheme(preferences))) {
+        if (hasColoredActionBar) {
             binding.chaptersSheet.chapterRecycler.setBackgroundColor(getResourceColor(R.attr.background))
         }
         config = ReaderConfig()

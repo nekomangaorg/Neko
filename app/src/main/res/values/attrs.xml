@@ -19,6 +19,8 @@
 
     <attr name="actionBarTintColor" format="color" />
     <attr name="readerBackground" format="color" />
+    <attr name="hasColoredActionBar" format="boolean">false</attr>
+
     <attr name="colorOnSecondary" format="color" />
     <attr name="tabBarIconColor" format="reference|integer" />
     <attr name="tabBarIconInactive" format="reference|integer" />

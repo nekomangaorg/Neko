@@ -330,6 +330,15 @@ fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
     return packagesSupportingCustomTabs
 }
 
+val Context.hasColoredActionBar: Boolean
+    get() {
+        val hasColoredActionBar: Boolean
+        val a = obtainStyledAttributes(intArrayOf(R.attr.hasColoredActionBar))
+        hasColoredActionBar = a.getBoolean(0, false)
+        a.recycle()
+        return hasColoredActionBar
+    }
+
 fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK
     return currentNightMode == Configuration.UI_MODE_NIGHT_YES
