@@ -41,16 +41,16 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         if (hasPrevChapter) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
             binding.upperText.text = buildSpannedString {
-                bold { append(context.getString(R.string.transition_previous)) }
+                bold { append(context.getString(R.string.previous_chapter)) }
                 append("\n${prevChapter!!.chapter.name}")
             }
             binding.lowerText.text = buildSpannedString {
-                bold { append(context.getString(R.string.transition_current)) }
+                bold { append(context.getString(R.string.current_chapter)) }
                 append("\n${transition.from.chapter.name}")
             }
         } else {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_CENTER
-            binding.upperText.text = context.getString(R.string.transition_no_previous)
+            binding.upperText.text = context.getString(R.string.theres_no_previous_chapter)
         }
     }
 
@@ -65,16 +65,16 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         if (hasNextChapter) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
             binding.upperText.text = buildSpannedString {
-                bold { append(context.getString(R.string.transition_finished)) }
+                bold { append(context.getString(R.string.finished_chapter)) }
                 append("\n${transition.from.chapter.name}")
             }
             binding.lowerText.text = buildSpannedString {
-                bold { append(context.getString(R.string.transition_next)) }
+                bold { append(context.getString(R.string.next_chapter)) }
                 append("\n${nextChapter!!.chapter.name}")
             }
         } else {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_CENTER
-            binding.upperText.text = context.getString(R.string.transition_no_next)
+            binding.upperText.text = context.getString(R.string.theres_no_next_chapter)
         }
     }
 
