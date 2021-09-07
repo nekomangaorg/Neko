@@ -486,16 +486,17 @@ class MangaHeaderHolder(
     private fun MaterialButton.checked(checked: Boolean) {
         if (checked) {
             backgroundTintList = ColorStateList.valueOf(
-                ColorUtils.setAlphaComponent(
+                ColorUtils.blendARGB(
                     context.getResourceColor(R.attr.colorSecondary),
-                    75
+                    context.getResourceColor(R.attr.background),
+                    0.706f
                 )
             )
             strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
         } else {
             resetStrokeColor()
             backgroundTintList =
-                ContextCompat.getColorStateList(context, android.R.color.transparent)
+                ColorStateList.valueOf(context.getResourceColor(R.attr.background))
         }
     }
 
