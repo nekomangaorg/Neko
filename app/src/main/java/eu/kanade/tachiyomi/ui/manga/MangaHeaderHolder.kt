@@ -485,6 +485,7 @@ class MangaHeaderHolder(
 
     private fun MaterialButton.checked(checked: Boolean) {
         if (checked) {
+            stateListAnimator = AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
             backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
                     context.getResourceColor(R.attr.colorSecondary),
@@ -494,6 +495,7 @@ class MangaHeaderHolder(
             )
             strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
         } else {
+            stateListAnimator = null
             resetStrokeColor()
             backgroundTintList =
                 ColorStateList.valueOf(context.getResourceColor(R.attr.background))
