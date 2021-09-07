@@ -8,6 +8,7 @@ import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
+import eu.kanade.tachiyomi.util.system.SideNavMode
 import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
@@ -106,6 +107,22 @@ class SettingsAppearanceController : SettingsController() {
                     context.resources.displayMetrics.heightPixels
                 ) >= 720.dpToPx
             }
+
+            intListPreference(activity) {
+                key = Keys.sideNavMode
+                titleRes = R.string.use_side_navigation
+                val values = SideNavMode.values()
+                entriesRes = values.map { it.stringRes }.toTypedArray()
+                entryValues = values.map { it.prefValue }
+                defaultValue = SideNavMode.DEFAULT.prefValue
+
+                onChange {
+                    activity?.recreate()
+                    true
+                }
+            }
+
+            infoPreference(R.string.by_default_side_nav_info)
         }
     }
 

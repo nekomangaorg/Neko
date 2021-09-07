@@ -631,6 +631,9 @@
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
     <string name="side_nav_icon_alignment">Side navigation icon alignment</string>
+    <string name="use_side_navigation">Use side navigation</string>
+    <string name="default_behavior">Default behavior</string>
+    <string name="by_default_side_nav_info">By default, side navigation shows up on landscape on certain phones and small tablets, and always for larger tablets</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
