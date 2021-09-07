@@ -41,7 +41,7 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
         if (hasPrevChapter) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
             binding.upperText.text = buildSpannedString {
-                bold { append(context.getString(R.string.previous_chapter)) }
+                bold { append(context.getString(R.string.previous_title)) }
                 append("\n${prevChapter!!.chapter.name}")
             }
             binding.lowerText.text = buildSpannedString {
@@ -69,7 +69,7 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
                 append("\n${transition.from.chapter.name}")
             }
             binding.lowerText.text = buildSpannedString {
-                bold { append(context.getString(R.string.next_chapter)) }
+                bold { append(context.getString(R.string.next_title)) }
                 append("\n${nextChapter!!.chapter.name}")
             }
         } else {
