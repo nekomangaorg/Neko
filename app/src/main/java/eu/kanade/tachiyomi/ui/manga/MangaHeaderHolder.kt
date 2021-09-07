@@ -181,7 +181,7 @@ class MangaHeaderHolder(
             binding.mangaAuthor.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.requestFocus()
             if (animated) {
-                val transition = androidx.transition.Slide()
+                val transition = androidx.transition.ChangeBounds()
                 transition.duration = binding.root.resources.getInteger(
                     android.R.integer.config_shortAnimTime
                 ).toLong()
