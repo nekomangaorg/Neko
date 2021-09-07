@@ -17,6 +17,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
 import com.google.android.material.chip.Chip
 import com.mikepenz.iconics.typeface.IIcon
@@ -78,12 +79,14 @@ class MangaHeaderHolder(
             topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = adapter.delegate.topCoverHeight()
             }
-            moreButton.setOnClickListener { expandDesc() }
+            moreButton.setOnClickListener {
+                expandDesc(true)
+            }
             mangaSummary.setOnClickListener {
                 if (moreButton.isVisible) {
-                    expandDesc()
+                    expandDesc(true)
                 } else if (!hadSelection) {
-                    collapseDesc()
+                    collapseDesc(true)
                 } else {
                     hadSelection = false
                 }
@@ -112,7 +115,9 @@ class MangaHeaderHolder(
             if (!itemView.resources.isLTR) {
                 moreBgGradient.rotation = 180f
             }
-            lessButton.setOnClickListener { collapseDesc() }
+            lessButton.setOnClickListener {
+                collapseDesc(true)
+            }
 
             webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
             similarButton.setOnClickListener { adapter.delegate.openSimilar() }
@@ -158,7 +163,7 @@ class MangaHeaderHolder(
         }
     }
 
-    private fun expandDesc() {
+    private fun expandDesc(animated: Boolean = false) {
         binding ?: return
         if (binding.moreButton.visibility == View.VISIBLE || isTablet) {
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
@@ -167,22 +172,42 @@ class MangaHeaderHolder(
             binding.mangaGenresTags.isVisible = true
             binding.lessButton.isVisible = !isTablet
             binding.moreButtonGroup.isVisible = false
+            if (animated) {
+                val animVector = AnimatedVectorDrawableCompat.create(binding.root.context, R.drawable.anim_expand_more_to_less)
+                binding.lessButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, animVector, null)
+                animVector?.start()
+            }
             binding.title.maxLines = Integer.MAX_VALUE
             binding.mangaAuthor.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.requestFocus()
+            if (animated) {
+                val transition = androidx.transition.Slide()
+                transition.duration = binding.root.resources.getInteger(
+                    android.R.integer.config_shortAnimTime
+                ).toLong()
+                androidx.transition.TransitionManager.beginDelayedTransition(
+                    adapter.controller.binding.recycler,
+                    transition
+                )
+            }
         }
     }
 
-    private fun collapseDesc() {
+    private fun collapseDesc(animated: Boolean = false) {
         binding ?: return
         if (isTablet) return
+        binding.moreButtonGroup.isVisible = !isTablet
+        if (animated) {
+            val animVector = AnimatedVectorDrawableCompat.create(binding.root.context, R.drawable.anim_expand_less_to_more)
+            binding.moreButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, animVector, null)
+            animVector?.start()
+        }
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
         setDescription()
         binding.mangaGenresTags.isVisible = isTablet
         binding.lessButton.isVisible = false
-        binding.moreButtonGroup.isVisible = !isTablet
         binding.title.maxLines = 4
         binding.mangaAuthor.maxLines = 2
         adapter.recyclerView.post {
