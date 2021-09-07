@@ -73,7 +73,7 @@
         <item name="md_color_button_text">?attr/colorSecondary</item>
         <item name="md_background_color">?attr/background</item>
         <item name="md_button_casing">literal</item>
-        <item name="md_corner_radius">16dp</item>
+        <item name="md_corner_radius">12dp</item>
 
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
