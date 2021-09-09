@@ -511,7 +511,7 @@ class LibraryController(
         binding.libraryGridRecycler.recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
-                    if (libraryLayout == 0) return 1
+                    if (libraryLayout == 0) return binding.libraryGridRecycler.recycler.manager.spanCount
                     val item = this@LibraryController.adapter.getItem(position)
                     return if (item is LibraryHeaderItem || (item is LibraryItem && item.manga.isBlank())) {
                         binding.libraryGridRecycler.recycler.manager.spanCount
