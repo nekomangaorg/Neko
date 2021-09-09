@@ -129,9 +129,9 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                 State.INVERSED -> {
                     setAnimVectorCompat(
                         R.drawable.anim_check_box_checked_to_x_24dp,
-                        R.attr.colorOnSurface
+                        R.attr.colorSecondaryVariant
                     )
-                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorOnSurface))
+                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondaryVariant))
                 }
             }
         }
@@ -154,9 +154,9 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                 State.INVERSED -> {
                     setVectorCompat(
                         R.drawable.ic_check_box_x_24dp,
-                        R.attr.colorOnSurface
+                        R.attr.colorSecondaryVariant
                     )
-                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorOnSurface))
+                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondaryVariant))
                 }
             }
         }
