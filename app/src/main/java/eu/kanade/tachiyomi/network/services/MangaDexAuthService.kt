@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -40,7 +41,7 @@ interface MangaDexAuthService : MangaDexImageService {
     suspend fun refreshToken(@Body request: RefreshTokenDto): ApiResponse<LoginResponseDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.userFollows}?limit=100") // &includes[]=${MdConstants.Type.coverArt}
+    @GET("${MdApi.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")
     suspend fun userFollowList(@Query("offset") offset: Int): Response<MangaListDto>
 
     @Headers("Cache-Control: no-cache")

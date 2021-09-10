@@ -6,7 +6,8 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 fun MangaDto.toBasicManga(coverQuality: Int = 0): SManga {
     return SManga.create().apply {
         url = "/title/" + this@toBasicManga.data.id
-        title = MdUtil.cleanString(MdUtil.getTitle(this@toBasicManga.data.attributes.title))
+        title = MdUtil.cleanString(MdUtil.getTitle(this@toBasicManga.data.attributes.title,
+            this@toBasicManga.data.attributes.originalLanguage))
 
         thumbnail_url = this@toBasicManga.relationships
             .firstOrNull { relationshipDto -> relationshipDto.type == MdConstants.Types.coverArt }
