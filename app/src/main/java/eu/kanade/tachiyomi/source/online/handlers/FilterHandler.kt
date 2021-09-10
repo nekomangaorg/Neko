@@ -93,10 +93,14 @@ class FilterHandler {
         Filter.Select<String>("Excluded tags mode", arrayOf("And", "Or"), 1)
 
     val sortableList = listOf(
-        Pair("Number of follows", ""),
+        Pair("Latest Uploaded chapter (Any language)", ""),
+        Pair("Relevance", "relevance"),
+        Pair("Number of follows", "followedCount"),
         Pair("Created at", "createdAt"),
         Pair("Manga info updated", "updatedAt"),
-    )
+        Pair("Title", "title"),
+
+        )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
 
