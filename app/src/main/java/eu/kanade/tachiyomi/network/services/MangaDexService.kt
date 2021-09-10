@@ -33,6 +33,7 @@ interface MangaDexService : MangaDexImageService {
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+        @Query(value = "contentRating[]") contentRatings: List<String>,
         @Query("offset") offset: Int,
     ): Response<ChapterListDto>
 
