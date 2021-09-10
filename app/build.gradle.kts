@@ -126,7 +126,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.0")
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-analytics-ktx:19.0.0")
+    implementation("com.google.firebase:firebase-analytics-ktx:19.0.1")
     implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.1")
 
     val lifecycleVersion = "2.2.0"
@@ -165,7 +165,7 @@ dependencies {
     implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
 
     // JSON
-    implementation("com.google.code.gson:gson:2.8.7")
+    implementation("com.google.code.gson:gson:2.8.8")
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // Serialization
@@ -178,7 +178,7 @@ dependencies {
     implementation("com.github.tachiyomiorg:unifile:17bec43")
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.14.1")
+    implementation("org.jsoup:jsoup:1.14.2")
 
     // Icons
     implementation("com.mikepenz:iconics-core:5.3.0")
@@ -187,7 +187,7 @@ dependencies {
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.5.0")
+    implementation("androidx.work:work-runtime-ktx:2.6.0")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
     // Database
@@ -273,7 +273,7 @@ dependencies {
 // Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.assertj:assertj-core:3.20.2")
-    testImplementation("org.mockito:mockito-core:3.11.2")
+    testImplementation("org.mockito:mockito-core:3.12.4")
 
     val roboElectricVersion = "3.3.2"
     testImplementation("org.robolectric:robolectric:$roboElectricVersion")
@@ -282,7 +282,7 @@ dependencies {
 
     implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
     implementation(kotlin("reflect", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.5.2")
 
 // Text distance
     implementation("info.debatty:java-string-similarity:2.0.0")
