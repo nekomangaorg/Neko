@@ -98,12 +98,6 @@ class ImageHandler {
     }
 
     suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
-        val service = if (isLogged) {
-            network.authService
-        } else {
-            network.service
-        }
-
         val data = page.url.split(",")
         val currentTime = Date().time
         val mdAtHomeServerUrl =
@@ -113,7 +107,7 @@ class ImageHandler {
                     log
                         .d("Time has expired get new at home url isLogged $isLogged")
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    val atHomeResponse = service.getAtHomeServer(page.mangaDexChapterId,
+                    val atHomeResponse = network.service.getAtHomeServer(page.mangaDexChapterId,
                         preferences.usePort443Only())
 
                     when (atHomeResponse) {

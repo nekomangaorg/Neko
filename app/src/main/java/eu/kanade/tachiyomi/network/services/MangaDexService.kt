@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.network.services
 import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
 import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
+import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -22,7 +23,7 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
-interface MangaDexService : MangaDexImageService {
+interface MangaDexService {
 
     @GET("${MdApi.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): Response<MangaListDto>
@@ -62,6 +63,13 @@ interface MangaDexService : MangaDexImageService {
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdApi.atHomeServer}/{chapterId}")
+    suspend fun getAtHomeServer(
+        @Path("chapterId") chapterId: String,
+        @Query("forcePort443") forcePort443: Boolean,
+    ): ApiResponse<AtHomeDto>
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): Response<ResultDto>

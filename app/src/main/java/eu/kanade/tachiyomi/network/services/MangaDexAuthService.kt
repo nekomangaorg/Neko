@@ -22,7 +22,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface MangaDexAuthService : MangaDexImageService {
+interface MangaDexAuthService {
 
     @Headers("Cache-Control: no-cache")
     @POST(MdApi.login)

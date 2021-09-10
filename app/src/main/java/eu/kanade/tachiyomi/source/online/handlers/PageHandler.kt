@@ -40,14 +40,8 @@ class PageHandler {
                         .substringAfterLast("/")
                     mangaPlusHandler.fetchPageList(mpChpId)
                 } else {
-                    val service = if (isLogged) {
-                        network.authService
-                    } else {
-                        network.service
-                    }
-
                     val atHomeResponse =
-                        service.getAtHomeServer(
+                        network.service.getAtHomeServer(
                             chapter.mangadex_chapter_id,
                             preferences.usePort443Only()
                         )
