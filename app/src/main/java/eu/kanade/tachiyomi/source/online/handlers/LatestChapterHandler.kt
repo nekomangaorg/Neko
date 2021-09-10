@@ -43,7 +43,7 @@ class LatestChapterHandler {
 
         val chapterListDto = response.body()!!
 
-        val mangaIds = chapterListDto.results.asSequence().map { it.relationships }.flatten()
+        val mangaIds = chapterListDto.results.asSequence().map { it.data.relationships }.flatten()
             .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct().toList()
 
         val queryParamters = mutableMapOf("ids[]" to mangaIds, "limit" to mangaIds.size)

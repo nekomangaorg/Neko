@@ -53,11 +53,11 @@ class ApiMangaParser {
             manga.description =
                 MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap()["en"] ?: "")
 
-            val authors = mangaDto.relationships.filter { relationshipDto ->
+            val authors = mangaDto.data.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
-            val artists = mangaDto.relationships.filter { relationshipDto ->
+            val artists = mangaDto.data.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
@@ -175,7 +175,7 @@ class ApiMangaParser {
 
             val apiChapter =
                 MdUtil.jsonParser.decodeFromString(ChapterDto.serializer(), jsonBody)
-            return apiChapter.relationships.firstOrNull { it.type.equals("manga", true) }?.id
+            return apiChapter.data.relationships.firstOrNull { it.type.equals("manga", true) }?.id
                 ?: throw Exception("Not found")
         } catch (e: Exception) {
             XLog.e(e)
@@ -231,7 +231,7 @@ class ApiMangaParser {
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
         val scanlatorName =
-            networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
+            networkChapter.data.relationships.filter { it.type == MdConstants.Types.scanlator }
                 .mapNotNull { groups[it.id] }.toMutableSet()
 
         if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {

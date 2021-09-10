@@ -48,7 +48,7 @@ class MangaHandler {
     suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         return withContext(Dispatchers.IO) {
             val response = network.service.viewChapter(urlChapterId)
-            response.body()!!.relationships.first { it.type == MdConstants.Types.manga }.id
+            response.body()!!.data.relationships.first { it.type == MdConstants.Types.manga }.id
         }
     }
 
@@ -112,7 +112,7 @@ class MangaHandler {
     }
 
     private fun getGroupMap(results: List<ChapterDto>): Map<String, String> {
-        return results.map { chapter -> chapter.relationships }
+        return results.map { chapter -> chapter.data.relationships }
             .flatten()
             .filter { it.type == MdConstants.Types.scanlator }
             .map { it.id to it.attributes!!.name!! }
