@@ -183,7 +183,7 @@ dependencies {
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.5.0")
+    implementation("androidx.work:work-runtime-ktx:2.6.0")
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
     // Database
