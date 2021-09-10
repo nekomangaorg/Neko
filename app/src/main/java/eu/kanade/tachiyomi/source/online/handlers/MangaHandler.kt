@@ -73,11 +73,9 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Fetch Chapters for  ${manga.title}") {
                 val langs = MdUtil.getLangsToShow(preferencesHelper)
-                val contentRating = MdUtil.getContentRatingToShow(preferencesHelper)
 
                 val response = logTimeTaken("fetching chapters from Dex") {
-                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, contentRating,
-                        0)
+                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
                 }
 
                 if (response.isSuccessful.not()) {
@@ -97,8 +95,7 @@ class MangaHandler {
                 while (hasMoreResults) {
                     offset += limit
                     val newResponse =
-                        network.service.viewChapters(MdUtil.getMangaId(manga.url), langs,
-                            contentRating, offset)
+                        network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
 
                     hasMoreResults = if (newResponse.code() != 200) {
                         false

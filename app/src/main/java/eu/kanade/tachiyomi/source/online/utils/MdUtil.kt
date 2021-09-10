@@ -278,8 +278,5 @@ class MdUtil {
 
         fun getLangsToShow(preferences: PreferencesHelper) =
             preferences.langsToShow().get().split(",")
-
-        fun getContentRatingToShow(preferences: PreferencesHelper) =
-            preferences.contentRatingSelections().toList()
     }
 }

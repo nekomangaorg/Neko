@@ -29,11 +29,10 @@ interface MangaDexService : MangaDexImageService {
     suspend fun viewManga(@Path("id") id: String): Response<MangaDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/feed?limit=500&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
+    @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
-        @Query(value = "contentRating[]") contentRatings: List<String>,
         @Query("offset") offset: Int,
     ): Response<ChapterListDto>
 
