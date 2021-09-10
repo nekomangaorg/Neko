@@ -76,7 +76,8 @@ class MangaHandler {
                 val contentRating = MdUtil.getContentRatingToShow(preferencesHelper)
 
                 val response = logTimeTaken("fetching chapters from Dex") {
-                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, contentRating, 0)
+                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, contentRating,
+                        0)
                 }
 
                 if (response.isSuccessful.not()) {
@@ -88,7 +89,7 @@ class MangaHandler {
                 val results = chapterListDto.results.toMutableList()
 
                 var hasMoreResults =
-                        chapterListDto.limit + chapterListDto.offset < chapterListDto.total
+                    chapterListDto.limit + chapterListDto.offset < chapterListDto.total
 
                 var offset = chapterListDto.offset
                 val limit = chapterListDto.limit
@@ -96,7 +97,8 @@ class MangaHandler {
                 while (hasMoreResults) {
                     offset += limit
                     val newResponse =
-                            network.service.viewChapters(MdUtil.getMangaId(manga.url), langs,contentRating, offset)
+                        network.service.viewChapters(MdUtil.getMangaId(manga.url), langs,
+                            contentRating, offset)
 
                     hasMoreResults = if (newResponse.code() != 200) {
                         false

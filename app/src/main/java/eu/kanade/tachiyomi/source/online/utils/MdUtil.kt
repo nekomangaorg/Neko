@@ -280,6 +280,6 @@ class MdUtil {
             preferences.langsToShow().get().split(",")
 
         fun getContentRatingToShow(preferences: PreferencesHelper) =
-                preferences.contentRatingSelections().toList()
+            preferences.contentRatingSelections().toList()
     }
 }
