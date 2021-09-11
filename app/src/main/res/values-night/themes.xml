@@ -20,9 +20,8 @@
         <item name="background">@color/backgroundChocolateStrawberries</item>
         <item name="colorSurface">@color/backgroundChocolateStrawberries</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-        <
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime">
@@ -34,24 +33,20 @@
         <item name="background">@color/backgroundLime</item>
         <item name="colorOnSecondary">@color/colorOnLime</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.Outrun">
         <item name="colorPrimary">@color/outrun_blush</item>
-        <item name="colorPrimaryDark">@color/outrun_dark_purple</item>
-        <item name="colorAccent">@color/outrun_pink</item>
-        <item name="colorAccentText">@color/md_white_1000</item>
+        <item name="colorSecondary">@color/outrun_pink</item>
+        <item name="colorSecondaryVariant">@color/md_white_1000</item>
         <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
-        <item name="colorSecondary">@color/outrun_black</item>
-        <item name="colorSecondaryVariant">@color/outrun_dark_purple</item>
-        <item name="background">@color/outrun_black</item>
-        <item name="android:colorBackground">@color/outrun_black</item>
         <item name="colorSurface">@color/outrun_black</item>
-        <item name="colorOnAccent">@color/md_white_1000</item>
+        <item name="background">@color/outrun_black</item>
+        <item name="colorOnSecondary">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/outrun_black</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
     </style>
 

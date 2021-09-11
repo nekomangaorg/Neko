@@ -13,7 +13,7 @@
         <item name="colorOnBackground">@android:color/system_neutral1_900</item>
         <item name="actionBarTintColor">@android:color/system_accent2_800</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 </resources>

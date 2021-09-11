@@ -22,7 +22,7 @@
             android:id="@+id/read"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            app:tint="?attr/colorOnAccent"
+            app:tint="?attr/colorSecondary"
             android:layout_gravity="end|center"
             android:layout_marginEnd="21dp"
             android:src="@drawable/ic_read_24dp" />

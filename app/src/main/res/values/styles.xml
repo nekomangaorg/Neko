@@ -340,7 +340,7 @@
 
     <style name="Theme.Widget.ImageBorderless.Secondary">
         <item name="android:background">@drawable/item_background_borderless_on_secondary</item>
-        <item name="android:tint">?attr/colorOnSecondary</item>
+        <item name="android:tint">?attr/colorOnHopper</item>
         <item name="rippleColor">@color/on_secondary_highlight</item>
     </style>
 
