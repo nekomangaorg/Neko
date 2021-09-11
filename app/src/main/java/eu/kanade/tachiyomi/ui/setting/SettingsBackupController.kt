@@ -57,14 +57,8 @@ class SettingsBackupController : SettingsController() {
                     context.toast(R.string.restore_miui_warning, Toast.LENGTH_LONG)
                 }
 
-                if (!BackupCreateService.isRunning(context)) {
-                    val ctrl = CreateBackupDialog()
-                    ctrl.targetController = this@SettingsBackupController
-                    ctrl.showDialog(router)
-                } else {
-                    context.toast(R.string.backup_in_progress)
-                }
-                backup(context, BackupConst.BACKUP_TYPE_FULL) }
+                backup(context, BackupConst.BACKUP_TYPE_FULL)
+            }
         }
 
         preference {
