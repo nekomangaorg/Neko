@@ -4,6 +4,7 @@
 - Clicking a genre tag searches your library, long clicking searches MangaDex ( @Jays2Kings for most of the heavy lifting )
 - Completed and Cancelled status (@animusfracto)
 - Add support for Comikey and BilliBilli chapters (@jobobby04)
+- New tracking sheet ui (@Jays2Kings)
 ## 🏗️ Changes
 - Added more Browse Sort options
 - Show unreleased Chapters

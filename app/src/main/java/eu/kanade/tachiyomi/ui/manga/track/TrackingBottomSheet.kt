@@ -234,7 +234,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         setMiddleTrackView(binding.searchProgress.id)
         binding.searchEmptyView.hide()
         val searchingItem = searchingItem ?: return
-        presenter.trackSearch(query, searchingItem.service, false)
+        presenter.trackSearch(query, searchingItem.service, searchingItem.track != null)
     }
 
     private fun setMiddleTrackView(id: Int) {
