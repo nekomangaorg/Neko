@@ -66,7 +66,7 @@ internal class QuadStateMultiChoiceDialogAdapter(
 
     internal inline fun <reified T> List<T>.pullIndices(indices: IntArray): List<T> {
         return mutableListOf<T>().apply {
-            for (index in indices) {
+            for (index in indices.indices) {
                 add(this@pullIndices[index])
             }
         }
