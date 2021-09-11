@@ -25,14 +25,24 @@
     </aapt:attr>
     <target android:name="path_1">
         <aapt:attr name="android:animation">
-            <objectAnimator
-                android:propertyName="pathData"
-                android:startOffset="75"
-                android:duration="250"
-                android:valueFrom="M 13.2 4 L 13.2 12 L 15.7 10.5 L 18.2 12 L 18.2 4 L 13.2 4"
-                android:valueTo="M 8 4 L 8 16 L 14.129 16 L 20 16 L 20 4 L 8 4"
-                android:valueType="pathType"
-                android:interpolator="@android:interpolator/fast_out_slow_in"/>
+            <set>
+                <objectAnimator
+                    android:propertyName="pathData"
+                    android:startOffset="75"
+                    android:duration="250"
+                    android:valueFrom="M 13.2 4 L 13.2 12 L 15.7 10.5 L 18.2 12 L 18.2 4 L 13.2 4"
+                    android:valueTo="M 8 4 L 8 16 L 14.129 16 L 20 16 L 20 4 L 8 4"
+                    android:valueType="pathType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+                <objectAnimator
+                    android:propertyName="pathData"
+                    android:startOffset="325"
+                    android:duration="1"
+                    android:valueFrom="M 20 2 L 8 2 C 6.9 2 6 2.9 6 4 L 6 16 C 6 17.1 6.9 18 8 18 L 20 18 C 21.1 18 22 17.1 22 16 L 22 4 C 22 2.9 21.1 2 20 2 Z"
+                    android:valueTo="M 20 2 L 8 2 C 6.9 2 6 2.9 6 4 L 6 16 C 6 17.1 6.9 18 8 18 L 20 18 C 21.1 18 22 17.1 22 16 L 22 4 C 22 2.9 21.1 2 20 2 Z"
+                    android:valueType="pathType"
+                    android:interpolator="@android:interpolator/fast_out_slow_in"/>
+            </set>
         </aapt:attr>
     </target>
     <target android:name="path_4">
