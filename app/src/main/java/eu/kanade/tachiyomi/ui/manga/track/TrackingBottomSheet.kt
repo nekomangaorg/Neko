@@ -1,48 +1,46 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
+import android.animation.LayoutTransition
+import android.content.Context
+import android.graphics.Typeface
 import android.os.Bundle
+import android.text.Spannable
+import android.text.SpannableString
+import android.text.style.StyleSpan
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
+import android.view.inputmethod.EditorInfo
+import android.view.inputmethod.InputMethodManager
 import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.elvishew.xlog.XLog
 import androidx.transition.TransitionManager
+import com.afollestad.materialdialogs.MaterialDialog
+import com.afollestad.materialdialogs.list.listItems
 import com.google.android.material.bottomsheet.BottomSheetBehavior
+import com.mikepenz.fastadapter.FastAdapter
+import com.mikepenz.fastadapter.adapters.ItemAdapter
+import com.mikepenz.fastadapter.listeners.addClickListener
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.TrackingBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsDivider
+import eu.kanade.tachiyomi.util.lang.indexesOf
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import timber.log.Timber
-import android.animation.LayoutTransition
-import android.content.Context
-import android.graphics.Typeface
-import android.text.Spannable
-import android.text.SpannableString
-import android.text.style.StyleSpan
-import android.view.ViewGroup
-import android.view.inputmethod.EditorInfo
-import android.view.inputmethod.InputMethodManager
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.view.updateLayoutParams
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItems
-import com.mikepenz.fastadapter.FastAdapter
-import com.mikepenz.fastadapter.adapters.ItemAdapter
-import com.mikepenz.fastadapter.listeners.addClickListener
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsDivider
-import eu.kanade.tachiyomi.util.lang.indexesOf
-import eu.kanade.tachiyomi.util.system.openInBrowser
-import eu.kanade.tachiyomi.util.view.expand
 
 class TrackingBottomSheet(private val controller: MangaDetailsController) :
     E2EBottomSheetDialog<TrackingBottomSheetBinding>(controller.activity!!),
@@ -103,7 +101,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
                 val text = binding.trackSearch.text?.toString() ?: ""
                 if (text.isNotBlank()) {
                     startTransition()
-                    val imm = activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                    val imm =
+                        activity.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
                     imm?.hideSoftInputFromWindow(binding.trackSearch.windowToken, 0)
                     binding.trackSearch.clearFocus()
                     search(text)
@@ -162,13 +161,15 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     fun onRefreshDone() {
         for (i in adapter!!.items.indices) {
-            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(
+                false)
         }
     }
 
     fun onRefreshError(error: Throwable) {
         for (i in adapter!!.items.indices) {
-            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(false)
+            (binding.trackRecycler.findViewHolderForAdapterPosition(i) as? TrackHolder)?.setProgress(
+                false)
         }
         activity.toast(error.message)
     }
@@ -197,7 +198,6 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
         showSearchView(item)
     }
-
 
     private fun startTransition(duration: Long = 100) {
         val transition = androidx.transition.AutoTransition()
@@ -234,7 +234,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         setMiddleTrackView(binding.searchProgress.id)
         binding.searchEmptyView.hide()
         val searchingItem = searchingItem ?: return
-        presenter.trackSearch(query, searchingItem.service)
+        presenter.trackSearch(query, searchingItem.service, false)
     }
 
     private fun setMiddleTrackView(id: Int) {
@@ -306,10 +306,16 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
                 val wordToSpan: Spannable = SpannableString(text)
                 text.indexesOf(ogTitle).forEach {
-                    wordToSpan.setSpan(StyleSpan(Typeface.ITALIC), it, it + ogTitle.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    wordToSpan.setSpan(StyleSpan(Typeface.ITALIC),
+                        it,
+                        it + ogTitle.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                 }
                 text.indexesOf(newTitle).forEach {
-                    wordToSpan.setSpan(StyleSpan(Typeface.ITALIC), it, it + newTitle.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+                    wordToSpan.setSpan(StyleSpan(Typeface.ITALIC),
+                        it,
+                        it + newTitle.length,
+                        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
                 }
 
                 val text2 = activity.getString(
@@ -320,7 +326,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
                 )
                 MaterialDialog(activity)
                     .title(R.string.remove_previous_tracker)
-                    .listItems(items = listOf(wordToSpan, text2), waitForPositiveButton = false) { dialog, i, _ ->
+                    .listItems(items = listOf(wordToSpan, text2),
+                        waitForPositiveButton = false) { dialog, i, _ ->
                         if (i == 0) {
                             removeTracker(searchingItem, true)
                         }
@@ -410,7 +417,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         val item = adapter?.getItem(position) ?: return
         if (item.track == null) return
 
-        val suggestedDate = presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
+        val suggestedDate =
+            presenter.getSuggestedDate(SetTrackReadingDatesDialog.ReadingDate.Finish)
         SetTrackReadingDatesDialog(
             controller,
             this,
@@ -431,7 +439,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     fun refreshItem(index: Int) {
-        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(true)
+        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(
+            true)
     }
 
     private fun refreshTrack(item: TrackService?) {
@@ -457,10 +466,18 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         presenter.removeTracker(item, fromServiceAlso)
     }
 
-    override fun setReadingDate(item: TrackItem, type: SetTrackReadingDatesDialog.ReadingDate, date: Long) {
+    override fun setReadingDate(
+        item: TrackItem,
+        type: SetTrackReadingDatesDialog.ReadingDate,
+        date: Long,
+    ) {
         when (type) {
-            SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(item, date)
-            SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(item, date)
+            SetTrackReadingDatesDialog.ReadingDate.Start -> controller.presenter.setTrackerStartDate(
+                item,
+                date)
+            SetTrackReadingDatesDialog.ReadingDate.Finish -> controller.presenter.setTrackerFinishDate(
+                item,
+                date)
         }
     }
 }
