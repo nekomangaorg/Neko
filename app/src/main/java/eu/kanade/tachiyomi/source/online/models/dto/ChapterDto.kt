@@ -33,6 +33,7 @@ data class ChapterAttributesDto(
     val publishAt: String,
     val data: List<String>,
     val dataSaver: List<String>,
+    val externalUrl: String? = null,
     val hash: String,
 )
 

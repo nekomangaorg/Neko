@@ -97,7 +97,7 @@ open class MangaDex : HttpSource() {
     }
 
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {
-        return pageHandler.fetchPageList(chapter, isLogged())
+        return pageHandler.fetchPageList(chapter)
     }
 
     override suspend fun fetchImage(page: Page): Response {
@@ -122,7 +122,7 @@ open class MangaDex : HttpSource() {
         }
         return followsHandler.fetchTrackingInfo(url)
     }
-   
+
     override fun isLogged(): Boolean {
         return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(
             this

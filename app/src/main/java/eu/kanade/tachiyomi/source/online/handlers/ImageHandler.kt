@@ -9,6 +9,9 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -23,6 +26,8 @@ class ImageHandler {
     val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
+    val bilibiliHandler: BilibiliHandler by injectLazy()
+    val comikeyHandler: ComikeyHandler by injectLazy()
 
     val log = XLog.tag("||ImageHandler").disableStackTrace().build()
 
@@ -31,28 +36,42 @@ class ImageHandler {
 
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
-            if (page.imageUrl!!.contains("mangaplus", true)) {
-                return@withIOContext mangaPlusHandler.client.newCall(GET(page.imageUrl!!,
-                    mangaPlusHandler.headers))
-                    .await()
-            } else {
-                val request = imageRequest(page, isLogged)
-                val response = try {
-                    network.nonRateLimitedClient.newCallWithProgress(request, page)
+            return@withIOContext when {
+                page.imageUrl!!.contains("mangaplus", true) -> {
+                    mangaPlusHandler.client.newCall(GET(page.imageUrl!!,
+                        mangaPlusHandler.headers))
                         .await()
-                } catch (e: Exception) {
-                    log.e("error getting images", e)
-                    reportFailedImage(request.url.toString())
-                    throw (e)
+                }
+                page.imageUrl!!.contains("comikey", true) -> {
+                    comikeyHandler.client.newCall(GET(page.imageUrl!!, comikeyHandler.headers))
+                        .await()
+                }
+                page.imageUrl!!.contains("/bfs/comic/", true)
+                -> {
+                    bilibiliHandler.client.newCall(GET(page.imageUrl!!,
+                        bilibiliHandler.headers))
+                        .await()
                 }
 
-                reportImageWithResponse(response)
+                else -> {
+                    val request = imageRequest(page, isLogged)
+                    val response = try {
+                        network.nonRateLimitedClient.newCallWithProgress(request, page)
+                            .await()
+                    } catch (e: Exception) {
+                        log.e("error getting images", e)
+                        reportFailedImage(request.url.toString())
+                        throw (e)
+                    }
 
-                if (!response.isSuccessful) {
-                    response.close()
-                    throw Exception("HTTP error ${response.code}")
+                    reportImageWithResponse(response)
+
+                    if (!response.isSuccessful) {
+                        response.close()
+                        throw Exception("HTTP error ${response.code}")
+                    }
+                    response
                 }
-                return@withIOContext response
             }
         }
     }

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -48,7 +49,7 @@ class MangaHandler {
     suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         return withContext(Dispatchers.IO) {
             val response = network.service.viewChapter(urlChapterId)
-            response.body()!!.data.relationships.first { it.type == MdConstants.Types.manga }.id
+            response.getOrThrow().data.relationships.first { it.type == MdConstants.Types.manga }.id
         }
     }
 

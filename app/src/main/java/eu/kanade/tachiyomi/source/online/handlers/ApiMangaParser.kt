@@ -17,7 +17,6 @@ import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
-import java.util.Date
 import java.util.Locale
 import kotlin.math.floor
 
@@ -155,13 +154,9 @@ class ApiMangaParser {
         chapterListResponse: List<ChapterDto>,
         groupMap: Map<String, String>,
     ): List<SChapter> {
-        val now = Date().time
-
         return chapterListResponse.asSequence()
             .map {
                 mapChapter(it, groupMap)
-            }.filter {
-                it.date_upload <= now
             }.toList()
     }
 
@@ -190,6 +185,7 @@ class ApiMangaParser {
         val chapter = SChapter.create()
         val attributes = networkChapter.data.attributes
         chapter.url = MdUtil.chapterSuffix + networkChapter.data.id
+
         val chapterName = mutableListOf<String>()
         // Build chapter name
 
@@ -228,6 +224,7 @@ class ApiMangaParser {
 
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
         // Convert from unix time
+
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
         val scanlatorName =

@@ -55,7 +55,7 @@ interface MangaDexService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.chapter}/{id}")
-    suspend fun viewChapter(@Path("id") id: String): Response<ChapterDto>
+    suspend fun viewChapter(@Path("id") id: String): ApiResponse<ChapterDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/random")

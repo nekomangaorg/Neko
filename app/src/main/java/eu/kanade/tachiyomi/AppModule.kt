@@ -20,11 +20,13 @@ import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
 import eu.kanade.tachiyomi.source.online.handlers.ImageHandler
 import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
-import eu.kanade.tachiyomi.source.online.handlers.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
@@ -88,6 +90,10 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(MangaDexLoginHelper())
 
         addSingleton(MangaPlusHandler())
+
+        addSingleton(BilibiliHandler())
+
+        addSingleton(ComikeyHandler())
 
         addSingleton(StatusHandler())
 
