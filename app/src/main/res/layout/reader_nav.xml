@@ -71,7 +71,6 @@
             android:layout_weight="1"
             android:maxHeight="?attr/actionBarSize"
             android:minHeight="?attr/actionBarSize"
-            android:progressBackgroundTint="@color/tint_color_secondary"
             android:stepSize="1"
             tools:value="4"
             tools:valueTo="10"

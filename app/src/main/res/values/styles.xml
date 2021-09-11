@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
 
     <!--========-->
     <!--Toolbars-->
@@ -10,7 +10,7 @@
     </style>
 
     <style name="Theme.ActionBar.DayNight" parent="ThemeOverlay.AppCompat.DayNight.ActionBar">
-        <item name="colorControlHighlight">@color/accent_highlight</item>
+        <item name="colorControlHighlight">@color/secondary_highlight</item>
     </style>
 
     <!--====-->
@@ -30,7 +30,7 @@
     <!--Text Appearance-->
     <!--===============-->
     <style name="TextAppearance" parent="@android:style/TextAppearance">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
     </style>
 
     <style name="TextAppearance.Regular">
@@ -50,7 +50,7 @@
     </style>
 
     <style name="TextAppearance.Regular.Body1.Light">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
     </style>
 
     <style name="TextAppearance.Regular.Body1.Secondary">
@@ -62,11 +62,11 @@
     </style>
 
     <style name="TextAppearance.Regular.Caption.Light">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
     </style>
 
     <style name="TextAppearance.Regular.Caption.Hint">
-        <item name="android:textColor">?android:attr/textColorHint</item>
+        <item name="android:textColor">@color/material_on_background_disabled</item>
     </style>
 
     <style name="TextAppearance.Regular.SubHeading">
@@ -78,7 +78,7 @@
     </style>
 
     <style name="TextAppearance.Regular.SubHeading.Light">
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
     </style>
 
     <style name="TextAppearance.Regular.SubHeading.Light.Bold">
@@ -98,7 +98,7 @@
     </style>
 
     <style name="TextAppearance.Medium.Body2.Hint">
-        <item name="android:textColor">?android:attr/textColorHint</item>
+        <item name="android:textColor">@color/material_on_background_disabled</item>
     </style>
 
     <style name="TextAppearance.Widget.Tab" parent="TextAppearance.MaterialComponents.Button">
@@ -120,7 +120,7 @@
         <item name="android:layout_margin">@dimen/fab_margin</item>
         <item name="android:scaleType">fitCenter</item>
         <item name="layout_anchorGravity">bottom|right|end</item>
-        <item name="tint">?attr/colorOnAccent</item>
+        <item name="tint">?attr/colorOnSecondary</item>
         <item name="backgroundTint">?attr/unreadBadgeColor</item>
         <item name="android:tint">?attr/unreadBadgeColor</item>
         <item name="iconTint">?attr/colorOnUnreadBadge</item>
@@ -162,7 +162,7 @@
     <style name="Theme.Widget.GridView.Catalogue">
         <item name="android:gravity">top|left</item>
         <item name="android:smoothScrollbar">true</item>
-        <item name="android:cacheColorHint">?android:attr/textColorHint</item>
+        <item name="android:cacheColorHint">@color/material_on_background_disabled</item>
         <item name="android:fastScrollEnabled">true</item>
         <item name="android:horizontalSpacing">0dp</item>
         <item name="android:verticalSpacing">0dp</item>
@@ -170,7 +170,7 @@
 
 
     <style name="Theme.Widget.SpinnerItem" parent="Widget.AppCompat.DropDownItem.Spinner">
-        <item name="android:textColor">?android:textColorPrimary</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
         <item name="android:background">@drawable/list_item_selector</item>
     </style>
 
@@ -191,7 +191,7 @@
 
     <style name="BottomSheetDialogTheme" parent="@style/Theme.MaterialComponents.BottomSheetDialog">
         <item name="android:windowIsFloating">false</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="background">@android:color/transparent</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="enableEdgeToEdge">true</item>
     </style>
@@ -217,8 +217,8 @@
 
     <style name="Theme.Widget.TextInputLayout.OutlinedBox.Dense" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense">
         <item name="boxStrokeColor">@color/text_input_stroke</item>
-        <item name="hintTextColor">?colorAccent</item>
-        <item name="android:textColorHint">?android:attr/textColorHint</item>
+        <item name="hintTextColor">?attr/colorSecondary</item>
+        <item name="android:textColorHint">@color/material_on_background_disabled</item>
     </style>
 
     <!--=================-->
@@ -227,7 +227,7 @@
     <style name="Theme.Widget.Tabs" parent="Widget.MaterialComponents.TabLayout.Colored">
         <item name="tabGravity">center</item>
         <item name="tabIndicator">@drawable/tab_indicator</item>
-        <item name="tabIndicatorColor">?attr/colorAccent</item>
+        <item name="tabIndicatorColor">?attr/colorSecondary</item>
         <item name="tabTextColor">@color/tabs_selector</item>
         <item name="tabRippleColor">?colorControlHighlight</item>
         <item name="tabIndicatorFullWidth">false</item>
@@ -251,23 +251,23 @@
     </style>
 
     <style name="Theme.Widget.Slider" parent="Widget.MaterialComponents.Slider">
-        <item name="trackColorInactive">@color/accent_alpha</item>
-        <item name="trackColorActive">?colorAccent</item>
-        <item name="thumbColor">?colorAccent</item>
+        <item name="trackColorInactive">@color/secondary_alpha</item>
+        <item name="trackColorActive">?colorSecondary</item>
+        <item name="thumbColor">?colorSecondary</item>
         <item name="labelStyle">@style/Theme.Widget.Tooltip</item>
-        <item name="tickColorActive">?colorOnAccent</item>
+        <item name="tickColorActive">?colorOnSecondary</item>
         <item name="tickColorInactive">?android:textColorSecondary</item>
         <item name="haloColor">?colorControlHighlight</item>
     </style>
 
 
     <style name="Theme.Widget.Tooltip" parent="Widget.MaterialComponents.Tooltip">
-        <item name="backgroundTint">?colorAccent</item>
+        <item name="backgroundTint">?colorSecondary</item>
         <item name="android:textAppearance">@style/Theme.TextAppearance.Tooltip</item>
     </style>
 
     <style name="Theme.TextAppearance.Tooltip" parent="@style/TextAppearance.MaterialComponents.Tooltip">
-        <item name="android:textColor">?colorOnAccent</item>
+        <item name="android:textColor">?colorOnSecondary</item>
     </style>
 
     <!--==============-->
@@ -287,19 +287,19 @@
     </style>
 
     <style name="Widget.Tachiyomi.Button.ActionButton.White">
-        <item name="iconTint">@color/md_white_1000</item>
-        <item name="android:textColor">@color/md_white_1000</item>
+        <item name="iconTint">@android:color/white</item>
+        <item name="android:textColor">@android:color/white</item>
     </style>
 
     <style name="Theme.Widget.Button" parent="Widget.AppCompat.Button" />
 
     <style name="Theme.Widget.Button.Colored" parent="Widget.MaterialComponents.Button">
-        <item name="backgroundTint">?attr/colorAccent</item>
+        <item name="backgroundTint">?attr/colorSecondary</item>
     </style>
 
     <style name="Theme.Widget.Button.Borderless" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAllCaps">false</item>
-        <item name="android:textColor">?attr/colorAccent</item>
+        <item name="android:textColor">?attr/colorSecondary</item>
         <item name="rippleColor">?colorControlHighlight</item>
     </style>
 
@@ -313,9 +313,9 @@
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0.0</item>
         <item name="android:layout_height">40dp</item>
-        <item name="iconTint">?colorAccent</item>
+        <item name="iconTint">?attr/colorSecondary</item>
         <item name="rippleColor">?colorControlHighlight</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:textColor">?attr/colorOnBackground</item>
         <item name="cornerRadius">20dp</item>
     </style>
 
@@ -329,12 +329,12 @@
     <style name="Theme.Widget.Button.TextButton" parent="Widget.MaterialComponents.Button.TextButton">
         <item name="android:textAllCaps">false</item>
         <item name="android:letterSpacing">0.0</item>
-        <item name="android:textColor">?colorAccent</item>
+        <item name="android:textColor">?attr/colorSecondary</item>
     </style>
 
     <style name="Theme.Widget.ImageBorderless" parent="Widget.AppCompat.ImageButton">
         <item name="android:background">?selectableItemBackgroundBorderless</item>
-        <item name="android:tint">?colorAccent</item>
+        <item name="android:tint">?attr/colorSecondary</item>
         <item name="rippleColor">?colorControlHighlight</item>
     </style>
 
@@ -342,7 +342,7 @@
         <item name="android:background">@drawable/round_ripple</item>
         <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <item name="android:tint">?colorAccent</item>
+        <item name="android:tint">?attr/colorSecondary</item>
     </style>
 
     <style name="PopupMenu" parent="Widget.AppCompat.Light.PopupMenu">
@@ -350,9 +350,9 @@
     </style>
 
     <style name="Theme.Widget.Chip.Outline" parent="Widget.MaterialComponents.Chip.Action">
-        <item name="chipBackgroundColor">@color/accent_alpha</item>
+        <item name="chipBackgroundColor">@color/secondary_alpha</item>
         <item name="chipMinHeight">28dp</item>
-        <item name="android:textColor">?colorOnAccent</item>
+        <item name="android:textColor">?attr/colorOnSurface</item>
         <item name="android:textAppearance">@style/Theme.TextAppearance.Chip</item>
         <item name="chipStrokeWidth">0dp</item>
         <item name="android:checkable">false</item>
@@ -369,10 +369,9 @@
     <!--===-->
 
     <style name="FilePickerTheme" parent="NNF_BaseTheme.Light">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorButtonNormal">@color/colorPrimary</item>
+        <item name="colorPrimary">@color/primaryTachiyomi</item>
+        <item name="colorAccent">@color/secondaryTachiyomi</item>
+        <item name="colorButtonNormal">@color/primaryTachiyomi</item>
         <item name="android:textSize">14sp</item>
 
         <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>

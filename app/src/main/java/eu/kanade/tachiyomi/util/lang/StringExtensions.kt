@@ -153,7 +153,7 @@ fun String.addBetaTag(context: Context): Spanned {
         length,
         length + betaText.length,
         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorAccent)),
+    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorSecondary)),
         length,
         length + betaText.length,
         Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)

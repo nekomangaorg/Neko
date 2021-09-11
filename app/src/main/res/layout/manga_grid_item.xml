@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                android:background="?android:attr/colorBackground"
+                android:background="?attr/background"
                 tools:ignore="ContentDescription"
                 tools:src="@mipmap/ic_launcher" />
 
@@ -134,14 +134,13 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?attr/colorOnBackground"
                 app:layout_constraintBottom_toTopOf="@+id/subtitle"
                 tools:text="Sample name" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/subtitle"
                 style="@style/Neko.Condensed.Medium"
-                android:textColor="@color/text_color_secondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-1dp"

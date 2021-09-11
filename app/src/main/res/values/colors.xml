@@ -1,27 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="colorPrimary">@color/md_white_1000</color>
+    <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
-    <color name="colorPrimaryDark">@color/md_white_1000</color>
-    <color name="app_color_primary">@color/neko_primary</color>
-    <color name="splashBackground">@color/app_color_primary</color>
-    <color name="colorAccent">@color/md_blue_A400</color>
-    <color name="colorAccentText">#184798</color>
+    <color name="primaryTachiyomi">@color/neko_primary</color>
+    <color name="splashBackground">@color/primaryTachiyomi</color>
+    <color name="secondaryTachiyomi">@color/md_blue_A400</color>
+    <color name="secondaryVariantTachiyomi">#184798</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
 
     <color name="gray">#404040</color>
 
 
-    <color name="read_chapter">@color/text_color_hint</color>
+    <color name="read_chapter">@color/material_on_background_disabled</color>
 
     <color name="total_badge">@color/neko_green_complementary</color>
     <color name="total_badge_text">@color/md_white_1000</color>
 
     <color name="colorAmoledPrimary">@color/md_black_1000</color>
 
-    <color name="textColorPrimary">@color/md_black_1000_87</color>
     <color name="textColorPrimaryInverse">@color/md_white_1000</color>
 
     <color name="strong_divider">@color/md_black_1000_38</color>
@@ -70,30 +68,30 @@
     <color name="navigation_prev">#CC7D1128</color>
 
     <!-- Spring Blossom -->
-    <color name="colorAccentDuskDawn">#c43c97</color>
-    <color name="colorAccentDuskDawnText">#803d6a</color>
+    <color name="secondaryDuskDawn">#c43c97</color>
+    <color name="secondaryVariantDuskDawn">#803d6a</color>
     <color name="backgroundDuskDawn">#f7f4f8</color>
     <color name="dialogDuskDawn">#efe3f3</color>
     <color name="primaryDuskDawn">#efe3f3</color>
-    <color name="textPrimaryDuskDawn">#DE240728</color>
+    <color name="colorOnBackgroundDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
     <!-- Sapphire Dusk Theme -->
     --
-    <color name="colorAccentSapphire">#589ab8</color>
-    <color name="colorAccentSapphireText">#79aec6</color>
+    <color name="secondarySapphire">#589ab8</color>
+    <color name="secondaryVariantSapphire">#79aec6</color>
     <color name="primarySapphire">#3e6c81</color>
     <!-- Sapphire Dusk -->
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>
-    <color name="colorAccentLime">#4AF88A</color>
+    <color name="secondaryLime">#4AF88A</color>
     <color name="textColorPrimaryLime">@color/md_white_1000</color>
     <color name="textColorSecondaryLime">@color/md_white_1000_76</color>
     <color name="textColorHintLime">@color/md_white_1000_50</color>
     <color name="rippleColorLime">@color/md_white_1000_20</color>
     <color name="backgroundLime">#202125</color>
-    <color name="colorAccentLimeText">#2C2D32</color>
+    <color name="secondaryVariantLime">#2C2D32</color>
     <color name="dialogLime">#282A2E</color>
     <color name="colorOnLime">#2C2D32</color>
 
@@ -126,29 +124,28 @@
     <color name="neko_miami_badge_1">#F706CF</color>
 
     <!-- Strawberry Daiquiri Theme -->
-    <!-- Hot Pink Theme -->
-    <color name="colorAccentPink">#FF3399</color>
-    <color name="colorPrimaryPink">#FF57B3</color>
-    <color name="colorAccentStrawberry">#ED4A65</color>
-    <color name="colorAccentStrawberryText">#b62e45</color>
+    <color name="secondaryStrawberry">#ED4A65</color>
+    <color name="secondaryAlternativeStrawberry">#b62e45</color>
 
     <color name="backgroundChocolateStrawberries">#1a1716</color>
     <color name="secondaryChocolateStrawberries">#211b19</color>
 
     <!-- Tako Theme -->
-    <color name="accentTako">#66577E</color>
-    <color name="colorOnAccentTako">#F3B375</color>
+    <color name="secondaryTako">#66577E</color>
+    <color name="onSecondaryTako">#F3B375</color>
+    <color name="secondaryVariantTako">#2b1f31</color>
     <color name="tabBarIconColorTako">#574360</color>
     <color name="rippleColoredTako">#1F66577E</color>
     <color name="surfaceTako">#F7F5FF</color>
     <color name="backgroundTako">#F2EDF7</color>
     <color name="actionTintTako">#221b28</color>
     <color name="inactiveTabTako">#C2221b28</color>
-    <color name="colorAccentTextTako">#2b1f31</color>
 
     <!-- MangaDex Theme -->
-    <color name="colorAccentMangaDex">#FF6740</color>
+    <color name="secondaryMangaDex">#FF6740</color>
 
-    <color name="colorAccentYotsuba">#FC8C5C</color>
-    <color name="colorAccentYotsubaText">#d35b27</color>
+    <!-- Yin Yang Theme -->
+    <color name="colorAccentYinyang">#000000</color>
+    <color name="colorAccentYinyangText">#777777</color>
+    <color name="colorOnAccentYinyang">@color/md_white_1000</color>
 </resources>

@@ -276,6 +276,10 @@ class MangaHeaderHolder(
             setImageDrawable(icon.create(context, 24f))
             adapter.delegate.setFavButtonPopup(this)
         }
+        binding.trueBackdrop.setBackgroundColor(
+            adapter.delegate.coverColor()
+                ?: itemView.context.getResourceColor(R.attr.background)
+        )
 
         val tracked = presenter.isTracked() && !item.isLocked
 
@@ -398,7 +402,7 @@ class MangaHeaderHolder(
             val accentArray = FloatArray(3)
 
             ColorUtils.colorToHSL(baseTagColor, bgArray)
-            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorSecondary), accentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
@@ -452,6 +456,22 @@ class MangaHeaderHolder(
         binding ?: return
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.clearFocus()
+    }
+
+    private fun MaterialButton.checked(checked: Boolean) {
+        if (checked) {
+            backgroundTintList = ColorStateList.valueOf(
+                ColorUtils.setAlphaComponent(
+                    context.getResourceColor(R.attr.colorSecondary),
+                    75
+                )
+            )
+            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+        } else {
+            resetStrokeColor()
+            backgroundTintList =
+                ContextCompat.getColorStateList(context, android.R.color.transparent)
+        }
     }
 
     fun setTopHeight(newHeight: Int) {

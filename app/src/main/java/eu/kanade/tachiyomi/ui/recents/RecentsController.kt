@@ -45,8 +45,10 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
+import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
@@ -212,7 +214,7 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
                     view.context.getResourceColor(R.attr.colorPrimaryVariant),
-                    view.context.getResourceColor(android.R.attr.colorBackground),
+                    view.context.getResourceColor(R.attr.background),
                     isExpanded.toInt().toFloat()
                 )
             )
@@ -256,7 +258,7 @@ class RecentsController(bundle: Bundle? = null) :
                         ColorStateList.valueOf(
                             ColorUtils.blendARGB(
                                 view.context.getResourceColor(R.attr.colorPrimaryVariant),
-                                view.context.getResourceColor(android.R.attr.colorBackground),
+                            view.context.getResourceColor(R.attr.background),
                                 (progress * 2f).coerceIn(0f, 1f)
                             )
                         )
@@ -734,6 +736,11 @@ class RecentsController(bundle: Bundle? = null) :
                     }
                 })
                 (activity as? MainActivity)?.showTabBar(true)
+                activity?.let {
+                    if (ThemeUtil.isColoredTheme(it.getPrefTheme(presenter.preferences))) {
+                        updateTitleAndMenu()
+                    }
+                }
             }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()

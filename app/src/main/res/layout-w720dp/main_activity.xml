@@ -24,7 +24,7 @@
         android:id="@+id/app_bar"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSecondary"
+        android:background="?attr/colorSurface"
         android:stateListAnimator="@null"
         android:theme="?attr/actionBarTheme"
         app:layout_constraintStart_toEndOf="@id/side_nav"
@@ -37,7 +37,7 @@
             app:titleTextColor="?actionBarTintColor"
             android:layout_height="?attr/actionBarSize"
             app:collapseIcon="@drawable/ic_arrow_back_24dp"
-            android:background="?attr/colorSecondary">
+            android:background="?attr/colorSurface">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/toolbar_title"
@@ -167,7 +167,7 @@
     <com.google.android.material.navigationrail.NavigationRailView
         android:id="@+id/side_nav"
         style="@style/Widget.MaterialComponents.NavigationRailView.Colored"
-        android:background="?android:colorBackground"
+        android:background="?attr/background"
         android:layout_width="wrap_content"
         android:layout_height="0dp"
         app:itemIconTint="@color/bottom_nav_item_selector"

@@ -1,19 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="colorPrimary">#292929</color>
-    <color name="colorPrimaryDark">#292929</color>
+    <color name="primaryVariantTachiyomi">#292929</color>
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
-    <color name="app_color_primary">#636363</color>
-    <color name="colorAccent">@color/neko_green_darker</color>
-    <color name="colorAccentText">#cce5ff</color>
 
-    <color name="rippleColor">@color/md_white_1000_20</color>
-    <color name="fullRippleColor">#707070</color>
+    <color name="secondaryTachiyomi">#636363</color>
+    <color name="secondaryVariantTachiyomi">@color/neko_green_darker</color>
     <color name="splashBackground">#212121</color>
     <color name="actionModeShadow">@color/md_black_1000</color>
 
-    <color name="textColorPrimary">@color/md_white_1000</color>
     <color name="textColorPrimaryInverse">@color/md_black_1000_87</color>
     <color name="strong_divider">@color/md_white_1000_38</color>
     <color name="divider">@color/md_white_1000_12</color>
@@ -26,23 +21,23 @@
     <color name="gray_button">#BFBFBF</color>
 
     <!-- Tako Theme -->
-    <color name="accentTako">#F3B375</color>
-    <color name="colorOnAccentTako">#242431</color>
-    <color name="tabBarIconColorTako">@color/accentTako</color>
+    <color name="secondaryTako">#F3B375</color>
+    <color name="onSecondaryTako">#242431</color>
+    <color name="secondaryVariantTako">#f4d1af</color>
+    <color name="tabBarIconColorTako">@color/secondaryTako</color>
     <color name="rippleColoredTako">#1FF3B375</color>
     <color name="surfaceTako">#2A2A3C</color>
     <color name="backgroundTako">#21212E</color>
     <color name="actionTintTako">#f4ece5</color>
     <color name="inactiveTabTako">#C2f4ece5</color>
-    <color name="colorAccentTextTako">#f4d1af</color>
 
     <!-- Midnight Dusk Theme -->
-    <color name="colorAccentDuskDawn">#F02475</color>
-    <color name="colorAccentDuskDawnText">#f091b7</color>
+    <color name="secondaryDuskDawn">#F02475</color>
+    <color name="secondaryVariantDuskDawn">#f091b7</color>
     <color name="backgroundDuskDawn">#16151D</color>
     <color name="dialogDuskDawn">#201F27</color>
     <color name="primaryDuskDawn">#E570A0</color>
-    <color name="textPrimaryDuskDawn">@color/md_white_1000</color>
+    <color name="colorOnBackgroundDuskDawn">@color/md_white_1000</color>
     <color name="appBarTextDuskDawn">@color/md_white_1000</color>
 
 </resources>

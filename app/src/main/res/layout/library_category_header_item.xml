@@ -30,7 +30,7 @@
         app:layout_constraintBottom_toBottomOf="@+id/category_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/category_title"
-        tools:tint="?attr/colorAccent"
+        tools:tint="?attr/colorSecondary"
         tools:visibility="gone" />
 
     <ImageView
@@ -40,7 +40,7 @@
         android:layout_marginStart="8dp"
         android:contentDescription="@string/select_all"
         android:src="@drawable/ic_expand_less_24dp"
-        app:tint="?android:textColorPrimary"
+        app:tint="?attr/colorOnBackground"
         app:layout_constraintBottom_toBottomOf="@+id/category_title"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/category_title" />
@@ -78,7 +78,7 @@
         android:paddingTop="4dp"
         android:paddingEnd="4dp"
         android:paddingBottom="4dp"
-        android:textColor="?android:textColorPrimary"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="18sp"
         app:layout_constrainedWidth="true"
         app:layout_constraintBottom_toBottomOf="parent"
@@ -97,7 +97,7 @@
         android:background="@drawable/square_ripple"
         android:clickable="true"
         android:drawablePadding="6dp"
-        app:drawableTint="?android:textColorPrimary"
+        app:drawableTint="?attr/colorOnBackground"
         android:ellipsize="start"
         android:focusable="true"
         android:gravity="center|end"
@@ -105,7 +105,7 @@
         android:padding="6dp"
         android:textAlignment="textEnd"
         android:textAppearance="@style/TextAppearance.MaterialComponents.Body2"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="12sp"
         android:textStyle="normal"
         app:layout_constrainedWidth="true"
@@ -127,7 +127,7 @@
         android:focusable="true"
         android:padding="4dp"
         android:src="@drawable/ic_refresh_24dp"
-        app:tint="?android:textColorPrimary"
+        app:tint="?attr/colorOnBackground"
         android:tooltipText="@string/update"
         app:layout_constraintBottom_toBottomOf="@id/category_title"
         app:layout_constraintEnd_toEndOf="parent"

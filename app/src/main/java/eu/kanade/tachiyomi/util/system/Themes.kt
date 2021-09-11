@@ -131,7 +131,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     val darkSecondaryText: Int =
         ColorUtils.setAlphaComponent(darkPrimaryText, (0.54f * 255f).roundToInt())
 
-    /** Complies with colorBackground */
+    /** Complies with background */
     @ColorInt
     val lightBackground: Int = Color.parseColor(
         when (styleRes) {
@@ -141,7 +141,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         }
     )
 
-    /** Complies with colorBackground (probably night) */
+    /** Complies with background (probably night) */
     @ColorInt
     val darkBackground: Int = Color.parseColor(
         when (styleRes) {
@@ -155,7 +155,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         }
     )
 
-    /** Complies with colorAccent */
+    /** Complies with colorSecondary */
     @ColorInt
     val lightAccent: Int = Color.parseColor(
         when (styleRes) {
@@ -168,7 +168,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         }
     )
 
-    /** Complies with colorAccent (probably night) */
+    /** Complies with colorSecondary (probably night) */
     @ColorInt
     val darkAccent: Int = Color.parseColor(
         when (styleRes) {
@@ -249,7 +249,7 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
         else -> Color.parseColor("#C2FFFFFF")
     }
 
-    /** Complies with tabBarIconColor or colorAccent */
+    /** Complies with tabBarIconColor or colorSecondary */
     @ColorInt
     val lightActiveTab: Int = when (styleRes) {
         else -> lightAccent
@@ -264,8 +264,8 @@ enum class Themes(@StyleRes val styleRes: Int, val nightMode: Int, @StringRes va
     data class Colors(
         @ColorInt val primaryText: Int,
         @ColorInt val secondaryText: Int,
-        @ColorInt val colorBackground: Int,
-        @ColorInt val colorAccent: Int,
+        @ColorInt val background: Int,
+        @ColorInt val colorSecondary: Int,
         /** Complies with colorSecondary */
         @ColorInt val appBar: Int,
         /** Complies with actionBarTintColor */

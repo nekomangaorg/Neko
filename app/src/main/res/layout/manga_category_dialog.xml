@@ -16,7 +16,7 @@
         app:boxStrokeColor="@color/text_box_stroke_selector"
         app:endIconMode="clear_text"
         app:hintEnabled="false"
-        app:hintTextColor="?colorAccent">
+        app:hintTextColor="?attr/colorSecondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/title"

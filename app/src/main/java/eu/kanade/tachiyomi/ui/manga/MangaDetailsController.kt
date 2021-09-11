@@ -363,7 +363,7 @@ class MangaDetailsController :
                         Palette.from(bitmap).generate {
                             if (it == null) return@generate
                             val colorBack = view.context.getResourceColor(
-                                android.R.attr.colorBackground
+                                R.attr.background
                             )
                             // this makes the color more consistent regardless of theme
                             val backDropColor =
@@ -398,20 +398,9 @@ class MangaDetailsController :
         val activity = activity as? MainActivity ?: return
         val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
-        if (ThemeUtil.hasDarkActionBarInLight(
-                activity,
-                activity.getPrefTheme(presenter.preferences)
-            )
-        ) {
-            if (forThis) activityBinding.appBar.context.setTheme(
-                R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
-            )
-            else activityBinding.appBar.context.setTheme(
-                R.style.Theme_ActionBar_Dark_DayNight
-            )
-
+        if (ThemeUtil.hasDarkActionBarInLight(activity, activity.getPrefTheme(presenter.preferences))) {
             val iconPrimary = view?.context?.getResourceColor(
-                if (forThis) android.R.attr.textColorPrimary
+                if (forThis) R.attr.colorOnBackground
                 else R.attr.actionBarTintColor
             ) ?: Color.BLACK
             activityBinding.toolbar.setTitleTextColor(iconPrimary)
@@ -480,19 +469,19 @@ class MangaDetailsController :
             colorAnimator?.cancel()
 
             getHeader()?.clearDescFocus()
-            val colorSecondary = activity?.getResourceColor(
-                R.attr.colorSecondary
+            val colorSurface = activity?.getResourceColor(
+                R.attr.colorSurface
             ) ?: Color.BLACK
             if (router.backstackSize > 0 &&
                 router.backstack.last().controller !is MangaDetailsController
             ) {
                 if (router.backstack.last().controller !is FloatingSearchInterface) {
-                    activityBinding?.appBar?.setBackgroundColor(colorSecondary)
+                    activityBinding?.appBar?.setBackgroundColor(colorSurface)
                 }
-                activityBinding?.toolbar?.setBackgroundColor(colorSecondary)
+                activityBinding?.toolbar?.setBackgroundColor(colorSurface)
                 activity?.window?.statusBarColor = activity?.getResourceColor(
                     android.R.attr.statusBarColor
-                ) ?: colorSecondary
+                ) ?: colorSurface
             }
         }
     }

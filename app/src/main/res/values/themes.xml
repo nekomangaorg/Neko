@@ -11,40 +11,35 @@
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="android:layoutDirection">ltr</item>
         <item name="android:windowDrawsSystemBarBackgrounds">true</item>
-        <item name="android:windowSplashScreenBackground" tools:targetApi="31">
-            @color/splash_background
-        </item>
-        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">
-            @drawable/ic_launcher_foreground
-        </item>
+        <item name="android:windowSplashScreenBackground" tools:targetApi="31">@color/splashBackground</item>
+        <item name="android:windowSplashScreenAnimatedIcon" tools:targetApi="31">@drawable/ic_launcher_foreground</item>
         <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">775</item>
-
-        <item name="colorPrimary">@color/app_color_primary</item>
-        <item name="colorPrimaryVariant">@color/colorPrimary</item>
-        <item name="colorSecondary">@color/background</item>
-        <item name="colorSecondaryVariant">?attr/colorPrimaryVariant</item>
-        <item name="colorPrimaryDark">?colorPrimary</item>
-        <item name="colorAccent">@color/colorAccent</item>
-        <item name="colorAccentText">@color/colorAccent</item>
-        <item name="colorControlActivated">?colorAccent</item>
-        <item name="android:textColorPrimary">@color/textColorPrimary</item>
-        <item name="android:textColorSecondary">@color/text_color_secondary</item>
-        <item name="android:textColorHint">@color/text_color_hint</item>
-        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
-        <item name="android:textColorSecondaryInverse">@color/text_color_inverse_secondary</item>
-        <item name="android:textColorHintInverse">@color/text_color_inverse_hint</item>
-        <item name="android:colorBackground">@color/background</item>
-        <item name="readerBackground">@color/colorPrimary</item>
-        <item name="android:listSelector">?colorAccent</item>
+        <!--Standard Material colors -->
+        <item name="colorPrimary">@color/primaryTachiyomi</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantTachiyomi</item>
+        <item name="colorSurface">@color/background</item> //old colorSecondary
+        <item name="colorOnSurface">@color/md_black_1000</item> //old colorOnSecondary
+        <item name="colorSecondary">@color/secondaryTachiyomi</item> //colorAccent
+        <item name="colorOnSecondary">@color/md_white_1000</item> // colorOnSecondary
+        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item> //colorAccentText
+        <item name="background">@color/background</item>
+        <item name="colorOnBackground">@color/md_black_1000_87</item>
+        <item name="colorBackgroundFloating">?colorSurface</item>
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="readerBackground">@color/primaryVariantTachiyomi</item>
+        <item name="android:listSelector">?attr/colorSecondary</item>
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="colorControlHighlight">@color/secondary_highlight</item>
+        <item name="android:colorBackground">?background</item>
+        <item name="android:colorControlHighlight">@color/secondary_highlight</item>
+        <item name="android:textColorSecondary">@color/text_color_secondary</item>
+        <item name="android:textColorHint">@color/text_color_hint</item>
         <item name="android:fontFamily">@font/montserrat_regular</item>
         <item name="fontFamily">@font/montserrat_regular</item>
         <item name="colorOnAccent">@color/md_white_1000</item>
         <item name="colorOnHopper">@color/md_white_1000</item>
-        <item name="colorControlHighlight">@color/accent_highlight</item>
-        <item name="android:colorControlHighlight">@color/accent_highlight</item>
         <item name="unreadBadgeColor">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
         <item name="colorDownloadBadge">@color/md_black_1000</item>
@@ -56,19 +51,19 @@
         <item name="preferenceTheme">@style/Neko.Preference</item>
 
         <!-- Custom Attributes-->
-        <item name="actionBarTintColor">?attr/colorOnSurface</item>
-        <item name="tabBarIconColor">?colorAccent</item>
+        <item name="actionBarTintColor">?attr/colorOnBackground</item>
+        <item name="tabBarIconColor">?attr/colorSecondary</item>
         <item name="tabBarIconInactive">@color/colorPrimaryInactive</item>
         <item name="android:statusBarColor">@color/status_bar</item>
         <item name="android:navigationBarColor">#B3000000</item>
-        <item name="android:colorEdgeEffect">?colorAccent</item>
-        <item name="tabHighlightBackground">@color/accent_alpha</item>
+        <item name="android:colorEdgeEffect">?attr/colorSecondary</item>
+        <item name="tabHighlightBackground">@color/secondary_alpha</item>
 
         <!-- Material Dialog colors -->
-        <item name="md_color_title">?android:attr/textColorPrimary</item>
+        <item name="md_color_title">?attr/colorOnBackground</item>
         <item name="md_color_content">?android:textColorSecondary</item>
-        <item name="md_color_button_text">?colorAccent</item>
-        <item name="md_background_color">?android:attr/colorBackground</item>
+        <item name="md_color_button_text">?attr/colorSecondary</item>
+        <item name="md_background_color">?attr/background</item>
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">16dp</item>
 
@@ -79,30 +74,35 @@
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
     <style name="Theme.Tachiyomi.AllBlue">
-        <item name="colorPrimaryVariant">@color/app_color_primary</item>
-        <item name="colorSecondary">@color/app_color_primary</item>
+        <item name="colorPrimaryVariant">@color/primaryTachiyomi</item>
         <item name="tabBarIconColor">@color/md_white_1000</item>
+		<item name="colorSurface">@color/primaryTachiyomi</item>
+        <item name="colorBackgroundFloating">?android:colorBackground</item>
         <item name="tabBarIconInactive">@color/md_white_1000_50</item>
         <item name="tabHighlightBackground">@color/md_white_1000_50</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
+        <item name="popupMenuBackground">@drawable/alt_popupmenu_background</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="android:statusBarColor">@color/surface_status_bar</item>
     </style>
 
     <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
-        <item name="colorPrimaryVariant">@color/app_color_primary</item>
-        <item name="colorSecondary">@color/app_color_primary</item>
+        <item name="colorPrimaryVariant">@color/primaryTachiyomi</item>
+        <item name="colorSurface">@color/primaryTachiyomi</item>
+        <item name="colorBackgroundFloating">?android:colorBackground</item>
+        <item name="android:colorBackgroundFloating">?android:colorBackground</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
+        <item name="android:statusBarColor">@color/surface_status_bar</item>
     </style>
 
     <style name="ThemeOverlay.Tachiyomi.Amoled" parent="">
-        <item name="colorSecondary">@color/md_black_1000</item>
+        <item name="colorSurface">@color/md_black_1000</item>
         <item name="colorPrimaryVariant">@color/md_black_1000</item>
-        <item name="colorOnPrimary">@color/md_black_1000</item>
-        <item name="android:colorBackground">@color/md_black_1000</item>
+        <item name="background">@color/md_black_1000</item>
         <item name="readerBackground">@color/md_black_1000</item>
 
         <!-- Material Dialog colors -->
@@ -115,30 +115,28 @@
 
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
-        <item name="colorAccent">@color/colorAccentDuskDawn</item>
-        <item name="colorAccentText">@color/colorAccentDuskDawnText</item>
         <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
-        <item name="colorSecondary">@color/backgroundDuskDawn</item>
-        <item name="colorSecondaryVariant">@color/dialogDuskDawn</item>
+        <item name="colorSecondary">@color/secondaryDuskDawn</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantDuskDawn</item>
+        <item name="colorSurface">@color/backgroundDuskDawn</item>
         <item name="background">@color/backgroundDuskDawn</item>
-        <item name="android:textColorPrimary">@color/textPrimaryDuskDawn</item>
+        <item name="colorOnBackground">@color/colorOnBackgroundDuskDawn</item>
+        <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
         <item name="colorOnHopper">?attr/colorOnAccent</item>
-        <item name="android:colorBackground">@color/backgroundDuskDawn</item>
-        <item name="actionBarTintColor">@color/appBarTextDuskDawn</item>
+
     </style>
 
 
     <style name="Theme.Tachiyomi.SapphireDusk" parent="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primarySapphire</item>
-        <item name="colorAccent">@color/colorAccentSapphire</item>
-        <item name="colorAccentText">@color/colorAccentSapphireText</item>
+        <item name="colorSecondary">@color/secondaryDuskDawn</item>
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">
-        <item name="colorAccent">@color/colorAccentStrawberry</item>
-        <item name="colorAccentText">@color/colorAccentStrawberryText</item>
+        <item name="colorSecondary">@color/secondaryStrawberry</item>
+        <item name="colorSecondaryVariant">@color/secondaryAlternativeStrawberry</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
         <item name="colorOnHopper">?attr/colorOnAccent</item>
@@ -147,15 +145,15 @@
 
     <!--== Tako Theme ==-->
     <style name="Theme.Tachiyomi.Tako">
-        <item name="colorAccent">@color/accentTako</item>
-        <item name="colorOnAccent">@color/colorOnAccentTako</item>
+        <item name="colorSecondary">@color/secondaryTako</item>
+        <item name="colorOnSecondary">@color/onSecondaryTako</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantTako</item>
         <item name="colorPrimaryVariant">@color/surfaceTako</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTako</item>
         <item name="colorControlHighlight">@color/rippleColoredTako</item>
-        <item name="colorSecondary">@color/backgroundTako</item>
+        <item name="colorSurface">@color/backgroundTako</item>
         <item name="actionBarTintColor">@color/actionTintTako</item>
-        <item name="android:colorBackground">@color/backgroundTako</item>
-        <item name="colorAccentText">@color/colorAccentTextTako</item>
+        <item name="background">@color/backgroundTako</item>
         <item name="tabBarIconInactive">@color/inactiveTabTako</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
@@ -165,11 +163,11 @@
 
 
     <style name="Theme.Tachiyomi.MangaDex">
-        <item name="colorAccent">@color/colorAccentMangaDex</item>
-        <item name="colorAccentText">@color/md_black_1000</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
+        <item name="colorSecondary">@color/secondaryMangaDex</item>
+        <item name="colorOnSecondary">@color/md_black_1000</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.Monet" />
@@ -179,15 +177,14 @@
     <!--===============-->
     <style name="Theme.Splash" parent="Theme.Tachiyomi">
         <item name="android:windowBackground">@drawable/splash_background</item>
-        <item name="android:statusBarColor">@color/splash_background</item>
-        <item name="android:navigationBarColor">@color/splash_background</item>
+        <item name="android:statusBarColor">@color/splashBackground</item>
+        <item name="android:navigationBarColor">@color/splashBackground</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
     <style name="Theme.OSS" parent="Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@android:color/black</item>
-        <item name="android:colorEdgeEffect">@color/colorAccent</item>
+        <item name="colorPrimary">@color/primaryTachiyomi</item>
+        <item name="android:colorEdgeEffect">@color/secondaryTachiyomi</item>
     </style>
 </resources>

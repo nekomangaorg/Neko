@@ -16,12 +16,12 @@
         android:layout_height="48sp"
         android:layout_weight="1"
         android:drawablePadding="12dp"
-        android:drawableTint="?android:textColorPrimary"
+        android:drawableTint="?attr/colorOnBackground"
         android:gravity="center|start"
         android:paddingStart="16dp"
         android:paddingEnd="16dp"
         android:ellipsize="end"
-        android:textColor="?android:textColorPrimary"
+        android:textColor="?attr/colorOnBackground"
         android:textSize="13sp"
         android:tint="@color/md_white_1000_54" />
 
@@ -31,7 +31,7 @@
         android:layout_height="42dp"
         android:paddingStart="8dp"
         android:paddingEnd="8dp"
-        app:tint="?colorAccent"
+        app:tint="?attr/colorSecondary"
         android:layout_gravity="center"
         android:visibility="invisible"
         tools:visibility="visible"

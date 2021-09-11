@@ -45,7 +45,7 @@
         android:layout_width="match_parent"
         android:id="@+id/front_view"
         android:layout_height="wrap_content"
-        android:background="?android:attr/colorBackground"
+        android:background="?attr/background"
         android:paddingTop="@dimen/material_component_lists_padding_above_list">
 
         <ImageView
@@ -56,7 +56,7 @@
             android:layout_gravity="start"
             android:contentDescription="@string/reorder"
             android:scaleType="center"
-            app:tint="?android:attr/textColorPrimary"
+            app:tint="?attr/colorOnBackground"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"

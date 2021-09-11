@@ -35,13 +35,13 @@
         android:layout_width="match_parent"
         android:layout_height="300dp"
         android:background="@drawable/gradient_shape"
-        android:backgroundTint="?android:attr/colorBackground"
+        android:backgroundTint="?attr/background"
         app:layout_constraintBottom_toBottomOf="@+id/true_backdrop" />
 
     <View
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="?android:attr/colorBackground"
+        android:background="?attr/background"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/backdrop_gradient" />
 
@@ -346,7 +346,7 @@
         android:layout_width="60dp"
         android:layout_height="16sp"
         android:background="@drawable/full_gradient"
-        android:backgroundTint="?android:attr/colorBackground"
+        android:backgroundTint="?attr/background"
         app:layout_constraintBottom_toBottomOf="@id/manga_summary"
         app:layout_constraintEnd_toEndOf="@id/more_end_guide" />
 
@@ -362,7 +362,7 @@
         android:id="@+id/more_bg_solid"
         android:layout_width="0dp"
         android:layout_height="16sp"
-        android:background="?android:attr/colorBackground"
+        android:background="?attr/background"
         app:layout_constraintBottom_toBottomOf="@id/manga_summary"
         app:layout_constraintEnd_toEndOf="@id/more_button"
         app:layout_constraintStart_toStartOf="@id/more_button" />
@@ -386,7 +386,7 @@
         android:paddingEnd="0dp"
         android:text="@string/more"
         android:textAlignment="viewEnd"
-        app:drawableTint="?colorAccent"
+        app:drawableTint="?colorSecondary"
         app:layout_constraintBottom_toBottomOf="@id/more_guide"
         app:layout_constraintEnd_toEndOf="parent"
         app:rippleColor="@null" />
@@ -431,7 +431,7 @@
         android:drawableEnd="@drawable/ic_expand_less_24dp"
         android:paddingStart="0dp"
         android:paddingEnd="0dp"
-        app:drawableTint="?colorAccent"
+        app:drawableTint="?colorSecondary"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@id/start_reading_button"
         app:layout_constraintEnd_toEndOf="parent"
@@ -491,7 +491,7 @@
             android:background="@null"
             android:padding="5dp"
             android:src="@drawable/ic_filter_list_24dp"
-            app:tint="?colorAccent"
+            app:tint="?attr/colorSecondary"
             app:layout_constraintBottom_toBottomOf="@id/chapters_title"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/chapters_title" />
@@ -506,7 +506,7 @@
             android:maxLines="2"
             android:padding="5dp"
             android:textAlignment="textEnd"
-            android:textColor="?attr/colorAccent"
+            android:textColor="@color/material_on_background_disabled"
             android:textSize="13sp"
             app:layout_constraintBaseline_toBaselineOf="@id/chapters_title"
             app:layout_constraintBottom_toBottomOf="@id/filter_button"
