@@ -82,6 +82,7 @@
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
     <style name="Theme.Tachiyomi.AllBlue">
+        <item name="hasColoredActionBar">true</item>
         <item name="colorPrimaryVariant">@color/primaryTachiyomi</item>
         <item name="tabBarIconColor">@color/md_white_1000</item>
         <item name="colorSurface">@color/primaryTachiyomi</item>
@@ -97,6 +98,7 @@
     </style>
 
     <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
+        <item name="hasColoredActionBar">true</item>
         <item name="colorPrimaryVariant">@color/primaryTachiyomi</item>
         <item name="colorSurface">@color/primaryTachiyomi</item>
         <item name="colorBackgroundFloating">?android:colorBackground</item>
