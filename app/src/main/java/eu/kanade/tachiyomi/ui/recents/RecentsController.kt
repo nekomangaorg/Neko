@@ -460,6 +460,19 @@ class RecentsController(bundle: Bundle? = null) :
         }
         setBottomPadding()
         binding.downloadBottomSheet.dlBottomSheet.update()
+
+        val searchItem =
+            (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as? SearchView ?: return
+        if (router.backstack.lastOrNull()?.controller != this) return
+        setOnQueryTextChangeListener(searchView) {
+            if (query != it) {
+                query = it ?: return@setOnQueryTextChangeListener false
+                resetProgressItem()
+                refresh()
+            }
+            true
+        }
     }
 
     override fun onDestroy() {
