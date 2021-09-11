@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
@@ -19,6 +21,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -39,6 +42,7 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
@@ -173,8 +177,12 @@ class MangaHeaderHolder(
             binding.lessButton.isVisible = !isTablet
             binding.moreButtonGroup.isVisible = false
             if (animated) {
-                val animVector = AnimatedVectorDrawableCompat.create(binding.root.context, R.drawable.anim_expand_more_to_less)
-                binding.lessButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, animVector, null)
+                val animVector = AnimatedVectorDrawableCompat.create(binding.root.context,
+                    R.drawable.anim_expand_more_to_less)
+                binding.lessButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null,
+                    null,
+                    animVector,
+                    null)
                 animVector?.start()
             }
             binding.title.maxLines = Integer.MAX_VALUE
@@ -198,8 +206,12 @@ class MangaHeaderHolder(
         if (isTablet) return
         binding.moreButtonGroup.isVisible = !isTablet
         if (animated) {
-            val animVector = AnimatedVectorDrawableCompat.create(binding.root.context, R.drawable.anim_expand_less_to_more)
-            binding.moreButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, animVector, null)
+            val animVector = AnimatedVectorDrawableCompat.create(binding.root.context,
+                R.drawable.anim_expand_less_to_more)
+            binding.moreButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null,
+                null,
+                animVector,
+                null)
             animVector?.start()
         }
         binding.mangaSummary.setTextIsSelectable(false)
@@ -270,8 +282,8 @@ class MangaHeaderHolder(
                 listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
 
-        if(MdUtil.getMangaId(manga.url).isDigitsOnly()) {
-            manga.description ="THIS MANGA IS NOT MIGRATED TO V5"
+        if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+            manga.description = "THIS MANGA IS NOT MIGRATED TO V5"
         }
 
         setDescription()
@@ -485,7 +497,8 @@ class MangaHeaderHolder(
 
     private fun MaterialButton.checked(checked: Boolean) {
         if (checked) {
-            stateListAnimator = AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
+            stateListAnimator =
+                AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
             backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
                     context.getResourceColor(R.attr.colorSecondary),

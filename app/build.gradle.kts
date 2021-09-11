@@ -185,6 +185,7 @@ dependencies {
     implementation("com.mikepenz:iconics-views:5.3.0")
     implementation("com.mikepenz:community-material-typeface:5.8.55.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
+    implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
     // Job scheduling
     implementation("androidx.work:work-runtime-ktx:2.6.0")
