@@ -90,10 +90,10 @@ fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: Pr
     val useAmoled =
         (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
             preferences.themeDarkAmoled().get()
-    if (oldTheme != null) {
+    if (oldTheme != null && useAmoled) {
         val array = oldTheme.obtainStyledAttributes(intArrayOf(R.attr.background))
         val bg = array.getColor(0, 0)
-        if (bg == Color.BLACK && useAmoled) {
+        if (bg == Color.BLACK) {
             return oldTheme
         }
     }
