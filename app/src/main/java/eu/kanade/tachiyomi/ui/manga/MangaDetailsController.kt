@@ -1262,7 +1262,7 @@ class MangaDetailsController :
      * @param content the actual text to copy to the board
      * @param label Label to show to the user describing the content
      */
-    override fun copyToClipboard(content: String, label: Int) {
+    override fun copyToClipboard(content: String, label: Int, useToast: Boolean) {
         if (content.isBlank()) return
 
         val activity = activity ?: return
@@ -1272,7 +1272,11 @@ class MangaDetailsController :
         val clipboard = activity.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         clipboard.setPrimaryClip(ClipData.newPlainText(contentType, content))
 
-        snack = view.snack(view.context.getString(R.string._copied_to_clipboard, contentType))
+        if (useToast) {
+            activity.toast(view.context.getString(R.string._copied_to_clipboard, contentType))
+        } else {
+            snack = view.snack(view.context.getString(R.string._copied_to_clipboard, contentType))
+        }
     }
 
     override fun showTrackingSheet() {

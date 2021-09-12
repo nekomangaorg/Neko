@@ -27,8 +27,12 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
     init {
         val listener = adapter.rowClickListener
         binding.logoContainer.setOnClickListener { listener.onLogoClick(bindingAdapterPosition) }
-        binding.addTracking.setOnClickListener { listener.onSetClick(bindingAdapterPosition) }
-        binding.trackTitle.setOnClickListener { listener.onSetClick(bindingAdapterPosition) }
+        binding.addTracking.setOnClickListener { listener.onTitleClick(bindingAdapterPosition) }
+        binding.trackTitle.setOnClickListener { listener.onTitleClick(bindingAdapterPosition) }
+        binding.trackTitle.setOnLongClickListener {
+            listener.onTitleLongClick(bindingAdapterPosition)
+            true
+        }
         binding.trackRemove.setOnClickListener { listener.onRemoveClick(bindingAdapterPosition) }
         binding.trackStatus.setOnClickListener { listener.onStatusClick(bindingAdapterPosition) }
         binding.trackChapters.setOnClickListener { listener.onChaptersClick(bindingAdapterPosition) }

@@ -126,7 +126,7 @@ class MangaDetailsAdapter(
         fun tagLongClicked(text: String)
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
-        fun copyToClipboard(content: String, label: Int)
+        fun copyToClipboard(content: String, label: Int, useToast: Boolean = false)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
         fun updateScroll()
