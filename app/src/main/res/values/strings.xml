@@ -177,11 +177,6 @@
     <string name="badges">Badges</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>
     <string name="grid_size">Grid size</string>
-    <string name="x_small">XS</string>
-    <string name="small">S</string>
-    <string name="medium">M</string>
-    <string name="large">L</string>
-    <string name="x_large">XL</string>
     <string name="_per_row">%d per row</string>
     <string name="hide_unread_badges">Hide unread badges</string>
     <string name="show_unread_badges">Show unread badges</string>
