@@ -5,7 +5,13 @@
 - Completed and Cancelled status (@animusfracto)
 - Add support for Comikey and BilliBilli chapters (@jobobby04)
 - New tracking sheet ui (@Jays2Kings)
+- Latest now follows the users default content ratings
+- Add Grey Wolf Theme
+- Add Teal Theme (@Jays2Kings)
+- If there's a gap in the chapters, a warning will show missing number of chapters on transition pages while reading (@curche)
 ## 🏗️ Changes
+- Update seekbar UI in reader to a slider: now shows the current page while dragging, and shows ticks through the track to represent the pages (@Jays2Kings)
+- Side navigation now always shows on larger tablets For shorter and smaller phones, side navigation may no longer show (@Jays2Kings)
 - Added more Browse Sort options
 - Show unreleased Chapters
 - Use color accented ripples (@Soitora)
