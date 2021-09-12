@@ -27,7 +27,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         val unreadBadgeBackground = if (showTotalChapters) {
             context.contextCompatColor(R.color.total_badge)
-        } else context.getResourceColor(R.attr.unreadBadgeColor)
+        } else context.getResourceColor(R.attr.colorSecondary)
 
         with(binding.unreadText) {
             isVisible = unread > 0 || unread == -1 || showTotalChapters
@@ -58,14 +58,15 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 downloads.toString()
             }
             setTextColor(context.getResourceColor(R.attr.colorOnDownloadBadge))
-            setBackgroundColor(context.getResourceColor(R.attr.downloadBadgeColor))
+            setBackgroundColor(context.getResourceColor(R.attr.colorDownloadBadge))
         }
 
         // Show the badge card if unread or downloads exists
         isVisible = binding.downloadText.isVisible || binding.unreadText.isVisible
 
         // Show the angles divider if both unread and downloads exists
-        binding.unreadAngle.isVisible = binding.downloadText.isVisible && binding.unreadText.isVisible
+        binding.unreadAngle.isVisible =
+            binding.downloadText.isVisible && binding.unreadText.isVisible
 
         binding.unreadAngle.setColorFilter(unreadBadgeBackground)
         if (binding.unreadAngle.isVisible) {

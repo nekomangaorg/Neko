@@ -4,6 +4,7 @@ import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Dialog
 import android.app.assist.AssistContent
+import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
@@ -27,13 +28,13 @@ import android.webkit.WebView
 import androidx.annotation.IdRes
 import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
-import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
@@ -74,6 +75,7 @@ import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
 import eu.kanade.tachiyomi.ui.similar.SimilarController
+import eu.kanade.tachiyomi.ui.source.LatestSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
@@ -81,12 +83,12 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
@@ -143,6 +145,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
         }
         extraViewForUndo = extraViewToCheck
+    }
+
+    override fun attachBaseContext(newBase: Context?) {
+        super.attachBaseContext(newBase?.prepareSideNavContext())
     }
 
     val toolbarHeight: Int
@@ -425,12 +431,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.cardFrame.isVisible = show
         if (changeBG) {
             binding.appBar.setBackgroundColor(
-                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSecondary)
+                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface)
             )
         }
         currentToolbar?.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (rootSearchController is RootSearchInterface && rootSearchController !is FollowsController && rootSearchController !is SimilarController) {
+            if (rootSearchController is RootSearchInterface && rootSearchController !is LatestSourceController && rootSearchController !is FollowsController && rootSearchController !is SimilarController) {
                 rootSearchController.expandSearch()
             } else onBackPressed()
         }
@@ -514,7 +520,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
                     getString(R.string.visit_recents_for_download_queue)
-                ).outerCircleColorInt(getResourceColor(R.attr.colorAccent)).outerCircleAlpha(0.95f)
+                ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary)).outerCircleAlpha(0.95f)
                     .titleTextSize(
                         20
                     )
@@ -709,6 +715,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         nav.selectedItemId = startingTab()
     }
 
+    fun goToTab(@IdRes id: Int) {
+        nav.selectedItemId = id
+    }
+
     private fun setRoot(controller: Controller, id: Int) {
         router.setRoot(controller.withFadeTransaction().tag(id.toString()))
     }
@@ -855,9 +865,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             tabAnimation?.start()
         } else {
             binding.tabsFrameLayout.isVisible = show
-        }
-        if (show) {
-            binding.appBar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
         }
     }
 

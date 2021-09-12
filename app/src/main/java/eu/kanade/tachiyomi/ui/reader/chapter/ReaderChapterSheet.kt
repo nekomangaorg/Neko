@@ -50,7 +50,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
     fun setup(activity: ReaderActivity) {
         presenter = activity.presenter
-        val fullPrimary = activity.getResourceColor(R.attr.colorSecondary)
+        val fullPrimary = activity.getResourceColor(R.attr.colorSurface)
 
         val primary = ColorUtils.setAlphaComponent(fullPrimary, 200)
 
@@ -173,6 +173,19 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             if (!sheetBehavior.isExpanded()) primary
             else fullPrimary
         )
+
+        binding.chapterRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE ||
+                    newState == RecyclerView.SCROLL_STATE_SETTLING
+                ) {
+                    sheetBehavior?.isDraggable = true
+                } else {
+                    sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
+                }
+            }
+        })
 
         binding.chapterRecycler.layoutManager = LinearLayoutManager(context)
         refreshList()

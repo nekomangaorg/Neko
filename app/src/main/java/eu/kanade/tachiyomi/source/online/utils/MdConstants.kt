@@ -16,5 +16,12 @@ object MdConstants {
         const val scanlator = "scanlation_group"
     }
 
+    object ContentRating {
+        const val safe = "safe"
+        const val suggestive = "suggestive"
+        const val erotica = "erotica"
+        const val pornographic = "pornographic"
+    }
+
     val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(5)
 }

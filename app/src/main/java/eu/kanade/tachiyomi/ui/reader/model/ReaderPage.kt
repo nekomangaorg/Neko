@@ -4,7 +4,7 @@ import android.graphics.drawable.Drawable
 import eu.kanade.tachiyomi.source.model.Page
 import java.io.InputStream
 
-class ReaderPage(
+open class ReaderPage(
     index: Int,
     url: String = "",
     imageUrl: String? = null,
@@ -16,14 +16,20 @@ class ReaderPage(
     var shiftedPage: Boolean = false,
     /** Value to check if a page is can be doubled up, but can't because the next page is too wide */
     var isolatedPage: Boolean = false,
+    var firstHalf: Boolean? = null,
+    var longPage: Boolean? = null,
 ) : Page(index, url, imageUrl, mangaDexChapterId, uri = null) {
 
-    lateinit var chapter: ReaderChapter
+    open lateinit var chapter: ReaderChapter
 
     /** Value to check if a page is too wide to be doubled up */
-    var fullPage: Boolean = false
+    var fullPage: Boolean? = null
         set(value) {
             field = value
-            if (value) shiftedPage = false
+            longPage = value
+            if (value == true) shiftedPage = false
         }
+
+    fun isFromSamePage(page: ReaderPage): Boolean =
+        index == page.index && chapter.chapter.id == page.chapter.chapter.id
 }

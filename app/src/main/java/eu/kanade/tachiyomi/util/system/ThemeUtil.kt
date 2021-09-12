@@ -87,12 +87,15 @@ fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
 }
 
 fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: PreferencesHelper, oldTheme: Resources.Theme?): Resources.Theme {
-    val useAmoled = (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
-        preferences.themeDarkAmoled().get()
-    if (oldTheme != null) {
-        val array = oldTheme.obtainStyledAttributes(intArrayOf(android.R.attr.colorBackground))
+    val useAmoled =
+        (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+            preferences.themeDarkAmoled().get()
+    if (oldTheme != null && useAmoled) {
+        val array = oldTheme.obtainStyledAttributes(intArrayOf(R.attr.background))
         val bg = array.getColor(0, 0)
-        if (bg == Color.BLACK && useAmoled) { return oldTheme }
+        if (bg == Color.BLACK) {
+            return oldTheme
+        }
     }
     if (useAmoled) {
         theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)

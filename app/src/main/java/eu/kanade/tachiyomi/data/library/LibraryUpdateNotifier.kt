@@ -62,12 +62,8 @@ class LibraryUpdateNotifier(private val context: Context) {
             setLargeIcon(notificationBitmap)
             setOngoing(true)
             setOnlyAlertOnce(true)
-            color = ContextCompat.getColor(context, R.color.colorAccent)
-            addAction(
-                R.drawable.ic_close_24dp,
-                context.getString(android.R.string.cancel),
-                cancelIntent
-            )
+            color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
+            addAction(R.drawable.ic_close_24dp, context.getString(android.R.string.cancel), cancelIntent)
         }
     }
 
@@ -168,13 +164,13 @@ class LibraryUpdateNotifier(private val context: Context) {
 
                                     Coil.imageLoader(context)
                                         .execute(request).drawable?.let { drawable ->
-                                            setLargeIcon((drawable as BitmapDrawable).bitmap)
+                                            setLargeIcon((drawable as? BitmapDrawable)?.bitmap)
                                         }
                                 } catch (e: Exception) {
                                 }
                                 setGroupAlertBehavior(NotificationCompat.GROUP_ALERT_SUMMARY)
                                 setContentTitle(manga.title)
-                                color = ContextCompat.getColor(context, R.color.colorAccent)
+                                color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
                                 val chaptersNames = if (chapterNames.size > MAX_CHAPTERS) {
                                     "${chapterNames.take(MAX_CHAPTERS - 1).joinToString(", ")}, " +
                                         context.resources.getQuantityString(
@@ -228,7 +224,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                         setSmallIcon(R.drawable.ic_neko_notification)
                         setLargeIcon(notificationBitmap)
                         setContentTitle(context.getString(R.string.new_chapters_found))
-                        color = ContextCompat.getColor(context, R.color.colorAccent)
+                        color = ContextCompat.getColor(context, R.color.secondaryTachiyomi)
                         if (updates.size > 1) {
                             setContentText(
                                 context.resources.getQuantityString(

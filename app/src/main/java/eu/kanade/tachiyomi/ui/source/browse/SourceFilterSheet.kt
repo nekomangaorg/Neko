@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -15,7 +16,6 @@ import eu.kanade.tachiyomi.databinding.SourceFilterSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 
@@ -50,23 +50,23 @@ class SourceFilterSheet(val activity: Activity) :
         binding.latestChaptersBtn.setOnClickListener { onLatestChapterClicked() }
 
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
-                OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    activity.window.decorView.rootWindowInsets?.let {
-                        setCardViewMax(it)
-                    }
-                    if (binding.titleLayout.height > 0) {
-                        binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                    }
+            OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                activity.window.decorView.rootWindowInsets?.let {
+                    setCardViewMax(it)
                 }
-            })
+                if (binding.titleLayout.height > 0) {
+                    binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
+                }
+            }
+        })
 
         binding.cardView.doOnApplyWindowInsets { _, insets, _ ->
             binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
                 matchConstraintMaxHeight =
                     fullHeight - insets.systemWindowInsetTop -
-                    binding.titleLayout.height - 75.dpToPx
+                        binding.titleLayout.height - 75.dpToPx
             }
         }
 
@@ -85,16 +85,16 @@ class SourceFilterSheet(val activity: Activity) :
         }
 
         (binding.root.parent.parent as? View)?.viewTreeObserver?.addOnGlobalLayoutListener(object :
-                OnGlobalLayoutListener {
-                override fun onGlobalLayout() {
-                    updateBottomButtons()
-                    if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
-                        (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(
-                            this
-                        )
-                    }
+            OnGlobalLayoutListener {
+            override fun onGlobalLayout() {
+                updateBottomButtons()
+                if (sheetBehavior.state != BottomSheetBehavior.STATE_COLLAPSED) {
+                    (binding.root.parent.parent as? View)?.viewTreeObserver?.removeOnGlobalLayoutListener(
+                        this
+                    )
                 }
-            })
+            }
+        })
 
         binding.filtersRecycler.viewTreeObserver.addOnScrollChangedListener {
             updateBottomButtons()

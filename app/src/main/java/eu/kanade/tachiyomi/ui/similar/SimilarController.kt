@@ -1,76 +1,94 @@
 package eu.kanade.tachiyomi.ui.similar
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuInflater
+import android.view.LayoutInflater
 import android.view.View
-import androidx.core.view.isVisible
-import com.google.android.material.snackbar.Snackbar
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.MaterialTheme
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.crazylegend.activity.getStatusBarHeight
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
+import com.google.android.material.composethemeadapter.MdcTheme
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
+import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
+import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
+import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
-import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
-import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.setStyle
-import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import kotlinx.coroutines.launch
 
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
  */
-class SimilarController(bundle: Bundle) : BrowseSourceController(bundle) {
+class SimilarController(bundle: Bundle? = null) :
+    BaseCoroutineController<SimilarControllerBinding, SimilarPresenter>(bundle) {
 
-    lateinit var similarPresenter: SimilarPresenter
-
-    constructor(manga: Manga, source: Source) : this(
+    constructor(manga: Manga) : this(
         Bundle().apply {
-            putLong(MANGA_ID, manga.id!!)
-            putLong(SOURCE_ID_KEY, source.id)
-            putBoolean(APPLY_INSET, false)
+            putLong(BrowseSourceController.MANGA_ID, manga.id!!)
         }
     )
+
+    override var presenter = SimilarPresenter(bundle!!.getLong(BrowseSourceController.MANGA_ID))
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.similar)
     }
 
-    override fun createPresenter(): BrowseSourcePresenter {
-        similarPresenter = SimilarPresenter(bundle!!.getLong(MANGA_ID), this)
-        return similarPresenter
-    }
-
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        binding.fab.isVisible = false
-        binding.swipeRefresh.setStyle()
+        viewScope.launch {
+            presenter.getSimilarManga()
+        }
 
-        binding.swipeRefresh.setProgressViewOffset(false, 20.dpToPx, binding.swipeRefresh.progressViewEndOffset + 25.dpToPx)
-        binding.swipeRefresh.isEnabled = true
-        binding.swipeRefresh.setOnRefreshListener {
-            similarPresenter.refreshSimilarManga()
+        binding.holder.setContent {
+            MdcTheme {
+                val refreshing = presenter.isRefreshing.observeAsState(initial = true)
+                SwipeRefresh(
+                    state = rememberSwipeRefreshState(refreshing.value),
+                    modifier = Modifier.padding(top = (activity!!.getStatusBarHeight.pxToDp + 4).dp),
+                    onRefresh = {
+                        viewScope.launch {
+                            presenter.getSimilarManga(true)
+                        }
+                    },
+                    indicator = { state, trigger ->
+                        SwipeRefreshIndicator(
+                            state = state,
+                            refreshTriggerDistance = trigger,
+                            backgroundColor = MaterialTheme.colors.secondary,
+                            contentColor = MaterialTheme.colors.onSecondary
+                        )
+                    }
+                ) {
+
+                    val groupedManga: Map<String, List<Manga>> by presenter.mangaMap.observeAsState(
+                        emptyMap())
+                    if (groupedManga.isEmpty() && refreshing.value.not()) {
+
+                        //show empty view
+                    } else {
+                        MangaListWithHeader(groupedManga = groupedManga,
+                            modifier = Modifier.padding(top = 10.dp)) { manga ->
+                            router.pushController(MangaDetailsController(manga,
+                                true).withFadeTransaction())
+                        }
+                    }
+                }
+            }
         }
     }
 
-    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-    }
-
-    fun showUserMessage(message: String) {
-        binding.swipeRefresh.isRefreshing = false
-        view?.snack(message, Snackbar.LENGTH_LONG)
-    }
-
-    /**
-     * Called from the presenter when the network request fails.
-     *
-     * @param error the error received.
-     */
-    override fun onAddPageError(error: Throwable) {
-        super.onAddPageError(error)
-        binding.emptyView.show(
-            CommunityMaterial.Icon.cmd_compass_off,
-            "No Similar Manga found"
-        )
-    }
+    override fun createBinding(inflater: LayoutInflater) =
+        SimilarControllerBinding.inflate(inflater)
 }
+

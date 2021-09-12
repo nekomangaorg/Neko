@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
@@ -16,7 +18,10 @@ import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.isDigitsOnly
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
+import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -37,7 +42,7 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
+import eu.kanade.tachiyomi.util.view.resetStrokeColor
 import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
@@ -78,12 +83,14 @@ class MangaHeaderHolder(
             topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = adapter.delegate.topCoverHeight()
             }
-            moreButton.setOnClickListener { expandDesc() }
+            moreButton.setOnClickListener {
+                expandDesc(true)
+            }
             mangaSummary.setOnClickListener {
                 if (moreButton.isVisible) {
-                    expandDesc()
+                    expandDesc(true)
                 } else if (!hadSelection) {
-                    collapseDesc()
+                    collapseDesc(true)
                 } else {
                     hadSelection = false
                 }
@@ -112,7 +119,9 @@ class MangaHeaderHolder(
             if (!itemView.resources.isLTR) {
                 moreBgGradient.rotation = 180f
             }
-            lessButton.setOnClickListener { collapseDesc() }
+            lessButton.setOnClickListener {
+                collapseDesc(true)
+            }
 
             webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
             similarButton.setOnClickListener { adapter.delegate.openSimilar() }
@@ -158,31 +167,80 @@ class MangaHeaderHolder(
         }
     }
 
-    private fun expandDesc() {
+    private fun expandDesc(animated: Boolean = false) {
         binding ?: return
         if (binding.moreButton.visibility == View.VISIBLE || isTablet) {
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
+            setDescription()
             binding.mangaGenresTags.isVisible = true
             binding.lessButton.isVisible = !isTablet
             binding.moreButtonGroup.isVisible = false
+            if (animated) {
+                val animVector = AnimatedVectorDrawableCompat.create(binding.root.context,
+                    R.drawable.anim_expand_more_to_less)
+                binding.lessButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null,
+                    null,
+                    animVector,
+                    null)
+                animVector?.start()
+            }
             binding.title.maxLines = Integer.MAX_VALUE
+            binding.mangaAuthor.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.requestFocus()
+            if (animated) {
+                val transition = androidx.transition.ChangeBounds()
+                transition.duration = binding.root.resources.getInteger(
+                    android.R.integer.config_shortAnimTime
+                ).toLong()
+                androidx.transition.TransitionManager.beginDelayedTransition(
+                    adapter.controller.binding.recycler,
+                    transition
+                )
+            }
         }
     }
 
-    private fun collapseDesc() {
+    private fun collapseDesc(animated: Boolean = false) {
         binding ?: return
         if (isTablet) return
+        binding.moreButtonGroup.isVisible = !isTablet
+        if (animated) {
+            val animVector = AnimatedVectorDrawableCompat.create(binding.root.context,
+                R.drawable.anim_expand_less_to_more)
+            binding.moreButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null,
+                null,
+                animVector,
+                null)
+            animVector?.start()
+        }
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
+        setDescription()
         binding.mangaGenresTags.isVisible = isTablet
         binding.lessButton.isVisible = false
-        binding.moreButtonGroup.isVisible = !isTablet
         binding.title.maxLines = 4
+        binding.mangaAuthor.maxLines = 2
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
+        }
+    }
+
+    private fun setDescription() {
+        if (binding != null) {
+            val desc = adapter.controller.mangaPresenter().manga.description
+            binding.mangaSummary.text = when {
+                desc.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
+                binding.mangaSummary.maxLines != Int.MAX_VALUE -> desc.replace(
+                    Regex(
+                        "[\\r\\n]{2,}",
+                        setOf(RegexOption.MULTILINE)
+                    ),
+                    "\n"
+                )
+                else -> desc.trim()
+            }
         }
     }
 
@@ -223,11 +281,14 @@ class MangaHeaderHolder(
             binding.mangaAuthor.text =
                 listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
         }
-        binding.mangaSummary.text = when {
-            MdUtil.getMangaId(manga.url).isDigitsOnly() -> "THIS MANGA IS NOT MIGRATED TO V5"
-            manga.description.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
-            else -> manga.description?.trim()
+
+        if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+            manga.description = "THIS MANGA IS NOT MIGRATED TO V5"
         }
+
+        setDescription()
+
+
 
         binding.mangaSummary.post {
 //            if (binding.subItemGroup.isVisible) {
@@ -252,6 +313,10 @@ class MangaHeaderHolder(
             setImageDrawable(icon.create(context, 24f))
             adapter.delegate.setFavButtonPopup(this)
         }
+        binding.trueBackdrop.setBackgroundColor(
+            adapter.delegate.coverColor()
+                ?: itemView.context.getResourceColor(R.attr.background)
+        )
 
         val tracked = presenter.isTracked() && !item.isLocked
 
@@ -374,7 +439,7 @@ class MangaHeaderHolder(
             val accentArray = FloatArray(3)
 
             ColorUtils.colorToHSL(baseTagColor, bgArray)
-            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorAccent), accentArray)
+            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorSecondary), accentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
@@ -413,6 +478,10 @@ class MangaHeaderHolder(
                     chip.setOnClickListener {
                         adapter.delegate.tagClicked(genreText)
                     }
+                    chip.setOnLongClickListener {
+                        adapter.delegate.tagLongClicked(genreText)
+                        true
+                    }
 
                     this.addView(chip)
                 }
@@ -424,6 +493,26 @@ class MangaHeaderHolder(
         binding ?: return
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.clearFocus()
+    }
+
+    private fun MaterialButton.checked(checked: Boolean) {
+        if (checked) {
+            stateListAnimator =
+                AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
+            backgroundTintList = ColorStateList.valueOf(
+                ColorUtils.blendARGB(
+                    context.getResourceColor(R.attr.colorSecondary),
+                    context.getResourceColor(R.attr.background),
+                    0.706f
+                )
+            )
+            strokeColor = ColorStateList.valueOf(Color.TRANSPARENT)
+        } else {
+            stateListAnimator = null
+            resetStrokeColor()
+            backgroundTintList =
+                ColorStateList.valueOf(context.getResourceColor(R.attr.background))
+        }
     }
 
     fun setTopHeight(newHeight: Int) {

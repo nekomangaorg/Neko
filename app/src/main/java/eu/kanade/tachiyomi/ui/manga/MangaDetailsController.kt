@@ -6,7 +6,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.drawable.BitmapDrawable
 import android.os.Build
@@ -24,16 +23,17 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.palette.graphics.Palette
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import coil.Coil
 import coil.imageLoader
 import coil.request.ImageRequest
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
 import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
+import com.afollestad.materialdialogs.utils.MDUtil.isLandscape
 import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -72,8 +72,10 @@ import eu.kanade.tachiyomi.ui.manga.merge.MergeSearchDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.similar.SimilarController
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.moveCategories
@@ -95,7 +97,6 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.toolbarHeight
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
@@ -199,8 +200,7 @@ class MangaDetailsController :
 
     /** Check if device is tablet, and use a second recycler to hold the details header if so */
     private fun setTabletMode(view: View) {
-        isTablet = view.context.isTablet() &&
-            view.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
+        isTablet = view.context.isTablet() && view.context.isLandscape()
         binding.tabletOverlay.isVisible = isTablet
         binding.tabletRecycler.isVisible = isTablet
         binding.tabletDivider.isVisible = isTablet
@@ -356,23 +356,26 @@ class MangaDetailsController :
             .memoryCacheKey(presenter.manga.key())
             .target(
                 onSuccess = { drawable ->
-                    val bitmap = (drawable as BitmapDrawable).bitmap
+                    val bitmap = (drawable as? BitmapDrawable)?.bitmap
                     // Generate the Palette on a background thread.
-                    Palette.from(bitmap).generate {
-                        if (it == null) return@generate
-                        val colorBack = view.context.getResourceColor(
-                            android.R.attr.colorBackground
-                        )
-                        // this makes the color more consistent regardless of theme
-                        val backDropColor =
-                            ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
+                    if (bitmap != null) {
+                        Palette.from(bitmap).generate {
+                            if (it == null) return@generate
+                            val colorBack = view.context.getResourceColor(
+                                R.attr.background
+                            )
+                            // this makes the color more consistent regardless of theme
+                            val backDropColor =
+                                ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
 
-                        coverColor = backDropColor
-                        getHeader()?.setBackDrop(backDropColor)
-                        if (toolbarIsColored) {
-                            val translucentColor = ColorUtils.setAlphaComponent(backDropColor, 175)
-                            activityBinding?.toolbar?.setBackgroundColor(translucentColor)
-                            activity?.window?.statusBarColor = translucentColor
+                            coverColor = backDropColor
+                            getHeader()?.setBackDrop(backDropColor)
+                            if (toolbarIsColored) {
+                                val translucentColor =
+                                    ColorUtils.setAlphaComponent(backDropColor, 175)
+                                activityBinding?.toolbar?.setBackgroundColor(translucentColor)
+                                activity?.window?.statusBarColor = translucentColor
+                            }
                         }
                     }
                     binding.mangaCoverFull.setImageDrawable(drawable)
@@ -394,20 +397,9 @@ class MangaDetailsController :
         val activity = activity as? MainActivity ?: return
         val activityBinding = activityBinding ?: return
         // if the theme is using inverted toolbar color
-        if (ThemeUtil.hasDarkActionBarInLight(
-                activity,
-                activity.getPrefTheme(presenter.preferences)
-            )
-        ) {
-            if (forThis) activityBinding.appBar.context.setTheme(
-                R.style.ThemeOverlay_AppCompat_DayNight_ActionBar
-            )
-            else activityBinding.appBar.context.setTheme(
-                R.style.Theme_ActionBar_Dark_DayNight
-            )
-
+        if (ThemeUtil.hasDarkActionBarInLight(activity, activity.getPrefTheme(presenter.preferences))) {
             val iconPrimary = view?.context?.getResourceColor(
-                if (forThis) android.R.attr.textColorPrimary
+                if (forThis) R.attr.colorOnBackground
                 else R.attr.actionBarTintColor
             ) ?: Color.BLACK
             activityBinding.toolbar.setTitleTextColor(iconPrimary)
@@ -476,19 +468,19 @@ class MangaDetailsController :
             colorAnimator?.cancel()
 
             getHeader()?.clearDescFocus()
-            val colorSecondary = activity?.getResourceColor(
-                R.attr.colorSecondary
+            val colorSurface = activity?.getResourceColor(
+                R.attr.colorSurface
             ) ?: Color.BLACK
             if (router.backstackSize > 0 &&
                 router.backstack.last().controller !is MangaDetailsController
             ) {
                 if (router.backstack.last().controller !is FloatingSearchInterface) {
-                    activityBinding?.appBar?.setBackgroundColor(colorSecondary)
+                    activityBinding?.appBar?.setBackgroundColor(colorSurface)
                 }
-                activityBinding?.toolbar?.setBackgroundColor(colorSecondary)
+                activityBinding?.toolbar?.setBackgroundColor(colorSurface)
                 activity?.window?.statusBarColor = activity?.getResourceColor(
                     android.R.attr.statusBarColor
-                ) ?: colorSecondary
+                ) ?: colorSurface
             }
         }
     }
@@ -902,15 +894,7 @@ class MangaDetailsController :
 
     override fun prepareToShareManga() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            val request = ImageRequest.Builder(activity!!).data(manga).target(
-                onError = {
-                    shareManga()
-                },
-                onSuccess = {
-                    presenter.shareManga((it as BitmapDrawable).bitmap)
-                }
-            ).build()
-            Coil.imageLoader(activity!!).enqueue(request)
+            presenter.shareManga()
         } else {
             shareManga()
         }
@@ -940,10 +924,7 @@ class MangaDetailsController :
 
     override fun openSimilar() {
         router.pushController(
-            SimilarController(
-                presenter.manga,
-                presenter.source
-            ).withFadeTransaction()
+            SimilarController(manga!!).withFadeTransaction()
         )
     }
 
@@ -1142,10 +1123,47 @@ class MangaDetailsController :
     }
 
     override fun tagClicked(text: String) {
-        val firstController = router.backstack.first()?.controller
-        if (firstController is LibraryController && router.backstack.size == 2) {
-            router.handleBack()
-            firstController.search(text)
+        if (router.backstackSize < 2) {
+            return
+        }
+
+        val controller =
+            when (val previousController = router.backstack[router.backstackSize - 2].controller) {
+                is LibraryController, is RecentsController -> {
+                    // Manually navigate to LibraryController
+                    router.handleBack()
+                    (activity as? MainActivity)?.goToTab(R.id.nav_browse)
+                    router.getControllerWithTag(R.id.nav_browse.toString()) as BrowseSourceController
+                }
+                is BrowseSourceController -> {
+                    router.handleBack()
+                    previousController
+                }
+                else -> null
+            }
+        controller?.let {
+            controller.searchWithGenre(text)
+        }
+    }
+
+    override fun tagLongClicked(text: String) {
+        if (router.backstackSize < 2) {
+            return
+        }
+
+        when (val previousController = router.backstack[router.backstackSize - 2].controller) {
+            is LibraryController -> {
+                router.handleBack()
+                previousController.search(text)
+            }
+            is BrowseSourceController, is RecentsController -> {
+                // Manually navigate to LibraryController
+                router.handleBack()
+                (activity as? MainActivity)?.goToTab(R.id.nav_library)
+                val controller =
+                    router.getControllerWithTag(R.id.nav_library.toString()) as LibraryController
+                controller.search(text)
+            }
         }
     }
 
@@ -1273,7 +1291,7 @@ class MangaDetailsController :
 
     //region Tracking methods
     fun refreshTracking(trackings: List<TrackItem>) {
-        trackingBottomSheet?.onNextTrackings(trackings)
+        trackingBottomSheet?.onNextTrackersUpdate(trackings)
     }
 
     fun onTrackSearchResults(results: List<TrackSearch>) {
@@ -1398,11 +1416,12 @@ class MangaDetailsController :
 
     override fun zoomImageFromThumb(thumbView: View) {
         if (fullCoverActive) return
+        val drawable = binding.mangaCoverFull.drawable ?: return
         fullCoverActive = true
-        val expandedImageView = binding.mangaCoverFull
+        drawable.alpha = 255
         val fullCoverDialog = FullCoverDialog(
             this,
-            expandedImageView.drawable,
+            drawable,
             thumbView
         )
         fullCoverDialog.setOnDismissListener {
@@ -1412,7 +1431,6 @@ class MangaDetailsController :
             fullCoverActive = false
         }
         fullCoverDialog.show()
-        return
     }
 
     companion object {

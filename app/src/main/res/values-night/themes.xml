@@ -4,57 +4,58 @@
     <style name="Theme.Tachiyomi" parent="Theme.Base">
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-        <item name="colorSecondaryVariant">@color/colorPrimary</item>
-        <item name="colorAccentText">@color/neko_green</item>
+        <item name="colorOnSurface">@color/md_white_1000</item>
+        <item name="colorOnBackground">@color/md_white_1000</item>
+        <item name="colorSecondaryVariant">@color/neko_green</item>
         <item name="unreadBadgeColor">@color/neko_green</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
         <item name="colorOnHopper">@color/md_black_1000</item>
+    </style>
 
+    <style name="Theme.Tachiyomi.GreyWolf">
+        <item name="colorPrimary">@color/gray</item>
+        <item name="colorSecondaryVariant">@color/gray_button</item>
+        <item name="colorSecondary">@color/greyWolfSecondary</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">
         <item name="colorPrimary">@color/primaryRed</item>
-        <item name="colorAccent">@color/holo_red</item>
-        <item name="colorAccentText">@color/md_red_500</item>
+        <item name="colorSecondary">@color/holo_red</item>
+        <item name="colorSecondaryVariant">@color/md_red_500</item>
         <item name="colorPrimaryVariant">@color/secondaryChocolateStrawberries</item>
-        <item name="android:colorBackground">@color/backgroundChocolateStrawberries</item>
-        <item name="colorSecondary">@color/backgroundChocolateStrawberries</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+        <item name="background">@color/backgroundChocolateStrawberries</item>
+        <item name="colorSurface">@color/backgroundChocolateStrawberries</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>
-        <item name="colorPrimaryDark">@color/backgroundLime</item>
-        <item name="colorAccent">@color/colorAccentLime</item>
-        <item name="colorAccentText">@color/colorAccentLime</item>
+        <item name="colorSecondary">@color/secondaryLime</item>
+        <item name="colorSecondaryVariant">@color/secondaryLime</item>
         <item name="colorPrimaryVariant">@color/dialogLime</item>
-        <item name="colorSecondary">@color/backgroundLime</item>
-        <item name="colorSecondaryVariant">@color/dialogLime</item>
+        <item name="colorSurface">@color/backgroundLime</item>
         <item name="background">@color/backgroundLime</item>
-        <item name="android:colorBackground">@color/backgroundLime</item>
-        <item name="colorSurface">@color/colorAccentLimeText</item>
-        <item name="colorOnAccent">@color/colorOnLime</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnAccent</item>
+        <item name="colorOnSecondary">@color/colorOnLime</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.Outrun">
         <item name="colorPrimary">@color/outrun_blush</item>
-        <item name="colorPrimaryDark">@color/outrun_dark_purple</item>
-        <item name="colorAccent">@color/outrun_pink</item>
-        <item name="colorAccentText">@color/md_white_1000</item>
+        <item name="colorSecondary">@color/outrun_pink</item>
+        <item name="colorSecondaryVariant">@color/md_white_1000</item>
         <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
-        <item name="colorSecondary">@color/outrun_black</item>
-        <item name="colorSecondaryVariant">@color/outrun_dark_purple</item>
-        <item name="background">@color/outrun_black</item>
-        <item name="android:colorBackground">@color/outrun_black</item>
         <item name="colorSurface">@color/outrun_black</item>
-        <item name="colorOnAccent">@color/md_white_1000</item>
+        <item name="background">@color/outrun_black</item>
+        <item name="colorOnSecondary">@color/md_white_1000</item>
         <item name="colorOnUnreadBadge">@color/outrun_black</item>
-        <item name="colorOnHopper">?attr/colorOnAccent</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
     </style>
 

@@ -15,15 +15,23 @@ open class MatPreference @JvmOverloads constructor(
     val activity: Activity?,
     context: Context,
     attrs:
-        AttributeSet? =
-            null
+    AttributeSet? =
+        null,
 ) :
     Preference(context, attrs) {
 
     val prefs: PreferencesHelper = Injekt.get()
+
+    @StringRes
+    var preSummaryRes: Int? = null
+        set(value) {
+            field = value
+            notifyChanged()
+        }
     private var isShowing = false
 
-    @StringRes var dialogTitleRes: Int? = null
+    @StringRes
+    var dialogTitleRes: Int? = null
 
     override fun onClick() {
         if (!isShowing) {
@@ -41,7 +49,14 @@ open class MatPreference @JvmOverloads constructor(
         }
 
     override fun getSummary(): CharSequence? {
-        customSummaryProvider?.let { return it.provideSummary(this) }
+        customSummaryProvider?.let {
+            val preSummaryRes = preSummaryRes
+            return if (preSummaryRes != null) {
+                context.getString(preSummaryRes, it.provideSummary(this))
+            } else {
+                it.provideSummary(this)
+            }
+        }
         return super.getSummary()
     }
 

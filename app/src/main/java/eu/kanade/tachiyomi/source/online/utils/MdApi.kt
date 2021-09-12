@@ -10,7 +10,6 @@ object MdApi {
     const val chapter = "/chapter"
     const val group = "/group"
     const val author = "/author"
-    const val chapterImageServer = "/at-home/server"
     const val userFollows = "/user/follows/manga"
     const val readingStatusForAllManga = "/manga/status"
     const val atHomeServer = "/at-home/server"

@@ -13,10 +13,10 @@
         android:layout_marginStart="16dp"
         android:layout_marginEnd="16dp"
         android:hint="@string/title"
-        app:boxStrokeColor="?colorAccent"
+        app:boxStrokeColor="@color/text_box_stroke_selector"
         app:endIconMode="clear_text"
         app:hintEnabled="false"
-        app:hintTextColor="?colorAccent">
+        app:hintTextColor="?attr/colorSecondary">
 
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/title"
@@ -27,7 +27,7 @@
 
     </com.google.android.material.textfield.TextInputLayout>
 
-    <com.google.android.material.checkbox.MaterialCheckBox
+    <eu.kanade.tachiyomi.widget.TriStateCheckBox
         android:id="@+id/download_new"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -35,7 +35,7 @@
         android:layout_marginEnd="12dp"
         android:text="@string/download_new_chapters" />
 
-    <com.google.android.material.checkbox.MaterialCheckBox
+    <eu.kanade.tachiyomi.widget.TriStateCheckBox
         android:id="@+id/include_global"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

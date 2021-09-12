@@ -35,7 +35,7 @@
                 android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                android:background="?android:attr/colorBackground"
+                android:background="?attr/background"
                 tools:ignore="ContentDescription"
                 tools:src="@mipmap/ic_launcher" />
 
@@ -62,34 +62,6 @@
                     android:padding="6dp"
                     android:src="@drawable/ic_start_reading_24dp"
                     app:tint="@android:color/white" />
-
-            </FrameLayout>
-
-            <FrameLayout
-                android:id="@+id/external_logo_container"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:foreground="?selectableItemBackgroundBorderless"
-                android:layout_gravity="end"
-                android:orientation="vertical"
-                android:padding="1dp"
-                android:layout_margin="5dp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintHorizontal_bias="0.5"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                android:visibility="gone"
-                tools:visibility="visible"
-                tools:background="#2E51A2">
-
-                <ImageView
-                    android:id="@+id/external_logo"
-                    android:layout_width="23dp"
-                    android:layout_height="23dp"
-                    android:layout_gravity="center"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    tools:src="@drawable/ic_tracker_anilist" />
 
             </FrameLayout>
 
@@ -162,14 +134,13 @@
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="?android:attr/textColorPrimary"
+                android:textColor="?attr/colorOnBackground"
                 app:layout_constraintBottom_toTopOf="@+id/subtitle"
                 tools:text="Sample name" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/subtitle"
                 style="@style/Neko.Condensed.Medium"
-                android:textColor="@color/text_color_secondary"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="-1dp"

@@ -14,6 +14,7 @@ import android.view.WindowInsets
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -47,6 +48,8 @@ import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.hasColoredActionBar
+import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -62,7 +65,6 @@ import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.toolbarHeight
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import java.util.Locale
@@ -212,7 +214,7 @@ class RecentsController(bundle: Bundle? = null) :
             binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
                     view.context.getResourceColor(R.attr.colorPrimaryVariant),
-                    view.context.getResourceColor(android.R.attr.colorBackground),
+                    view.context.getResourceColor(R.attr.background),
                     isExpanded.toInt().toFloat()
                 )
             )
@@ -256,7 +258,7 @@ class RecentsController(bundle: Bundle? = null) :
                         ColorStateList.valueOf(
                             ColorUtils.blendARGB(
                                 view.context.getResourceColor(R.attr.colorPrimaryVariant),
-                                view.context.getResourceColor(android.R.attr.colorBackground),
+                            view.context.getResourceColor(R.attr.background),
                                 (progress * 2f).coerceIn(0f, 1f)
                             )
                         )
@@ -458,6 +460,19 @@ class RecentsController(bundle: Bundle? = null) :
         }
         setBottomPadding()
         binding.downloadBottomSheet.dlBottomSheet.update()
+
+        val searchItem =
+            (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+        val searchView = searchItem?.actionView as? SearchView ?: return
+        if (router.backstack.lastOrNull()?.controller != this) return
+        setOnQueryTextChangeListener(searchView) {
+            if (query != it) {
+                query = it ?: return@setOnQueryTextChangeListener false
+                resetProgressItem()
+                refresh()
+            }
+            true
+        }
     }
 
     override fun onDestroy() {
@@ -734,6 +749,9 @@ class RecentsController(bundle: Bundle? = null) :
                     }
                 })
                 (activity as? MainActivity)?.showTabBar(true)
+                if (activity?.hasColoredActionBar == true) {
+                    updateTitleAndMenu()
+                }
             }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()

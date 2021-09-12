@@ -13,13 +13,15 @@
 
     <attr name="unreadBadgeColor" format="color" />
     <attr name="colorOnUnreadBadge" format="color" />
-    <attr name="downloadBadgeColor" format="color" />
+    <attr name="colorDownloadBadge" format="color" />
     <attr name="colorOnDownloadBadge" format="color" />
-    <attr name="actionBarTintColor" format="color" />
     <attr name="colorOnHopper" format="color" />
+
+    <attr name="actionBarTintColor" format="color" />
     <attr name="readerBackground" format="color" />
-    <attr name="colorAccentText" format="color" />
-    <attr name="colorOnAccent" format="color" />
+    <attr name="hasColoredActionBar" format="boolean">false</attr>
+
+    <attr name="colorOnSecondary" format="color" />
     <attr name="tabBarIconColor" format="reference|integer" />
     <attr name="tabBarIconInactive" format="reference|integer" />
     <attr name="tabHighlightBackground" format="color" />
@@ -32,14 +34,18 @@
     </declare-styleable>
 
     <declare-styleable name="TriStateCheckBox">
-        <attr name="android:text" format="reference|string" />
-        <attr name="android:maxLines" />
+        <attr name="android:text" format="reference|string"/>
+        <attr name="android:maxLines"/>
+        <attr name="android:textAppearance"/>
+        <attr name="android:drawablePadding"/>
     </declare-styleable>
 
 
     <declare-styleable name="SortTextView">
-        <attr name="android:text" format="reference|string" />
-        <attr name="android:maxLines" />
+        <attr name="android:text" format="reference|string"/>
+        <attr name="android:maxLines"/>
+        <attr name="android:textAppearance"/>
+        <attr name="android:drawablePadding"/>
     </declare-styleable>
 
     <declare-styleable name="MenuSheetItemView">

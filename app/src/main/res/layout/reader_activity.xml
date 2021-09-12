@@ -62,7 +62,7 @@
                 app:titleTextAppearance="@style/Neko.Toolbar.TitleText"
                 app:subtitleCentered="true"
                 app:subtitleTextAppearance="@style/Neko.Toolbar.SubTitleText"
-                app:subtitleTextColor="@color/text_color_high_emphasis"
+                app:subtitleTextColor="@color/action_bar_tint_alpha"
                 android:background="@drawable/reader_toolbar_ripple" />
 
         </FrameLayout>

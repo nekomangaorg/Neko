@@ -37,14 +37,14 @@
             android:layout_width="@dimen/material_layout_avatar"
             android:layout_height="@dimen/material_layout_avatar"
             android:adjustViewBounds="true"
-            android:background="?android:attr/colorBackground"
+            android:background="?attr/background"
             app:layout_constrainedHeight="true"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             android:scaleType="centerCrop"
-            tools:background="?android:attr/colorBackground"
+            tools:background="?attr/background"
             tools:ignore="ContentDescription"
             tools:src="@mipmap/ic_launcher" />
 
@@ -73,14 +73,13 @@
         android:layout_marginEnd="6dp"
         android:ellipsize="end"
         android:maxLines="2"
-        android:textColor="?android:attr/textColorPrimary"
+        android:textColor="?attr/colorOnBackground"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@id/unread_download_badge"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toEndOf="@+id/card"
         app:layout_constraintTop_toTopOf="parent"
         tools:text="Manga title" />
-
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/subtitle"

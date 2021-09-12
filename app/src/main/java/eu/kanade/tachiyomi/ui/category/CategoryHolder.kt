@@ -54,14 +54,14 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         }
         createCategory = category.order == CREATE_CATEGORY_ORDER
         if (createCategory) {
-            binding.title.setTextColor(ContextCompat.getColor(itemView.context, R.color.text_color_hint))
+            binding.title.setTextColor(ContextCompat.getColor(itemView.context, R.color.material_on_background_disabled))
             regularDrawable = itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_add)
             binding.image.isVisible = false
             binding.editButton.setImageDrawable(null)
             binding.editText.setText("")
             binding.editText.hint = binding.title.text
         } else {
-            binding.title.setTextColor(itemView.context.getResourceColor(android.R.attr.textColorPrimary))
+            binding.title.setTextColor(itemView.context.getResourceColor(R.attr.colorOnBackground))
             regularDrawable = itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_drag_handle)
             binding.image.isVisible = true
             binding.editText.setText(binding.title.text)
@@ -77,7 +77,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
             binding.editText.requestFocus()
             binding.editText.selectAll()
             binding.editButton.setImageDrawable(ContextCompat.getDrawable(itemView.context, R.drawable.ic_check_24dp))
-            binding.editButton.drawable.mutate().setTint(itemView.context.getResourceColor(R.attr.colorAccent))
+            binding.editButton.drawable.mutate().setTint(itemView.context.getResourceColor(R.attr.colorSecondary))
             showKeyboard()
             if (!createCategory) {
                 binding.reorder.setImageDrawable(itemView.context.iconicsDrawable(MaterialDesignDx.Icon.gmf_delete))

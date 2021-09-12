@@ -83,6 +83,8 @@
     <string name="create_new_category">Create new category</string>
     <string name="new_category">New category</string>
     <string name="category_is_empty">Category is empty</string>
+    <string name="show_categories_while_filtering">Show empty categories while filtering</string>
+    <string name="no_matches_for_filters_short">No matches for your filters</string>
     <string name="top_category">Top category (%1$s)</string>
     <string name="default_category">Default category</string>
     <string name="first_category">First category</string>
@@ -132,6 +134,7 @@
     <string name="library_is_empty_add_from_browse">Your library is empty, add series to your
         library from the browse tab.</string>
     <string name="no_matches_for_filters">No matches found for your current filters</string>
+    <string name="getting_started_guide">Getting started guide</string>
     <string name="show_all_categories">Show all categories</string>
     <string name="move_dynamic_to_bottom">Move collapsed dynamic categories to bottom</string>
     <string name="show_number_of_items">Show number of items</string>
@@ -172,7 +175,6 @@
     <string name="download_badge">Download badges</string>
     <string name="hide_start_reading_button">Hide start reading button</string>
     <string name="badges">Badges</string>
-    <string name="uniform_covers">Uniform covers</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>
     <string name="grid_size">Grid size</string>
     <string name="x_small">XS</string>
@@ -214,9 +216,9 @@
     <!-- Library settings -->
     <string name="library_update_frequency">Library update frequency</string>
     <string name="library_update_order">Library update order</string>
-    <string name="select_order_to_update">Select the order in which Tachiyomi checks for update</string>
     <string name="library_update_restriction">Library update restrictions</string>
     <string name="library_update_restriction_summary">Update only when the conditions are met</string>
+    <string name="restrictions_">Restrictions: %1$s</string>
     <string name="only_update_ongoing">Only update ongoing manga</string>
     <string name="sort_by_ignoring_articles">Sort by ignoring articles</string>
     <string name="when_sorting_ignore_articles">When sorting alphabetically, sort ignoring
@@ -264,12 +266,16 @@
     <string name="only_unread">Only unread</string>
     <string name="only_downloaded">Only downloaded</string>
     <string name="unread_or_downloaded">Unread or downloaded</string>
+
+    <!-- Recents Settings -->
     <string name="show_reset_history_button">Show reset history button</string>
     <string name="show_read_chapters_all">Show read chapters in Grouped and All</string>
     <string name="show_title_first">Show title first</string>
     <string name="a_while_ago">A while ago</string>
     <string name="show_updated_time">Show updated time</string>
     <string name="group_chapters_together">Group chapters together</string>
+    <string name="uniform_covers">Uniform covers</string>
+    <string name="affects_library_grid">Affects library grid covers</string>
 
     <!-- Browse -->
     <string name="search_filters">Search filters</string>
@@ -343,6 +349,7 @@
     <string name="reduces_banding_impacts_performance">Reduces banding, but impacts
         performance</string>
     <string name="invert_double_pages">Invert double pages</string>
+    <string name="split_double_pages_portrait">Split double pages in portrait</string>
     <string name="crop_borders">Crop borders</string>
     <string name="crop_borders_paged">Crop borders (Paged)</string>
     <string name="crop_borders_webtoon">Crop borders (Webtoon)</string>
@@ -382,6 +389,7 @@
     <string name="original_size">Original size</string>
     <string name="smart_fit">Smart fit</string>
     <string name="zoom_start_position">Zoom start position</string>
+    <string name="split_double_pages">Split double pages</string>
     <string name="double_pages">Double pages</string>
     <string name="single_page">Single page</string>
     <string name="switch_to_double">Switch to double pages</string>
@@ -431,7 +439,10 @@
         <item quantity="one">%1$d page</item>
         <item quantity="other">%1$d pages</item>
     </plurals>
-
+    <plurals name="missing_chapters_warning">
+        <item quantity="one">There is 1 missing chapter</item>
+        <item quantity="other">There are %d missing chapters</item>
+    </plurals>
 
     <!-- Manga details -->
     <string name="about_this_">About this %1$s</string>
@@ -512,8 +523,14 @@
     <string name="url_not_set_click_again">Manga URL not set, please click title and select manga again</string>
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>
+    <string name="select_an_entry">Select an entry</string>
+    <string name="source_unsupported">Source is not supported</string>
+    <string name="no_match_found">No match found</string>
     <string name="remove_tracking">Remove tracking from app</string>
     <string name="remove_tracking_from_">Also remove from %1$s</string>
+    <string name="remove_previous_tracker">Remove previous tracker?</string>
+    <string name="remove_x_from_service_and_add_y">Remove %1$s from %2$s and add %3$s</string>
+    <string name="keep_both_on_service">Keep both on %1$s and only replace locally</string>
     <string name="anilist" translatable="false">AniList</string>
     <string name="myanimelist" translatable="false">MyAnimeList</string>
     <string name="kitsu" translatable="false">Kitsu</string>
@@ -568,6 +585,7 @@
     <string name="settings">Settings</string>
     <string name="general">General</string>
     <string name="reader">Reader</string>
+    <string name="appearance">Appearance</string>
     <string name="advanced">Advanced</string>
     <string name="about">About</string>
     <string name="help">Help</string>
@@ -585,19 +603,21 @@
     <string name="dark">Neko Green</string>
     <string name="outrun">Outrun</string>
     <string name="sapphire_dusk">Sapphire Dusk</string>
+    <string name="grey_wolf">Grey Wolf</string>
     <string name="light_blue">Light Blue</string>
     <string name="dark_blue">Dark Blue</string>
     <string name="midnight_dusk">Midnight Dusk</string>
     <string name="spring_blossom">Spring Blossom</string>
     <string name="strawberry_daiquiri">Strawberry Daiquiri</string>
-    <string name="a_brighter_you">A Brighter You</string>
-    <string name="a_calmer_you">A Calmer You</string>
+    <string name="a_brighter_you">A Brighter You (Dynamic)</string>
+    <string name="a_calmer_you">A Calmer You (Dynamic)</string>
     <string name="yotsuba">Yotsuba</string>
     <string name="tako">Tako</string>
     <string name="yin">Yin</string>
     <string name="yang">Yang</string>
     <string name="chocolate_strawberries">Chocolate Strawberries</string>
     <string name="mangadex">MangaDex</string>
+    <string name="teal_ocean">Teal Ocean</string>
     <string name="hot_pink">Hot Pink</string>
     <string name="flat_lime">Flat Lime</string>
     <string name="white_theme">Neko Pure</string>
@@ -612,6 +632,9 @@
     <string name="secure_screen">Secure screen</string>
     <string name="hide_bottom_nav">Auto-hide bottom navigation</string>
     <string name="side_nav_icon_alignment">Side navigation icon alignment</string>
+    <string name="use_side_navigation">Use side navigation</string>
+    <string name="default_behavior">Default behavior</string>
+    <string name="by_default_side_nav_info">By default, side navigation is used for certain phones and small tablets when in landscape, and always shows on larger tablets</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="pure_black_dark_mode">Pure black dark mode</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
@@ -664,7 +687,7 @@
     <string name="what_should_backup">What do you want to backup?</string>
     <string name="restoring_backup">Restoring backup</string>
     <string name="restore_duration">%02d min, %02d sec</string>
-    <string name="restore_miui_warning">MIUI Optimization must be enabled for restore to work correctly.</string>
+    <string name="restore_miui_warning">Backup/restore may not function properly if MIUI Optimization is disabled.</string>
     <string name="progress">Progress</string>
     <string name="complete">Complete</string>
     <plurals name="restore_completed_message">
@@ -1027,6 +1050,7 @@
     <string name="follows_re_reading">Re Reading</string>
 
     <!-- Similar -->
+    <string name="similar_type">Similar</string>
     <string name="similar">Similar manga</string>
     <string name="similar_settings">Similar Manga Settings</string>
     <string name="similar_screen_summary_message">

@@ -14,13 +14,13 @@
         android:id="@+id/category_hopper_layout"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:background="?colorAccent"
+        android:background="?attr/colorSecondary"
         android:clickable="true"
         android:focusable="true">
 
         <ImageButton
             android:id="@+id/up_category"
-            style="@style/Theme.Widget.ImageBorderless"
+            style="@style/Theme.Widget.ImageBorderless.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"
@@ -35,13 +35,12 @@
 
         <ImageButton
             android:id="@+id/category_button"
-            style="@style/Theme.Widget.ImageBorderless"
+            style="@style/Theme.Widget.ImageBorderless.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/categories"
             android:padding="8dp"
             android:src="@drawable/ic_label_outline_24dp"
-            app:tint="?attr/colorOnHopper"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@id/down_category"
             app:layout_constraintStart_toEndOf="@id/up_category"
@@ -49,14 +48,13 @@
 
         <ImageButton
             android:id="@+id/down_category"
-            style="@style/Theme.Widget.ImageBorderless"
+            style="@style/Theme.Widget.ImageBorderless.Secondary"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
             android:contentDescription="@string/next_title"
             android:padding="8dp"
             android:src="@drawable/ic_expand_more_24dp"
-            app:tint="?attr/colorOnHopper"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/category_button"

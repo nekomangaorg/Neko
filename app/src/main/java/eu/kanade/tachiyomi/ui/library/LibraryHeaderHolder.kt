@@ -10,6 +10,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -21,7 +22,6 @@ import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -53,7 +53,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 .autoHide(true, 5000L)
                 .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
                 .text(R.string.long_press_category)
-                .color(itemView.context.getResourceColor(R.attr.colorAccent))
+                .color(itemView.context.getResourceColor(R.attr.colorSecondary))
                 .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE)
                 .withShadow(false).corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
                 .show()
@@ -230,7 +230,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         )
         val tintedDrawable = drawable?.mutate()
         tintedDrawable?.setTint(
-            if (allSelected) contentView.context.getResourceColor(R.attr.colorAccent)
+            if (allSelected) contentView.context.getResourceColor(R.attr.colorSecondary)
             else ContextCompat.getColor(contentView.context, R.color.gray_button)
         )
         binding.checkbox.setImageDrawable(tintedDrawable)

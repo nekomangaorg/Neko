@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.source.online.utils
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import kotlinx.serialization.json.Json
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
@@ -58,12 +57,7 @@ class MdUtil {
 
         private const
         val scanlatorSeparator = " & "
-
-        const val contentRatingSafe = "safe"
-        const val contentRatingSuggestive = "suggestive"
-        const val contentRatingErotica = "erotica"
-        const val contentRatingPornographic = "pornographic"
-
+        
         val validOneShotFinalChapters = listOf("0", "1")
 
         val englishDescriptionTags = listOf(
@@ -259,14 +253,6 @@ class MdUtil {
         fun parseDate(dateAsString: String): Long =
             dateFormatter.parse(dateAsString)?.time ?: 0
 
-        fun createMangaEntry(json: MangaDto, coverUrl: String?): SManga {
-            return SManga.create().apply {
-                url = "/title/" + json.data.id
-                title = cleanString(json.data.attributes.title["en"]!!)
-                thumbnail_url = coverUrl
-            }
-        }
-
         fun cdnCoverUrl(dexId: String, fileName: String, quality: Int): String {
             val coverQualitySuffix = when (quality) {
                 1 -> ".512.jpg"
@@ -278,5 +264,10 @@ class MdUtil {
 
         fun getLangsToShow(preferences: PreferencesHelper) =
             preferences.langsToShow().get().split(",")
+
+        fun getTitle(titleMap: Map<String, String?>, originalLanguage: String): String {
+            return titleMap["en"] ?: titleMap[originalLanguage] ?: titleMap["jp"] ?: titleMap["ja"]
+            ?: titleMap["kr"] ?: titleMap["zh"] ?: ""
+        }
     }
 }

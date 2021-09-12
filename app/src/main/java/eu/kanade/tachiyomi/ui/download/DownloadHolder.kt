@@ -55,7 +55,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
 
         binding.downloadMenu.setVectorCompat(
             R.drawable.ic_more_vert_24dp,
-            android.R.attr.textColorPrimary
+            R.attr.colorOnBackground
         )
     }
 

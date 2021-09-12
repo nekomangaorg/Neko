@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
@@ -26,47 +29,59 @@ class MangaDexLoginHelper {
     val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
     val preferences: PreferencesHelper by injectLazy()
 
+    val log = XLog.tag("||LoginHelper")
+
     suspend fun isAuthenticated(): Boolean {
         val lastRefreshTime = preferences.lastRefreshTime()
-        XLog.i("last refresh time $lastRefreshTime")
-        XLog.i("current time ${System.currentTimeMillis()}")
+        log.i("last refresh time $lastRefreshTime")
+        log.i("current time ${System.currentTimeMillis()}")
         if ((lastRefreshTime + TimeUnit.MINUTES.toMillis(15)) > System.currentTimeMillis()) {
-            XLog.i("Token was refreshed recently dont hit dex to check")
+            log.i("Token was refreshed recently dont hit dex to check")
             return true
         }
-        XLog.i("token was not refreshed recently hit dex auth check")
-        val authenticated = runCatching {
-            authService.checkToken().body()!!.isAuthenticated
-        }.getOrElse { e ->
-            XLog.e("error authenticating", e)
-            false
-        }
-        XLog.i("check token is authenticated $authenticated")
+        log.i("token was not refreshed recently hit dex auth check")
+        authService.checkToken()
+
+        val checkTokenResponse = authService.checkToken()
+            .onError {
+                log.e("error code returned ${this.statusCode}")
+            }.onException {
+                log.e("error exception", this.exception)
+            }
+
+        val authenticated = checkTokenResponse.getOrNull()?.isAuthenticated ?: false
+
+        log.i("check token is authenticated $authenticated")
         return authenticated
     }
 
     suspend fun refreshToken(): Boolean {
         val refreshToken = preferences.refreshToken()
         if (refreshToken.isNullOrEmpty()) {
-            XLog.i("refresh token is null can't refresh token")
+            log.i("refresh token is null can't refresh token")
             return false
         }
+        log.i("refreshing token")
+
         val refreshTokenResponse = authService.refreshToken(RefreshTokenDto(refreshToken))
-        XLog.i("refreshing token")
-        return runCatching {
-            val refreshTokenDto = refreshTokenResponse.body()!!
-            val result = refreshTokenDto.result == "ok"
-            if (result) {
-                preferences.setTokens(
-                    refreshTokenDto.token.refresh,
-                    refreshTokenDto.token.session
-                )
+            .onError {
+                log.e("error code returned ${this.statusCode}")
+            }.onException {
+                log.e("error exception", this.exception)
             }
-            result
-        }.getOrElse { e ->
-            XLog.e("Error refreshing token ", e)
-            false
+
+        val refreshTokenDto = refreshTokenResponse.getOrNull()
+        val result = refreshTokenDto?.result == "ok"
+        log.i("refresh token was succesful : $result")
+        if (result) {
+            preferences.setTokens(
+                refreshTokenDto!!.token.refresh,
+                refreshTokenDto!!.token.session
+            )
+        } else {
+            log.e("error refreshing token")
         }
+        return result
     }
 
     suspend fun login(
@@ -97,7 +112,7 @@ class MangaDexLoginHelper {
         val username = preferences.sourceUsername(source)
         val password = preferences.sourcePassword(source)
         if (username.isNullOrBlank() || password.isNullOrBlank()) {
-            XLog.i("No username or password stored, can't login")
+            log.i("No username or password stored, can't login")
             return false
         }
         return login(username, password)

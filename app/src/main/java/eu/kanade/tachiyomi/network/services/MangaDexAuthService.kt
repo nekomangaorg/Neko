@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.network.services
 
+import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.source.online.models.dto.CheckTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
@@ -11,6 +12,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
@@ -20,7 +22,7 @@ import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
 
-interface MangaDexAuthService : MangaDexImageService {
+interface MangaDexAuthService {
 
     @Headers("Cache-Control: no-cache")
     @POST(MdApi.login)
@@ -32,14 +34,14 @@ interface MangaDexAuthService : MangaDexImageService {
 
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.checkToken)
-    suspend fun checkToken(): Response<CheckTokenDto>
+    suspend fun checkToken(): ApiResponse<CheckTokenDto>
 
     @Headers("Cache-Control: no-cache")
     @POST(MdApi.refreshToken)
-    suspend fun refreshToken(@Body request: RefreshTokenDto): Response<LoginResponseDto>
+    suspend fun refreshToken(@Body request: RefreshTokenDto): ApiResponse<LoginResponseDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.userFollows}?limit=100") // &includes[]=${MdConstants.Type.coverArt}
+    @GET("${MdApi.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")
     suspend fun userFollowList(@Query("offset") offset: Int): Response<MangaListDto>
 
     @Headers("Cache-Control: no-cache")

@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.FrameLayout
+import androidx.core.view.updateLayoutParams
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.TriStateCheckBoxBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -56,6 +57,18 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
 
         val maxLines = a.getInt(R.styleable.TriStateCheckBox_android_maxLines, Int.MAX_VALUE)
         binding.textView.maxLines = maxLines
+
+        val resourceId = a.getResourceId(R.styleable.TriStateCheckBox_android_textAppearance, 0)
+        if (resourceId != 0) {
+            binding.textView.setTextAppearance(resourceId)
+        }
+
+        val drawablePadding = a.getDimensionPixelSize(R.styleable.TriStateCheckBox_android_drawablePadding, 0)
+        if (drawablePadding != 0) {
+            binding.textView.updateLayoutParams<MarginLayoutParams> {
+                marginStart = drawablePadding
+            }
+        }
 
         a.recycle()
 
@@ -109,16 +122,16 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                 State.CHECKED -> {
                     setAnimVectorCompat(
                         R.drawable.anim_check_box_blank_to_checked_24dp,
-                        R.attr.colorAccent
+                        R.attr.colorSecondary
                     )
-                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
+                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondary))
                 }
                 State.INVERSED -> {
                     setAnimVectorCompat(
                         R.drawable.anim_check_box_checked_to_x_24dp,
-                        R.attr.colorAccentText
+                        R.attr.colorSecondaryVariant
                     )
-                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccentText))
+                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondaryVariant))
                 }
             }
         }
@@ -135,15 +148,15 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                     backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorControlNormal))
                 }
                 State.CHECKED -> {
-                    setVectorCompat(R.drawable.ic_check_box_24dp, R.attr.colorAccent)
-                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent))
+                    setVectorCompat(R.drawable.ic_check_box_24dp, R.attr.colorSecondary)
+                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondary))
                 }
                 State.INVERSED -> {
                     setVectorCompat(
                         R.drawable.ic_check_box_x_24dp,
-                        R.attr.colorAccentText
+                        R.attr.colorSecondaryVariant
                     )
-                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccentText))
+                    backgroundTintList = ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondaryVariant))
                 }
             }
         }

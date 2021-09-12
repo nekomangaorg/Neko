@@ -4,7 +4,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Filter
 import eu.kanade.tachiyomi.source.model.FilterList
 import eu.kanade.tachiyomi.source.model.MangaTag
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import uy.kohesive.injekt.injectLazy
 import java.util.Locale
 
@@ -26,15 +26,17 @@ class FilterHandler {
         if (preferencesHelper.showContentRatingFilter()) {
             val set = preferencesHelper.contentRatingSelections()
             val contentRating = listOf(
-                ContentRating("Safe").apply { state = set.contains(MdUtil.contentRatingSafe) },
+                ContentRating("Safe").apply {
+                    state = set.contains(MdConstants.ContentRating.safe)
+                },
                 ContentRating("Suggestive").apply {
-                    state = set.contains(MdUtil.contentRatingSuggestive)
+                    state = set.contains(MdConstants.ContentRating.suggestive)
                 },
                 ContentRating("Erotica").apply {
-                    state = set.contains(MdUtil.contentRatingErotica)
+                    state = set.contains(MdConstants.ContentRating.erotica)
                 },
                 ContentRating("Pornographic").apply {
-                    state = set.contains(MdUtil.contentRatingPornographic)
+                    state = set.contains(MdConstants.ContentRating.pornographic)
                 },
             )
 
@@ -93,10 +95,14 @@ class FilterHandler {
         Filter.Select<String>("Excluded tags mode", arrayOf("And", "Or"), 1)
 
     val sortableList = listOf(
-        Pair("Number of follows", ""),
+        Pair("Latest Uploaded chapter (Any language)", ""),
+        Pair("Relevance", "relevance"),
+        Pair("Number of follows", "followedCount"),
         Pair("Created at", "createdAt"),
         Pair("Manga info updated", "updatedAt"),
-    )
+        Pair("Title", "title"),
+
+        )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
 

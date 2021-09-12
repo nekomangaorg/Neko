@@ -9,6 +9,9 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -23,34 +26,52 @@ class ImageHandler {
     val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
+    val bilibiliHandler: BilibiliHandler by injectLazy()
+    val comikeyHandler: ComikeyHandler by injectLazy()
+
+    val log = XLog.tag("||ImageHandler").disableStackTrace().build()
 
     // chapter id and last request time
     private val tokenTracker = hashMapOf<String, Long>()
 
     suspend fun getImage(page: Page, isLogged: Boolean): Response {
         return withIOContext {
-            if (page.imageUrl!!.contains("mangaplus", true)) {
-                return@withIOContext mangaPlusHandler.client.newCall(GET(page.imageUrl!!,
-                    mangaPlusHandler.headers))
-                    .await()
-            } else {
-                val request = imageRequest(page, isLogged)
-                val response = try {
-                    network.nonRateLimitedClient.newCallWithProgress(request, page)
+            return@withIOContext when {
+                page.imageUrl!!.contains("mangaplus", true) -> {
+                    mangaPlusHandler.client.newCall(GET(page.imageUrl!!,
+                        mangaPlusHandler.headers))
                         .await()
-                } catch (e: Exception) {
-                    XLog.e("error getting images", e)
-                    reportFailedImage(request.url.toString())
-                    throw (e)
+                }
+                page.imageUrl!!.contains("comikey", true) -> {
+                    comikeyHandler.client.newCall(GET(page.imageUrl!!, comikeyHandler.headers))
+                        .await()
+                }
+                page.imageUrl!!.contains("/bfs/comic/", true)
+                -> {
+                    bilibiliHandler.client.newCall(GET(page.imageUrl!!,
+                        bilibiliHandler.headers))
+                        .await()
                 }
 
-                reportImageWithResponse(response)
+                else -> {
+                    val request = imageRequest(page, isLogged)
+                    val response = try {
+                        network.nonRateLimitedClient.newCallWithProgress(request, page)
+                            .await()
+                    } catch (e: Exception) {
+                        log.e("error getting images", e)
+                        reportFailedImage(request.url.toString())
+                        throw (e)
+                    }
 
-                if (!response.isSuccessful) {
-                    response.close()
-                    throw Exception("HTTP error ${response.code}")
+                    reportImageWithResponse(response)
+
+                    if (!response.isSuccessful) {
+                        response.close()
+                        throw Exception("HTTP error ${response.code}")
+                    }
+                    response
                 }
-                return@withIOContext response
             }
         }
     }
@@ -75,46 +96,43 @@ class ImageHandler {
             cache,
             duration
         )
+        log.d(atHomeImageReportDto)
         sendReport(atHomeImageReportDto)
     }
 
     fun sendReport(atHomeImageReportDto: AtHomeImageReportDto) {
         launchIO {
-            XLog.d("Image to report $atHomeImageReportDto")
+            log.d("Image to report $atHomeImageReportDto")
 
             if (atHomeImageReportDto.url.startsWith(MdConstants.cdnUrl)) {
-                XLog.d("image is at CDN don't report to md@home node")
+                log.d("image is at CDN don't report to md@home node")
                 return@launchIO
             }
             runCatching {
                 network.service.atHomeImageReport(atHomeImageReportDto)
             }.onFailure { e ->
-                XLog.e("error trying to post to dex@home", e)
+                log.e("error trying to post to dex@home", e)
             }
         }
     }
 
     suspend fun imageRequest(page: Page, isLogged: Boolean): Request {
-        val service = if (isLogged) {
-            network.authService
-        } else {
-            network.service
-        }
-
         val data = page.url.split(",")
         val currentTime = Date().time
         val mdAtHomeServerUrl =
             when (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
+                    log
+                        .d("Time has expired get new at home url isLogged $isLogged")
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    val atHomeResponse = service.getAtHomeServer(page.mangaDexChapterId,
+                    val atHomeResponse = network.service.getAtHomeServer(page.mangaDexChapterId,
                         preferences.usePort443Only())
 
                     when (atHomeResponse) {
                         is ApiResponse.Success -> {
                             updateTokenTracker(page.mangaDexChapterId, currentTime)
-                            XLog.d("Successfully refresh page")
+                            log.d("Successfully refresh page")
                             atHomeResponse.getOrThrow().baseUrl
                         }
                         is ApiResponse.Failure.Error -> {
@@ -126,8 +144,8 @@ class ImageHandler {
                     }
                 }
             }
-        XLog.d("Image server is $mdAtHomeServerUrl")
-        XLog.d("page url is ${page.imageUrl}")
+        log.d("Image server is $mdAtHomeServerUrl")
+        log.d("page url is ${page.imageUrl}")
         return GET(mdAtHomeServerUrl + page.imageUrl, network.headers)
     }
 

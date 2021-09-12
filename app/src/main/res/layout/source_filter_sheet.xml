@@ -6,7 +6,7 @@
     android:layout_height="wrap_content"
     android:background="@drawable/bottom_sheet_rounded_background"
     app:layout_constraintVertical_chainStyle="packed"
-    android:backgroundTint="?android:attr/colorBackground">
+    android:backgroundTint="?attr/background">
 
     <androidx.cardview.widget.CardView
         android:id="@+id/card_view"
@@ -28,7 +28,7 @@
             android:layout_marginBottom="12dp"
             android:clipToPadding="false"
             android:background="@drawable/bottom_sheet_rounded_background"
-            android:backgroundTint="?attr/colorSecondary"
+            android:backgroundTint="?attr/colorSurface"
             app:layout_constraintBottom_toTopOf="@id/title_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.0"
@@ -48,7 +48,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="top"
-        android:background="?attr/colorSecondary"
+        android:background="?attr/colorSurface"
         android:clickable="true"
         android:focusable="true"
         app:layout_constraintStart_toStartOf="parent"
@@ -103,7 +103,7 @@
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
             android:text="@string/filter"
-            app:iconTint="?colorAccent"
+            app:iconTint="?attr/colorSecondary"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toBottomOf="@id/follows_btn"

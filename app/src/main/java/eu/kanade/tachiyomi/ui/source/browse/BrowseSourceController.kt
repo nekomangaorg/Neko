@@ -9,6 +9,7 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DividerItemDecoration
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -44,7 +45,6 @@ import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
@@ -111,6 +111,9 @@ open class BrowseSourceController(bundle: Bundle) :
      * Endless loading item.
      */
     private var progressItem: ProgressItem? = null
+
+    /** Current filter sheet */
+    var filterSheet: SourceFilterSheet? = null
 
     init {
         setHasOptionsMenu(true)
@@ -319,7 +322,9 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     private fun showFilters() {
+        if (filterSheet != null) return
         val sheet = SourceFilterSheet(activity!!)
+        filterSheet = sheet
         sheet.setFilters(presenter.filterItems)
         presenter.filtersChanged = false
         val oldFilters = mutableListOf<Any?>()
@@ -386,6 +391,12 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
             }
         }
+        sheet.setOnDismissListener {
+            filterSheet = null
+        }
+        sheet.setOnCancelListener {
+            filterSheet = null
+        }
 
         sheet.onFollowsClicked = {
             sheet.dismiss()
@@ -404,6 +415,64 @@ open class BrowseSourceController(bundle: Bundle) :
         }
 
         sheet.show()
+    }
+
+    /**
+     * Attempts to restart the request with a new genre-filtered query.
+     * If the genre name can't be found the filters,
+     * the standard searchWithQuery search method is used instead.
+     *
+     * @param genreName the name of the genre
+     */
+    fun searchWithGenre(genreName: String, useContains: Boolean = false) {
+        presenter.sourceFilters = presenter.source.getFilterList()
+
+        var filterList: FilterList? = null
+
+        filter@ for (sourceFilter in presenter.sourceFilters) {
+            if (sourceFilter is Filter.Group<*>) {
+                for (filter in sourceFilter.state) {
+                    if (filter is Filter<*> &&
+                        if (useContains) filter.name.contains(genreName, true)
+                        else filter.name.equals(genreName, true)
+                    ) {
+                        when (filter) {
+                            is Filter.TriState -> filter.state = 1
+                            is Filter.CheckBox -> filter.state = true
+                        }
+                        filterList = presenter.sourceFilters
+                        break@filter
+                    }
+                }
+            } else if (sourceFilter is Filter.Select<*>) {
+                val index = sourceFilter.values.filterIsInstance<String>()
+                    .indexOfFirst {
+                        if (useContains) it.contains(genreName, true)
+                        else it.equals(genreName, true)
+                    }
+
+                if (index != -1) {
+                    sourceFilter.state = index
+                    filterList = presenter.sourceFilters
+                    break
+                }
+            }
+        }
+
+        if (filterList != null) {
+            filterSheet?.setFilters(presenter.filterItems)
+
+            showProgressBar()
+
+            adapter?.clear()
+            presenter.restartPager("", filterList)
+        } else {
+            if (!useContains) {
+                searchWithGenre(genreName, true)
+                return
+            }
+            searchWithQuery(genreName)
+        }
     }
 
     private fun openInWebView(dex: Boolean = true) {
@@ -470,7 +539,8 @@ open class BrowseSourceController(bundle: Bundle) :
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
 
-        val searchItem = (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+        val searchItem =
+            (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
         val searchView = searchItem?.actionView as? SearchView ?: return
         setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
             searchWithQuery(it ?: "")

@@ -10,6 +10,7 @@ import androidx.preference.PreferenceScreen
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.RouterTransaction
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.googlematerial.OutlinedGoogleMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
@@ -32,9 +33,19 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             titleRes = R.string.general
             onClick { navigateTo(SettingsGeneralController()) }
         }
+
         preference {
             iconDrawable =
-                MaterialDesignDx.Icon.gmf_book.create(context, colorAttr = R.attr.colorOnSurface)
+                OutlinedGoogleMaterial.Icon.gmo_palette.create(context,
+                    colorAttr = R.attr.colorOnSurface)
+            titleRes = R.string.appearance
+            onClick { navigateTo(SettingsAppearanceController()) }
+        }
+
+        preference {
+            iconDrawable =
+                OutlinedGoogleMaterial.Icon.gmo_collections_bookmark.create(context,
+                    colorAttr = R.attr.colorOnSurface)
             titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
@@ -48,7 +59,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         }
         preference {
             iconDrawable =
-                MaterialDesignDx.Icon.gmf_chrome_reader_mode.create(
+                OutlinedGoogleMaterial.Icon.gmo_chrome_reader_mode.create(
                     context,
                     colorAttr = R.attr.colorOnSurface
                 )
@@ -56,7 +67,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             onClick { navigateTo(SettingsReaderController()) }
         }
         preference {
-            iconDrawable = MaterialDesignDx.Icon.gmf_file_download.create(
+            iconDrawable = OutlinedGoogleMaterial.Icon.gmo_download.create(
                 context,
                 colorAttr = R.attr.colorOnSurface
             )

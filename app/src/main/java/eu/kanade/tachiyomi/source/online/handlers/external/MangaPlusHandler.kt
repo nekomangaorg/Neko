@@ -1,10 +1,11 @@
-package eu.kanade.tachiyomi.source.online.handlers
+package eu.kanade.tachiyomi.source.online.handlers.external
 
 import MangaPlusSerializer
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
+import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
 import kotlinx.serialization.protobuf.ProtoBuf
 import okhttp3.Headers
 import okhttp3.Interceptor
@@ -30,7 +31,7 @@ class MangaPlusHandler {
         .build()
 
     suspend fun fetchPageList(chapterId: String): List<Page> {
-        val response = client.newCall(pageListRequest(chapterId)).await()
+        val response = client.newCall(pageListRequest(chapterId.substringAfterLast("/"))).await()
         return pageListParse(response)
     }
 
@@ -99,8 +100,6 @@ class MangaPlusHandler {
 
     companion object {
         private const val WEB_URL = "https://mangaplus.shueisha.co.jp"
-        private const val USER_AGENT =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36"
         private val HEX_GROUP = "(.{1,2})".toRegex()
     }
 }

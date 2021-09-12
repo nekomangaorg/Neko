@@ -1,6 +1,6 @@
 plugins {
     id("org.jmailen.kotlinter") version "3.6.0"
-    id("org.jetbrains.kotlin.android") version "1.5.30" apply false
+    id("org.jetbrains.kotlin.android") version "1.5.21" apply false
 }
 allprojects {
     repositories {
@@ -25,7 +25,7 @@ buildscript {
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.7.1")
         classpath("com.android.tools.build:gradle:7.0.2")
         classpath("com.google.gms:google-services:4.3.10")
-        val kotlinVersion = "1.5.30"
+        val kotlinVersion = "1.5.21"
         classpath("org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
         classpath("com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:8.8.6")

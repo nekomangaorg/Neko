@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:state_activated="true" android:color="?colorOnAccent">
+    <item android:state_activated="true" android:color="?attr/colorSecondary">
         <shape android:shape="rectangle">
             <corners android:radius="2dp" />
-            <solid android:color="?attr/colorAccent" />
+            <solid android:color="?attr/colorSecondary" />
             <padding android:left="8dp" android:right="8dp" />
         </shape>
     </item>
@@ -15,7 +15,7 @@
             <padding android:left="8dp" android:right="8dp" />
         </shape>
     </item>
-    <item android:color="?colorAccent">
+    <item android:color="?attr/colorSecondary">
         <shape android:shape="rectangle" android:color="?colorAccent">
             <corners android:radius="2dp" />
             <solid android:color="@android:color/transparent" />

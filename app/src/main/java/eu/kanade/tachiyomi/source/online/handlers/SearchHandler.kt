@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.skydoves.sandwich.getOrNull
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -26,8 +27,8 @@ class SearchHandler {
         return withContext(Dispatchers.IO) {
             if (query.startsWith(PREFIX_ID_SEARCH)) {
                 val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
-                val response = service.viewManga(realQuery)
-                val details = apiMangaParser.mangaDetailsParse(response.body()!!)
+                val response = service.viewManga(realQuery).getOrNull()!!
+                val details = apiMangaParser.mangaDetailsParse(response)
                 MangaListPage(listOf(details), false)
             } else {
                 val queryParamters = mutableMapOf<String, Any>()
@@ -59,7 +60,7 @@ class SearchHandler {
         val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
         val thumbQuality = preferencesHelper.thumbnailQuality()
-        
+
         val mangaList = mangaListDto.results.map {
             it.toBasicManga(thumbQuality)
         }

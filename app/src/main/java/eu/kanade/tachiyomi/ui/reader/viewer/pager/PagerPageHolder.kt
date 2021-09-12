@@ -37,9 +37,11 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.Companion.CUTOUT_S
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.bottomCutoutInset
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -348,7 +350,7 @@ class PagerPageHolder(
                 val stream = streamFn().buffered(16)
 
                 val stream2 = if (extraPage != null) streamFn2?.invoke()?.buffered(16) else null
-                openStream = this@PagerPageHolder.mergePages(stream, stream2)
+                openStream = this@PagerPageHolder.mergeOrSplitPages(stream, stream2)
                 ImageUtil.isAnimatedAndSupported(stream) ||
                     if (stream2 != null) ImageUtil.isAnimatedAndSupported(stream2) else false
             }
@@ -490,16 +492,8 @@ class PagerPageHolder(
             setMinimumDpi(90)
             setMinimumTileDpi(180)
             setCropBorders(config.imageCropBorders)
-            val topInsets =
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetTop?.toFloat()
-                        ?: 0f
-                } else 0f
-            val bottomInsets =
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.P) {
-                    viewer.activity.window.decorView.rootWindowInsets.displayCutout?.safeInsetBottom?.toFloat()
-                        ?: 0f
-                } else 0f
+            val topInsets = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
+            val bottomInsets = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
             setExtendPastCutout(config.cutoutBehavior == CUTOUT_START_EXTENDED && config.scaleTypeIsFullFit() && topInsets + bottomInsets > 0)
             if ((config.cutoutBehavior != CUTOUT_IGNORE || !config.scaleTypeIsFullFit()) &&
                 android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
@@ -514,6 +508,16 @@ class PagerPageHolder(
             }
             setOnImageEventListener(
                 object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+
+                    override fun onImageLoaded() {
+                        if (this@PagerPageHolder.extraPage == null &&
+                            this@PagerPageHolder.page.longPage == null &&
+                            sHeight < sWidth
+                        ) {
+                            this@PagerPageHolder.page.longPage = true
+                        }
+                    }
+
                     override fun onReady() {
                         var centerV = 0f
                         when (config.imageZoomType) {
@@ -659,9 +663,66 @@ class PagerPageHolder(
         return decodeLayout
     }
 
-    private fun mergePages(imageStream: InputStream, imageStream2: InputStream?): InputStream {
-        imageStream2 ?: return imageStream
-        if (page.fullPage) return imageStream
+    private fun mergeOrSplitPages(
+        imageStream: InputStream,
+        imageStream2: InputStream?,
+    ): InputStream {
+        if (page.longPage == true && viewer.config.splitPages) {
+            val imageBytes = imageStream.readBytes()
+            val imageBitmap = try {
+                BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            } catch (e: Exception) {
+                imageStream.close()
+                XLog.e("Cannot split page ${e.message}")
+                return imageBytes.inputStream()
+            }
+            val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+            return ImageUtil.splitBitmap(imageBitmap, (page.firstHalf == false).xor(!isLTR)) {
+                scope?.launchUI {
+                    if (it == 100) {
+                        progressBar.completeAndFadeOut()
+                    } else {
+                        progressBar.setProgress(it)
+                    }
+                }
+            }
+        }
+        if (imageStream2 == null) {
+            if (viewer.config.splitPages && page.longPage == null) {
+                val imageBytes = imageStream.readBytes()
+                val imageBitmap = try {
+                    BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+                } catch (e: Exception) {
+                    imageStream.close()
+                    page.longPage = true
+                    skipExtra = true
+                    XLog.e("Cannot split page ${e.message}")
+                    return imageBytes.inputStream()
+                }
+                val height = imageBitmap.height
+                val width = imageBitmap.width
+                return if (height < width) {
+                    imageStream.close()
+                    page.longPage = true
+                    skipExtra = true
+                    val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
+                    return ImageUtil.splitBitmap(imageBitmap, !isLTR) {
+                        scope?.launchUI {
+                            if (it == 100) {
+                                progressBar.completeAndFadeOut()
+                            } else {
+                                progressBar.setProgress(it)
+                            }
+                        }
+                    }
+                } else {
+                    page.longPage = false
+                    imageBytes.inputStream()
+                }
+            }
+            return imageStream
+        }
+        if (page.fullPage == true) return imageStream
         if (ImageUtil.isAnimatedAndSupported(imageStream)) {
             page.fullPage = true
             skipExtra = true
@@ -740,7 +801,7 @@ class PagerPageHolder(
     }
 
     private fun splitDoublePages() {
-        extraPage ?: return
+        // extraPage ?: return
         viewer.splitDoublePages(page)
         if (extraPage?.fullPage == true) {
             extraPage = null

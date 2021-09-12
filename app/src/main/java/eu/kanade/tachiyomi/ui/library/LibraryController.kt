@@ -33,6 +33,7 @@ import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
+import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -83,6 +84,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -95,9 +97,9 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.widget.EmptyView
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
@@ -177,6 +179,9 @@ class LibraryController(
     private val scrollDistanceTilHidden = 1000.dpToPx
     private var textAnim: ViewPropertyAnimator? = null
     private var hasExpanded = false
+
+    val hasActiveFilters: Boolean
+        get() = presenter.hasActiveFilters
 
     var hopperGravity: Int = preferences.hopperGravity().get()
         @SuppressLint("RtlHardcoded")
@@ -325,6 +330,8 @@ class LibraryController(
                 bottom = view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
             )
             updateHopperY()
+            binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight = 60.dpToPx +
+                (view?.rootWindowInsets?.systemWindowInsetBottom ?: 0)
         }
     }
 
@@ -432,7 +439,7 @@ class LibraryController(
         filterTooltip =
             ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
                 .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
-                .color(activity.getResourceColor(R.attr.colorAccent))
+                .color(activity.getResourceColor(R.attr.colorSecondary))
                 .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE).withShadow(false)
                 .corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
 
@@ -504,7 +511,7 @@ class LibraryController(
         binding.libraryGridRecycler.recycler.manager.spanSizeLookup = (
             object : GridLayoutManager.SpanSizeLookup() {
                 override fun getSpanSize(position: Int): Int {
-                    if (libraryLayout == 0) return 1
+                    if (libraryLayout == 0) return binding.libraryGridRecycler.recycler.manager.spanCount
                     val item = this@LibraryController.adapter.getItem(position)
                     return if (item is LibraryHeaderItem || (item is LibraryItem && item.manga.isBlank())) {
                         binding.libraryGridRecycler.recycler.manager.spanCount
@@ -560,6 +567,7 @@ class LibraryController(
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                         topMargin = insets.systemWindowInsetTop + 4.dpToPx
                     }
+                    updateFilterSheetY()
                 },
                 onLeavingController = {
                     binding.headerCard.isVisible = false
@@ -569,11 +577,9 @@ class LibraryController(
                 }
             )
 
-        // Using a double post because when the filter sheet is open it hides the hopper
-        view.post {
-            view.post {
-                updateHopperY()
-            }
+        viewScope.launchUI {
+            delay(50)
+            updateHopperY()
         }
         setSwipeRefresh()
 
@@ -670,8 +676,17 @@ class LibraryController(
         }
         binding.roundedCategoryHopper.categoryButton.setOnClickListener {
             val items = presenter.categories.map { category ->
-                MaterialMenuSheet.MenuSheetItem(category.order, text = category.name)
+                MaterialMenuSheet.MenuSheetItem(
+                    category.order,
+                    text = category.name +
+                        if (adapter.showNumber && !category.isHidden) {
+                            " (${adapter.itemsPerCategory[category.id]})"
+                        } else {
+                            ""
+                        }
+                )
             }
+            if (items.isEmpty()) return@setOnClickListener
             MaterialMenuSheet(
                 activity!!,
                 items,
@@ -770,7 +785,7 @@ class LibraryController(
     }
 
     fun hideHopper(hide: Boolean) {
-        binding.categoryHopperFrame.isVisible = !hide
+        binding.categoryHopperFrame.isVisible = !singleCategory && !hide
         binding.jumperCategoryText.isVisible = !hide
     }
 
@@ -993,8 +1008,15 @@ class LibraryController(
         } else {
             binding.emptyView.show(
                 CommunityMaterial.Icon2.cmd_heart_off,
-                if (binding.filterBottomSheet.filterBottomSheet.hasActiveFilters()) R.string.no_matches_for_filters
-                else R.string.library_is_empty_add_from_browse
+                if (hasActiveFilters) R.string.no_matches_for_filters
+                else R.string.library_is_empty_add_from_browse,
+                if (!hasActiveFilters) {
+                    listOf(
+                        EmptyView.Action(R.string.getting_started_guide) {
+                            activity?.openInBrowser("https://tachiyomi.org/help/guides/getting-started/#installing-an-extension")
+                        }
+                    )
+                } else emptyList()
             )
         }
         adapter.setItems(mangaMap)
@@ -1016,7 +1038,14 @@ class LibraryController(
 
         binding.categoryHopperFrame.isVisible = !singleCategory && !preferences.hideHopper().get()
         adapter.isLongPressDragEnabled = canDrag()
-        binding.categoryRecycler.setCategories(presenter.categories)
+        binding.categoryRecycler.setCategories(
+            presenter.categories,
+            if (adapter.showNumber) {
+                adapter.itemsPerCategory
+            } else {
+                emptyMap()
+            }
+        )
         with(binding.filterBottomSheet.root) {
             updateGroupTypeButton(presenter.groupType)
             setExpandText(canCollapseOrExpandCategory())
@@ -1262,8 +1291,7 @@ class LibraryController(
     }
 
     override fun canDrag(): Boolean {
-        val filterOff =
-            !binding.filterBottomSheet.filterBottomSheet.hasActiveFilters() && presenter.groupType == BY_DEFAULT
+        val filterOff = !hasActiveFilters && presenter.groupType == BY_DEFAULT
         return filterOff && adapter.mode != SelectableAdapter.Mode.MULTI
     }
 

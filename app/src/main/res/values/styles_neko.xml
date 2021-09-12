@@ -3,9 +3,9 @@
 
     <style name="Neko.Iconics" parent="">
         <item name="iiv_size">24dp</item>
-        <item name="iiv_color">?attr/colorAccent</item>
-        <item name="iiv_checked_color">?attr/colorAccent</item>
-        <item name="iiv_unchecked_color">?attr/colorAccent</item>
+        <item name="iiv_color">?attr/colorSecondary</item>
+        <item name="iiv_checked_color">?attr/colorSecondary</item>
+        <item name="iiv_unchecked_color">?attr/colorSecondary</item>
         <item name="iiv_checked_size">24dp</item>
         <item name="iiv_unchecked_size">24dp</item>
         <item name="android:background">@drawable/round_ripple</item>
@@ -37,7 +37,7 @@
 
 
     <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
-        <item name="strokeColor">?attr/colorAccent</item>
+        <item name="strokeColor">?attr/colorSecondary</item>
         <item name="android:letterSpacing">-0.02</item>
         <item name="android:textAllCaps">true</item>
         <item name="fontFamily">@font/montserrat_medium</item>
@@ -56,15 +56,15 @@
     </style>
 
     <style name="cursor" parent="ThemeOverlay.MaterialComponents.TextInputEditText.OutlinedBox">
-        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="colorControlActivated">?attr/colorSecondary</item>
     </style>
 
     <style name="Neko.TextInputLayout.OutlineBox" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
         <item name="android:theme">@style/cursor</item>
-        <item name="boxStrokeColor">?attr/colorAccent</item>
+        <item name="boxStrokeColor">?attr/colorSecondary</item>
         <item name="endIconMode">clear_text</item>
-        <item name="hintTextColor">?attr/colorAccent</item>
-        <item name="endIconTint">?attr/colorAccent</item>
+        <item name="hintTextColor">?attr/colorSecondary</item>
+        <item name="endIconTint">?attr/colorSecondary</item>
     </style>
 
     <style name="Neko.Toolbar.TitleText" parent="">

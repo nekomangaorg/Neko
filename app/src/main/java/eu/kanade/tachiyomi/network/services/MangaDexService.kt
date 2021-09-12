@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.network.services
 
+import com.skydoves.sandwich.ApiResponse
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateDto
+import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
@@ -20,16 +23,22 @@ import retrofit2.http.Path
 import retrofit2.http.Query
 import retrofit2.http.QueryMap
 
-interface MangaDexService : MangaDexImageService {
+interface MangaDexService {
 
     @GET("${MdApi.manga}?includes[]=${MdConstants.Types.coverArt}")
     suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): Response<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
-    suspend fun viewManga(@Path("id") id: String): Response<MangaDto>
+    suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
+
+    @GET("${MdApi.manga}/{id}/aggregate")
+    suspend fun aggregateChapters(
+        @Path("id") mangaId: String,
+        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+    ): ApiResponse<AggregateDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
+    @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
@@ -41,12 +50,13 @@ interface MangaDexService : MangaDexImageService {
     suspend fun latestChapters(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
-        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("contentRating[]") contentRating: List<String>,
     ): Response<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.chapter}/{id}")
-    suspend fun viewChapter(@Path("id") id: String): Response<ChapterDto>
+    suspend fun viewChapter(@Path("id") id: String): ApiResponse<ChapterDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/random")
@@ -54,6 +64,13 @@ interface MangaDexService : MangaDexImageService {
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
+
+    @Headers("Cache-Control: no-cache")
+    @GET("${MdApi.atHomeServer}/{chapterId}")
+    suspend fun getAtHomeServer(
+        @Path("chapterId") chapterId: String,
+        @Query("forcePort443") forcePort443: Boolean,
+    ): ApiResponse<AtHomeDto>
 
     @POST(MdConstants.atHomeReportUrl)
     suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): Response<ResultDto>

@@ -24,3 +24,11 @@ fun WindowInsets.hasSideNavBar() =
 
 @RequiresApi(Build.VERSION_CODES.R)
 fun WindowInsets.isImeVisible() = isVisible(WindowInsets.Type.ime())
+
+fun WindowInsets.topCutoutInset() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    displayCutout?.safeInsetTop ?: 0
+} else 0
+
+fun WindowInsets.bottomCutoutInset() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+    displayCutout?.safeInsetBottom ?: 0
+} else 0

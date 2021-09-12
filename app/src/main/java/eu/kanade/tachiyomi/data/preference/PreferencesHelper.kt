@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -202,6 +203,8 @@ class PreferencesHelper(val context: Context) {
 
     fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
 
+    fun automaticSplitsPage() = flowPrefs.getBoolean(Keys.automaticSplitsPage, false)
+
     fun invertDoublePages() = flowPrefs.getBoolean(Keys.invertDoublePages, false)
 
     fun readerBottomButtons() = flowPrefs.getStringSet(
@@ -325,6 +328,9 @@ class PreferencesHelper(val context: Context) {
     fun filterTracked() = rxPrefs.getInteger(Keys.filterTracked, 0)
 
     fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
+
+    fun showEmptyCategoriesWhileFiltering() =
+        flowPrefs.getBoolean(Keys.showEmptyCategoriesFiltering, false)
 
     fun filterMerged() = rxPrefs.getInteger(Keys.filterMerged, 0)
 
@@ -467,6 +473,10 @@ class PreferencesHelper(val context: Context) {
 
     fun incognitoMode() = flowPrefs.getBoolean(Keys.incognitoMode, false)
 
+    fun hasPromptedBeforeUpdateAll() = flowPrefs.getBoolean("has_prompted_update_all", false)
+
+    fun sideNavMode() = flowPrefs.getInt(Keys.sideNavMode, 0)
+
     fun shouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
 
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
@@ -503,7 +513,8 @@ class PreferencesHelper(val context: Context) {
         prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun contentRatingSelections(): MutableSet<String> =
-        prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
+        prefs.getStringSet(Keys.contentRating,
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))!!
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")
 

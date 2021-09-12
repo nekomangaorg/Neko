@@ -28,8 +28,10 @@ class LatestChapterHandler {
 
             val langs = MdUtil.getLangsToShow(preferencesHelper)
 
+            val contentRatings = preferencesHelper.contentRatingSelections().toList()
+
             val response = logTimeTaken("fetching latest chapters from dex") {
-                service.latestChapters(limit, offset, langs)
+                service.latestChapters(limit, offset, langs, contentRatings)
             }
 
             latestChapterParse(response)
@@ -43,12 +45,20 @@ class LatestChapterHandler {
 
         val chapterListDto = response.body()!!
 
-        val mangaIds = chapterListDto.results.asSequence().map { it.relationships }.flatten()
+        val mangaIds = chapterListDto.results.asSequence().map { it.data.relationships }.flatten()
             .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct().toList()
 
-        val queryParamters = mutableMapOf("ids[]" to mangaIds, "limit" to mangaIds.size)
+        val allContentRating = listOf(MdConstants.ContentRating.safe,
+            MdConstants.ContentRating.suggestive,
+            MdConstants.ContentRating.erotica,
+            MdConstants.ContentRating.pornographic)
 
-        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParamters))
+        val queryParameters =
+            mutableMapOf("ids[]" to mangaIds,
+                "limit" to mangaIds.size,
+                "contentRating[]" to allContentRating)
+
+        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters))
 
         val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
 

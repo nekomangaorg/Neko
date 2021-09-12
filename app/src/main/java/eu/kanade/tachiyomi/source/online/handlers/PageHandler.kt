@@ -3,10 +3,14 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onError
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import kotlinx.coroutines.Dispatchers
@@ -19,64 +23,76 @@ class PageHandler {
     val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
+    val comikeyHandler: ComikeyHandler by injectLazy()
+    val bilibiliHandler: BilibiliHandler by injectLazy()
     val imageHandler: ImageHandler by injectLazy()
 
-    suspend fun fetchPageList(chapter: SChapter, isLogged: Boolean): List<Page> {
+    suspend fun fetchPageList(chapter: SChapter): List<Page> {
         return withContext(Dispatchers.IO) {
             XLog.d("fetching page list")
+
             try {
                 val chapterResponse = network.service.viewChapter(chapter.mangadex_chapter_id)
-                if (chapterResponse.isSuccessful.not()) {
+                val response = chapterResponse.onError {
                     XLog.e(
                         "error returned from chapterResponse ${
-                            chapterResponse.errorBody()?.string()
+                            this.errorBody
                         }"
                     )
                     throw Exception("error returned from chapterResponse")
+                }.getOrThrow()
+                val externalUrl = response.data.attributes.externalUrl
+                if (externalUrl != null) {
+                    when {
+                        "mangaplus".equals(chapter.scanlator, true) -> {
+                            return@withContext mangaPlusHandler.fetchPageList(externalUrl)
+                        }
+                        "comikey".equals(chapter.scanlator, true) -> {
+                            return@withContext comikeyHandler.fetchPageList(externalUrl)
+                        }
+                        "bilibili comics".equals(chapter.scanlator, true) -> {
+                            if (response.data.attributes.data.isEmpty()) {
+                                return@withContext bilibiliHandler.fetchPageList(externalUrl)
+                            }
+                        }
+                        else -> throw Exception("${chapter.scanlator} not supported")
+                    }
                 }
 
-                if (chapter.scanlator.equals("mangaplus", true)) {
-                    val mpChpId = chapterResponse.body()!!.data.attributes.data.first()
-                        .substringAfterLast("/")
-                    mangaPlusHandler.fetchPageList(mpChpId)
-                } else {
-                    val service = if (isLogged) {
-                        network.authService
-                    } else {
-                        network.service
-                    }
+                if (response.data.attributes.data.isEmpty()) {
+                    throw Exception("This chapter has no pages, it might not be release yet, try refreshing")
+                }
 
-                    val atHomeResponse =
-                        service.getAtHomeServer(
-                            chapter.mangadex_chapter_id,
-                            preferences.usePort443Only()
-                        )
-
-                    when (atHomeResponse) {
-                        is ApiResponse.Success -> {
-                            XLog.d("successfully got at home host")
-                        }
-                        is ApiResponse.Failure.Error -> {
-                            XLog.e("error returned from atHomeResponse ${
-                                atHomeResponse.response.errorBody()?.string()
-                            }")
-                            throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
-                        }
-                        is ApiResponse.Failure.Exception<*> -> {
-                            XLog.e("error returned from atHomeResponse ${atHomeResponse.message}")
-                            throw Exception("Error getting image ${atHomeResponse.message}")
-                        }
-                    }
-
-                    val atHomeDto = atHomeResponse.getOrThrow()
-
-
-                    pageListParse(
-                        chapterResponse.body()!!,
-                        atHomeDto,
-                        preferences.dataSaver()
+                val atHomeResponse =
+                    network.service.getAtHomeServer(
+                        chapter.mangadex_chapter_id,
+                        preferences.usePort443Only()
                     )
+
+                when (atHomeResponse) {
+                    is ApiResponse.Success -> {
+                        XLog.d("successfully got at home host")
+                    }
+                    is ApiResponse.Failure.Error -> {
+                        XLog.e("error returned from atHomeResponse ${
+                            atHomeResponse.response.errorBody()?.string()
+                        }")
+                        throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
+                    }
+                    is ApiResponse.Failure.Exception<*> -> {
+                        XLog.e("error returned from atHomeResponse ${atHomeResponse.message}")
+                        throw Exception("Error getting image ${atHomeResponse.message}")
+                    }
                 }
+
+                val atHomeDto = atHomeResponse.getOrThrow()
+
+
+                return@withContext pageListParse(
+                    response,
+                    atHomeDto,
+                    preferences.dataSaver()
+                )
             } catch (e: Exception) {
                 XLog.e("error processing page list ", e)
                 throw (e)

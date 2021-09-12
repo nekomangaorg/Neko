@@ -74,6 +74,8 @@ object PreferenceKeys {
 
     const val pageLayout = "page_layout"
 
+    const val automaticSplitsPage = "automatic_splits_page"
+
     const val invertDoublePages = "invert_double_pages"
 
     const val readerBottomButtons = "reader_bottom_buttons"
@@ -151,6 +153,8 @@ object PreferenceKeys {
     const val filterMerged = "pref_filter_merged_key"
 
     const val filterMissingChapters = "pref_filter_missing_chapters_key"
+
+    const val showEmptyCategoriesFiltering = "show_empty_categories_filtering"
 
     const val librarySortingMode = "library_sorting_mode"
 
@@ -232,6 +236,8 @@ object PreferenceKeys {
     const val dohProvider = "doh_provider"
 
     const val incognitoMode = "incognito_mode"
+
+    const val sideNavMode = "side_nav_mode"
 
     const val shouldAutoUpdate = "should_auto_update"
 

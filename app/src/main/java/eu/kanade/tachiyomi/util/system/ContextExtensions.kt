@@ -38,8 +38,13 @@ import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.io.File
+
+private const val TABLET_UI_MIN_SCREEN_WIDTH_DP = 720
 
 /**
  * Display a toast in this context.
@@ -176,6 +181,26 @@ fun Context.notificationBuilder(
         builder.block()
     }
     return builder
+}
+
+fun Context.prepareSideNavContext(): Context {
+    val configuration = resources.configuration
+    val expected = when (Injekt.get<PreferencesHelper>().sideNavMode().get()) {
+        SideNavMode.ALWAYS.prefValue -> true
+        SideNavMode.NEVER.prefValue -> false
+        else -> null
+    }
+    if (expected != null) {
+        val overrideConf = Configuration()
+        overrideConf.setTo(configuration)
+        overrideConf.screenWidthDp = if (expected) {
+            overrideConf.screenWidthDp.coerceAtLeast(TABLET_UI_MIN_SCREEN_WIDTH_DP)
+        } else {
+            overrideConf.screenWidthDp.coerceAtMost(TABLET_UI_MIN_SCREEN_WIDTH_DP - 1)
+        }
+        return createConfigurationContext(overrideConf)
+    }
+    return this
 }
 
 /**
@@ -329,6 +354,15 @@ fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
     }
     return packagesSupportingCustomTabs
 }
+
+val Context.hasColoredActionBar: Boolean
+    get() {
+        val hasColoredActionBar: Boolean
+        val a = obtainStyledAttributes(intArrayOf(R.attr.hasColoredActionBar))
+        hasColoredActionBar = a.getBoolean(0, false)
+        a.recycle()
+        return hasColoredActionBar
+    }
 
 fun Context.isInNightMode(): Boolean {
     val currentNightMode = resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK

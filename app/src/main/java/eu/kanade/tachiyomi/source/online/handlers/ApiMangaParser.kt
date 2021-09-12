@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
@@ -10,33 +14,49 @@ import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
-import java.util.Date
 import java.util.Locale
 import kotlin.math.floor
 
 class ApiMangaParser {
     val network: NetworkHelper by injectLazy()
     val filterHandler: FilterHandler by injectLazy()
+    val preferencesHelper: PreferencesHelper by injectLazy()
 
     /**
      * Parse the manga details json into manga object
      */
-    fun mangaDetailsParse(mangaDto: MangaDto): SManga {
+    suspend fun mangaDetailsParse(mangaDto: MangaDto): SManga {
         try {
             val mangaAttributesDto = mangaDto.data.attributes
 
             val manga = mangaDto.toBasicManga()
 
+            val simpleChapters = withIOContext {
+                val aggregateDto = network.service.aggregateChapters(mangaDto.data.id,
+                    MdUtil.getLangsToShow(preferencesHelper))
+                    .onError {
+                        XLog.e("error getting aggregate for ${mangaDto.data.id}")
+                    }.onException {
+                        XLog.e("error getting aggregate for ${mangaDto.data.id}")
+                    }.getOrNull()
+
+                aggregateDto?.volumes?.values
+                    ?.flatMap { it.chapters.values }
+                    ?.map { it.chapter }
+                    ?: emptyList()
+            }
+
             manga.description =
                 MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap()["en"] ?: "")
 
-            val authors = mangaDto.relationships.filter { relationshipDto ->
+            val authors = mangaDto.data.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
-            val artists = mangaDto.relationships.filter { relationshipDto ->
+            val artists = mangaDto.data.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
@@ -64,13 +84,15 @@ class ApiMangaParser {
 
             val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
             val publishedOrCancelled =
-                tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED
-            /*if (publishedOrCancelled && isMangaCompleted(networkApiManga, filteredChapters)) {
+                (tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED)
+            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter
+                    ?: "zzzzzz")
+            ) {
                 manga.status = SManga.COMPLETED
                 manga.missing_chapters = null
-            } else {*/
-            manga.status = tempStatus
-            // }
+            } else {
+                manga.status = tempStatus
+            }
 
             val tags = filterHandler.getTags()
 
@@ -99,34 +121,6 @@ class ApiMangaParser {
             throw e
         }
     }
-
-    /**
-     * If chapter title is oneshot or a chapter exists which matches the last chapter in the required language
-     * return manga is complete
-     */
-    /*private fun isMangaCompleted(
-        serializer: ApiMangaSerializer,
-        filteredChapters: List<ChapterSerializer>
-    ): Boolean {
-        if (filteredChapters.isEmpty() || serializer.data.manga.lastChapter.isNullOrEmpty()) {
-            return false
-        }
-        val finalChapterNumber = serializer.data.manga.lastChapter!!
-        if (MdUtil.validOneShotFinalChapters.contains(finalChapterNumber)) {
-            filteredChapters.firstOrNull()?.let {
-                if (isOneShot(it, finalChapterNumber)) {
-                    return true
-                }
-            }
-        }
-        val removeOneshots = filteredChapters.asSequence()
-            .map { it.chapter!!.toDoubleOrNull() }
-            .filter { it != null }
-            .map { floor(it!!).toInt() }
-            .filter { it != 0 }
-            .toList().distinctBy { it }
-        return removeOneshots.toList().size == floor(finalChapterNumber.toDouble()).toInt()
-    }*/
 
     /* private fun filterChapterForChecking(serializer: ApiMangaSerializer): List<ChapterSerializer> {
          serializer.data.chapters ?: return emptyList()
@@ -160,13 +154,9 @@ class ApiMangaParser {
         chapterListResponse: List<ChapterDto>,
         groupMap: Map<String, String>,
     ): List<SChapter> {
-        val now = Date().time
-
         return chapterListResponse.asSequence()
             .map {
                 mapChapter(it, groupMap)
-            }.filter {
-                it.date_upload <= now
             }.toList()
     }
 
@@ -180,7 +170,7 @@ class ApiMangaParser {
 
             val apiChapter =
                 MdUtil.jsonParser.decodeFromString(ChapterDto.serializer(), jsonBody)
-            return apiChapter.relationships.firstOrNull { it.type.equals("manga", true) }?.id
+            return apiChapter.data.relationships.firstOrNull { it.type.equals("manga", true) }?.id
                 ?: throw Exception("Not found")
         } catch (e: Exception) {
             XLog.e(e)
@@ -195,6 +185,7 @@ class ApiMangaParser {
         val chapter = SChapter.create()
         val attributes = networkChapter.data.attributes
         chapter.url = MdUtil.chapterSuffix + networkChapter.data.id
+
         val chapterName = mutableListOf<String>()
         // Build chapter name
 
@@ -233,10 +224,11 @@ class ApiMangaParser {
 
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
         // Convert from unix time
+
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
         val scanlatorName =
-            networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
+            networkChapter.data.relationships.filter { it.type == MdConstants.Types.scanlator }
                 .mapNotNull { groups[it.id] }.toMutableSet()
 
         if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {

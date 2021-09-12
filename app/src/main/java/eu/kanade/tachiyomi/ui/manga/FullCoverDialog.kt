@@ -12,6 +12,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
+import androidx.core.view.updateLayoutParams
 import androidx.transition.ChangeBounds
 import androidx.transition.ChangeImageTransform
 import androidx.transition.TransitionManager
@@ -22,10 +23,9 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.FullCoverDialogBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.animateBlur
-import eu.kanade.tachiyomi.util.view.updateLayoutParams
 import uy.kohesive.injekt.injectLazy
 
-class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable, val thumbView: View) :
+class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable, private val thumbView: View) :
     Dialog(controller.activity!!, R.style.FullCoverDialogTheme) {
 
     val activity = controller.activity
@@ -89,16 +89,16 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
             // begins, it will position the zoomed-in view in the place of the
             // thumbnail.
             thumbView.alpha = 0f
-            val defMargin = 16.dpToPx
-            if (Build.VERSION.SDK_INT >= 31) {
+            val defMargin = 8.dpToPx
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 activity?.window?.decorView?.animateBlur(1f, 20f, 50)?.start()
             }
             expandedImageView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = 0
                 width = 0
-                topMargin = defMargin
-                leftMargin = defMargin
-                rightMargin = defMargin
+                topMargin = defMargin + 48.dpToPx
+                marginStart = defMargin
+                marginEnd = defMargin
                 bottomMargin = defMargin
                 horizontalBias = 0.5f
                 verticalBias = 0.5f

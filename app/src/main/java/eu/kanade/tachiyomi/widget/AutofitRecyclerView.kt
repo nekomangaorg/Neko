@@ -16,6 +16,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     val manager = GridLayoutManager(context, 1)
 
+    var lastMeasuredWidth = 0
     var columnWidth = -1f
         set(value) {
             field = value
@@ -53,6 +54,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     override fun onMeasure(widthSpec: Int, heightSpec: Int) {
         super.onMeasure(widthSpec, heightSpec)
         setSpan()
+        lastMeasuredWidth = measuredWidth
     }
 
     fun setGridSize(preferences: PreferencesHelper) {
@@ -82,7 +84,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     }
 
     private fun setSpan(force: Boolean = false) {
-        if ((spanCount == 0 || force) && columnWidth > 0) {
+        if ((spanCount == 0 || force || measuredHeight != lastMeasuredWidth) && columnWidth > 0) {
             val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
             val count = max(1, (dpWidth / columnWidth).roundToInt())
             spanCount = count

@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -16,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
-import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import kotlinx.coroutines.Dispatchers
@@ -44,8 +42,6 @@ open class MangaDex : HttpSource() {
     private val pageHandler: PageHandler by injectLazy()
 
     private val imageHandler: ImageHandler by injectLazy()
-
-    private val similarHandler: SimilarHandler by injectLazy()
 
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 
@@ -98,7 +94,7 @@ open class MangaDex : HttpSource() {
     }
 
     override suspend fun fetchPageList(chapter: SChapter): List<Page> {
-        return pageHandler.fetchPageList(chapter, isLogged())
+        return pageHandler.fetchPageList(chapter)
     }
 
     override suspend fun fetchImage(page: Page): Response {
@@ -122,27 +118,6 @@ open class MangaDex : HttpSource() {
             throw Exception("Not Logged in to MangaDex")
         }
         return followsHandler.fetchTrackingInfo(url)
-    }
-
-    suspend fun fetchSimilarManga(
-        manga: Manga,
-        refresh: Boolean,
-    ): MangaListPage {
-        return similarHandler.fetchSimilarManga(manga, refresh)
-    }
-
-    suspend fun fetchSimilarExternalAnilistManga(
-        manga: Manga,
-        refresh: Boolean,
-    ): MangaListPage {
-        return similarHandler.fetchSimilarExternalAnilistManga(manga, refresh)
-    }
-
-    suspend fun fetchSimilarExternalMalManga(
-        manga: Manga,
-        refresh: Boolean,
-    ): MangaListPage {
-        return similarHandler.fetchSimilarExternalMalManga(manga, refresh)
     }
 
     override fun isLogged(): Boolean {

@@ -18,15 +18,19 @@ data class MangaListDto(
 data class MangaDto(
     val result: String,
     val data: MangaDataDto,
+)
+
+@Serializable
+data class MangaDataDto(
+    val id: String,
+    val type: String,
+    val attributes: MangaAttributesDto,
     val relationships: List<RelationshipDto>,
 )
 
 @Serializable
-data class MangaDataDto(val id: String, val type: String, val attributes: MangaAttributesDto)
-
-@Serializable
 data class MangaAttributesDto(
-    val title: Map<String, String>,
+    val title: Map<String, String?>,
     val altTitles: List<JsonElement>,
     val description: JsonElement,
     val links: JsonElement?,
@@ -103,17 +107,36 @@ data class CoverListDto(
 @Serializable
 data class CoverDto(
     val data: CoverDataDto,
-    val relationships: List<RelationshipDto>,
 )
 
 @Serializable
 data class CoverDataDto(
     val attributes: CoverAttributesDto,
+    val relationships: List<RelationshipDto>,
 )
 
 @Serializable
 data class CoverAttributesDto(
     val fileName: String,
+)
+
+@Serializable
+data class AggregateDto(
+    val result: String,
+    val volumes: Map<String, AggregateVolume>,
+)
+
+@Serializable
+data class AggregateVolume(
+    val volume: String,
+    val count: String,
+    val chapters: Map<String, AggregateChapter>,
+)
+
+@Serializable
+data class AggregateChapter(
+    val chapter: String,
+    val count: String,
 )
 
 fun JsonElement.asMdMap(): Map<String, String> {

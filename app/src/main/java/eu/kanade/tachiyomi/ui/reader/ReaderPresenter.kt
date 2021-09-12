@@ -466,7 +466,7 @@ class ReaderPresenter(
         if (shouldTrack &&
             // For double pages, check if the second to last page is doubled up
             (
-                selectedChapter.pages?.lastIndex == page.index ||
+                (selectedChapter.pages?.lastIndex == page.index && page.firstHalf != true) ||
                     (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
                 )
         ) {
@@ -757,7 +757,7 @@ class ReaderPresenter(
             File.separator + Environment.DIRECTORY_PICTURES +
             File.separator + context.getString(R.string.app_name)
         val destDir = if (preferences.folderPerManga()) {
-            File(baseDir + File.separator + manga.title)
+            File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
         } else {
             File(baseDir)
         }

@@ -53,6 +53,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.CoroutineScope
@@ -898,17 +899,18 @@ class MangaDetailsPresenter(
         }
     }
 
-    fun shareManga(cover: Bitmap) {
+    fun shareManga() {
         val context = Injekt.get<Application>()
 
         val destDir = File(context.cacheDir, "shared_image")
 
-        scope.launch(Dispatchers.IO) {
+        scope.launchIO {
             destDir.deleteRecursively()
             try {
-                val image = saveImage(cover, destDir, manga)
-                if (image != null) controller.shareManga(image)
-                else controller.shareManga()
+                val file = saveCover(destDir)
+                withUIContext {
+                    controller.shareManga(file)
+                }
             } catch (e: java.lang.Exception) {
             }
         }
@@ -964,7 +966,7 @@ class MangaDetailsPresenter(
     }
 
     private fun saveCover(directory: File): File {
-        val cover = coverCache.getCoverFile(manga)
+        val cover = coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 
@@ -1106,21 +1108,9 @@ class MangaDetailsPresenter(
                     service.search(query, manga, wasPreviouslyTracked)
                 } catch (e: Exception) {
                     withContext(Dispatchers.Main) { controller.trackSearchError(e) }
-                    null
+                    return@launch
                 }
-                if (!results.isNullOrEmpty()) {
-                    withContext(Dispatchers.Main) { controller.onTrackSearchResults(results) }
-                } else {
-                    withContext(Dispatchers.Main) {
-                        controller.trackSearchError(
-                            Exception(
-                                preferences.context.getString(
-                                    R.string.no_results_found
-                                )
-                            )
-                        )
-                    }
-                }
+                withContext(Dispatchers.Main) { controller.onTrackSearchResults(results.orEmpty()) }
             }
         }
     }
