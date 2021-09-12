@@ -65,7 +65,8 @@ class SimilarController(bundle: Bundle? = null) :
                         SwipeRefreshIndicator(
                             state = state,
                             refreshTriggerDistance = trigger,
-                            backgroundColor = MaterialTheme.colors.primary,
+                            backgroundColor = MaterialTheme.colors.secondary,
+                            contentColor = MaterialTheme.colors.onSecondary
                         )
                     }
                 ) {

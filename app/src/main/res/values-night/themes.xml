@@ -6,10 +6,19 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
         <item name="colorOnSurface">@color/md_white_1000</item>
         <item name="colorOnBackground">@color/md_white_1000</item>
+        <item name="colorSecondaryVariant">@color/neko_green</item>
         <item name="unreadBadgeColor">@color/neko_green</item>
         <item name="colorOnUnreadBadge">@color/md_black_1000</item>
         <item name="colorOnHopper">@color/md_black_1000</item>
+    </style>
 
+    <style name="Theme.Tachiyomi.GreyWolf">
+        <item name="colorPrimary">@color/gray</item>
+        <item name="colorSecondaryVariant">@color/gray_button</item>
+        <item name="colorSecondary">@color/greyWolfSecondary</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
+        <item name="colorOnHopper">?attr/colorOnSecondary</item>
+        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">
@@ -19,7 +28,7 @@
         <item name="colorPrimaryVariant">@color/secondaryChocolateStrawberries</item>
         <item name="background">@color/backgroundChocolateStrawberries</item>
         <item name="colorSurface">@color/backgroundChocolateStrawberries</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
@@ -32,7 +41,7 @@
         <item name="colorSurface">@color/backgroundLime</item>
         <item name="background">@color/backgroundLime</item>
         <item name="colorOnSecondary">@color/colorOnLime</item>
-        <item name="unreadBadgeColor">?attr/colorAccent</item>
+        <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>

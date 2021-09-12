@@ -4,9 +4,8 @@
     <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
-    <color name="splashBackground">@color/primaryTachiyomi</color>
-    <color name="secondaryTachiyomi">@color/md_blue_A400</color>
-    <color name="secondaryVariantTachiyomi">#184798</color>
+    <color name="secondaryTachiyomi">@color/neko_accent</color>
+    <color name="secondaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
 
@@ -96,6 +95,10 @@
     <color name="secondaryVariantLime">#2C2D32</color>
     <color name="dialogLime">#282A2E</color>
     <color name="colorOnLime">#2C2D32</color>
+
+    <!-- Grey Wolf -->
+    <color name="greyWolfSecondary">#636363</color>
+
 
     <!--Outrun theme -->
     <color name="outrun_pink">#dd546e</color>
