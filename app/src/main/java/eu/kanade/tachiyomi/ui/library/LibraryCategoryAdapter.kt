@@ -67,10 +67,8 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
 
     private fun setItemsPerCategoryMap() {
         itemsPerCategory = headerItems.map { header ->
-            (header as LibraryHeaderItem).catId to getSectionItems(header).filter {
-                val manga = (it as? LibraryItem)?.manga ?: return@filter false
-                !manga.isHidden() && !manga.isBlank()
-            }.size
+            (header as LibraryHeaderItem).catId to
+                controller.presenter.getItemCountInCategories((header as LibraryHeaderItem).catId)
         }.toMap()
     }
 

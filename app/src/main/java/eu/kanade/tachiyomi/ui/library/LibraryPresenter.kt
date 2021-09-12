@@ -149,6 +149,15 @@ class LibraryPresenter(
         }
     }
 
+    fun getItemCountInCategories(categoryId: Int): Int {
+        val items = sectionedLibraryItems[categoryId]
+        return if (items?.firstOrNull()?.manga?.isHidden() == true) {
+            items?.firstOrNull()?.manga?.read ?: 0
+        } else {
+            sectionedLibraryItems[categoryId]?.size ?: 0
+        }
+    }
+
     /** Get favorited manga for library and sort and filter it */
     fun getLibrary() {
         if (categories.isEmpty()) {
@@ -621,7 +630,7 @@ class LibraryPresenter(
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
-                            LibraryItem(LibraryManga.createHide(catId, mergedTitle), headerItem)
+                            LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem)
                         )
                     }
                 }
@@ -731,7 +740,7 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) items.add(
-                    LibraryItem(LibraryManga.createHide(catId, mergedTitle), headerItem)
+                    LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem)
                 )
             }
         }

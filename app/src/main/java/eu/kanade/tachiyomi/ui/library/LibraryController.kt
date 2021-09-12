@@ -679,7 +679,7 @@ class LibraryController(
                 MaterialMenuSheet.MenuSheetItem(
                     category.order,
                     text = category.name +
-                        if (adapter.showNumber && !category.isHidden) {
+                        if (adapter.showNumber && adapter.itemsPerCategory[category.id] != null) {
                             " (${adapter.itemsPerCategory[category.id]})"
                         } else {
                             ""
