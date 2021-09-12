@@ -1692,6 +1692,7 @@ class LibraryController(
         // Destroy action mode if there are no items selected.
         val shareItem = menu.findItem(R.id.action_share)
         val categoryItem = menu.findItem(R.id.action_move_to_category)
+        categoryItem.isVisible = presenter.allCategories.size > 1
         categoryItem.isVisible = presenter.categories.size > 1
         shareItem.isVisible = true
         if (count == 0) destroyActionModeIfNeeded()
