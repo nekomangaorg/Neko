@@ -1053,7 +1053,9 @@ class MangaDetailsController :
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
-                    presenter.setFavorite(true)
+                    if (!presenter.manga.favorite) {
+                        toggleMangaFavorite()
+                    }
                 }
                 addCallback(
                     object : BaseTransientBottomBar.BaseCallback<Snackbar>() {
