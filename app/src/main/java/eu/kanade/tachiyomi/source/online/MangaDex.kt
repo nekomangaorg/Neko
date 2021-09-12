@@ -15,7 +15,6 @@ import eu.kanade.tachiyomi.source.online.handlers.LatestChapterHandler
 import eu.kanade.tachiyomi.source.online.handlers.MangaHandler
 import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
-import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import kotlinx.coroutines.Dispatchers
@@ -43,8 +42,6 @@ open class MangaDex : HttpSource() {
     private val pageHandler: PageHandler by injectLazy()
 
     private val imageHandler: ImageHandler by injectLazy()
-
-    private val similarHandler: SimilarHandler by injectLazy()
 
     private val loginHelper: MangaDexLoginHelper by injectLazy()
 

@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
 import eu.kanade.tachiyomi.source.Source
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -328,7 +329,8 @@ class PreferencesHelper(val context: Context) {
 
     fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
 
-    fun showEmptyCategoriesWhileFiltering() = flowPrefs.getBoolean(Keys.showEmptyCategoriesFiltering, false)
+    fun showEmptyCategoriesWhileFiltering() =
+        flowPrefs.getBoolean(Keys.showEmptyCategoriesFiltering, false)
 
     fun filterMerged() = rxPrefs.getInteger(Keys.filterMerged, 0)
 
@@ -511,7 +513,8 @@ class PreferencesHelper(val context: Context) {
         prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun contentRatingSelections(): MutableSet<String> =
-        prefs.getStringSet(Keys.contentRating, setOf("safe", "suggestive"))!!
+        prefs.getStringSet(Keys.contentRating,
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))!!
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")
 

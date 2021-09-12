@@ -38,7 +38,7 @@ interface MangaDexService {
     ): ApiResponse<AggregateDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=safe&contentRating[]=suggestive&contentRating[]=erotica&contentRating[]=pornographic&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
+    @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")
     suspend fun viewChapters(
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
@@ -50,7 +50,8 @@ interface MangaDexService {
     suspend fun latestChapters(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
-        @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("translatedLanguage[]") translatedLanguages: List<String>,
+        @Query("contentRating[]") contentRating: List<String>,
     ): Response<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")

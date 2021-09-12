@@ -57,12 +57,7 @@ class MdUtil {
 
         private const
         val scanlatorSeparator = " & "
-
-        const val contentRatingSafe = "safe"
-        const val contentRatingSuggestive = "suggestive"
-        const val contentRatingErotica = "erotica"
-        const val contentRatingPornographic = "pornographic"
-
+        
         val validOneShotFinalChapters = listOf("0", "1")
 
         val englishDescriptionTags = listOf(
