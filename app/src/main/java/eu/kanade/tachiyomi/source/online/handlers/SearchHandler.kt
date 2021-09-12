@@ -28,7 +28,7 @@ class SearchHandler {
             if (query.startsWith(PREFIX_ID_SEARCH)) {
                 val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
                 val response = service.viewManga(realQuery).getOrNull()!!
-                val details = apiMangaParser.mangaDetailsParse(response)
+                val details = apiMangaParser.mangaDetailsParse(response.data)
                 MangaListPage(listOf(details), false)
             } else {
                 val queryParamters = mutableMapOf<String, Any>()
@@ -61,7 +61,7 @@ class SearchHandler {
 
         val thumbQuality = preferencesHelper.thumbnailQuality()
 
-        val mangaList = mangaListDto.results.map {
+        val mangaList = mangaListDto.data.map {
             it.toBasicManga(thumbQuality)
         }
 

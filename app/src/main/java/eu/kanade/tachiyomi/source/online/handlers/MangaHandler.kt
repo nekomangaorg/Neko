@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.logTimeTaken
@@ -63,7 +63,7 @@ class MangaHandler {
                         throw(Exception("Error from MangaDex ${this.message}"))
                     }.getOrNull()!!
 
-                apiMangaParser.mangaDetailsParse(response)
+                apiMangaParser.mangaDetailsParse(response.data)
             }
         }
     }
@@ -83,7 +83,7 @@ class MangaHandler {
                 }
 
                 val chapterListDto = response.body()!!
-                val results = chapterListDto.results.toMutableList()
+                val results = chapterListDto.data.toMutableList()
 
                 var hasMoreResults =
                     chapterListDto.limit + chapterListDto.offset < chapterListDto.total
@@ -100,7 +100,7 @@ class MangaHandler {
                         false
                     } else {
                         val newChapterListDto = newResponse.body()!!
-                        results.addAll(newChapterListDto.results)
+                        results.addAll(newChapterListDto.data)
                         newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
                     }
                 }
@@ -112,8 +112,8 @@ class MangaHandler {
         }
     }
 
-    private fun getGroupMap(results: List<ChapterDto>): Map<String, String> {
-        return results.map { chapter -> chapter.data.relationships }
+    private fun getGroupMap(results: List<ChapterDataDto>): Map<String, String> {
+        return results.map { chapter -> chapter.relationships }
             .flatten()
             .filter { it.type == MdConstants.Types.scanlator }
             .map { it.id to it.attributes!!.name!! }

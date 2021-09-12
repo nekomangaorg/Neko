@@ -41,8 +41,8 @@ class SimilarHandler {
                 val dbDto =
                     MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(similarDbEntry.data)
                 val thumbQuality = preferencesHelper.thumbnailQuality()
-                val idsToManga = dbDto.similarMdexApi?.results?.map {
-                    it.data.id to it.toBasicManga(thumbQuality)
+                val idsToManga = dbDto.similarMdexApi?.data?.map {
+                    it.id to it.toBasicManga(thumbQuality)
                 }?.toMap() ?: emptyMap()
 
                 return dbDto.similarApi?.matches?.mapNotNull { idsToManga[it.id] } ?: emptyList()
@@ -76,8 +76,8 @@ class SimilarHandler {
         val idsToManga = hashMapOf<String, SManga>()
         val thumbQuality = preferencesHelper.thumbnailQuality()
 
-        mangaListDto.results.forEach {
-            idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
+        mangaListDto.data.forEach {
+            idsToManga[it.id] = it.toBasicManga(thumbQuality)
         }
         val mangaList = ids.map { idsToManga[it]!! }
 
@@ -125,8 +125,8 @@ class SimilarHandler {
                 val dbDto =
                     MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(similarDbEntry.data)
                 val idsToManga = hashMapOf<String, SManga>()
-                dbDto.anilistMdexApi!!.results.forEach {
-                    idsToManga[it.data.id] = it.toBasicManga()
+                dbDto.anilistMdexApi!!.data.forEach {
+                    idsToManga[it.id] = it.toBasicManga()
                 }
                 val ids = dbDto.anilistApi!!.data.Media.recommendations.edges.map {
                     if (it.node.mediaRecommendation.format != "MANGA")
@@ -176,8 +176,8 @@ class SimilarHandler {
         val idsToManga = hashMapOf<String, SManga>()
         val thumbQuality = preferencesHelper.thumbnailQuality()
 
-        mangaListDto.results.forEach {
-            idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
+        mangaListDto.data.forEach {
+            idsToManga[it.id] = it.toBasicManga(thumbQuality)
         }
 
         // Loop through our *sorted* related array and list in that order
@@ -232,8 +232,8 @@ class SimilarHandler {
                 val idsToManga = hashMapOf<String, SManga>()
                 val thumbQuality = preferencesHelper.thumbnailQuality()
 
-                dbDto.myanimelistMdexApi!!.results.forEach {
-                    idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
+                dbDto.myanimelistMdexApi!!.data.forEach {
+                    idsToManga[it.id] = it.toBasicManga(thumbQuality)
                 }
                 val ids = dbDto.myanimelistApi!!.recommendations.mapNotNull {
                     mappings.getMangadexID(it.mal_id.toString(), "mal")
@@ -277,8 +277,8 @@ class SimilarHandler {
         val idsToManga = hashMapOf<String, SManga>()
         val thumbQuality = preferencesHelper.thumbnailQuality()
 
-        mangaListDto.results.forEach {
-            idsToManga[it.data.id] = it.toBasicManga(thumbQuality)
+        mangaListDto.data.forEach {
+            idsToManga[it.id] = it.toBasicManga(thumbQuality)
         }
 
         // Loop through our *sorted* related array and list in that order
@@ -330,8 +330,8 @@ class SimilarHandler {
             throw Exception("Error getting manga http code: ${response.code()}")
         }
         val responseBody = response.body()!!
-        if (responseBody.results.size != mangaIds.size) {
-            throw Exception("Unable to complete response ${responseBody.results.size} of ${mangaIds.size} returned")
+        if (responseBody.data.size != mangaIds.size) {
+            throw Exception("Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }
         return responseBody
     }

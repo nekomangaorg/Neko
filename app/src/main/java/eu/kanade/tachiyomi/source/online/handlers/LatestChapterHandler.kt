@@ -45,7 +45,7 @@ class LatestChapterHandler {
 
         val chapterListDto = response.body()!!
 
-        val mangaIds = chapterListDto.results.asSequence().map { it.data.relationships }.flatten()
+        val mangaIds = chapterListDto.data.asSequence().map { it.relationships }.flatten()
             .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct().toList()
 
         val allContentRating = listOf(MdConstants.ContentRating.safe,
@@ -62,7 +62,7 @@ class LatestChapterHandler {
 
         val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
 
-        val mangaDtoMap = mangaListDto.body()!!.results.associateBy({ it.data.id }, { it })
+        val mangaDtoMap = mangaListDto.body()!!.data.associateBy({ it.id }, { it })
 
         val thumbQuality = preferencesHelper.thumbnailQuality()
         val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }.map {

@@ -8,7 +8,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
@@ -38,14 +38,14 @@ class FollowsHandler {
 
             val response = async { service.userFollowList(0) }
             val mangaListDto = response.await().body()!!
-            val results = mangaListDto.results.toMutableList()
+            val results = mangaListDto.data.toMutableList()
 
             if (mangaListDto.total > mangaListDto.limit) {
                 val totalRequestNo = (mangaListDto.total / mangaListDto.limit)
                 val restOfResults = (1..totalRequestNo).map { pos ->
                     async {
                         val newResponse = service.userFollowList(pos * mangaListDto.limit)
-                        newResponse.body()!!.results
+                        newResponse.body()!!.data
                     }
                 }.awaitAll().flatten()
                 results.addAll(restOfResults)
@@ -61,14 +61,14 @@ class FollowsHandler {
      * used when multiple follows
      */
     private fun followsParseMangaPage(
-        response: List<MangaDto>,
+        response: List<MangaDataDto>,
         readingStatusMap: Map<String, String?>,
     ): MangaListPage {
         val comparator = compareBy<SManga> { it.follow_status }.thenBy { it.title }
 
         val result = response.map { mangaDto ->
             mangaDto.toBasicManga(preferences.thumbnailQuality()).apply {
-                this.follow_status = FollowStatus.fromDex(readingStatusMap[mangaDto.data.id])
+                this.follow_status = FollowStatus.fromDex(readingStatusMap[mangaDto.id])
             }
         }.sortedWith(comparator)
 

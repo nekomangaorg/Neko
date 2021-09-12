@@ -7,7 +7,8 @@ data class ChapterListDto(
     val limit: Int,
     val offset: Int,
     val total: Int,
-    val results: List<ChapterDto>,
+    val result: String,
+    val data: List<ChapterDataDto>,
 )
 
 @Serializable
@@ -42,7 +43,8 @@ data class GroupListDto(
     val limit: Int,
     val offset: Int,
     val total: Int,
-    val results: List<GroupDto>,
+    val result: String,
+    val results: List<GroupDataDto>,
 )
 
 @Serializable

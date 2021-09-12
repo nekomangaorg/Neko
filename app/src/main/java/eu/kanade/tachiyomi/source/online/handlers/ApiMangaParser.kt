@@ -8,8 +8,9 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
-import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
+import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -28,19 +29,19 @@ class ApiMangaParser {
     /**
      * Parse the manga details json into manga object
      */
-    suspend fun mangaDetailsParse(mangaDto: MangaDto): SManga {
+    suspend fun mangaDetailsParse(mangaDto: MangaDataDto): SManga {
         try {
-            val mangaAttributesDto = mangaDto.data.attributes
+            val mangaAttributesDto = mangaDto.attributes
 
             val manga = mangaDto.toBasicManga()
 
             val simpleChapters = withIOContext {
-                val aggregateDto = network.service.aggregateChapters(mangaDto.data.id,
+                val aggregateDto = network.service.aggregateChapters(mangaDto.id,
                     MdUtil.getLangsToShow(preferencesHelper))
                     .onError {
-                        XLog.e("error getting aggregate for ${mangaDto.data.id}")
+                        XLog.e("error getting aggregate for ${mangaDto.id}")
                     }.onException {
-                        XLog.e("error getting aggregate for ${mangaDto.data.id}")
+                        XLog.e("error getting aggregate for ${mangaDto.id}")
                     }.getOrNull()
 
                 aggregateDto?.volumes?.values
@@ -52,11 +53,11 @@ class ApiMangaParser {
             manga.description =
                 MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap()["en"] ?: "")
 
-            val authors = mangaDto.data.relationships.filter { relationshipDto ->
+            val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
-            val artists = mangaDto.data.relationships.filter { relationshipDto ->
+            val artists = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.artist, true)
             }.mapNotNull { it.attributes!!.name }.distinct()
 
@@ -151,7 +152,7 @@ class ApiMangaParser {
     }
 
     fun chapterListParse(
-        chapterListResponse: List<ChapterDto>,
+        chapterListResponse: List<ChapterDataDto>,
         groupMap: Map<String, String>,
     ): List<SChapter> {
         return chapterListResponse.asSequence()
@@ -179,12 +180,12 @@ class ApiMangaParser {
     }
 
     private fun mapChapter(
-        networkChapter: ChapterDto,
+        networkChapter: ChapterDataDto,
         groups: Map<String, String>,
     ): SChapter {
         val chapter = SChapter.create()
-        val attributes = networkChapter.data.attributes
-        chapter.url = MdUtil.chapterSuffix + networkChapter.data.id
+        val attributes = networkChapter.attributes
+        chapter.url = MdUtil.chapterSuffix + networkChapter.id
 
         val chapterName = mutableListOf<String>()
         // Build chapter name
@@ -228,7 +229,7 @@ class ApiMangaParser {
         chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
 
         val scanlatorName =
-            networkChapter.data.relationships.filter { it.type == MdConstants.Types.scanlator }
+            networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
                 .mapNotNull { groups[it.id] }.toMutableSet()
 
         if (scanlatorName.contains("no group") || scanlatorName.isEmpty()) {
