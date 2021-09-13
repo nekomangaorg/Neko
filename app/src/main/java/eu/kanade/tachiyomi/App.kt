@@ -56,7 +56,7 @@ open class App : Application(), LifecycleObserver {
     @Suppress("unused")
     fun onAppBackgrounded() {
         // App in background
-        if (preferences.lockAfter().getOrDefault() >= 0) {
+        if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().getOrDefault() >= 0) {
             SecureActivityDelegate.locked = true
         }
     }

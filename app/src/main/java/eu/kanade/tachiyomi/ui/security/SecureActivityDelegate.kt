@@ -15,6 +15,7 @@ object SecureActivityDelegate {
     private val preferences by injectLazy<PreferencesHelper>()
 
     var locked: Boolean = true
+    var isAuthenticating: Boolean = false
 
     fun setSecure(activity: Activity?, force: Boolean? = null) {
         val enabled = force ?: preferences.secureScreen().getOrDefault()
@@ -29,9 +30,9 @@ object SecureActivityDelegate {
     }
 
     fun promptLockIfNeeded(activity: Activity?) {
-        if (activity == null) return
+        if (activity == null || isAuthenticating) return
         val lockApp = preferences.useBiometrics().getOrDefault()
-        if (lockApp && BiometricManager.from(activity).canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
+        if (lockApp && BiometricManager.from(activity).canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
                 intent.putExtra("fromSearch", (activity is SearchActivity))
