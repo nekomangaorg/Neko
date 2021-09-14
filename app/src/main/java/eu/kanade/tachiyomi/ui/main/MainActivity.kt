@@ -82,6 +82,7 @@ import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.toast
@@ -452,28 +453,35 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     private fun setNavBarColor(insets: WindowInsets?) {
         if (insets == null) return
-        window.navigationBarColor = if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1) {
-            // basically if in landscape on a phone
-            // For lollipop, draw opaque nav bar
-            if (insets.hasSideNavBar()) {
-                Color.BLACK
-            } else Color.argb(179, 0, 0, 0)
-        }
-        // if the android q+ device has gesture nav, transparent nav bar
-        // this is here in case some crazy with a notch uses landscape
-        else if (insets.isBottomTappable()) {
-            getColor(android.R.color.transparent)
-        }
-        // if in landscape with 2/3 button mode, fully opaque nav bar
-        else if (insets.hasSideNavBar()) {
-            getResourceColor(R.attr.colorPrimaryVariant)
-        }
-        // if in portrait with 2/3 button mode, translucent nav bar
-        else {
-            ColorUtils.setAlphaComponent(
-                getResourceColor(R.attr.colorPrimaryVariant),
-                179
-            )
+        window.navigationBarColor = when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
+                // basically if in landscape on a phone
+                // For lollipop, draw opaque nav bar
+                when {
+                    insets.hasSideNavBar() -> Color.BLACK
+                    isInNightMode() -> ColorUtils.setAlphaComponent(
+                        getResourceColor(R.attr.colorPrimaryVariant),
+                        179
+                    )
+                    else -> Color.argb(179, 0, 0, 0)
+                }
+            }
+            // if the android q+ device has gesture nav, transparent nav bar
+            // this is here in case some crazy with a notch uses landscape
+            insets.isBottomTappable() -> {
+                getColor(android.R.color.transparent)
+            }
+            // if in landscape with 2/3 button mode, fully opaque nav bar
+            insets.hasSideNavBar() -> {
+                getResourceColor(R.attr.colorPrimaryVariant)
+            }
+            // if in portrait with 2/3 button mode, translucent nav bar
+            else -> {
+                ColorUtils.setAlphaComponent(
+                    getResourceColor(R.attr.colorPrimaryVariant),
+                    179
+                )
+            }
         }
     }
 
