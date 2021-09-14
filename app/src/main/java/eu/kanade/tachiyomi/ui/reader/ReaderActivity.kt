@@ -13,6 +13,7 @@ import android.graphics.drawable.LayerDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.view.HapticFeedbackConstants
 import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
@@ -746,6 +747,9 @@ class ReaderActivity :
         binding.readerNav.pageSeekbar.addOnChangeListener { _, value, fromUser ->
             if (viewer != null && fromUser) {
                 moveToPageIndex(value.roundToInt())
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                    binding.readerNav.pageSeekbar.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
+                }
             }
         }
 
