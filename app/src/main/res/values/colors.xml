@@ -8,6 +8,7 @@
     <color name="secondaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
+    <color name="legacyRippleColor">@color/md_black_1000_12</color>
 
     <color name="gray">#404040</color>
 
@@ -28,6 +29,8 @@
     <color name="background">@color/md_grey_50</color>
     <color name="dialog">@color/md_white_1000</color>
     <color name="splashIcon">@color/md_black_1000</color>
+    <color name="colorOnSurface">@color/md_black_1000</color>
+    <color name="colorOnBackground">@color/md_black_1000_87</color>
 
 
     <color name="elevated_dark_background">#121212</color>

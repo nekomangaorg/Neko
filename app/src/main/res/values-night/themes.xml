@@ -58,6 +58,4 @@
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
     </style>
-
-
 </resources>

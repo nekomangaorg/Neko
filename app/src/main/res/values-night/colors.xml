@@ -3,6 +3,10 @@
     <!-- Application Colors -->
     <color name="primaryVariantTachiyomi">#292929</color>
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
+    <color name="legacyRippleColor">@color/md_white_1000_20</color>
+    <color name="colorOnSurface">@color/md_white_1000</color>
+    <color name="colorOnBackground">@color/md_white_1000</color>
+
     <color name="secondaryTachiyomi">@color/neko_green</color>
     <color name="secondaryVariantTachiyomi">@color/neko_green_darker</color>
     <color name="actionModeShadow">@color/md_black_1000</color>

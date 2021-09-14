@@ -21,18 +21,13 @@
         <!--Standard Material colors -->
         <item name="colorPrimary">@color/primaryTachiyomi</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTachiyomi</item>
-        <item name="colorSurface">@color/background</item>
-        //old colorSecondary
-        <item name="colorOnSurface">@color/md_black_1000</item>
-        //old colorOnSecondary
-        <item name="colorSecondary">@color/secondaryTachiyomi</item>
-        //colorAccent
-        <item name="colorOnSecondary">@color/md_white_1000</item>
-        // colorOnSecondary
-        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item>
-        //colorAccentText
+        <item name="colorSurface">@color/background</item> //old colorSecondary
+        <item name="colorOnSurface">@color/colorOnSurface</item> //old colorOnSecondary
+        <item name="colorSecondary">@color/secondaryTachiyomi</item> //colorAccent
+        <item name="colorOnSecondary">@color/md_white_1000</item> // colorOnSecondary
+        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item> //colorAccentText
         <item name="background">@color/background</item>
-        <item name="colorOnBackground">@color/md_black_1000_87</item>
+        <item name="colorOnBackground">@color/colorOnBackground</item>
         <item name="colorBackgroundFloating">?colorSurface</item>
         <item name="elevationOverlayEnabled">false</item>
         <item name="readerBackground">@color/primaryVariantTachiyomi</item>
@@ -40,7 +35,7 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
         <item name="actionModeStyle">@style/CustomActionModeStyle</item>
-        <item name="colorControlHighlight">@color/secondary_highlight</item>
+        <item name="colorControlHighlight">@color/legacyRippleColor</item>
         <item name="android:colorBackground">?background</item>
         <item name="android:colorControlHighlight">@color/secondary_highlight</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
@@ -75,8 +70,8 @@
         <item name="md_button_casing">literal</item>
         <item name="md_corner_radius">12dp</item>
 
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">true</item>
+        <item name="android:windowLightStatusBar">@bool/isLightMode</item>
+        <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/isLightMode</item>
     </style>
 
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
