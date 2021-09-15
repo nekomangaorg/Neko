@@ -25,6 +25,7 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
@@ -461,17 +462,19 @@ class RecentsController(bundle: Bundle? = null) :
         setBottomPadding()
         binding.downloadBottomSheet.dlBottomSheet.update()
 
-        val searchItem =
-            (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
-        val searchView = searchItem?.actionView as? SearchView ?: return
-        if (router.backstack.lastOrNull()?.controller != this) return
-        setOnQueryTextChangeListener(searchView) {
-            if (query != it) {
-                query = it ?: return@setOnQueryTextChangeListener false
-                resetProgressItem()
-                refresh()
+        if (BuildConfig.DEBUG && query.isBlank()) {
+            val searchItem =
+                (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+            val searchView = searchItem?.actionView as? SearchView ?: return
+            if (router.backstack.lastOrNull()?.controller != this) return
+            setOnQueryTextChangeListener(searchView) {
+                if (query != it) {
+                    query = it ?: return@setOnQueryTextChangeListener false
+                    resetProgressItem()
+                    refresh()
+                }
+                true
             }
-            true
         }
     }
 
