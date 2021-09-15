@@ -151,8 +151,8 @@ class LibraryPresenter(
 
     fun getItemCountInCategories(categoryId: Int): Int {
         val items = sectionedLibraryItems[categoryId]
-        return if (items?.firstOrNull()?.manga?.isHidden() == true) {
-            items?.firstOrNull()?.manga?.read ?: 0
+        return if (items?.firstOrNull()?.manga?.isHidden() == true || items?.firstOrNull()?.manga?.isBlank() == true) {
+            items.firstOrNull()?.manga?.read ?: 0
         } else {
             sectionedLibraryItems[categoryId]?.size ?: 0
         }
