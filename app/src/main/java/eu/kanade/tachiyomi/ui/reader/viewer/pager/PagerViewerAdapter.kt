@@ -140,12 +140,13 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
     override fun getItemPosition(view: Any): Int {
         if (view is PositionableView) {
             val position = joinedItems.indexOfFirst {
-                val secondPage = it.second as? ReaderPage
                 if (it.first is InsertPage && view.item is Pair<*, *>) {
                     ((view.item as? Pair<*, *>?)?.first as? InsertPage)?.let { viewPage ->
-                        return@indexOfFirst (it.first as? InsertPage)?.isFromSamePage(viewPage) == true
+                        return@indexOfFirst (it.first as? InsertPage)?.isFromSamePage(viewPage) == true &&
+                            (it.first as? InsertPage)?.firstHalf == viewPage.firstHalf
                     }
                 }
+                val secondPage = it.second as? ReaderPage
                 view.item == it.first to secondPage
             }
             if (position != -1) {
