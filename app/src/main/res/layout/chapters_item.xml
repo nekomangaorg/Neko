@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone"
-        android:background="?attr/colorAccent"
+        android:background="?attr/colorSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -22,7 +22,7 @@
             android:id="@+id/read"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            app:tint="?attr/colorSecondary"
+            app:tint="?attr/colorOnSecondary"
             android:layout_gravity="end|center"
             android:layout_marginEnd="21dp"
             android:src="@drawable/ic_read_24dp" />
@@ -46,7 +46,7 @@
             android:layout_height="24dp"
             android:layout_gravity="start|center"
             android:layout_marginStart="21dp"
-            app:tint="?colorOnSecondary"
+            app:tint="?attr/colorOnSecondary"
             android:src="@drawable/ic_bookmark_24dp" />
     </FrameLayout>
 
