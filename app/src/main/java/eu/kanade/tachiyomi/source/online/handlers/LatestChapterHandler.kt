@@ -21,7 +21,10 @@ class LatestChapterHandler {
     private val service: MangaDexService by lazy { Injekt.get<NetworkHelper>().service }
     private val preferencesHelper: PreferencesHelper by injectLazy()
 
+    private val uniqueManga = mutableSetOf<String>()
+
     suspend fun getPage(page: Int): MangaListPage {
+        if (page == 1) uniqueManga.clear()
         return withContext(Dispatchers.IO) {
             val limit = MdUtil.latestChapterLimit
             val offset = MdUtil.getLatestChapterListOffset(page)
@@ -46,7 +49,10 @@ class LatestChapterHandler {
         val chapterListDto = response.body()!!
 
         val mangaIds = chapterListDto.data.asSequence().map { it.relationships }.flatten()
-            .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct().toList()
+            .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct()
+            .filter { uniqueManga.contains(it).not() }.toList()
+
+        uniqueManga.addAll(mangaIds)
 
         val allContentRating = listOf(MdConstants.ContentRating.safe,
             MdConstants.ContentRating.suggestive,
