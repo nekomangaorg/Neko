@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi
 
 import android.app.Application
+import androidx.core.content.ContextCompat
 import com.google.gson.Gson
 import eu.kanade.tachiyomi.data.cache.ChapterCache
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -31,8 +32,6 @@ import eu.kanade.tachiyomi.ui.similar.SimilarRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.api.InjektModule
 import uy.kohesive.injekt.api.InjektRegistrar
@@ -112,15 +111,16 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { MangaShortcutManager() }
 
         // Asynchronously init expensive components for a faster cold start
+        ContextCompat.getMainExecutor(app).execute {
+            get<PreferencesHelper>()
 
-        GlobalScope.launch { get<PreferencesHelper>() }
+            get<NetworkHelper>()
 
-        GlobalScope.launch { get<NetworkHelper>() }
+            get<SourceManager>()
 
-        GlobalScope.launch { get<SourceManager>() }
+            get<DatabaseHelper>()
 
-        GlobalScope.launch { get<DatabaseHelper>() }
-
-        GlobalScope.launch { get<DownloadManager>() }
+        get<DownloadManager>()
+    }
     }
 }
