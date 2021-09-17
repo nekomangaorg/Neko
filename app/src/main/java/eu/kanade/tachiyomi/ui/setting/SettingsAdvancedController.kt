@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.os.Environment
 import android.os.PowerManager
@@ -84,24 +83,22 @@ class SettingsAdvancedController : SettingsController() {
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
-            if (pm != null) preference {
-                key = "disable_batt_opt"
-                titleRes = R.string.disable_battery_optimization
-                summaryRes = R.string.disable_if_issues_with_updating
+        val pm = context.getSystemService(Context.POWER_SERVICE) as? PowerManager?
+        if (pm != null) preference {
+            key = "disable_batt_opt"
+            titleRes = R.string.disable_battery_optimization
+            summaryRes = R.string.disable_if_issues_with_updating
 
-                onClick {
-                    val packageName: String = context.packageName
-                    if (!pm.isIgnoringBatteryOptimizations(packageName)) {
-                        val intent = Intent().apply {
-                            action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
-                            data = "package:$packageName".toUri()
-                        }
-                        startActivity(intent)
-                    } else {
-                        context.toast(R.string.battery_optimization_disabled)
+            onClick {
+                val packageName: String = context.packageName
+                if (!pm.isIgnoringBatteryOptimizations(packageName)) {
+                    val intent = Intent().apply {
+                        action = Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS
+                        data = "package:$packageName".toUri()
                     }
+                    startActivity(intent)
+                } else {
+                    context.toast(R.string.battery_optimization_disabled)
                 }
             }
         }
