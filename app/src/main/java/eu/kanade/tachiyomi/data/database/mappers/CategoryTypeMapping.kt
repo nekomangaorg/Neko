@@ -68,7 +68,7 @@ class CategoryGetResolver : DefaultGetResolver<Category>() {
                 mangaSort = orderString.first()
                 mangaOrder = emptyList()
             }
-            else -> mangaOrder = orderString.split("/")?.mapNotNull { it.toLongOrNull() }
+            else -> mangaOrder = orderString.split("/").mapNotNull { it.toLongOrNull() }
         }
     }
 }

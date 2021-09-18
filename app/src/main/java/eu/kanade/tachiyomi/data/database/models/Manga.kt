@@ -100,7 +100,7 @@ interface Manga : SManga {
                 TYPE_COMIC -> R.string.comic
                 else -> R.string.manga
             }
-        ).toLowerCase(Locale.getDefault())
+        ).lowercase(Locale.getDefault())
     }
 
     fun getGenres(): List<String>? {
