@@ -9,7 +9,9 @@ import android.os.Environment
 import android.os.PowerManager
 import android.provider.Settings
 import android.widget.Toast
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
 import com.afollestad.materialdialogs.MaterialDialog
 import com.afollestad.materialdialogs.list.listItemsMultiChoice
@@ -28,6 +30,8 @@ import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.CrashLogUtil
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.log.XLogLevel
 import eu.kanade.tachiyomi.util.system.CrashLogUtil
 import eu.kanade.tachiyomi.util.system.launchUI
@@ -139,7 +143,9 @@ class SettingsAdvancedController : SettingsController() {
 
                 onClick {
                     context.toast(R.string.starting_cleanup)
-                    coverCache.deleteOldCovers()
+                    (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                        coverCache.deleteOldCovers()
+                    }
                 }
             }
             preference {
@@ -152,7 +158,9 @@ class SettingsAdvancedController : SettingsController() {
 
                 onClick {
                     context.toast(R.string.starting_cleanup)
-                    coverCache.deleteAllCachedCovers()
+                    (activity as? AppCompatActivity)?.lifecycleScope?.launchIO {
+                        coverCache.deleteAllCachedCovers()
+                    }
                 }
             }
             preference {
