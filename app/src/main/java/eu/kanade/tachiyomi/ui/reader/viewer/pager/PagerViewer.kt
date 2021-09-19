@@ -26,7 +26,7 @@ import kotlinx.coroutines.cancel
 @Suppress("LeakingThis")
 abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
 
-    private val scope = MainScope()
+    val scope = MainScope()
 
     /**
      * View pager used by this viewer. It's abstract to implement L2R, R2L and vertical pagers on
