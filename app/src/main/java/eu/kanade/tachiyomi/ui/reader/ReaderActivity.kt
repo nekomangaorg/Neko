@@ -746,8 +746,12 @@ class ReaderActivity :
         // Init listeners on bottom menu
         binding.readerNav.pageSeekbar.addOnChangeListener { _, value, fromUser ->
             if (viewer != null && fromUser) {
+                val prevValue = (viewer as? PagerViewer)?.pager?.currentItem ?: -1
                 moveToPageIndex(value.roundToInt())
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
+                val newValue = (viewer as? PagerViewer)?.pager?.currentItem ?: -1
+                if (prevValue > -1 && newValue != prevValue &&
+                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+                ) {
                     binding.readerNav.pageSeekbar.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
                 }
             }
