@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
+import androidx.annotation.ColorInt
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
 import androidx.core.view.isVisible
@@ -76,6 +77,12 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
             binding.upperText.textAlignment = TEXT_ALIGNMENT_CENTER
             binding.upperText.text = context.getString(R.string.theres_no_next_chapter)
         }
+    }
+
+    fun setTextColors(@ColorInt color: Int) {
+        binding.upperText.setTextColor(color)
+        binding.warningText.setTextColor(color)
+        binding.lowerText.setTextColor(color)
     }
 
     private fun missingChapterWarning(transition: ChapterTransition) {
