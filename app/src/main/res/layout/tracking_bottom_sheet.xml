@@ -103,7 +103,7 @@
             android:layout_width="match_parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHeight_default="wrap"
+            app:layout_constraintHeight="true"
             app:layout_constraintTop_toBottomOf="@id/title_layout"
             app:layout_constraintBottom_toTopOf="@id/text_input_layout"
             android:layout_height="0dp">

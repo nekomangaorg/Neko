@@ -1131,14 +1131,14 @@ class LibraryPresenter(
             db: DatabaseHelper,
             sourceManager: SourceManager,
         ) {
-            val random: Random = {
+            val random: Random = run {
                 val cal = Calendar.getInstance()
                 cal.time = Date()
                 cal[Calendar.MINUTE] = 0
                 cal[Calendar.SECOND] = 0
                 cal[Calendar.MILLISECOND] = 0
                 Random(cal.time.time)
-            }()
+            }
 
             val recentManga by lazy {
                 runBlocking {
