@@ -68,6 +68,7 @@ class MangaHeaderHolder(
     private var showReadingButton = true
     private var showMoreButton = true
     var hadSelection = false
+    private var canCollapse = true
 
     init {
 
@@ -207,7 +208,7 @@ class MangaHeaderHolder(
 
     private fun collapseDesc(animated: Boolean = false) {
         binding ?: return
-        if (isTablet) return
+        if (isTablet || !canCollapse) return
         binding.moreButtonGroup.isVisible = !isTablet
         if (animated) {
             val animVector = AnimatedVectorDrawableCompat.create(
@@ -309,15 +310,14 @@ class MangaHeaderHolder(
 
 
         binding.mangaSummary.post {
-//            if (binding.subItemGroup.isVisible) {
-//                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) || binding.lessButton.isVisible) {
-//                    binding.mangaSummary.setTextIsSelectable(true)
-//                    binding.moreButtonGroup.isVisible = false
-//                    showMoreButton = binding.lessButton.isVisible
-//                } else {
-//                    binding.moreButtonGroup.isVisible = true
-//                }
-//            }
+            if (binding.subItemGroup.isVisible) {
+                if ((binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()) && binding.moreButton.isVisible) {
+                    expandDesc()
+                    binding.lessButton.isVisible = false
+                    showMoreButton = binding.lessButton.isVisible
+                    canCollapse = false
+                }
+            }
             if (adapter.hasFilter()) collapse()
             else expand()
         }
@@ -551,6 +551,7 @@ class MangaHeaderHolder(
 
     fun collapse() {
         binding ?: return
+        if (!canCollapse) return
         binding.subItemGroup.isVisible = false
         binding.startReadingButton.isVisible = false
         if (binding.moreButton.isVisible || binding.moreButton.isInvisible) {
