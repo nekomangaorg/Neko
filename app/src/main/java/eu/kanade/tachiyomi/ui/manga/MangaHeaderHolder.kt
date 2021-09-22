@@ -252,7 +252,7 @@ class MangaHeaderHolder(
                 desc.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
                 binding.mangaSummary.maxLines != Int.MAX_VALUE -> desc.replace(
                     Regex(
-                        "[\\r\\n]{2,}",
+                        "[\\r\\n\\s*]{2,}",
                         setOf(RegexOption.MULTILINE)
                     ),
                     "\n"
