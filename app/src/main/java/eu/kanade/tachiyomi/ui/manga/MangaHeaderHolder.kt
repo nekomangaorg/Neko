@@ -19,6 +19,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.transition.TransitionSet
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
@@ -189,7 +190,10 @@ class MangaHeaderHolder(
             binding.mangaAuthor.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.requestFocus()
             if (animated) {
-                val transition = androidx.transition.ChangeBounds()
+                val transition = TransitionSet()
+                    .addTransition(androidx.transition.ChangeBounds())
+                    .addTransition(androidx.transition.Fade())
+                    .addTransition(androidx.transition.Slide())
                 transition.duration = binding.root.resources.getInteger(
                     android.R.integer.config_shortAnimTime
                 ).toLong()
@@ -206,13 +210,27 @@ class MangaHeaderHolder(
         if (isTablet) return
         binding.moreButtonGroup.isVisible = !isTablet
         if (animated) {
-            val animVector = AnimatedVectorDrawableCompat.create(binding.root.context,
-                R.drawable.anim_expand_less_to_more)
-            binding.moreButton.setCompoundDrawablesRelativeWithIntrinsicBounds(null,
+            val animVector = AnimatedVectorDrawableCompat.create(
+                binding.root.context,
+                R.drawable.anim_expand_less_to_more
+            )
+            binding.moreButton.setCompoundDrawablesRelativeWithIntrinsicBounds(
+                null,
                 null,
                 animVector,
-                null)
+                null
+            )
             animVector?.start()
+            val transition = TransitionSet()
+                .addTransition(androidx.transition.ChangeBounds())
+                .addTransition(androidx.transition.Fade())
+            transition.duration = binding.root.resources.getInteger(
+                android.R.integer.config_shortAnimTime
+            ).toLong()
+            androidx.transition.TransitionManager.beginDelayedTransition(
+                adapter.controller.binding.recycler,
+                transition
+            )
         }
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
