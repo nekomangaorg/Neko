@@ -5,14 +5,17 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.net.ConnectivityManager
-import android.net.NetworkInfo.State.CONNECTED
-import android.net.NetworkInfo.State.DISCONNECTED
+import android.net.Network
+import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
+import android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED
+import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
+import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import com.github.pwittchen.reactivenetwork.library.Connectivity
-import com.github.pwittchen.reactivenetwork.library.ReactiveNetwork
+import androidx.work.NetworkType
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -21,9 +24,6 @@ import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.powerManager
-import eu.kanade.tachiyomi.util.system.toast
-import rx.android.schedulers.AndroidSchedulers
-import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
@@ -115,12 +115,34 @@ class DownloadService : Service() {
      */
     private lateinit var subscriptions: CompositeSubscription
 
+    private val networkCallback = object : ConnectivityManager.NetworkCallback() {
+        override fun onAvailable(network: Network) {
+            onNetworkStateChanged()
+        }
+
+        override fun onLost(network: Network) {
+            onNetworkStateChanged()
+        }
+
+        override fun onCapabilitiesChanged(
+            network: Network,
+            networkCapabilities: NetworkCapabilities
+        ) {
+            onNetworkStateChanged()
+        }
+
+        override fun onUnavailable() {
+            onNetworkStateChanged()
+        }
+    }
+
     /**
      * Called when the service is created.
      */
     override fun onCreate() {
         super.onCreate()
         startForeground(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, getPlaceholderNotification())
+        downloadManager.setPlaceholder()
         runningRelay.call(true)
         subscriptions = CompositeSubscription()
         listenDownloaderState()
@@ -133,6 +155,7 @@ class DownloadService : Service() {
     override fun onDestroy() {
         runningRelay.call(false)
         subscriptions.unsubscribe()
+        connectivityManager.unregisterNetworkCallback(networkCallback)
         downloadManager.stopDownloads()
         callListeners(downloadManager.hasQueue())
         wakeLock.releaseIfNeeded()
@@ -159,40 +182,31 @@ class DownloadService : Service() {
      * @see onNetworkStateChanged
      */
     private fun listenNetworkChanges() {
-        subscriptions += ReactiveNetwork.observeNetworkConnectivity(applicationContext)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(
-                { state ->
-                    onNetworkStateChanged(state)
-                },
-                {
-                    toast(R.string.could_not_download_chapter_can_try_again)
-                    stopSelf()
-                }
-            )
+        onNetworkStateChanged()
+        val networkChangeFilter = NetworkRequest.Builder().build()
+        connectivityManager.registerNetworkCallback(networkChangeFilter, networkCallback)
+        return
     }
 
     /**
      * Called when the network state changes.
      *
-     * @param connectivity the new network state.
      */
-    private fun onNetworkStateChanged(connectivity: Connectivity) {
-        when (connectivity.state) {
-            CONNECTED -> {
-                if (preferences.downloadOnlyOverWifi() && connectivityManager.activeNetworkInfo?.type != ConnectivityManager.TYPE_WIFI) {
-                    downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
-                } else {
-                    val started = downloadManager.startDownloads()
-                    if (!started) stopSelf()
-                }
-            }
-            DISCONNECTED -> {
-                downloadManager.stopDownloads(getString(R.string.no_network_connection))
-            }
-            else -> { /* Do nothing */
-            }
+    private fun onNetworkStateChanged() {
+        val manager = connectivityManager
+        val networkCapabilities = manager.getNetworkCapabilities(manager.activeNetwork)
+        if (networkCapabilities == null || !(networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED))) {
+            downloadManager.stopDownloads(getString(R.string.no_network_connection))
+            return
+        }
+        if (preferences.downloadOnlyOverWifi() &&
+            !networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
+        ) {
+            downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
+        } else {
+            val started = downloadManager.startDownloads()
+            if (!started) stopSelf()
         }
     }
 
