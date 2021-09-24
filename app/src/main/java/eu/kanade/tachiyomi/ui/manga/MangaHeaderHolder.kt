@@ -311,8 +311,9 @@ class MangaHeaderHolder(
 
         binding.mangaSummary.post {
             if (binding.subItemGroup.isVisible) {
-                if (binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank()
-                    && binding.moreButton.isVisible && manga.initialized) {
+                if (binding.mangaSummary.lineCount < 3 && manga.genre.isNullOrBlank() &&
+                    binding.moreButton.isVisible && manga.initialized
+                ) {
                     expandDesc()
                     binding.lessButton.isVisible = false
                     showMoreButton = binding.lessButton.isVisible
