@@ -30,7 +30,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 460.dpToPx + height
+        sheetBehavior.peekHeight = 470.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -161,7 +161,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
             val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
 
             MaterialDialog(activity!!)
-                .title(R.string.filter_groups_title)
+                .title(R.string.filter_groups)
                 .listItemsMultiChoice(
                     items = scanlators,
                     initialSelection = preselected.toIntArray(),
