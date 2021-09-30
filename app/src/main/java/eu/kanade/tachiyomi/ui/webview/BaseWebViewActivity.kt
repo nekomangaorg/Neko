@@ -16,9 +16,12 @@ import androidx.core.net.toUri
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.webkit.WebSettingsCompat.*
+import androidx.webkit.WebViewFeature
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.WebviewActivityBinding
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
+import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
@@ -103,6 +106,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             insets
         }
 
+        setWebDarkMode()
         binding.swipeRefresh.isEnabled = false
 
         if (bundle == null) {
@@ -133,6 +137,21 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         }
     }
 
+    private fun setWebDarkMode() {
+        if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
+            setForceDarkStrategy(
+                binding.webview.settings,
+                DARK_STRATEGY_WEB_THEME_DARKENING_ONLY
+            )
+            if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
+                setForceDark(
+                    binding.webview.settings,
+                    if (isInNightMode()) FORCE_DARK_ON else FORCE_DARK_OFF
+                )
+            }
+        }
+    }
+
     override fun onProvideAssistContent(outContent: AssistContent?) {
         super.onProvideAssistContent(outContent)
         binding.webview.url?.let { outContent?.webUri = it.toUri() }
@@ -150,15 +169,16 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         setTheme(prefTheme.styleRes)
         if (!lightMode && preferences.themeDarkAmoled().get()) {
             setTheme(R.style.ThemeOverlay_Tachiyomi_Amoled)
-            /* if (ThemeUtil.isColoredTheme(prefTheme)) {
-                 setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
-             }*/
+            if (ThemeUtil.isColoredTheme(prefTheme)) {
+                setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
+            }
         }
         window.statusBarColor = ColorUtils.setAlphaComponent(
             getResourceColor(R.attr.colorSurface),
             255
         )
-        binding.toolbar.setBackgroundColor(getResourceColor(R.attr.colorSecondary))
+        setWebDarkMode()
+        binding.toolbar.setBackgroundColor(getResourceColor(R.attr.colorSurface))
         binding.toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
             .style.ThemeOverlay_MaterialComponents_Dark
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
