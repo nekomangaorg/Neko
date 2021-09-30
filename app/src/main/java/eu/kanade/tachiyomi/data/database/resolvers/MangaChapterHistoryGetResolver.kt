@@ -40,20 +40,23 @@ class MangaChapterHistoryGetResolver : DefaultGetResolver<MangaChapterHistory>()
 
         // Get chapter object
         val chapter =
-            if (!cursor.isNull(cursor.getColumnIndex(ChapterTable.COL_MANGA_ID))) chapterResolver
-                .mapFromCursor(
-                    cursor
-                ) else ChapterImpl()
+            if (!cursor.isNull(cursor.getColumnIndex(ChapterTable.COL_MANGA_ID))) {
+                chapterResolver.mapFromCursor(cursor)
+            } else {
+                ChapterImpl()
+            }
 
         // Get history object
         val history =
-            if (!cursor.isNull(cursor.getColumnIndex(HistoryTable.COL_ID))) historyGetResolver.mapFromCursor(
-                cursor
-            ) else HistoryImpl().apply {
-                last_read = try {
-                    cursor.getLong(cursor.getColumnIndex(HistoryTable.COL_LAST_READ))
-                } catch (e: Exception) {
-                    0L
+            if (!cursor.isNull(cursor.getColumnIndex(HistoryTable.COL_ID))) {
+                historyGetResolver.mapFromCursor(cursor)
+            } else {
+                HistoryImpl().apply {
+                    last_read = try {
+                        cursor.getLong(cursor.getColumnIndex(HistoryTable.COL_LAST_READ))
+                    } catch (e: Exception) {
+                        0L
+                    }
                 }
             }
 

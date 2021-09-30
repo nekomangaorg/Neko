@@ -15,7 +15,7 @@
         android:paddingTop="0dp"
         android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area">
 
-        <androidx.legacy.widget.Space
+        <Space
             android:id="@+id/spinner_end"
             android:layout_width="16dp"
             android:layout_height="0dp"

@@ -85,9 +85,7 @@ class MangaDetailsAdapter(
             }
             MangaDetailsPresenter.TENS_OF_CHAPTERS -> recyclerView.context.getString(
                 R.string.chapters_,
-                get10sRange(
-                    chapter.chapter_number
-                )
+                get10sRange(chapter.chapter_number)
             )
             else -> getChapterName(chapter)
         }
