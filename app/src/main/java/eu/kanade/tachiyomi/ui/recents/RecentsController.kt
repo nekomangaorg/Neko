@@ -3,14 +3,7 @@ package eu.kanade.tachiyomi.ui.recents
 import android.app.Activity
 import android.content.res.ColorStateList
 import android.os.Bundle
-import android.os.Handler
-import android.view.LayoutInflater
-import android.view.Menu
-import android.view.MenuInflater
-import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
-import android.view.WindowInsets
+import android.view.*
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -46,29 +39,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
 import eu.kanade.tachiyomi.ui.source.browse.ProgressItem
-import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
-import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.hasColoredActionBar
-import eu.kanade.tachiyomi.util.system.isLTR
-import eu.kanade.tachiyomi.util.system.spToPx
-import eu.kanade.tachiyomi.util.system.toInt
-import eu.kanade.tachiyomi.util.view.activityBinding
-import eu.kanade.tachiyomi.util.view.collapse
-import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.hide
-import eu.kanade.tachiyomi.util.view.isCollapsed
-import eu.kanade.tachiyomi.util.view.isExpanded
-import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
-import eu.kanade.tachiyomi.util.view.scrollViewWith
-import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
-import eu.kanade.tachiyomi.util.view.setStyle
-import eu.kanade.tachiyomi.util.view.smoothScrollToTop
-import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.toolbarHeight
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import java.util.Locale
+import eu.kanade.tachiyomi.util.system.*
+import eu.kanade.tachiyomi.util.view.*
+import java.util.*
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -93,10 +66,6 @@ class RecentsController(bundle: Bundle? = null) :
     init {
         setHasOptionsMenu(true)
         retainViewMode = RetainViewMode.RETAIN_DETACH
-    }
-
-    constructor(viewType: Int) : this() {
-        presenter.toggleGroupRecents(viewType, false)
     }
 
     /**
@@ -357,7 +326,7 @@ class RecentsController(bundle: Bundle? = null) :
                         }
                     setAction(R.string.cancel) {
                         LibraryUpdateService.stop(context)
-                        Handler().post {
+                        viewScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
                                 Notifications.ID_LIBRARY_PROGRESS
@@ -734,9 +703,7 @@ class RecentsController(bundle: Bundle? = null) :
                 ).forEachIndexed { index, resId ->
                     tabs.addTab(
                         tabs.newTab().setText(resId).also { tab ->
-                            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-                                tab.view.tooltipText = null
-                            }
+                            tab.view.compatToolTipText = null
                         },
                         index == selectedTab
                     )
