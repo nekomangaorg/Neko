@@ -239,7 +239,7 @@ dependencies {
     implementation("me.saket.cascade:cascade:1.3.0")
 
     //Compose
-    val composeVersion = "1.0.2"
+    val composeVersion = "1.0.3"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     // Tooling support (Previews, etc.)
