@@ -178,7 +178,7 @@ dependencies {
     implementation("com.github.tachiyomiorg:unifile:17bec43")
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.14.2")
+    implementation("org.jsoup:jsoup:1.14.3")
 
     // Icons
     implementation("com.mikepenz:iconics-core:5.3.1")
