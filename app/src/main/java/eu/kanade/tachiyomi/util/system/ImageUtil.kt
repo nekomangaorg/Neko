@@ -111,7 +111,6 @@ object ImageUtil {
         val midX = image.width / 2
         val midY = image.height / 2
         val offsetX = (image.width * 0.01).toInt()
-        val offsetY = (image.height * 0.01).toInt()
         val topLeftIsDark = isDark(image.getPixel(left, top))
         val topRightIsDark = isDark(image.getPixel(right, top))
         val midLeftIsDark = isDark(image.getPixel(left, midY))

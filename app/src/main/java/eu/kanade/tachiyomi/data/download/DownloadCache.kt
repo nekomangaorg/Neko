@@ -217,7 +217,7 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      */
     @Synchronized
-    fun addChapter(chapterDirName: String, mangaUniFile: UniFile, manga: Manga) {
+    fun addChapter(chapterDirName: String, manga: Manga) {
         val id = manga.id ?: return
         val files = mangaFiles[id]
         val mangadexId = chapterDirName.substringAfterLast("- ")

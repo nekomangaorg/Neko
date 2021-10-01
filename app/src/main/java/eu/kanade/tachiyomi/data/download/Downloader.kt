@@ -531,7 +531,7 @@ class Downloader(
         // Only rename the directory if it's downloaded.
         if (download.status == Download.State.DOWNLOADED) {
             tmpDir.renameTo(dirname)
-            cache.addChapter(dirname, mangaDir, download.manga)
+            cache.addChapter(dirname, download.manga)
 
             DiskUtil.createNoMediaFile(tmpDir, context)
         }

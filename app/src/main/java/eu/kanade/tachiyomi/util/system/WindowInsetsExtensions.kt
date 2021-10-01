@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.os.Build
+import android.view.View
 import android.view.WindowInsets
 import androidx.annotation.RequiresApi
+import androidx.core.view.WindowInsetsCompat
 
 fun WindowInsets.getBottomGestureInsets(): Int {
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) mandatorySystemGestureInsets.bottom
@@ -16,6 +18,9 @@ fun WindowInsets.isBottomTappable() = (
     )
 
 fun WindowInsets.hasSideInsets() = systemWindowInsetLeft > 0 || systemWindowInsetRight > 0
+
+val View.rootWindowInsetsCompat
+get() = rootWindowInsets?.let { WindowInsetsCompat.toWindowInsetsCompat(it) }
 
 /** returns if device is in landscape with 2/3 button mode */
 fun WindowInsets.hasSideNavBar() =

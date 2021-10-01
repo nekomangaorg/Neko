@@ -6,11 +6,13 @@ import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.widget.NestedScrollView
 import androidx.viewpager.widget.ViewPager
 import com.google.android.material.tabs.TabLayout
 import eu.kanade.tachiyomi.databinding.TabbedBottomSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
 import kotlin.math.max
 
@@ -23,7 +25,7 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
     open var offset = -1
 
     init {
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetTop
+        val height = activity.window.decorView.rootWindowInsetsCompat!!.getInsets(systemBars()).top
         binding.pager.maxHeight = activity.window.decorView.height - height - 125.dpToPx
 
         val adapter = TabbedSheetAdapter()
