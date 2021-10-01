@@ -20,7 +20,7 @@ fun WindowInsets.isBottomTappable() = (
 fun WindowInsets.hasSideInsets() = systemWindowInsetLeft > 0 || systemWindowInsetRight > 0
 
 val View.rootWindowInsetsCompat
-get() = rootWindowInsets?.let { WindowInsetsCompat.toWindowInsetsCompat(it) }
+    get() = rootWindowInsets?.let { WindowInsetsCompat.toWindowInsetsCompat(it) }
 
 /** returns if device is in landscape with 2/3 button mode */
 fun WindowInsets.hasSideNavBar() =
