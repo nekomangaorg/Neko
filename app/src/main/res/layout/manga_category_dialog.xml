@@ -18,7 +18,7 @@
         app:hintEnabled="false"
         app:hintTextColor="?attr/colorSecondary">
 
-        <com.google.android.material.textfield.TextInputEditText
+        <eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText
             android:id="@+id/title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

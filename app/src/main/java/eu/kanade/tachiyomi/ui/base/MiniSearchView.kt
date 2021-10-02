@@ -13,13 +13,19 @@ import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.widget.TachiyomiTextInputEditText.Companion.setIncognito
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.cancel
 
 class MiniSearchView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     SearchView(context, attrs) {
 
+    private var scope: CoroutineScope? = null
+    private val searchTextView: SearchAutoComplete? = findViewById(androidx.appcompat.R.id.search_src_text)
+
     init {
-        val searchTextView =
-            findViewById<SearchAutoComplete>(androidx.appcompat.R.id.search_src_text)
         searchTextView?.setTextAppearance(android.R.style.TextAppearance_Material_Body1)
         val actionColorAlpha =
             ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.actionBarTintColor), 200)
@@ -37,6 +43,18 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
 
         val searchMagIconImageView = findViewById<ImageView>(androidx.appcompat.R.id.search_mag_icon)
         searchMagIconImageView?.layoutParams = LinearLayout.LayoutParams(0, 0)
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
+        searchTextView?.setIncognito(scope!!)
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        scope?.cancel()
+        scope = null
     }
 
     override fun onActionViewExpanded() {
