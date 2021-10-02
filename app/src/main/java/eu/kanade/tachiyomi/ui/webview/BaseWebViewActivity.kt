@@ -72,12 +72,15 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 left = insets.getInsets(systemBars()).left,
                 right = insets.getInsets(systemBars()).right
             )
-            WindowInsetsCompat.Builder(insets).setInsets(systemBars(), Insets.of(
-                0,
-                insets.getInsets(systemBars()).top,
-                0,
-                insets.getInsets(systemBars()).bottom
-            )).build()
+            WindowInsetsCompat.Builder(insets).setInsets(
+                systemBars(),
+                Insets.of(
+                    0,
+                    insets.getInsets(systemBars()).top,
+                    0,
+                    insets.getInsets(systemBars()).bottom
+                )
+            ).build()
         }
         binding.swipeRefresh.setStyle()
         binding.swipeRefresh.setOnRefreshListener {
