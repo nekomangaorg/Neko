@@ -542,7 +542,7 @@ open class BrowseSourceController(bundle: Bundle) :
             val searchItem =
                 (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
             val searchView = searchItem?.actionView as? SearchView ?: return
-            setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
+            setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
                 searchWithQuery(it ?: "")
                 true
             }
