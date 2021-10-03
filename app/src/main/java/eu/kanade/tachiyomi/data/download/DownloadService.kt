@@ -7,22 +7,23 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
-import android.net.NetworkCapabilities.NET_CAPABILITY_INTERNET
-import android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED
-import android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
+import androidx.work.NetworkType
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.lang.plusAssign
 import eu.kanade.tachiyomi.util.system.connectivityManager
+import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.powerManager
+import eu.kanade.tachiyomi.util.system.wifiManager
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
@@ -193,16 +194,11 @@ class DownloadService : Service() {
     private fun onNetworkStateChanged() {
         val manager = connectivityManager
         val networkCapabilities = manager.getNetworkCapabilities(manager.activeNetwork)
-        if (networkCapabilities == null || !(networkCapabilities.hasCapability(
-                NET_CAPABILITY_INTERNET) &&
-                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED))
-        ) {
+        if (networkCapabilities == null || !isOnline()) {
             downloadManager.stopDownloads(getString(R.string.no_network_connection))
             return
         }
-        if (preferences.downloadOnlyOverWifi() &&
-            !networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)
-        ) {
+        if (preferences.downloadOnlyOverWifi() && !wifiManager.isWifiEnabled) {
             downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
         } else {
             val started = downloadManager.startDownloads()
