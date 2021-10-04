@@ -1378,6 +1378,7 @@ class LibraryController(
                 (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(position) as? LibraryHolder)?.toggleActivation()
                 adapter.moveItem(position, lastItemPosition!!)
             } else {
+                isDragging = true
                 lastItem = adapter.getItem(position)
                 lastItemPosition = position
                 onItemLongClick(position)
@@ -1429,6 +1430,8 @@ class LibraryController(
 
     override fun onItemReleased(position: Int) {
         lastItem = null
+        isDragging = false
+        binding.swipeRefresh.isEnabled = true
         if (adapter.selectedItemCount > 0) {
             lastItemPosition = null
             return

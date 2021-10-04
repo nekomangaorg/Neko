@@ -34,6 +34,7 @@ import com.bluelinelabs.conductor.RouterTransaction
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
+import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
@@ -358,6 +359,7 @@ fun Controller.scrollViewWith(
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
                         ?.controller == this@scrollViewWith && statusBarHeight > -1 &&
+                    (this@scrollViewWith as? BaseController<*>)?.isDragging != true &&
                     activity != null && activityBinding!!.appBar.height > 0 &&
                     recycler.translationY == 0f
                 ) {
@@ -426,7 +428,9 @@ fun Controller.scrollViewWith(
 
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE &&
+                    (this@scrollViewWith as? BaseController<*>)?.isDragging != true
+                ) {
                     if (isTablet) {
                         return
                     }

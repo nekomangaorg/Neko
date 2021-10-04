@@ -25,6 +25,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
     lateinit var binding: VB
     lateinit var viewScope: CoroutineScope
+    var isDragging = false
 
     val isBindingInitialized get() = this::binding.isInitialized
     init {
