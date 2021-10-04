@@ -7,6 +7,7 @@ import android.content.Intent
 import android.net.ConnectivityManager
 import android.net.Network
 import android.net.NetworkCapabilities
+import android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED
 import android.net.NetworkRequest
 import android.os.Build
 import android.os.IBinder
@@ -23,7 +24,6 @@ import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import eu.kanade.tachiyomi.util.system.powerManager
-import eu.kanade.tachiyomi.util.system.wifiManager
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
 
@@ -198,7 +198,7 @@ class DownloadService : Service() {
             downloadManager.stopDownloads(getString(R.string.no_network_connection))
             return
         }
-        if (preferences.downloadOnlyOverWifi() && !wifiManager.isWifiEnabled) {
+        if (preferences.downloadOnlyOverWifi() && networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
             downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
         } else {
             val started = downloadManager.startDownloads()
