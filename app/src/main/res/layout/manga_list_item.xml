@@ -64,8 +64,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title"
-        style="@style/Neko.Headline5"
-        android:textSize="18sp"
+        style="?textAppearanceLabelLarge"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="12dp"
@@ -74,6 +73,7 @@
         android:ellipsize="end"
         android:maxLines="2"
         android:textColor="?attr/colorOnBackground"
+        android:textSize="16sp"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@id/unread_download_badge"
         app:layout_constraintHorizontal_bias="0.0"
@@ -83,7 +83,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/subtitle"
-        style="@style/Neko.Body1"
+        style="?textAppearanceBodyMedium"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="6dp"
@@ -91,7 +91,6 @@
         android:maxLines="1"
         android:singleLine="true"
         android:textColor="?android:attr/textColorSecondary"
-        android:textSize="14sp"
         app:layout_constrainedWidth="true"
         app:layout_constraintEnd_toStartOf="@id/unread_download_badge"
         app:layout_constraintHorizontal_bias="0.0"

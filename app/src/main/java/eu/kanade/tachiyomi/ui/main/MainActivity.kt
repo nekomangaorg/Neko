@@ -8,7 +8,7 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.Drawable
+import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -26,13 +26,12 @@ import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
 import androidx.annotation.IdRes
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.appcompat.widget.Toolbar
-import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -107,17 +106,16 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
+import kotlin.math.min
 
 open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
 
     protected lateinit var router: Router
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
-
-    var drawerArrow: DrawerArrowDrawable? = null
-        private set
-    private var searchDrawable: Drawable? = null
-    private var dismissDrawable: Drawable? = null
+    private val searchDrawable by lazy { contextCompatDrawable(R.drawable.ic_search_24dp) }
+    protected val backDrawable by lazy { contextCompatDrawable(R.drawable.ic_arrow_back_24dp) }
+    private val dismissDrawable by lazy { contextCompatDrawable(R.drawable.ic_close_24dp) }
     private var gestureDetector: GestureDetectorCompat? = null
 
     private var snackBar: Snackbar? = null
@@ -135,6 +133,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     var tabAnimation: ValueAnimator? = null
     var overflowDialog: Dialog? = null
     var currentToolbar: Toolbar? = null
+    var ogWidth: Int = Int.MAX_VALUE
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -149,6 +148,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun attachBaseContext(newBase: Context?) {
+        ogWidth = min(newBase?.resources?.configuration?.screenWidthDp ?: Int.MAX_VALUE, ogWidth)
         super.attachBaseContext(newBase?.prepareSideNavContext())
     }
 
@@ -176,17 +176,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         setContentView(binding.root)
 
-        drawerArrow = DrawerArrowDrawable(this)
-        drawerArrow?.color = getResourceColor(R.attr.actionBarTintColor)
         binding.toolbar.overflowIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
-        searchDrawable = ContextCompat.getDrawable(
-            this,
-            R.drawable.ic_search_24dp
-        )
-        dismissDrawable = ContextCompat.getDrawable(
-            this,
-            R.drawable.ic_close_24dp
-        )
+
+        val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar, android.R.attr.windowLightStatusBar))
+        val wic = WindowInsetsControllerCompat(window, window.decorView)
+        val isLight = a.getBoolean(0, false)
+        wic.isAppearanceLightStatusBars = isLight
+        wic.isAppearanceLightNavigationBars = isLight
+        a.recycle()
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
@@ -268,6 +265,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
 
+        arrayOf(binding.toolbar, binding.cardToolbar).forEach { toolbar ->
+            toolbar.setNavigationIconTint(getResourceColor(R.attr.actionBarTintColor))
+            toolbar.router = router
+        }
         if (router.hasRootController()) {
             nav.selectedItemId =
                 when (router.backstack.firstOrNull()?.controller) {
@@ -383,8 +384,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
 
-        binding.toolbar.navigationIcon =
-            if (router.backstackSize > 1) drawerArrow else searchDrawable
+        val navIcon = if (router.backstackSize > 1) backDrawable else searchDrawable
+        binding.toolbar.navigationIcon = navIcon
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
 
@@ -430,7 +431,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         binding.toolbar.isVisible = !show
         binding.cardFrame.isVisible = show
-        if (changeBG) {
+        val bgColor = (binding.appBar.background as? ColorDrawable)?.color ?: Color.TRANSPARENT
+        if (changeBG && (if (solidBG) bgColor == Color.TRANSPARENT else false)) {
             binding.appBar.setBackgroundColor(
                 if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface)
             )
@@ -532,10 +534,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     .titleTextSize(
                         20
                     )
-                    .titleTextColor(android.R.color.white).descriptionTextSize(16)
-                    .descriptionTextColor(R.color.md_white_1000_76)
+                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary)).descriptionTextSize(16)
+                    .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
                     .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
-                    .targetCircleColor(android.R.color.white).targetRadius(45),
+                    .targetCircleColor(android.R.color.white)
+                    .targetRadius(45),
                 object : TapTargetView.Listener() {
                     override fun onTargetClick(view: TapTargetView) {
                         super.onTargetClick(view)
@@ -673,7 +676,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     override fun onBackPressed() {
-        val sheetController = router.backstack.last().controller as? BottomSheetController
+        val sheetController = router.backstack.lastOrNull()?.controller as? BottomSheetController
         if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
             else !router.handleBack()
         ) {
@@ -807,15 +810,10 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
-        if (onRoot) {
-            binding.toolbar.navigationIcon = searchDrawable
-            binding.cardToolbar.navigationIcon = searchDrawable
-        } else {
-            binding.toolbar.navigationIcon = drawerArrow
-            binding.cardToolbar.navigationIcon = drawerArrow
-        }
+        val navIcon = if (onRoot) searchDrawable else backDrawable
+        binding.toolbar.navigationIcon = navIcon
+        binding.cardToolbar.navigationIcon = navIcon
         binding.cardToolbar.subtitle = null
-        drawerArrow?.progress = 1f
 
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
         if (nav == binding.sideNav) {
@@ -1015,5 +1013,5 @@ interface BottomSheetController {
     fun hideSheet()
     fun toggleSheet()
     fun handleSheetBack(): Boolean
-    fun sheetIsExpanded(): Boolean
+    fun sheetIsFullscreen(): Boolean
 }

@@ -22,10 +22,11 @@
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">
-        <item name="colorPrimary">@color/primaryRed</item>
+        <item name="colorPrimary">@color/primaryStrawberry</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
         <item name="colorSecondary">@color/holo_red</item>
-        <item name="colorSecondaryVariant">@color/md_red_500</item>
-        <item name="colorPrimaryVariant">@color/secondaryChocolateStrawberries</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
         <item name="background">@color/backgroundChocolateStrawberries</item>
         <item name="colorSurface">@color/backgroundChocolateStrawberries</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
@@ -35,12 +36,15 @@
 
     <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
         <item name="colorSecondary">@color/secondaryLime</item>
-        <item name="colorSecondaryVariant">@color/secondaryLime</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantLime</item>
         <item name="colorPrimaryVariant">@color/dialogLime</item>
         <item name="colorSurface">@color/backgroundLime</item>
         <item name="background">@color/backgroundLime</item>
         <item name="colorOnSecondary">@color/colorOnLime</item>
+        <item name="colorTertiary">@color/download_badge_light</item>
+        <item name="colorOnTertiary">@color/md_white_1000</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>

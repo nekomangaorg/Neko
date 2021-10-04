@@ -5,15 +5,13 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.fastadapter.FastAdapter
-import com.mikepenz.fastadapter.ISelectionListener
 import com.mikepenz.fastadapter.adapters.ItemAdapter
-import com.mikepenz.fastadapter.select.SelectExtension
-import com.mikepenz.fastadapter.select.getSelectExtension
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -22,11 +20,12 @@ import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.databinding.SetCategoriesSheetBinding
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
+import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import uy.kohesive.injekt.injectLazy
-import java.util.ArrayList
 import java.util.Date
 import java.util.Locale
 import kotlin.math.max
@@ -35,22 +34,59 @@ class SetCategoriesSheet(
     private val activity: Activity,
     private val listManga: List<Manga>,
     var categories: MutableList<Category>,
-    var preselected: Array<Int>,
+    var preselected: Array<TriStateCheckBox.State>,
     private val addingToLibrary: Boolean,
     val onMangaAdded: (() -> Unit) = { }
 ) : E2EBottomSheetDialog<SetCategoriesSheetBinding>(activity) {
 
-    constructor(activity: Activity, manga: Manga, categories: MutableList<Category>, preselected: Array<Int>, addingToLibrary: Boolean, onMangaAdded: () -> Unit) :
-        this(activity, listOf(manga), categories, preselected, addingToLibrary, onMangaAdded)
+    constructor(
+        activity: Activity,
+        manga: Manga,
+        categories: MutableList<Category>,
+        preselected: Array<Int>,
+        addingToLibrary: Boolean,
+        onMangaAdded: () -> Unit
+    ) : this(
+        activity, listOf(manga), categories,
+        categories.map {
+            if (it.id in preselected) {
+                TriStateCheckBox.State.CHECKED
+            } else {
+                TriStateCheckBox.State.UNCHECKED
+            }
+        }.toTypedArray(),
+        addingToLibrary, onMangaAdded
+    )
 
     private val fastAdapter: FastAdapter<AddCategoryItem>
     private val itemAdapter = ItemAdapter<AddCategoryItem>()
-    private val selectExtension: SelectExtension<AddCategoryItem>
+
     private val db: DatabaseHelper by injectLazy()
     override var recyclerView: RecyclerView? = binding.categoryRecyclerView
 
+    private val preCheckedCategories = categories.mapIndexedNotNull { index, category ->
+        category.takeIf { preselected[index] == TriStateCheckBox.State.CHECKED }
+    }
+    private val preIndeterminateCategories = categories.mapIndexedNotNull { index, category ->
+        category.takeIf { preselected[index] == TriStateCheckBox.State.INDETERMINATE }
+    }
+    private val selectedCategories = preIndeterminateCategories + preCheckedCategories
+
+    private val selectedItems: Set<AddCategoryItem>
+        get() = itemAdapter.adapterItems.filter { it.isSelected }.toSet()
+
+    private val checkedItems: Set<AddCategoryItem>
+        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.CHECKED }.toSet()
+
+    private val indeterminateItems: Set<AddCategoryItem>
+        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.INDETERMINATE }.toSet()
+
+    private val uncheckedItems: Set<AddCategoryItem>
+        get() = itemAdapter.adapterItems.filter { !it.isSelected }.toSet()
+
     override fun createBinding(inflater: LayoutInflater) =
         SetCategoriesSheetBinding.inflate(inflater)
+
     init {
         binding.toolbarTitle.text = context.getString(
             if (addingToLibrary) {
@@ -84,9 +120,9 @@ class SetCategoriesSheet(
         binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener {
             binding.categoryRecyclerView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
-                val insets = activity.window.decorView.rootWindowInsets
+                val insets = activity.window.decorView.rootWindowInsetsCompat
                 matchConstraintMaxHeight =
-                    fullHeight - (insets?.systemWindowInsetTop ?: 0) -
+                    fullHeight - (insets?.getInsets(systemBars())?.top ?: 0) -
                     binding.titleLayout.height - binding.buttonLayout.height - 75.dpToPx
             }
         }
@@ -95,38 +131,70 @@ class SetCategoriesSheet(
         fastAdapter.setHasStableIds(true)
         binding.categoryRecyclerView.layoutManager = LinearLayoutManager(context)
         binding.categoryRecyclerView.adapter = fastAdapter
-        itemAdapter.set(categories.map(::AddCategoryItem))
-        itemAdapter.adapterItems.forEach { item ->
-            item.isSelected = preselected.any { it == item.category.id }
-        }
-
-        selectExtension = fastAdapter.getSelectExtension()
-        selectExtension.apply {
-            isSelectable = true
-            multiSelect = true
-            setCategoriesButtons()
-            selectionListener = object : ISelectionListener<AddCategoryItem> {
-                override fun onSelectionChanged(item: AddCategoryItem, selected: Boolean) {
-                    setCategoriesButtons()
+        itemAdapter.set(
+            categories.mapIndexed { index, category ->
+                AddCategoryItem(category).apply {
+                    skipInversed = preselected[index] != TriStateCheckBox.State.INDETERMINATE
+                    state = preselected[index]
                 }
             }
+        )
+        setCategoriesButtons()
+        fastAdapter.onClickListener = onClickListener@{ view, _, item, _ ->
+            val checkBox = view as? TriStateCheckBox ?: return@onClickListener true
+            checkBox.goToNextStep()
+            item.state = checkBox.state
+            setCategoriesButtons()
+            true
         }
     }
 
-    fun setCategoriesButtons() {
+    private fun setCategoriesButtons() {
+        val addingMore = checkedItems.isNotEmpty() &&
+            selectedCategories.isNotEmpty() &&
+            selectedItems.map { it.category }
+                .containsAll(selectedCategories) &&
+            checkedItems.size > preCheckedCategories.size
+        val nothingChanged = itemAdapter.adapterItems.map { it.state }
+            .toTypedArray()
+            .contentEquals(preselected)
+        val removing = selectedItems.isNotEmpty() && (
+            // Check that selected items has the previous delta items
+            (
+                selectedCategories.containsAll(indeterminateItems.map { it.category }) &&
+                    preIndeterminateCategories.size > indeterminateItems.size
+                ) ||
+                // or check that checked items has the previous checked items
+                (
+                    preCheckedCategories.containsAll(checkedItems.map { it.category }) &&
+                        preCheckedCategories.size > checkedItems.size
+                    )
+            ) &&
+            // Additional checks in case a delta item is now fully checked
+            preCheckedCategories.size >= checkedItems.size &&
+            preIndeterminateCategories.size >= indeterminateItems.size
+
+        val items = when {
+            addingToLibrary -> checkedItems.map { it.category }
+            addingMore -> checkedItems.map { it.category }.subtract(preCheckedCategories)
+            removing -> selectedCategories.subtract(selectedItems.map { it.category })
+            nothingChanged -> selectedItems.map { it.category }
+            else -> checkedItems.map { it.category }
+        }
         binding.addToCategoriesButton.text = context.getString(
-            if (addingToLibrary) {
-                R.string.add_to_
-            } else {
-                R.string.move_to_
+            when {
+                addingToLibrary || (addingMore && !nothingChanged) -> R.string.add_to_
+                removing -> R.string.remove_from_
+                nothingChanged -> R.string.keep_in_
+                else -> R.string.move_to_
             },
-            when (selectExtension.selections.size) {
+            when (items.size) {
                 0 -> context.getString(R.string.default_category).lowercase(Locale.ROOT)
-                1 -> selectExtension.selectedItems.firstOrNull()?.category?.name ?: ""
+                1 -> items.firstOrNull()?.name ?: ""
                 else -> context.resources.getQuantityString(
                     R.plurals.category_plural,
-                    selectExtension.selections.size,
-                    selectExtension.selections.size
+                    items.size,
+                    items.size
                 )
             }
         )
@@ -139,7 +207,7 @@ class SetCategoriesSheet(
         updateBottomButtons()
         binding.root.post {
             binding.categoryRecyclerView.scrollToPosition(
-                max(0, itemAdapter.adapterItems.indexOf(selectExtension.selectedItems.firstOrNull()))
+                max(0, itemAdapter.adapterItems.indexOf(selectedItems.firstOrNull()))
             )
         }
     }
@@ -157,7 +225,8 @@ class SetCategoriesSheet(
         val array = context.obtainStyledAttributes(attrsArray)
         val headerHeight = array.getDimensionPixelSize(0, 0)
         binding.buttonLayout.updatePaddingRelative(
-            bottom = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+            bottom = activity.window.decorView.rootWindowInsetsCompat
+                ?.getInsets(systemBars())?.bottom ?: 0
         )
 
         binding.buttonLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -193,15 +262,14 @@ class SetCategoriesSheet(
             db.insertManga(manga).executeAsBlocking()
         }
 
-        val mc = ArrayList<MangaCategory>()
-
-        val selectedCategories = selectExtension.selectedItems.map(AddCategoryItem::category)
-        for (manga in listManga) {
-            for (cat in selectedCategories) {
-                mc.add(MangaCategory.create(manga, cat))
-            }
-        }
-        db.setMangaCategories(mc, listManga)
+        val addCategories = checkedItems.map(AddCategoryItem::category)
+        val removeCategories = uncheckedItems.map(AddCategoryItem::category)
+        val mangaCategories = listManga.map { manga ->
+            val categories = db.getCategoriesForManga(manga).executeAsBlocking()
+                .subtract(removeCategories).plus(addCategories).distinct()
+            categories.map { MangaCategory.create(manga, it) }
+        }.flatten()
+        db.setMangaCategories(mangaCategories, listManga)
         onMangaAdded()
     }
 }

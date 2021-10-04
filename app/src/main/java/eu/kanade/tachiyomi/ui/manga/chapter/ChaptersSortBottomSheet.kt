@@ -5,14 +5,15 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.setNegativeStateItems
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
@@ -54,7 +55,6 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
     override fun onStart() {
         super.onStart()
-        sheetBehavior.expand()
         sheetBehavior.skipCollapsed = true
     }
 
@@ -161,22 +161,29 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
 
         binding.filterGroupsButton.setOnClickListener {
             val scanlators = presenter.allChapterScanlators.toList()
-            val preselected = presenter.filteredScanlators.map { scanlators.indexOf(it) }
-
-            MaterialDialog(activity!!)
-                .title(R.string.filter_groups)
-                .listItemsMultiChoice(
-                    items = scanlators,
-                    initialSelection = preselected.toIntArray(),
-                    allowEmptySelection = false
-                ) { _, selections, _ ->
-                    val selected = selections.map { scanlators[it] }
-                    presenter.filterScanlatorsClicked(selected)
+            val filteredScanlators =
+                (
+                    presenter.manga.filtered_scanlators?.let { ChapterUtil.getScanlators(it) }
+                        ?.toMutableSet()
+                        ?: mutableSetOf()
+                    )
+            val preselected = scanlators.map { it in filteredScanlators }.toBooleanArray()
+            activity.materialAlertDialog()
+                .setTitle(R.string.filter_groups)
+                .setNegativeStateItems(scanlators, preselected) { _, pos, checked ->
+                    if (checked) {
+                        filteredScanlators.add(scanlators[pos])
+                    } else {
+                        filteredScanlators.remove(scanlators[pos])
+                    }
                 }
-                .negativeButton(R.string.reset_group_filter) {
-                    presenter.filterScanlatorsClicked(scanlators)
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.filter) { _, _ ->
+                    presenter.setScanlatorFilter(filteredScanlators)
                 }
-                .positiveButton(android.R.string.ok)
+                .setNeutralButton(R.string.reset) { _, _, ->
+                    presenter.setScanlatorFilter(emptySet())
+                }
                 .show()
         }
     }

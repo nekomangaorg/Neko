@@ -19,6 +19,7 @@ import androidx.core.text.isDigitsOnly
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.widget.TextViewCompat
 import androidx.transition.TransitionSet
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
@@ -450,6 +451,9 @@ class MangaHeaderHolder(
 
         if (!manga.initialized) return
         updateCover(manga)
+        if (adapter.preferences.themeMangaDetails()) {
+            updateColors(false)
+        }
     }
 
     private fun setGenreTags(binding: MangaHeaderItemBinding, manga: Manga) {
@@ -462,11 +466,11 @@ class MangaHeaderHolder(
             val accentArray = FloatArray(3)
 
             ColorUtils.colorToHSL(baseTagColor, bgArray)
-            ColorUtils.colorToHSL(context.getResourceColor(R.attr.colorSecondary), accentArray)
+            ColorUtils.colorToHSL(adapter.delegate.accentColor() ?: context.getResourceColor(R.attr.colorSecondary), accentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
-                        bgArray[0],
+                        if (adapter.delegate.accentColor() != null) accentArray[0] else bgArray[0],
                         bgArray[1],
                         (
                             when {
@@ -524,7 +528,7 @@ class MangaHeaderHolder(
                 AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
             backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
-                    context.getResourceColor(R.attr.colorSecondary),
+                    adapter.delegate.accentColor() ?: context.getResourceColor(R.attr.colorSecondary),
                     context.getResourceColor(R.attr.background),
                     0.706f
                 )
@@ -549,6 +553,50 @@ class MangaHeaderHolder(
     fun setBackDrop(color: Int) {
         binding ?: return
         binding.trueBackdrop.setBackgroundColor(color)
+    }
+
+    fun updateColors(updateAll: Boolean = true) {
+        binding ?: return
+        val accentColor = adapter.delegate.accentColor() ?: return
+        val manga = adapter.presenter.manga
+        with(binding) {
+            trueBackdrop.setBackgroundColor(
+                adapter.delegate.coverColor()
+                    ?: trueBackdrop.context.getResourceColor(R.attr.background)
+            )
+            TextViewCompat.setCompoundDrawableTintList(moreButton, ColorStateList.valueOf(accentColor))
+            moreButton.setTextColor(accentColor)
+            TextViewCompat.setCompoundDrawableTintList(lessButton, ColorStateList.valueOf(accentColor))
+            lessButton.setTextColor(accentColor)
+            shareButton.imageTintList = ColorStateList.valueOf(accentColor)
+            webviewButton.imageTintList = ColorStateList.valueOf(accentColor)
+            filterButton.imageTintList = ColorStateList.valueOf(accentColor)
+
+            val states = arrayOf(
+                intArrayOf(-android.R.attr.state_enabled),
+                intArrayOf()
+            )
+
+            val colors = intArrayOf(
+                ColorUtils.setAlphaComponent(root.context.getResourceColor(R.attr.tabBarIconInactive), 43),
+                accentColor
+            )
+
+            startReadingButton.backgroundTintList = ColorStateList(states, colors)
+
+            val textColors = intArrayOf(
+                ColorUtils.setAlphaComponent(root.context.getResourceColor(R.attr.colorOnSurface), 97),
+                root.context.getResourceColor(android.R.attr.textColorPrimaryInverse)
+            )
+            startReadingButton.setTextColor(ColorStateList(states, textColors))
+            trackButton.iconTint = ColorStateList.valueOf(accentColor)
+            favoriteButton.iconTint = ColorStateList.valueOf(accentColor)
+            if (updateAll) {
+                trackButton.checked(trackButton.stateListAnimator != null)
+                favoriteButton.checked(favoriteButton.stateListAnimator != null)
+                setGenreTags(this, manga)
+            }
+        }
     }
 
     fun updateTracking() {

@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.SetTrackReadingDatesDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
+import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.addNewScanlatorsToFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
@@ -1204,11 +1205,11 @@ class MangaDetailsPresenter(
         updateRemote(track, item.service)
     }
 
-    fun getSuggestedDate(readingDate: SetTrackReadingDatesDialog.ReadingDate): Long? {
+    fun getSuggestedDate(readingDate: TrackingBottomSheet.ReadingDate): Long? {
         val chapters = db.getHistoryByMangaId(manga.id ?: 0L).executeAsBlocking()
         val date = when (readingDate) {
-            SetTrackReadingDatesDialog.ReadingDate.Start -> chapters.minOfOrNull { it.last_read }
-            SetTrackReadingDatesDialog.ReadingDate.Finish -> chapters.maxOfOrNull { it.last_read }
+            TrackingBottomSheet.ReadingDate.Start -> chapters.minOfOrNull { it.last_read }
+            TrackingBottomSheet.ReadingDate.Finish -> chapters.maxOfOrNull { it.last_read }
         } ?: return null
         return if (date <= 0L) null else date
     }

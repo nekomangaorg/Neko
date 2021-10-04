@@ -2,13 +2,11 @@ package eu.kanade.tachiyomi.ui.category
 
 import android.app.Activity
 import android.app.Dialog
+import android.content.DialogInterface
 import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.callbacks.onShow
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -19,6 +17,7 @@ import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibrarySort
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import uy.kohesive.injekt.injectLazy
@@ -39,31 +38,36 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     lateinit var binding: MangaCategoryDialogBinding
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = dialog(activity!!)
-        binding = MangaCategoryDialogBinding.bind(dialog.getCustomView())
+        val dialog = dialog(activity!!).create()
         onViewCreated()
+        dialog.setOnShowListener {
+            dialog.getButton(DialogInterface.BUTTON_POSITIVE)?.setOnClickListener {
+                if (onPositiveButtonClick()) {
+                    dialog.dismiss()
+                }
+            }
+        }
         return dialog
     }
 
-    fun dialog(activity: Activity): MaterialDialog {
-        return MaterialDialog(activity).apply {
-            title(if (category == null) R.string.new_category else R.string.manage_category)
-            customView(viewRes = R.layout.manga_category_dialog)
-            negativeButton(android.R.string.cancel) { dismiss() }
-            positiveButton(R.string.save) {
+    fun dialog(activity: Activity): MaterialAlertDialogBuilder {
+        return activity.materialAlertDialog().apply {
+            setTitle(if (category == null) R.string.new_category else R.string.manage_category)
+            binding = MangaCategoryDialogBinding.inflate(activity.layoutInflater)
+            setView(binding.root)
+            setNegativeButton(android.R.string.cancel, null)
+            setPositiveButton(R.string.save) { dialog, _ ->
                 if (onPositiveButtonClick()) {
-                    dismiss()
+                    dialog.dismiss()
                 }
             }
-            noAutoDismiss()
         }
     }
 
     fun show(activity: Activity) {
-        val dialog = dialog(activity)
-        binding = MangaCategoryDialogBinding.bind(dialog.getCustomView())
+        val dialog = dialog(activity).create()
         onViewCreated()
-        dialog.onShow {
+        dialog.setOnShowListener {
             binding.title.requestFocus()
         }
         dialog.show()

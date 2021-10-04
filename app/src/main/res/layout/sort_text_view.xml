@@ -11,13 +11,14 @@
 
     <ImageView
         android:id="@+id/sort_image_view"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:contentDescription="@string/sort"
         android:layout_marginStart="12dp"
         android:padding="4dp"
         tools:srcCompat="@drawable/ic_arrow_upward_24dp"
         app:srcCompat="@drawable/ic_blank_24dp"
-        app:tint="?attr/colorSecondary"
-        style="@style/MD_ListItem_Control" />
+        app:tint="?attr/colorSecondary" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/text_view"
@@ -27,7 +28,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
         android:textSize="14sp"
-        style="@style/TextAppearance.Regular"
+        style="?textAppearanceBodyMedium"
         tools:text="Item" />
 
 </LinearLayout>

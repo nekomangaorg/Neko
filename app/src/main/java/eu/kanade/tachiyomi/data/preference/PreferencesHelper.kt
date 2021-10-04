@@ -398,8 +398,6 @@ class PreferencesHelper(val context: Context) {
 
     fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
 
-    fun extensionUpdatesCount() = rxPrefs.getInteger("ext_updates_count", 0)
-
     fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
 
     fun showRecentsDownloads() =
@@ -465,6 +463,12 @@ class PreferencesHelper(val context: Context) {
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
+
+    fun showNsfwSource() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
+    fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
+    fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
+
+    fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
 
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 

@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.util.AttributeSet
 import android.view.Gravity
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textview.MaterialTextView
 import eu.kanade.tachiyomi.R
@@ -29,8 +28,8 @@ class CenteredToolbar@JvmOverloads constructor(context: Context, attrs: Attribut
     override fun setCustomTitle(title: CharSequence?) {
         super.setCustomTitle(title)
         toolbarTitle.updateLayoutParams<LayoutParams> {
-            gravity = if (navigationIcon is DrawerArrowDrawable) Gravity.START else Gravity.CENTER
+            gravity = if (!onRoot) Gravity.START else Gravity.CENTER
         }
-        toolbarTitle.compoundDrawablePadding = if (navigationIcon is DrawerArrowDrawable) 6.dpToPx else 0
+        toolbarTitle.compoundDrawablePadding = if (!onRoot) 6.dpToPx else 0
     }
 }

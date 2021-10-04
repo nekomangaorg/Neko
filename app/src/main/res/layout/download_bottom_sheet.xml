@@ -39,7 +39,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title_text"
-            style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+            style="?textAppearanceTitleLarge"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_gravity="center"

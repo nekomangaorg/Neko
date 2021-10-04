@@ -41,7 +41,6 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.roundToInt
 
 class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -102,8 +101,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     var libraryRecyler: View? = null
     var controller: LibraryController? = null
     var bottomBarHeight = 0
-    val shadowAlpha = 0.15f
-    val shadow2Alpha = 0.05f
 
     override fun onFinishInflate() {
         super.onFinishInflate()
@@ -123,15 +120,11 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     ?: controller.activityBinding?.root?.rootWindowInsets?.systemWindowInsetBottom
                         ?: 0
         }
-        val shadow2: View = controller.binding.shadow2
-        val shadow: View = controller.binding.shadow
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
                 override fun onSlide(bottomSheet: View, progress: Float) {
                     this@FilterBottomSheet.controller?.updateFilterSheetY()
                     binding.pill.alpha = (1 - max(0f, progress)) * 0.25f
-                    shadow2.alpha = (1 - max(0f, progress)) * shadow2Alpha
-                    shadow.alpha = (1 + min(0f, progress)) * shadowAlpha
                     updateRootPadding(progress)
                 }
 
@@ -169,7 +162,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     else -> 0f
                 }
             )
-            shadow.alpha = if (sheetBehavior.isHidden()) 0f else shadowAlpha
 
             if (binding.secondLayout.width + (binding.groupBy.width * 2) + 20.dpToPx < width) {
                 binding.secondLayout.removeView(binding.viewOptions)
@@ -198,12 +190,9 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     }
 
     private fun stateChanged(state: Int) {
-        val shadow = controller?.binding?.shadow ?: return
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            shadow.alpha = shadowAlpha
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight
-                ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -211,7 +200,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         if (state == BottomSheetBehavior.STATE_HIDDEN) {
             onGroupClicked(ACTION_HIDE_FILTER_TIP)
             reSortViews()
-            shadow.alpha = 0f
             libraryRecyler?.updatePaddingRelative(bottom = 10.dpToPx + bottomBarHeight)
         }
     }

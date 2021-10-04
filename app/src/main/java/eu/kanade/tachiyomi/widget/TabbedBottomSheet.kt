@@ -98,11 +98,7 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
         super.onMeasure(widthMeasureSpec, heightSpec)
         var height = 0
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
-            max(
-                0,
-                MeasureSpec.getSize(widthMeasureSpec) -
-                    paddingLeft - paddingRight
-            ),
+            max(0, MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight),
             MeasureSpec.getMode(widthMeasureSpec)
         )
         for (i in 0 until childCount) {

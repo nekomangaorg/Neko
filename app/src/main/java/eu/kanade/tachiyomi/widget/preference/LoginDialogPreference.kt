@@ -4,16 +4,12 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
-import androidx.core.view.isVisible
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -40,14 +36,13 @@ abstract class LoginDialogPreference(
     open var canLogout = false
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!).apply {
-            customView(R.layout.pref_account_login, scrollable = false)
+        binding = PrefAccountLoginBinding.inflate(activity!!.layoutInflater)
+        val dialog = activity!!.materialAlertDialog().apply {
+            setView(binding.root)
         }
-        binding = PrefAccountLoginBinding.bind(dialog.getCustomView())
+        onViewCreated(binding.root)
 
-        onViewCreated(dialog.view)
-
-        return dialog
+        return dialog.create()
     }
 
     fun onViewCreated(view: View) {

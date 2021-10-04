@@ -83,6 +83,15 @@ class SettingsAppearanceController : SettingsController() {
         }
 
         preferenceCategory {
+            titleRes = R.string.details_page
+            switchPreference {
+                key = Keys.themeMangaDetails
+                titleRes = R.string.theme_buttons_based_on_cover
+                defaultValue = true
+            }
+        }
+
+        preferenceCategory {
             titleRes = R.string.navigation
 
             switchPreference {

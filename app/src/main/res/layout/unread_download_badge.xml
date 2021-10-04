@@ -3,10 +3,10 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/badge_view"
+    app:strokeColor="@color/library_stroke_selector"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    app:cardCornerRadius="10dp"
-    app:cardElevation="4dp"
+    app:cardElevation="0dp"
     android:layout_marginStart="2dp"
     android:layout_marginTop="5dp"
     android:visibility="gone"
@@ -18,7 +18,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/download_text"
-            style="@style/TextAppearance.Regular.Caption.Light"
+            style="?textAppearanceCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/colorDownloadBadge"
@@ -49,7 +49,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/unread_text"
-            style="@style/TextAppearance.Regular.Caption.Light"
+            style="?textAppearanceCaption"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="?attr/unreadBadgeColor"

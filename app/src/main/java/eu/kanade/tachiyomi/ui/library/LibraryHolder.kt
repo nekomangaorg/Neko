@@ -42,7 +42,8 @@ abstract class LibraryHolder(
                 item.downloadCount == -1 -> -1
                 else -> item.downloadCount
             },
-            showTotal
+            showTotal,
+            this is LibraryGridHolder
         )
     }
 

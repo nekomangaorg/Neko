@@ -11,6 +11,6 @@
     android:paddingTop="8dp"
     android:paddingEnd="0dp"
     android:paddingBottom="8dp"
-    android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+    android:textAppearance="?textAppearanceTitleMedium"
     android:textSize="15sp"
     tools:text="@string/categories" />

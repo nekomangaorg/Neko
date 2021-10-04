@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga.track
 
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import eu.kanade.tachiyomi.R
@@ -47,7 +48,7 @@ class TrackAdapter(controller: OnClickListener) : RecyclerView.Adapter<TrackHold
         fun onChaptersClick(position: Int)
         fun onScoreClick(position: Int)
         fun onRemoveClick(position: Int)
-        fun onStartDateClick(position: Int)
-        fun onFinishDateClick(position: Int)
+        fun onStartDateClick(view: View, position: Int)
+        fun onFinishDateClick(view: View, position: Int)
     }
 }

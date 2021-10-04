@@ -23,7 +23,7 @@
 
     <TextView
         android:id="@+id/search_result_pref_breadcrumb"
-        style="@style/TextAppearance.Regular.Caption"
+        style="?textAppearanceCaption"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:ellipsize="end"

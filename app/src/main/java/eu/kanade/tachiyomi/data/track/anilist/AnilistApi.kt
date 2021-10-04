@@ -248,9 +248,9 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         val calendar = Calendar.getInstance()
         calendar.timeInMillis = dateValue
         return jsonObject(
-            "year" to calendar.year,
-            "month" to calendar.month + 1,
-            "day" to calendar.dayOfMonth,
+            "year" to calendar.get(Calendar.YEAR),
+            "month" to calendar.get(Calendar.MONTH) + 1,
+            "day" to calendar.get(Calendar.DAY_OF_MONTH),
         )
     }
 

@@ -15,15 +15,17 @@
         android:layout_width="0dp"
         android:layout_height="0dp"/>
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/overflow_card_view"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        app:strokeWidth="0dp"
         android:layout_marginStart="24dp"
         android:layout_marginEnd="14dp"
-        android:background="?attr/background"
-        app:cardBackgroundColor="?attr/background"
+        android:background="?colorBackgroundFloating"
+        app:cardBackgroundColor="?colorBackgroundFloating"
         app:cardCornerRadius="12dp"
+        app:cardElevation="0dp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
@@ -102,5 +104,5 @@
                 app:icon="@drawable/ic_help_outline_24dp" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

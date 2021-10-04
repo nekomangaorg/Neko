@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
@@ -12,7 +11,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.webkit.WebView
 import android.widget.LinearLayout
-import androidx.annotation.ColorInt
 import androidx.core.graphics.ColorUtils
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import com.mikepenz.iconics.utils.colorInt
@@ -90,16 +88,6 @@ open class WebViewActivity : BaseWebViewActivity() {
             binding.webview.settings.userAgentString = source.headers["User-Agent"]
             binding.webview.loadUrl(url, headers)
         }
-    }
-
-    @ColorInt
-    fun parseHTMLColor(color: String): Int {
-        val trimmedColor = color.trim('"')
-        val rgb = Regex("""^rgb\((\d+),\s*(\d+),\s*(\d+)\)$""").find(trimmedColor)
-        val red = rgb?.groupValues?.getOrNull(1)?.toIntOrNull() ?: return getResourceColor(R.attr.background)
-        val green = rgb.groupValues.getOrNull(2)?.toIntOrNull() ?: return getResourceColor(R.attr.background)
-        val blue = rgb.groupValues.getOrNull(3)?.toIntOrNull() ?: return getResourceColor(R.attr.background)
-        return Color.rgb(red, green, blue)
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {

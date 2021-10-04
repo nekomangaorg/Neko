@@ -30,8 +30,8 @@ class SearchActivity : MainActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding.toolbar.navigationIcon = drawerArrow
-        binding.cardToolbar.navigationIcon = drawerArrow
+        binding.toolbar.navigationIcon = backDrawable
+        binding.cardToolbar.navigationIcon = backDrawable
         binding.toolbar.setNavigationOnClickListener { popToRoot() }
         binding.cardToolbar.setNavigationOnClickListener { popToRoot() }
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
@@ -75,9 +75,8 @@ class SearchActivity : MainActivity() {
             return
         }
         setFloatingToolbar(canShowFloatingToolbar(to))
-        binding.cardToolbar.navigationIcon = drawerArrow
-        binding.toolbar.navigationIcon = drawerArrow
-        drawerArrow?.progress = 1f
+        binding.cardToolbar.navigationIcon = backDrawable
+        binding.toolbar.navigationIcon = backDrawable
 
         nav.isVisible = false
         binding.bottomView?.isVisible = false

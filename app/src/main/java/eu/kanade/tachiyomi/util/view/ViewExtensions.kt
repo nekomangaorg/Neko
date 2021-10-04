@@ -23,7 +23,7 @@ import android.view.WindowInsets
 import android.widget.Button
 import android.widget.FrameLayout
 import android.widget.TextView
-import androidx.annotation.ColorRes
+import androidx.annotation.Dimension
 import androidx.annotation.FloatRange
 import androidx.annotation.IdRes
 import androidx.annotation.Px
@@ -45,15 +45,19 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
+import com.google.android.material.card.MaterialCardView
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.navigation.NavigationBarMenuView
 import com.google.android.material.navigation.NavigationBarView
+import com.google.android.material.shape.CornerFamily
+import com.google.android.material.shape.ShapeAppearanceModel
 import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.lang.tintText
 import eu.kanade.tachiyomi.util.system.ThemeUtil
-import eu.kanade.tachiyomi.util.system.contextCompatColor
+import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
@@ -305,17 +309,8 @@ fun SwipeRefreshLayout.setStyle() {
 
 fun MaterialButton.resetStrokeColor() {
     strokeColor = ColorStateList.valueOf(
-        ColorUtils.setAlphaComponent(
-            context.getResourceColor(
-                R.attr.colorOnSurface
-            ),
-            31
-        )
+        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31)
     )
-}
-
-fun TextView.setTextColorRes(@ColorRes id: Int) {
-    setTextColor(context.contextCompatColor(id))
 }
 
 @SuppressLint("RestrictedApi")
@@ -409,6 +404,27 @@ inline fun View.popupMenu(
 
     popup.show()
     return popup
+}
+
+fun MaterialCardView.makeShapeCorners(
+    @Dimension topStart: Float = 0f,
+    @Dimension bottomEnd: Float = 0f
+): ShapeAppearanceModel {
+    return shapeAppearanceModel.toBuilder()
+        .apply {
+            if (context.resources.isLTR) {
+                setTopLeftCorner(CornerFamily.ROUNDED, topStart)
+                setBottomLeftCorner(CornerFamily.ROUNDED, if (topStart > 0) 4f.dpToPx else 0f)
+                setBottomRightCorner(CornerFamily.ROUNDED, bottomEnd)
+                setTopRightCorner(CornerFamily.ROUNDED, if (bottomEnd > 0) 4f.dpToPx else 0f)
+            } else {
+                setTopLeftCorner(CornerFamily.ROUNDED, if (topStart > 0) 4f.dpToPx else 0f)
+                setBottomLeftCorner(CornerFamily.ROUNDED, topStart)
+                setBottomRightCorner(CornerFamily.ROUNDED, if (bottomEnd > 0) 4f.dpToPx else 0f)
+                setTopRightCorner(CornerFamily.ROUNDED, bottomEnd)
+            }
+        }
+        .build()
 }
 
 fun Dialog.blurBehindWindow(

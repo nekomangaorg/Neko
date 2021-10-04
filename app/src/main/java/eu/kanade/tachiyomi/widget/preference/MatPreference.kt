@@ -4,10 +4,11 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.annotation.StringRes
+import androidx.appcompat.app.AlertDialog
 import androidx.preference.Preference
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.callbacks.onDismiss
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -35,12 +36,18 @@ open class MatPreference @JvmOverloads constructor(
 
     override fun onClick() {
         if (!isShowing) {
-            dialog().apply {
-                onDismiss { this@MatPreference.isShowing = false }
-            }.show()
+            val dialog = dialog().apply {
+                setOnDismissListener { this@MatPreference.isShowing = false }
+            }.create()
+//            dialog.setOnShowListener {
+            onShow(dialog)
+//            }
+            dialog.show()
         }
         isShowing = true
     }
+
+    protected open fun onShow(dialog: AlertDialog) { }
 
     protected open var customSummaryProvider: SummaryProvider<MatPreference>? = null
         set(value) {
@@ -82,14 +89,14 @@ open class MatPreference @JvmOverloads constructor(
         super.setSummary(summary)
     }
 
-    open fun dialog(): MaterialDialog {
-        return MaterialDialog(activity ?: context).apply {
+    open fun dialog(): MaterialAlertDialogBuilder {
+        return (activity ?: context).materialAlertDialog().apply {
             if (dialogTitleRes != null) {
-                title(res = dialogTitleRes)
+                setTitle(dialogTitleRes!!)
             } else if (title != null) {
-                title(text = title.toString())
+                setTitle(title.toString())
             }
-            negativeButton(android.R.string.cancel)
+            setNegativeButton(android.R.string.cancel, null)
         }
     }
 }

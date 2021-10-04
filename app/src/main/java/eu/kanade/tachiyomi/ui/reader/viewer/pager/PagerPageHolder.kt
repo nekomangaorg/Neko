@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.viewer.pager
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
@@ -39,6 +40,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.bottomCutoutInset
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.topCutoutInset
@@ -142,6 +144,12 @@ class PagerPageHolder(
                 3 -> Color.TRANSPARENT
                 else -> ThemeUtil.readerBackgroundColor(theme)
             }
+        )
+        progressBar.foregroundTintList = ColorStateList.valueOf(
+            context.getResourceColor(
+                if (isInvertedFromTheme()) R.attr.colorPrimaryInverse
+                else R.attr.colorPrimary
+            )
         )
     }
 
@@ -461,13 +469,20 @@ class PagerPageHolder(
     /**
      * Creates a new progress bar.
      */
-    @SuppressLint("PrivateResource")
     private fun createProgressBar(): ReaderProgressBar {
         return ReaderProgressBar(context, null).apply {
             val size = 48.dpToPx
             layoutParams = LayoutParams(size, size).apply {
                 gravity = Gravity.CENTER
             }
+        }
+    }
+
+    private fun isInvertedFromTheme(): Boolean {
+        return when ((background as? ColorDrawable)?.color ?: Color.TRANSPARENT) {
+            Color.WHITE -> context.isInNightMode()
+            Color.BLACK -> !context.isInNightMode()
+            else -> false
         }
     }
 

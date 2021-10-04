@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.webview
 
+import android.annotation.SuppressLint
 import android.app.assist.AssistContent
 import android.content.res.Configuration
 import android.graphics.Color
@@ -170,6 +171,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         binding.webview.reload()
     }
 
+    @SuppressLint("ResourceType")
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         val lightMode = !isInNightMode()
@@ -181,63 +183,45 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 setTheme(R.style.ThemeOverlay_Tachiyomi_AllBlue)
             }
         }
-        window.statusBarColor = ColorUtils.setAlphaComponent(
-            getResourceColor(R.attr.colorSurface),
-            255
+        val themeValue = TypedValue()
+        theme.resolveAttribute(android.R.attr.windowLightStatusBar, themeValue, true)
+
+        val wic = WindowInsetsControllerCompat(window, window.decorView)
+        wic.isAppearanceLightStatusBars = themeValue.data == -1
+        wic.isAppearanceLightNavigationBars = themeValue.data == -1
+
+        val attrs = theme.obtainStyledAttributes(
+            intArrayOf(
+                R.attr.colorSurface,
+                R.attr.actionBarTintColor,
+                R.attr.colorPrimaryVariant,
+            )
         )
         setWebDarkMode()
-        binding.toolbar.setBackgroundColor(getResourceColor(R.attr.colorSurface))
-        binding.toolbar.popupTheme = if (lightMode) R.style.ThemeOverlay_MaterialComponents else R
-            .style.ThemeOverlay_MaterialComponents_Dark
-        val tintColor = getResourceColor(R.attr.actionBarTintColor)
-        binding.toolbar.navigationIcon?.setTint(tintColor)
+        val colorSurface = attrs.getColor(0, 0)
+        val actionBarTintColor = attrs.getColor(1, 0)
+        val colorPrimaryVariant = attrs.getColor(2, 0)
+        attrs.recycle()
+
+        window.statusBarColor = ColorUtils.setAlphaComponent(colorSurface, 255)
+        binding.toolbar.setBackgroundColor(colorSurface)
+        binding.toolbar.popupTheme =
+            if (lightMode) R.style.ThemeOverlay_Material3
+            else R.style.ThemeOverlay_Material3_Dark
+        binding.toolbar.setNavigationIconTint(actionBarTintColor)
         binding.toolbar.overflowIcon?.mutate()
-        binding.toolbar.setTitleTextColor(tintColor)
-        binding.toolbar.overflowIcon?.setTint(tintColor)
-        binding.swipeRefresh.setStyle()
+        binding.toolbar.setTitleTextColor(actionBarTintColor)
+        binding.toolbar.overflowIcon?.setTint(actionBarTintColor)
+        binding.swipeRefresh.setColorSchemeColors(actionBarTintColor)
+        binding.swipeRefresh.setProgressBackgroundColorSchemeColor(colorPrimaryVariant)
 
         window.navigationBarColor =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) getResourceColor(R.attr.colorPrimaryVariant)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || !lightMode) colorPrimaryVariant
             else Color.BLACK
 
         binding.webLinearLayout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
             View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
             View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val lightNav =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1) {
-                    val typedValue = TypedValue()
-                    theme.resolveAttribute(
-                        android.R.attr.windowLightNavigationBar,
-                        typedValue,
-                        true
-                    )
-                    typedValue.data == -1
-                } else {
-                    lightMode
-                }
-            if (lightNav) {
-                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility.or(
-                    View
-                        .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                )
-            } else {
-                window.decorView.systemUiVisibility = window.decorView.systemUiVisibility.rem(
-                    View
-                        .SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR
-                )
-            }
-        }
-
-        val typedValue = TypedValue()
-        theme.resolveAttribute(android.R.attr.windowLightStatusBar, typedValue, true)
-        if (typedValue.data == -1) {
-            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
-                .or(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        } else {
-            window.decorView.systemUiVisibility = window.decorView.systemUiVisibility
-                .rem(View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR)
-        }
     }
 
     override fun onBackPressed() {

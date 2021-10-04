@@ -51,16 +51,12 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
         binding.actionsContainer.removeAllViews()
         if (!actions.isNullOrEmpty()) {
             actions.forEach {
-                val button = (
-                    inflate(
-                        context,
-                        R.layout.material_text_button,
-                        null
-                    ) as MaterialButton
-                    ).apply {
-                    setText(it.resId)
-                    setOnClickListener(it.listener)
-                }
+                val button =
+                    (inflate(context, R.layout.material_text_button, null) as MaterialButton)
+                        .apply {
+                            setText(it.resId)
+                            setOnClickListener(it.listener)
+                        }
 
                 binding.actionsContainer.addView(button)
             }

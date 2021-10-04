@@ -5,7 +5,9 @@ import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.content.res.ColorStateList
 import android.content.res.Configuration
+import android.graphics.Color
 import android.os.Build
 import android.os.Environment
 import android.provider.Settings
@@ -17,13 +19,14 @@ import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.appcompat.widget.SearchView
+import androidx.cardview.widget.CardView
 import androidx.core.content.ContextCompat
+import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-import com.afollestad.materialdialogs.MaterialDialog
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -39,9 +42,11 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isTablet
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
+import kotlin.math.roundToInt
 import kotlin.random.Random
 
 fun Controller.setOnQueryTextChangeListener(
@@ -113,9 +118,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
         recycler.applyBottomAnimatedInsets(setPadding = true)
         recycler.doOnApplyWindowInsets { view, insets, _ ->
             val headerHeight = insets.systemWindowInsetTop + appBarHeight
-            view.updatePaddingRelative(
-                top = headerHeight
-            )
+            view.updatePaddingRelative(top = headerHeight)
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                 view.updatePaddingRelative(
                     bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
@@ -140,6 +143,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
         if (floatingBar) {
             activityBinding?.appBar?.elevation = 0f
+            setAppBarBG(0f)
             return@f
         }
         elevationAnim = ValueAnimator.ofFloat(
@@ -147,6 +151,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             if (el) 15f else 0f
         )
         elevationAnim?.addUpdateListener { valueAnimator ->
+            setAppBarBG(valueAnimator.animatedValue as Float / 15f)
             activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
         }
         elevationAnim?.start()
@@ -155,6 +160,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
     val floatingBar =
         !(activityBinding?.toolbar?.isVisible == true || activityBinding?.tabsFrameLayout?.isVisible == true)
     if (floatingBar) {
+        setAppBarBG(0f)
         activityBinding?.appBar?.elevation = 0f
     }
     elevateFunc(recycler.canScrollVertically(-1))
@@ -236,6 +242,7 @@ fun Controller.scrollViewWith(
         statusBarHeight = insets.systemWindowInsetTop
         afterInsets?.invoke(insets)
     }
+
     var elevationAnim: ValueAnimator? = null
     var elevate = false
     var isInView = true
@@ -249,6 +256,7 @@ fun Controller.scrollViewWith(
             val floatingBar =
                 (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
             if (floatingBar) {
+                setAppBarBG(0f, includeTabView)
                 activityBinding?.appBar?.elevation = 0f
                 return@f
             }
@@ -257,12 +265,14 @@ fun Controller.scrollViewWith(
                 if (el) 15f else 0f
             )
             elevationAnim?.addUpdateListener { valueAnimator ->
+                setAppBarBG(valueAnimator.animatedValue as Float / 15f, includeTabView)
                 activityBinding?.appBar?.elevation = valueAnimator.animatedValue as Float
             }
             elevationAnim?.start()
         }
     }
     if ((this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView) {
+        setAppBarBG(0f, includeTabView)
         activityBinding?.appBar?.elevation = 0f
     }
     addLifecycleListener(
@@ -289,7 +299,7 @@ fun Controller.scrollViewWith(
                     lastY = 0f
                     activityBinding!!.toolbar.tag = randomTag
                     activityBinding!!.toolbar.setOnClickListener {
-                        if ((this@scrollViewWith as? BottomSheetController)?.sheetIsExpanded() != true) {
+                        if ((this@scrollViewWith as? BottomSheetController)?.sheetIsFullscreen() != true) {
                             recycler.smoothScrollToTop()
                         } else {
                             (this@scrollViewWith as? BottomSheetController)?.toggleSheet()
@@ -473,6 +483,39 @@ fun Controller.scrollViewWith(
     return elevateFunc
 }
 
+fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
+    val context = view?.context ?: return
+    val floatingBar =
+        (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
+    if ((this as? BottomSheetController)?.sheetIsFullscreen() == true) return
+    if (floatingBar) {
+        (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(context.getResourceColor(R.attr.colorPrimaryVariant))
+        activityBinding?.appBar?.setBackgroundColor(Color.TRANSPARENT)
+        activity?.window?.statusBarColor = context.getResourceColor(android.R.attr.statusBarColor)
+    } else {
+        val color = ColorUtils.blendARGB(
+            context.getResourceColor(R.attr.colorSurface),
+            context.getResourceColor(R.attr.colorPrimaryVariant),
+            value
+        )
+        activityBinding?.appBar?.setBackgroundColor(color)
+        activity?.window?.statusBarColor =
+            ColorUtils.setAlphaComponent(color, (0.87f * 255).roundToInt())
+        if ((this as? FloatingSearchInterface)?.showFloatingBar() == true) {
+            val invColor = ColorUtils.blendARGB(
+                context.getResourceColor(R.attr.colorSurface),
+                context.getResourceColor(R.attr.colorPrimaryVariant),
+                1 - value
+            )
+            (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(
+                ColorStateList.valueOf(
+                    invColor
+                )
+            )
+        }
+    }
+}
+
 fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: Int) {
     val activity = activity ?: return
     permissions.forEach { permission ->
@@ -506,11 +549,11 @@ fun Controller.requestFilePermissionsSafe(
         (!preferences.hasDeniedA11FilePermission().get() || showA11PermissionAnyway)
     ) {
         preferences.hasDeniedA11FilePermission().set(true)
-        MaterialDialog(activity)
-            .title(R.string.all_files_permission_required)
-            .message(R.string.external_storage_permission_notice)
-            .cancelOnTouchOutside(false)
-            .positiveButton(android.R.string.ok) {
+        activity.materialAlertDialog()
+            .setTitle(R.string.all_files_permission_required)
+            .setMessage(R.string.external_storage_permission_notice)
+            .setCancelable(false)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 val intent = Intent(
                     Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
                     "package:${activity.packageName}".toUri()
@@ -522,7 +565,7 @@ fun Controller.requestFilePermissionsSafe(
                     activity.startActivity(intent2)
                 }
             }
-            .negativeButton(android.R.string.cancel)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 }

@@ -22,8 +22,8 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
 
     private lateinit var toolbarsubTitle: TextView
     private lateinit var cardIncogImage: ImageView
-    private val defStyleRes = com.google.android.material.R.style.Widget_MaterialComponents_Toolbar
-    private val subtitleTextAppeance: Int
+    private val defStyleRes = com.google.android.material.R.style.Widget_Material3_Toolbar
+    private val subtitleTextAppearance: Int
 
     init {
         val a = context.obtainStyledAttributes(
@@ -32,7 +32,7 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
             0,
             defStyleRes
         )
-        subtitleTextAppeance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0)
+        subtitleTextAppearance = a.getResourceId(R.styleable.Toolbar_subtitleTextAppearance, 0)
         a.recycle()
     }
     override fun onFinishInflate() {
@@ -42,7 +42,7 @@ class FloatingToolbar @JvmOverloads constructor(context: Context, attrs: Attribu
         toolbarTitle.setTextColor(actionColorAlpha)
 
         toolbarsubTitle = findViewById<MaterialTextView>(R.id.card_subtitle)
-        toolbarsubTitle.setTextAppearance(subtitleTextAppeance)
+        toolbarsubTitle.setTextAppearance(subtitleTextAppearance)
         toolbarsubTitle.setTextColor(actionColorAlphaSecondary)
         toolbarsubTitle.isVisible = false
 

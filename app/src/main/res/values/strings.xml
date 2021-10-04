@@ -522,6 +522,7 @@
     <string name="source_unsupported">Source is not supported</string>
     <string name="no_match_found">No match found</string>
     <string name="remove_tracking">Remove tracking from app</string>
+    <string name="cannot_remove_tracking_while_offline">Tracker cannot be removed from %1$s while offline</string>
     <string name="remove_tracking_from_">Also remove from %1$s</string>
     <string name="remove_previous_tracker">Remove previous tracker?</string>
     <string name="remove_x_from_service_and_add_y">Remove %1$s from %2$s and add %3$s</string>
@@ -532,7 +533,7 @@
     <string name="started_reading_date">Started reading date</string>
     <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please login to MAL again</string>
-    <string name="suggested_date_">Suggested date: %1$s</string>
+    <string name="use_suggested_date">Use suggested date</string>
 
     <!-- Migration -->
     <string name="select_sources">Select sources</string>
@@ -632,6 +633,8 @@
     <string name="by_default_side_nav_info">By default, side navigation is used for certain phones and small tablets when in landscape, and always shows on larger tablets</string>
     <string name="follow_system_theme">Follow system theme</string>
     <string name="pure_black_dark_mode">Pure black dark mode</string>
+    <string name="details_page">Details page</string>
+    <string name="theme_buttons_based_on_cover">Theme buttons based on cover</string>
     <string name="hides_on_scroll">Hides when scrolling</string>
     <string name="hide_app_block_screenshots">Hide app contents when switching apps and block screenshots</string>
     <string name="hide_notification_content">Hide notification content</string>
@@ -893,6 +896,7 @@
     <string name="include_">Include: %s</string>
     <string name="install">Install</string>
     <string name="keep">Keep</string>
+    <string name="keep_in_">Keep in %1$s</string>
     <string name="left">Left</string>
     <string name="less">Less</string>
     <string name="loading">Loading…</string>
@@ -929,6 +933,7 @@
     <string name="preview">Preview</string>
     <string name="previous">Previous</string>
     <string name="remove">Remove</string>
+    <string name="remove_from_">Remove from %1$s</string>
     <string name="reorder">Reorder</string>
     <string name="reset">Reset</string>
     <string name="restore">Restore</string>

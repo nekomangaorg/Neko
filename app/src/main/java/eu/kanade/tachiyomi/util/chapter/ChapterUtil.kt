@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import android.content.Context
 import android.content.res.ColorStateList
 import android.widget.TextView
+import androidx.core.widget.TextViewCompat
 import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
@@ -36,7 +37,7 @@ class ChapterUtil {
             }
         }
 
-        fun setBookmark(textView: TextView, chapter: Chapter) {
+        private fun setBookmark(textView: TextView, chapter: Chapter) {
             if (chapter.bookmark) {
                 val context = textView.context
                 val drawable = VectorDrawableCompat.create(
@@ -51,8 +52,9 @@ class ChapterUtil {
                     null,
                     null
                 )
-                textView.compoundDrawableTintList = ColorStateList.valueOf(
-                    bookmarkedColor(context)
+                TextViewCompat.setCompoundDrawableTintList(
+                    textView,
+                    ColorStateList.valueOf(bookmarkedColor(context))
                 )
                 textView.compoundDrawablePadding = 3.dpToPx
                 textView.translationX = (-2f).dpToPxEnd

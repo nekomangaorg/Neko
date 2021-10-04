@@ -112,10 +112,11 @@ dependencies {
 
     // Source models and interfaces from Tachiyomi 1.x
     implementation("tachiyomi.sourceapi:source-api:1.1")
-    // Android support library
-    implementation("androidx.appcompat:appcompat:1.3.1")
+
+    // Android X libraries
+    implementation("androidx.appcompat:appcompat:1.4.0-alpha03")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.4.0")
+    implementation("com.google.android.material:material:1.5.0-alpha04")
     implementation("androidx.webkit:webkit:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.preference:preference:1.1.1")
@@ -156,7 +157,7 @@ dependencies {
     implementation("org.conscrypt:conscrypt-android:2.5.2")
 
     // Chucker
-    val chuckerVersion = "3.2.0"
+    val chuckerVersion = "3.5.2"
     debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
     releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
 
@@ -225,12 +226,6 @@ dependencies {
     implementation("eu.davidea:flexible-adapter:5.1.0")
     implementation("eu.davidea:flexible-adapter-ui:1.0.0")
     implementation("com.nononsenseapps:filepicker:2.5.2")
-    val materialDialogVersion = "3.1.1"
-    implementation("com.afollestad.material-dialogs:core:$materialDialogVersion")
-    implementation("com.afollestad.material-dialogs:input:$materialDialogVersion")
-    implementation("com.afollestad.material-dialogs:datetime:$materialDialogVersion")
-
-    implementation("me.zhanghai.android.systemuihelper:library:1.0.0")
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.sephiroth74:NumberSlidingPicker:1.0.3")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")

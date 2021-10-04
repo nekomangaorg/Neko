@@ -24,7 +24,6 @@
         android:id="@+id/app_bar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?attr/colorSurface"
         android:stateListAnimator="@null"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
@@ -34,13 +33,13 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             app:titleTextColor="?actionBarTintColor"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="56dp"
             app:collapseIcon="@drawable/ic_arrow_back_24dp"
-            android:background="?attr/colorSurface">
+            android:background="@android:color/transparent">
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/toolbar_title"
-                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                style="?textAppearanceTitleLarge"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:drawableTint="?actionBarTintColor"
@@ -57,18 +56,19 @@
         <FrameLayout
             android:id="@+id/card_frame"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize">
+            android:layout_height="56dp" >
 
-            <androidx.cardview.widget.CardView
+            <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_view"
                 android:layout_width="match_parent"
                 android:layout_marginTop="4dp"
                 app:cardBackgroundColor="?colorPrimaryVariant"
                 android:layout_marginBottom="4dp"
-                android:layout_marginStart="14dp"
-                android:layout_marginEnd="14dp"
-                app:cardCornerRadius="8dp"
-                android:layout_height="match_parent">
+                app:strokeWidth="0dp"
+                android:layout_marginStart="10dp"
+                android:layout_marginEnd="10dp"
+                app:cardCornerRadius="30dp"
+                android:layout_height="match_parent" >
 
                 <eu.kanade.tachiyomi.ui.base.FloatingToolbar
                     android:id="@+id/card_toolbar"
@@ -80,11 +80,11 @@
                     android:background="@drawable/rect_ripple"
                     app:navigationIconTint="@color/text_color_secondary"
                     app:navigationIcon="@drawable/ic_search_24dp"
-                    app:titleTextAppearance="@style/TextAppearance.MaterialComponents.Body1"
-                    app:subtitleTextAppearance="@style/TextAppearance.MaterialComponents.Caption"
+                    app:titleTextAppearance="@style/TextAppearance.FloatingTitle"
+                    app:subtitleTextAppearance="?textAppearanceBodySmall"
                     app:collapseIcon="@drawable/ic_arrow_back_24dp"
                     android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                    android:layout_height="match_parent" >
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -101,7 +101,7 @@
                             android:layout_marginEnd="6dp"
                             android:layout_marginStart="0dp"
                             android:contentDescription="@string/incognito_mode"
-                            android:src="@drawable/ic_incognito_circle_24dp" />
+                            android:src="@drawable/ic_incognito_circle_24dp"/>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -111,14 +111,14 @@
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/card_title"
-                                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                                style="?textAppearanceTitleLarge"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
+                                android:drawableTint="?actionBarTintColor"
                                 android:ellipsize="end"
                                 android:layout_gravity="center"
                                 android:maxLines="1"
                                 android:textColor="?actionBarTintColor"
-                                android:fontFamily="@font/montserrat_medium"
                                 android:textSize="20sp"
                                 tools:drawableEnd="@drawable/ic_arrow_drop_down_24dp"
                                 tools:drawableStart="@drawable/ic_blank_24dp"
@@ -126,7 +126,7 @@
 
                             <com.google.android.material.textview.MaterialTextView
                                 android:id="@+id/card_subtitle"
-                                style="@style/TextAppearance.AppCompat.Widget.ActionBar.Title"
+                                style="?textAppearanceTitleLarge"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:ellipsize="end"
@@ -138,7 +138,7 @@
                         </LinearLayout>
                     </LinearLayout>
                 </eu.kanade.tachiyomi.ui.base.FloatingToolbar>
-            </androidx.cardview.widget.CardView>
+            </com.google.android.material.card.MaterialCardView>
         </FrameLayout>
 
         <FrameLayout
@@ -179,15 +179,8 @@
         android:id="@+id/bottom_nav"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="?colorPrimaryVariant"
-        app:itemIconTint="@color/bottom_nav_item_selector"
-        app:itemRippleColor="@color/ripple_nav"
-        app:itemTextColor="@color/bottom_nav_item_selector"
-        app:labelVisibilityMode="labeled"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:menu="@menu/bottom_navigation"
-        app:tabRippleColor="?colorControlHighlight"
-        app:tabTextColor="?attr/tabBarIconColor" />
+        app:menu="@menu/bottom_navigation" />
 </androidx.constraintlayout.widget.ConstraintLayout>

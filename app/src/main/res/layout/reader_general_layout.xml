@@ -22,7 +22,7 @@
         android:paddingEnd="@dimen/material_component_dialogs_padding_around_content_area">
 
         <com.google.android.material.textview.MaterialTextView
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="?textAppearanceTitleSmall"
             android:textSize="15sp"
             android:layout_width="match_parent"
             android:textColor="?attr/colorSecondary"
@@ -47,7 +47,7 @@
             android:entries="@array/rotation_type" />
 
         <com.google.android.material.textview.MaterialTextView
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="?textAppearanceTitleSmall"
             android:textSize="15sp"
             android:layout_width="match_parent"
             android:textColor="?attr/colorSecondary"

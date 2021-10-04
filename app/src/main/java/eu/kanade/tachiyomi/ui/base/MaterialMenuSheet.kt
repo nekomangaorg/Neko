@@ -1,8 +1,8 @@
 package eu.kanade.tachiyomi.ui.base
 
-import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.app.Activity
+import android.content.res.ColorStateList
 import android.os.Build
 import android.view.LayoutInflater
 import android.view.View
@@ -15,8 +15,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
@@ -103,12 +105,17 @@ class MaterialMenuSheet(
             elevationAnimator?.cancel()
             isElevated = elevate
             elevationAnimator?.cancel()
-            elevationAnimator = ObjectAnimator.ofFloat(
-                binding.titleLayout,
-                "elevation",
-                binding.titleLayout.elevation,
-                if (elevate) 5f else 0f
+            val nonElevateColor = activity.getResourceColor(R.attr.colorSurface)
+            val elevateColor = activity.getResourceColor(R.attr.colorPrimaryVariant)
+
+            elevationAnimator = ValueAnimator.ofArgb(
+                if (elevate) nonElevateColor else elevateColor,
+                if (elevate) elevateColor else nonElevateColor
             )
+
+            elevationAnimator?.addUpdateListener {
+                binding.titleLayout.backgroundTintList = ColorStateList.valueOf(it.animatedValue as Int)
+            }
             elevationAnimator?.start()
         }
         elevate(binding.menuSheetRecycler.canScrollVertically(-1))

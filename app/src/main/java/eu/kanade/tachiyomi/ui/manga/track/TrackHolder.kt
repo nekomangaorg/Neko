@@ -37,8 +37,8 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
         binding.trackStatus.setOnClickListener { listener.onStatusClick(bindingAdapterPosition) }
         binding.trackChapters.setOnClickListener { listener.onChaptersClick(bindingAdapterPosition) }
         binding.scoreContainer.setOnClickListener { listener.onScoreClick(bindingAdapterPosition) }
-        binding.trackStartDate.setOnClickListener { listener.onStartDateClick(bindingAdapterPosition) }
-        binding.trackFinishDate.setOnClickListener { listener.onFinishDateClick(bindingAdapterPosition) }
+        binding.trackStartDate.setOnClickListener { listener.onStartDateClick(it, bindingAdapterPosition) }
+        binding.trackFinishDate.setOnClickListener { listener.onFinishDateClick(it, bindingAdapterPosition) }
     }
 
     @SuppressLint("SetTextI18n")

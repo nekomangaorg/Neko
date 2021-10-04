@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 
 import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
+import android.content.res.ColorStateList
 import android.view.View
 import androidx.core.view.isVisible
+import androidx.core.widget.TextViewCompat
 import coil.load
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -13,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdLang
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
@@ -114,14 +117,14 @@ class ChapterHolder(
         val animatorSet = AnimatorSet()
         val anim1 = slideAnimation(0f, slide)
         anim1.startDelay = 1000
-        anim1.addListener(StartAnimatorListener { binding.leftView.isVisible = true })
+        anim1.addListener(StartAnimatorListener { binding.startView.isVisible = true })
         val anim2 = slideAnimation(slide, -slide)
         anim2.duration = 600
         anim2.startDelay = 500
         anim2.addUpdateListener {
-            if (binding.leftView.isVisible && binding.frontView.translationX <= 0) {
-                binding.leftView.isVisible = false
-                binding.rightView.isVisible = true
+            if (binding.startView.isVisible && binding.frontView.translationX <= 0) {
+                binding.startView.isVisible = false
+                binding.endView.isVisible = true
             }
         }
         val anim3 = slideAnimation(-slide, 0f)
@@ -144,12 +147,12 @@ class ChapterHolder(
         return binding.frontView
     }
 
-    override fun getRearRightView(): View {
-        return binding.rightView
+    override fun getRearEndView(): View {
+        return binding.endView
     }
 
-    override fun getRearLeftView(): View {
-        return binding.leftView
+    override fun getRearStartView(): View {
+        return binding.startView
     }
 
     private fun resetFrontView() {
@@ -158,12 +161,18 @@ class ChapterHolder(
         }
     }
 
-    fun notifyStatus(
-        status: Download.State,
-        locked: Boolean,
-        progress: Int,
-        animated: Boolean = false,
-    ) = with(binding.downloadButton.downloadButton) {
+    fun notifyStatus(status: Download.State, locked: Boolean, progress: Int, animated: Boolean = false) = with(binding.downloadButton.downloadButton) {
+        adapter.delegate.accentColor()?.let {
+            binding.startView.backgroundTintList = ColorStateList.valueOf(it)
+            binding.bookmark.imageTintList = ColorStateList.valueOf(
+                context.getResourceColor(android.R.attr.textColorPrimaryInverse)
+            )
+            TextViewCompat.setCompoundDrawableTintList(
+                binding.chapterTitle,
+                ColorStateList.valueOf(it)
+            )
+            colorSecondary = it
+        }
         if (locked) {
             isVisible = false
             return

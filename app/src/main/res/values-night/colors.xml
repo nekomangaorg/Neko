@@ -3,7 +3,7 @@
     <!-- Application Colors -->
     <color name="primaryVariantTachiyomi">#292929</color>
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
-    <color name="legacyRippleColor">@color/md_white_1000_20</color>
+   <color name="legacyRippleColor">@color/md_white_1000_20</color>
     <color name="colorOnSurface">@color/md_white_1000</color>
     <color name="colorOnBackground">@color/md_white_1000</color>
 
@@ -22,7 +22,16 @@
     <color name="dialog">#292929</color>
     <color name="gray_button">#BFBFBF</color>
 
+    <!-- Chocolate Strawberries Theme -->
+    <color name="primaryStrawberry">#e14e4e</color>
+    <color name="primaryInverseStrawberry">#9f1414</color>
+    <color name="secondaryVariantStrawberry">#f9bab2</color>
+    <color name="primaryVariantStrawberry">#211b19</color>
+
     <!-- Tako Theme -->
+    <color name="primaryTako">#fccd9f</color>
+    <color name="primaryVariantTako">#292828</color>
+    <color name="primaryInverseTako">#a85d14</color>
     <color name="secondaryTako">#F3B375</color>
     <color name="onSecondaryTako">#242431</color>
     <color name="secondaryVariantTako">#f4d1af</color>
@@ -35,7 +44,8 @@
 
     <!-- Midnight Dusk Theme -->
     <color name="secondaryDuskDawn">#F02475</color>
-    <color name="secondaryVariantDuskDawn">#f091b7</color>
+    <color name="primaryInverseDuskDawn">#8d0c3f</color>
+    <color name="secondaryVariantDuskDawn">#ffc1da</color>
     <color name="backgroundDuskDawn">#16151D</color>
     <color name="dialogDuskDawn">#201F27</color>
     <color name="primaryDuskDawn">#E570A0</color>
@@ -44,8 +54,9 @@
 
     <!-- Teal/Sapphire Theme -->
     <color name="secondaryTealSapphire">#589ab8</color>
-    <color name="secondaryVariantTealSapphire">#79aec6</color>
-    <color name="primaryTealSapphire">#3e6c81</color>
+    <color name="secondaryVariantTealSapphire">#b5ebff</color>
+    <color name="primaryTealSapphire">#80b8d1</color>
+    <color name="primaryInverseTealSapphire">#1d698b</color>
     <color name="primaryVariantTealSapphire">#1d2528</color>
     <color name="backgroundTealSapphire">#14191b</color>
     <color name="colorOnBackgroundTealSapphire">@color/md_white_1000</color>

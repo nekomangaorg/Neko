@@ -23,7 +23,7 @@
 
     <eu.kanade.tachiyomi.ui.reader.PageIndicatorTextView
         android:id="@+id/page_number"
-        style="@style/Neko.Caption"
+        style="?textAppearanceBodySmall"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|center_horizontal"

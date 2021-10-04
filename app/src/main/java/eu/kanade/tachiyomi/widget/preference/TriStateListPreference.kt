@@ -5,13 +5,11 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.core.text.buildSpannedString
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.checkItem
-import com.afollestad.materialdialogs.list.uncheckItem
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.widget.materialdialogs.QuadStateCheckBox
-import eu.kanade.tachiyomi.widget.materialdialogs.listItemsQuadStateMultiChoice
+import eu.kanade.tachiyomi.util.system.setTriStateItems
+import eu.kanade.tachiyomi.widget.TriStateCheckBox
 
 class TriStateListPreference @JvmOverloads constructor(
     activity: Activity?,
@@ -74,7 +72,7 @@ class TriStateListPreference @JvmOverloads constructor(
     }
 
     @SuppressLint("CheckResult")
-    override fun MaterialDialog.setItems() {
+    override fun MaterialAlertDialogBuilder.setListItems() {
         val set = prefs.getStringSet(key, defValue).getOrDefault()
         val items = if (allSelectionRes != null) {
             if (showAllLast) entries + listOf(context.getString(allSelectionRes!!))
@@ -85,48 +83,48 @@ class TriStateListPreference @JvmOverloads constructor(
             prefs.getStringSet(it, defValue).getOrDefault()
         }.orEmpty()
         val allValue = intArrayOf(
-            if (set.isEmpty()) QuadStateCheckBox.State.CHECKED.ordinal
-            else QuadStateCheckBox.State.UNCHECKED.ordinal
+            if (set.isEmpty()) TriStateCheckBox.State.CHECKED.ordinal
+            else TriStateCheckBox.State.UNCHECKED.ordinal
         )
         val preselected =
             if (allSelectionRes != null && !showAllLast) { allValue } else { intArrayOf() } + entryValues
                 .map {
                     when (it) {
-                        in set -> QuadStateCheckBox.State.CHECKED.ordinal
-                        in excludedSet -> QuadStateCheckBox.State.INVERSED.ordinal
-                        else -> QuadStateCheckBox.State.UNCHECKED.ordinal
+                        in set -> TriStateCheckBox.State.CHECKED.ordinal
+                        in excludedSet -> TriStateCheckBox.State.INVERSED.ordinal
+                        else -> TriStateCheckBox.State.UNCHECKED.ordinal
                     }
                 }
                 .toIntArray() +
                 if (allSelectionRes != null && showAllLast) { allValue } else { intArrayOf() }
         var includedItems = set
         var excludedItems = excludedSet
-        positiveButton(android.R.string.ok) {
+        setPositiveButton(android.R.string.ok) { _, _ ->
             prefs.getStringSet(key, emptySet()).set(includedItems)
             excludeKey?.let { prefs.getStringSet(it, emptySet()).set(excludedItems) }
             callChangeListener(includedItems to excludedItems)
             notifyChanged()
         }
-        listItemsQuadStateMultiChoice(
+        setTriStateItems(
             items = items,
             disabledIndices = if (allSelectionRes != null) intArrayOf(allPos) else null,
             initialSelection = preselected
-        ) { _, sels, _ ->
+        ) { adapter, sels, _, _, _ ->
             val selections = sels.filterIndexed { index, i -> allSelectionRes == null || index != allPos }
             includedItems = selections
-                .mapIndexed { index, value -> if (value == QuadStateCheckBox.State.CHECKED.ordinal) index else null }
+                .mapIndexed { index, value -> if (value == TriStateCheckBox.State.CHECKED.ordinal) index else null }
                 .filterNotNull()
                 .map { entryValues[it] }
                 .toSet()
             excludedItems = selections
-                .mapIndexed { index, value -> if (value == QuadStateCheckBox.State.INVERSED.ordinal) index else null }
+                .mapIndexed { index, value -> if (value == TriStateCheckBox.State.INVERSED.ordinal) index else null }
                 .filterNotNull()
                 .map { entryValues[it] }
                 .toSet()
 
             if (allSelectionRes != null && !allIsAlwaysSelected) {
-                if (includedItems.isEmpty()) checkItem(allPos)
-                else uncheckItem(allPos)
+                if (includedItems.isEmpty()) adapter.checkItems(intArrayOf(allPos))
+                else adapter.uncheckItems(intArrayOf(allPos))
             }
         }
     }

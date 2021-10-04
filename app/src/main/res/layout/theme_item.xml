@@ -27,7 +27,6 @@
         app:layout_constraintStart_toStartOf="@id/theme_selected"
         app:layout_constraintBottom_toBottomOf="@id/theme_selected"
         app:layout_constraintEnd_toEndOf="@id/theme_selected"
-        app:cardElevation="4dp"
         app:cardCornerRadius="16dp">
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
@@ -49,7 +48,6 @@
                     android:layout_width="match_parent"
                     android:layout_height="@dimen/theme_app_bar_preview"
                     android:background="?attr/colorSurface"
-                    android:elevation="1dp"
                     app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toTopOf="parent">
@@ -209,7 +207,7 @@
         android:textAlignment="center"
         android:layout_marginStart="6dp"
         android:layout_marginEnd="6dp"
-        android:textAppearance="@style/TextAppearance.MaterialComponents.Caption"
+        android:textAppearance="?textAppearanceCaption"
         app:layout_constraintTop_toBottomOf="@id/theme_selected"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"

@@ -16,6 +16,9 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.widget.TriStateCheckBox
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import java.util.Date
 
 fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper): Boolean {
@@ -65,17 +68,24 @@ fun List<Manga>.moveCategories(
     onMangaMoved: () -> Unit,
 ) {
     if (this.isEmpty()) return
-    val commonCategories = this
-        .map { db.getCategoriesForManga(it).executeAsBlocking() }
-        .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
-        .mapNotNull { it.id }
-        .toTypedArray()
     val categories = db.getCategories().executeAsBlocking()
+    val commonCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
+        .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+        .toTypedArray()
+    val mangaCategories = map { db.getCategoriesForManga(it).executeAsBlocking() }
+    val common = mangaCategories.reduce { set1, set2 -> set1.intersect(set2).toMutableList() }
+    val mixedCategories = mangaCategories.flatten().distinct().subtract(common).toMutableList()
     SetCategoriesSheet(
         activity,
         this,
         categories.toMutableList(),
-        commonCategories,
+        categories.map {
+            when (it) {
+                in commonCategories -> TriStateCheckBox.State.CHECKED
+                in mixedCategories -> TriStateCheckBox.State.INDETERMINATE
+                else -> TriStateCheckBox.State.UNCHECKED
+            }
+        }.toTypedArray(),
         false
     ) {
         onMangaMoved()

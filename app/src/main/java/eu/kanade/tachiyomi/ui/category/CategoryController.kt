@@ -5,7 +5,6 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import eu.davidea.flexibleadapter.FlexibleAdapter
@@ -14,6 +13,7 @@ import eu.kanade.tachiyomi.databinding.CategoriesControllerBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGORY_ORDER
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.snack
@@ -124,13 +124,13 @@ class CategoryController(bundle: Bundle? = null) :
     }
 
     override fun onItemDelete(position: Int) {
-        MaterialDialog(activity!!)
-            .title(R.string.confirm_category_deletion)
-            .message(R.string.confirm_category_deletion_message)
-            .positiveButton(R.string.delete) {
+        activity!!.materialAlertDialog()
+            .setTitle(R.string.confirm_category_deletion)
+            .setMessage(R.string.confirm_category_deletion_message)
+            .setPositiveButton(R.string.delete) { _, _ ->
                 deleteCategory(position)
             }
-            .negativeButton(android.R.string.no)
+            .setNegativeButton(android.R.string.cancel, null)
             .show()
     }
 

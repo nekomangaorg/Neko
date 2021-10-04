@@ -8,7 +8,7 @@
     android:background="?attr/background">
 
     <FrameLayout
-        android:id="@+id/right_view"
+        android:id="@+id/end_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@color/material_green_800"
@@ -74,8 +74,8 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/title"
-            style="@style/TextAppearance.Regular.Body1.SemiBold"
-            android:layout_width="0dp"
+            style="?textAppearanceTitleSmall"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginStart="12dp"
             android:layout_marginTop="2dp"
@@ -93,11 +93,11 @@
             app:flow_verticalBias="0.0"
             app:layout_constraintStart_toEndOf="@id/card_layout"
             app:layout_constraintTop_toTopOf="parent"
-            tools:text="New Chapter" />
+            tools:text="New Chapters" />
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/subtitle"
-            style="@style/TextAppearance.MaterialComponents.Body1"
+            style="?textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="16dp"
@@ -116,7 +116,7 @@
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/body"
-            style="@style/TextAppearance.MaterialComponents.Body1"
+            style="?textAppearanceBodySmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginEnd="6dp"

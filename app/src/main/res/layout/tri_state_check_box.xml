@@ -10,22 +10,22 @@
 
     <ImageView
         android:id="@+id/tri_state_box"
+        android:layout_height="wrap_content"
+        android:layout_width="wrap_content"
         android:contentDescription="@string/enable"
         android:padding="4dp"
         app:srcCompat="@drawable/ic_check_box_outline_blank_24dp"
         tools:tint="?colorControlNormal"
-        android:background="@drawable/round_ripple"
-        style="@style/MD_ListItem_Control" />
+        android:background="@drawable/round_ripple" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/text_view"
-        android:layout_marginStart="2dp"
+        android:layout_marginStart="0dp"
         android:layout_marginEnd="4dp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_vertical"
-        android:textSize="14sp"
-        style="@style/TextAppearance.Regular"
+        style="?textAppearanceBodyMedium"
         tools:text="Item" />
 
 </LinearLayout>

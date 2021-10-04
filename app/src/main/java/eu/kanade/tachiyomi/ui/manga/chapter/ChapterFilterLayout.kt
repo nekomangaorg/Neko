@@ -26,14 +26,14 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
     private fun checkedFilter(checkBox: TriStateCheckBox, state: TriStateCheckBox.State) {
         if (state != TriStateCheckBox.State.UNCHECKED) {
             if (binding.showAll == checkBox && state == TriStateCheckBox.State.CHECKED) {
-                binding.showUnread.animateDrawableToState(TriStateCheckBox.State.UNCHECKED)
-                binding.showDownload.animateDrawableToState(TriStateCheckBox.State.UNCHECKED)
-                binding.showBookmark.animateDrawableToState(TriStateCheckBox.State.UNCHECKED)
+                binding.showUnread.setState(TriStateCheckBox.State.UNCHECKED, true)
+                binding.showDownload.setState(TriStateCheckBox.State.UNCHECKED)
+                binding.showBookmark.setState(TriStateCheckBox.State.UNCHECKED)
             } else {
                 if (binding.showAll == checkBox) {
                     binding.showAll.state = TriStateCheckBox.State.CHECKED
                 } else {
-                    binding.showAll.animateDrawableToState(TriStateCheckBox.State.UNCHECKED)
+                    binding.showAll.setState(TriStateCheckBox.State.UNCHECKED, true)
                 }
             }
         } else if (
@@ -41,7 +41,7 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
             binding.showDownload.isUnchecked &&
             binding.showBookmark.isUnchecked
         ) {
-            binding.showAll.animateDrawableToState(TriStateCheckBox.State.CHECKED)
+            binding.showAll.setState(TriStateCheckBox.State.CHECKED, true)
         }
         mOnCheckedChangeListener?.onCheckedChanged(this)
     }

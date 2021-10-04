@@ -6,7 +6,7 @@
     <!--============-->
     <style name="Theme" />
 
-    <style name="Theme.Base" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <style name="Theme.Base" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="android:forceDarkAllowed" tools:targetApi="29">false</item>
         <item name="android:enforceNavigationBarContrast" tools:targetApi="29">false</item>
         <item name="android:layoutDirection">ltr</item>
@@ -20,26 +20,41 @@
         <item name="android:windowSplashScreenAnimationDuration" tools:targetApi="31">775</item>
         <!--Standard Material colors -->
         <item name="colorPrimary">@color/primaryTachiyomi</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseTachiyomi</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTachiyomi</item>
         <item name="colorSurface">@color/background</item> //old colorSecondary
         <item name="colorOnSurface">@color/colorOnSurface</item> //old colorOnSecondary
         <item name="colorSecondary">@color/secondaryTachiyomi</item> //colorAccent
-        <item name="colorOnSecondary">@color/md_white_1000</item> // colorOnSecondary
-        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item> //colorAccentText
+        <item name="colorOnSecondary">@color/md_white_1000</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item> // much darker / lighter version of colorSecondary
+        <item name="colorSecondaryContainer">@color/secondary_container</item>
         <item name="background">@color/background</item>
         <item name="colorOnBackground">@color/colorOnBackground</item>
         <item name="colorBackgroundFloating">?colorSurface</item>
-        <item name="elevationOverlayEnabled">false</item>
+
+        <item name="colorTertiary">@color/download_badge</item>
+        <item name="colorOnTertiary">@color/black</item>
+
         <item name="readerBackground">@color/primaryVariantTachiyomi</item>
         <item name="android:listSelector">?attr/colorSecondary</item>
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
-        <item name="actionModeStyle">@style/CustomActionModeStyle</item>
+        <item name="actionModeBackground">?colorPrimaryVariant</item>
         <item name="colorControlHighlight">@color/legacyRippleColor</item>
         <item name="android:colorBackground">?background</item>
         <item name="android:colorControlHighlight">@color/secondary_highlight</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
+        <item name="textAppearanceButton">@style/TextAppearance.Tachiyomi.Button</item>
+        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary</item>
+        <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
+        <item name="switchStyle">@style/Widget.Tachiyomi.CompoundButton.Switch</item>
+        <item name="sliderStyle">@style/Widget.Tachiyomi.Slider</item>
+        <item name="checkboxStyle">@style/Widget.Tachiyomi.CompoundButton.CheckBox</item>
+        <item name="radioButtonStyle">@style/Widget.Tachiyomi.CompoundButton.RadioButton</item>
+        <item name="bottomNavigationStyle">@style/Widget.Tachiyomi.BottomNavigationView</item>
+        <item name="navigationRailStyle">@style/Widget.Tachiyomi.NavigationRail</item>
+        <item name="elevationOverlayEnabled">false</item>
         <item name="android:fontFamily">@font/montserrat_regular</item>
         <item name="fontFamily">@font/montserrat_regular</item>
         <item name="colorOnHopper">@color/md_white_1000</item>
@@ -50,8 +65,9 @@
 
         <!-- Themes -->
         <item name="windowActionModeOverlay">true</item>
+        <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.DayNight</item>
-        <item name="preferenceTheme">@style/Neko.Preference</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
 
         <!-- Custom Attributes-->
         <item name="actionBarTintColor">?attr/colorOnBackground</item>
@@ -62,14 +78,6 @@
         <item name="android:colorEdgeEffect">?attr/colorSecondary</item>
         <item name="tabHighlightBackground">@color/secondary_alpha</item>
 
-        <!-- Material Dialog colors -->
-        <item name="md_color_title">?attr/colorOnBackground</item>
-        <item name="md_color_content">?android:textColorSecondary</item>
-        <item name="md_color_button_text">?attr/colorSecondary</item>
-        <item name="md_background_color">?attr/background</item>
-        <item name="md_button_casing">literal</item>
-        <item name="md_corner_radius">12dp</item>
-
         <item name="android:windowLightStatusBar">@bool/isLightMode</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">@bool/isLightMode</item>
     </style>
@@ -78,11 +86,15 @@
 
     <style name="Theme.Tachiyomi.AllBlue">
         <item name="hasColoredActionBar">true</item>
-        <item name="colorPrimaryVariant">@color/primaryTachiyomi</item>
+        <item name="colorPrimaryVariant">@color/legacyBlue</item>
         <item name="tabBarIconColor">@color/md_white_1000</item>
-        <item name="colorSurface">@color/primaryTachiyomi</item>
-        <item name="colorBackgroundFloating">?android:colorBackground</item>
+		<item name="colorSurface">@color/legacyBlue</item>
+        <item name="colorSecondaryVariant">@color/md_white_1000</item>
+        <item name="colorSecondaryContainer">@color/md_white_1000_20</item>
+        <item name="colorBackgroundFloating">?background</item>
+        <item name="android:colorBackgroundFloating">?background</item>
         <item name="tabBarIconInactive">@color/md_white_1000_50</item>
+        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Tachiyomi.MaterialAlertDialog.Colored</item>
         <item name="tabHighlightBackground">@color/md_white_1000_50</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="popupMenuBackground">@drawable/alt_popupmenu_background</item>
@@ -94,10 +106,10 @@
 
     <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
         <item name="hasColoredActionBar">true</item>
-        <item name="colorPrimaryVariant">@color/primaryTachiyomi</item>
+        <item name="colorPrimaryVariant">@color/legacyBlue</item>
         <item name="colorSurface">@color/primaryTachiyomi</item>
-        <item name="colorBackgroundFloating">?android:colorBackground</item>
-        <item name="android:colorBackgroundFloating">?android:colorBackground</item>
+        <item name="colorBackgroundFloating">?background</item>
+        <item name="android:colorBackgroundFloating">?background</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="android:windowLightStatusBar">false</item>
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
@@ -109,9 +121,6 @@
         <item name="colorPrimaryVariant">@color/md_black_1000</item>
         <item name="background">@color/md_black_1000</item>
         <item name="readerBackground">@color/md_black_1000</item>
-
-        <!-- Material Dialog colors -->
-        <item name="md_background_color">@color/md_black_1000</item>
     </style>
 
     <style name="Theme.Tachiyomi.FlatLime" />
@@ -122,6 +131,7 @@
 
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseDuskDawn</item>
         <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
         <item name="colorSecondary">@color/secondaryDuskDawn</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantDuskDawn</item>
@@ -137,6 +147,7 @@
 
     <style name="Theme.Tachiyomi.SapphireDusk">
         <item name="colorPrimary">@color/primaryTealSapphire</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseTealSapphire</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTealSapphire</item>
         <item name="colorSecondary">@color/secondaryTealSapphire</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTealSapphire</item>
@@ -146,14 +157,19 @@
         <item name="colorSurface">@color/backgroundTealSapphire</item>
         <item name="colorOnBackground">@color/colorOnBackgroundTealSapphire</item>
         <item name="actionBarTintColor">@color/appBarTextTealSapphire</item>
+        <item name="colorTertiary">@color/downloadBadgeDayNightInverse</item>
+        <item name="colorOnTertiary">?android:textColorPrimaryInverse</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
     </style>
 
     <style name="Theme.Tachiyomi.Strawberries">
+        <item name="colorPrimary">@color/primaryStrawberry</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
         <item name="colorSecondary">@color/secondaryStrawberry</item>
-        <item name="colorSecondaryVariant">@color/secondaryAlternativeStrawberry</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
@@ -162,10 +178,14 @@
 
     <!--== Tako Theme ==-->
     <style name="Theme.Tachiyomi.Tako">
+        <item name="colorPrimary">@color/primaryTako</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseTako</item>
         <item name="colorSecondary">@color/secondaryTako</item>
         <item name="colorOnSecondary">@color/onSecondaryTako</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantTako</item>
-        <item name="colorPrimaryVariant">@color/surfaceTako</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantTako</item>
+        <item name="colorTertiary">@color/downloadBadgeDayNight</item>
+        <item name="colorOnTertiary">@color/colorOnDownloadBadgeDayNight</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTako</item>
         <item name="colorControlHighlight">@color/rippleColoredTako</item>
         <item name="colorSurface">@color/backgroundTako</item>
@@ -200,8 +220,10 @@
         <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
     </style>
 
-    <style name="Theme.OSS" parent="Theme.MaterialComponents.DayNight">
-        <item name="colorPrimary">@color/primaryTachiyomi</item>
-        <item name="android:colorEdgeEffect">@color/secondaryTachiyomi</item>
+    <style name="Theme.OSS" parent="Theme.Tachiyomi.Monet">
+        <item name="colorPrimary">?colorPrimaryVariant</item>
+        <item name="android:statusBarColor">?colorPrimaryVariant</item>
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
     </style>
 </resources>

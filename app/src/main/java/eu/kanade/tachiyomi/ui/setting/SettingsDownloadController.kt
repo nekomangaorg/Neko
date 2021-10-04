@@ -1,17 +1,14 @@
 package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.net.Uri
-import android.os.Bundle
 import android.os.Environment
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -19,8 +16,8 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.preference.getOrDefault
-import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.getFilePicker
+import eu.kanade.tachiyomi.util.system.withOriginalWidth
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -38,9 +35,7 @@ class SettingsDownloadController : SettingsController() {
             key = Keys.downloadsDirectory
             titleRes = R.string.download_location
             onClick {
-                val ctrl = DownloadDirectoriesDialog()
-                ctrl.targetController = this@SettingsDownloadController
-                ctrl.showDialog(router)
+                DownloadDirectoriesDialog(this@SettingsDownloadController).show()
             }
 
             preferences.downloadsDirectory().asObservable()
@@ -151,34 +146,39 @@ class SettingsDownloadController : SettingsController() {
         }
     }
 
-    class DownloadDirectoriesDialog : DialogController() {
+    class DownloadDirectoriesDialog(val controller: SettingsDownloadController) :
+        MaterialAlertDialogBuilder(controller.activity!!.withOriginalWidth()) {
 
         private val preferences: PreferencesHelper = Injekt.get()
 
-        override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-            val activity = activity!!
-            val currentDir = preferences.downloadsDirectory().getOrDefault()
-            val externalDirs = getExternalDirs() + File(activity.getString(R.string.custom_location))
-            val selectedIndex = externalDirs.map(File::toString).indexOfFirst { it in currentDir }
+        val activity = controller.activity!!
 
-            return MaterialDialog(activity)
-                .listItemsSingleChoice(items = externalDirs.map { it.path }, initialSelection = selectedIndex) { _, position, text ->
-                    val target = targetController as? SettingsDownloadController
-                    if (position == externalDirs.lastIndex) {
-                        target?.customDirectorySelected(currentDir)
-                    } else {
-                        target?.predefinedDirectorySelected(text.toString())
-                    }
+        init {
+            val currentDir = preferences.downloadsDirectory().getOrDefault()
+            val externalDirs =
+                getExternalDirs() + File(activity.getString(R.string.custom_location))
+            val selectedIndex = externalDirs.map(File::toString).indexOfFirst { it in currentDir }
+            val items = externalDirs.map { it.path }
+
+            setTitle(R.string.download_location)
+            setSingleChoiceItems(items.toTypedArray(), selectedIndex) { dialog, position ->
+                if (position == externalDirs.lastIndex) {
+                    controller.customDirectorySelected(currentDir)
+                } else {
+                    controller.predefinedDirectorySelected(items[position])
                 }
+                dialog.dismiss()
+            }
+            setNegativeButton(android.R.string.cancel, null)
         }
 
         private fun getExternalDirs(): List<File> {
             val defaultDir = Environment.getExternalStorageDirectory().absolutePath +
-                File.separator + resources?.getString(R.string.app_name) +
+                File.separator + activity.resources?.getString(R.string.app_name) +
                 File.separator + "downloads"
 
             return mutableListOf(File(defaultDir)) +
-                ContextCompat.getExternalFilesDirs(activity!!, "").filterNotNull()
+                ContextCompat.getExternalFilesDirs(activity, "").filterNotNull()
         }
     }
 

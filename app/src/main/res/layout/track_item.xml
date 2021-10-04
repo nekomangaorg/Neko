@@ -3,7 +3,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/track"
-    style="@style/Theme.Widget.CardView.Item"
+    app:cardElevation="0dp"
+    style="@style/Widget.Tachiyomi.CardView.Tracker"
     android:padding="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -11,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_weight="1"
-        android:background="?md_background_color">
+        android:background="?background">
 
         <FrameLayout
             android:id="@+id/logo_container"
@@ -59,7 +60,7 @@
 
             <TextView
                 android:id="@+id/track_title"
-                style="@style/TextAppearance.MaterialComponents.Headline6"
+                style="?textAppearanceTitleMedium"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/card_item_selector"
@@ -110,91 +111,105 @@
             android:id="@+id/sub_tracking_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/divider">
 
-            <TextView
-                android:id="@+id/track_status"
-                style="@style/TextAppearance.Regular.Body1.Secondary"
-                android:layout_width="0dp"
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:id="@+id/top_tracking_layout"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@drawable/card_item_selector"
-                android:gravity="center"
-                android:maxLines="2"
-                android:paddingStart="6dp"
-                android:paddingTop="16dp"
-                android:paddingEnd="6dp"
-                android:paddingBottom="16dp"
-                app:layout_constraintEnd_toStartOf="@id/track_chapters"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent"
-                tools:text="Currently Reading" />
-
-            <TextView
-                android:id="@+id/track_chapters"
-                style="@style/TextAppearance.Regular.Body1.Secondary"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/card_item_selector"
-                android:gravity="center"
-                android:maxLines="2"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                app:layout_constraintEnd_toStartOf="@id/score_container"
-                app:layout_constraintStart_toEndOf="@id/track_status"
-                app:layout_constraintTop_toTopOf="parent"
-                app:layout_constraintBottom_toBottomOf="@+id/track_status"
-                tools:text="Chapter 12 of 24" />
-
-            <FrameLayout
-                android:id="@+id/score_container"
-                android:layout_width="0dp"
-                android:paddingTop="16dp"
-                android:paddingBottom="16dp"
-                android:layout_height="wrap_content"
-                android:background="@drawable/card_item_selector"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toEndOf="@id/track_chapters"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintBottom_toTopOf="@id/bottom_divider"
                 app:layout_constraintTop_toTopOf="parent">
+                <TextView
+                    android:id="@+id/track_status"
+                    style="?textAppearanceBodySecondary"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/card_item_selector"
+                    android:gravity="center"
+                    android:maxLines="2"
+                    android:paddingStart="6dp"
+                    android:paddingTop="16dp"
+                    android:paddingEnd="6dp"
+                    android:paddingBottom="16dp"
+                    app:layout_constraintHeight_min="wrap"
+                    app:layout_constraintEnd_toStartOf="@id/track_chapters"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    tools:text="Currently Reading" />
 
                 <TextView
-                    android:id="@+id/track_score"
-                    style="@style/TextAppearance.Regular.Body1.Secondary"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/track_chapters"
+                    style="?textAppearanceBodySecondary"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    app:drawableTint="?attr/colorOnBackground"
-                    tools:text="10"
-                    app:drawableEndCompat="@drawable/ic_star_12dp" />
-            </FrameLayout>
+                    android:background="@drawable/card_item_selector"
+                    android:gravity="center"
+                    android:maxLines="2"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    app:layout_constraintHeight_min="wrap"
+                    app:layout_constraintEnd_toStartOf="@id/score_container"
+                    app:layout_constraintStart_toEndOf="@id/track_status"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    tools:text="Chapter 12 of 24" />
 
-            <View
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:alpha="0.25"
-                android:background="@color/strong_divider"
-                app:layout_constraintBottom_toTopOf="@+id/bottom_divider"
-                app:layout_constraintEnd_toStartOf="@id/track_chapters"
-                app:layout_constraintStart_toEndOf="@+id/track_status"
-                app:layout_constraintTop_toTopOf="parent" />
+                <FrameLayout
+                    android:id="@+id/score_container"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:paddingTop="16dp"
+                    android:paddingBottom="16dp"
+                    android:background="@drawable/card_item_selector"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintHeight_min="wrap"
+                    app:layout_constraintStart_toEndOf="@id/track_chapters"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" >
 
-            <View
-                android:id="@+id/vert_divider_2"
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_marginTop="10dp"
-                android:layout_marginBottom="10dp"
-                android:alpha="0.25"
-                android:background="@color/strong_divider"
-                app:layout_constraintBottom_toTopOf="@+id/bottom_divider"
-                app:layout_constraintEnd_toStartOf="@id/score_container"
-                app:layout_constraintStart_toEndOf="@+id/track_chapters"
-                app:layout_constraintTop_toTopOf="parent" />
+                    <TextView
+                        android:id="@+id/track_score"
+                        style="?textAppearanceBodySecondary"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        app:drawableTint="?attr/colorOnBackground"
+                        tools:text="10"
+                        app:drawableEndCompat="@drawable/ic_star_12dp" />
+                </FrameLayout>
+
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.25"
+                    android:background="@color/strong_divider"
+                    app:layout_constraintEnd_toStartOf="@id/track_chapters"
+                    app:layout_constraintStart_toEndOf="@id/track_status"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <View
+                    android:id="@+id/vert_divider_2"
+                    android:layout_width="1dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:alpha="0.25"
+                    android:background="@color/strong_divider"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@id/score_container"
+                    app:layout_constraintStart_toEndOf="@+id/track_chapters"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <View
                 android:id="@+id/bottom_divider"
@@ -202,13 +217,14 @@
                 android:layout_height="1dp"
                 android:alpha="0.25"
                 android:background="@color/strong_divider"
+                app:layout_constraintTop_toBottomOf="@id/top_tracking_layout"
+                app:layout_constraintBottom_toTopOf="@id/track_start_date"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/track_chapters" />
+                app:layout_constraintEnd_toEndOf="parent" />
 
             <TextView
                 android:id="@+id/track_start_date"
-                style="@style/TextAppearance.Regular.Body1.Secondary"
+                style="?textAppearanceBodySecondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/card_item_selector"
@@ -236,7 +252,7 @@
 
             <TextView
                 android:id="@+id/track_finish_date"
-                style="@style/TextAppearance.Regular.Body1.Secondary"
+                style="?textAppearanceBodySecondary"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:background="@drawable/card_item_selector"
@@ -270,8 +286,7 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toEndOf="@id/logo_container"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="parent" />
 
         <androidx.constraintlayout.widget.Group
             android:id="@+id/track_group"

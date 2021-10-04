@@ -24,7 +24,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
         android:layout_width="match_parent"
-        android:layout_height="?actionBarSize"
+        android:layout_height="56dp"
         android:layout_gravity="top"
         android:background="@drawable/bottom_sheet_rounded_background"
         android:backgroundTint="?attr/colorSurface"
@@ -44,7 +44,7 @@
             android:layout_gravity="center"
             android:ellipsize="end"
             android:maxLines="1"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            android:textAppearance="?textAppearanceHeadlineMedium"
             android:textColor="?actionBarTintColor"
             android:textSize="17sp"
             app:layout_constraintBottom_toBottomOf="parent"

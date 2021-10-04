@@ -2,11 +2,11 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.app.Dialog
 import android.os.Bundle
-import com.afollestad.materialdialogs.MaterialDialog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -19,14 +19,14 @@ class TrackLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         val serviceName = activity!!.getString(service.nameRes())
-        return MaterialDialog(activity!!)
-            .title(text = activity!!.getString(R.string.logout_from_, serviceName))
-            .negativeButton(R.string.cancel)
-            .positiveButton(R.string.logout) { _ ->
+        return activity!!.materialAlertDialog()
+            .setTitle(activity!!.getString(R.string.logout_from_, serviceName))
+            .setNegativeButton(R.string.cancel, null)
+            .setPositiveButton(R.string.logout) { _, _ ->
                 service.logout()
                 (targetController as? Listener)?.trackLogoutDialogClosed(service)
                 activity!!.toast(R.string.successfully_logged_out)
-            }
+            }.create()
     }
 
     interface Listener {

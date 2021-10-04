@@ -43,7 +43,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:text="@string/add_x_to"
-            android:textAppearance="@style/TextAppearance.MaterialComponents.Headline6"
+            style="?textAppearanceTitleMedium"
             android:textColor="?actionBarTintColor"
             android:textSize="17sp"
             app:layout_constraintBottom_toBottomOf="parent"

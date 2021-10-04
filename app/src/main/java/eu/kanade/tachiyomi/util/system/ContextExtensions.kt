@@ -41,6 +41,7 @@ import com.mikepenz.iconics.utils.sizeDp
 import com.nononsenseapps.filepicker.FilePickerActivity
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.widget.CustomLayoutPickerActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -111,6 +112,7 @@ fun Context.hasPermission(permission: String) =
  *
  * @param resource the attribute.
  */
+@ColorInt
 fun Context.getResourceColor(@AttrRes resource: Int): Int {
     val typedArray = obtainStyledAttributes(intArrayOf(resource))
     val attrValue = typedArray.getColor(0, 0)
@@ -203,6 +205,20 @@ fun Context.prepareSideNavContext(): Context {
         return createConfigurationContext(overrideConf)
     }
     return this
+}
+
+fun Context.withOriginalWidth(): Context {
+    val width = (this as? MainActivity)?.ogWidth ?: resources.configuration.screenWidthDp
+    val configuration = resources.configuration
+    val overrideConf = Configuration()
+    overrideConf.setTo(configuration)
+    overrideConf.screenWidthDp = width
+    resources.configuration.updateFrom(overrideConf)
+    return this
+}
+
+fun Context.isLandscape(): Boolean {
+    return resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
 }
 
 /**

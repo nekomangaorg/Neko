@@ -1,8 +1,10 @@
 package eu.kanade.tachiyomi.data.image.coil
 
 import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.widget.ImageView
+import androidx.palette.graphics.Palette
 import coil.ImageLoader
 import coil.imageLoader
 import coil.memory.MemoryCache
@@ -19,6 +21,18 @@ class LibraryMangaImageTarget(
 ) : ImageViewTarget(view) {
 
     private val coverCache: CoverCache by injectLazy()
+
+    override fun onSuccess(result: Drawable) {
+        super.onSuccess(result)
+        if (manga.vibrantCoverColor == null) {
+            val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return
+            Palette.from(bitmap).generate {
+                if (it == null) return@generate
+                val color = it.getBestColor() ?: return@generate
+                manga.vibrantCoverColor = color
+            }
+        }
+    }
 
     override fun onError(error: Drawable?) {
         super.onError(error)
@@ -51,4 +65,21 @@ inline fun ImageView.loadManga(
         .memoryCacheKey(manga.key())
         .build()
     return imageLoader.enqueue(request)
+}
+
+fun Palette.getBestColor(): Int? {
+    val vibPopulation = vibrantSwatch?.population ?: -1
+    val domLum = dominantSwatch?.hsl?.get(2) ?: -1f
+    val mutedPopulation = mutedSwatch?.population ?: -1
+    val mutedSaturationLimit = if (mutedPopulation > vibPopulation * 3f) 0.1f else 0.25f
+    return when {
+        (dominantSwatch?.hsl?.get(1) ?: 0f) >= .25f &&
+            domLum <= .8f && domLum > .2f -> dominantSwatch?.rgb
+        vibPopulation >= mutedPopulation * 0.75f -> vibrantSwatch?.rgb
+        mutedPopulation > vibPopulation * 1.5f &&
+            (mutedSwatch?.hsl?.get(1) ?: 0f) > mutedSaturationLimit -> mutedSwatch?.rgb
+        else -> arrayListOf(vibrantSwatch, lightVibrantSwatch, darkVibrantSwatch).maxByOrNull {
+            if (it === vibrantSwatch) (it?.population ?: -1) * 3 else it?.population ?: -1
+        }?.rgb
+    }
 }

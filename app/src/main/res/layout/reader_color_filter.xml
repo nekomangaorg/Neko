@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/filter_bottom_sheet"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -25,34 +26,39 @@
         <com.google.android.material.button.MaterialButton
             android:id="@+id/swipe_down"
             style="@style/Theme.Widget.Button.TextButton"
-            android:layout_width="match_parent"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_marginEnd="6dp"
             android:text="@string/preview"
-            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/switch_color_filter"
+            app:layout_constraintBaseline_toBaselineOf="@+id/switch_color_filter"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Color filter -->
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/switch_color_filter"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="@string/use_custom_color_filter"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/swipe_down" />
+            app:layout_constraintStart_toEndOf="@id/swipe_down"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <!-- Red filter -->
 
-        <SeekBar
-            android:id="@+id/seekbar_color_filter_red"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider_color_filter_red"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:contentDescription="@string/red_initial"
+            app:tickVisible="false"
             android:layout_marginEnd="8dp"
-            android:max="255"
+            android:stepSize="1"
+            android:valueTo="255"
             android:padding="@dimen/material_component_text_fields_floating_label_padding_between_label_and_input_text"
             app:layout_constraintEnd_toStartOf="@id/txt_color_filter_red_value"
             app:layout_constraintStart_toEndOf="@id/txt_color_filter_red_symbol"
@@ -64,9 +70,9 @@
             android:layout_height="wrap_content"
             android:text="@string/red_initial"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_red"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_red"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_red" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_red" />
 
         <TextView
             android:id="@+id/txt_color_filter_red_value"
@@ -74,23 +80,26 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_red"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_red"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_red" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_red" />
 
         <!-- Green filter -->
 
-        <SeekBar
-            android:id="@+id/seekbar_color_filter_green"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider_color_filter_green"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/green_initial"
+            app:tickVisible="false"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:max="255"
+            android:stepSize="1"
+            android:valueTo="255"
             android:padding="@dimen/material_component_text_fields_floating_label_padding_between_label_and_input_text"
             app:layout_constraintEnd_toStartOf="@id/txt_color_filter_green_value"
             app:layout_constraintStart_toEndOf="@id/txt_color_filter_green_symbol"
-            app:layout_constraintTop_toBottomOf="@id/seekbar_color_filter_red" />
+            app:layout_constraintTop_toBottomOf="@id/slider_color_filter_red" />
 
         <TextView
             android:id="@+id/txt_color_filter_green_symbol"
@@ -98,9 +107,9 @@
             android:layout_height="wrap_content"
             android:text="@string/green_initial"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_green"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_green"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_green" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_green" />
 
         <TextView
             android:id="@+id/txt_color_filter_green_value"
@@ -108,23 +117,26 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_green"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_green"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_green" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_green" />
 
         <!-- Blue filter -->
 
-        <SeekBar
-            android:id="@+id/seekbar_color_filter_blue"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider_color_filter_blue"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:contentDescription="@string/blue_initial"
+            app:tickVisible="false"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:max="255"
+            android:stepSize="1"
+            android:valueTo="255"
             android:padding="@dimen/material_component_text_fields_floating_label_padding_between_label_and_input_text"
             app:layout_constraintEnd_toStartOf="@id/txt_color_filter_blue_value"
             app:layout_constraintStart_toEndOf="@id/txt_color_filter_blue_symbol"
-            app:layout_constraintTop_toBottomOf="@id/seekbar_color_filter_green" />
+            app:layout_constraintTop_toBottomOf="@id/slider_color_filter_green" />
 
         <TextView
             android:id="@+id/txt_color_filter_blue_symbol"
@@ -132,9 +144,9 @@
             android:layout_height="wrap_content"
             android:text="@string/blue_initial"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_blue"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_blue"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_blue" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_blue" />
 
         <TextView
             android:id="@+id/txt_color_filter_blue_value"
@@ -142,23 +154,26 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_blue"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_blue"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_blue" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_blue" />
 
         <!-- Alpha filter -->
 
-        <SeekBar
-            android:id="@+id/seekbar_color_filter_alpha"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/slider_color_filter_alpha"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            app:tickVisible="false"
+            android:contentDescription="@string/alpha_initial"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
-            android:max="255"
+            android:stepSize="1"
+            android:valueTo="255"
             android:padding="@dimen/material_component_text_fields_floating_label_padding_between_label_and_input_text"
             app:layout_constraintEnd_toStartOf="@id/txt_color_filter_alpha_value"
             app:layout_constraintStart_toEndOf="@id/txt_color_filter_alpha_symbol"
-            app:layout_constraintTop_toBottomOf="@id/seekbar_color_filter_blue" />
+            app:layout_constraintTop_toBottomOf="@id/slider_color_filter_blue" />
 
         <TextView
             android:id="@+id/txt_color_filter_alpha_symbol"
@@ -166,9 +181,9 @@
             android:layout_height="wrap_content"
             android:text="@string/alpha_initial"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_alpha"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_alpha"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_alpha" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_alpha" />
 
         <TextView
             android:id="@+id/txt_color_filter_alpha_value"
@@ -176,9 +191,9 @@
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/seekbar_color_filter_alpha"
+            app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_alpha"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/seekbar_color_filter_alpha" />
+            app:layout_constraintTop_toTopOf="@id/slider_color_filter_alpha" />
 
         <!-- Filter mode -->
 
@@ -188,13 +203,13 @@
             android:layout_height="wrap_content"
             app:title="@string/color_filter_blend_mode"
             android:entries="@array/color_filter_modes"
-            app:layout_constraintTop_toBottomOf="@id/seekbar_color_filter_alpha"
+            app:layout_constraintTop_toBottomOf="@id/slider_color_filter_alpha"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="@id/spinner_end" />
 
         <!-- Brightness -->
 
-        <androidx.appcompat.widget.SwitchCompat
+        <com.google.android.material.switchmaterial.SwitchMaterial
             android:id="@+id/custom_brightness"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -204,39 +219,42 @@
 
         <!-- Brightness value -->
 
-        <eu.kanade.tachiyomi.widget.NegativeSeekBar
-            android:id="@+id/brightness_seekbar"
+        <com.google.android.material.slider.Slider
+            android:id="@+id/brightness_slider"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
+            android:contentDescription="@string/use_custom_brightness"
+            app:tickVisible="false"
             android:layout_marginEnd="8dp"
             android:padding="@dimen/material_component_text_fields_floating_label_padding_between_label_and_input_text"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@id/txt_brightness_seekbar_value"
-            app:layout_constraintStart_toEndOf="@id/txt_brightness_seekbar_icon"
+            app:layout_constraintEnd_toStartOf="@id/txt_brightness_slider_value"
+            app:layout_constraintStart_toEndOf="@id/txt_brightness_slider_icon"
             app:layout_constraintTop_toBottomOf="@id/custom_brightness"
-            app:max_seek="100"
-            app:min_seek="-75" />
+            android:stepSize="1"
+            android:valueFrom="-75"
+            android:valueTo="100" />
 
         <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/txt_brightness_seekbar_icon"
+            android:id="@+id/txt_brightness_slider_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
             android:tint="?android:attr/textColorSecondary"
-            app:layout_constraintBottom_toBottomOf="@id/brightness_seekbar"
+            app:layout_constraintBottom_toBottomOf="@id/brightness_slider"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@id/brightness_seekbar"
+            app:layout_constraintTop_toTopOf="@id/brightness_slider"
             app:srcCompat="@drawable/ic_brightness_day_24dp" />
 
         <TextView
-            android:id="@+id/txt_brightness_seekbar_value"
+            android:id="@+id/txt_brightness_slider_value"
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
-            app:layout_constraintBottom_toBottomOf="@id/brightness_seekbar"
+            app:layout_constraintBottom_toBottomOf="@id/brightness_slider"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="@id/brightness_seekbar" />
+            app:layout_constraintTop_toTopOf="@id/brightness_slider" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView>

@@ -5,8 +5,7 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.Preference
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 
 open class ListMatPreference @JvmOverloads constructor(
@@ -37,25 +36,21 @@ open class ListMatPreference @JvmOverloads constructor(
         else entries[index]
     }
 
-    override fun dialog(): MaterialDialog {
+    override fun dialog(): MaterialAlertDialogBuilder {
         return super.dialog().apply {
-            setItems()
+            setListItems()
         }
     }
 
     @SuppressLint("CheckResult")
-    open fun MaterialDialog.setItems() {
+    open fun MaterialAlertDialogBuilder.setListItems() {
         val default = entryValues.indexOf(
             if (sharedPref != null) {
                 val settings = context.getSharedPreferences(sharedPref, Context.MODE_PRIVATE)
                 settings.getString(key, "")
             } else prefs.getStringPref(key, defValue).getOrDefault()
         )
-        listItemsSingleChoice(
-            items = entries,
-            waitForPositiveButton = false,
-            initialSelection = default
-        ) { _, pos, _ ->
+        setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
             val value = entryValues[pos]
             if (sharedPref != null) {
                 val oldDef = if (default > -1) entries[default] else ""
@@ -75,7 +70,7 @@ open class ListMatPreference @JvmOverloads constructor(
                 this@ListMatPreference.summary = this@ListMatPreference.summary
                 callChangeListener(value)
             }
-            dismiss()
+            dialog.dismiss()
         }
     }
 }

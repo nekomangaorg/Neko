@@ -5,6 +5,7 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ObjectAnimator
 import android.animation.ValueAnimator
 import android.content.Context
+import android.content.res.ColorStateList
 import android.graphics.Canvas
 import android.graphics.Paint
 import android.graphics.RectF
@@ -43,11 +44,20 @@ class ReaderProgressBar @JvmOverloads constructor(
     /**
      * The paint to use to draw the progress bar.
      */
-    private val paint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = context.getResourceColor(R.attr.colorSecondary)
-        isAntiAlias = true
-        strokeCap = Paint.Cap.ROUND
-        style = Paint.Style.STROKE
+    private var paint = setPaint()
+
+    override fun setForegroundTintList(tint: ColorStateList?) {
+        super.setForegroundTintList(tint)
+        paint = setPaint()
+    }
+
+    private fun setPaint(): Paint {
+        return Paint(Paint.ANTI_ALIAS_FLAG).apply {
+            color = foregroundTintList?.defaultColor ?: context.getResourceColor(R.attr.colorSecondary)
+            isAntiAlias = true
+            strokeCap = Paint.Cap.ROUND
+            style = Paint.Style.STROKE
+        }
     }
 
     /**

@@ -4,16 +4,22 @@ import android.content.Context
 import android.util.AttributeSet
 import android.widget.TextView
 import androidx.annotation.DrawableRes
-import androidx.appcompat.graphics.drawable.DrawerArrowDrawable
 import androidx.core.view.isVisible
+import com.bluelinelabs.conductor.Router
 import com.google.android.material.appbar.MaterialToolbar
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.main.SearchActivity
 
 open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialToolbar(context, attrs) {
 
-    protected lateinit var toolbarTitle: TextView
-    private val defStyleRes = com.google.android.material.R.style.Widget_MaterialComponents_Toolbar
+    var router: Router? = null
+    val onRoot: Boolean
+        get() = router?.backstackSize ?: 1 <= 1 && context !is SearchActivity
+
+    lateinit var toolbarTitle: TextView
+        protected set
+    private val defStyleRes = com.google.android.material.R.style.Widget_Material3_Toolbar
 
     protected val titleTextAppearance: Int
 
@@ -35,6 +41,11 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
 
     override fun setTitle(title: CharSequence?) {
         setCustomTitle(title)
+    }
+
+    override fun setTitleTextColor(color: Int) {
+        super.setTitleTextColor(color)
+        if (::toolbarTitle.isInitialized) toolbarTitle.setTextColor(color)
     }
 
     protected open fun setCustomTitle(title: CharSequence?) {
@@ -69,7 +80,7 @@ open class BaseToolbar @JvmOverloads constructor(context: Context, attrs: Attrib
     @DrawableRes
     private fun getDropdownRes(): Int {
         return when {
-            incognito && navigationIcon !is DrawerArrowDrawable -> R.drawable.ic_blank_28dp
+            incognito && onRoot -> R.drawable.ic_blank_28dp
             else -> 0
         }
     }

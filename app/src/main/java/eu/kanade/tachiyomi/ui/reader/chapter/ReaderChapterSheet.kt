@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.reader.chapter
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
+import android.os.Build
 import android.util.AttributeSet
 import android.view.View
 import android.widget.LinearLayout
@@ -21,6 +22,7 @@ import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.ReaderPresenter
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -54,6 +56,13 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
         val primary = ColorUtils.setAlphaComponent(fullPrimary, 200)
 
+        val hasLightNav = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || activity.isInNightMode()
+        val navPrimary = ColorUtils.setAlphaComponent(
+            if (hasLightNav) {
+                fullPrimary
+            } else Color.BLACK,
+            200
+        )
         sheetBehavior = BottomSheetBehavior.from(this)
         binding.chaptersButton.setOnClickListener {
             if (sheetBehavior.isExpanded()) {
@@ -84,7 +93,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     binding.chapterRecycler.alpha = trueProgress
                     if (activity.sheetManageNavColor && progress > 0f) {
                         activity.window.navigationBarColor =
-                            lerpColor(ColorUtils.setAlphaComponent(primary, 0), primary, trueProgress)
+                            lerpColor(ColorUtils.setAlphaComponent(navPrimary, if (hasLightNav) 0 else 179), navPrimary, trueProgress)
                     }
                 }
 
@@ -112,7 +121,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         }
                         activity.binding.readerNav.root.alpha = 0f
                         binding.chapterRecycler.alpha = 1f
-                        if (activity.sheetManageNavColor) activity.window.navigationBarColor = primary
+                        if (activity.sheetManageNavColor) activity.window.navigationBarColor = navPrimary
                     }
                     if (state == BottomSheetBehavior.STATE_HIDDEN) {
                         activity.binding.readerNav.root.alpha = 0f

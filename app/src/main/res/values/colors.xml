@@ -4,6 +4,9 @@
     <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
+    <color name="primaryInverseTachiyomi">#78bcff</color>
+    <color name="legacyBlue">#54759E</color>
+    <color name="splashBackground">@color/primaryTachiyomi</color>
     <color name="secondaryTachiyomi">@color/neko_accent</color>
     <color name="secondaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
@@ -69,18 +72,20 @@
     <color name="navigation_prev">#CC7D1128</color>
 
     <!-- Spring Blossom -->
+    <color name="primaryDuskDawn">#a149bf</color>
+    <color name="primaryInverseDuskDawn">#cd95e0</color>
     <color name="secondaryDuskDawn">#c43c97</color>
-    <color name="secondaryVariantDuskDawn">#803d6a</color>
+    <color name="secondaryVariantDuskDawn">#4c163a</color>
     <color name="backgroundDuskDawn">#f7f4f8</color>
     <color name="dialogDuskDawn">#efe3f3</color>
-    <color name="primaryDuskDawn">#efe3f3</color>
     <color name="colorOnBackgroundDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
     <!-- Teal/Sapphire Theme -->
     <color name="secondaryTealSapphire">#05B1A4</color>
-    <color name="secondaryVariantTealSapphire">#22786f</color>
+    <color name="secondaryVariantTealSapphire">#12524b</color>
     <color name="primaryTealSapphire">#5f9c96</color>
+    <color name="primaryInverseTealSapphire">#a1e1db</color>
     <color name="primaryVariantTealSapphire">#d4f1e6</color>
     <color name="backgroundTealSapphire">#f0f7f7</color>
     <color name="colorOnBackgroundTealSapphire">#DE072926</color>
@@ -89,13 +94,14 @@
 
     <!-- Flat Lime Theme -->
     <color name="primaryLime">#7CF7A5</color>
+    <color name="primaryInverseLime">#09933c</color>
     <color name="secondaryLime">#4AF88A</color>
     <color name="textColorPrimaryLime">@color/md_white_1000</color>
     <color name="textColorSecondaryLime">@color/md_white_1000_76</color>
     <color name="textColorHintLime">@color/md_white_1000_50</color>
     <color name="rippleColorLime">@color/md_white_1000_20</color>
     <color name="backgroundLime">#202125</color>
-    <color name="secondaryVariantLime">#2C2D32</color>
+    <color name="secondaryVariantLime">#cbffe0</color>
     <color name="dialogLime">#282A2E</color>
     <color name="colorOnLime">#2C2D32</color>
 
@@ -132,16 +138,21 @@
     <color name="neko_miami_badge_1">#F706CF</color>
 
     <!-- Strawberry Daiquiri Theme -->
+    <color name="primaryStrawberry">#d31d3b</color>
+    <color name="primaryVariantStrawberry">#F3E7E7</color>
+    <color name="primaryInverseStrawberry">#ef8e9e</color>
     <color name="secondaryStrawberry">#ED4A65</color>
-    <color name="secondaryAlternativeStrawberry">#b62e45</color>
+    <color name="secondaryVariantStrawberry">#68101f</color>
 
     <color name="backgroundChocolateStrawberries">#1a1716</color>
-    <color name="secondaryChocolateStrawberries">#211b19</color>
 
     <!-- Tako Theme -->
+    <color name="primaryTako">#463561</color>
+    <color name="primaryVariantTako">#E5DCF4</color>
+    <color name="primaryInverseTako">#ac8fd9</color>
     <color name="secondaryTako">#66577E</color>
     <color name="onSecondaryTako">#F3B375</color>
-    <color name="secondaryVariantTako">#2b1f31</color>
+    <color name="secondaryVariantTako">#3f2b49</color>
     <color name="tabBarIconColorTako">#574360</color>
     <color name="rippleColoredTako">#1F66577E</color>
     <color name="surfaceTako">#F7F5FF</color>

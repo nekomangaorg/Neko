@@ -19,7 +19,7 @@
         android:maxLines="1"
         android:textAllCaps="true"
         android:textSize="15sp"
-        android:textAppearance="@style/Neko.Headline6.Lower"
+        android:textAppearance="?textAppearanceTitleMedium"
         android:textColor="?attr/colorOnBackground"
         tools:text="Header" />
 

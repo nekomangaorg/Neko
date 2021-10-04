@@ -6,10 +6,10 @@ import android.os.Build
 import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
-import com.afollestad.materialdialogs.MaterialDialog
+import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
+import eu.kanade.tachiyomi.BuildConfig
 import com.elvishew.xlog.XLog
 import com.mikepenz.aboutlibraries.LibsBuilder
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdateChecker
@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.updater.UpdaterService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
 import kotlinx.coroutines.Dispatchers
@@ -195,10 +196,10 @@ class AboutController : SettingsController() {
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {
             val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-            return MaterialDialog(activity!!)
-                .title(R.string.new_version_available)
-                .message(text = args.getString(BODY_KEY) ?: "")
-                .positiveButton(if (isOnA12) R.string.update else R.string.download) {
+            return activity!!.materialAlertDialog()
+                .setTitle(R.string.new_version_available)
+                .setMessage(args.getString(BODY_KEY) ?: "")
+                .setPositiveButton(if (isOnA12) R.string.update else R.string.download) { _, _ ->
                     val appContext = applicationContext
                     if (appContext != null) {
                         // Start download
@@ -206,7 +207,8 @@ class AboutController : SettingsController() {
                         UpdaterService.start(appContext, url, true)
                     }
                 }
-                .negativeButton(R.string.ignore)
+                .setNegativeButton(R.string.ignore, null)
+                .create()
         }
 
         companion object {

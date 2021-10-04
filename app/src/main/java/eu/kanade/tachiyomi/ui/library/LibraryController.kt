@@ -6,8 +6,8 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
-import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -23,6 +23,7 @@ import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
@@ -38,8 +39,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.github.florent37.viewtooltip.ViewTooltip
@@ -84,6 +83,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
@@ -308,7 +308,6 @@ class LibraryController(
                 binding.filterBottomSheet.filterBottomSheet.translationY = 0f
             }
             val pad = bottomBar.translationY - bottomBar.height
-            binding.shadow2.translationY = pad
             binding.filterBottomSheet.filterBottomSheet.updatePaddingRelative(
                 bottom = max(
                     (-pad).toInt(),
@@ -439,9 +438,11 @@ class LibraryController(
                 ?: return
         filterTooltip =
             ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
-                .position(ViewTooltip.Position.TOP).text(R.string.tap_library_to_show_filters)
+                .position(ViewTooltip.Position.TOP)
+                .text(R.string.tap_library_to_show_filters)
+                .textColor(activity.getResourceColor(R.attr.colorOnSecondary))
                 .color(activity.getResourceColor(R.attr.colorSecondary))
-                .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.WHITE).withShadow(false)
+                .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).withShadow(false)
                 .corner(30).arrowWidth(15).arrowHeight(15).distanceWithView(0)
 
         filterTooltip?.show()
@@ -611,10 +612,12 @@ class LibraryController(
                         updateLibrary()
                     }
                     preferences.updateOnRefresh().getOrDefault() == -1 -> {
-                        MaterialDialog(activity!!).title(R.string.what_should_update)
-                            .negativeButton(android.R.string.cancel)
-                            .listItemsSingleChoice(
-                                items = listOf(
+                        var selected = 0
+                        activity!!.materialAlertDialog()
+                            .setTitle(R.string.what_should_update)
+                            .setNegativeButton(android.R.string.cancel, null)
+                            .setSingleChoiceItems(
+                                arrayOf(
                                     context.getString(
                                         R.string.top_category,
                                         presenter.allCategories.first().name
@@ -623,14 +626,23 @@ class LibraryController(
                                         R.string.categories_in_global_update
                                     )
                                 ),
-                                selection = { _, index, _ ->
-                                    preferences.updateOnRefresh().set(index)
-                                    when (index) {
-                                        0 -> updateLibrary(presenter.allCategories.first())
-                                        else -> updateLibrary()
-                                    }
+                                -1
+                            ) { dialog, index ->
+                                selected = index
+                                (dialog as? AlertDialog)?.getButton(DialogInterface.BUTTON_POSITIVE)?.isEnabled = true
+                            }
+                            .setPositiveButton(
+                                R.string.update
+                            ) { _, _ ->
+                                preferences.updateOnRefresh().set(selected)
+                                when (selected) {
+                                    0 -> updateLibrary(presenter.allCategories.first())
+                                    else -> updateLibrary()
                                 }
-                            ).positiveButton(R.string.update).show()
+                            }
+                            .show().apply {
+                                getButton(DialogInterface.BUTTON_POSITIVE).isEnabled = false
+                            }
                     }
                     else -> {
                         when (preferences.updateOnRefresh().getOrDefault()) {
@@ -763,8 +775,7 @@ class LibraryController(
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
-            val insetKey =
-                insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+            val insetKey = insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
             listOfYs.add(view.height - (insetKey).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +
@@ -776,8 +787,7 @@ class LibraryController(
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
                 binding.libraryGridRecycler.recycler.translationY
         } else {
-            binding.jumperCategoryText.translationY =
-                binding.libraryGridRecycler.recycler.translationY
+            binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
     }
 
@@ -1207,7 +1217,17 @@ class LibraryController(
             binding.libraryGridRecycler.recycler.scrollToPosition(0)
         }
         this.query = query ?: ""
-
+        if (this.query.isNotBlank() && adapter.scrollableHeaders.isEmpty()) {
+            searchItem.string = this.query
+            adapter.addScrollableHeader(searchItem)
+        } else if (this.query.isNotBlank()) {
+            searchItem.string = this.query
+            (binding.libraryGridRecycler.recycler.findViewHolderForAdapterPosition(0) as? SearchGlobalItem.Holder)?.bind(
+                this.query
+            )
+        } else if (this.query.isBlank() && adapter.scrollableHeaders.isNotEmpty()) {
+            adapter.removeAllScrollableHeaders()
+        }
         adapter.setFilter(query)
         viewScope.launchUI {
             adapter.performFilterAsync()
@@ -1580,7 +1600,7 @@ class LibraryController(
         }
     }
 
-    override fun sheetIsExpanded(): Boolean = false
+    override fun sheetIsFullscreen(): Boolean = false
 
     override fun handleSheetBack(): Boolean {
         if (binding.recyclerCover.isClickable) {
@@ -1707,10 +1727,13 @@ class LibraryController(
             R.id.action_move_to_category -> showChangeMangaCategoriesSheet()
             R.id.action_share -> shareManga()
             R.id.action_delete -> {
-                MaterialDialog(activity!!).message(R.string.remove_from_library_question)
-                    .positiveButton(R.string.remove) {
-                        deleteMangaListFromLibrary()
-                    }.negativeButton(android.R.string.no).show()
+                activity!!.materialAlertDialog()
+                    .setMessage(R.string.remove_from_library_question)
+                    .setPositiveButton(R.string.remove) { _, _ ->
+                        deleteMangasFromLibrary()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
             R.id.action_download_unread -> {
                 presenter.downloadUnread(selectedMangaSet.toList())

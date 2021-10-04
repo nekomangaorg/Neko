@@ -18,10 +18,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
+import androidx.annotation.ColorInt
+import androidx.annotation.FloatRange
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
+import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.palette.graphics.Palette
@@ -30,11 +34,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import coil.imageLoader
 import coil.request.ImageRequest
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.checkbox.checkBoxPrompt
-import com.afollestad.materialdialogs.checkbox.isCheckPromptChecked
 import com.afollestad.materialdialogs.utils.MDUtil.isLandscape
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.elvishew.xlog.XLog
@@ -49,6 +49,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
+import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
@@ -57,6 +58,8 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.base.MiniSearchView
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -81,12 +84,20 @@ import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.ThemeUtil
+import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
+import eu.kanade.tachiyomi.util.system.contextCompatColor
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.system.isLandscape
 import eu.kanade.tachiyomi.util.system.isOnline
+import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
@@ -106,6 +117,7 @@ import uy.kohesive.injekt.api.get
 import java.io.File
 import java.util.Locale
 import kotlin.math.max
+import kotlin.math.roundToInt
 
 class MangaDetailsController :
     BaseController<MangaDetailsControllerBinding>,
@@ -148,6 +160,8 @@ class MangaDetailsController :
     var colorAnimator: ValueAnimator? = null
     val presenter: MangaDetailsPresenter
     var coverColor: Int? = null
+    var accentColor: Int? = null
+    var headerColor: Int? = null
     var toolbarIsColored = false
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
@@ -172,7 +186,7 @@ class MangaDetailsController :
     var fullCoverActive = false
 
     override fun getTitle(): String? {
-        return null
+        return manga.title
     }
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -183,6 +197,8 @@ class MangaDetailsController :
         super.onViewCreated(view)
         coverColor = null
         fullCoverActive = false
+        setAccentColorValue()
+        setHeaderColorValue()
 
         setTabletMode(view)
         setRecycler(view)
@@ -195,7 +211,77 @@ class MangaDetailsController :
         presenter.onCreate()
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         binding.swipeRefresh.setOnRefreshListener { presenter.refreshAll() }
-        requestFilePermissionsSafe(301, presenter.preferences)
+        updateToolbarTitleAlpha()
+        requestFilePermissionsSafe(301, presenter.preferences, presenter.manga.isLocal())
+    }
+
+    private fun setAccentColorValue(colorToUse: Int? = null) {
+        val context = view?.context ?: return
+        accentColor = if (presenter.preferences.themeMangaDetails()) {
+            (colorToUse ?: manga?.vibrantCoverColor)?.let {
+                val luminance = ColorUtils.calculateLuminance(it).toFloat()
+                if (if (!context.isInNightMode()) luminance > 0.4 else luminance <= 0.6) {
+                    ColorUtils.blendARGB(
+                        it,
+                        context.contextCompatColor(R.color.colorOnDownloadBadgeDayNight),
+                        (if (!context.isInNightMode()) luminance else -(luminance - 1))
+                            .toFloat() * if (context.isInNightMode()) 0.33f else 0.5f
+                    )
+                } else {
+                    it
+                }
+            }
+        } else {
+            null
+        }
+    }
+
+    private fun setRefreshStyle() {
+        with(binding.swipeRefresh) {
+            if (presenter.preferences.themeMangaDetails() && accentColor != null && headerColor != null) {
+                val newColor = makeColorFrom(
+                    hueOf = accentColor!!,
+                    satAndLumOf = context.getResourceColor(R.attr.actionBarTintColor)
+                )
+                setColorSchemeColors(newColor)
+                setProgressBackgroundColorSchemeColor(headerColor!!)
+            } else {
+                setStyle()
+            }
+        }
+    }
+
+    private fun setHeaderColorValue(colorToUse: Int? = null) {
+        val context = view?.context ?: return
+        headerColor = if (presenter.preferences.themeMangaDetails()) {
+            (colorToUse ?: manga?.vibrantCoverColor)?.let { color ->
+                val newColor =
+                    makeColorFrom(color, context.getResourceColor(R.attr.colorPrimaryVariant))
+                activity?.window?.navigationBarColor = ColorUtils.setAlphaComponent(
+                    newColor,
+                    Color.alpha(activity?.window?.navigationBarColor ?: Color.BLACK)
+                )
+                newColor
+            }
+        } else {
+            null
+        }
+        setRefreshStyle()
+    }
+
+    @ColorInt
+    private fun makeColorFrom(@ColorInt hueOf: Int, @ColorInt satAndLumOf: Int): Int {
+        val satLumArray = FloatArray(3)
+        val hueArray = FloatArray(3)
+        ColorUtils.colorToHSL(satAndLumOf, satLumArray)
+        ColorUtils.colorToHSL(hueOf, hueArray)
+        return ColorUtils.HSLToColor(
+            floatArrayOf(
+                hueArray[0],
+                satLumArray[1],
+                satLumArray[2]
+            )
+        )
     }
 
     /** Check if device is tablet, and use a second recycler to hold the details header if so */
@@ -217,6 +303,7 @@ class MangaDetailsController :
         presenter.onDestroy()
         adapter = null
         trackingBottomSheet = null
+        updateToolbarTitleAlpha(1f)
         externalBottomSheet = null
         mergeSearchDialog = null
         super.onDestroyView(view)
@@ -238,7 +325,6 @@ class MangaDetailsController :
         val appbarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
         val offset = 10.dpToPx
-        binding.swipeRefresh.setStyle()
         binding.swipeRefresh.setDistanceToTriggerSync(70.dpToPx)
         activityBinding!!.appBar.elevation = 0f
 
@@ -269,6 +355,7 @@ class MangaDetailsController :
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     super.onScrolled(recyclerView, dx, dy)
                     if (!isTablet) {
+                        updateToolbarTitleAlpha(isScrollingDown = dy > 0)
                         val atTop = !recyclerView.canScrollVertically(-1)
                         val tY = getHeader()?.binding?.backdrop?.translationY ?: 0f
                         getHeader()?.binding?.backdrop?.translationY = max(0f, tY + dy * 0.25f)
@@ -278,6 +365,7 @@ class MangaDetailsController :
 
                 override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                     val atTop = !recyclerView.canScrollVertically(-1)
+                    updateToolbarTitleAlpha()
                     if (atTop) getHeader()?.binding?.backdrop?.translationY = 0f
                 }
             }
@@ -291,9 +379,7 @@ class MangaDetailsController :
         headerHeight = tHeight + insets.systemWindowInsetTop
         binding.swipeRefresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         if (isTablet) {
-            binding.tabletOverlay.updateLayoutParams<ViewGroup.LayoutParams> {
-                height = headerHeight
-            }
+            binding.tabletOverlay.updateLayoutParams<ViewGroup.LayoutParams> { height = headerHeight }
             // 4dp extra to line up chapter header and manga header
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
         }
@@ -308,43 +394,49 @@ class MangaDetailsController :
     /** Set the toolbar to fully transparent or colored and translucent */
     private fun colorToolbar(isColor: Boolean, animate: Boolean = true) {
         if (isColor == toolbarIsColored || (isTablet && isColor)) return
+        val activity = activity ?: return
         toolbarIsColored = isColor
         val isCurrentController =
             router?.backstack?.lastOrNull()?.controller == this@MangaDetailsController
         if (isCurrentController) setTitle()
         if (actionMode != null) {
-            activityBinding?.toolbar?.setBackgroundColor(Color.TRANSPARENT)
             return
         }
-        val color =
-            coverColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
-        val colorFrom =
-            if (colorAnimator?.isRunning == true) activity?.window?.statusBarColor
-                ?: color
-            else ColorUtils.setAlphaComponent(
-                color,
-                if (toolbarIsColored) 0 else 175
-            )
-        val colorTo = ColorUtils.setAlphaComponent(
-            color,
-            if (toolbarIsColored) 175 else 0
-        )
+        val scrollingColor = headerColor ?: activity.getResourceColor(R.attr.colorPrimaryVariant)
+        if (ThemeUtil.hasDarkActionBarInLight(activity, activity.getPrefTheme(presenter.preferences))) {
+            setActionBar(!toolbarIsColored)
+        }
+        val topColor = ColorUtils.setAlphaComponent(scrollingColor, 0)
+        val scrollingStatusColor = ColorUtils.setAlphaComponent(scrollingColor, (0.87f * 255).roundToInt())
         colorAnimator?.cancel()
         if (animate) {
-            colorAnimator = ValueAnimator.ofObject(
-                android.animation.ArgbEvaluator(),
-                colorFrom,
-                colorTo
+            colorAnimator = ValueAnimator.ofFloat(
+                if (toolbarIsColored) 0f else 1f,
+                if (toolbarIsColored) 1f else 0f
             )
             colorAnimator?.duration = 250 // milliseconds
             colorAnimator?.addUpdateListener { animator ->
-                activityBinding?.toolbar?.setBackgroundColor(animator.animatedValue as Int)
-                activity?.window?.statusBarColor = (animator.animatedValue as Int)
+                activityBinding?.appBar?.setBackgroundColor(
+                    ColorUtils.blendARGB(
+                        topColor,
+                        scrollingColor,
+                        animator.animatedValue as Float
+                    )
+                )
+                activity.window?.statusBarColor = if (toolbarIsColored) {
+                    ColorUtils.blendARGB(
+                        topColor,
+                        scrollingStatusColor,
+                        animator.animatedValue as Float
+                    )
+                } else {
+                    Color.TRANSPARENT
+                }
             }
             colorAnimator?.start()
         } else {
-            activityBinding?.toolbar?.setBackgroundColor(colorTo)
-            activity?.window?.statusBarColor = colorTo
+            activityBinding?.appBar?.setBackgroundColor(if (toolbarIsColored) scrollingColor else topColor)
+            activity.window?.statusBarColor = if (toolbarIsColored) scrollingStatusColor else topColor
         }
     }
 
@@ -352,8 +444,7 @@ class MangaDetailsController :
     fun setPaletteColor() {
         val view = view ?: return
 
-        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false)
-            .memoryCacheKey(presenter.manga.key())
+        val request = ImageRequest.Builder(view.context).data(presenter.manga).allowHardware(false).memoryCacheKey(presenter.manga.key())
             .target(
                 onSuccess = { drawable ->
                     val bitmap = (drawable as? BitmapDrawable)?.bitmap
@@ -361,20 +452,42 @@ class MangaDetailsController :
                     if (bitmap != null) {
                         Palette.from(bitmap).generate {
                             if (it == null) return@generate
-                            val colorBack = view.context.getResourceColor(
-                                R.attr.background
-                            )
+                            val colorBack = view.context.getResourceColor(R.attr.background)
                             // this makes the color more consistent regardless of theme
+                            val dominant = it.getDominantColor(colorBack)
+                            val domLum = ColorUtils.calculateLuminance(dominant)
+                            val lumWrongForTheme = (if (view.context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
                             val backDropColor =
-                                ColorUtils.blendARGB(it.getVibrantColor(colorBack), colorBack, .35f)
+                                ColorUtils.blendARGB(
+                                    it.getDominantColor(colorBack),
+                                    colorBack,
+                                    if (lumWrongForTheme) 0.9f else 0.65f
+                                )
 
                             coverColor = backDropColor
-                            getHeader()?.setBackDrop(backDropColor)
-                            if (toolbarIsColored) {
-                                val translucentColor =
-                                    ColorUtils.setAlphaComponent(backDropColor, 175)
-                                activityBinding?.toolbar?.setBackgroundColor(translucentColor)
-                                activity?.window?.statusBarColor = translucentColor
+                            if (presenter.preferences.themeMangaDetails()) {
+                                launchUI {
+                                    view.context.getResourceColor(R.attr.colorSecondary)
+                                    val vibrantColor = it.getBestColor() ?: return@launchUI
+                                    manga?.vibrantCoverColor = vibrantColor
+                                    setAccentColorValue(vibrantColor)
+                                    setHeaderColorValue(vibrantColor)
+                                    getHeader()?.updateColors()
+                                    if (adapter?.itemCount ?: 0 > 1) {
+                                        (presenter.chapters).forEach { chapter ->
+                                            val chapterHolder =
+                                                binding.recycler.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
+                                                    ?: return@forEach
+                                            chapterHolder.notifyStatus(
+                                                chapter.status,
+                                                isLocked(),
+                                                chapter.progress
+                                            )
+                                        }
+                                    }
+                                }
+                            } else {
+                                getHeader()?.setBackDrop(backDropColor)
                             }
                         }
                     }
@@ -403,29 +516,42 @@ class MangaDetailsController :
                 else R.attr.actionBarTintColor
             ) ?: Color.BLACK
             activityBinding.toolbar.setTitleTextColor(iconPrimary)
-            activity.drawerArrow?.color = iconPrimary
+            updateToolbarTitleAlpha()
             activityBinding.toolbar.overflowIcon?.setTint(iconPrimary)
-            activityBinding.mainContent.systemUiVisibility = if (forThis) {
-                activityBinding.mainContent.systemUiVisibility.or(
-                    View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-                )
-            } else activityBinding.mainContent.systemUiVisibility.rem(
-                View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-            )
+            val wic = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
+            wic.isAppearanceLightStatusBars = forThis
+            activityBinding.toolbar.setNavigationIconTint(iconPrimary)
+            activityBinding.toolbar.navigationIcon =
+                activity.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)
+            val menu = activityBinding.toolbar.menu ?: return
+            menu.findItem(R.id.action_download)?.tintIcon(iconPrimary)
+            menu.findItem(R.id.action_search)?.tintIcon(iconPrimary)
+            menu.findItem(R.id.action_mark_all_as_read)?.tintIcon(iconPrimary)
+            val searchView = menu.findItem(R.id.action_search)?.actionView as? MiniSearchView ?: return
+            activityBinding.toolbar.collapseIcon = activity.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
+                setTint(iconPrimary)
+            }
+            searchView.tintBar(iconPrimary)
+        }
+    }
+
+    private fun MenuItem.tintIcon(color: Int) {
+        val drawable = icon
+        if (drawable != null) {
+            val wrapped = DrawableCompat.wrap(drawable)
+            drawable.mutate()
+            DrawableCompat.setTint(wrapped, color)
+            icon = drawable
         }
     }
 
     private fun setStatusBarAndToolbar() {
-        activity?.window?.statusBarColor = if (toolbarIsColored) {
-            val translucentColor =
-                ColorUtils.setAlphaComponent(coverColor ?: Color.TRANSPARENT, 175)
-            activityBinding?.toolbar?.setBackgroundColor(translucentColor)
-            translucentColor
-        } else Color.TRANSPARENT
-        activityBinding?.appBar?.setBackgroundColor(Color.TRANSPARENT)
-        activityBinding?.toolbar?.setBackgroundColor(
-            activity?.window?.statusBarColor
-                ?: Color.TRANSPARENT
+        val topColor = Color.TRANSPARENT
+        val scrollingColor = headerColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
+        val scrollingStatusColor = ColorUtils.setAlphaComponent(scrollingColor, (0.87f * 255).roundToInt())
+        activity?.window?.statusBarColor = if (toolbarIsColored) scrollingStatusColor else topColor
+        activityBinding?.appBar?.setBackgroundColor(
+            if (toolbarIsColored) scrollingColor else topColor
         )
     }
 
@@ -456,6 +582,7 @@ class MangaDetailsController :
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
             setActionBar(true)
+            updateToolbarTitleAlpha(0f)
             setStatusBarAndToolbar()
         } else {
             if (router.backstack.lastOrNull()?.controller is DialogController) {
@@ -477,7 +604,6 @@ class MangaDetailsController :
                 if (router.backstack.last().controller !is FloatingSearchInterface) {
                     activityBinding?.appBar?.setBackgroundColor(colorSurface)
                 }
-                activityBinding?.toolbar?.setBackgroundColor(colorSurface)
                 activity?.window?.statusBarColor = activity?.getResourceColor(
                     android.R.attr.statusBarColor
                 ) ?: colorSurface
@@ -522,19 +648,25 @@ class MangaDetailsController :
             }
             1 -> return
             else -> {
-                MaterialDialog(context).title(R.string.chapters_removed).message(
-                    text = context.resources.getQuantityString(
-                        R.plurals.deleted_chapters,
-                        deletedChapters.size,
-                        deletedChapters.size,
-                        deletedChapters.joinToString("\n") { it.name }
+                context.materialAlertDialog()
+                    .setCustomTitleAndMessage(
+                        R.string.chapters_removed,
+                        context.resources.getQuantityString(
+                            R.plurals.deleted_chapters,
+                            deletedChapters.size,
+                            deletedChapters.size,
+                            deletedChapters.joinToString("\n") { it.name }
+                        )
                     )
-                ).positiveButton(R.string.delete) {
-                    presenter.deleteChapters(deletedChapters, false)
-                    if (it.isCheckPromptChecked()) deleteRemovedPref.set(2)
-                }.negativeButton(R.string.keep) {
-                    if (it.isCheckPromptChecked()) deleteRemovedPref.set(1)
-                }.cancelOnTouchOutside(false).checkBoxPrompt(R.string.remember_this_choice) {}
+                    .setPositiveButton(R.string.delete) { dialog, _ ->
+                        presenter.deleteChapters(deletedChapters, false)
+                        if (dialog.isPromptChecked) deleteRemovedPref.set(2)
+                    }
+                    .setNegativeButton(R.string.keep) { dialog, _ ->
+                        if (dialog.isPromptChecked) deleteRemovedPref.set(1)
+                    }
+                    .setCancelable(false)
+                    .addCheckBoxPrompt(R.string.remember_this_choice)
                     .show()
             }
         }
@@ -820,7 +952,6 @@ class MangaDetailsController :
         val searchItem = menu.findItem(R.id.action_search)
         val searchView = searchItem.actionView as SearchView
         searchView.queryHint = resources?.getString(R.string.search_chapters)
-        searchItem.icon?.mutate()?.setTint(iconPrimary)
         searchItem.collapseActionView()
         if (query.isNotEmpty()) {
             searchItem.expandActionView()
@@ -846,17 +977,23 @@ class MangaDetailsController :
         when (item.itemId) {
             R.id.action_refresh_tracking -> presenter.refreshTracking(true)
             R.id.action_mark_all_as_read -> {
-                MaterialDialog(view!!.context).message(R.string.mark_all_chapters_as_read)
-                    .positiveButton(R.string.mark_as_read) {
+                activity!!.materialAlertDialog()
+                    .setMessage(R.string.mark_all_chapters_as_read)
+                    .setPositiveButton(R.string.mark_as_read) { _, _ ->
                         markAsRead(presenter.chapters)
-                    }.negativeButton(android.R.string.cancel).show()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
             R.id.remove_all, R.id.remove_read, R.id.remove_non_bookmarked -> massDeleteChapters(item.itemId)
             R.id.action_mark_all_as_unread -> {
-                MaterialDialog(view!!.context).message(R.string.mark_all_chapters_as_unread)
-                    .positiveButton(R.string.mark_as_unread) {
+                activity!!.materialAlertDialog()
+                    .setMessage(R.string.mark_all_chapters_as_unread)
+                    .setPositiveButton(R.string.mark_as_unread) { _, _ ->
                         markAsUnread(presenter.chapters)
-                    }.negativeButton(android.R.string.cancel).show()
+                    }
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .show()
             }
             R.id.download_next, R.id.download_next_5, R.id.download_next_10, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
                 item.itemId
@@ -881,8 +1018,7 @@ class MangaDetailsController :
             val stream = cover.getUriCompat(activity!!)
             val intent = Intent(Intent.ACTION_SEND).apply {
                 putExtra(Intent.EXTRA_STREAM, stream)
-                flags =
-                    Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
                 clipData = ClipData.newRawUri(null, stream)
                 type = "image/*"
             }
@@ -980,17 +1116,49 @@ class MangaDetailsController :
 
     private fun massDeleteChapters(chapters: List<ChapterItem>, isEverything: Boolean) {
         val context = view?.context ?: return
-        MaterialDialog(context).message(
-            text =
-            if (isEverything) context.getString(R.string.remove_all_downloads)
-            else context.resources.getQuantityString(
-                R.plurals.remove_n_chapters,
-                chapters.size,
-                chapters.size
+        context.materialAlertDialog()
+            .setMessage(
+                if (isEverything) context.getString(R.string.remove_all_downloads)
+                else context.resources.getQuantityString(
+                    R.plurals.remove_n_chapters,
+                    chapters.size,
+                    chapters.size
+                )
             )
-        ).positiveButton(R.string.remove) {
-            presenter.deleteChapters(chapters, isEverything = isEverything)
-        }.negativeButton(android.R.string.cancel).show()
+            .setPositiveButton(R.string.remove) { _, _ ->
+                presenter.deleteChapters(chapters, isEverything = isEverything)
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
+    }
+
+    private fun updateToolbarTitleAlpha(@FloatRange(from = 0.0, to = 1.0) alpha: Float? = null, isScrollingDown: Boolean = false) {
+        if ((
+            router?.backstack?.lastOrNull()?.controller != this@MangaDetailsController &&
+                alpha == null
+            ) || isScrollingDown
+        ) return
+        val scrolledList = binding.recycler
+        val toolbarTextView = activityBinding?.toolbar?.toolbarTitle ?: return
+        toolbarTextView.setTextColor(
+            ColorUtils.setAlphaComponent(
+                toolbarTextView.currentTextColor,
+                (
+                    when {
+                        // Specific alpha provided
+                        alpha != null -> alpha
+
+                        // First item isn't in view, full opacity
+                        ((scrolledList.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition() > 0) -> 1f
+                        ((scrolledList.layoutManager as LinearLayoutManager).findFirstCompletelyVisibleItemPosition() == 0) -> 0f
+
+                        // Based on scroll amount when first item is in view
+                        else -> (scrolledList.computeVerticalScrollOffset() - (20.dpToPx))
+                            .coerceIn(0, 255) / 255f
+                    } * 255
+                    ).roundToInt()
+            )
+        )
     }
 
     private fun downloadChapters(choice: Int) {
@@ -1022,6 +1190,7 @@ class MangaDetailsController :
 
     //region Interface methods
     override fun coverColor(): Int? = coverColor
+    override fun accentColor(): Int? = accentColor
     override fun topCoverHeight(): Int = headerHeight
 
     override fun startDownloadNow(position: Int) {
@@ -1031,6 +1200,7 @@ class MangaDetailsController :
 
     // In case the recycler is at the bottom and collapsing the header makes it unscrollable
     override fun updateScroll() {
+        updateToolbarTitleAlpha()
         if (!binding.recycler.canScrollVertically(-1)) {
             getHeader()?.binding?.backdrop?.translationY = 0f
             activityBinding?.appBar?.y = 0f
@@ -1338,11 +1508,9 @@ class MangaDetailsController :
     private fun createActionModeIfNeeded() {
         if (actionMode == null) {
             actionMode = (activity as AppCompatActivity).startSupportActionMode(this)
-            activityBinding?.toolbar?.setBackgroundColor(Color.TRANSPARENT)
             val view = activity?.window?.currentFocus ?: return
-            val imm =
-                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-                    ?: return
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+                ?: return
             imm.hideSoftInputFromWindow(view.windowToken, 0)
             if (adapter?.mode != SelectableAdapter.Mode.MULTI) {
                 adapter?.mode = SelectableAdapter.Mode.MULTI
@@ -1427,11 +1595,7 @@ class MangaDetailsController :
         val drawable = binding.mangaCoverFull.drawable ?: return
         fullCoverActive = true
         drawable.alpha = 255
-        val fullCoverDialog = FullCoverDialog(
-            this,
-            drawable,
-            thumbView
-        )
+        val fullCoverDialog = FullCoverDialog(this, drawable, thumbView)
         fullCoverDialog.setOnDismissListener {
             fullCoverActive = false
         }

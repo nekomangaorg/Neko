@@ -8,7 +8,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/title_view"
-        style="@style/TextAppearance.MaterialComponents.Body2"
+        style="?textAppearanceBodyMedium"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -25,7 +25,7 @@
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/detail_view"
-        style="@style/TextAppearance.MaterialComponents.Body2"
+        style="?textAppearanceBodyMedium"
         android:textColor="?android:attr/textColorSecondary"
         android:layout_width="0dp"
         android:layout_height="wrap_content"

@@ -28,12 +28,16 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.statusBars
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.Lifecycle
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import com.afollestad.materialdialogs.MaterialDialog
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.elvishew.xlog.XLog
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -84,17 +88,19 @@ import eu.kanade.tachiyomi.util.system.hasColoredActionBar
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
+import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import eu.kanade.tachiyomi.util.system.setThemeAndNight
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -111,7 +117,6 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.sample
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import me.zhanghai.android.systemuihelper.SystemUiHelper
 import nucleus.factory.RequiresPresenter
 import uy.kohesive.injekt.injectLazy
 import java.io.File
@@ -119,6 +124,7 @@ import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
 import kotlin.math.abs
+import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
@@ -126,9 +132,7 @@ import kotlin.math.roundToInt
  * viewers, to which calls from the presenter or UI events are delegated.
  */
 @RequiresPresenter(ReaderPresenter::class)
-class ReaderActivity :
-    BaseRxActivity<ReaderPresenter>(),
-    SystemUiHelper.OnVisibilityChangeListener {
+class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     lateinit var binding: ReaderActivityBinding
 
@@ -164,11 +168,6 @@ class ReaderActivity :
     private var fromUrl = false
 
     /**
-     * System UI helper to hide status & navigation bar on all different API levels.
-     */
-    private var systemUi: SystemUiHelper? = null
-
-    /**
      * Configuration at reader level, like background color or forced orientation.
      */
     private var config: ReaderConfig? = null
@@ -180,7 +179,8 @@ class ReaderActivity :
 
     var sheetManageNavColor = false
 
-    private var lightStatusBar = false
+    private val wic by lazy { WindowInsetsControllerCompat(window, binding.root) }
+    var lastVis = false
 
     private var snackbar: Snackbar? = null
 
@@ -218,23 +218,18 @@ class ReaderActivity :
         binding = ReaderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
         val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar))
-        lightStatusBar = a.getBoolean(0, false)
+        val lightStatusBar = a.getBoolean(0, false)
         a.recycle()
         setNotchCutoutMode()
 
-        var systemUiFlag = View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            systemUiFlag = systemUiFlag.or(View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR)
-        }
+        wic.isAppearanceLightStatusBars = lightStatusBar
+        wic.isAppearanceLightNavigationBars = lightStatusBar
+
         binding.appBar.setBackgroundColor(contextCompatColor(R.color.surface_alpha))
         ViewCompat.setBackgroundTintList(
             binding.readerNav.root,
             ColorStateList.valueOf(contextCompatColor(R.color.surface_alpha))
         )
-        binding.readerLayout.systemUiVisibility = when (lightStatusBar) {
-            true -> binding.readerLayout.systemUiVisibility.or(systemUiFlag)
-            false -> binding.readerLayout.systemUiVisibility.rem(systemUiFlag)
-        }
 
         if (presenter.needsInit()) {
             fromUrl = handleIntentAction(intent)
@@ -780,46 +775,91 @@ class ReaderActivity :
         if (!menuVisible) binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
         binding.chaptersSheet.root.sheetBehavior?.isGestureInsetBottomIgnored = true
         val peek = 50.dpToPx
-        binding.readerLayout.doOnApplyWindowInsets { _, insets, _ ->
-            sheetManageNavColor = when {
-                insets.isBottomTappable() -> {
-                    window.navigationBarColor = Color.TRANSPARENT
-                    false
+        binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
+            setNavColor(insets)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                if (lastVis != insets.isVisible(statusBars()) && preferences.fullscreen().get()) {
+                    onVisibilityChange(insets.isVisible(statusBars()))
                 }
-                insets.hasSideNavBar() -> {
-                    window.navigationBarColor = getResourceColor(R.attr.colorSurface)
-                    false
-                }
-                // if in portrait with 2/3 button mode, translucent nav bar
-                else -> {
-                    true
-                }
+                lastVis = insets.isVisible(statusBars())
             }
 
+            if (!preferences.fullscreen().get() && sheetManageNavColor) {
+                window.navigationBarColor = getResourceColor(R.attr.colorSurface)
+            }
             binding.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.systemWindowInsetLeft
-                rightMargin = insets.systemWindowInsetRight
+                leftMargin = insets.getInsetsIgnoringVisibility(systemBars()).left
+                rightMargin = insets.getInsetsIgnoringVisibility(systemBars()).right
             }
             binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.systemWindowInsetTop
+                topMargin = insets.getInsetsIgnoringVisibility(systemBars()).top
             }
             binding.chaptersSheet.chaptersBottomSheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.systemWindowInsetLeft
-                rightMargin = insets.systemWindowInsetRight
-                height = 280.dpToPx + insets.systemWindowInsetBottom
+                leftMargin = insets.getInsetsIgnoringVisibility(systemBars()).left
+                rightMargin = insets.getInsetsIgnoringVisibility(systemBars()).right
+                height = 280.dpToPx + insets.getInsetsIgnoringVisibility(systemBars()).bottom
             }
             binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = 12.dpToPx + insets.systemWindowInsetLeft
-                rightMargin = 12.dpToPx + insets.systemWindowInsetRight
+                leftMargin = 12.dpToPx + insets.getInsetsIgnoringVisibility(systemBars()).left
+                rightMargin = 12.dpToPx + insets.getInsetsIgnoringVisibility(systemBars()).right
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
-                peek + insets.getBottomGestureInsets()
-            binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+                peek + if (preferences.fullscreen().get()) {
+                insets.getBottomGestureInsets()
+            } else {
+                val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
+                max(
+                    0,
+                    (rootInsets.getBottomGestureInsets()) -
+                        rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom
+                )
+            }
+            binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.getInsetsIgnoringVisibility(systemBars()).bottom)
             binding.viewerContainer.requestLayout()
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            @Suppress("DEPRECATION")
+            binding.readerLayout.setOnSystemUiVisibilityChangeListener {
+                if (preferences.fullscreen().get()) {
+                    onVisibilityChange((it and View.SYSTEM_UI_FLAG_HIDE_NAVIGATION) == 0)
+                }
+            }
         }
     }
 
-    fun showPageLayoutMenu() {
+    fun setNavColor(insets: WindowInsetsCompat) {
+        sheetManageNavColor = when {
+            Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
+                // basically if in landscape on a phone
+                // For lollipop, draw opaque nav bar
+                window.navigationBarColor = when {
+                    insets.hasSideNavBar() -> Color.BLACK
+                    isInNightMode() -> {
+                        ColorUtils.setAlphaComponent(
+                            getResourceColor(R.attr.colorPrimaryVariant),
+                            179
+                        )
+                    }
+                    else -> Color.argb(179, 0, 0, 0)
+                }
+                !insets.hasSideNavBar()
+            }
+            insets.isBottomTappable() -> {
+                window.navigationBarColor = Color.TRANSPARENT
+                false
+            }
+            insets.hasSideNavBar() -> {
+                window.navigationBarColor = getResourceColor(R.attr.colorSurface)
+                false
+            }
+            // if in portrait with 2/3 button mode, translucent nav bar
+            else -> {
+                true
+            }
+        }
+    }
+
+    private fun showPageLayoutMenu() {
         with(binding.chaptersSheet.doublePage) {
             val config = (viewer as? PagerViewer)?.config
             val selectedId = when {
@@ -864,7 +904,7 @@ class ReaderActivity :
         binding.viewerContainer.requestLayout()
         if (visible) {
             snackbar?.dismiss()
-            systemUi?.show()
+            wic.show(systemBars())
             binding.readerMenu.isVisible = true
 
             if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
@@ -888,7 +928,9 @@ class ReaderActivity :
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
             }
         } else {
-            systemUi?.hide()
+            if (preferences.fullscreen().get()) {
+                wic.hide(systemBars())
+            }
 
             if (animate) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
@@ -937,7 +979,7 @@ class ReaderActivity :
                             ReadingModeType.WEBTOON.flagValue -> R.string.webtoon_style
                             else -> R.string.left_to_right_viewer
                         }
-                    ).toLowerCase(Locale.getDefault())
+                    ).lowercase(Locale.getDefault())
                 ),
                 4000
             ) {
@@ -1305,10 +1347,13 @@ class ReaderActivity :
     private fun showSetCoverPrompt(page: ReaderPage) {
         if (page.status != Page.READY) return
 
-        MaterialDialog(this).title(R.string.use_image_as_cover)
-            .positiveButton(android.R.string.yes) {
+        materialAlertDialog()
+            .setMessage(R.string.use_image_as_cover)
+            .setPositiveButton(android.R.string.ok) { _, _ ->
                 setAsCover(page)
-            }.negativeButton(android.R.string.no).show()
+            }
+            .setNegativeButton(android.R.string.cancel, null)
+            .show()
     }
 
     /**
@@ -1429,19 +1474,30 @@ class ReaderActivity :
         )
     }
 
-    override fun onVisibilityChange(visible: Boolean) {
+    private fun onVisibilityChange(visible: Boolean) {
         if (visible && !menuStickyVisible && !menuVisible && !binding.readerMenu.isVisible) {
             menuStickyVisible = visible
             if (visible) {
                 coroutine = launchUI {
                     delay(2000)
-                    if (systemUi?.isShowing == true) {
+                    if (window.decorView.rootWindowInsetsCompat?.isVisible(statusBars()) == true) {
                         menuStickyVisible = false
                         setMenuVisibility(false)
                     }
                 }
-                if (sheetManageNavColor) window.navigationBarColor =
-                    getResourceColor(R.attr.colorSurface)
+                if (sheetManageNavColor) {
+                    window.navigationBarColor =
+                        ColorUtils.setAlphaComponent(
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || isInNightMode()) {
+                                getResourceColor(R.attr.colorSurface)
+                            } else Color.BLACK,
+                            if (binding.root.rootWindowInsetsCompat?.hasSideNavBar() == true) {
+                                255
+                            } else {
+                                179
+                            }
+                        )
+                }
                 binding.readerMenu.isVisible = true
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.setAnimationListener(
@@ -1608,14 +1664,9 @@ class ReaderActivity :
          * Sets the fullscreen reading mode (immersive) according to [enabled].
          */
         private fun setFullscreen(enabled: Boolean) {
-            systemUi = if (enabled) {
-                val level = SystemUiHelper.LEVEL_IMMERSIVE
-                val flags = SystemUiHelper.FLAG_LAYOUT_IN_SCREEN_OLDER_DEVICES
-
-                SystemUiHelper(this@ReaderActivity, level, flags, this@ReaderActivity)
-            } else {
-                null
-            }
+            WindowCompat.setDecorFitsSystemWindows(window, !enabled)
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
+            binding.root.rootWindowInsetsCompat?.let { setNavColor(it) }
         }
 
         /**

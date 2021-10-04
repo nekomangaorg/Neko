@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import uy.kohesive.injekt.Injekt
@@ -74,13 +75,17 @@ class LibraryItem(
                             bottomMargin = 6.dpToPx
                         }
                     } else if (libraryLayout == 2) {
-                        binding.constraintLayout.background = ContextCompat.getDrawable(
-                            context,
-                            R.drawable.library_confortable_grid_selector
+                        binding.constraintLayout.background = context.contextCompatDrawable(
+                            R.drawable.library_comfortable_grid_selector
                         )
-                        binding.constraintLayout.foreground = ContextCompat.getDrawable(
-                            context,
-                            R.drawable.library_confortable_grid_selector_overlay
+                        binding.constraintLayout.foreground = context.contextCompatDrawable(
+                            R.drawable.library_comfortable_grid_selector_overlay
+                        )
+                        binding.card.setCardForegroundColor(
+                            ContextCompat.getColorStateList(
+                                context,
+                                R.color.library_comfortable_grid_foreground
+                            )
                         )
                     }
                     if (isFixedSize) {
@@ -95,10 +100,10 @@ class LibraryItem(
                         binding.coverThumbnail.adjustViewBounds = false
                         binding.coverThumbnail.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
-                            (parent.itemWidth / 3f * 3.7f).toInt()
+                            (parent.itemWidth / 3f * 3.875f).toInt()
                         )
                     } else {
-                        binding.constraintLayout.minHeight = coverHeight
+                        binding.constraintLayout.minHeight = coverHeight / 2
                         binding.coverThumbnail.minimumHeight = (parent.itemWidth / 3f * 3.6f).toInt()
                         binding.coverThumbnail.maxHeight = (parent.itemWidth / 3f * 6f).toInt()
                     }
@@ -123,6 +128,7 @@ class LibraryItem(
         payloads: MutableList<Any?>?
     ) {
         holder.onSetValues(this)
+        (holder as? LibraryGridHolder)?.setSelected(adapter.isSelected(position))
     }
 
     /**

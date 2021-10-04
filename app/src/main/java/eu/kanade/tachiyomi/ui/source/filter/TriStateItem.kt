@@ -38,7 +38,7 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
             filter.state = when (state) {
                 TriStateCheckBox.State.UNCHECKED -> Filter.TriState.STATE_IGNORE
                 TriStateCheckBox.State.CHECKED -> Filter.TriState.STATE_INCLUDE
-                TriStateCheckBox.State.INVERSED -> Filter.TriState.STATE_EXCLUDE
+                else -> Filter.TriState.STATE_EXCLUDE
             }
         }
     }

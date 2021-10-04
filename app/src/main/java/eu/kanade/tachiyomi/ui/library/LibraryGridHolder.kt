@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
+import eu.kanade.tachiyomi.util.system.dpToPx
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -90,6 +91,20 @@ class LibraryGridHolder(
                     }
                 }
             } else setCover(item.manga)
+        }
+    }
+
+    override fun toggleActivation() {
+        super.toggleActivation()
+        setSelected(adapter.isSelected(flexibleAdapterPosition))
+    }
+
+    fun setSelected(isSelected: Boolean) {
+        with(binding) {
+            card.strokeWidth = if (isSelected) 3.dpToPx else 1.dpToPx
+            arrayOf(card, unreadDownloadBadge.root, title, subtitle).forEach {
+                it.isSelected = isSelected
+            }
         }
     }
 

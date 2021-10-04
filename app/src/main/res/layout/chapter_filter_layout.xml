@@ -10,7 +10,7 @@
         android:layout_height="wrap_content">
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/filter_title"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="?textAppearanceHeadlineSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"

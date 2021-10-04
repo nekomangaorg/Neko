@@ -2,12 +2,13 @@
 <resources>
 
     <style name="Theme.Tachiyomi.Monet">
-        <item name="colorPrimary">@android:color/system_accent2_100</item>
+        <item name="colorPrimary">@android:color/system_accent1_500</item>
+        <item name="colorPrimaryInverse">@android:color/system_accent1_200</item>
         <item name="colorSecondary">@android:color/system_accent1_600</item>
-        <item name="colorDownloadBadge">@android:color/system_accent3_300</item>
-        <item name="colorOnDownloadBadge">@color/black</item>
-        <item name="colorSecondaryVariant">@android:color/system_accent1_800</item>
-        <item name="colorPrimaryVariant">@android:color/system_accent2_50</item>
+        <item name="colorTertiary">@android:color/system_accent3_300</item>
+        <item name="colorOnTertiary">@color/black</item>
+        <item name="colorSecondaryVariant">@android:color/system_accent2_900</item>
+        <item name="colorPrimaryVariant">@android:color/system_neutral2_100</item>
         <item name="colorSurface">@android:color/system_neutral1_50</item>
         <item name="background">@android:color/system_neutral1_50</item>
         <item name="colorOnBackground">@android:color/system_neutral1_900</item>
@@ -15,5 +16,12 @@
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
+    </style>
+
+    <style name="Theme.OSS" parent="Theme.Tachiyomi.Monet">
+        <item name="colorPrimary">?colorPrimaryVariant</item>
+        <item name="android:statusBarColor">?colorPrimaryVariant</item>
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
     </style>
 </resources>

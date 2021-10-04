@@ -62,7 +62,7 @@
         android:layout_height="match_parent"
         app:fastScrollerBubbleEnabled="true" />
 
-    <androidx.cardview.widget.CardView
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/header_card"
         android:layout_marginTop="6dp"
         app:cardCornerRadius="16dp"
@@ -74,7 +74,7 @@
 
         <TextView
             android:id="@+id/header_title"
-            style="@style/TextAppearance.MaterialComponents.Headline6"
+            style="?textAppearanceTitleSmall"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/list_item_selector"
@@ -85,14 +85,14 @@
             android:inputType="none"
             android:maxLines="1"
             android:textAlignment="center"
-            android:paddingStart="32dp"
-            android:paddingEnd="32dp"
+            android:paddingStart="12dp"
+            android:paddingEnd="12dp"
             android:paddingTop="4dp"
             android:paddingBottom="4dp"
             android:textColor="?actionBarTintColor"
             android:textSize="14sp"
             tools:text="Category" />
-    </androidx.cardview.widget.CardView>
+    </com.google.android.material.card.MaterialCardView>
 
     <eu.kanade.tachiyomi.widget.EmptyView
         android:id="@+id/empty_view"
@@ -100,16 +100,6 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="gone" />
-
-    <View
-        android:id="@+id/shadow"
-        android:layout_width="match_parent"
-        android:layout_height="24dp"
-        android:alpha="0.15"
-        android:background="@drawable/shape_gradient_top_shadow"
-        android:paddingBottom="10dp"
-        app:layout_anchor="@id/filter_bottom_sheet"
-        app:layout_anchorGravity="top" />
 
     <com.google.android.material.textview.MaterialTextView
         android:id="@+id/jumper_category_text"
@@ -126,7 +116,8 @@
     <FrameLayout
         android:id="@+id/category_hopper_frame"
         android:layout_width="wrap_content"
-        tools:translationY="400dp"
+        tools:layout_marginBottom="62dp"
+        tools:layout_gravity="bottom|end"
         android:layout_height="wrap_content"
         android:layout_gravity="top|center">
 
@@ -137,12 +128,4 @@
     <!-- Adding bottom sheet after main content -->
     <include layout="@layout/filter_bottom_sheet"
         android:id="@+id/filter_bottom_sheet"/>
-
-    <View
-        android:id="@+id/shadow2"
-        android:layout_width="match_parent"
-        android:layout_height="8dp"
-        android:layout_gravity="bottom"
-        android:alpha="0.05"
-        android:background="@drawable/shape_gradient_top_shadow" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

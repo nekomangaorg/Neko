@@ -6,6 +6,7 @@ import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.databinding.AddCategoryItemBinding
+import eu.kanade.tachiyomi.widget.TriStateCheckBox
 
 class AddCategoryItem(val category: Category) : AbstractItem<FastAdapter.ViewHolder<AddCategoryItem>>() {
 
@@ -17,6 +18,13 @@ class AddCategoryItem(val category: Category) : AbstractItem<FastAdapter.ViewHol
 
     override var identifier = category.id?.toLong() ?: -1L
 
+    var state: TriStateCheckBox.State = TriStateCheckBox.State.UNCHECKED
+        set(value) {
+            field = value
+            isSelected = value != TriStateCheckBox.State.UNCHECKED
+        }
+    var skipInversed = false
+
     override fun getViewHolder(v: View): FastAdapter.ViewHolder<AddCategoryItem> {
         return ViewHolder(v)
     }
@@ -24,13 +32,19 @@ class AddCategoryItem(val category: Category) : AbstractItem<FastAdapter.ViewHol
     class ViewHolder(view: View) : FastAdapter.ViewHolder<AddCategoryItem>(view) {
 
         val binding = AddCategoryItemBinding.bind(view)
+
+        init {
+            binding.categoryCheckbox.useIndeterminateForInverse = true
+        }
+
         override fun bindView(item: AddCategoryItem, payloads: List<Any>) {
+            binding.categoryCheckbox.skipInversed = item.skipInversed
             binding.categoryCheckbox.text = item.category.name
-            binding.categoryCheckbox.isChecked = item.isSelected
+            binding.categoryCheckbox.state = item.state
         }
 
         override fun unbindView(item: AddCategoryItem) {
-            binding.categoryCheckbox.text = null
+            binding.categoryCheckbox.text = ""
             binding.categoryCheckbox.isChecked = false
         }
     }

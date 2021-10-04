@@ -3,8 +3,7 @@ package eu.kanade.tachiyomi.widget.preference
 import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsSingleChoice
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 
 class IntListMatPreference @JvmOverloads constructor(
@@ -37,23 +36,26 @@ class IntListMatPreference @JvmOverloads constructor(
         defValue = defaultValue as? Int ?: defValue
     }
 
-    override fun dialog(): MaterialDialog {
+    override fun dialog(): MaterialAlertDialogBuilder {
         return super.dialog().apply {
             val default = entryValues.indexOf(customSelectedValue ?: prefs.getInt(key, defValue).getOrDefault())
-            listItemsSingleChoice(
-                items = entries,
-                waitForPositiveButton = false,
-                initialSelection = default
-            ) {
-                _, pos, _ ->
+            setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
                 val value = entryValues[pos]
                 if (key != null) {
                     prefs.getInt(key, defValue).set(value)
                 }
                 callChangeListener(value)
                 notifyChanged()
-                dismiss()
+                dialog.dismiss()
             }
+//            listItemsSingleChoice(
+//                items = entries,
+//                waitForPositiveButton = false,
+//                initialSelection = default
+//            ) {
+//                _, pos, _ ->
+//
+//            }
         }
     }
 }

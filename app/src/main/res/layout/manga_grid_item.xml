@@ -19,11 +19,12 @@
         <com.google.android.material.card.MaterialCardView
             android:id="@+id/card"
             android:layout_width="match_parent"
+            app:strokeColor="@color/library_stroke_selector"
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
-            android:layout_marginStart="10dp"
-            android:layout_marginTop="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginTop="6dp"
+            android:layout_marginEnd="6dp"
             app:layout_constraintBottom_toTopOf="@+id/text_layout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -76,7 +77,7 @@
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/compact_title"
-                style="@style/Neko.Condensed.Medium"
+                style="?textAppearanceLabelMedium"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_gravity="bottom"
@@ -86,6 +87,7 @@
                 android:ellipsize="end"
                 android:maxLines="2"
                 android:textColor="@android:color/white"
+                android:textSize="13sp"
                 tools:text="Sample name" />
 
             <ProgressBar
@@ -102,20 +104,21 @@
 
         </com.google.android.material.card.MaterialCardView>
 
+        <include
+            layout="@layout/unread_download_badge"
+            android:id="@+id/unread_download_badge"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="3dp"
+            android:layout_marginStart="3dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
         <View
             android:id="@+id/badge_guide"
             android:layout_width="match_parent"
             android:layout_height="10dp"
             app:layout_constraintTop_toTopOf="@+id/card" />
-
-        <include
-            layout="@layout/unread_download_badge"
-            android:id="@+id/unread_download_badge"
-            android:layout_width="wrap_content"
-            android:layout_marginStart="1dp"
-            android:layout_height="wrap_content"
-            app:layout_constraintBottom_toBottomOf="@id/badge_guide"
-            app:layout_constraintStart_toStartOf="parent" />
 
         <LinearLayout
             android:id="@+id/text_layout"
@@ -123,31 +126,32 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:layout_marginStart="10dp"
-            android:layout_marginEnd="10dp"
+            android:layout_marginStart="6dp"
+            android:layout_marginEnd="6dp"
+            android:layout_marginBottom="4dp"
             android:orientation="vertical"
             android:layout_height="30sp">
 
             <com.google.android.material.textview.MaterialTextView
-                style="@style/Neko.Condensed.Medium"
                 android:id="@+id/title"
+                style="?textAppearanceBodySmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
-                android:textColor="?attr/colorOnBackground"
+                android:textColor="@color/library_comfortable_title_selector"
                 app:layout_constraintBottom_toTopOf="@+id/subtitle"
                 tools:text="Sample name" />
 
             <com.google.android.material.textview.MaterialTextView
                 android:id="@+id/subtitle"
-                style="@style/Neko.Condensed.Medium"
+                style="?textAppearanceBodySmall"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:textColor="@color/library_comfortable_subtitle_selector"
                 android:layout_marginTop="-1dp"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textSize="12sp"
                 tools:text="Sample artist" />
         </LinearLayout>
 

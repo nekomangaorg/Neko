@@ -65,7 +65,6 @@
 
         <eu.kanade.tachiyomi.ui.reader.ReaderSlider
             android:id="@+id/page_seekbar"
-            style="@style/Theme.Widget.Slider"
             android:layout_width="0dp"
             android:layout_height="40dp"
             android:layout_weight="1"
