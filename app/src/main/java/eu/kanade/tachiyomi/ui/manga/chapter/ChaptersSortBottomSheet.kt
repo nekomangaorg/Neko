@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -13,7 +14,9 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setNegativeStateItems
+import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import eu.kanade.tachiyomi.widget.SortTextView
@@ -30,7 +33,8 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         ChapterSortBottomSheetBinding.inflate(inflater)
 
     init {
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        val height = activity.window.decorView.rootWindowInsetsCompat
+            ?.getInsetsIgnoringVisibility(systemBars())?.bottom ?: 0
         sheetBehavior.peekHeight = 470.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(
@@ -64,7 +68,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
         super.onCreate(savedInstanceState)
         initGeneralPreferences()
         setBottomEdge(binding.hideTitles, activity)
-        binding.settingsScrollView.viewTreeObserver.addOnGlobalLayoutListener {
+        binding.settingsScrollView.checkHeightThen {
             val isScrollable =
                 binding.settingsScrollView.height < binding.sortLayout.height +
                     binding.settingsScrollView.paddingTop + binding.settingsScrollView.paddingBottom

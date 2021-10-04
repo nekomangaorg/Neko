@@ -21,6 +21,7 @@ import eu.kanade.tachiyomi.databinding.SetCategoriesSheetBinding
 import eu.kanade.tachiyomi.ui.category.ManageCategoryDialog
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
@@ -117,13 +118,13 @@ class SetCategoriesSheet(
             }
         )
 
-        binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener {
+        binding.titleLayout.checkHeightThen {
             binding.categoryRecyclerView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
                 val insets = activity.window.decorView.rootWindowInsetsCompat
                 matchConstraintMaxHeight =
                     fullHeight - (insets?.getInsets(systemBars())?.top ?: 0) -
-                    binding.titleLayout.height - binding.buttonLayout.height - 75.dpToPx
+                    binding.titleLayout.height - binding.buttonLayout.height - 45.dpToPx
             }
         }
 

@@ -23,7 +23,6 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
-import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
@@ -80,19 +79,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     init {
         val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
-        sheetBehavior.peekHeight = 500.dpToPx + height
-
-        sheetBehavior.addBottomSheetCallback(
-            object : BottomSheetBehavior.BottomSheetCallback() {
-                override fun onSlide(bottomSheet: View, progress: Float) {}
-
-                override fun onStateChanged(p0: View, state: Int) {
-                    if (state == BottomSheetBehavior.STATE_EXPANDED) {
-                        sheetBehavior.skipCollapsed = true
-                    }
-                }
-            }
-        )
+        sheetBehavior.peekHeight = 525.dpToPx + height
+        sheetBehavior.expand()
+        sheetBehavior.skipCollapsed = true
 
         binding.searchCloseButton.setOnClickListener {
             onBackPressed()
@@ -520,12 +509,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         showMenuPicker(view, item, ReadingDate.Finish, suggestedFinishDate)
     }
 
-    private fun showMenuPicker(
-        view: View,
-        trackItem: TrackItem,
-        readingDate: ReadingDate,
-        suggestedDate: Long?,
-    ) {
+    private fun showMenuPicker(view: View, trackItem: TrackItem, readingDate: ReadingDate, suggestedDate: Long?) {
         val date = if (readingDate == ReadingDate.Start) {
             trackItem.track?.started_reading_date
         } else {
@@ -560,11 +544,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         Finish
     }
 
-    private fun showDatePicker(
-        trackItem: TrackItem,
-        readingDate: ReadingDate,
-        suggestedDate: Long?,
-    ) {
+    private fun showDatePicker(trackItem: TrackItem, readingDate: ReadingDate, suggestedDate: Long?) {
         val dialog = MaterialDatePicker.Builder.datePicker()
             .setTitleText(
                 when (readingDate) {
@@ -572,8 +552,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
                     ReadingDate.Finish -> R.string.finished_reading_date
                 }
             )
-            .setSelection(getCurrentDate(trackItem, readingDate, suggestedDate)?.timeInMillis)
-            .apply {
+            .setSelection(getCurrentDate(trackItem, readingDate, suggestedDate)?.timeInMillis).apply {
             }
             .build()
 
@@ -586,11 +565,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         dialog.show((activity as AppCompatActivity).supportFragmentManager, readingDate.toString())
     }
 
-    private fun getSuggestedDate(
-        trackItem: TrackItem,
-        readingDate: ReadingDate,
-        suggestedDate: Long?,
-    ): String? {
+    private fun getSuggestedDate(trackItem: TrackItem, readingDate: ReadingDate, suggestedDate: Long?): String? {
         trackItem.track ?: return null
         val date = when (readingDate) {
             ReadingDate.Start -> trackItem.track.started_reading_date
@@ -621,11 +596,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
         return null
     }
 
-    private fun getCurrentDate(
-        trackItem: TrackItem,
-        readingDate: ReadingDate,
-        suggestedDate: Long?,
-    ): Calendar? {
+    private fun getCurrentDate(trackItem: TrackItem, readingDate: ReadingDate, suggestedDate: Long?): Calendar? {
         // Today if no date is set, otherwise the already set date
         return Calendar.getInstance().apply {
             suggestedDate?.let {
@@ -653,8 +624,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     fun refreshItem(index: Int) {
-        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(
-            true)
+        (binding.trackRecycler.findViewHolderForAdapterPosition(index) as? TrackHolder)?.setProgress(true)
     }
 
     private fun refreshTrack(item: TrackService?) {
