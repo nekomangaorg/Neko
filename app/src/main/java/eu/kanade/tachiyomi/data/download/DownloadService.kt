@@ -198,7 +198,7 @@ class DownloadService : Service() {
             downloadManager.stopDownloads(getString(R.string.no_network_connection))
             return
         }
-        if (preferences.downloadOnlyOverWifi() && networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
+        if (preferences.downloadOnlyOverWifi() && !networkCapabilities.hasCapability(NET_CAPABILITY_NOT_METERED)) {
             downloadManager.stopDownloads(getString(R.string.no_wifi_connection))
         } else {
             val started = downloadManager.startDownloads()
