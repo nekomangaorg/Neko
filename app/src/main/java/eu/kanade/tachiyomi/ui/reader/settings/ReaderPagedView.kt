@@ -79,7 +79,9 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             binding.webtoonSidePadding,
             binding.webtoonEnableZoomOut,
             binding.webtoonNav,
-            binding.webtoonInvert
+            binding.webtoonInvert,
+            binding.webtoonPageLayout,
+            binding.webtoonInvertDoublePages
         ).forEach { it.isVisible = !show }
         val isFullFit = when (preferences.imageScaleType().get()) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
