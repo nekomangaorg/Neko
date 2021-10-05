@@ -69,7 +69,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/red_initial"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_red"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_red" />
@@ -79,7 +79,9 @@
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
+            android:textColor="?android:textColorSecondary"
+            tools:text="0"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_red"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_red" />
@@ -106,7 +108,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/green_initial"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_green"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_green" />
@@ -116,7 +118,9 @@
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
+            tools:text="34"
+            android:textColor="?android:textColorSecondary"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_green"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_green" />
@@ -143,7 +147,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/blue_initial"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_blue"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_blue" />
@@ -153,7 +157,9 @@
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
+            android:textColor="?android:textColorSecondary"
+            tools:text="100"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_blue"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_blue" />
@@ -180,7 +186,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@string/alpha_initial"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_alpha"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_alpha" />
@@ -190,7 +196,9 @@
             android:layout_width="30dp"
             android:layout_height="wrap_content"
             android:layout_alignParentEnd="true"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
+            android:textColor="?android:textColorSecondary"
+            tools:text="10"
             app:layout_constraintBottom_toBottomOf="@id/slider_color_filter_alpha"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/slider_color_filter_alpha" />
@@ -240,7 +248,6 @@
             android:id="@+id/txt_brightness_slider_icon"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
             android:tint="?android:attr/textColorSecondary"
             app:layout_constraintBottom_toBottomOf="@id/brightness_slider"
             app:layout_constraintStart_toStartOf="parent"
@@ -251,7 +258,9 @@
             android:id="@+id/txt_brightness_slider_value"
             android:layout_width="30dp"
             android:layout_height="wrap_content"
-            android:textAppearance="@style/TextAppearance.Regular.SubHeading.Secondary"
+            style="?textAppearanceBodyLarge"
+            android:textColor="?android:textColorSecondary"
+            tools:text="-30"
             app:layout_constraintBottom_toBottomOf="@id/brightness_slider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/brightness_slider" />
