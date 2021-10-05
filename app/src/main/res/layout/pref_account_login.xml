@@ -83,7 +83,7 @@
         android:layout_gravity="center"
         android:layout_marginTop="20dp"
         android:scaleType="fitCenter"
-        android:text="@string/login"
+        android:text="@string/log_in"
         android:textSize="16sp"
         app:finalCornerAngle="50dp"
         app:initialCornerAngle="2dp"

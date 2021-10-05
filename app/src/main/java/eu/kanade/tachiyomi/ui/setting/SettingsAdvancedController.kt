@@ -207,7 +207,7 @@ class SettingsAdvancedController : SettingsController() {
                     R.string.disabled,
                     R.string.cloudflare,
                     R.string.google,
-                    R.string.adGuard
+                    R.string.ad_guard
                 )
                 entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE, PREF_DOH_ADGUARD)
 

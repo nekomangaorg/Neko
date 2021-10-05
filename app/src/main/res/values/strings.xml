@@ -533,7 +533,7 @@
     <string name="kitsu" translatable="false">Kitsu</string>
     <string name="started_reading_date">Started reading date</string>
     <string name="finished_reading_date">Finished reading date</string>
-    <string name="myanimelist_relogin">Please login to MAL again</string>
+    <string name="myanimelist_relogin">Please log in to MAL again</string>
     <string name="use_suggested_date">Use suggested date</string>
 
     <!-- Migration -->
@@ -708,7 +708,7 @@
     <string name="disabled">Disabled</string>
     <string name="cloudflare" translatable="false">Cloudflare</string>
     <string name="google" translatable="false">Google</string>
-    <string name="adGuard" translatable="false">AdGuard</string>
+    <string name="ad_guard" translatable="false">AdGuard</string>
     <string name="requires_app_restart">Requires app restart to take effect</string>
     <string name="used_">Used: %1$s</string>
     <plurals name="cache_cleared">
@@ -767,10 +767,10 @@
     <string name="username">Username</string>
     <string name="email">Email address</string>
     <string name="password">Password</string>
+    <string name="log_in">Log in</string>
+    <string name="log_out">Log out</string>
+    <string name="log_out_from_">Log out from %1$s?</string>
     <string name="show_password">Show password</string>
-    <string name="login">Login</string>
-    <string name="logout">Logout</string>
-    <string name="logout_from_">Logout from %1$s?</string>
 
     <string name="successfully_logged_in">Successfully logged in</string>
     <string name="username_must_not_be_blank">Username or password cannot be blank</string>
