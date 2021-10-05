@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import eu.kanade.tachiyomi.ui.reader.viewer.navigation.EdgeNavigation
@@ -36,6 +37,10 @@ class WebtoonConfig(
 
     var zoomPropertyChangedListener: ((Boolean) -> Unit)? = null
 
+    var splitPages = preferences.webtoonPageLayout().get() == PageLayout.SPLIT_PAGES.webtoonValue
+
+    var invertDoublePages = false
+
     init {
         preferences.navigationModeWebtoon()
             .register({ navigationMode = it }, { updateNavigation(it) })
@@ -66,6 +71,15 @@ class WebtoonConfig(
 
         preferences.webtoonEnableZoomOut()
             .register({ enableZoomOut = it }, { zoomPropertyChangedListener?.invoke(it) })
+
+        preferences.webtoonPageLayout()
+            .register(
+                { splitPages = it == PageLayout.SPLIT_PAGES.webtoonValue },
+                { imagePropertyChangedListener?.invoke() }
+            )
+
+        preferences.webtoonInvertDoublePages()
+            .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
 
         navigationOverlayForNewUser = preferences.showNavigationOverlayNewUserWebtoon().get()
         if (navigationOverlayForNewUser) {

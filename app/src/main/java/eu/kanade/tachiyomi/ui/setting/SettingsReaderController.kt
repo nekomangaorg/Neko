@@ -327,6 +327,22 @@ class SettingsReaderController : SettingsController() {
                 defaultValue = "0"
             }
 
+            intListPreference(activity) {
+                key = Keys.webtoonPageLayout
+                title = context.getString(R.string.page_layout)
+                dialogTitleRes = R.string.page_layout
+                val enumConstants = arrayOf(PageLayout.SINGLE_PAGE, PageLayout.SPLIT_PAGES)
+                entriesRes = enumConstants.map { it.fullStringRes }.toTypedArray()
+                entryValues = enumConstants.map { it.webtoonValue }
+                defaultValue = PageLayout.SINGLE_PAGE.value
+            }
+
+            switchPreference {
+                key = Keys.webtoonInvertDoublePages
+                titleRes = R.string.invert_double_pages
+                defaultValue = false
+            }
+
             switchPreference {
                 key = Keys.webtoonEnableZoomOut
                 titleRes = R.string.enable_zoom_out

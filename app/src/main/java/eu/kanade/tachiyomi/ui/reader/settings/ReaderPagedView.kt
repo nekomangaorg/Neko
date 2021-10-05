@@ -49,6 +49,8 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             webtoonEnableZoomOut.bindToPreference(preferences.webtoonEnableZoomOut())
             webtoonNav.bindToPreference(preferences.navigationModeWebtoon())
             webtoonInvert.bindToPreference(preferences.webtoonNavInverted())
+            webtoonPageLayout.bindToPreference(preferences.webtoonPageLayout())
+            webtoonInvertDoublePages.bindToPreference(preferences.webtoonInvertDoublePages())
 
             updatePagedGroup(!isWebtoonView)
         }

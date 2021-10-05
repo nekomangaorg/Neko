@@ -131,6 +131,22 @@
             android:textColor="?attr/colorOnBackground"
             app:layout_constraintTop_toBottomOf="@id/webtoon_side_padding" />
 
+        <eu.kanade.tachiyomi.widget.MaterialSpinnerView
+            android:id="@+id/webtoon_page_layout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            app:title="@string/page_layout"
+            android:entries="@array/webtoon_page_layouts" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/webtoon_invert_double_pages"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/invert_double_pages"
+            android:textColor="?attr/colorOnBackground" />
+
         <androidx.constraintlayout.widget.Group
             android:id="@+id/pager_prefs_group"
             android:layout_width="wrap_content"
@@ -144,7 +160,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:visibility="gone"
-            app:constraint_referenced_ids="crop_borders_webtoon,webtoon_side_padding,webtoon_enable_zoom_out" />
+            app:constraint_referenced_ids="crop_borders_webtoon,webtoon_side_padding,webtoon_enable_zoom_out,webtoon_page_layout,webtoon_invert_double_pages" />
 
     </LinearLayout>
 </eu.kanade.tachiyomi.ui.reader.settings.ReaderPagedView>

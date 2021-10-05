@@ -207,6 +207,10 @@ class PreferencesHelper(val context: Context) {
 
     fun invertDoublePages() = flowPrefs.getBoolean(Keys.invertDoublePages, false)
 
+    fun webtoonPageLayout() = flowPrefs.getInt(Keys.webtoonPageLayout, PageLayout.SINGLE_PAGE.value)
+
+    fun webtoonInvertDoublePages() = flowPrefs.getBoolean(Keys.webtoonInvertDoublePages, false)
+
     fun readerBottomButtons() = flowPrefs.getStringSet(
         Keys.readerBottomButtons,
         ReaderBottomButton.BUTTONS_DEFAULTS

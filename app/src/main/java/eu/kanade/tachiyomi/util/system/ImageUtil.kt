@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.system
 import android.content.Context
 import android.content.res.Configuration
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Rect
@@ -323,6 +324,23 @@ object ImageUtil {
         return ColorDrawable(backgroundColor)
     }
 
+    /**
+     * Check whether the image is a double-page spread
+     * @return true if the width is greater than the height
+     */
+    fun isDoublePage(imageStream: InputStream): Boolean {
+        imageStream.mark(imageStream.available() + 1)
+
+        val imageBytes = imageStream.readBytes()
+
+        val options = BitmapFactory.Options().apply { inJustDecodeBounds = true }
+        BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size, options)
+
+        imageStream.reset()
+
+        return options.outWidth > options.outHeight
+    }
+
     fun splitBitmap(
         imageBitmap: Bitmap,
         secondHalf: Boolean,
@@ -330,10 +348,61 @@ object ImageUtil {
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
-        val result = Bitmap.createBitmap(width / 2, height, Bitmap.Config.ARGB_8888)
+        val result = Bitmap.createBitmap(width / 2, height * 2, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         progressCallback?.invoke(98)
         canvas.drawBitmap(imageBitmap, Rect(if (!secondHalf) 0 else width / 2, 0, if (secondHalf) width else width / 2, height), result.rect, null)
+        progressCallback?.invoke(99)
+        val output = ByteArrayOutputStream()
+        result.compress(Bitmap.CompressFormat.JPEG, 100, output)
+        progressCallback?.invoke(100)
+        return ByteArrayInputStream(output.toByteArray())
+    }
+
+    fun splitAndStackBitmap(
+        imageBitmap: Bitmap,
+        rightSideOnTop: Boolean,
+        progressCallback: ((Int) -> Unit)? = null
+    ): ByteArrayInputStream {
+        val height = imageBitmap.height
+        val width = imageBitmap.width
+        val result = Bitmap.createBitmap(width / 2, height * 2, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(result)
+        progressCallback?.invoke(98)
+        val upperPart = Rect(
+            0,
+            0,
+            result.width,
+            result.height / 2
+        )
+        val lowerPart = Rect(
+            0,
+            result.height / 2,
+            result.width,
+            result.height
+        )
+        canvas.drawBitmap(
+            imageBitmap,
+            Rect(
+                if (!rightSideOnTop) 0 else width / 2,
+                0,
+                if (!rightSideOnTop) width / 2 else width,
+                height
+            ),
+            upperPart,
+            null
+        )
+        canvas.drawBitmap(
+            imageBitmap,
+            Rect(
+                if (rightSideOnTop) 0 else width / 2,
+                0,
+                if (rightSideOnTop) width / 2 else width,
+                height
+            ),
+            lowerPart,
+            null
+        )
         progressCallback?.invoke(99)
         val output = ByteArrayOutputStream()
         result.compress(Bitmap.CompressFormat.JPEG, 100, output)
