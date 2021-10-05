@@ -746,8 +746,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 val prevValue = (viewer as? PagerViewer)?.pager?.currentItem ?: -1
                 moveToPageIndex(value.roundToInt())
                 val newValue = (viewer as? PagerViewer)?.pager?.currentItem ?: -1
-                if (prevValue > -1 && newValue != prevValue &&
-                    Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 &&
+                    ((prevValue > -1 && newValue != prevValue) || viewer !is PagerViewer)
                 ) {
                     binding.readerNav.pageSeekbar.performHapticFeedback(HapticFeedbackConstants.TEXT_HANDLE_MOVE)
                 }
