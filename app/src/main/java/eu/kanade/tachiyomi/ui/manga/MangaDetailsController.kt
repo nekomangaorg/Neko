@@ -941,14 +941,12 @@ class MangaDetailsController :
     //region action bar menu methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         colorToolbar(binding.recycler.canScrollVertically(-1))
-        activityBinding?.toolbar?.navigationIcon =
-            activityBinding?.toolbar?.navigationIcon?.mutate()?.apply {
-                setTint(view?.context?.getResourceColor(R.attr.actionBarTintColor) ?: Color.WHITE)
-            }
-        inflater.inflate(R.menu.manga_details, menu)
+        setActionBar(!toolbarIsColored)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_read).isVisible = !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_unread).isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_read).isVisible =
+            presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_unread).isVisible =
+            presenter.anyRead() && !presenter.isLockedFromSearch
         menu.findItem(R.id.action_remove_downloads).isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch
         menu.findItem(R.id.remove_non_bookmarked).isVisible =
