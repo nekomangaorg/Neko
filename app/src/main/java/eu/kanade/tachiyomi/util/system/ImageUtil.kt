@@ -362,12 +362,15 @@ object ImageUtil {
     fun splitAndStackBitmap(
         imageBitmap: Bitmap,
         rightSideOnTop: Boolean,
+        hasMargins: Boolean,
         progressCallback: ((Int) -> Unit)? = null
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
-        val result = Bitmap.createBitmap(width / 2, height * 2, Bitmap.Config.ARGB_8888)
+        val gap = if (hasMargins) 15.dpToPx else 0
+        val result = Bitmap.createBitmap(width / 2, height * 2 + gap, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
+        canvas.drawColor(Color.BLACK)
         progressCallback?.invoke(98)
         val upperPart = Rect(
             0,
@@ -377,7 +380,7 @@ object ImageUtil {
         )
         val lowerPart = Rect(
             0,
-            result.height / 2,
+            result.height / 2 + gap,
             result.width,
             result.height
         )
