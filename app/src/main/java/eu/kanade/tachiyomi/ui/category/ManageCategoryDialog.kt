@@ -188,7 +188,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
                 updateCategories.add(categoryId.toString())
                 excludeUpdateCategories.remove(categoryId.toString())
             }
-            TriStateCheckBox.State.INVERSED -> {
+            TriStateCheckBox.State.IGNORE -> {
                 updateCategories.remove(categoryId.toString())
                 excludeUpdateCategories.add(categoryId.toString())
             }
@@ -213,7 +213,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         box.isVisible = (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
         if (shouldShow) box.state = when {
             updateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.CHECKED
-            excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.INVERSED
+            excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.IGNORE
             else -> TriStateCheckBox.State.UNCHECKED
         }
     }

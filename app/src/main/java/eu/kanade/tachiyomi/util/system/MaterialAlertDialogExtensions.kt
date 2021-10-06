@@ -118,7 +118,7 @@ internal fun MaterialAlertDialogBuilder.setNegativeStateItems(
         items = items,
         initialSelection = initialSelection.map {
             if (it) {
-                TriStateCheckBox.State.INVERSED.ordinal
+                TriStateCheckBox.State.IGNORE.ordinal
             } else {
                 TriStateCheckBox.State.UNCHECKED.ordinal
             }
@@ -126,7 +126,7 @@ internal fun MaterialAlertDialogBuilder.setNegativeStateItems(
             .toIntArray(),
         skipChecked = true
     ) { _, _, _, index, state ->
-        listener.onClick(null, index, state == TriStateCheckBox.State.INVERSED.ordinal)
+        listener.onClick(null, index, state == TriStateCheckBox.State.IGNORE.ordinal)
     }
 }
 

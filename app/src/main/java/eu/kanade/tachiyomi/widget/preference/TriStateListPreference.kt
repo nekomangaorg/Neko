@@ -91,7 +91,7 @@ class TriStateListPreference @JvmOverloads constructor(
                 .map {
                     when (it) {
                         in set -> TriStateCheckBox.State.CHECKED.ordinal
-                        in excludedSet -> TriStateCheckBox.State.INVERSED.ordinal
+                        in excludedSet -> TriStateCheckBox.State.IGNORE.ordinal
                         else -> TriStateCheckBox.State.UNCHECKED.ordinal
                     }
                 }
@@ -117,7 +117,7 @@ class TriStateListPreference @JvmOverloads constructor(
                 .map { entryValues[it] }
                 .toSet()
             excludedItems = selections
-                .mapIndexed { index, value -> if (value == TriStateCheckBox.State.INVERSED.ordinal) index else null }
+                .mapIndexed { index, value -> if (value == TriStateCheckBox.State.IGNORE.ordinal) index else null }
                 .filterNotNull()
                 .map { entryValues[it] }
                 .toSet()

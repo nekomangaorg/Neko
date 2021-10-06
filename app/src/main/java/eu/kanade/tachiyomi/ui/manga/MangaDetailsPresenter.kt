@@ -746,17 +746,17 @@ class MangaDetailsPresenter(
     ) {
         manga.readFilter = when (unread) {
             TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_UNREAD
-            TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_READ
+            TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_READ
             else -> Manga.SHOW_ALL
         }
         manga.downloadedFilter = when (downloaded) {
             TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_DOWNLOADED
-            TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+            TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
             else -> Manga.SHOW_ALL
         }
         manga.bookmarkedFilter = when (bookmarked) {
             TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_BOOKMARKED
-            TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+            TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
             else -> Manga.SHOW_ALL
         }
         manga.setFilterToLocal()
@@ -793,21 +793,21 @@ class MangaDetailsPresenter(
         preferences.filterChapterByRead().set(
             when (unread) {
                 TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_UNREAD
-                TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_READ
+                TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_READ
                 else -> Manga.SHOW_ALL
             }
         )
         preferences.filterChapterByDownloaded().set(
             when (downloaded) {
                 TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_DOWNLOADED
-                TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+                TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
                 else -> Manga.SHOW_ALL
             }
         )
         preferences.filterChapterByBookmarked().set(
             when (bookmarked) {
                 TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_BOOKMARKED
-                TriStateCheckBox.State.INVERSED -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+                TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
                 else -> Manga.SHOW_ALL
             }
         )

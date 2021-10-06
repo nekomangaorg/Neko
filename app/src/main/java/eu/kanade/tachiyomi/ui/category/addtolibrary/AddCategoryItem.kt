@@ -34,7 +34,7 @@ class AddCategoryItem(val category: Category) : AbstractItem<FastAdapter.ViewHol
         val binding = AddCategoryItemBinding.bind(view)
 
         init {
-            binding.categoryCheckbox.useIndeterminateForInverse = true
+            binding.categoryCheckbox.useIndeterminateForIgnore = true
         }
 
         override fun bindView(item: AddCategoryItem, payloads: List<Any>) {

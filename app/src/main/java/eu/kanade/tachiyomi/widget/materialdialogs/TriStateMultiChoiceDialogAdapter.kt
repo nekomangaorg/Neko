@@ -32,7 +32,7 @@ internal class TriStateMultiChoiceDialogAdapter(
     private val states = TriStateCheckBox.State.values()
     private val defaultOrdinal
         get() = if (skipChecked) {
-            TriStateCheckBox.State.INVERSED.ordinal
+            TriStateCheckBox.State.IGNORE.ordinal
         } else {
             TriStateCheckBox.State.CHECKED.ordinal
         }
@@ -48,7 +48,7 @@ internal class TriStateMultiChoiceDialogAdapter(
                         // This value was selected
                         notifyItemChanged(index, CheckPayload)
                     }
-                    current == TriStateCheckBox.State.INVERSED.ordinal && previous != TriStateCheckBox.State.INVERSED.ordinal -> {
+                    current == TriStateCheckBox.State.IGNORE.ordinal && previous != TriStateCheckBox.State.IGNORE.ordinal -> {
                         // This value was inverse selected
                         notifyItemChanged(index, InverseCheckPayload)
                     }
@@ -64,8 +64,8 @@ internal class TriStateMultiChoiceDialogAdapter(
     internal fun itemClicked(index: Int) {
         val newSelection = this.currentSelection.toMutableList()
         newSelection[index] = when (currentSelection[index]) {
-            TriStateCheckBox.State.CHECKED.ordinal -> TriStateCheckBox.State.INVERSED.ordinal
-            TriStateCheckBox.State.INVERSED.ordinal -> TriStateCheckBox.State.UNCHECKED.ordinal
+            TriStateCheckBox.State.CHECKED.ordinal -> TriStateCheckBox.State.IGNORE.ordinal
+            TriStateCheckBox.State.IGNORE.ordinal -> TriStateCheckBox.State.UNCHECKED.ordinal
             // UNCHECKED
             else -> defaultOrdinal
         }
@@ -116,7 +116,7 @@ internal class TriStateMultiChoiceDialogAdapter(
                 return
             }
             InverseCheckPayload -> {
-                holder.controlView.setState(TriStateCheckBox.State.INVERSED, true)
+                holder.controlView.setState(TriStateCheckBox.State.IGNORE, true)
                 return
             }
             UncheckPayload -> {

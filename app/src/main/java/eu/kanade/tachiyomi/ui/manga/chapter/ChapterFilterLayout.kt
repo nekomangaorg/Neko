@@ -49,17 +49,17 @@ class ChapterFilterLayout @JvmOverloads constructor(context: Context, attrs: Att
     fun setCheckboxes(manga: Manga, preferences: PreferencesHelper) {
         binding.showUnread.state = when (manga.readFilter(preferences)) {
             Manga.CHAPTER_SHOW_UNREAD -> TriStateCheckBox.State.CHECKED
-            Manga.CHAPTER_SHOW_READ -> TriStateCheckBox.State.INVERSED
+            Manga.CHAPTER_SHOW_READ -> TriStateCheckBox.State.IGNORE
             else -> TriStateCheckBox.State.UNCHECKED
         }
         binding.showDownload.state = when (manga.downloadedFilter(preferences)) {
             Manga.CHAPTER_SHOW_DOWNLOADED -> TriStateCheckBox.State.CHECKED
-            Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> TriStateCheckBox.State.INVERSED
+            Manga.CHAPTER_SHOW_NOT_DOWNLOADED -> TriStateCheckBox.State.IGNORE
             else -> TriStateCheckBox.State.UNCHECKED
         }
         binding.showBookmark.state = when (manga.bookmarkedFilter(preferences)) {
             Manga.CHAPTER_SHOW_BOOKMARKED -> TriStateCheckBox.State.CHECKED
-            Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> TriStateCheckBox.State.INVERSED
+            Manga.CHAPTER_SHOW_NOT_BOOKMARKED -> TriStateCheckBox.State.IGNORE
             else -> TriStateCheckBox.State.UNCHECKED
         }
 

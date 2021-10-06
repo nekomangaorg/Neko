@@ -30,7 +30,7 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
         view.state = when (filter.state) {
             Filter.TriState.STATE_IGNORE -> TriStateCheckBox.State.UNCHECKED
             Filter.TriState.STATE_INCLUDE -> TriStateCheckBox.State.CHECKED
-            Filter.TriState.STATE_EXCLUDE -> TriStateCheckBox.State.INVERSED
+            Filter.TriState.STATE_EXCLUDE -> TriStateCheckBox.State.IGNORE
             else -> throw Exception("Unknown state")
         }
 
@@ -38,7 +38,7 @@ open class TriStateItem(val filter: Filter.TriState) : AbstractFlexibleItem<TriS
             filter.state = when (state) {
                 TriStateCheckBox.State.UNCHECKED -> Filter.TriState.STATE_IGNORE
                 TriStateCheckBox.State.CHECKED -> Filter.TriState.STATE_INCLUDE
-                else -> Filter.TriState.STATE_EXCLUDE
+                TriStateCheckBox.State.IGNORE -> Filter.TriState.STATE_EXCLUDE
             }
         }
     }

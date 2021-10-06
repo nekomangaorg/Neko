@@ -69,7 +69,7 @@ class SetCategoriesSheet(
         category.takeIf { preselected[index] == TriStateCheckBox.State.CHECKED }
     }
     private val preIndeterminateCategories = categories.mapIndexedNotNull { index, category ->
-        category.takeIf { preselected[index] == TriStateCheckBox.State.INDETERMINATE }
+        category.takeIf { preselected[index] == TriStateCheckBox.State.IGNORE }
     }
     private val selectedCategories = preIndeterminateCategories + preCheckedCategories
 
@@ -80,7 +80,7 @@ class SetCategoriesSheet(
         get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.CHECKED }.toSet()
 
     private val indeterminateItems: Set<AddCategoryItem>
-        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.INDETERMINATE }.toSet()
+        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.IGNORE }.toSet()
 
     private val uncheckedItems: Set<AddCategoryItem>
         get() = itemAdapter.adapterItems.filter { !it.isSelected }.toSet()
@@ -135,7 +135,7 @@ class SetCategoriesSheet(
         itemAdapter.set(
             categories.mapIndexed { index, category ->
                 AddCategoryItem(category).apply {
-                    skipInversed = preselected[index] != TriStateCheckBox.State.INDETERMINATE
+                    skipInversed = preselected[index] != TriStateCheckBox.State.IGNORE
                     state = preselected[index]
                 }
             }
