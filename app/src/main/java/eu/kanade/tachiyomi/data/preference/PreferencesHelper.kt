@@ -451,8 +451,6 @@ class PreferencesHelper(val context: Context) {
 
     fun onlySearchPinned() = flowPrefs.getBoolean(Keys.onlySearchPinned, false)
 
-    fun showLibraryUpdateErrors() = prefs.getBoolean(Keys.showLibraryUpdateErrors, false)
-
     // Tutorial preferences
     fun shownFilterTutorial() = flowPrefs.getBoolean("shown_filter_tutorial", false)
 

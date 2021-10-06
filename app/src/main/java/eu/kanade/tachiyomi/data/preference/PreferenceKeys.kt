@@ -223,8 +223,6 @@ object PreferenceKeys {
     const val showUpdatedTime = "show_updated_time"
     const val groupChaptersUpdates = "group_chapters_updates"
 
-    const val showLibraryUpdateErrors = "show_library_update_errors"
-
     const val categoryNumberOfItems = "display_number_of_items"
 
     const val alwaysShowChapterTransition = "always_show_chapter_transition"

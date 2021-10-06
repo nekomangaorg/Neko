@@ -55,13 +55,6 @@ object Notifications {
     const val ID_INSTALL = 3
 
     /**
-     * Notification channel and ids used by the library updater.
-     */
-    const val CHANNEL_LIBRARY = "library_channel"
-    const val ID_LIBRARY_PROGRESS = -101
-    const val ID_LIBRARY_ERROR = -102
-
-    /**
      * Notification channel and ids used by the downloader.
      */
     private const val GROUP_DOWNLOADER = "group_downloader"
@@ -75,9 +68,18 @@ object Notifications {
     /**
      * Notification channel and ids used by the library updater.
      */
+    private const val GROUP_LIBRARY = "group_library"
     const val CHANNEL_NEW_CHAPTERS = "new_chapters_channel"
     const val ID_NEW_CHAPTERS = -301
     const val GROUP_NEW_CHAPTERS = "eu.kanade.tachiyomi.NEW_CHAPTERS"
+
+    /**
+     * Notification channel and ids used by the library updater.
+     */
+    const val CHANNEL_LIBRARY_PROGRESS = "library_progress_channel"
+    const val ID_LIBRARY_PROGRESS = -101
+    const val CHANNEL_LIBRARY_ERROR = "library_errors_channel"
+    const val ID_LIBRARY_ERROR = -102
 
     /**
      * Notification channel and ids used for backup and restore.
@@ -98,6 +100,10 @@ object Notifications {
     const val CHANNEL_CRASH_LOGS = "crash_logs_channel"
     const val ID_CRASH_LOGS = -601
 
+    private val deprecatedChannels = listOf(
+        "library_channel"
+    )
+
     /**
      * Creates the notification channels introduced in Android Oreo.
      *
@@ -106,6 +112,9 @@ object Notifications {
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         listOf(
+            NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.backup_and_restore)),
+            NotificationChannelGroup(GROUP_EXTENSION_UPDATES, context.getString(R.string.extension_updates)),
+            NotificationChannelGroup(GROUP_LIBRARY, context.getString(R.string.library)),
             NotificationChannelGroup(
                 GROUP_BACKUP_RESTORE,
                 context.getString(R.string.group_backup_restore)
@@ -120,10 +129,19 @@ object Notifications {
                 NotificationManager.IMPORTANCE_LOW
             ),
             NotificationChannel(
-                CHANNEL_LIBRARY,
+                CHANNEL_LIBRARY_PROGRESS,
                 context.getString(R.string.updating_library),
                 NotificationManager.IMPORTANCE_LOW
             ).apply {
+                group = GROUP_LIBRARY
+                setShowBadge(false)
+            },
+            NotificationChannel(
+                CHANNEL_LIBRARY_ERROR,
+                context.getString(R.string.channel_errors),
+                NotificationManager.IMPORTANCE_LOW
+            ).apply {
+                group = GROUP_LIBRARY
                 setShowBadge(false)
             },
             NotificationChannel(
@@ -154,7 +172,9 @@ object Notifications {
                 CHANNEL_NEW_CHAPTERS,
                 context.getString(R.string.new_chapters),
                 NotificationManager.IMPORTANCE_DEFAULT
-            ),
+            ).apply {
+                group = GROUP_LIBRARY
+            },
             NotificationChannel(
                 CHANNEL_BACKUP_RESTORE_PROGRESS,
                 context.getString(R.string.backup_restore_progress),

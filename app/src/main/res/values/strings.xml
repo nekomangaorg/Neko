@@ -206,6 +206,7 @@
         <item quantity="one">1 update failed</item>
         <item quantity="other">%1$d updates failed</item>
     </plurals>
+    <string name="channel_errors">Errors</string>
 
     <string name="number_of_migrated">only %d manga needed to be migrated</string>
 
@@ -225,7 +226,6 @@
     <string name="auto_refresh_covers_summary">Refresh covers in library as well
         when updating library</string>
     <string name="global_updates">Global updates</string>
-    <string name="show_notification_error">Show a notification for errors</string>
     <string name="display_buttons_bottom_reader">Buttons at bottom of reader</string>
     <string name="certain_buttons_can_be_found">Certain buttons can be found in other places if disabled here</string>
     <string name="search_suggestions">Search suggestions</string>

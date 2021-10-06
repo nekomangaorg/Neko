@@ -197,12 +197,6 @@ class SettingsLibraryController : SettingsController() {
                 summaryRes = R.string.auto_refresh_covers_summary
                 defaultValue = true
             }
-
-            switchPreference {
-                key = Keys.showLibraryUpdateErrors
-                titleRes = R.string.show_notification_error
-                defaultValue = true
-            }
         }
     }
 }
