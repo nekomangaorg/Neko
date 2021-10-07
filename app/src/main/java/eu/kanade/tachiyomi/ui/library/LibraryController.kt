@@ -10,7 +10,6 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.LayoutInflater
@@ -21,7 +20,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewPropertyAnimator
-import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -32,6 +30,7 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -85,6 +84,7 @@ import eu.kanade.tachiyomi.util.system.isImeVisible
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.expand
@@ -208,9 +208,14 @@ class LibraryController(
     private lateinit var elevateAppBar: ((Boolean) -> Unit)
     private var hopperOffset = 0f
     private val maxHopperOffset: Float
-        get() =
-            if (activityBinding?.bottomNav != null) 55f.dpToPx
-            else (view?.rootWindowInsets?.systemWindowInsetBottom?.toFloat() ?: 0f) + 55f.dpToPx
+        get() = if (activityBinding?.bottomNav != null) {
+            55f.dpToPx
+        } else {
+            (
+                view?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom?.toFloat()
+                    ?: 0f
+                ) + 55f.dpToPx
+        }
 
     override fun getTitle(): String? {
         setSubtitle()
@@ -239,7 +244,7 @@ class LibraryController(
             insets: WindowInsetsCompat,
             runningAnimations: List<WindowInsetsAnimationCompat>,
         ): WindowInsetsCompat {
-            updateHopperY(insets.toWindowInsets())
+            updateHopperY(insets)
             return insets
         }
 
@@ -301,38 +306,27 @@ class LibraryController(
 
     fun updateFilterSheetY() {
         val bottomBar = activityBinding?.bottomNav
+        val systemInsets = view?.rootWindowInsetsCompat?.getInsets(systemBars())
+        val bottomSheet = binding.filterBottomSheet.filterBottomSheet
         if (bottomBar != null) {
-            if (binding.filterBottomSheet.filterBottomSheet.sheetBehavior.isHidden()) {
-                val pad = bottomBar.translationY - bottomBar.height
-                binding.filterBottomSheet.filterBottomSheet.translationY = pad
+            bottomSheet.translationY = if (bottomSheet.sheetBehavior.isHidden()) {
+                bottomBar.translationY - bottomBar.height
             } else {
-                binding.filterBottomSheet.filterBottomSheet.translationY = 0f
+                0f
             }
             val pad = bottomBar.translationY - bottomBar.height
-            binding.filterBottomSheet.filterBottomSheet.updatePaddingRelative(
-                bottom = max(
-                    (-pad).toInt(),
-                    view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
-                )
-            )
+            val padding = max((-pad).toInt(), systemInsets?.bottom ?: 0)
+            bottomSheet.updatePaddingRelative(bottom = padding)
 
-            val padding = max(
-                (-pad).toInt(),
-                view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
-            )
-            binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight =
-                60.dpToPx + padding
+            bottomSheet.sheetBehavior?.peekHeight = 60.dpToPx + padding
             updateHopperY()
             binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 bottomMargin = -pad.toInt()
             }
         } else {
-            binding.filterBottomSheet.filterBottomSheet.updatePaddingRelative(
-                bottom = view?.rootWindowInsets?.systemWindowInsetBottom ?: 0
-            )
+            bottomSheet.updatePaddingRelative(bottom = systemInsets?.bottom ?: 0)
             updateHopperY()
-            binding.filterBottomSheet.filterBottomSheet.sheetBehavior?.peekHeight = 60.dpToPx +
-                (view?.rootWindowInsets?.systemWindowInsetBottom ?: 0)
+            bottomSheet.sheetBehavior?.peekHeight = 60.dpToPx + (systemInsets?.bottom ?: 0)
         }
     }
 
@@ -766,20 +760,19 @@ class LibraryController(
         }
     }
 
-    fun updateHopperY(windowInsets: WindowInsets? = null) {
+    fun updateHopperY(windowInsets: WindowInsetsCompat? = null) {
         val view = view ?: return
-        val insets = windowInsets ?: view.rootWindowInsets
+        val insets = windowInsets ?: view.rootWindowInsetsCompat
         val listOfYs = mutableListOf(
             binding.filterBottomSheet.filterBottomSheet.y,
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
         )
-        val insetBottom = insets?.systemWindowInsetBottom ?: 0
+        val insetBottom = insets?.getInsets(systemBars())?.bottom ?: 0
         if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
-            val insetKey =
-                insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+            val insetKey = insets.getInsets(ime() or systemBars()).bottom
             listOfYs.add(view.height - (insetKey).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +
@@ -891,7 +884,7 @@ class LibraryController(
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
-                Handler().post {
+                viewScope.launchUI {
                     NotificationReceiver.dismissNotification(
                         context,
                         Notifications.ID_LIBRARY_PROGRESS
@@ -903,7 +896,7 @@ class LibraryController(
 
     private fun setRecyclerLayout() {
         with(binding.libraryGridRecycler.recycler) {
-            post {
+            viewScope.launchUI {
                 updatePaddingRelative(
                     bottom = 50.dpToPx + (activityBinding?.bottomNav?.height ?: 0)
                 )
@@ -924,6 +917,7 @@ class LibraryController(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     private fun setPreferenceFlows() {
         listOf(
             preferences.libraryLayout(),
@@ -1165,7 +1159,7 @@ class LibraryController(
             binding.libraryGridRecycler.recycler.suppressLayout(true)
             val appbarOffset = if (appbar?.y ?: 0f > -20) 0 else (
                 appbar?.y?.plus(
-                    view?.rootWindowInsets?.systemWindowInsetTop ?: 0
+                    view?.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0
                 ) ?: 0f
                 ).roundToInt() + 30.dpToPx
             val previousHeader = adapter.getItem(adapter.indexOf(pos - 1)) as? LibraryHeaderItem
@@ -1240,6 +1234,7 @@ class LibraryController(
         return true
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onDestroyActionMode(mode: ActionMode?) {
         selectedMangaSet.clear()
         actionMode = null
@@ -1387,6 +1382,7 @@ class LibraryController(
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     override fun onUpdateManga(manga: Manga?) {
         if (manga == null) adapter.notifyDataSetChanged()
         else presenter.updateManga()
@@ -1505,7 +1501,7 @@ class LibraryController(
             view.elevation = 15f.dpToPx
             setAction(R.string.cancel) {
                 LibraryUpdateService.stop(context)
-                Handler().post {
+                viewScope.launchUI {
                     NotificationReceiver.dismissNotification(
                         context,
                         Notifications.ID_LIBRARY_PROGRESS

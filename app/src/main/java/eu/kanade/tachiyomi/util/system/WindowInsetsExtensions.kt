@@ -41,7 +41,7 @@ fun WindowInsetsCompat.hasSideNavBar() =
         getInsets(systemBars()).bottom == 0
 
 @RequiresApi(Build.VERSION_CODES.R)
-fun WindowInsets.isImeVisible() = isVisible(WindowInsets.Type.ime())
+fun WindowInsetsCompat.isImeVisible() = isVisible(WindowInsetsCompat.Type.ime())
 
 fun WindowInsets.topCutoutInset() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
     displayCutout?.safeInsetTop ?: 0
