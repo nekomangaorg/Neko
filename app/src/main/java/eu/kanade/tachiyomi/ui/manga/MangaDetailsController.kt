@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.ClipData
 import android.content.ClipboardManager
@@ -95,6 +96,7 @@ import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -156,10 +158,10 @@ class MangaDetailsController :
     private var manga: Manga? = null
     var colorAnimator: ValueAnimator? = null
     val presenter: MangaDetailsPresenter
-    var coverColor: Int? = null
-    var accentColor: Int? = null
-    var headerColor: Int? = null
-    var toolbarIsColored = false
+    private var coverColor: Int? = null
+    private var accentColor: Int? = null
+    private var headerColor: Int? = null
+    private var toolbarIsColored = false
     private var snack: Snackbar? = null
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     private var trackingBottomSheet: TrackingBottomSheet? = null
@@ -179,8 +181,8 @@ class MangaDetailsController :
 
     private var actionMode: ActionMode? = null
 
-    var headerHeight = 0
-    var fullCoverActive = false
+    private var headerHeight = 0
+    private var fullCoverActive = false
 
     override fun getTitle(): String? {
         return manga!!.title
@@ -326,8 +328,8 @@ class MangaDetailsController :
 
         if (isTablet) {
             val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
-            headerHeight =
-                tHeight + (activityBinding?.root?.rootWindowInsets?.systemWindowInsetTop ?: 0)
+            headerHeight = tHeight +
+                (view.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0)
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
             binding.recycler.doOnApplyWindowInsetsCompat { _, insets, _ ->
                 setInsets(insets, appbarHeight, offset)
@@ -411,10 +413,11 @@ class MangaDetailsController :
             ColorUtils.setAlphaComponent(scrollingColor, (0.87f * 255).roundToInt())
         colorAnimator?.cancel()
         if (animate) {
-            colorAnimator = ValueAnimator.ofFloat(
+            val cA = ValueAnimator.ofFloat(
                 if (toolbarIsColored) 0f else 1f,
                 if (toolbarIsColored) 1f else 0f
             )
+            colorAnimator = cA
             colorAnimator?.duration = 250 // milliseconds
             colorAnimator?.addUpdateListener { animator ->
                 activityBinding?.appBar?.setBackgroundColor(
@@ -434,7 +437,7 @@ class MangaDetailsController :
                     Color.TRANSPARENT
                 }
             }
-            colorAnimator?.start()
+            cA.start()
         } else {
             activityBinding?.appBar?.setBackgroundColor(if (toolbarIsColored) scrollingColor else topColor)
             activity.window?.statusBarColor =
@@ -704,6 +707,7 @@ class MangaDetailsController :
         else binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateHeader() {
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         adapter?.setChapters(presenter.chapters)
@@ -712,6 +716,7 @@ class MangaDetailsController :
         activity?.invalidateOptionsMenu()
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun updateChapters(chapters: List<ChapterItem>) {
         view ?: return
         binding.swipeRefresh.isRefreshing = presenter.isLoading
@@ -738,6 +743,7 @@ class MangaDetailsController :
         }
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     fun refreshAdapter() = adapter?.notifyDataSetChanged()
 
     override fun onItemClick(view: View?, position: Int): Boolean {
@@ -1223,8 +1229,7 @@ class MangaDetailsController :
         presenter.downloadChapters(chapters)
         val text = view.context.getString(
             R.string.add_x_to_library,
-            presenter.manga.seriesType
-                (view.context).lowercase(Locale.ROOT)
+            presenter.manga.seriesType(view.context).lowercase(Locale.ROOT)
         )
         if (!presenter.manga.favorite && (
                 snack == null ||
@@ -1361,7 +1366,7 @@ class MangaDetailsController :
             toggleMangaFavorite()
         } else {
             val favButton = getHeader()?.binding?.favoriteButton ?: return
-            val popup = makeFavPopup(favButton, manga, categories)
+            val popup = makeFavPopup(favButton, categories)
             popup?.show()
         }
     }
