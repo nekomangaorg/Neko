@@ -35,6 +35,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
+import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.controller.OneWayFadeChangeHandler
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
@@ -323,14 +324,16 @@ fun Controller.scrollViewWith(
                         v.layoutParams = params
                         onLeavingController?.invoke()
                     }
-                    if (!customPadding && router.backstackSize == 2 && changeType == ControllerChangeType.PUSH_EXIT) {
+                    if (!customPadding && router.backstackSize == 2 && changeType == ControllerChangeType.PUSH_EXIT &&
+                        router.backstack.lastOrNull()?.controller !is DialogController
+                    ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val bottomNav = activityBinding?.bottomNav ?: return
                         val v = View(activity)
                         fakeBottomNavView = v
-                        parent.addView(v, parent.indexOfChild(recycler) + 1)
+                        parent.addView(v)
                         val params = fakeBottomNavView?.layoutParams
-                        params?.height = recycler.paddingBottom
+                        params?.height = bottomNav.height
                         (params as? FrameLayout.LayoutParams)?.gravity = Gravity.BOTTOM
                         fakeBottomNavView?.translationY = bottomNav.translationY
                         params?.width = MATCH_PARENT
