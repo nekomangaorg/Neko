@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.topCutoutInset
+import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
@@ -479,7 +480,7 @@ class PagerPageHolder(
     }
 
     private fun isInvertedFromTheme(): Boolean {
-        return when ((background as? ColorDrawable)?.color ?: Color.TRANSPARENT) {
+        return when (backgroundColor) {
             Color.WHITE -> context.isInNightMode()
             Color.BLACK -> !context.isInNightMode()
             else -> false

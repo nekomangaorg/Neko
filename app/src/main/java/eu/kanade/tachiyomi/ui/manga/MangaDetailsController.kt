@@ -322,7 +322,6 @@ class MangaDetailsController :
         array.recycle()
         val offset = 10.dpToPx
         binding.swipeRefresh.setDistanceToTriggerSync(70.dpToPx)
-        activityBinding!!.appBar.elevation = 0f
 
         if (isTablet) {
             val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight

@@ -489,4 +489,25 @@ object ImageUtil {
             }
         }
     }
+
+    fun getPercentOfColor(
+        @ColorInt color: Int,
+        @ColorInt colorFrom: Int,
+        @ColorInt colorTo: Int
+    ): Float {
+        val reds = arrayOf(Color.red(color), Color.red(colorFrom), Color.red(colorTo))
+        val blues = arrayOf(Color.blue(color), Color.blue(colorFrom), Color.blue(colorTo))
+        val greens = arrayOf(Color.green(color), Color.green(colorFrom), Color.green(colorTo))
+        val alphas = arrayOf(Color.alpha(color), Color.alpha(colorFrom), Color.alpha(colorTo))
+        val rPercent = (reds[0] - reds[1]).toFloat() / (reds[2] - reds[1]).toFloat()
+        val bPercent = (blues[0] - blues[1]).toFloat() / (blues[2] - blues[1]).toFloat()
+        val gPercent = (greens[0] - greens[1]).toFloat() / (greens[2] - greens[1]).toFloat()
+        val aPercent = (alphas[0] - alphas[1]).toFloat() / (alphas[2] - alphas[1]).toFloat()
+        return arrayOf(
+            rPercent.takeIf { reds[2] != reds[1] },
+            bPercent.takeIf { blues[2] != blues[1] },
+            gPercent.takeIf { greens[2] != greens[1] },
+            aPercent.takeIf { alphas[2] != alphas[1] }
+        ).filterNotNull().average().toFloat().takeIf { it in 0f..1f } ?: 0f
+    }
 }

@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.graphics.Point
 import android.graphics.RenderEffect
 import android.graphics.Shader
+import android.graphics.drawable.ColorDrawable
 import android.os.Build
 import android.view.Gravity
 import android.view.MenuItem
@@ -426,6 +427,9 @@ fun MaterialCardView.makeShapeCorners(
         }
         .build()
 }
+
+val View.backgroundColor
+    get() = (background as? ColorDrawable)?.color
 
 fun Dialog.blurBehindWindow(
     window: Window?,

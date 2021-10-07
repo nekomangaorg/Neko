@@ -26,6 +26,7 @@
         android:layout_height="wrap_content"
         android:stateListAnimator="@null"
         android:theme="?attr/actionBarTheme"
+        android:elevation="0dp"
         app:layout_constraintStart_toEndOf="@id/side_nav"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent">

@@ -8,7 +8,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Rect
-import android.graphics.drawable.ColorDrawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
@@ -85,6 +84,7 @@ import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
 import eu.kanade.tachiyomi.util.view.getItemView
@@ -431,7 +431,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
         binding.toolbar.isVisible = !show
         binding.cardFrame.isVisible = show
-        val bgColor = (binding.appBar.background as? ColorDrawable)?.color ?: Color.TRANSPARENT
+        val bgColor = binding.appBar.backgroundColor ?: Color.TRANSPARENT
         if (changeBG && (if (solidBG) bgColor == Color.TRANSPARENT else false)) {
             binding.appBar.setBackgroundColor(
                 if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface)
