@@ -239,9 +239,9 @@ open class BrowseSourceController(bundle: Bundle) :
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
-                    if (dy <= 0) {
+                    if (dy <= 0 && !binding.fab.isExtended) {
                         binding.fab.extend()
-                    } else {
+                    } else if (dy > 0 && binding.fab.isExtended) {
                         binding.fab.shrink()
                     }
                 }

@@ -6,8 +6,8 @@ import android.util.AttributeSet
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.LinearLayout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
-import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.util.view.collapse
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
@@ -72,9 +72,9 @@ class DownloadBottomSheet @JvmOverloads constructor(
         val array = context.obtainStyledAttributes(attrsArray)
         val headerHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        binding.recyclerLayout.doOnApplyWindowInsets { v, windowInsets, _ ->
+        binding.recyclerLayout.doOnApplyWindowInsetsCompat { v, windowInsets, _ ->
             v.updateLayoutParams<MarginLayoutParams> {
-                topMargin = windowInsets.systemWindowInsetTop +
+                topMargin = windowInsets.getInsets(systemBars()).top +
                     (controller.toolbarHeight ?: headerHeight) -
                     binding.sheetLayout.height
             }
@@ -173,7 +173,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
      * @return the holder of the download or null if it's not bound.
      */
     private fun getHolder(download: Download): DownloadHolder? {
-        return binding.dlRecycler?.findViewHolderForItemId(download.chapter.id!!) as? DownloadHolder
+        return binding.dlRecycler.findViewHolderForItemId(download.chapter.id!!) as? DownloadHolder
     }
 
     /**

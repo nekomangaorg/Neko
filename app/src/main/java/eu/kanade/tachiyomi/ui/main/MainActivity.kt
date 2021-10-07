@@ -370,11 +370,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R && !isPush) {
                             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
                         }
-                    } else {
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
-                            @Suppress("DEPRECATION")
-                            window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
-                        }
+                    } else if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                        @Suppress("DEPRECATION")
+                        window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                     }
                 }
             }

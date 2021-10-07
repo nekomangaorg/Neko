@@ -382,7 +382,7 @@ class RecentsController(bundle: Bundle? = null) :
         val pad = bottomBar?.translationY?.minus(bottomBar.height) ?: 0f
         val padding = max(
             (-pad).toInt(),
-            view?.rootWindowInsets?.getBottomGestureInsets() ?: 0
+            view?.rootWindowInsetsCompat?.getBottomGestureInsets() ?: 0
         )
         binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight = 48.spToPx + padding
         binding.downloadBottomSheet.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
