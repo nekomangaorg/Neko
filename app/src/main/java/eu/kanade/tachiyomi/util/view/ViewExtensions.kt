@@ -37,6 +37,8 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.ime
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
@@ -60,6 +62,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
@@ -138,14 +141,15 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     }
 }
 
-fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = false) {
+fun View.applyBottomAnimatedInsets(
+    bottomMargin: Int = 0,
+    setPadding: Boolean = false,
+    onApplyInsets: ((View, WindowInsetsCompat) -> Unit)? = null
+) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
-    val setInsets: ((WindowInsets) -> Unit) = { insets ->
-        val bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            insets.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime()).bottom
-        } else {
-            insets.systemWindowInsetBottom
-        }
+    val setInsets: ((WindowInsetsCompat) -> Unit) = { insets ->
+        val bottom = insets.getInsets(systemBars() or ime()).bottom
+
         if (setPadding) {
             updatePaddingRelative(bottom = bottomMargin + bottom)
         } else {
@@ -155,7 +159,8 @@ fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = 
         }
     }
     var handleInsets = true
-    doOnApplyWindowInsets { _, insets, _ ->
+    doOnApplyWindowInsetsCompat { view, insets, _ ->
+        onApplyInsets?.invoke(view, insets)
         if (handleInsets) {
             setInsets(insets)
         }
@@ -174,7 +179,7 @@ fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = 
                 bounds: WindowInsetsAnimationCompat.BoundsCompat,
             ): WindowInsetsAnimationCompat.BoundsCompat {
                 handleInsets = false
-                rootWindowInsets?.let { insets -> setInsets(insets) }
+                rootWindowInsetsCompat?.let { insets -> setInsets(insets) }
                 return super.onStart(animation, bounds)
             }
 
@@ -182,13 +187,13 @@ fun View.applyBottomAnimatedInsets(bottomMargin: Int = 0, setPadding: Boolean = 
                 insets: WindowInsetsCompat,
                 runningAnimations: List<WindowInsetsAnimationCompat>,
             ): WindowInsetsCompat {
-                insets.toWindowInsets()?.let { setInsets(it) }
+                setInsets(insets)
                 return insets
             }
 
             override fun onEnd(animation: WindowInsetsAnimationCompat) {
                 handleInsets = true
-                rootWindowInsets?.let { insets -> setInsets(insets) }
+                rootWindowInsetsCompat?.let { insets -> setInsets(insets) }
             }
         }
     )
