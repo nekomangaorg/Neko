@@ -127,7 +127,7 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:19.0.2")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.1")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.3")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
