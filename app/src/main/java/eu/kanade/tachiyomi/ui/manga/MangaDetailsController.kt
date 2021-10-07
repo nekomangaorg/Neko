@@ -16,7 +16,6 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import androidx.annotation.ColorInt
 import androidx.annotation.FloatRange
@@ -25,6 +24,8 @@ import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.DrawableCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -97,7 +98,7 @@ import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setCustomTitleAndMessage
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getText
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
@@ -328,7 +329,7 @@ class MangaDetailsController :
             headerHeight =
                 tHeight + (activityBinding?.root?.rootWindowInsets?.systemWindowInsetTop ?: 0)
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
-            binding.recycler.doOnApplyWindowInsets { _, insets, _ ->
+            binding.recycler.doOnApplyWindowInsetsCompat { _, insets, _ ->
                 setInsets(insets, appbarHeight, offset)
             }
         } else {
@@ -367,11 +368,11 @@ class MangaDetailsController :
         )
     }
 
-    private fun setInsets(insets: WindowInsets, appbarHeight: Int, offset: Int) {
-        binding.recycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-        binding.tabletRecycler.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
+    private fun setInsets(insets: WindowInsetsCompat, appbarHeight: Int, offset: Int) {
+        binding.recycler.updatePaddingRelative(bottom = insets.getInsets(systemBars()).bottom)
+        binding.tabletRecycler.updatePaddingRelative(bottom = insets.getInsets(systemBars()).bottom)
         val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
-        headerHeight = tHeight + insets.systemWindowInsetTop
+        headerHeight = tHeight + insets.getInsets(systemBars()).top
         binding.swipeRefresh.setProgressViewOffset(false, (-40).dpToPx, headerHeight + offset)
         if (isTablet) {
             binding.tabletOverlay.updateLayoutParams<ViewGroup.LayoutParams> {
@@ -383,7 +384,7 @@ class MangaDetailsController :
         getHeader()?.setTopHeight(headerHeight)
         binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = headerHeight
-            bottomMargin = insets.systemWindowInsetBottom
+            bottomMargin = insets.getInsets(systemBars()).bottom
         }
         binding.fastScroller.scrollOffset = headerHeight
     }

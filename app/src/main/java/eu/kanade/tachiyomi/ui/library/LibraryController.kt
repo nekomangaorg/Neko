@@ -32,6 +32,7 @@ import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -568,7 +569,7 @@ class LibraryController(
                         topMargin = binding.libraryGridRecycler.recycler.paddingTop
                     }
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = insets.systemWindowInsetTop + 4.dpToPx
+                        topMargin = insets.getInsets(systemBars()).top + 4.dpToPx
                     }
                     updateFilterSheetY()
                 },

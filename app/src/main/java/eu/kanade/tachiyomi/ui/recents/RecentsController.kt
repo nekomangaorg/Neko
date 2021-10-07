@@ -9,9 +9,9 @@ import android.view.MenuInflater
 import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.ItemTouchHelper
@@ -50,6 +50,7 @@ import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasColoredActionBar
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.view.activityBinding
@@ -159,13 +160,14 @@ class RecentsController(bundle: Bundle? = null) :
             swipeRefreshLayout = binding.swipeRefresh,
             includeTabView = true,
             afterInsets = {
-                headerHeight = it.systemWindowInsetTop + appBarHeight + 48.dpToPx
+                headerHeight = it.getInsets(systemBars()).top + appBarHeight + 48.dpToPx
                 binding.recycler.updatePaddingRelative(
-                    bottom = activityBinding?.bottomNav?.height ?: it.systemWindowInsetBottom
+                    bottom = activityBinding?.bottomNav?.height ?: it.getInsets(systemBars()).bottom
                 )
                 binding.recentsEmptyView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                     topMargin = headerHeight
-                    bottomMargin = activityBinding?.bottomNav?.height ?: it.systemWindowInsetBottom
+                    bottomMargin =
+                        activityBinding?.bottomNav?.height ?: it.getInsets(systemBars()).bottom
                 }
                 if (activityBinding?.bottomNav == null) {
                     setBottomPadding()
@@ -176,10 +178,11 @@ class RecentsController(bundle: Bundle? = null) :
             }
         )
 
-        activityBinding?.root?.post {
+        viewScope.launchUI {
             val height =
-                activityBinding?.bottomNav?.height ?: view.rootWindowInsets?.systemWindowInsetBottom
-                ?: 0
+                activityBinding?.bottomNav?.height ?: view.rootWindowInsetsCompat?.getInsets(
+                    systemBars()
+                )?.bottom ?: 0
             binding.recycler.updatePaddingRelative(bottom = height)
             binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
                 bottom = height
@@ -190,7 +193,6 @@ class RecentsController(bundle: Bundle? = null) :
                 (activity as? MainActivity)?.showTabBar(show = false, animate = false)
                 setRecentsAppBarBG(1f)
             }
-            val isCollapsed = binding.downloadBottomSheet.root.sheetBehavior.isCollapsed()
             binding.downloadBottomSheet.dlRecycler.alpha = isExpanded.toInt().toFloat()
             binding.downloadBottomSheet.sheetLayout.backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
@@ -387,12 +389,16 @@ class RecentsController(bundle: Bundle? = null) :
             bottomMargin = -pad.toInt()
         }
         binding.downloadBottomSheet.dlRecycler.updatePaddingRelative(
-            bottom = max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) +
-                binding.downloadBottomSheet.downloadFab.height + 20.dpToPx
+            bottom = max(
+                -pad.toInt(),
+                view?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0
+            ) + binding.downloadBottomSheet.downloadFab.height + 20.dpToPx
         )
         binding.downloadBottomSheet.downloadFab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-            bottomMargin =
-                max(-pad.toInt(), view?.rootWindowInsets?.systemWindowInsetBottom ?: 0) + 16.dpToPx
+            bottomMargin = max(
+                -pad.toInt(),
+                view?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0
+            ) + 16.dpToPx
         }
         setPadding(binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.isHideable == true)
     }
@@ -422,12 +428,12 @@ class RecentsController(bundle: Bundle? = null) :
         return false
     }
 
-    fun setPadding(sheetIsHidden: Boolean, insets: WindowInsets? = null) {
+    fun setPadding(sheetIsHidden: Boolean) {
         val peekHeight = binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.peekHeight ?: 0
-        val cInsets = insets ?: view?.rootWindowInsets ?: return
+        val cInsets = view?.rootWindowInsetsCompat ?: return
         binding.recycler.updatePaddingRelative(
             bottom = if (sheetIsHidden) {
-                activityBinding?.bottomNav?.height ?: cInsets.systemWindowInsetBottom
+                activityBinding?.bottomNav?.height ?: cInsets.getInsets(systemBars()).bottom
             } else {
                 peekHeight
             }

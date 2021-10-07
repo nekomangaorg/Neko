@@ -5,9 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsAnimationCompat
-import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.DividerItemDecoration
@@ -200,12 +198,9 @@ open class BrowseSourceController(bundle: Bundle) :
             recycler,
             true,
             afterInsets = { insets ->
-                if (handleInsets) {
-                    updateFab(insets)
-                }
-            },
-            onBottomNavUpdate = {
-                updateFab()
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                    binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                        bottomMargin = insets.getInsets(systemBars()).bottom + 16.dpToPx
             }
         )
 
