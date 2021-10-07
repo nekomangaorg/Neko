@@ -11,8 +11,6 @@ import android.graphics.Rect
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.provider.Settings
 import android.view.GestureDetector
 import android.view.Gravity
@@ -21,7 +19,6 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
 import android.view.WindowManager
 import android.webkit.WebView
 import androidx.annotation.IdRes
@@ -30,6 +27,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -83,10 +83,11 @@ import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePadding
@@ -130,8 +131,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
-    var tabAnimation: ValueAnimator? = null
-    var overflowDialog: Dialog? = null
+    private var tabAnimation: ValueAnimator? = null
+    private var overflowDialog: Dialog? = null
     var currentToolbar: Toolbar? = null
     var ogWidth: Int = Int.MAX_VALUE
 
@@ -196,7 +197,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     anchorView = binding.bottomNav
                     setAction(R.string.cancel) {
                         LibraryUpdateService.stop(context)
-                        Handler(Looper.getMainLooper()).post {
+                        lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
                                 Notifications.ID_LIBRARY_PROGRESS
@@ -223,41 +224,37 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         val content: ViewGroup = binding.mainContent
         DownloadService.addListener(this)
-        content.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        container.systemUiVisibility =
-            View.SYSTEM_UI_FLAG_LAYOUT_STABLE or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-
+        WindowCompat.setDecorFitsSystemWindows(window, false)
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
-        setNavBarColor(content.rootWindowInsets)
+        setNavBarColor(content.rootWindowInsetsCompat)
         nav.isVisible = false
-        content.doOnApplyWindowInsets { v, insets, _ ->
+        content.doOnApplyWindowInsetsCompat { v, insets, _ ->
             setNavBarColor(insets)
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.systemWindowInsetLeft
-                rightMargin = insets.systemWindowInsetRight
+                leftMargin = insets.getInsetsIgnoringVisibility(systemBars()).left
+                rightMargin = insets.getInsetsIgnoringVisibility(systemBars()).right
             }
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
             v.updatePadding(
-                left = insets.systemWindowInsetLeft,
-                right = insets.systemWindowInsetRight
+                left = insets.getInsetsIgnoringVisibility(systemBars()).left,
+                right = insets.getInsetsIgnoringVisibility(systemBars()).right
             )
             binding.appBar.updatePadding(
-                top = insets.systemWindowInsetTop
+                top = insets.getInsetsIgnoringVisibility(systemBars()).top
             )
-            binding.bottomNav?.updatePadding(bottom = insets.systemWindowInsetBottom)
+            binding.bottomNav?.updatePadding(bottom = insets.getInsetsIgnoringVisibility(systemBars()).bottom)
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,
-                bottom = insets.systemWindowInsetBottom,
-                top = insets.systemWindowInsetTop
+                bottom = insets.getInsetsIgnoringVisibility(systemBars()).bottom,
+                top = insets.getInsetsIgnoringVisibility(systemBars()).top
             )
-            binding.bottomView?.isVisible = insets.systemWindowInsetBottom > 0
+            binding.bottomView?.isVisible = insets.getInsetsIgnoringVisibility(systemBars()).bottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
-                height = insets.systemWindowInsetBottom
+                height = insets.getInsetsIgnoringVisibility(systemBars()).bottom
             }
         }
         // Set this as nav view will try to set its own insets and they're hilariously bad
@@ -375,6 +372,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         }
                     } else {
                         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+                            @Suppress("DEPRECATION")
                             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                         }
                     }
@@ -453,7 +451,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
     }
 
-    private fun setNavBarColor(insets: WindowInsets?) {
+    private fun setNavBarColor(insets: WindowInsetsCompat?) {
         if (insets == null) return
         window.navigationBarColor = when {
             Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
@@ -851,14 +849,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 binding.tabsFrameLayout.alpha = 0f
                 binding.tabsFrameLayout.isVisible = true
             }
-            tabAnimation = ValueAnimator.ofFloat(
+            val tA = ValueAnimator.ofFloat(
                 binding.tabsFrameLayout.alpha,
                 if (show) 1f else 0f
             )
-            tabAnimation?.addUpdateListener { valueAnimator ->
+            tA.addUpdateListener { valueAnimator ->
                 binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
             }
-            tabAnimation?.addListener(
+            tA.addListener(
                 EndAnimatorListener {
                     binding.tabsFrameLayout.isVisible = show
                     if (!show) {
@@ -867,8 +865,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     }
                 }
             )
-            tabAnimation?.duration = 200
-            tabAnimation?.start()
+            tA.duration = 200
+            tabAnimation = tA
+            tA.start()
         } else {
             binding.tabsFrameLayout.isVisible = show
         }
