@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga.chapter
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
+import androidx.appcompat.app.AlertDialog
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
@@ -171,6 +172,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                         ?: mutableSetOf()
                     )
             val preselected = scanlators.map { it in filteredScanlators }.toBooleanArray()
+            var alertDialog: AlertDialog? = null
             activity.materialAlertDialog()
                 .setTitle(R.string.filter_groups)
                 .setNegativeStateItems(scanlators, preselected) { _, pos, checked ->
@@ -179,6 +181,8 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                     } else {
                         filteredScanlators.remove(scanlators[pos])
                     }
+                    alertDialog?.getButton(BUTTON_POSITIVE)?.isEnabled =
+                        scanlators.size != filteredScanlators.size
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(R.string.filter) { _, _ ->
@@ -187,7 +191,11 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                 .setNeutralButton(R.string.reset) { _, _ ->
                     presenter.setScanlatorFilter(emptySet())
                 }
-                .show()
+                .show().apply {
+                    alertDialog = this
+                    setOnCancelListener { alertDialog = null }
+                    setOnDismissListener { alertDialog = null }
+                }
         }
     }
 
