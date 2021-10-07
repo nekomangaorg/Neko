@@ -259,8 +259,8 @@
 1
 
     <style name="Widget.Tachiyomi.Button.OutlinedButton.Icon" parent="Widget.Material3.Button.OutlinedButton.Icon">
-        <item name="android:paddingLeft">12dp</item>
-        <item name="android:paddingRight">16dp</item>
+        <item name="android:paddingStart">12dp</item>
+        <item name="android:paddingEnd">16dp</item>
         <item name="android:layout_width">wrap_content</item>
         <item name="android:letterSpacing">0.0</item>
         <item name="android:layout_height">40dp</item>
