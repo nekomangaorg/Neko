@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.download.DownloadProvider
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.jobs.tracking.TrackingSyncJob
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
 import eu.kanade.tachiyomi.source.SourceManager
@@ -197,12 +198,16 @@ class SettingsAdvancedController : SettingsController() {
                     activity?.toast(R.string.cookies_cleared)
                 }
             }
-
             intListPreference(activity) {
                 key = PreferenceKeys.dohProvider
                 titleRes = R.string.doh
-                entriesRes = arrayOf(R.string.disabled, R.string.cloudflare, R.string.google)
-                entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE)
+                entriesRes = arrayOf(
+                    R.string.disabled,
+                    R.string.cloudflare,
+                    R.string.google,
+                    R.string.adGuard
+                )
+                entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE, PREF_DOH_ADGUARD)
 
                 defaultValue = -1
                 onChange {
