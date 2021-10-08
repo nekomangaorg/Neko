@@ -285,7 +285,6 @@
                 android:contentDescription="@string/share"
                 android:padding="5dp"
                 android:tooltipText="@string/merge_other"
-                android:visibility="gone"
                 app:iiv_icon="gmf_merge_type"
                 tools:background="@color/md_black_1000"
                 tools:visibility="visible" />
@@ -356,7 +355,7 @@
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="@+id/more_button"
         app:layout_constraintTop_toTopOf="@id/more_button"
-        app:layout_constraintBottom_toBottomOf="@id/more_button"/>
+        app:layout_constraintBottom_toBottomOf="@id/more_button" />
 
     <View
         android:id="@+id/more_bg_solid"
