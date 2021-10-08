@@ -15,7 +15,6 @@ import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
 import androidx.core.app.NotificationCompat
-import androidx.work.NetworkType
 import com.jakewharton.rxrelay.BehaviorRelay
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.notification.Notifications
@@ -126,7 +125,7 @@ class DownloadService : Service() {
 
         override fun onCapabilitiesChanged(
             network: Network,
-            networkCapabilities: NetworkCapabilities
+            networkCapabilities: NetworkCapabilities,
         ) {
             onNetworkStateChanged()
         }
@@ -142,7 +141,6 @@ class DownloadService : Service() {
     override fun onCreate() {
         super.onCreate()
         startForeground(Notifications.ID_DOWNLOAD_CHAPTER_PROGRESS, getPlaceholderNotification())
-        downloadManager.setPlaceholder()
         runningRelay.call(true)
         subscriptions = CompositeSubscription()
         listenDownloaderState()
@@ -195,8 +193,10 @@ class DownloadService : Service() {
     private fun onNetworkStateChanged() {
         val manager = connectivityManager
         val networkCapabilities = manager.getNetworkCapabilities(manager.activeNetwork)
-        if (networkCapabilities == null || !(networkCapabilities.hasCapability(NET_CAPABILITY_INTERNET) &&
-                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED))) {
+        if (networkCapabilities == null || !(networkCapabilities.hasCapability(
+                NET_CAPABILITY_INTERNET) &&
+                networkCapabilities.hasCapability(NET_CAPABILITY_VALIDATED))
+        ) {
             downloadManager.stopDownloads(getString(R.string.no_network_connection))
             return
         }
