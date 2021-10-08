@@ -124,11 +124,11 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.6.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.1")
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-analytics-ktx:19.0.1")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.1")
+    implementation("com.google.firebase:firebase-analytics-ktx:19.0.2")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.3")
 
     val lifecycleVersion = "2.2.0"
     implementation("androidx.lifecycle:lifecycle-extensions:$lifecycleVersion")
@@ -146,7 +146,7 @@ dependencies {
     implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
 
     // Network client
-    val okhttpVersion = "4.9.1"
+    val okhttpVersion = "4.9.2"
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
@@ -170,7 +170,7 @@ dependencies {
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // Serialization
-    val kotlinSerialization = "1.2.2"
+    val kotlinSerialization = "1.3.0"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
 
@@ -179,7 +179,7 @@ dependencies {
     implementation("com.github.tachiyomiorg:unifile:17bec43")
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.14.2")
+    implementation("org.jsoup:jsoup:1.14.3")
 
     // Icons
     implementation("com.mikepenz:iconics-core:5.3.1")
@@ -207,7 +207,7 @@ dependencies {
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
     // Image library
-    val coilVersion = "1.3.2"
+    val coilVersion = "1.4.0"
     implementation("io.coil-kt:coil:$coilVersion")
     implementation("io.coil-kt:coil-gif:$coilVersion")
     implementation("io.coil-kt:coil-svg:$coilVersion")
@@ -240,7 +240,7 @@ dependencies {
     implementation("me.saket.cascade:cascade:1.3.0")
 
     //Compose
-    val composeVersion = "1.0.2"
+    val composeVersion = "1.0.3"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     // Tooling support (Previews, etc.)
@@ -257,7 +257,7 @@ dependencies {
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 
     //accompianist
-    val accompanistVersion = "0.18.0"
+    val accompanistVersion = "0.19.0"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-placeholder:$accompanistVersion")
 
@@ -275,7 +275,7 @@ dependencies {
 // Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.assertj:assertj-core:3.21.0")
-    testImplementation("org.mockito:mockito-core:3.12.4")
+    testImplementation("org.mockito:mockito-core:4.0.0")
 
     val roboElectricVersion = "3.3.2"
     testImplementation("org.robolectric:robolectric:$roboElectricVersion")
@@ -303,7 +303,7 @@ dependencies {
     implementation("com.github.FunkyMuse.KAHelpers:activity:$kahelpersVersion")
     implementation("com.github.skydoves:sandwich:1.2.1")
 
-    implementation("com.mikepenz:aboutlibraries:8.9.1")
+    implementation("com.mikepenz:aboutlibraries:8.9.3")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
