@@ -139,7 +139,7 @@
     <style name="Theme.Tachiyomi.MidnightDusk">
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorPrimaryInverse">@color/primaryInverseDuskDawn</item>
-        <item name="colorPrimaryVariant">@color/dialogDuskDawn</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantDuskDawn</item>
         <item name="colorSecondary">@color/secondaryDuskDawn</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantDuskDawn</item>
         <item name="colorSurface">@color/backgroundDuskDawn</item>
