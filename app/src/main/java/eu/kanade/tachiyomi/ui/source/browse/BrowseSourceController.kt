@@ -5,6 +5,7 @@ import android.os.Build
 import android.os.Bundle
 import android.view.*
 import androidx.appcompat.widget.SearchView
+import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -200,7 +201,7 @@ open class BrowseSourceController(bundle: Bundle) :
             afterInsets = { insets ->
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                     binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        bottomMargin = insets.getInsets(systemBars()).bottom + 16.dpToPx
+                        bottomMargin = insets.getInsets(systemBars() or ime()).bottom + 16.dpToPx
             }
         )
 
