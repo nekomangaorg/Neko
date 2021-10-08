@@ -16,6 +16,7 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.Insets
 import androidx.core.net.toUri
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
@@ -58,14 +59,13 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
         val container: ViewGroup = findViewById(R.id.web_view_layout)
         val content: LinearLayout = binding.webLinearLayout
-        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         ViewCompat.setOnApplyWindowInsetsListener(container) { v, insets ->
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.systemWindowInsetLeft
-                rightMargin = insets.systemWindowInsetRight
+                leftMargin = insets.getInsets(systemBars()).left
+                rightMargin = insets.getInsets(systemBars()).right
             }
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
@@ -219,9 +219,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O || !lightMode) colorPrimaryVariant
             else Color.BLACK
 
-        binding.webLinearLayout.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_STABLE or
-            View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN or
-            View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+        WindowCompat.setDecorFitsSystemWindows(window, false)
     }
 
     override fun onBackPressed() {
