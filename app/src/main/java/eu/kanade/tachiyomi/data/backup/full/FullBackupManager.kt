@@ -64,8 +64,6 @@ class FullBackupManager(val context: Context) {
             backup = Backup(
                 backupManga(databaseManga, flags),
                 backupCategories(),
-                emptyList(),
-                backupExtensionInfo(databaseManga)
             )
         }
 

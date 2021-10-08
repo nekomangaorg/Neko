@@ -27,12 +27,6 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
             throw Exception(context.getString(R.string.backup_has_no_manga))
         }
 
-        val sources = backup.backupSources.map { it.sourceId to it.name }.toMap()
-        val missingSources = sources
-            .filter { sourceManager.get(it.key) == null }
-            .values
-            .sorted()
-
         val trackers = backup.backupManga
             .flatMap { it.tracking }
             .map { it.syncId }
@@ -43,6 +37,6 @@ class FullBackupRestoreValidator : AbstractBackupRestoreValidator() {
             .map { context.getString(it.nameRes()) }
             .sorted()
 
-        return Results(missingSources, missingTrackers)
+        return Results(emptyList(), missingTrackers)
     }
 }
