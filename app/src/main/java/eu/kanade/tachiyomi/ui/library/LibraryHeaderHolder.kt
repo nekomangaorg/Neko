@@ -22,6 +22,7 @@ import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.compatToolTipText
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -41,6 +42,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         }
         binding.categoryTitle.setOnClickListener { toggleCategory() }
         binding.categorySort.setOnClickListener { it.post { showCatSortOptions() } }
+        binding.categorySort.compatToolTipText = view.context.getString(R.string.sort)
         binding.checkbox.setOnClickListener { selectAll() }
         binding.updateButton.drawable.mutate()
     }
