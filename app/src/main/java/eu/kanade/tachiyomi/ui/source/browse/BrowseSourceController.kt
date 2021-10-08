@@ -37,10 +37,8 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
-import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -53,7 +51,6 @@ import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
-import kotlin.math.min
 
 /**
  * Controller to manage the catalogues available in the app.
@@ -212,36 +209,37 @@ open class BrowseSourceController(bundle: Bundle) :
             }
         )
 
-        ViewCompat.setWindowInsetsAnimationCallback(view,  object : WindowInsetsAnimationCompat.Callback(
-            DISPATCH_MODE_STOP
-        ) {
-            override fun onPrepare(animation: WindowInsetsAnimationCompat) {
-                handleInsets = false
-                super.onPrepare(animation)
-            }
+        ViewCompat.setWindowInsetsAnimationCallback(view,
+            object : WindowInsetsAnimationCompat.Callback(
+                DISPATCH_MODE_STOP
+            ) {
+                override fun onPrepare(animation: WindowInsetsAnimationCompat) {
+                    handleInsets = false
+                    super.onPrepare(animation)
+                }
 
-            override fun onStart(
-                animation: WindowInsetsAnimationCompat,
-                bounds: WindowInsetsAnimationCompat.BoundsCompat,
-            ): WindowInsetsAnimationCompat.BoundsCompat {
-                handleInsets = false
-                updateFab()
-                return bounds
-            }
+                override fun onStart(
+                    animation: WindowInsetsAnimationCompat,
+                    bounds: WindowInsetsAnimationCompat.BoundsCompat,
+                ): WindowInsetsAnimationCompat.BoundsCompat {
+                    handleInsets = false
+                    updateFab()
+                    return bounds
+                }
 
-            override fun onProgress(
-                insets: WindowInsetsCompat,
-                runningAnimations: List<WindowInsetsAnimationCompat>,
-            ): WindowInsetsCompat {
-                updateFab(insets.toWindowInsets())
-                return insets
-            }
+                override fun onProgress(
+                    insets: WindowInsetsCompat,
+                    runningAnimations: List<WindowInsetsAnimationCompat>,
+                ): WindowInsetsCompat {
+                    updateFab(insets.toWindowInsets())
+                    return insets
+                }
 
-            override fun onEnd(animation: WindowInsetsAnimationCompat) {
-                handleInsets = true
-                updateFab()
-            }
-        })
+                override fun onEnd(animation: WindowInsetsAnimationCompat) {
+                    handleInsets = true
+                    updateFab()
+                }
+            })
 
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {
@@ -276,7 +274,7 @@ open class BrowseSourceController(bundle: Bundle) :
             searchView.clearFocus()
         }
 
-        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = false) {
+        setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
             searchWithQuery(it ?: "")
             true
         }
@@ -761,9 +759,11 @@ open class BrowseSourceController(bundle: Bundle) :
         val insets = windowInsets ?: view.rootWindowInsets
         binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = max(
-                (activityBinding!!.bottomNav?.height ?: 0) - (activityBinding!!.bottomNav?.translationY ?: 0f).toInt(),
+                (activityBinding!!.bottomNav?.height
+                    ?: 0) - (activityBinding!!.bottomNav?.translationY ?: 0f).toInt(),
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    insets?.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())?.bottom ?: 0
+                    insets?.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())?.bottom
+                        ?: 0
                 } else {
                     insets?.systemWindowInsetBottom ?: 0
                 }
