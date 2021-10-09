@@ -114,7 +114,9 @@ class Downloader(
      * @return true if the downloader is started, false otherwise.
      */
     fun start(): Boolean {
-        if (isRunning || queue.isEmpty()) return false
+        if (isRunning || queue.isEmpty()) {
+            return isRunning
+        }
         notifier.paused = false
         if (!subscriptions.hasSubscriptions()) initializeSubscriptions()
 
