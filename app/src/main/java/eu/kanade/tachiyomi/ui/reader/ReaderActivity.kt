@@ -1026,7 +1026,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             lastShiftDoubleState?.let { newViewer.config.shiftDoublePage = it }
         }
 
-        binding.navigationOverlay.isLTR = viewer !is L2RPagerViewer
+        binding.navigationOverlay.isLTR = viewer !is R2LPagerViewer
         binding.viewerContainer.setBackgroundColor(
             if (viewer is WebtoonViewer) {
                 Color.BLACK
