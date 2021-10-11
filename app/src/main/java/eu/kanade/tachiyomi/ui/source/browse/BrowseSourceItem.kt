@@ -6,6 +6,7 @@ import android.view.ViewGroup
 import android.widget.FrameLayout
 import android.widget.ImageView
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.tfcporciuncula.flow.Preference
@@ -54,6 +55,15 @@ class BrowseSourceItem(
                 } else {
                     binding.constraintLayout.background = context.contextCompatDrawable(
                         R.drawable.library_comfortable_grid_selector
+                    )
+                    binding.constraintLayout.foreground = context.contextCompatDrawable(
+                        R.drawable.library_comfortable_grid_selector_overlay
+                    )
+                    binding.card.setCardForegroundColor(
+                        ContextCompat.getColorStateList(
+                            context,
+                            R.color.library_comfortable_grid_foreground
+                        )
                     )
                 }
                 binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
