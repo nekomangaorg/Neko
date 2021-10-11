@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.MenuSheetItemBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
 
-class MenuSheetItemView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
+class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
     LinearLayout(context, attrs) {
     private val mText: String
     private val mIconRes: Int

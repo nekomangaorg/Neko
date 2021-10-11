@@ -110,7 +110,7 @@ class TriStateListPreference @JvmOverloads constructor(
             disabledIndices = if (allSelectionRes != null) intArrayOf(allPos) else null,
             initialSelection = preselected
         ) { adapter, sels, _, _, _ ->
-            val selections = sels.filterIndexed { index, i -> allSelectionRes == null || index != allPos }
+            val selections = sels.filterIndexed { index, _ -> allSelectionRes == null || index != allPos }
             includedItems = selections
                 .mapIndexed { index, value -> if (value == TriStateCheckBox.State.CHECKED.ordinal) index else null }
                 .filterNotNull()

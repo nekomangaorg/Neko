@@ -76,7 +76,7 @@ class MultiListMatPreference @JvmOverloads constructor(
             if (allSelectionRes != null && !showAllLast) { allValue } else { booleanArrayOf() } +
                 entryValues.map { it in set }.toBooleanArray() +
                 if (allSelectionRes != null && showAllLast) { allValue } else { booleanArrayOf() }
-        setPositiveButton(android.R.string.ok) { dialog, _ ->
+        setPositiveButton(android.R.string.ok) { _, _ ->
             val pos = mutableListOf<Int>()
             for (i in items.indices)
                 if (!(allSelectionRes != null && i == allPos) && selected[i]) pos.add(i)

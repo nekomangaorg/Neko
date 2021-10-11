@@ -24,7 +24,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.toast
 import kotlin.math.max
 
-class MaterialSpinnerView @JvmOverloads constructor(context: Context, attrs: AttributeSet?) :
+class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     FrameLayout(context, attrs) {
 
     private var entries = emptyList<String>()

@@ -110,7 +110,7 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
         if (height != 0) {
             heightSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY)
         }
-        if (maxHeight < height + (rootWindowInsets?.systemWindowInsetBottom ?: 0)) {
+        if (maxHeight < height + (rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0)) {
             heightSpec = MeasureSpec.makeMeasureSpec(maxHeight, MeasureSpec.AT_MOST)
         }
         super.onMeasure(widthMeasureSpec, heightSpec)

@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.data.notification
 
-import android.app.Activity
-import android.app.KeyguardManager
 import android.app.PendingIntent
 import android.content.BroadcastReceiver
 import android.content.ClipData
@@ -69,12 +67,6 @@ class NotificationReceiver : BroadcastReceiver() {
             }
             // Clear the download queue
             ACTION_CLEAR_DOWNLOADS -> downloadManager.clearQueue(true)
-            // Launch share activity and dismiss notification
-            ACTION_SHARE_IMAGE -> shareImage(
-                context,
-                intent.getStringExtra(EXTRA_FILE_LOCATION)!!,
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
-            )
             // Delete image from path and dismiss notification
             ACTION_DELETE_IMAGE -> deleteImage(
                 context,
@@ -133,26 +125,6 @@ class NotificationReceiver : BroadcastReceiver() {
      */
     private fun dismissNotification(context: Context, notificationId: Int) {
         context.notificationManager.cancel(notificationId)
-    }
-
-    /**
-     * Called to start share intent to share image
-     *
-     * @param context context of application
-     * @param path path of file
-     * @param notificationId id of notification
-     */
-    private fun shareImage(context: Context, path: String, notificationId: Int) {
-        val km = context.getSystemService(Activity.KEYGUARD_SERVICE) as KeyguardManager
-        // Create intent
-        val intent = Intent(Intent.ACTION_SEND).apply {
-            val uri = File(path).getUriCompat(context)
-            putExtra(Intent.EXTRA_STREAM, uri)
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
-            clipData = ClipData.newRawUri(null, uri)
-            type = "image/*"
-        }
-        // Close Navigation Shade
     }
 
     /**
@@ -309,9 +281,6 @@ class NotificationReceiver : BroadcastReceiver() {
 
     companion object {
         private const val NAME = "NotificationReceiver"
-
-        // Called to launch share intent.
-        private const val ACTION_SHARE_IMAGE = "$ID.$NAME.SHARE_IMAGE"
 
         // Called to delete image.
         private const val ACTION_DELETE_IMAGE = "$ID.$NAME.DELETE_IMAGE"

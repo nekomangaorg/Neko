@@ -111,7 +111,7 @@ inline fun PreferenceScreen.switchPreference(block: (@DSL SwitchPreferenceCompat
     return initThenAdd(SwitchPreferenceCompat(context), block)
 }
 
-inline fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
+fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
     return initThenAdd(
         Preference(context),
         {

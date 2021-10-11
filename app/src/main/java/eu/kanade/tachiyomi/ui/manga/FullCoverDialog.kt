@@ -12,6 +12,7 @@ import android.view.View
 import android.view.animation.DecelerateInterpolator
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.updateLayoutParams
 import androidx.transition.ChangeBounds
@@ -23,6 +24,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.FullCoverDialogBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.animateBlur
 import uy.kohesive.injekt.injectLazy
 
@@ -69,9 +71,10 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
 
         val rect = Rect()
         thumbView.getGlobalVisibleRect(rect)
-        val topInset = activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0
-        val leftInset = activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetLeft ?: 0
-        val rightInset = activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetRight ?: 0
+        val systemInsets = activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())
+        val topInset = systemInsets?.top ?: 0
+        val leftInset = systemInsets?.left ?: 0
+        val rightInset = systemInsets?.right ?: 0
         expandedImageView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = thumbView.height
             width = thumbView.width
@@ -164,9 +167,10 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
         binding.mangaCoverFull.isClickable = false
         binding.touchOutside.isClickable = false
         val expandedImageView = binding.mangaCoverFull
-        val topInset = activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0
-        val leftInset = activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetLeft ?: 0
-        val rightInset = activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetRight ?: 0
+        val systemInsets = activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())
+        val topInset = systemInsets?.top ?: 0
+        val leftInset = systemInsets?.left ?: 0
+        val rightInset = systemInsets?.right ?: 0
         expandedImageView.updateLayoutParams<ConstraintLayout.LayoutParams> {
             height = thumbView.height
             width = thumbView.width

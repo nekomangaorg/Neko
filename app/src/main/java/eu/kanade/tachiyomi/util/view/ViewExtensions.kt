@@ -34,6 +34,7 @@ import androidx.appcompat.widget.PopupMenu
 import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
+import androidx.core.view.OnApplyWindowInsetsListener
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
@@ -127,16 +128,12 @@ inline val View.marginTop: Int
 inline val View.marginBottom: Int
     get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin ?: 0
 
-inline val View.marginRight: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.rightMargin ?: 0
-
-inline val View.marginLeft: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.leftMargin ?: 0
-
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        v.updatePaddingRelative(bottom = insets.systemWindowInsetBottom)
-        // v.updatePaddingRelative(bottom = v.paddingBottom + insets.systemWindowInsetBottom)
+        v.updatePaddingRelative(
+            bottom = WindowInsetsCompat.toWindowInsetsCompat(insets)
+                .getInsets(systemBars()).bottom
+        )
         return insets
     }
 }
@@ -199,12 +196,12 @@ fun View.applyBottomAnimatedInsets(
     )
 }
 
-object ControllerViewWindowInsetsListener : View.OnApplyWindowInsetsListener {
-    override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
+object ControllerViewWindowInsetsListener : OnApplyWindowInsetsListener {
+    override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
         v.updateLayoutParams<FrameLayout.LayoutParams> {
             val attrsArray = intArrayOf(android.R.attr.actionBarSize)
             val array = v.context.obtainStyledAttributes(attrsArray)
-            topMargin = insets.systemWindowInsetTop + array.getDimensionPixelSize(0, 0)
+            topMargin = insets.getInsets(systemBars()).top + array.getDimensionPixelSize(0, 0)
             array.recycle()
         }
         return insets
@@ -232,7 +229,7 @@ fun View.doOnApplyWindowInsetsCompat(f: (View, WindowInsetsCompat, ViewPaddingSt
 }
 
 fun View.applyWindowInsetsForController() {
-    setOnApplyWindowInsetsListener(ControllerViewWindowInsetsListener)
+    ViewCompat.setOnApplyWindowInsetsListener(this, ControllerViewWindowInsetsListener)
     requestApplyInsetsWhenAttached()
 }
 
@@ -304,7 +301,11 @@ inline fun View.updatePaddingRelative(
 fun setBottomEdge(view: View, activity: Activity) {
     val marginB = view.marginBottom
     view.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-        bottomMargin = marginB + activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        bottomMargin = marginB +
+            (
+                activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())
+                    ?.bottom ?: 0
+                )
     }
 }
 
