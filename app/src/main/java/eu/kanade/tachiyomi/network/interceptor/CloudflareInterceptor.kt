@@ -1,14 +1,14 @@
-package eu.kanade.tachiyomi.network
+package eu.kanade.tachiyomi.network.interceptor
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
+import androidx.core.content.ContextCompat
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.util.system.WebViewClientCompat
 import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.isOutdated
@@ -20,6 +20,7 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
+import eu.kanade.tachiyomi.source.online.HttpSource
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
@@ -27,7 +28,7 @@ import java.util.concurrent.TimeUnit
 
 class CloudflareInterceptor(private val context: Context) : Interceptor {
 
-    private val handler = Handler(Looper.getMainLooper())
+    private val executor = ContextCompat.getMainExecutor(context)
 
     private val networkHelper: NetworkHelper by injectLazy()
 
@@ -56,7 +57,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         val response = chain.proceed(originalRequest)
 
         // Check if Cloudflare anti-bot is on
-        if (response.code != 503 || response.header("Server") !in SERVER_CHECK) {
+        if (response.code !in ERROR_CODES || response.header("Server") !in SERVER_CHECK) {
             return response
         }
 
@@ -92,14 +93,14 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         val headers = request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
         headers["X-Requested-With"] = WebViewUtil.REQUESTED_WITH
 
-        handler.post {
+        executor.execute {
             val webview = WebView(context)
             webView = webview
             webview.setDefaultSettings()
 
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
             webview.settings.userAgentString = request.header("User-Agent")
-                ?: "Mozilla/5.0 (Windows NT 6.3; WOW64)"
+                ?: HttpSource.DEFAULT_USER_AGENT
 
             webview.webViewClient = object : WebViewClientCompat() {
                 override fun onPageFinished(view: WebView, url: String) {
@@ -128,7 +129,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
                     isMainFrame: Boolean
                 ) {
                     if (isMainFrame) {
-                        if (errorCode == 503) {
+                        if (errorCode in ERROR_CODES) {
                             // Found the Cloudflare challenge page.
                             challengeFound = true
                         } else {
@@ -146,13 +147,14 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         // around 4 seconds but it can take more due to slow networks or server issues.
         latch.await(12, TimeUnit.SECONDS)
 
-        handler.post {
+        executor.execute {
             if (!cloudflareBypassed) {
                 isWebViewOutdated = webView?.isOutdated() == true
             }
 
             webView?.stopLoading()
             webView?.destroy()
+            webView = null
         }
 
         // Throw exception if we failed to bypass Cloudflare
@@ -167,6 +169,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     }
 
     companion object {
+        private val ERROR_CODES = listOf(403, 503)
         private val SERVER_CHECK = arrayOf("cloudflare-nginx", "cloudflare")
         private val COOKIE_NAMES = listOf("cf_clearance")
     }
