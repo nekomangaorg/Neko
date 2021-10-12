@@ -40,7 +40,14 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             adapter.libraryListener.manageCategory(flexibleAdapterPosition)
             category?.isDynamic == false
         }
-        binding.categoryTitle.setOnClickListener { toggleCategory() }
+        binding.categoryTitle.setOnClickListener {
+            val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+            if (category?.isHidden == false && adapter.mode == SelectableAdapter.Mode.MULTI) {
+                selectAll()
+            } else {
+                toggleCategory()
+            }
+        }
         binding.categorySort.setOnClickListener { it.post { showCatSortOptions() } }
         binding.categorySort.compatToolTipText = view.context.getString(R.string.sort)
         binding.checkbox.setOnClickListener { selectAll() }
