@@ -90,11 +90,7 @@ class SetCategoriesSheet(
 
     init {
         binding.toolbarTitle.text = context.getString(
-            if (addingToLibrary) {
-                R.string.add_x_to
-            } else {
-                R.string.move_x_to
-            },
+            if (addingToLibrary) R.string.add_x_to else R.string.move_x_to,
             if (listManga.size == 1) {
                 listManga.first().seriesType(context)
             } else {
@@ -239,10 +235,16 @@ class SetCategoriesSheet(
         binding.newCategoryButton.setOnClickListener {
             ManageCategoryDialog(null) {
                 categories = db.getCategories().executeAsBlocking()
-                itemAdapter.set(categories.map(::AddCategoryItem))
-                itemAdapter.adapterItems.forEach { item ->
-                    item.isSelected = it == item.category.id
-                }
+                val map = itemAdapter.adapterItems.map { it.category.id to it.state }.toMap()
+                itemAdapter.set(
+                    categories.mapIndexed { index, category ->
+                        AddCategoryItem(category).apply {
+                            skipInversed =
+                                preselected.getOrElse(index) { TriStateCheckBox.State.UNCHECKED } != TriStateCheckBox.State.IGNORE
+                            state = map[category.id] ?: TriStateCheckBox.State.CHECKED
+                        }
+                    }
+                )
                 setCategoriesButtons()
             }.show(activity)
         }
