@@ -2,9 +2,11 @@ package eu.kanade.tachiyomi.ui.reader.viewer
 
 import android.content.Context
 import android.os.Handler
+import android.os.Looper
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.ViewConfiguration
+import androidx.core.content.ContextCompat
 import kotlin.math.abs
 
 /**
@@ -16,7 +18,8 @@ open class GestureDetectorWithLongTap(
     listener: Listener
 ) : GestureDetector(context, listener) {
 
-    private val handler = Handler()
+    private val handler = Handler(Looper.getMainLooper())
+
     private val slop = ViewConfiguration.get(context).scaledTouchSlop
     private val longTapTime = ViewConfiguration.getLongPressTimeout().toLong()
     private val doubleTapTime = ViewConfiguration.getDoubleTapTimeout().toLong()
