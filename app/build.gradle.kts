@@ -140,7 +140,6 @@ dependencies {
     implementation("io.reactivex:rxandroid:1.2.1")
     implementation("io.reactivex:rxjava:1.3.8")
     implementation("com.jakewharton.rxrelay:rxrelay:1.2.0")
-    implementation("com.f2prateek.rx.preferences:rx-preferences:1.0.2")
     implementation("com.github.pwittchen:reactivenetwork:0.13.0")
 
     // Coroutines

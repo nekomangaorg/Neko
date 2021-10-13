@@ -7,7 +7,6 @@ import android.util.AttributeSet
 import androidx.core.text.buildSpannedString
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.setTriStateItems
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 
@@ -44,7 +43,7 @@ class TriStateListPreference @JvmOverloads constructor(
     }
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
-        var includedStrings = prefs.getStringSet(key, defValue).getOrDefault().mapNotNull { value ->
+        var includedStrings = prefs.getStringSet(key, defValue).get().mapNotNull { value ->
             entryValues.indexOf(value).takeUnless { it == -1 }
         }.toIntArray().sorted().map { entries[it] }
         allSelectionRes?.let { allRes ->
@@ -57,7 +56,7 @@ class TriStateListPreference @JvmOverloads constructor(
             }
         }
         val excludedStrings = excludeKey?.let {
-            prefs.getStringSet(it, defValue).getOrDefault().mapNotNull { value ->
+            prefs.getStringSet(it, defValue).get().mapNotNull { value ->
                 entryValues.indexOf(value).takeUnless {
                     it == -1
                 }
@@ -73,14 +72,14 @@ class TriStateListPreference @JvmOverloads constructor(
 
     @SuppressLint("CheckResult")
     override fun MaterialAlertDialogBuilder.setListItems() {
-        val set = prefs.getStringSet(key, defValue).getOrDefault()
+        val set = prefs.getStringSet(key, defValue).get()
         val items = if (allSelectionRes != null) {
             if (showAllLast) entries + listOf(context.getString(allSelectionRes!!))
             else listOf(context.getString(allSelectionRes!!)) + entries
         } else entries
         val allPos = if (showAllLast) items.size - 1 else 0
         val excludedSet = excludeKey?.let {
-            prefs.getStringSet(it, defValue).getOrDefault()
+            prefs.getStringSet(it, defValue).get()
         }.orEmpty()
         val allValue = intArrayOf(
             if (set.isEmpty()) TriStateCheckBox.State.CHECKED.ordinal

@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.jobs.library.DelayedLibrarySuggestionsJob
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.category.CategoryController
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.library.display.TabbedLibraryDisplaySheet
@@ -137,8 +138,9 @@ class SettingsLibraryController : SettingsController() {
                 preSummaryRes = R.string.restrictions_
                 noSelectionRes = R.string.none
 
-                preferences.libraryUpdateInterval().asObservable()
-                    .subscribeUntilDestroy { isVisible = it > 0 }
+                preferences.libraryUpdateInterval().asImmediateFlowIn(viewScope) {
+                    isVisible = it > 0
+                }
 
                 onChange {
                     // Post to event looper to allow the preference to be updated.

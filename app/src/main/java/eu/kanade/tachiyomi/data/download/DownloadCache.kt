@@ -8,11 +8,16 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.drop
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -51,17 +56,20 @@ class DownloadCache(
     private var mangaFiles: MutableMap<Long, Pair<MutableSet<String>, MutableSet<String>>> =
         mutableMapOf()
 
+    val scope = CoroutineScope(Job() + Dispatchers.IO)
+
     init {
-        preferences.downloadsDirectory().asObservable().skip(1).subscribe {
-            lastRenew = 0L // invalidate cache
-        }
+        preferences.downloadsDirectory().asFlow()
+            .drop(1)
+            .onEach { lastRenew = 0L } // invalidate cache
+            .launchIn(scope)
     }
 
     /**
      * Returns the downloads directory from the user's preferences.
      */
     private fun getDirectoryFromPreference(): UniFile {
-        val dir = preferences.downloadsDirectory().getOrDefault()
+        val dir = preferences.downloadsDirectory().get()
         return UniFile.fromUri(context, dir.toUri())
     }
 

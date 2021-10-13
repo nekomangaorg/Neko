@@ -7,7 +7,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -186,8 +185,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                             category ?: recyclerView.context.getString(R.string.default_value)
                         } else {
                             val title = item.manga.title
-                            if (preferences.removeArticles().getOrDefault()) title.removeArticles()
-                                .chop(15)
+                            if (preferences.removeArticles().get()) title.removeArticles().chop(15)
                             else title.take(10)
                         }
                     }
@@ -256,7 +254,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
                         }
                     }
                     LibrarySort.Title -> {
-                        val title = if (preferences.removeArticles().getOrDefault()) {
+                        val title = if (preferences.removeArticles().get()) {
                             item.manga.title.removeArticles()
                         } else {
                             item.manga.title

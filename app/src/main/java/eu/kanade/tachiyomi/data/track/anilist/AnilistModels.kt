@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.data.track.anilist
 
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import uy.kohesive.injekt.injectLazy
@@ -94,7 +93,7 @@ fun Track.toAnilistStatus() = when (status) {
 
 private val preferences: PreferencesHelper by injectLazy()
 
-fun Track.toAnilistScore(): String = when (preferences.anilistScoreType().getOrDefault()) {
+fun Track.toAnilistScore(): String = when (preferences.anilistScoreType().get()) {
 // 10 point
     "POINT_10" -> (score.toInt() / 10).toString()
 // 100 point

@@ -6,7 +6,7 @@ import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
+import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.UpdaterJob
 import eu.kanade.tachiyomi.data.updater.UpdaterService
@@ -30,7 +30,7 @@ object Migrations {
         prefs.edit {
             remove(UpdaterService.NOTIFY_ON_INSTALL_KEY)
         }
-        val oldVersion = preferences.lastVersionCode().getOrDefault()
+        val oldVersion = preferences.lastVersionCode().get()
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
             if (oldVersion < 38) {
@@ -88,6 +88,7 @@ object Migrations {
                     1 -> OrientationType.FREE.flagValue
                     2 -> OrientationType.PORTRAIT.flagValue
                     3 -> OrientationType.LANDSCAPE.flagValue
+                    4 -> OrientationType.LOCKED_PORTRAIT.flagValue
                     4 -> OrientationType.LOCKED_PORTRAIT.flagValue
                     5 -> OrientationType.LOCKED_LANDSCAPE.flagValue
                     else -> OrientationType.FREE.flagValue

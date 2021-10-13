@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Context
 import android.util.AttributeSet
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 
 class IntListMatPreference @JvmOverloads constructor(
     activity: Activity?,
@@ -26,7 +25,7 @@ class IntListMatPreference @JvmOverloads constructor(
     var customSelectedValue: Int? = null
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
-        val index = entryValues.indexOf(prefs.getInt(key, defValue).getOrDefault())
+        val index = entryValues.indexOf(prefs.getInt(key, defValue).get())
         if (entries.isEmpty() || index == -1) ""
         else entries[index]
     }
@@ -38,7 +37,7 @@ class IntListMatPreference @JvmOverloads constructor(
 
     override fun dialog(): MaterialAlertDialogBuilder {
         return super.dialog().apply {
-            val default = entryValues.indexOf(customSelectedValue ?: prefs.getInt(key, defValue).getOrDefault())
+            val default = entryValues.indexOf(customSelectedValue ?: prefs.getInt(key, defValue).get())
             setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
                 val value = entryValues[pos]
                 if (key != null) {
@@ -48,14 +47,6 @@ class IntListMatPreference @JvmOverloads constructor(
                 notifyChanged()
                 dialog.dismiss()
             }
-//            listItemsSingleChoice(
-//                items = entries,
-//                waitForPositiveButton = false,
-//                initialSelection = default
-//            ) {
-//                _, pos, _ ->
-//
-//            }
         }
     }
 }

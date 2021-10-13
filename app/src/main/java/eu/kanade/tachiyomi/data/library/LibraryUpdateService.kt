@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateRanker.rankingScheme
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService.Companion.start
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
@@ -427,7 +426,7 @@ class LibraryUpdateService(
             withIOContext {
                 // dont refresh covers while using cached source
                 if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .getOrDefault()
+                        .get()
                 ) {
                     coverCache.deleteFromCache(thumbnailUrl)
                     // load new covers in background

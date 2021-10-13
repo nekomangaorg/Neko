@@ -5,7 +5,6 @@ import android.content.Intent
 import android.view.WindowManager
 import androidx.biometric.BiometricManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
@@ -18,7 +17,7 @@ object SecureActivityDelegate {
     var isAuthenticating: Boolean = false
 
     fun setSecure(activity: Activity?, force: Boolean? = null) {
-        val enabled = force ?: preferences.secureScreen().getOrDefault()
+        val enabled = force ?: preferences.secureScreen().get()
         if (enabled) {
             activity?.window?.setFlags(
                 WindowManager.LayoutParams.FLAG_SECURE,
@@ -31,7 +30,7 @@ object SecureActivityDelegate {
 
     fun promptLockIfNeeded(activity: Activity?) {
         if (activity == null || isAuthenticating) return
-        val lockApp = preferences.useBiometrics().getOrDefault()
+        val lockApp = preferences.useBiometrics().get()
         if (lockApp && BiometricManager.from(activity).canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
@@ -45,7 +44,7 @@ object SecureActivityDelegate {
     }
 
     fun shouldBeLocked(): Boolean {
-        val lockApp = preferences.useBiometrics().getOrDefault()
+        val lockApp = preferences.useBiometrics().get()
         if (lockApp && isAppLocked()) return true
         return false
     }
@@ -53,9 +52,9 @@ object SecureActivityDelegate {
     private fun isAppLocked(): Boolean {
         return locked &&
             (
-                preferences.lockAfter().getOrDefault() <= 0 ||
-                    Date().time >= preferences.lastUnlock().getOrDefault() + 60 * 1000 * preferences
-                    .lockAfter().getOrDefault()
+                preferences.lockAfter().get() <= 0 ||
+                    Date().time >= preferences.lastUnlock().get() + 60 * 1000 * preferences
+                    .lockAfter().get()
                 )
     }
 }

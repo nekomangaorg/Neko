@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.MangaCategoryDialogBinding
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.library.LibrarySort
@@ -112,7 +111,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             true -> preferences.downloadNew().set(true)
             false -> preferences.downloadNew().set(false)
         }
-        if (preferences.libraryUpdateInterval().getOrDefault() > 0 &&
+        if (preferences.libraryUpdateInterval().get() > 0 &&
             updatePref(
                     preferences.libraryUpdateCategories(),
                     preferences.libraryUpdateCategoriesExclude(),
@@ -169,7 +168,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
             binding.includeGlobal,
             preferences.libraryUpdateCategories(),
             preferences.libraryUpdateCategoriesExclude(),
-            preferences.libraryUpdateInterval().getOrDefault() > 0
+            preferences.libraryUpdateInterval().get() > 0
         )
     }
 

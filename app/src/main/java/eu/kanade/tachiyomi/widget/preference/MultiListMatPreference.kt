@@ -8,7 +8,6 @@ import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.widget.AppCompatCheckedTextView
 import androidx.core.view.children
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.util.system.disableItems
 
 class MultiListMatPreference @JvmOverloads constructor(
@@ -44,7 +43,7 @@ class MultiListMatPreference @JvmOverloads constructor(
     }
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
-        var values = prefs.getStringSet(key, defValue).getOrDefault().mapNotNull { value ->
+        var values = prefs.getStringSet(key, defValue).get().mapNotNull { value ->
             entryValues.indexOf(value).takeUnless { it == -1 }
         }.toIntArray().sorted().map { entries[it] }
         allSelectionRes?.let { allRes ->
@@ -64,7 +63,7 @@ class MultiListMatPreference @JvmOverloads constructor(
 
     @SuppressLint("CheckResult")
     override fun MaterialAlertDialogBuilder.setListItems() {
-        val set = prefs.getStringSet(key, defValue).getOrDefault()
+        val set = prefs.getStringSet(key, defValue).get()
         val items = if (allSelectionRes != null) {
             if (showAllLast) entries + listOf(context.getString(allSelectionRes!!))
             else listOf(context.getString(allSelectionRes!!)) + entries

@@ -6,9 +6,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.view.isVisible
-import com.f2prateek.rx.preferences.Preference
+import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.FilterTagGroupBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -82,7 +81,7 @@ class FilterTagGroup@JvmOverloads constructor(context: Context, attrs: Attribute
         set(index) = toggleButton(index, false)
 
     fun setState(preference: Preference<Int>) {
-        state = preference.getOrDefault() - 1
+        state = preference.get() - 1
     }
 
     fun setState(text: String) {

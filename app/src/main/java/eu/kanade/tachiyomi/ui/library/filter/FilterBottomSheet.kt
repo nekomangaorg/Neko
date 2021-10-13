@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.databinding.FilterBottomSheetBinding
 import eu.kanade.tachiyomi.ui.library.LibraryController
@@ -255,16 +254,16 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         }
     }
 
-    fun hasActiveFilters() = filterItems.any { it.isActivated }
+    private fun hasActiveFilters() = filterItems.any { it.isActivated }
 
     private fun hasActiveFiltersFromPref(): Boolean {
-        return preferences.filterDownloaded().getOrDefault() > 0 ||
-            preferences.filterUnread().getOrDefault() > 0 ||
-            preferences.filterCompleted().getOrDefault() > 0 ||
-            preferences.filterTracked().getOrDefault() > 0 ||
-            preferences.filterMangaType().getOrDefault() > 0 ||
-            preferences.filterMerged().getOrDefault() > 0 ||
-            preferences.filterMissingChapters().getOrDefault() > 0 ||
+        return preferences.filterDownloaded().get() > 0 ||
+            preferences.filterUnread().get() > 0 ||
+            preferences.filterCompleted().get() > 0 ||
+            preferences.filterTracked().get() > 0 ||
+            preferences.filterMangaType().get() > 0 ||
+            preferences.filterMerged().get() > 0 ||
+            preferences.filterMissingChapters()  > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 
@@ -327,7 +326,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             withContext(Dispatchers.Main) {
                 downloaded.setState(preferences.filterDownloaded())
                 completed.setState(preferences.filterCompleted())
-                val unreadP = preferences.filterUnread().getOrDefault()
+                val unreadP = preferences.filterUnread().get()
                 if (unreadP <= 2) {
                     unread.state = unreadP - 1
                 } else if (unreadP >= 3) {
@@ -335,7 +334,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 }
                 tracked?.setState(preferences.filterTracked())
                 mangaType?.setState(
-                    when (preferences.filterMangaType().getOrDefault()) {
+                    when (preferences.filterMangaType().get()) {
                         Manga.TYPE_MANGA -> context.getString(R.string.manga)
                         Manga.TYPE_MANHUA -> context.getString(R.string.manhua)
                         Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)

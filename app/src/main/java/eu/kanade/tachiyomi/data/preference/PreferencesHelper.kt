@@ -1,15 +1,13 @@
 package eu.kanade.tachiyomi.data.preference
 
 import android.content.Context
-import android.content.SharedPreferences
 import android.net.Uri
 import android.os.Build
 import android.os.Environment
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.preference.PreferenceManager
-import com.f2prateek.rx.preferences.Preference
-import com.f2prateek.rx.preferences.RxSharedPreferences
 import com.tfcporciuncula.flow.FlowSharedPreferences
+import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -36,62 +34,40 @@ import java.text.SimpleDateFormat
 import java.util.Locale
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
-fun <T> Preference<T>.getOrDefault(): T = get() ?: defaultValue()!!
-
-fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
+fun <T> Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
     block(get())
     return asFlow()
         .onEach { block(it) }
 }
 
-fun <T> com.tfcporciuncula.flow.Preference<T>.asImmediateFlowIn(
-    scope: CoroutineScope,
-    block: (value: T) -> Unit,
-): Job {
+fun <T> Preference<T>.asImmediateFlowIn(scope: CoroutineScope, block: (value: T) -> Unit): Job {
     block(get())
     return asFlow()
         .onEach { block(it) }
         .launchIn(scope)
 }
 
-fun com.tfcporciuncula.flow.Preference<Boolean>.toggle() = set(!get())
+fun Preference<Boolean>.toggle() = set(!get())
 
-private class DateFormatConverter : Preference.Adapter<DateFormat> {
-    override fun get(key: String, preferences: SharedPreferences): DateFormat {
-        val dateFormat = preferences.getString(Keys.dateFormat, "")!!
-
-        if (dateFormat != "") {
-            return SimpleDateFormat(dateFormat, Locale.getDefault())
-        }
-
-        return DateFormat.getDateInstance(DateFormat.SHORT)
-    }
-
-    override fun set(key: String, value: DateFormat, editor: SharedPreferences.Editor) {
-        // No-op
-    }
-}
-
-operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.plusAssign(item: T) {
+operator fun <T> Preference<Set<T>>.plusAssign(item: T) {
     set(get() + item)
 }
 
-operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.minusAssign(item: T) {
+operator fun <T> Preference<Set<T>>.minusAssign(item: T) {
     set(get() - item)
 }
 
-operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.plusAssign(item: Collection<T>) {
+operator fun <T> Preference<Set<T>>.plusAssign(item: Collection<T>) {
     set(get() + item)
 }
 
-operator fun <T> com.tfcporciuncula.flow.Preference<Set<T>>.minusAssign(item: Collection<T>) {
+operator fun <T> Preference<Set<T>>.minusAssign(item: Collection<T>) {
     set(get() - item)
 }
 
 class PreferencesHelper(val context: Context) {
 
     private val prefs = PreferenceManager.getDefaultSharedPreferences(context)
-    private val rxPrefs = RxSharedPreferences.create(prefs)
     private val flowPrefs = FlowSharedPreferences(prefs)
 
     private val defaultFolder = context.getString(R.string.app_name) + when (BuildConfig.DEBUG) {
@@ -115,9 +91,9 @@ class PreferencesHelper(val context: Context) {
         )
     )
 
-    fun getInt(key: String, default: Int?) = rxPrefs.getInteger(key, default)
-    fun getStringPref(key: String, default: String?) = rxPrefs.getString(key, default)
-    fun getStringSet(key: String, default: Set<String>) = rxPrefs.getStringSet(key, default)
+    fun getInt(key: String, default: Int) = flowPrefs.getInt(key, default)
+    fun getStringPref(key: String, default: String) = flowPrefs.getString(key, default)
+    fun getStringSet(key: String, default: Set<String>) = flowPrefs.getStringSet(key, default)
 
     fun startingTab() = flowPrefs.getInt(Keys.startingTab, 0)
     fun backReturnsToStart() = flowPrefs.getBoolean(Keys.backToStart, true)
@@ -133,11 +109,8 @@ class PreferencesHelper(val context: Context) {
     fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
 
     val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    fun lightTheme() =
-        flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
-
-    fun darkTheme() =
-        flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
@@ -163,11 +136,9 @@ class PreferencesHelper(val context: Context) {
 
     fun colorFilterMode() = flowPrefs.getInt(Keys.colorFilterMode, 0)
 
-    fun defaultReadingMode() =
-        prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
+    fun defaultReadingMode() = prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
 
-    fun defaultOrientationType() =
-        flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
+    fun defaultOrientationType() = flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
 
     fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
 
@@ -195,11 +166,9 @@ class PreferencesHelper(val context: Context) {
 
     fun navigationModeWebtoon() = flowPrefs.getInt(Keys.navigationModeWebtoon, 0)
 
-    fun pagerNavInverted() =
-        flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+    fun pagerNavInverted() = flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
-    fun webtoonNavInverted() =
-        flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+    fun webtoonNavInverted() = flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
     fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
 
@@ -216,11 +185,9 @@ class PreferencesHelper(val context: Context) {
         ReaderBottomButton.BUTTONS_DEFAULTS
     )
 
-    fun showNavigationOverlayNewUser() =
-        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
+    fun showNavigationOverlayNewUser() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
-    fun showNavigationOverlayNewUserWebtoon() =
-        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
+    fun showNavigationOverlayNewUserWebtoon() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
 
     fun preloadSize() = flowPrefs.getInt(Keys.preloadSize, 6)
 
@@ -234,11 +201,11 @@ class PreferencesHelper(val context: Context) {
 
     fun lastUsedCatalogueSource() = flowPrefs.getLong(Keys.lastUsedCatalogueSource, -1)
 
-    fun lastUsedCategory() = rxPrefs.getInteger(Keys.lastUsedCategory, 0)
+    fun lastUsedCategory() = flowPrefs.getInt(Keys.lastUsedCategory, 0)
 
     fun lastUsedSources() = flowPrefs.getStringSet("last_used_sources", emptySet())
 
-    fun lastVersionCode() = rxPrefs.getInteger("last_version_code", 0)
+    fun lastVersionCode() = flowPrefs.getInt("last_version_code", 0)
 
     fun browseAsList() = flowPrefs.getBoolean(Keys.catalogueAsList, false)
 
@@ -247,7 +214,7 @@ class PreferencesHelper(val context: Context) {
     fun enabledLanguages() =
         flowPrefs.getStringSet(Keys.enabledLanguages, setOf("en", Locale.getDefault().language))
 
-    fun sourceSorting() = rxPrefs.getInteger(Keys.sourcesSort, 0)
+    fun sourceSorting() = flowPrefs.getInt(Keys.sourcesSort, 0)
 
     fun sourceUsername(source: Source) = prefs.getString(Keys.sourceUsername(source.id), "")
 
@@ -273,7 +240,7 @@ class PreferencesHelper(val context: Context) {
 
     fun trackToken(sync: TrackService) = flowPrefs.getString(Keys.trackToken(sync.id), "")
 
-    fun anilistScoreType() = rxPrefs.getString("anilist_score_type", "POINT_10")
+    fun anilistScoreType() = flowPrefs.getString("anilist_score_type", "POINT_10")
 
     fun backupsDirectory() = flowPrefs.getString(Keys.backupDirectory, defaultBackupDir.toString())
 
@@ -283,8 +250,7 @@ class PreferencesHelper(val context: Context) {
             else -> SimpleDateFormat(format, Locale.getDefault())
         }
 
-    fun downloadsDirectory() =
-        rxPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun downloadsDirectory() = flowPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
@@ -305,7 +271,7 @@ class PreferencesHelper(val context: Context) {
 
     fun removeAfterMarkedAsRead() = prefs.getBoolean(Keys.removeAfterMarkedAsRead, false)
 
-    fun libraryUpdateInterval() = rxPrefs.getInteger(Keys.libraryUpdateInterval, 24)
+    fun libraryUpdateInterval() = flowPrefs.getInt(Keys.libraryUpdateInterval, 24)
 
     fun libraryUpdateRestriction() = prefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
 
@@ -313,7 +279,7 @@ class PreferencesHelper(val context: Context) {
     fun libraryUpdateCategoriesExclude() =
         flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
 
-    fun libraryUpdatePrioritization() = rxPrefs.getInteger(Keys.libraryUpdatePrioritization, 0)
+    fun libraryUpdatePrioritization() = flowPrefs.getInt(Keys.libraryUpdatePrioritization, 0)
 
     fun libraryLayout() = flowPrefs.getInt(Keys.libraryLayout, 2)
 
@@ -321,32 +287,32 @@ class PreferencesHelper(val context: Context) {
 
     fun uniformGrid() = flowPrefs.getBoolean(Keys.uniformGrid, true)
 
-    fun downloadBadge() = rxPrefs.getBoolean(Keys.downloadBadge, false)
+    fun downloadBadge() = flowPrefs.getBoolean(Keys.downloadBadge, false)
 
-    fun filterDownloaded() = rxPrefs.getInteger(Keys.filterDownloaded, 0)
+    fun filterDownloaded() = flowPrefs.getInt(Keys.filterDownloaded, 0)
 
-    fun filterUnread() = rxPrefs.getInteger(Keys.filterUnread, 0)
+    fun filterUnread() = flowPrefs.getInt(Keys.filterUnread, 0)
 
-    fun filterCompleted() = rxPrefs.getInteger(Keys.filterCompleted, 0)
+    fun filterCompleted() = flowPrefs.getInt(Keys.filterCompleted, 0)
 
-    fun filterTracked() = rxPrefs.getInteger(Keys.filterTracked, 0)
+    fun filterTracked() = flowPrefs.getInt(Keys.filterTracked, 0)
 
-    fun filterMangaType() = rxPrefs.getInteger(Keys.filterMangaType, 0)
+    fun filterMangaType() = flowPrefs.getInt(Keys.filterMangaType, 0)
 
     fun showEmptyCategoriesWhileFiltering() =
         flowPrefs.getBoolean(Keys.showEmptyCategoriesFiltering, false)
 
-    fun filterMerged() = rxPrefs.getInteger(Keys.filterMerged, 0)
+    fun filterMerged() = flowPrefs.getInt(Keys.filterMerged, 0)
 
     fun filterMissingChapters() = rxPrefs.getInteger(Keys.filterMissingChapters, 0)
 
-    fun librarySortingMode() = rxPrefs.getInteger(Keys.librarySortingMode, 0)
+    fun librarySortingMode() = flowPrefs.getInt(Keys.librarySortingMode, 0)
 
-    fun librarySortingAscending() = rxPrefs.getBoolean("library_sorting_ascending", true)
+    fun librarySortingAscending() = flowPrefs.getBoolean("library_sorting_ascending", true)
 
     fun automaticUpdates() = prefs.getBoolean(Keys.automaticUpdates, true)
 
-    fun collapsedCategories() = rxPrefs.getStringSet("collapsed_categories", mutableSetOf())
+    fun collapsedCategories() = flowPrefs.getStringSet("collapsed_categories", mutableSetOf())
 
     fun collapsedDynamicCategories() =
         flowPrefs.getStringSet("collapsed_dynamic_categories", mutableSetOf())
@@ -373,34 +339,34 @@ class PreferencesHelper(val context: Context) {
 
     fun skipFiltered() = prefs.getBoolean(Keys.skipFiltered, true)
 
-    fun useBiometrics() = rxPrefs.getBoolean(Keys.useBiometrics, false)
+    fun useBiometrics() = flowPrefs.getBoolean(Keys.useBiometrics, false)
 
-    fun lockAfter() = rxPrefs.getInteger(Keys.lockAfter, 0)
+    fun lockAfter() = flowPrefs.getInt(Keys.lockAfter, 0)
 
-    fun lastUnlock() = rxPrefs.getLong(Keys.lastUnlock, 0)
+    fun lastUnlock() = flowPrefs.getLong(Keys.lastUnlock, 0)
 
-    fun secureScreen() = rxPrefs.getBoolean(Keys.secureScreen, false)
+    fun secureScreen() = flowPrefs.getBoolean(Keys.secureScreen, false)
 
     fun hideNotificationContent() = prefs.getBoolean(Keys.hideNotificationContent, false)
 
-    fun removeArticles() = rxPrefs.getBoolean(Keys.removeArticles, false)
+    fun removeArticles() = flowPrefs.getBoolean(Keys.removeArticles, false)
 
-    fun migrateFlags() = rxPrefs.getInteger("migrate_flags", Int.MAX_VALUE)
+    fun migrateFlags() = flowPrefs.getInt("migrate_flags", Int.MAX_VALUE)
 
-    fun trustedSignatures() = rxPrefs.getStringSet("trusted_signatures", emptySet())
+    fun trustedSignatures() = flowPrefs.getStringSet("trusted_signatures", emptySet())
 
     // using string instead of set so it is ordered
     fun migrationSources() = flowPrefs.getString("migrate_sources", "")
 
-    fun useSourceWithMost() = rxPrefs.getBoolean("use_source_with_most", false)
+    fun useSourceWithMost() = flowPrefs.getBoolean("use_source_with_most", false)
 
-    fun skipPreMigration() = rxPrefs.getBoolean(Keys.skipPreMigration, false)
+    fun skipPreMigration() = flowPrefs.getBoolean(Keys.skipPreMigration, false)
 
-    fun defaultMangaOrder() = rxPrefs.getString("default_manga_order", "")
+    fun defaultMangaOrder() = flowPrefs.getString("default_manga_order", "")
 
-    fun refreshCoversToo() = rxPrefs.getBoolean(Keys.refreshCoversToo, true)
+    fun refreshCoversToo() = flowPrefs.getBoolean(Keys.refreshCoversToo, true)
 
-    fun updateOnRefresh() = rxPrefs.getInteger(Keys.updateOnRefresh, -1)
+    fun updateOnRefresh() = flowPrefs.getInt(Keys.updateOnRefresh, -1)
 
     fun recentsViewType() = flowPrefs.getInt("recents_view_type", 0)
 
@@ -419,7 +385,7 @@ class PreferencesHelper(val context: Context) {
 
     fun showTitleFirstInRecents() = flowPrefs.getBoolean(Keys.showTitleFirstInRecents, false)
 
-    fun lastExtCheck() = rxPrefs.getLong("last_ext_check", 0)
+    fun lastExtCheck() = flowPrefs.getLong("last_ext_check", 0)
 
     fun lastAppCheck() = flowPrefs.getLong("last_app_check", 0)
 

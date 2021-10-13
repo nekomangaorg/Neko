@@ -14,7 +14,6 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.log.XLogSetup
 import org.conscrypt.Conscrypt
@@ -56,7 +55,7 @@ open class App : Application(), LifecycleObserver {
     @Suppress("unused")
     fun onAppBackgrounded() {
         // App in background
-        if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().getOrDefault() >= 0) {
+        if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
     }

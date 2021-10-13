@@ -4,7 +4,6 @@ import androidx.biometric.BiometricManager
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 
@@ -28,7 +27,7 @@ class SettingsSecurityController : SettingsController() {
             preference = intListPreference(activity) {
                 key = PreferenceKeys.lockAfter
                 titleRes = R.string.lock_when_idle
-                isVisible = preferences.useBiometrics().getOrDefault()
+                isVisible = preferences.useBiometrics().get()
                 val values = listOf(0, 2, 5, 10, 20, 30, 60, 90, 120, -1)
                 entries = values.mapNotNull {
                     when (it) {

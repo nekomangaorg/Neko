@@ -6,7 +6,6 @@ import android.content.Context
 import android.util.AttributeSet
 import androidx.preference.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 
 open class ListMatPreference @JvmOverloads constructor(
     activity: Activity?,
@@ -31,7 +30,7 @@ open class ListMatPreference @JvmOverloads constructor(
     }
 
     override var customSummaryProvider: SummaryProvider<MatPreference>? = SummaryProvider<MatPreference> {
-        val index = entryValues.indexOf(prefs.getStringPref(key, defValue).getOrDefault())
+        val index = entryValues.indexOf(prefs.getStringPref(key, defValue).get())
         if (entries.isEmpty() || index == -1) ""
         else entries[index]
     }
@@ -48,7 +47,7 @@ open class ListMatPreference @JvmOverloads constructor(
             if (sharedPref != null) {
                 val settings = context.getSharedPreferences(sharedPref, Context.MODE_PRIVATE)
                 settings.getString(key, "")
-            } else prefs.getStringPref(key, defValue).getOrDefault()
+            } else prefs.getStringPref(key, defValue).get()
         )
         setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
             val value = entryValues[pos]
