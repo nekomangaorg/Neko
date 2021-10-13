@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
+    <color name="primaryVariantTachiyomi">#E5ECF4</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
     <color name="primaryInverseTachiyomi">#78bcff</color>
