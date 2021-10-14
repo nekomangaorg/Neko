@@ -67,7 +67,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     private fun setItemsPerCategoryMap() {
         itemsPerCategory = headerItems.map { header ->
             (header as LibraryHeaderItem).catId to
-                controller.presenter.getItemCountInCategories((header as LibraryHeaderItem).catId)
+                controller.presenter.getItemCountInCategories(header.catId)
         }.toMap()
     }
 
@@ -163,9 +163,9 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
             val chars = string.codePoints().toArray().firstOrNull() ?: return ""
             val char = Character.toChars(chars)
-            return String(char).toUpperCase(Locale.US)
+            return String(char).uppercase(Locale.US)
         } else {
-            return string.toCharArray().firstOrNull()?.toString()?.toUpperCase(Locale.US) ?: ""
+            return string.toCharArray().firstOrNull()?.toString()?.uppercase(Locale.US) ?: ""
         }
     }
 

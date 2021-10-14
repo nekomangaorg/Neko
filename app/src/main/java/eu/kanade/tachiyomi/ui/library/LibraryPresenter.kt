@@ -1220,7 +1220,7 @@ class LibraryPresenter(
                             file.renameTo(cc.getCustomCoverFile(manga))
                         }
                         manga.thumbnail_url =
-                            manga.thumbnail_url!!.toLowerCase(Locale.ROOT).substringAfter("custom-")
+                            manga.thumbnail_url!!.lowercase(Locale.ROOT).substringAfter("custom-")
                         db.insertManga(manga).executeAsBlocking()
                     }
                 }

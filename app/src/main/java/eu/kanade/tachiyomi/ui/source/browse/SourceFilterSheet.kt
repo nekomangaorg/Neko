@@ -5,8 +5,9 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewTreeObserver.OnGlobalLayoutListener
-import android.view.WindowInsets
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -14,9 +15,10 @@ import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.databinding.SourceFilterSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsets
-import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import eu.kanade.tachiyomi.util.view.checkHeightThen
+import eu.kanade.tachiyomi.util.view.collapse
+import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 
 class SourceFilterSheet(val activity: Activity) :
@@ -49,23 +51,15 @@ class SourceFilterSheet(val activity: Activity) :
         binding.followsBtn.setOnClickListener { onFollowsClicked() }
         binding.latestChaptersBtn.setOnClickListener { onLatestChapterClicked() }
 
-        binding.titleLayout.viewTreeObserver.addOnGlobalLayoutListener(object :
-            OnGlobalLayoutListener {
-            override fun onGlobalLayout() {
-                activity.window.decorView.rootWindowInsets?.let {
-                    setCardViewMax(it)
-                }
-                if (binding.titleLayout.height > 0) {
-                    binding.titleLayout.viewTreeObserver.removeOnGlobalLayoutListener(this)
-                }
-            }
-        })
+        binding.titleLayout.checkHeightThen {
+            activity.window.decorView.rootWindowInsetsCompat?.let { setCardViewMax(it) }
+        }
 
-        binding.cardView.doOnApplyWindowInsets { _, insets, _ ->
+        binding.cardView.doOnApplyWindowInsetsCompat { _, insets, _ ->
             binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
                 matchConstraintMaxHeight =
-                    fullHeight - insets.systemWindowInsetTop -
+                    fullHeight - insets.getInsets(systemBars()).top -
                         binding.titleLayout.height - 75.dpToPx
             }
         }
@@ -74,9 +68,9 @@ class SourceFilterSheet(val activity: Activity) :
         val array = context.obtainStyledAttributes(attrsArray)
         val headerHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
-        binding.root.doOnApplyWindowInsets { _, insets, _ ->
+        binding.root.doOnApplyWindowInsetsCompat { _, insets, _ ->
             binding.titleLayout.updatePaddingRelative(
-                bottom = insets.systemWindowInsetBottom
+                bottom = insets.getInsets(systemBars()).bottom
             )
             binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = headerHeight + headerHeight + binding.titleLayout.paddingBottom
@@ -123,9 +117,9 @@ class SourceFilterSheet(val activity: Activity) :
         )
     }
 
-    fun setCardViewMax(insets: WindowInsets) {
+    fun setCardViewMax(insets: WindowInsetsCompat) {
         val fullHeight = activity.window.decorView.height
-        val newHeight = fullHeight - insets.systemWindowInsetTop -
+        val newHeight = fullHeight - insets.getInsets(systemBars()).top -
             binding.titleLayout.height - 75.dpToPx
         if ((binding.cardView.layoutParams as ConstraintLayout.LayoutParams).matchConstraintMaxHeight != newHeight) {
             binding.cardView.updateLayoutParams<ConstraintLayout.LayoutParams> {
@@ -150,7 +144,8 @@ class SourceFilterSheet(val activity: Activity) :
         val array = context.obtainStyledAttributes(attrsArray)
         val headerHeight = array.getDimensionPixelSize(0, 0)
         binding.titleLayout.updatePaddingRelative(
-            bottom = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+            bottom = activity.window.decorView.rootWindowInsetsCompat
+                ?.getInsets(systemBars())?.bottom ?: 0
         )
 
         binding.titleLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {

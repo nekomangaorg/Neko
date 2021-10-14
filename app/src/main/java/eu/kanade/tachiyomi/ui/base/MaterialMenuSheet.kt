@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.BottomMenuSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
@@ -44,12 +46,11 @@ class MaterialMenuSheet(
         binding.menuSheetLayout.checkHeightThen {
             binding.menuSheetRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 val fullHeight = activity.window.decorView.height
-                val insets = activity.window.decorView.rootWindowInsets
+                val insets = activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())
                 matchConstraintMaxHeight =
                     min(
-                        (maxHeight ?: fullHeight) + (insets?.systemWindowInsetBottom ?: 0),
-                        fullHeight - (insets?.systemWindowInsetTop ?: 0) -
-                            binding.titleLayout.height - 26.dpToPx
+                        (maxHeight ?: fullHeight) + (insets?.bottom ?: 0),
+                        fullHeight - (insets?.top ?: 0) - binding.titleLayout.height - 26.dpToPx
                     )
             }
         }

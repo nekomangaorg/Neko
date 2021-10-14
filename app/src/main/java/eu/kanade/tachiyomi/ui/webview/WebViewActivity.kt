@@ -7,10 +7,7 @@ import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
-import android.view.View
-import android.view.ViewGroup
 import android.webkit.WebView
-import android.widget.LinearLayout
 import androidx.core.graphics.ColorUtils
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import com.mikepenz.iconics.utils.colorInt
@@ -48,10 +45,6 @@ open class WebViewActivity : BaseWebViewActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         title = intent.extras?.getString(TITLE_KEY)
-        val container: ViewGroup = findViewById(R.id.web_view_layout)
-        val content: LinearLayout = findViewById(R.id.web_linear_layout)
-        container.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-        content.systemUiVisibility = View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
 
         binding.swipeRefresh.isEnabled = false
 

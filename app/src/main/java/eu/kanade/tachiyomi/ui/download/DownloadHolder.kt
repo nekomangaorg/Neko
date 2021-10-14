@@ -84,7 +84,7 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
     }
 
     private fun showPopupMenu(view: View) {
-        val item = adapter.getItem(flexibleAdapterPosition) ?: return
+        adapter.getItem(flexibleAdapterPosition) ?: return
 
         // Create a PopupMenu, giving it the clicked view for an anchor
         val popup = CascadePopupMenu(view.context, view, styler = cascadeMenuStyler(view.context))
