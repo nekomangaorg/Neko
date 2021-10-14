@@ -180,9 +180,7 @@ class ThemePreference @JvmOverloads constructor(context: Context, attrs: Attribu
 
         override var identifier = theme.hashCode().toLong()
 
-        override fun getViewHolder(v: View): FastAdapter.ViewHolder<ThemeItem> {
-            return ViewHolder(v)
-        }
+        override fun getViewHolder(v: View) = ViewHolder(v)
 
         @Suppress("UNUSED_PARAMETER")
         override var isSelected: Boolean
