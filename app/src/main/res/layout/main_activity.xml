@@ -68,7 +68,7 @@
                 app:strokeWidth="0dp"
                 android:layout_marginStart="10dp"
                 android:layout_marginEnd="10dp"
-                app:cardCornerRadius="30dp"
+                app:cardCornerRadius="24dp"
                 android:layout_height="match_parent" >
 
                 <eu.kanade.tachiyomi.ui.base.FloatingToolbar
