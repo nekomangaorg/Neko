@@ -199,7 +199,7 @@ fun View.applyBottomAnimatedInsets(
 object ControllerViewWindowInsetsListener : OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
         v.updateLayoutParams<FrameLayout.LayoutParams> {
-            val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+            val attrsArray = intArrayOf(R.attr.mainActionBarSize)
             val array = v.context.obtainStyledAttributes(attrsArray)
             topMargin = insets.getInsets(systemBars()).top + array.getDimensionPixelSize(0, 0)
             array.recycle()

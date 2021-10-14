@@ -24,7 +24,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/title_layout"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
+        android:layout_height="?attr/mainActionBarSize"
         android:layout_gravity="top"
         android:background="@drawable/bottom_sheet_rounded_background"
         android:backgroundTint="?attr/colorSurface"

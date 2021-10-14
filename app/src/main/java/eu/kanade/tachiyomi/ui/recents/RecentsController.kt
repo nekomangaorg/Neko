@@ -150,7 +150,7 @@ class RecentsController(bundle: Bundle? = null) :
         adapter.itemTouchHelperCallback.setSwipeFlags(
             ItemTouchHelper.LEFT
         )
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appBarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()

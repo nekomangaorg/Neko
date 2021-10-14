@@ -34,7 +34,7 @@
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
             app:titleTextColor="?actionBarTintColor"
-            android:layout_height="56dp"
+            android:layout_height="?mainActionBarSize"
             app:collapseIcon="@drawable/ic_arrow_back_24dp"
             android:background="@android:color/transparent">
 
@@ -57,7 +57,7 @@
         <FrameLayout
             android:id="@+id/card_frame"
             android:layout_width="match_parent"
-            android:layout_height="56dp" >
+            android:layout_height="?mainActionBarSize" >
 
             <com.google.android.material.card.MaterialCardView
                 android:id="@+id/card_view"

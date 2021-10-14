@@ -218,7 +218,7 @@ class SetCategoriesSheet(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
         val array = context.obtainStyledAttributes(attrsArray)
         val headerHeight = array.getDimensionPixelSize(0, 0)
         binding.buttonLayout.updatePaddingRelative(

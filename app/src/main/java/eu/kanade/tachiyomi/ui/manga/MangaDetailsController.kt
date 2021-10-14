@@ -319,7 +319,7 @@ class MangaDetailsController :
             MangaDetailsDivider(view.context)
         )
         binding.recycler.setHasFixedSize(true)
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
+        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
         val array = view.context.obtainStyledAttributes(attrsArray)
         val appbarHeight = array.getDimensionPixelSize(0, 0)
         array.recycle()
