@@ -256,10 +256,12 @@ class MangaDetailsController :
             (colorToUse ?: manga?.vibrantCoverColor)?.let { color ->
                 val newColor =
                     makeColorFrom(color, context.getResourceColor(R.attr.colorPrimaryVariant))
-                activity?.window?.navigationBarColor = ColorUtils.setAlphaComponent(
-                    newColor,
-                    Color.alpha(activity?.window?.navigationBarColor ?: Color.BLACK)
-                )
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O_MR1 || context.isInNightMode()) {
+                    activity?.window?.navigationBarColor = ColorUtils.setAlphaComponent(
+                        newColor,
+                        Color.alpha(activity?.window?.navigationBarColor ?: Color.BLACK)
+                    )
+                }
                 newColor
             }
         } else {
