@@ -245,7 +245,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.appBar.updatePadding(
                 top = insets.getInsetsIgnoringVisibility(systemBars()).top
             )
-            binding.bottomNav?.updatePadding(bottom = insets.getInsetsIgnoringVisibility(systemBars()).bottom)
+            binding.bottomNav?.updatePadding(
+                bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    insets.getInsetsIgnoringVisibility(systemBars()).bottom
+                } else {
+                    insets.getInsets(systemBars()).bottom
+                }
+            )
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,
