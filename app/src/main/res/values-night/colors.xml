@@ -9,8 +9,10 @@
     <color name="colorOnSurface">@color/md_white_1000</color>
     <color name="colorOnBackground">@color/md_white_1000</color>
 
+    <color name="rippleColorTachiyomi">#1F3399FF</color>
     <color name="secondaryTachiyomi">@color/neko_green</color>
     <color name="secondaryVariantTachiyomi">@color/neko_green_darker</color>
+    <color name="splashBackground">#212121</color>
     <color name="actionModeShadow">@color/md_black_1000</color>
 
     <color name="textColorPrimaryInverse">@color/md_black_1000_87</color>
@@ -27,8 +29,11 @@
     <!-- Chocolate Strawberries Theme -->
     <color name="primaryStrawberry">#e14e4e</color>
     <color name="primaryInverseStrawberry">#9f1414</color>
+    <color name="secondaryStrawberry">@color/holo_red</color>
+    <color name="rippleColorStrawberry">#1FAA2200</color>
     <color name="secondaryVariantStrawberry">#f9bab2</color>
     <color name="primaryVariantStrawberry">#2B2320</color>
+    <color name="backgroundStrawberries">#1a1716</color>
 
     <!-- Tako Theme -->
     <color name="primaryTako">#fccd9f</color>
@@ -38,7 +43,7 @@
     <color name="onSecondaryTako">#242431</color>
     <color name="secondaryVariantTako">#f4d1af</color>
     <color name="tabBarIconColorTako">@color/secondaryTako</color>
-    <color name="rippleColoredTako">#1FF3B375</color>
+    <color name="rippleColorTako">#1FF3B375</color>
     <color name="surfaceTako">#2A2A3C</color>
     <color name="backgroundTako">#21212E</color>
     <color name="actionTintTako">#f4ece5</color>
@@ -46,6 +51,7 @@
 
     <!-- Midnight Dusk Theme -->
     <color name="secondaryDuskDawn">#F02475</color>
+    <color name="rippleColorDuskDawn">#1FF02475</color>
     <color name="primaryInverseDuskDawn">#8d0c3f</color>
     <color name="secondaryVariantDuskDawn">#ffc1da</color>
     <color name="backgroundDuskDawn">#16151D</color>
@@ -56,6 +62,7 @@
 
     <!-- Teal/Sapphire Theme -->
     <color name="secondaryTealSapphire">#589ab8</color>
+    <color name="rippleColorTealSapphire">#1F589ab8</color>
     <color name="secondaryVariantTealSapphire">#b5ebff</color>
     <color name="primaryTealSapphire">#80b8d1</color>
     <color name="primaryInverseTealSapphire">#1d698b</color>

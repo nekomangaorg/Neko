@@ -44,14 +44,13 @@
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
         <item name="actionModeBackground">?colorPrimaryVariant</item>
-        <item name="colorControlHighlight">@color/legacyRippleColor</item>
+        <item name="colorControlHighlight">@color/rippleColorTachiyomi</item>
         <item name="android:colorBackground">?background</item>
-        <item name="android:colorControlHighlight">@color/secondary_highlight</item>
+        <item name="android:colorControlHighlight">?colorControlHighlight</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
         <item name="textAppearanceButton">@style/TextAppearance.Tachiyomi.Button</item>
-        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary
-        </item>
+        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary</item>
         <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
         <item name="switchStyle">@style/Widget.Tachiyomi.CompoundButton.Switch</item>
         <item name="sliderStyle">@style/Widget.Tachiyomi.Slider</item>
@@ -142,6 +141,7 @@
         <item name="colorPrimaryInverse">@color/primaryInverseDuskDawn</item>
         <item name="colorPrimaryVariant">@color/primaryVariantDuskDawn</item>
         <item name="colorSecondary">@color/secondaryDuskDawn</item>
+        <item name="colorControlHighlight">@color/rippleColorDuskDawn</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantDuskDawn</item>
         <item name="colorSurface">@color/backgroundDuskDawn</item>
         <item name="background">@color/backgroundDuskDawn</item>
@@ -158,6 +158,7 @@
         <item name="colorPrimaryInverse">@color/primaryInverseTealSapphire</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTealSapphire</item>
         <item name="colorSecondary">@color/secondaryTealSapphire</item>
+        <item name="colorControlHighlight">@color/rippleColorTealSapphire</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTealSapphire</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantTealSapphire</item>
         <item name="colorOnSecondary">@color/md_black_1000</item>
@@ -177,7 +178,9 @@
         <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
         <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
         <item name="colorSecondary">@color/secondaryStrawberry</item>
+        <item name="colorControlHighlight">@color/rippleColorStrawberry</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
+        <item name="background">@color/backgroundStrawberries</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
@@ -195,7 +198,7 @@
         <item name="colorTertiary">?attr/colorAccent</item>
         <item name="colorOnTertiary">?attr/colorOnSecondary</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTako</item>
-        <item name="colorControlHighlight">@color/rippleColoredTako</item>
+        <item name="colorControlHighlight">@color/rippleColorTako</item>
         <item name="colorSurface">@color/backgroundTako</item>
         <item name="actionBarTintColor">@color/actionTintTako</item>
         <item name="background">@color/backgroundTako</item>

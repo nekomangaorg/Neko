@@ -5,6 +5,7 @@
         <item name="colorPrimary">@android:color/system_accent1_500</item>
         <item name="colorPrimaryInverse">@android:color/system_accent1_200</item>
         <item name="colorSecondary">@android:color/system_accent1_600</item>
+        <item name="colorControlHighlight">@color/secondary_highlight</item>
         <item name="colorTertiary">@android:color/system_accent3_300</item>
         <item name="colorOnTertiary">@color/black</item>
         <item name="colorSecondaryVariant">@android:color/system_accent2_900</item>

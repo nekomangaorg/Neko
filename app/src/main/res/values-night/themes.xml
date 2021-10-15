@@ -38,6 +38,7 @@
         <item name="colorPrimary">@color/primaryLime</item>
         <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
         <item name="colorSecondary">@color/secondaryLime</item>
+        <item name="colorControlHighlight">@color/rippleColorLime</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantLime</item>
         <item name="colorPrimaryVariant">@color/dialogLime</item>
         <item name="colorSurface">@color/backgroundLime</item>

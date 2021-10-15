@@ -12,7 +12,7 @@
     </style>
 
     <style name="Theme.ActionBar.DayNight" parent="ThemeOverlay.Material3.ActionBar">
-        <item name="colorControlHighlight">@color/secondary_highlight</item>
+        <item name="colorControlHighlight">?colorControlHighlight</item>
         <item name="elevationOverlayEnabled">true</item>
         <item name="elevationOverlayColor">?colorSecondary</item>
     </style>
