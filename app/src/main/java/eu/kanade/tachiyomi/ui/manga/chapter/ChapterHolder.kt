@@ -157,6 +157,7 @@ class ChapterHolder(
 
     private fun resetFrontView() {
         if (binding.frontView.translationX != 0f) itemView.post {
+            androidx.transition.TransitionManager.endTransitions(adapter.recyclerView)
             adapter.notifyItemChanged(flexibleAdapterPosition)
         }
     }

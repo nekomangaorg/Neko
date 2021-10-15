@@ -177,6 +177,7 @@ class MangaHeaderHolder(
     private fun expandDesc(animated: Boolean = false) {
         binding ?: return
         if (binding.moreButton.visibility == View.VISIBLE || isTablet) {
+            androidx.transition.TransitionManager.endTransitions(adapter.controller.binding.recycler)
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
             setDescription()
@@ -216,6 +217,7 @@ class MangaHeaderHolder(
         if (isTablet || !canCollapse) return
         binding.moreButtonGroup.isVisible = !isTablet
         if (animated) {
+            androidx.transition.TransitionManager.endTransitions(adapter.controller.binding.recycler)
             val animVector = AnimatedVectorDrawableCompat.create(
                 binding.root.context,
                 R.drawable.anim_expand_less_to_more
