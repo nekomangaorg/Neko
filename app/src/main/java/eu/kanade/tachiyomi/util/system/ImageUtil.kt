@@ -348,7 +348,7 @@ object ImageUtil {
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
-        val result = Bitmap.createBitmap(width / 2, height * 2, Bitmap.Config.ARGB_8888)
+        val result = Bitmap.createBitmap(width / 2, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(result)
         progressCallback?.invoke(98)
         canvas.drawBitmap(imageBitmap, Rect(if (!secondHalf) 0 else width / 2, 0, if (secondHalf) width else width / 2, height), result.rect, null)
