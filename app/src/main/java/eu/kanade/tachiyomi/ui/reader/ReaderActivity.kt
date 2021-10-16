@@ -796,7 +796,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 firstPass = false
                 lastVis = vis
             }
-
+            wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
             if (!preferences.fullscreen().get() && sheetManageNavColor) {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
@@ -945,6 +945,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         } else {
             if (preferences.fullscreen().get()) {
                 wic.hide(systemBars())
+                wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
             }
 
             if (animate && binding.readerMenu.isVisible) {
