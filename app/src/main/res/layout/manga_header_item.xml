@@ -84,7 +84,7 @@
 
     <TextView
         android:id="@+id/title"
-        style="?textAppearanceHeadlineSmall"
+        style="?textAppearanceTitleMedium"
         android:layout_width="wrap_content"
         app:layout_constraintHorizontal_bias="0.0"
         app:layout_constrainedWidth="true"
