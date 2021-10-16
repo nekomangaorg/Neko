@@ -26,12 +26,10 @@ import android.view.animation.AnimationUtils
 import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.Insets
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type.navigationBars
 import androidx.core.view.WindowInsetsCompat.Type.statusBars
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.WindowInsetsControllerCompat
@@ -786,9 +784,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         var firstPass = true
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
-            val hasNav = insets.getInsetsIgnoringVisibility(navigationBars()) == Insets.NONE
-            val navVis = if (hasNav) insets.isVisible(navigationBars()) else true
-            val vis = insets.isVisible(statusBars()) && navVis
+            val vis = insets.isVisible(statusBars())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (!firstPass && lastVis != vis && preferences.fullscreen().get()) {
                     onVisibilityChange(vis)
