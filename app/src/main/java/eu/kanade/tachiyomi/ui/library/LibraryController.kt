@@ -45,6 +45,7 @@ import com.github.florent37.viewtooltip.ViewTooltip
 import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.tfcporciuncula.flow.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -916,7 +917,6 @@ class LibraryController(
         }
     }
 
-    @SuppressLint("NotifyDataSetChanged")
     private fun setPreferenceFlows() {
         listOf(
             preferences.libraryLayout(),
@@ -930,16 +930,17 @@ class LibraryController(
                 }
                 .launchIn(viewScope)
         }
-        preferences.hideStartReadingButton().asFlow()
+        preferences.hideStartReadingButton().register()
+        preferences.outlineOnCovers().register { adapter.showOutline = it }
+        preferences.categoryNumberOfItems().register { adapter.showNumber = it }
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    private fun <T> Preference<T>.register(onChanged: ((T) -> Unit)? = null) {
+        asFlow()
             .drop(1)
             .onEach {
-                adapter.notifyDataSetChanged()
-            }
-            .launchIn(viewScope)
-        preferences.categoryNumberOfItems().asFlow()
-            .drop(1)
-            .onEach {
-                adapter.showNumber = it
+                onChanged?.invoke(it)
                 adapter.notifyDataSetChanged()
             }
             .launchIn(viewScope)

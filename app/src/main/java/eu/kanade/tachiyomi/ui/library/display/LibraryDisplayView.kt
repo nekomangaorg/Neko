@@ -32,6 +32,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
     override fun initGeneralPreferences() {
         binding.displayGroup.bindToPreference(preferences.libraryLayout())
         binding.uniformGrid.bindToPreference(preferences.uniformGrid())
+        binding.outlineOnCovers.bindToPreference(preferences.outlineOnCovers())
         binding.gridSeekbar.value = ((preferences.gridSize().get() + .5f) * 2f).roundToInt().toFloat()
         binding.resetGridSize.setOnClickListener {
             binding.gridSeekbar.value = 3f

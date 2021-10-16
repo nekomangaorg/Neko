@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.timeSpanFromNow
+import eu.kanade.tachiyomi.util.view.setCards
 
 class RecentMangaHolder(
     view: View,
@@ -86,6 +87,8 @@ class RecentMangaHolder(
                 }
             }
         }
+        setCards(adapter.showOutline, binding.card, null)
+
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
         val chapterName = if (item.mch.manga.hideChapterTitle(adapter.preferences)) {
             val number = adapter.decimalFormat.format(item.chapter.chapter_number.toDouble())

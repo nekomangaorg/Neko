@@ -434,6 +434,16 @@ fun MaterialCardView.makeShapeCorners(
         .build()
 }
 
+fun setCards(
+    showOutline: Boolean,
+    mainCard: MaterialCardView,
+    badgeView: MaterialCardView?
+) {
+    badgeView?.strokeWidth = if (showOutline) 0.75f.dpToPx.toInt() else 0
+    badgeView?.cardElevation = if (showOutline) 0f else 3f.dpToPx
+    mainCard.strokeWidth = if (showOutline) 1.dpToPx else 0
+}
+
 val View.backgroundColor
     get() = (background as? ColorDrawable)?.color
 

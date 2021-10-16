@@ -181,6 +181,8 @@ object PreferenceKeys {
 
     const val uniformGrid = "uniform_grid"
 
+    const val outlineOnCovers = "outline_on_covers"
+
     const val lang = "app_language"
 
     const val langToShow = "mangadex_languages_new"

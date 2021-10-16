@@ -4,6 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/badge_view"
     app:strokeColor="@color/library_stroke_selector"
+    app:strokeWidth="0.75dp"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     app:cardElevation="0dp"

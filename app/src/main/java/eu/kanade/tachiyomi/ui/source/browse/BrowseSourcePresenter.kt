@@ -127,7 +127,7 @@ open class BrowseSourcePresenter(
     private var scope = CoroutineScope(Job() + Dispatchers.IO)
 
     init {
-        query = searchQuery
+        query = searchQuery ?: ""
     }
 
     override fun onCreate(savedState: Bundle?) {
@@ -183,6 +183,7 @@ open class BrowseSourcePresenter(
 
         val browseAsList = prefs.browseAsList()
         val sourceListType = prefs.libraryLayout()
+        val outlineCovers = prefs.outlineOnCovers()
 
         // Prepare the pager.
         pagerSubscription?.let { remove(it) }
@@ -196,6 +197,7 @@ open class BrowseSourcePresenter(
                         manga,
                         browseAsList,
                         sourceListType,
+                        outlineCovers,
                         isFollows
                     )
                 }

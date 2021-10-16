@@ -287,6 +287,8 @@ class PreferencesHelper(val context: Context) {
 
     fun uniformGrid() = flowPrefs.getBoolean(Keys.uniformGrid, true)
 
+    fun outlineOnCovers() = flowPrefs.getBoolean(Keys.outlineOnCovers, true)
+
     fun downloadBadge() = flowPrefs.getBoolean(Keys.downloadBadge, false)
 
     fun filterDownloaded() = flowPrefs.getInt(Keys.filterDownloaded, 0)

@@ -32,6 +32,8 @@
         android:id="@+id/front_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:clipChildren="false"
         android:layout_gravity="center_vertical"
         android:background="@drawable/list_item_selector"
         android:minHeight="@dimen/material_component_lists_single_line_with_avatar_height">
@@ -196,7 +198,7 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="space,card_layout" />
 
-        <View
+        <Space
             android:id="@+id/padding"
             android:layout_width="0dp"
             android:layout_height="6dp"

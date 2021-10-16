@@ -11,6 +11,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.CoverViewTarget
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
+import eu.kanade.tachiyomi.util.view.setCards
 
 /**
  * Class used to hold the displayed data of a manga in the catalogue, like the cover or the title.
@@ -23,10 +24,16 @@ import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 class BrowseSourceListHolder(
     private val view: View,
     adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+    showOutline: Boolean,
+    isFollows : Boolean = false,
 ) :
     BrowseSourceHolder(view, adapter) {
 
     private val binding = MangaListItemBinding.bind(view)
+
+    init {
+        setCards(showOutline, binding.card, binding.unreadDownloadBadge.badgeView)
+    }
 
     /**
      * Method called from [CatalogueAdapter.onBindViewHolder]. It updates the data for this

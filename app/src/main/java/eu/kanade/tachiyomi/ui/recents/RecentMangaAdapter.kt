@@ -23,6 +23,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var showTitleFirst = preferences.showTitleFirstInRecents().get()
     var showUpdatedTime = preferences.showUpdatedTime().get()
     var uniformCovers = preferences.uniformGrid().get()
+    var showOutline = preferences.outlineOnCovers().get()
 
     val viewType: Int
         get() = delegate.getViewType()
@@ -47,6 +48,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         preferences.uniformGrid().register { uniformCovers = it }
+        preferences.outlineOnCovers().register { showOutline = it }
     }
 
     private fun <T> Preference<T>.register(onChanged: (T) -> Unit) {

@@ -177,6 +177,7 @@
     <string name="hide_start_reading_button">Hide start reading button</string>
     <string name="badges">Badges</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>
+    <string name="show_outline_around_covers">Show outline around covers</string>
     <string name="grid_size">Grid size</string>
     <string name="_per_row">%d per row</string>
     <string name="hide_unread_badges">Hide unread badges</string>
