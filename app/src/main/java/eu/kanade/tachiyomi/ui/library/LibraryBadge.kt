@@ -72,9 +72,10 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
             setBackgroundColor(context.getResourceColor(R.attr.colorDownloadBadge))
         }
 
+        shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
         if (changeShape) {
             shapeAppearanceModel = makeShapeCorners(radius, radius)
-            if (binding.downloadText.isVisible) {
+            if (binding.downloadText.isVisible && binding.unreadText.isVisible) {
                 binding.downloadText.background =
                     MaterialShapeDrawable(makeShapeCorners(topStart = radius)).apply {
                         this.fillColor =
@@ -84,7 +85,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                     MaterialShapeDrawable(makeShapeCorners(bottomEnd = radius)).apply {
                         this.fillColor = ColorStateList.valueOf(unreadBadgeBackground)
                     }
-            } else {
+            } else if (binding.unreadText.isVisible) {
                 binding.unreadText.background =
                     MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                         this.fillColor = ColorStateList.valueOf(unreadBadgeBackground)
@@ -92,9 +93,13 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 if (unread == -1) {
                     shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
                 }
+            } else if (binding.downloadText.isVisible) {
+                binding.downloadText.background =
+                    MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
+                        this.fillColor =
+                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorTertiary))
+                    }
             }
-        } else {
-            shapeAppearanceModel = shapeAppearanceModel.withCornerSize(radius)
         }
 
         // Show the badge card if unread or downloads exists
