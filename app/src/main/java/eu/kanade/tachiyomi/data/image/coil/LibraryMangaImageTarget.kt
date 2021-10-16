@@ -67,6 +67,8 @@ inline fun ImageView.loadManga(
     return imageLoader.enqueue(request)
 }
 
+fun Palette.getBestColor(defaultColor: Int) = getBestColor() ?: defaultColor
+
 fun Palette.getBestColor(): Int? {
     val vibPopulation = vibrantSwatch?.population ?: -1
     val domLum = dominantSwatch?.hsl?.get(2) ?: -1f
