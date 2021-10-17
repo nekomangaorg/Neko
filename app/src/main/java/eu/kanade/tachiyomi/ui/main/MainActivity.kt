@@ -222,36 +222,38 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         nav.isVisible = false
         content.doOnApplyWindowInsetsCompat { v, insets, _ ->
             setNavBarColor(insets)
+            val systemInsets =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    insets.getInsetsIgnoringVisibility(systemBars())
+                } else {
+                    insets.getInsets(systemBars())
+                }
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.getInsetsIgnoringVisibility(systemBars()).left
-                rightMargin = insets.getInsetsIgnoringVisibility(systemBars()).right
+                leftMargin = systemInsets.left
+                rightMargin = systemInsets.right
             }
             // Consume any horizontal insets and pad all content in. There's not much we can do
             // with horizontal insets
             v.updatePadding(
-                left = insets.getInsetsIgnoringVisibility(systemBars()).left,
-                right = insets.getInsetsIgnoringVisibility(systemBars()).right
+                left = systemInsets.left,
+                right = systemInsets.right
             )
             binding.appBar.updatePadding(
-                top = insets.getInsetsIgnoringVisibility(systemBars()).top
+                top = systemInsets.top
             )
             binding.bottomNav?.updatePadding(
-                bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    insets.getInsetsIgnoringVisibility(systemBars()).bottom
-                } else {
-                    insets.getInsets(systemBars()).bottom
-                }
+                bottom = systemInsets.bottom
             )
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,
-                bottom = insets.getInsetsIgnoringVisibility(systemBars()).bottom,
-                top = insets.getInsetsIgnoringVisibility(systemBars()).top
+                bottom = systemInsets.bottom,
+                top = systemInsets.top
             )
-            binding.bottomView?.isVisible = insets.getInsetsIgnoringVisibility(systemBars()).bottom > 0
+            binding.bottomView?.isVisible = systemInsets.bottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
-                height = insets.getInsetsIgnoringVisibility(systemBars()).bottom
+                height = systemInsets.bottom
             }
         }
         // Set this as nav view will try to set its own insets and they're hilariously bad

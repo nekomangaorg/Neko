@@ -784,6 +784,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         var firstPass = true
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
+            val systemInsets =
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                    insets.getInsetsIgnoringVisibility(systemBars())
+                } else {
+                    insets.getInsets(systemBars())
+                }
             val vis = insets.isVisible(statusBars())
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (!firstPass && lastVis != vis && preferences.fullscreen().get()) {
@@ -797,20 +803,20 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
             binding.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.getInsetsIgnoringVisibility(systemBars()).left
-                rightMargin = insets.getInsetsIgnoringVisibility(systemBars()).right
+                leftMargin = systemInsets.left
+                rightMargin = systemInsets.right
             }
             binding.toolbar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                topMargin = insets.getInsetsIgnoringVisibility(systemBars()).top
+                topMargin = systemInsets.top
             }
             binding.chaptersSheet.chaptersBottomSheet.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = insets.getInsetsIgnoringVisibility(systemBars()).left
-                rightMargin = insets.getInsetsIgnoringVisibility(systemBars()).right
-                height = 280.dpToPx + insets.getInsetsIgnoringVisibility(systemBars()).bottom
+                leftMargin = systemInsets.left
+                rightMargin = systemInsets.right
+                height = 280.dpToPx + systemInsets.bottom
             }
             binding.navLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                leftMargin = 12.dpToPx + insets.getInsetsIgnoringVisibility(systemBars()).left
-                rightMargin = 12.dpToPx + insets.getInsetsIgnoringVisibility(systemBars()).right
+                leftMargin = 12.dpToPx + systemInsets.left
+                rightMargin = 12.dpToPx + systemInsets.right
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
                 peek + if (preferences.fullscreen().get()) {
@@ -823,8 +829,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                             rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom
                     )
                 }
-            binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.getInsetsIgnoringVisibility(
-                systemBars()).bottom)
+            binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = systemInsets.bottom)
             binding.viewerContainer.requestLayout()
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
