@@ -6,6 +6,7 @@ import android.view.WindowManager
 import androidx.biometric.BiometricManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.SearchActivity
+import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 
@@ -14,7 +15,6 @@ object SecureActivityDelegate {
     private val preferences by injectLazy<PreferencesHelper>()
 
     var locked: Boolean = true
-    var isAuthenticating: Boolean = false
 
     fun setSecure(activity: Activity?, force: Boolean? = null) {
         val enabled = force ?: preferences.secureScreen().get()
@@ -29,7 +29,7 @@ object SecureActivityDelegate {
     }
 
     fun promptLockIfNeeded(activity: Activity?, requireSuccess: Boolean = false) {
-        if (activity == null || isAuthenticating) return
+        if (activity == null || AuthenticatorUtil.isAuthenticating) return
         val lockApp = preferences.useBiometrics().get()
         if (lockApp && BiometricManager.from(activity).canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS) {
             if (isAppLocked()) {

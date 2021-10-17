@@ -1,33 +1,31 @@
 package eu.kanade.tachiyomi.ui.setting
 
-import androidx.biometric.BiometricManager
+import androidx.fragment.app.FragmentActivity
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
+import eu.kanade.tachiyomi.util.system.AuthenticatorUtil.isAuthenticationSupported
 
 class SettingsSecurityController : SettingsController() {
     override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
         titleRes = R.string.security
 
-        val biometricManager = BiometricManager.from(context)
-        if (biometricManager.canAuthenticate() == BiometricManager.BIOMETRIC_SUCCESS) {
-            var preference: IntListMatPreference? = null
+        if (context.isAuthenticationSupported()) {
             switchPreference {
                 key = PreferenceKeys.useBiometrics
                 titleRes = R.string.lock_with_biometrics
                 defaultValue = false
 
-                onChange {
-                    preference?.isVisible = it as Boolean
-                    true
-                }
+                requireAuthentication(
+                    activity as? FragmentActivity,
+                    activity!!.getString(R.string.lock_with_biometrics)
+                )
             }
-            preference = intListPreference(activity) {
+            intListPreference(activity) {
                 key = PreferenceKeys.lockAfter
                 titleRes = R.string.lock_when_idle
-                isVisible = preferences.useBiometrics().get()
                 val values = listOf(0, 2, 5, 10, 20, 30, 60, 90, 120, -1)
                 entries = values.mapNotNull {
                     when (it) {
@@ -42,6 +40,8 @@ class SettingsSecurityController : SettingsController() {
                 }
                 entryValues = values
                 defaultValue = 0
+
+                preferences.useBiometrics().asImmediateFlowIn(viewScope) { isVisible = it }
             }
         }
 

@@ -24,6 +24,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.log.XLogSetup
+import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.flow.launchIn
 import org.conscrypt.Conscrypt
@@ -95,7 +96,7 @@ open class App : Application(), DefaultLifecycleObserver {
     }
 
     override fun onPause(owner: LifecycleOwner) {
-        if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().get() >= 0) {
+        if (!AuthenticatorUtil.isAuthenticating && preferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
     }

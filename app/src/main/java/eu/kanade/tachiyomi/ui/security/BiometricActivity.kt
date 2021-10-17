@@ -5,6 +5,7 @@ import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricPrompt
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.activity.BaseThemedActivity
+import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import java.util.Date
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -15,7 +16,7 @@ class BiometricActivity : BaseThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         val fromSearch = intent.getBooleanExtra("fromSearch", false)
-        SecureActivityDelegate.isAuthenticating = true
+        AuthenticatorUtil.isAuthenticating = true
         val biometricPrompt = BiometricPrompt(
             this,
             executor,
@@ -24,7 +25,7 @@ class BiometricActivity : BaseThemedActivity() {
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
                     super.onAuthenticationError(errorCode, errString)
-                    SecureActivityDelegate.isAuthenticating = false
+                    AuthenticatorUtil.isAuthenticating = false
                     if (fromSearch) finish()
                     else finishAffinity()
                 }
@@ -32,7 +33,7 @@ class BiometricActivity : BaseThemedActivity() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     super.onAuthenticationSucceeded(result)
                     SecureActivityDelegate.locked = false
-                    SecureActivityDelegate.isAuthenticating = false
+                    AuthenticatorUtil.isAuthenticating = false
                     preferences.lastUnlock().set(Date().time)
                     finish()
                 }
