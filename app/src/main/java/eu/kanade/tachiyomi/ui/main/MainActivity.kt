@@ -385,6 +385,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
 
         if (savedInstanceState == null) {
+            // Reset Incognito Mode on relaunch
+            preferences.incognitoMode().set(false)
+
             // Show changelog if needed
             if (Migrations.upgrade(preferences)) {
                 if (!BuildConfig.DEBUG) {

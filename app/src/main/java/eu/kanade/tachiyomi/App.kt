@@ -1,9 +1,15 @@
 package eu.kanade.tachiyomi
 
+import android.annotation.SuppressLint
 import android.app.Application
+import android.app.PendingIntent
+import android.content.BroadcastReceiver
 import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
@@ -19,6 +25,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.log.XLogSetup
+import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.flow.launchIn
 import org.conscrypt.Conscrypt
 import uy.kohesive.injekt.Injekt
@@ -31,6 +38,9 @@ open class App : Application(), LifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
 
+    private val disableIncognitoReceiver = DisableIncognitoReceiver()
+
+    @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
         super.onCreate()
         XLogSetup(this)
@@ -55,8 +65,34 @@ open class App : Application(), LifecycleObserver {
             .asImmediateFlow { AppCompatDelegate.setDefaultNightMode(it) }
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
 
-        // Reset Incognito Mode on relaunch
-        preferences.incognitoMode().set(false)
+        // Show notification to disable Incognito Mode when it's enabled
+        preferences.incognitoMode().asFlow()
+            .onEach { enabled ->
+                val notificationManager = NotificationManagerCompat.from(this)
+                if (enabled) {
+                    disableIncognitoReceiver.register()
+                    val notification = notification(Notifications.CHANNEL_INCOGNITO_MODE) {
+                        val incogText = getString(R.string.incognito_mode)
+                        setContentTitle(incogText)
+                        setContentText(getString(R.string.turn_off_, incogText))
+                        setSmallIcon(R.drawable.ic_glasses_24dp)
+                        setOngoing(true)
+
+                        val pendingIntent = PendingIntent.getBroadcast(
+                            this@App,
+                            0,
+                            Intent(ACTION_DISABLE_INCOGNITO_MODE),
+                            PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+                        )
+                        setContentIntent(pendingIntent)
+                    }
+                    notificationManager.notify(Notifications.ID_INCOGNITO_MODE, notification)
+                } else {
+                    disableIncognitoReceiver.unregister()
+                    notificationManager.cancel(Notifications.ID_INCOGNITO_MODE)
+                }
+            }
+            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
 
     @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
@@ -76,4 +112,28 @@ open class App : Application(), LifecycleObserver {
     protected open fun setupNotificationChannels() {
         Notifications.createChannels(this)
     }
+
+    private inner class DisableIncognitoReceiver : BroadcastReceiver() {
+        private var registered = false
+
+        override fun onReceive(context: Context, intent: Intent) {
+            preferences.incognitoMode().set(false)
+        }
+
+        fun register() {
+            if (!registered) {
+                registerReceiver(this, IntentFilter(ACTION_DISABLE_INCOGNITO_MODE))
+                registered = true
+            }
+        }
+
+        fun unregister() {
+            if (registered) {
+                unregisterReceiver(this)
+                registered = false
+            }
+        }
+    }
 }
+
+private const val ACTION_DISABLE_INCOGNITO_MODE = "tachi.action.DISABLE_INCOGNITO_MODE"
