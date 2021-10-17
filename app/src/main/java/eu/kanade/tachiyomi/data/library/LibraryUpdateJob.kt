@@ -9,6 +9,7 @@ import androidx.work.WorkManager
 import androidx.work.Worker
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.concurrent.TimeUnit
@@ -17,8 +18,16 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
     Worker(context, workerParams) {
 
     override fun doWork(): Result {
-        LibraryUpdateService.start(context)
-        return Result.success()
+        val preferences = Injekt.get<PreferencesHelper>()
+        if (requiresWifiConnection(preferences) && !context.isConnectedToWifi()) {
+            Result.failure()
+        }
+
+        return if (LibraryUpdateService.start(context)) {
+            Result.success()
+        } else {
+            Result.failure()
+        }
     }
 
     companion object {
@@ -28,17 +37,11 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
             val preferences = Injekt.get<PreferencesHelper>()
             val interval = prefInterval ?: preferences.libraryUpdateInterval().get()
             if (interval > 0) {
-                val restrictions = preferences.libraryUpdateRestriction()!!
-                val acRestriction = "ac" in restrictions
-                val wifiRestriction = if ("wifi" in restrictions) {
-                    NetworkType.UNMETERED
-                } else {
-                    NetworkType.CONNECTED
-                }
+                val restrictions = preferences.libraryUpdateRestriction().orEmpty()
 
                 val constraints = Constraints.Builder()
-                    .setRequiredNetworkType(wifiRestriction)
-                    .setRequiresCharging(acRestriction)
+                    .setRequiredNetworkType(NetworkType.CONNECTED)
+                    .setRequiresCharging("ac" in restrictions)
                     .build()
 
                 val request = PeriodicWorkRequestBuilder<LibraryUpdateJob>(
@@ -56,6 +59,11 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
             } else {
                 WorkManager.getInstance(context).cancelAllWorkByTag(TAG)
             }
+        }
+
+        fun requiresWifiConnection(preferences: PreferencesHelper): Boolean {
+            val restrictions = preferences.libraryUpdateRestriction().orEmpty()
+            return "wifi" in restrictions
         }
     }
 }

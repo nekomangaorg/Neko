@@ -648,9 +648,9 @@ class LibraryUpdateService(
             context: Context,
             category: Category? = null,
             target: Target = Target.CHAPTERS,
-            mangaToUse: List<LibraryManga>? = null,
-        ) {
-            if (!isRunning()) {
+            mangaToUse: List<LibraryManga>? = null
+        ): Boolean {
+            return if (!isRunning()) {
                 val intent = Intent(context, LibraryUpdateService::class.java).apply {
                     putExtra(KEY_TARGET, target)
                     category?.id?.let { id ->
@@ -666,11 +666,13 @@ class LibraryUpdateService(
                 } else {
                     context.startForegroundService(intent)
                 }
+                true
             } else {
                 if (target == Target.CHAPTERS) category?.id?.let {
                     if (mangaToUse != null) instance?.addMangaToQueue(it, mangaToUse)
                     else instance?.addCategory(it)
                 }
+                false
             }
         }
 
