@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.util.chapter
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.util.lang.compareToCaseInsensitiveNaturalOrder
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -36,8 +37,7 @@ class ChapterSort(val manga: Manga, val chapterFilter: ChapterFilter = Injekt.ge
     }
 
     fun <T : Chapter> sortComparator(ignoreAsc: Boolean = false): Comparator<T> {
-        val sortDescending = !ignoreAsc &&
-            manga.sortDescending(preferences)
+        val sortDescending = !ignoreAsc && manga.sortDescending(preferences)
         val sortFunction: (T, T) -> Int =
             when (manga.chapterOrder(preferences)) {
                 Manga.CHAPTER_SORTING_SOURCE -> when (sortDescending) {
@@ -45,8 +45,8 @@ class ChapterSort(val manga: Manga, val chapterFilter: ChapterFilter = Injekt.ge
                     false -> { c1, c2 -> c2.source_order.compareTo(c1.source_order) }
                 }
                 Manga.CHAPTER_SORTING_NUMBER -> when (sortDescending) {
-                    true -> { c1, c2 -> c2.chapter_number.compareTo(c1.chapter_number) }
-                    false -> { c1, c2 -> c1.chapter_number.compareTo(c2.chapter_number) }
+                    true -> { c1, c2 -> c2.chapter_number.toString().compareToCaseInsensitiveNaturalOrder(c1.chapter_number.toString()) }
+                    false -> { c1, c2 -> c1.chapter_number.toString().compareToCaseInsensitiveNaturalOrder(c2.chapter_number.toString()) }
                 }
                 Manga.CHAPTER_SORTING_UPLOAD_DATE -> when (sortDescending) {
                     true -> { c1, c2 -> c2.date_upload.compareTo(c1.date_upload) }
