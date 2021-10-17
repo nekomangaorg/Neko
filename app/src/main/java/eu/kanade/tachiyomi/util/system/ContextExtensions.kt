@@ -299,6 +299,24 @@ fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
 }
 
 /**
+ * Returns true if device is connected to Wifi.
+ */
+fun Context.isConnectedToWifi(): Boolean {
+    if (!wifiManager.isWifiEnabled) return false
+
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+        val activeNetwork = connectivityManager.activeNetwork ?: return false
+        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+
+        networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
+            networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
+    } else {
+        @Suppress("DEPRECATION")
+        wifiManager.connectionInfo.bssid != null
+    }
+}
+
+/**
  * Returns true if the given service class is running.
  */
 fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
