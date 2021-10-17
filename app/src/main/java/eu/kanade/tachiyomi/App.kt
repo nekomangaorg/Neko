@@ -75,7 +75,7 @@ open class App : Application(), DefaultLifecycleObserver {
                         val incogText = getString(R.string.incognito_mode)
                         setContentTitle(incogText)
                         setContentText(getString(R.string.turn_off_, incogText))
-                        setSmallIcon(R.drawable.ic_glasses_24dp)
+                        setSmallIcon(R.drawable.ic_incognito_24dp)
                         setOngoing(true)
 
                         val pendingIntent = PendingIntent.getBroadcast(
