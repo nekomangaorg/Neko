@@ -19,20 +19,20 @@ import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 
-class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
+class AppUpdateJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result = coroutineScope {
         try {
             val preferences: PreferencesHelper by injectLazy()
-            val result = UpdateChecker.getUpdateChecker().checkForUpdate()
-            if (result is UpdateResult.NewUpdate<*>) {
+            val result = AppUpdateChecker.getUpdateChecker().checkForUpdate()
+            if (result is AppUpdateResult.NewUpdate<*>) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    preferences.shouldAutoUpdate() != AutoUpdaterJob.NEVER
+                    preferences.appShouldAutoUpdate() != AutoUpdaterJob.NEVER
                 ) {
                     AutoUpdaterJob.setupTask(context)
                 }
-                UpdaterNotifier(context).promptUpdate(
+                AppUpdateNotifier(context).promptUpdate(
                     result.release.info,
                     result.release.downloadLink,
                     result.release.releaseLink
@@ -66,7 +66,7 @@ class UpdaterJob(private val context: Context, workerParams: WorkerParameters) :
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
 
-            val request = PeriodicWorkRequestBuilder<UpdaterJob>(
+            val request = PeriodicWorkRequestBuilder<AppUpdateJob>(
                 2,
                 TimeUnit.DAYS,
                 3,

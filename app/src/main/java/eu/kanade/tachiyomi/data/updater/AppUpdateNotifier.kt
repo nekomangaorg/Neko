@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.util.system.notificationManager
  *
  * @param context context of application.
  */
-internal class UpdaterNotifier(private val context: Context) {
+internal class AppUpdateNotifier(private val context: Context) {
 
     /**
      * Builder to manage notifications.
@@ -44,9 +44,9 @@ internal class UpdaterNotifier(private val context: Context) {
     }
 
     fun promptUpdate(body: String, url: String, releaseUrl: String) {
-        val intent = Intent(context, UpdaterService::class.java).apply {
-            putExtra(UpdaterService.EXTRA_DOWNLOAD_URL, url)
-            putExtra(UpdaterService.EXTRA_NOTIFY_ON_INSTALL, true)
+        val intent = Intent(context, AppUpdateService::class.java).apply {
+            putExtra(AppUpdateService.EXTRA_DOWNLOAD_URL, url)
+            putExtra(AppUpdateService.EXTRA_NOTIFY_ON_INSTALL, true)
         }
 
         val pendingIntent = NotificationReceiver.openUpdatePendingActivity(context, body, url)
@@ -202,7 +202,7 @@ internal class UpdaterNotifier(private val context: Context) {
             addAction(
                 R.drawable.ic_refresh_24dp,
                 context.getString(R.string.retry),
-                UpdaterService.downloadApkPendingService(context, url)
+                AppUpdateService.downloadApkPendingService(context, url)
             )
             // Cancel action
             addAction(

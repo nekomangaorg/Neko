@@ -11,10 +11,10 @@ import com.mikepenz.aboutlibraries.LibsBuilder
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.updater.UpdateChecker
-import eu.kanade.tachiyomi.data.updater.UpdateResult
-import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
-import eu.kanade.tachiyomi.data.updater.UpdaterService
+import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
+import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
+import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
@@ -36,7 +36,7 @@ class AboutController : SettingsController() {
     /**
      * Checks for new releases
      */
-    private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
+    private val updateChecker by lazy { AppUpdateChecker.getUpdateChecker() }
 
     private val userPreferences: PreferencesHelper by injectLazy()
 
@@ -165,17 +165,17 @@ class AboutController : SettingsController() {
                 }
             }
             when (result) {
-                is UpdateResult.NewUpdate<*> -> {
+                is AppUpdateResult.NewUpdate<*> -> {
                     val body = result.release.info
                     val url = result.release.downloadLink
 
                     // Create confirmation window
                     withContext(Dispatchers.Main) {
-                        UpdaterNotifier.releasePageUrl = result.release.releaseLink
+                        AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                         NewUpdateDialogController(body, url).showDialog(router)
                     }
                 }
-                is UpdateResult.NoNewUpdate -> {
+                is AppUpdateResult.NoNewUpdate -> {
                     withContext(Dispatchers.Main) {
                         activity?.toast(R.string.no_new_updates_available)
                     }
@@ -203,7 +203,7 @@ class AboutController : SettingsController() {
                     if (appContext != null) {
                         // Start download
                         val url = args.getString(URL_KEY) ?: ""
-                        UpdaterService.start(appContext, url, true)
+                        AppUpdateService.start(appContext, url, true)
                     }
                 }
                 .setNegativeButton(R.string.ignore, null)

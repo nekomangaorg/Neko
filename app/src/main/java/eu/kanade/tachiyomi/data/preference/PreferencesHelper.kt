@@ -451,7 +451,7 @@ class PreferencesHelper(val context: Context) {
 
     fun sideNavMode() = flowPrefs.getInt(Keys.sideNavMode, 0)
 
-    fun shouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
+    fun appShouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
 
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 

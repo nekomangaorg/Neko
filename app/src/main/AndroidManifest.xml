@@ -191,7 +191,7 @@
             android:exported="false" />
 
         <receiver
-            android:name=".data.updater.UpdaterBroadcast"
+            android:name=".data.updater.AppUpdateBroadcast"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
@@ -207,7 +207,7 @@
             android:exported="false" />
 
         <service
-            android:name=".data.updater.UpdaterService"
+            android:name=".data.updater.AppUpdateService"
             android:exported="false" />
 
         <service

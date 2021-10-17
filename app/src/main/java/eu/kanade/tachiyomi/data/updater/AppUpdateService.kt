@@ -35,7 +35,7 @@ import okhttp3.internal.http2.StreamResetException
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 
-class UpdaterService : Service() {
+class AppUpdateService : Service() {
 
     private val network: NetworkHelper by injectLazy()
 
@@ -44,7 +44,7 @@ class UpdaterService : Service() {
      */
     private lateinit var wakeLock: PowerManager.WakeLock
 
-    private lateinit var notifier: UpdaterNotifier
+    private lateinit var notifier: AppUpdateNotifier
 
     private var runningJob: Job? = null
 
@@ -52,7 +52,7 @@ class UpdaterService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        notifier = UpdaterNotifier(this)
+        notifier = AppUpdateNotifier(this)
 
         startForeground(Notifications.ID_UPDATER,
             notifier.onDownloadStarted(getString(R.string.app_name)).build())
@@ -189,7 +189,7 @@ class UpdaterService : Service() {
                 }
             }
 
-            val newIntent = Intent(this, UpdaterBroadcast::class.java)
+            val newIntent = Intent(this, AppUpdateBroadcast::class.java)
                 .setAction(PACKAGE_INSTALLED_ACTION)
                 .putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
                 .putExtra(EXTRA_FILE_URI, file.getUriCompat(this).toString())
@@ -222,7 +222,7 @@ class UpdaterService : Service() {
 
         internal const val NOTIFY_ON_INSTALL_KEY = "notify_on_install_complete"
 
-        private var instance: UpdaterService? = null
+        private var instance: AppUpdateService? = null
 
         /**
          * Returns the status of the service.
@@ -240,7 +240,7 @@ class UpdaterService : Service() {
         fun start(context: Context, url: String, notifyOnInstall: Boolean) {
             if (!isRunning()) {
                 val title = context.getString(R.string.app_name)
-                val intent = Intent(context, UpdaterService::class.java).apply {
+                val intent = Intent(context, AppUpdateService::class.java).apply {
                     putExtra(EXTRA_DOWNLOAD_TITLE, title)
                     putExtra(EXTRA_DOWNLOAD_URL, url)
                     putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
@@ -259,7 +259,7 @@ class UpdaterService : Service() {
          * @param context the application context.
          */
         fun stop(context: Context) {
-            context.stopService(Intent(context, UpdaterService::class.java))
+            context.stopService(Intent(context, AppUpdateService::class.java))
         }
 
         /**
@@ -268,12 +268,8 @@ class UpdaterService : Service() {
          * @param url the url to the new update.
          * @return [PendingIntent]
          */
-        internal fun downloadApkPendingService(
-            context: Context,
-            url: String,
-            notifyOnInstall: Boolean = false,
-        ): PendingIntent {
-            val intent = Intent(context, UpdaterService::class.java).apply {
+        internal fun downloadApkPendingService(context: Context, url: String, notifyOnInstall: Boolean = false): PendingIntent {
+            val intent = Intent(context, AppUpdateService::class.java).apply {
                 putExtra(EXTRA_DOWNLOAD_URL, url)
                 putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
             }

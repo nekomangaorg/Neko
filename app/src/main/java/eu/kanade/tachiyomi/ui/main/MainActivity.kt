@@ -52,9 +52,9 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
-import eu.kanade.tachiyomi.data.updater.UpdateChecker
-import eu.kanade.tachiyomi.data.updater.UpdateResult
-import eu.kanade.tachiyomi.data.updater.UpdaterNotifier
+import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
+import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
+import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -128,7 +128,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val hideBottomNav
         get() = router.backstackSize > 1 && router.backstack[1].controller !is DialogController
 
-    private val updateChecker by lazy { UpdateChecker.getUpdateChecker() }
+    private val updateChecker by lazy { AppUpdateChecker.getUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     private var tabAnimation: ValueAnimator? = null
     private var overflowDialog: Dialog? = null
@@ -562,13 +562,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 try {
                     val result = updateChecker.checkForUpdate()
                     preferences.lastAppCheck().set(Date().time)
-                    if (result is UpdateResult.NewUpdate<*>) {
+                    if (result is AppUpdateResult.NewUpdate<*>) {
                         val body = result.release.info
                         val url = result.release.downloadLink
 
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
-                            UpdaterNotifier.releasePageUrl = result.release.releaseLink
+                            AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                             AboutController.NewUpdateDialogController(body, url).showDialog(router)
                         }
                     }

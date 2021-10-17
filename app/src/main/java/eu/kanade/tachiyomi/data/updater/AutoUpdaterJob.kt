@@ -31,11 +31,11 @@ class AutoUpdaterJob(private val context: Context, workerParams: WorkerParameter
             ) {
                 return@coroutineScope Result.failure()
             }
-            val result = UpdateChecker.getUpdateChecker().checkForUpdate()
-            if (result is UpdateResult.NewUpdate<*> && !UpdaterService.isRunning()) {
-                UpdaterNotifier(context).cancel()
-                UpdaterNotifier.releasePageUrl = result.release.releaseLink
-                UpdaterService.start(context, result.release.downloadLink, false)
+            val result = AppUpdateChecker.getUpdateChecker().checkForUpdate()
+            if (result is AppUpdateResult.NewUpdate<*> && !AppUpdateService.isRunning()) {
+                AppUpdateNotifier(context).cancel()
+                AppUpdateNotifier.releasePageUrl = result.release.releaseLink
+                AppUpdateService.start(context, result.release.downloadLink, false)
             }
             Result.success()
         } catch (e: Exception) {
@@ -62,7 +62,7 @@ class AutoUpdaterJob(private val context: Context, workerParams: WorkerParameter
 
         fun setupTask(context: Context) {
             val preferences = Injekt.get<PreferencesHelper>()
-            val restrictions = preferences.shouldAutoUpdate()
+            val restrictions = preferences.appShouldAutoUpdate()
             val wifiRestriction = if (restrictions == ONLY_ON_UNMETERED) {
                 NetworkType.UNMETERED
             } else {
