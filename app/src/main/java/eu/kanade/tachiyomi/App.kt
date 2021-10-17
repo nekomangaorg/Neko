@@ -10,9 +10,8 @@ import android.content.IntentFilter
 import android.os.Build
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.app.NotificationManagerCompat
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleObserver
-import androidx.lifecycle.OnLifecycleEvent
+import androidx.lifecycle.DefaultLifecycleObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.ProcessLifecycleOwner
 import androidx.lifecycle.lifecycleScope
 import androidx.multidex.MultiDex
@@ -34,7 +33,7 @@ import uy.kohesive.injekt.injectLazy
 import uy.kohesive.injekt.registry.default.DefaultRegistrar
 import java.security.Security
 
-open class App : Application(), LifecycleObserver {
+open class App : Application(), DefaultLifecycleObserver {
 
     val preferences: PreferencesHelper by injectLazy()
 
@@ -95,10 +94,7 @@ open class App : Application(), LifecycleObserver {
             .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
     }
 
-    @OnLifecycleEvent(Lifecycle.Event.ON_STOP)
-    @Suppress("unused")
-    fun onAppBackgrounded() {
-        // App in background
+    override fun onPause(owner: LifecycleOwner) {
         if (!SecureActivityDelegate.isAuthenticating && preferences.lockAfter().get() >= 0) {
             SecureActivityDelegate.locked = true
         }
