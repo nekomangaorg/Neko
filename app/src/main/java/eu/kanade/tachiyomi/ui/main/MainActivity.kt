@@ -20,7 +20,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.webkit.WebView
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
 import androidx.core.graphics.ColorUtils
@@ -157,14 +156,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         get() = max(binding.toolbar.height, binding.cardFrame.height)
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        // Create a webview before extensions do or else they will break night mode theme
-        // https://stackoverflow.com/questions/54191883
-        XLog.d("Manually instantiating WebView to avoid night mode issue.")
-        try {
-            WebView(applicationContext)
-        } catch (e: Exception) {
-            XLog.e("Exception when creating webview at start", e)
-        }
         super.onCreate(savedInstanceState)
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079

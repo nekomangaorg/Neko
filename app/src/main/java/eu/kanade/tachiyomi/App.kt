@@ -3,10 +3,12 @@ package eu.kanade.tachiyomi
 import android.app.Application
 import android.content.Context
 import android.os.Build
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.lifecycle.OnLifecycleEvent
 import androidx.lifecycle.ProcessLifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.multidex.MultiDex
 import com.mikepenz.iconics.Iconics
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -14,8 +16,10 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.data.image.coil.CoilSetup
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.log.XLogSetup
+import kotlinx.coroutines.flow.launchIn
 import org.conscrypt.Conscrypt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
@@ -46,6 +50,10 @@ open class App : Application(), LifecycleObserver {
         Iconics.registerFont(CommunityMaterial)
         Iconics.registerFont(MaterialDesignDx)
         ProcessLifecycleOwner.get().lifecycle.addObserver(this)
+
+        preferences.nightMode()
+            .asImmediateFlow { AppCompatDelegate.setDefaultNightMode(it) }
+            .launchIn(ProcessLifecycleOwner.get().lifecycleScope)
 
         // Reset Incognito Mode on relaunch
         preferences.incognitoMode().set(false)

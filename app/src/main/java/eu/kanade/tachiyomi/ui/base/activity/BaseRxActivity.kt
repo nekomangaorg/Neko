@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
-import eu.kanade.tachiyomi.util.system.setThemeAndNight
+import eu.kanade.tachiyomi.util.system.setThemeByPref
 import nucleus.view.NucleusAppCompatActivity
 import uy.kohesive.injekt.injectLazy
 
@@ -19,7 +19,7 @@ abstract class BaseRxActivity<P : BasePresenter<*>> : NucleusAppCompatActivity<P
 
     override fun onCreate(savedInstanceState: Bundle?) {
         updatedTheme = null
-        setThemeAndNight(preferences)
+        setThemeByPref(preferences)
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
     }

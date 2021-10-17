@@ -9,7 +9,7 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.main.SearchActivity
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.system.getThemeWithExtras
-import eu.kanade.tachiyomi.util.system.setThemeAndNight
+import eu.kanade.tachiyomi.util.system.setThemeByPref
 import uy.kohesive.injekt.injectLazy
 
 abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
@@ -22,7 +22,7 @@ abstract class BaseActivity<VB : ViewBinding> : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         updatedTheme = null
-        setThemeAndNight(preferences)
+        setThemeByPref(preferences)
         super.onCreate(savedInstanceState)
         SecureActivityDelegate.setSecure(this)
     }

@@ -74,13 +74,10 @@ object ThemeUtil {
     }
 }
 
-fun AppCompatActivity.setThemeAndNight(preferences: PreferencesHelper) {
+fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
     if (preferences.nightMode().isNotSet() && preferences.oldTheme().isSet()) {
         ThemeUtil.convertTheme(preferences, preferences.oldTheme().get())
         preferences.oldTheme().delete()
-    }
-    if (AppCompatDelegate.getDefaultNightMode() != preferences.nightMode().get()) {
-        AppCompatDelegate.setDefaultNightMode(preferences.nightMode().get())
     }
     val theme = getPrefTheme(preferences)
     setTheme(theme.styleRes)
