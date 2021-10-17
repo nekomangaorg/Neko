@@ -1216,8 +1216,15 @@ class MangaDetailsController :
 
     private fun isLocked(): Boolean {
         if (presenter.isLockedFromSearch) {
+            return SecureActivityDelegate.shouldBeLocked()
+        }
+        return false
+    }
+
+    private fun needsToBeUnlocked(): Boolean {
+        if (presenter.isLockedFromSearch) {
             SecureActivityDelegate.promptLockIfNeeded(activity)
-            return true
+            return SecureActivityDelegate.shouldBeLocked()
         }
         return false
     }
@@ -1377,7 +1384,7 @@ class MangaDetailsController :
     }
 
     override fun favoriteManga(longPress: Boolean) {
-        if (isLocked()) return
+        if (needsToBeUnlocked()) return
         val manga = presenter.manga
         val categories = presenter.getCategories()
         if (!manga.favorite) {
@@ -1485,7 +1492,7 @@ class MangaDetailsController :
     }
 
     override fun showTrackingSheet() {
-        if (isLocked()) return
+        if (needsToBeUnlocked()) return
         trackingBottomSheet =
             TrackingBottomSheet(this)
         trackingBottomSheet?.show()

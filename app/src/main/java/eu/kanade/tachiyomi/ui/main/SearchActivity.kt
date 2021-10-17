@@ -135,6 +135,9 @@ class SearchActivity : MainActivity() {
                         }
                     }
                 }
+                if (intent.action == SHORTCUT_MANGA_BACK) {
+                    SecureActivityDelegate.promptLockIfNeeded(this, true)
+                }
                 router.replaceTopController(
                     RouterTransaction.with(MangaDetailsController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())
@@ -143,6 +146,7 @@ class SearchActivity : MainActivity() {
             }
             SHORTCUT_SOURCE -> {
                 val extras = intent.extras ?: return false
+                SecureActivityDelegate.promptLockIfNeeded(this, true)
                 router.replaceTopController(
                     RouterTransaction.with(BrowseSourceController(extras))
                         .pushChangeHandler(SimpleSwapChangeHandler())

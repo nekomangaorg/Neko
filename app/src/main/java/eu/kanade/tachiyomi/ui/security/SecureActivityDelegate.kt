@@ -28,13 +28,13 @@ object SecureActivityDelegate {
         }
     }
 
-    fun promptLockIfNeeded(activity: Activity?) {
+    fun promptLockIfNeeded(activity: Activity?, requireSuccess: Boolean = false) {
         if (activity == null || isAuthenticating) return
         val lockApp = preferences.useBiometrics().get()
         if (lockApp && BiometricManager.from(activity).canAuthenticate(BiometricManager.Authenticators.DEVICE_CREDENTIAL or BiometricManager.Authenticators.BIOMETRIC_WEAK) == BiometricManager.BIOMETRIC_SUCCESS) {
             if (isAppLocked()) {
                 val intent = Intent(activity, BiometricActivity::class.java)
-                intent.putExtra("fromSearch", (activity is SearchActivity))
+                intent.putExtra("fromSearch", (activity is SearchActivity) && !requireSuccess)
                 activity.startActivity(intent)
                 activity.overridePendingTransition(0, 0)
             }
