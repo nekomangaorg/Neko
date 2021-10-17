@@ -37,7 +37,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
             val preferences = Injekt.get<PreferencesHelper>()
             val interval = prefInterval ?: preferences.libraryUpdateInterval().get()
             if (interval > 0) {
-                val restrictions = preferences.libraryUpdateRestriction().orEmpty()
+                val restrictions = preferences.libraryUpdateRestriction().get()
 
                 val constraints = Constraints.Builder()
                     .setRequiredNetworkType(NetworkType.CONNECTED)
@@ -62,7 +62,7 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
         }
 
         fun requiresWifiConnection(preferences: PreferencesHelper): Boolean {
-            val restrictions = preferences.libraryUpdateRestriction().orEmpty()
+            val restrictions = preferences.libraryUpdateRestriction().get()
             return "wifi" in restrictions
         }
     }
