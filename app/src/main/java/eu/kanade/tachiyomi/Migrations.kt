@@ -33,6 +33,18 @@ object Migrations {
         val oldVersion = preferences.lastVersionCode().get()
         if (oldVersion < BuildConfig.VERSION_CODE) {
             preferences.lastVersionCode().set(BuildConfig.VERSION_CODE)
+
+            // Always set up background tasks to ensure they're running
+            if (BuildConfig.INCLUDE_UPDATER) {
+                UpdaterJob.setupTask(context)
+            }
+            LibraryUpdateJob.setupTask(context)
+            BackupCreatorJob.setupTask(context)
+
+            if (oldVersion == 0) {
+                return BuildConfig.DEBUG
+            }
+
             if (oldVersion < 38) {
                 if (preferences.automaticUpdates()) {
                     UpdaterJob.setupTask(context)
