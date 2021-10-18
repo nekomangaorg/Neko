@@ -20,7 +20,7 @@ class SettingsSecurityController : SettingsController() {
 
                 requireAuthentication(
                     activity as? FragmentActivity,
-                    activity!!.getString(R.string.lock_with_biometrics)
+                    context.getString(R.string.lock_with_biometrics)
                 )
             }
             intListPreference(activity) {
