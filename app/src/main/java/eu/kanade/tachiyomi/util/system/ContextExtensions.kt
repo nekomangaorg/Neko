@@ -166,7 +166,7 @@ val Float.dpToPxEnd: Float
 val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
-fun Context.isTablet() = resources.getBoolean(R.bool.isTablet)
+fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600.dpToPx
 
 /**
  * Helper method to create a notification builder.
