@@ -49,6 +49,8 @@ import com.tfcporciuncula.flow.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
+import eu.davidea.flexibleadapter.items.IHeader
+import eu.davidea.flexibleadapter.items.ISectionable
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
@@ -107,6 +109,7 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.ArrayList
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -1438,7 +1441,7 @@ class LibraryController(
         if (lastItemPosition == null) return
         val item = adapter.getItem(position) as? LibraryItem ?: return
         val newHeader = adapter.getSectionHeader(position) as? LibraryHeaderItem
-        val libraryItems = adapter.getSectionItems(adapter.getSectionHeader(position))
+        val libraryItems = getSectionItems(adapter.getSectionHeader(position), item)
             .filterIsInstance<LibraryItem>()
         val mangaIds = libraryItems.mapNotNull { (it as? LibraryItem)?.manga?.id }
         if (newHeader?.category?.id == item.manga.category) {
@@ -1459,6 +1462,17 @@ class LibraryController(
             )
         }
         lastItemPosition = null
+    }
+
+    private fun getSectionItems(header: IHeader<*>, skipItem: ISectionable<*, *>): List<ISectionable<*, *>> {
+        val sectionItems: MutableList<ISectionable<*, *>> = ArrayList()
+        var startPosition: Int = adapter.getGlobalPositionOf(header)
+        var item = adapter.getItem(++startPosition) as? LibraryItem
+        while (item?.header == header || item == skipItem) {
+            sectionItems.add(item as ISectionable<*, *>)
+            item = adapter.getItem(++startPosition) as? LibraryItem
+        }
+        return sectionItems
     }
 
     private fun moveMangaToCategory(
