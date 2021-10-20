@@ -303,7 +303,7 @@ dependencies {
     implementation("com.github.FunkyMuse.KAHelpers:activity:$kahelpersVersion")
     implementation("com.github.skydoves:sandwich:1.2.1")
 
-    implementation("com.mikepenz:aboutlibraries:8.9.3")
+    implementation("com.mikepenz:aboutlibraries:8.9.4")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
