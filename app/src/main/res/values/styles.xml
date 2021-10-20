@@ -12,7 +12,6 @@
     </style>
 
     <style name="Theme.ActionBar.DayNight" parent="ThemeOverlay.Material3.ActionBar">
-        <item name="colorControlHighlight">?colorControlHighlight</item>
         <item name="elevationOverlayEnabled">true</item>
         <item name="elevationOverlayColor">?colorSecondary</item>
     </style>
@@ -63,6 +62,13 @@
         <item name="iconTint">?attr/colorOnUnreadBadge</item>
         <item name="textAllCaps">false</item>
         <item name="android:textColor">?attr/colorOnUnreadBadge</item>
+    </style>
+
+    <style name="Widget.Tachiyomi.ActionMode" parent="Widget.Material3.ActionMode">
+        <item name="colorControlHighlight">?colorControlHighlight</item>
+        <item name="background">?colorPrimaryVariant</item>
+        <item name="height">?attr/mainActionBarSize</item>
+        <item name="android:minHeight">?attr/mainActionBarSize</item>
     </style>
 
     <style name="Widget.Tachiyomi.CardView.Tracker" parent="Widget.Material3.CardView.Outlined">

@@ -43,10 +43,9 @@
         <item name="android:listSelector">?attr/colorSecondary</item>
         <item name="android:divider">@color/divider</item>
         <item name="android:listDivider">@drawable/line_divider</item>
-        <item name="actionModeBackground">?colorPrimaryVariant</item>
         <item name="colorControlHighlight">@color/rippleColorTachiyomi</item>
+        <item name="actionModeStyle">@style/Widget.Tachiyomi.ActionMode</item>
         <item name="android:colorBackground">?background</item>
-        <item name="android:colorControlHighlight">?colorControlHighlight</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
         <item name="textAppearanceButton">@style/TextAppearance.Tachiyomi.Button</item>
