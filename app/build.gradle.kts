@@ -183,8 +183,8 @@ dependencies {
     implementation("org.jsoup:jsoup:1.14.3")
 
     // Icons
-    implementation("com.mikepenz:iconics-core:5.3.1")
-    implementation("com.mikepenz:iconics-views:5.3.1")
+    implementation("com.mikepenz:iconics-core:5.3.2")
+    implementation("com.mikepenz:iconics-views:5.3.2")
     implementation("com.mikepenz:community-material-typeface:5.8.55.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
@@ -235,7 +235,7 @@ dependencies {
     implementation("me.saket.cascade:cascade:1.3.0")
 
     //Compose
-    val composeVersion = "1.0.3"
+    val composeVersion = "1.0.4"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     // Tooling support (Previews, etc.)
@@ -252,7 +252,7 @@ dependencies {
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 
     //accompianist
-    val accompanistVersion = "0.19.0"
+    val accompanistVersion = "0.20.0"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-placeholder:$accompanistVersion")
 
@@ -298,7 +298,7 @@ dependencies {
     implementation("com.github.FunkyMuse.KAHelpers:activity:$kahelpersVersion")
     implementation("com.github.skydoves:sandwich:1.2.1")
 
-    implementation("com.mikepenz:aboutlibraries:8.9.3")
+    implementation("com.mikepenz:aboutlibraries:8.9.4")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.7")
 
 }
