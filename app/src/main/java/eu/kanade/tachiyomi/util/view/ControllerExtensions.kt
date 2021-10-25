@@ -24,6 +24,8 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
+import androidx.core.view.WindowInsetsCompat.Type.ime
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
@@ -46,6 +48,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isTablet
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.toast
 import uy.kohesive.injekt.injectLazy
@@ -117,19 +120,19 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             }
         }
         recycler.updatePaddingRelative(
-            top = activityBinding!!.toolbar.y.toInt() + appBarHeight
+            top = activityBinding!!.toolbar.y.toInt() + appBarHeight,
+            bottom = recycler.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom ?: 0
         )
-        recycler.applyBottomAnimatedInsets(setPadding = true)
-        recycler.doOnApplyWindowInsets { view, insets, _ ->
-            val headerHeight = insets.systemWindowInsetTop + appBarHeight
+        recycler.applyBottomAnimatedInsets(setPadding = true) { view, insets ->
+            val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
             view.updatePaddingRelative(top = headerHeight)
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+        }
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
+            recycler.doOnApplyWindowInsetsCompat { view, insets, _ ->
+                val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
                 view.updatePaddingRelative(
-                    bottom = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                        insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
-                    } else {
-                        insets.systemWindowInsetBottom
-                    }
+                    top = headerHeight,
+                    bottom = insets.getInsets(ime() or systemBars()).bottom
                 )
             }
         }
@@ -197,7 +200,6 @@ fun Controller.scrollViewWith(
     var statusBarHeight = -1
     val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
-    val isSideNavWithTabs = activityBinding?.sideNav != null && includeTabView && recycler.context.isTablet()
     val attrsArray = intArrayOf(R.attr.actionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
@@ -225,23 +227,25 @@ fun Controller.scrollViewWith(
     var fakeBottomNavView: View? = null
     if (!customPadding) {
         recycler.updatePaddingRelative(
-            top = (activity?.window?.decorView?.rootWindowInsets?.systemWindowInsetTop ?: 0) +
-                appBarHeight
+            top = (
+                activity?.window?.decorView?.rootWindowInsetsCompat?.getInsets(systemBars())?.top
+                    ?: 0
+                ) + appBarHeight
         )
     }
-    recycler.doOnApplyWindowInsets { view, insets, _ ->
-        val headerHeight = insets.systemWindowInsetTop + appBarHeight
+    recycler.doOnApplyWindowInsetsCompat { view, insets, _ ->
+        val headerHeight = insets.getInsets(systemBars()).top + appBarHeight
         if (!customPadding) view.updatePaddingRelative(
             top = headerHeight,
-            bottom = if (padBottom) insets.systemWindowInsetBottom else view.paddingBottom
+            bottom = if (padBottom) insets.getInsets(systemBars()).bottom else view.paddingBottom
         )
         swipeRefreshLayout?.setProgressViewOffset(
             true,
             headerHeight + (-60).dpToPx,
             headerHeight + 10.dpToPx
         )
-        statusBarHeight = insets.systemWindowInsetTop
-        afterInsets?.invoke(insets)
+        statusBarHeight = insets.getInsets(systemBars()).top
+        afterInsets?.invoke(insets.toWindowInsets()!!)
     }
 
     var toolbarColorAnim: ValueAnimator? = null
@@ -516,17 +520,6 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
                     invColor
                 )
             )
-        }
-    }
-}
-
-fun Controller.requestPermissionsSafe(permissions: Array<String>, requestCode: Int) {
-    val activity = activity ?: return
-    permissions.forEach { permission ->
-        if (ContextCompat.checkSelfPermission(activity,
-                permission) != PackageManager.PERMISSION_GRANTED
-        ) {
-            requestPermissions(arrayOf(permission), requestCode)
         }
     }
 }
