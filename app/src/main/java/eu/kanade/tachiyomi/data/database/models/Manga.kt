@@ -33,7 +33,7 @@ interface Manga : SManga {
 
     var chapter_flags: Int
 
-    var scanlator_filter: String?
+    var filtered_scanlators: String?
 
     fun isBlank() = id == Long.MIN_VALUE
 

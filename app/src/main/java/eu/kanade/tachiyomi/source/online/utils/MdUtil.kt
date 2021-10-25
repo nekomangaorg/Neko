@@ -54,9 +54,6 @@ class MdUtil {
                 useArrayPolymorphism = true
                 prettyPrint = true
             }
-
-        private const
-        val scanlatorSeparator = " & "
         
         val validOneShotFinalChapters = listOf("0", "1")
 
@@ -211,15 +208,6 @@ class MdUtil {
                 newDescription = newDescription.replace(it, "")
             }
             return cleanString(newDescription)
-        }
-
-        fun getScanlators(scanlators: String): List<String> {
-            if (scanlators.isBlank()) return emptyList()
-            return scanlators.split(scanlatorSeparator).distinct()
-        }
-
-        fun getScanlatorString(scanlators: Set<String>): String {
-            return scanlators.toList().sorted().joinToString(scanlatorSeparator)
         }
 
         fun getMissingChapterCount(chapters: List<SChapter>, mangaStatus: Int): String? {

@@ -96,6 +96,7 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
@@ -702,7 +703,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val readerNavGestureDetector = ReaderNavGestureDetector(this)
         val gestureDetector = GestureDetectorCompat(this, readerNavGestureDetector)
         with(binding.readerNav) {
-            binding.readerNav.pageSeekbar.addOnSliderTouchListener(object : Slider.OnSliderTouchListener {
+            binding.readerNav.pageSeekbar.addOnSliderTouchListener(object :
+                Slider.OnSliderTouchListener {
                 override fun onStartTrackingTouch(slider: Slider) {
                     readerNavGestureDetector.lockVertical = false
                     readerNavGestureDetector.hasScrollHorizontal = true
@@ -757,8 +759,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             (viewer as? PagerViewer)?.let {
                 if (it.config.doublePages || it.config.splitPages) {
                     if (it.hasExtraPage(value.roundToInt(), presenter.getCurrentChapter())) {
-                        val invertDoublePage = (viewer as? PagerViewer)?.config?.invertDoublePages ?: false
-                        return@setLabelFormatter if (!binding.readerNav.pageSeekbar.isRTL.xor(invertDoublePage)) {
+                        val invertDoublePage =
+                            (viewer as? PagerViewer)?.config?.invertDoublePages ?: false
+                        return@setLabelFormatter if (!binding.readerNav.pageSeekbar.isRTL.xor(
+                                invertDoublePage)
+                        ) {
                             "$pageNumber-${pageNumber + 1}"
                         } else {
                             "${pageNumber + 1}-$pageNumber"
@@ -805,16 +810,17 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
                 peek + if (preferences.fullscreen().get()) {
-                insets.getBottomGestureInsets()
-            } else {
-                val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
-                max(
-                    0,
-                    (rootInsets.getBottomGestureInsets()) -
-                        rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom
-                )
-            }
-            binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.getInsetsIgnoringVisibility(systemBars()).bottom)
+                    insets.getBottomGestureInsets()
+                } else {
+                    val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
+                    max(
+                        0,
+                        (rootInsets.getBottomGestureInsets()) -
+                            rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom
+                    )
+                }
+            binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = insets.getInsetsIgnoringVisibility(
+                systemBars()).bottom)
             binding.viewerContainer.requestLayout()
         }
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
@@ -1051,7 +1057,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         } else {
             pViewer.config.doublePages = doublePages
             if (pViewer.config.autoDoublePages) {
-                pViewer.config.splitPages = preferences.automaticSplitsPage().get() && !pViewer.config.doublePages
+                pViewer.config.splitPages =
+                    preferences.automaticSplitsPage().get() && !pViewer.config.doublePages
             }
         }
         val currentChapter = presenter.getCurrentChapter()
@@ -1112,8 +1119,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             binding.readerNav.leftChapter.isVisible = false
             binding.readerNav.rightChapter.isVisible = false
         } else if (viewer is R2LPagerViewer) {
-            binding.readerNav.leftChapter.alpha = if (viewerChapters.nextChapter != null) 1f else 0.5f
-            binding.readerNav.rightChapter.alpha = if (viewerChapters.prevChapter != null) 1f else 0.5f
+            binding.readerNav.leftChapter.alpha =
+                if (viewerChapters.nextChapter != null) 1f else 0.5f
+            binding.readerNav.rightChapter.alpha =
+                if (viewerChapters.prevChapter != null) 1f else 0.5f
         } else {
             binding.readerNav.rightChapter.alpha =
                 if (viewerChapters.nextChapter != null) 1f else 0.5f
@@ -1209,7 +1218,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         binding.readerNav.pageSeekbar.valueTo = pages.lastIndex.toFloat()
         val progress = page.index + if (hasExtraPage) 1 else 0
         // For a double page, show the last 2 pages as if it was the final part of the seekbar
-        binding.readerNav.pageSeekbar.value = (if (progress == pages.lastIndex) progress else page.index).toFloat()
+        binding.readerNav.pageSeekbar.value =
+            (if (progress == pages.lastIndex) progress else page.index).toFloat()
     }
 
     /**
@@ -1539,7 +1549,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val currentOrientation = resources.configuration.orientation
         viewer.config.doublePages = (currentOrientation == Configuration.ORIENTATION_LANDSCAPE)
         if (viewer.config.autoDoublePages) {
-            viewer.config.splitPages = preferences.automaticSplitsPage().get() && !viewer.config.doublePages
+            viewer.config.splitPages =
+                preferences.automaticSplitsPage().get() && !viewer.config.doublePages
         }
     }
 
@@ -1626,7 +1637,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             preferences.automaticSplitsPage().asFlow()
                 .drop(1)
                 .onEach {
-                    val isPaused = !this@ReaderActivity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
+                    val isPaused =
+                        !this@ReaderActivity.lifecycle.currentState.isAtLeast(Lifecycle.State.RESUMED)
                     if (isPaused) {
                         (viewer as? PagerViewer)?.config?.let { config ->
                             reloadChapters(config.doublePages, true)

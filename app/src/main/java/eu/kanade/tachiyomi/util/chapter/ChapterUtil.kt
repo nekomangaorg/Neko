@@ -28,7 +28,7 @@ class ChapterUtil {
             textView: TextView,
             chapter: Chapter,
             showBookmark: Boolean = true,
-            hideStatus: Boolean = false
+            hideStatus: Boolean = false,
         ) {
             val context = textView.context
             textView.setTextColor(chapterColor(context, chapter, hideStatus))
@@ -86,11 +86,14 @@ class ChapterUtil {
             }
         }
 
-        private fun readColor(context: Context): Int = context.contextCompatColor(R.color.read_chapter)
+        private fun readColor(context: Context): Int =
+            context.contextCompatColor(R.color.read_chapter)
 
-        private fun unreadColor(context: Context): Int = context.getResourceColor(R.attr.colorOnBackground)
+        private fun unreadColor(context: Context): Int =
+            context.getResourceColor(R.attr.colorOnBackground)
 
-        private fun bookmarkedColor(context: Context): Int = context.getResourceColor(R.attr.colorSecondary)
+        private fun bookmarkedColor(context: Context): Int =
+            context.getResourceColor(R.attr.colorSecondary)
 
         private val volumeRegex = Regex("""(vol|volume)\.? *([0-9]+)?""", RegexOption.IGNORE_CASE)
         private val seasonRegex = Regex("""(Season |S)([0-9]+)?""")
@@ -141,6 +144,17 @@ class ChapterUtil {
 
         fun hasTensOfChapters(chapters: List<ChapterItem>): Boolean {
             return chapters.size > 20
+        }
+
+        private const val scanlatorSeparator = " & "
+
+        fun getScanlators(scanlators: String?): List<String> {
+            if (scanlators.isNullOrBlank()) return emptyList()
+            return scanlators.split(scanlatorSeparator).distinct()
+        }
+
+        fun getScanlatorString(scanlators: Set<String>): String {
+            return scanlators.toList().sorted().joinToString(scanlatorSeparator)
         }
     }
 }

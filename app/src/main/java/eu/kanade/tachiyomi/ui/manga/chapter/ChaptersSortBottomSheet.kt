@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.setNegativeStateItems
-import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.util.view.setBottomEdge
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import eu.kanade.tachiyomi.widget.SortTextView
@@ -181,7 +180,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
                 .setPositiveButton(R.string.filter) { _, _ ->
                     presenter.setScanlatorFilter(filteredScanlators)
                 }
-                .setNeutralButton(R.string.reset) { _, _, ->
+                .setNeutralButton(R.string.reset) { _, _ ->
                     presenter.setScanlatorFilter(emptySet())
                 }
                 .show()

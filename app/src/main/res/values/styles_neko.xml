@@ -35,14 +35,6 @@
         <item name="cornerRadius">20dp</item>
     </style>
 
-
-    <style name="Neko.Button.RoundedOutline" parent="Theme.Widget.Button.RoundedOutline">
-        <item name="strokeColor">?attr/colorSecondary</item>
-        <item name="android:letterSpacing">-0.02</item>
-        <item name="android:textAllCaps">true</item>
-        <item name="fontFamily">@font/montserrat_medium</item>
-    </style>
-
     <style name="chipText" parent="TextAppearance.MaterialComponents.Chip">
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>

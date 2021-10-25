@@ -7,6 +7,22 @@ import eu.davidea.viewholders.FlexibleViewHolder
 abstract class BaseFlexibleViewHolder(
     view: View,
     adapter: FlexibleAdapter<*>,
-    stickyHeader: Boolean = false
+    stickyHeader: Boolean = false,
 ) :
-    FlexibleViewHolder(view, adapter, stickyHeader)
+    FlexibleViewHolder(view, adapter, stickyHeader) {
+    override fun getRearRightView(): View? {
+        return getRearEndView()
+    }
+
+    override fun getRearLeftView(): View? {
+        return getRearStartView()
+    }
+
+    open fun getRearStartView(): View? {
+        return null
+    }
+
+    open fun getRearEndView(): View? {
+        return null
+    }
+}

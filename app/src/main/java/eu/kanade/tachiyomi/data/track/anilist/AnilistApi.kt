@@ -1,9 +1,6 @@
 package eu.kanade.tachiyomi.data.track.anilist
 
 import androidx.core.net.toUri
-import com.afollestad.date.dayOfMonth
-import com.afollestad.date.month
-import com.afollestad.date.year
 import com.elvishew.xlog.XLog
 import com.github.salomonbrys.kotson.array
 import com.github.salomonbrys.kotson.get
@@ -102,7 +99,11 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         }
     }
 
-    suspend fun search(search: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
+    suspend fun search(
+        search: String,
+        manga: Manga,
+        wasPreviouslyTracked: Boolean,
+    ): List<TrackSearch> {
         return withContext(Dispatchers.IO) {
             val variables = jsonObject(
                 "query" to if (manga.anilist_id != null && !wasPreviouslyTracked) manga.anilist_id else search

@@ -3,8 +3,6 @@ package eu.kanade.tachiyomi.ui.setting
 import android.app.Dialog
 import android.os.Bundle
 import androidx.preference.PreferenceScreen
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.list.listItemsMultiChoice
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -12,7 +10,6 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
-import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
@@ -22,6 +19,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLoginDialog
 import eu.kanade.tachiyomi.widget.preference.MangadexLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.SiteLoginPreference
@@ -133,19 +131,19 @@ class SettingsSiteController :
             summaryRes = R.string.sync_follows_to_library_summary
 
             onClick {
-                MaterialDialog(activity!!).show {
-                    listItemsMultiChoice(
-                        items = context.resources.getStringArray(R.array.follows_options).toList()
-                            .let { it.subList(1, it.size) },
-                        initialSelection = intArrayOf(0, 5)
-                    ) { _, indices, _ ->
-                        preferences.mangadexSyncToLibraryIndexes()
-                            .set(indices.map { (it + 1).toString() }.toSet())
-                        StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
-                    }
-                    positiveButton(android.R.string.ok)
-                    negativeButton(android.R.string.cancel)
-                }
+                /* MaterialDialog(activity!!).show {
+                     listItemsMultiChoice(
+                         items = context.resources.getStringArray(R.array.follows_options).toList()
+                             .let { it.subList(1, it.size) },
+                         initialSelection = intArrayOf(0, 5)
+                     ) { _, indices, _ ->
+                         preferences.mangadexSyncToLibraryIndexes()
+                             .set(indices.map { (it + 1).toString() }.toSet())
+                         StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
+                     }
+                     positiveButton(android.R.string.ok)
+                     negativeButton(android.R.string.cancel)
+                 }*/
             }
         }
 
@@ -192,12 +190,12 @@ class SettingsSiteController :
             titleRes = R.string.v5_migration_service
             summary = context.resources.getString(R.string.v5_migration_desc)
             onClick {
-                MaterialDialog(activity!!).show {
+                /*MaterialDialog(activity!!).show {
                     title(text = "This will start legacy id migration (Note: This uses data)")
                     positiveButton(android.R.string.ok) {
                         V5MigrationJob.doWorkNow(activity!!)
                     }
-                }
+                }*/
             }
         }
     }
@@ -231,18 +229,20 @@ class SettingsSiteController :
             val initialLangs = preferences!!.langsToShow().get().split(",")
                 .map { lang -> options.indexOfFirst { it.first == lang } }.toIntArray()
 
-            return MaterialDialog(activity)
-                .title(R.string.show_languages)
-                .listItemsMultiChoice(
-                    items = options.map { it.second },
-                    initialSelection = initialLangs
-                ) { _, selections, _ ->
-                    val selected = selections.map { options[it].first }
-                    preferences!!.langsToShow().set(selected.joinToString(","))
-                }
-                .positiveButton(android.R.string.ok) {
-                }
-                .negativeButton(android.R.string.cancel)
+            return activity.materialAlertDialog().create()
+
+            /*  return MaterialDialog(activity)
+                  .title(R.string.show_languages)
+                  .listItemsMultiChoice(
+                      items = options.map { it.second },
+                      initialSelection = initialLangs
+                  ) { _, selections, _ ->
+                      val selected = selections.map { options[it].first }
+                      preferences!!.langsToShow().set(selected.joinToString(","))
+                  }
+                  .positiveButton(android.R.string.ok) {
+                  }
+                  .negativeButton(android.R.string.cancel)*/
         }
     }
 }

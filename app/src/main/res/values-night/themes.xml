@@ -43,9 +43,9 @@
         <item name="colorSurface">@color/backgroundLime</item>
         <item name="background">@color/backgroundLime</item>
         <item name="colorOnSecondary">@color/colorOnLime</item>
-        <item name="colorTertiary">@color/download_badge_light</item>
+        <item name="colorTertiary">?attr/colorSecondary</item>
         <item name="colorOnTertiary">@color/md_white_1000</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
+        <item name="unreadBadgeColor">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>

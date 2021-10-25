@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.backup.BackupConst
 import eu.kanade.tachiyomi.data.backup.BackupCreateService
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
+import eu.kanade.tachiyomi.data.backup.full.FullBackupRestoreValidator
 import eu.kanade.tachiyomi.data.backup.full.models.BackupFull
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
@@ -318,24 +319,20 @@ class SettingsBackupController : SettingsController() {
             val isOnline: Boolean = args.getBoolean(KEY_MODE, true)
 
             return try {
-                var message = if (type == BackupConst.BACKUP_TYPE_FULL) {
-                    activity.getString(R.string.restore_content_full)
-                } else {
-                    activity.getString(R.string.restore_content)
-                }
+                var message = activity.getString(R.string.restore_neko)
 
-                val validator = if (type == BackupConst.BACKUP_TYPE_FULL) {
-                    FullBackupRestoreValidator()
-                } else {
-                    LegacyBackupRestoreValidator()
-                }
+                val validator = FullBackupRestoreValidator()
 
                 val results = validator.validate(activity, uri)
                 if (results.missingSources.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${results.missingSources.joinToString("\n") { "- $it" }}"
+                    message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${
+                        results.missingSources.joinToString("\n") { "- $it" }
+                    }"
                 }
                 if (results.missingTrackers.isNotEmpty()) {
-                    message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${results.missingTrackers.joinToString("\n") { "- $it" }}"
+                    message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${
+                        results.missingTrackers.joinToString("\n") { "- $it" }
+                    }"
                 }
 
                 return activity.materialAlertDialog()

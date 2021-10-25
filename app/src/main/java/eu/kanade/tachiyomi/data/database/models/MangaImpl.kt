@@ -56,7 +56,7 @@ open class MangaImpl : Manga {
 
     override var anime_planet_id: String? = null
 
-    override var scanlator_filter: String? = null
+    override var filtered_scanlators: String? = null
 
     override var missing_chapters: String? = null
 
@@ -69,7 +69,7 @@ open class MangaImpl : Manga {
     override var merge_manga_image_url: String? = null
 
     override var last_chapter_number: Int? = null
-    
+
     override fun copyFrom(other: SManga) {
         if (other is MangaImpl &&
             other.title.isNotBlank() && other.title != title

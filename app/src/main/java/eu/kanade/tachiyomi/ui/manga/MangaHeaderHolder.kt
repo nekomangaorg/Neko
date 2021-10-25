@@ -466,7 +466,8 @@ class MangaHeaderHolder(
             val accentArray = FloatArray(3)
 
             ColorUtils.colorToHSL(baseTagColor, bgArray)
-            ColorUtils.colorToHSL(adapter.delegate.accentColor() ?: context.getResourceColor(R.attr.colorSecondary), accentArray)
+            ColorUtils.colorToHSL(adapter.delegate.accentColor()
+                ?: context.getResourceColor(R.attr.colorSecondary), accentArray)
             val downloadedColor = ColorUtils.setAlphaComponent(
                 ColorUtils.HSLToColor(
                     floatArrayOf(
@@ -528,7 +529,8 @@ class MangaHeaderHolder(
                 AnimatorInflater.loadStateListAnimator(context, R.animator.icon_btn_state_list_anim)
             backgroundTintList = ColorStateList.valueOf(
                 ColorUtils.blendARGB(
-                    adapter.delegate.accentColor() ?: context.getResourceColor(R.attr.colorSecondary),
+                    adapter.delegate.accentColor()
+                        ?: context.getResourceColor(R.attr.colorSecondary),
                     context.getResourceColor(R.attr.background),
                     0.706f
                 )
@@ -564,9 +566,11 @@ class MangaHeaderHolder(
                 adapter.delegate.coverColor()
                     ?: trueBackdrop.context.getResourceColor(R.attr.background)
             )
-            TextViewCompat.setCompoundDrawableTintList(moreButton, ColorStateList.valueOf(accentColor))
+            TextViewCompat.setCompoundDrawableTintList(moreButton,
+                ColorStateList.valueOf(accentColor))
             moreButton.setTextColor(accentColor)
-            TextViewCompat.setCompoundDrawableTintList(lessButton, ColorStateList.valueOf(accentColor))
+            TextViewCompat.setCompoundDrawableTintList(lessButton,
+                ColorStateList.valueOf(accentColor))
             lessButton.setTextColor(accentColor)
             shareButton.imageTintList = ColorStateList.valueOf(accentColor)
             webviewButton.imageTintList = ColorStateList.valueOf(accentColor)
@@ -578,22 +582,24 @@ class MangaHeaderHolder(
             )
 
             val colors = intArrayOf(
-                ColorUtils.setAlphaComponent(root.context.getResourceColor(R.attr.tabBarIconInactive), 43),
+                ColorUtils.setAlphaComponent(root.context.getResourceColor(R.attr.tabBarIconInactive),
+                    43),
                 accentColor
             )
 
             startReadingButton.backgroundTintList = ColorStateList(states, colors)
 
             val textColors = intArrayOf(
-                ColorUtils.setAlphaComponent(root.context.getResourceColor(R.attr.colorOnSurface), 97),
+                ColorUtils.setAlphaComponent(root.context.getResourceColor(R.attr.colorOnSurface),
+                    97),
                 root.context.getResourceColor(android.R.attr.textColorPrimaryInverse)
             )
             startReadingButton.setTextColor(ColorStateList(states, textColors))
-            trackButton.iconTint = ColorStateList.valueOf(accentColor)
-            favoriteButton.iconTint = ColorStateList.valueOf(accentColor)
+            trackButton.icon!!.tint = ColorStateList.valueOf(accentColor)
+            // favoriteButton.icon!!.tint = ColorStateList.valueOf(accentColor)
             if (updateAll) {
-                trackButton.checked(trackButton.stateListAnimator != null)
-                favoriteButton.checked(favoriteButton.stateListAnimator != null)
+                // trackButton.checked(trackButton.stateListAnimator != null)
+                // favoriteButton.checked(favoriteButton.stateListAnimator != null)
                 setGenreTags(this, manga)
             }
         }

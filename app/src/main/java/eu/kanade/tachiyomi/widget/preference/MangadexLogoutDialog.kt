@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.widget.preference
 
 import android.app.Dialog
 import android.os.Bundle
-import com.afollestad.materialdialogs.MaterialDialog
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -11,6 +10,7 @@ import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.launchNow
+import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
@@ -27,9 +27,10 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
     constructor(source: Source) : this(Bundle().apply { putLong("key", source.id) })
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        return MaterialDialog(activity!!)
-            .title(R.string.logout)
-            .positiveButton(R.string.logout) {
+        return activity!!.materialAlertDialog().apply {
+            setTitle(R.string.logout)
+            setNegativeButton(android.R.string.cancel, null)
+            setPositiveButton(R.string.logout) { _, _ ->
                 launchNow {
                     runCatching {
                         // val loggedOut = source.logout()
@@ -40,7 +41,7 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                             preferences.setTokens("", "")
                         }
                         activity?.toast(R.string.successfully_logged_out)
-                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
+                        //(targetController as? Listener)?.siteLogoutDialogClosed(source)
                         /* } else {
                              activity?.toast(loggedOut.error)
                          }*/
@@ -50,7 +51,7 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                     }
                 }
             }
-            .negativeButton(android.R.string.cancel)
+        }.create()
     }
 
     interface Listener {

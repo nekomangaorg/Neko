@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
@@ -241,7 +242,7 @@ class ApiMangaParser {
          }*/
 
 
-        chapter.scanlator = MdUtil.cleanString(MdUtil.getScanlatorString(scanlatorName))
+        chapter.scanlator = MdUtil.cleanString(ChapterUtil.getScanlatorString(scanlatorName))
 
         chapter.mangadex_chapter_id = MdUtil.getChapterId(chapter.url)
 

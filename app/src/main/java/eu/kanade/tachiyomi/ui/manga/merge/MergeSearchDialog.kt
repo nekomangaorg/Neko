@@ -4,9 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.recyclerview.widget.GridLayoutManager
-import com.afollestad.materialdialogs.MaterialDialog
-import com.afollestad.materialdialogs.customview.customView
-import com.afollestad.materialdialogs.customview.getCustomView
 import com.jakewharton.rxbinding.widget.textChanges
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
@@ -43,25 +40,25 @@ class MergeSearchDialog : DialogController {
     }
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
-        val dialog = MaterialDialog(activity!!).apply {
-            customView(
-                viewRes = R.layout.merge_search_dialog,
-                scrollable = false,
-                noVerticalPadding = true
-            )
-            negativeButton(android.R.string.cancel)
-        }
+        /* val dialog = MaterialDialog(activity!!).apply {
+             customView(
+                 viewRes = R.layout.merge_search_dialog,
+                 scrollable = false,
+                 noVerticalPadding = true
+             )
+             negativeButton(android.R.string.cancel)
+         }*/
 
-        binding = MergeSearchDialogBinding.bind(dialog.getCustomView())
+        /*  binding = MergeSearchDialogBinding.bind(dialog.getCustomView())
 
-        /* val width = ViewGroup.LayoutParams.MATCH_PARENT
+          *//* val width = ViewGroup.LayoutParams.MATCH_PARENT
          val height = ViewGroup.LayoutParams.WRAP_CONTENT
-         dialog.window!!.setLayout(width, height)*/
+         dialog.window!!.setLayout(width, height)*//*
 
         dialogView = dialog.view
         onViewCreated(dialog.view, savedViewState)
-
-        return dialog
+*/
+        return Dialog(view!!.context)
     }
 
     fun onViewCreated(view: View, savedState: Bundle?) {

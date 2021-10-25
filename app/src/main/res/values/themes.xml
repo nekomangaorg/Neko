@@ -22,17 +22,21 @@
         <item name="colorPrimary">@color/primaryTachiyomi</item>
         <item name="colorPrimaryInverse">@color/primaryInverseTachiyomi</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTachiyomi</item>
-        <item name="colorSurface">@color/background</item> //old colorSecondary
-        <item name="colorOnSurface">@color/colorOnSurface</item> //old colorOnSecondary
-        <item name="colorSecondary">@color/secondaryTachiyomi</item> //colorAccent
+        <item name="colorSurface">@color/background</item>
+        //old colorSecondary
+        <item name="colorOnSurface">@color/colorOnSurface</item>
+        //old colorOnSecondary
+        <item name="colorSecondary">@color/secondaryTachiyomi</item>
+        //colorAccent
         <item name="colorOnSecondary">@color/md_white_1000</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item> // much darker / lighter version of colorSecondary
+        <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item>
+        // much darker / lighter version of colorSecondary
         <item name="colorSecondaryContainer">@color/secondary_container</item>
         <item name="background">@color/background</item>
         <item name="colorOnBackground">@color/colorOnBackground</item>
         <item name="colorBackgroundFloating">?colorSurface</item>
 
-        <item name="colorTertiary">@color/download_badge</item>
+        <item name="colorTertiary">@color/md_black_1000</item>
         <item name="colorOnTertiary">@color/black</item>
 
         <item name="readerBackground">@color/primaryVariantTachiyomi</item>
@@ -46,7 +50,8 @@
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
         <item name="textAppearanceButton">@style/TextAppearance.Tachiyomi.Button</item>
-        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary</item>
+        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary
+        </item>
         <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
         <item name="switchStyle">@style/Widget.Tachiyomi.CompoundButton.Switch</item>
         <item name="sliderStyle">@style/Widget.Tachiyomi.Slider</item>
@@ -88,13 +93,15 @@
         <item name="hasColoredActionBar">true</item>
         <item name="colorPrimaryVariant">@color/legacyBlue</item>
         <item name="tabBarIconColor">@color/md_white_1000</item>
-		<item name="colorSurface">@color/legacyBlue</item>
+        <item name="colorSurface">@color/legacyBlue</item>
         <item name="colorSecondaryVariant">@color/md_white_1000</item>
         <item name="colorSecondaryContainer">@color/md_white_1000_20</item>
         <item name="colorBackgroundFloating">?background</item>
         <item name="android:colorBackgroundFloating">?background</item>
         <item name="tabBarIconInactive">@color/md_white_1000_50</item>
-        <item name="materialAlertDialogTheme">@style/ThemeOverlay.Tachiyomi.MaterialAlertDialog.Colored</item>
+        <item name="materialAlertDialogTheme">
+            @style/ThemeOverlay.Tachiyomi.MaterialAlertDialog.Colored
+        </item>
         <item name="tabHighlightBackground">@color/md_white_1000_50</item>
         <item name="actionBarTintColor">@color/md_white_1000</item>
         <item name="popupMenuBackground">@drawable/alt_popupmenu_background</item>
@@ -157,8 +164,8 @@
         <item name="colorSurface">@color/backgroundTealSapphire</item>
         <item name="colorOnBackground">@color/colorOnBackgroundTealSapphire</item>
         <item name="actionBarTintColor">@color/appBarTextTealSapphire</item>
-        <item name="colorTertiary">@color/downloadBadgeDayNightInverse</item>
-        <item name="colorOnTertiary">?android:textColorPrimaryInverse</item>
+        <item name="colorTertiary">?attr/colorSecondary</item>
+        <item name="colorOnTertiary">?attr/colorOnSecondary</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
@@ -184,8 +191,8 @@
         <item name="colorOnSecondary">@color/onSecondaryTako</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantTako</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTako</item>
-        <item name="colorTertiary">@color/downloadBadgeDayNight</item>
-        <item name="colorOnTertiary">@color/colorOnDownloadBadgeDayNight</item>
+        <item name="colorTertiary">?attr/colorAccent</item>
+        <item name="colorOnTertiary">?attr/colorOnSecondary</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTako</item>
         <item name="colorControlHighlight">@color/rippleColoredTako</item>
         <item name="colorSurface">@color/backgroundTako</item>

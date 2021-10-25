@@ -64,7 +64,7 @@ data class BackupManga(
             chapter_flags = this@BackupManga.chapterFlags
             merge_manga_url = this@BackupManga.mergedMangaUrl
             merge_manga_image_url = this@BackupManga.mergedMangaImageUrl
-            scanlator_filter = this@BackupManga.scanlatorFilter
+            filtered_scanlators = this@BackupManga.scanlatorFilter
         }
     }
 
@@ -99,7 +99,7 @@ data class BackupManga(
                 chapterFlags = manga.chapter_flags,
                 mergedMangaUrl = manga.merge_manga_url,
                 mergedMangaImageUrl = manga.merge_manga_image_url,
-                scanlatorFilter = manga.scanlator_filter,
+                scanlatorFilter = manga.filtered_scanlators,
             )
         }
     }

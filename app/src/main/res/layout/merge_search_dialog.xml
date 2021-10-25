@@ -44,7 +44,7 @@
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/merge_recycler"
-            style="@style/Theme.Widget.CardView"
+            style="@style/Widget.Tachiyomi.CardView.Tracker"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:choiceMode="singleChoice"

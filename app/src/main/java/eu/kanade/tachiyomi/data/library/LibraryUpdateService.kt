@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.addNewScanlatorsToFilter
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
@@ -462,13 +463,13 @@ class LibraryUpdateService(
                     if (shouldDownload) {
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
 
-                        if (manga.scanlator_filter != null) {
-                            val scanlatorsToDownload =
-                                MdUtil.getScanlators(manga.scanlator_filter!!).toMutableSet()
+                        if (manga.filtered_scanlators != null) {
+                            val scanlatorsToIgnore =
+                                ChapterUtil.getScanlators(manga.filtered_scanlators).toMutableSet()
 
                             // only download scanlators we have filtered, unless a new scanlator starts uploading
                             chaptersToDl =
-                                chaptersToDl.filter { scanlatorsToDownload.contains(it.scanlator) }
+                                chaptersToDl.filter { it.scanlator !in scanlatorsToIgnore }
                         }
 
                         downloadChapters(manga, chaptersToDl)

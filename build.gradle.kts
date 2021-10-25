@@ -23,7 +23,7 @@ subprojects {
 buildscript {
     dependencies {
         classpath("com.google.firebase:firebase-crashlytics-gradle:2.7.1")
-        classpath("com.android.tools.build:gradle:7.0.2")
+        classpath("com.android.tools.build:gradle:7.0.3")
         classpath("com.google.gms:google-services:4.3.10")
         val kotlinVersion = "1.5.21"
         classpath("org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion")

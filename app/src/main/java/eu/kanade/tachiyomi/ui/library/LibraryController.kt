@@ -60,7 +60,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.databinding.LibraryControllerBinding
-import eu.kanade.tachiyomi.ui.base.MaterialFastScroll
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.category.CategoryController
@@ -171,6 +170,7 @@ class LibraryController(
     override var presenter = LibraryPresenter(this)
 
     private var observeLater: Boolean = false
+    var searchItem = SearchGlobalItem()
 
     var snack: Snackbar? = null
     var displaySheet: TabbedLibraryDisplaySheet? = null
@@ -257,7 +257,7 @@ class LibraryController(
                     hopperOffset = hopperOffset.coerceIn(0f, maxHopperOffset)
                 }
                 if (!preferences.hideBottomNavOnScroll()
-                    .get() || activityBinding?.bottomNav == null
+                        .get() || activityBinding?.bottomNav == null
                 ) {
                     updateFilterSheetY()
                 }
@@ -347,7 +347,7 @@ class LibraryController(
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
             val closerToEdge =
                 if (preferences.hideBottomNavOnScroll()
-                    .get() && activityBinding?.bottomNav != null
+                        .get() && activityBinding?.bottomNav != null
                 ) {
                     closerToBottom && !atTop
                 } else {
@@ -449,7 +449,8 @@ class LibraryController(
     }
 
     private fun openRandomManga() {
-        val items = adapter.currentItems.filter { (it is LibraryItem && !it.manga.isBlank() && !it.manga.isHidden() && (!it.manga.initialized || it.manga.unread > 0)) }
+        val items =
+            adapter.currentItems.filter { (it is LibraryItem && !it.manga.isBlank() && !it.manga.isHidden() && (!it.manga.initialized || it.manga.unread > 0)) }
         if (items.isNotEmpty()) {
             val item = items.random() as LibraryItem
             openManga(item.manga)
@@ -629,7 +630,8 @@ class LibraryController(
                                 -1
                             ) { dialog, index ->
                                 selected = index
-                                (dialog as? AlertDialog)?.getButton(DialogInterface.BUTTON_POSITIVE)?.isEnabled = true
+                                (dialog as? AlertDialog)?.getButton(DialogInterface.BUTTON_POSITIVE)?.isEnabled =
+                                    true
                             }
                             .setPositiveButton(
                                 R.string.update
@@ -775,7 +777,8 @@ class LibraryController(
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
-            val insetKey = insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
+            val insetKey =
+                insets.getInsets(WindowInsets.Type.ime() or WindowInsets.Type.systemBars()).bottom
             listOfYs.add(view.height - (insetKey).toFloat())
         }
         binding.categoryHopperFrame.y = -binding.categoryHopperFrame.height +
@@ -785,9 +788,10 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                binding.libraryGridRecycler.recycler.translationY
+                    binding.libraryGridRecycler.recycler.translationY
         } else {
-            binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
+            binding.jumperCategoryText.translationY =
+                binding.libraryGridRecycler.recycler.translationY
         }
     }
 
@@ -825,8 +829,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1396,9 +1400,9 @@ class LibraryController(
     override fun onItemMove(fromPosition: Int, toPosition: Int) {
         // Because padding a recycler causes it to scroll up we have to scroll it back down... wild
         if ((
-            adapter.getItem(fromPosition) is LibraryItem &&
-                adapter.getItem(fromPosition) is LibraryItem
-            ) ||
+                adapter.getItem(fromPosition) is LibraryItem &&
+                    adapter.getItem(fromPosition) is LibraryItem
+                ) ||
             adapter.getItem(fromPosition) == null
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
@@ -1730,7 +1734,7 @@ class LibraryController(
                 activity!!.materialAlertDialog()
                     .setMessage(R.string.remove_from_library_question)
                     .setPositiveButton(R.string.remove) { _, _ ->
-                        deleteMangasFromLibrary()
+                        deleteMangaListFromLibrary()
                     }
                     .setNegativeButton(android.R.string.cancel, null)
                     .show()

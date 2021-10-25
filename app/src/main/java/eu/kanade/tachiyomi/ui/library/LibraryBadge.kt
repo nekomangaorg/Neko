@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.makeShapeCorners
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 
 class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialCardView(context, attrs) {
@@ -30,7 +31,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         unread: Int,
         downloads: Int,
         showTotalChapters: Boolean,
-        changeShape: Boolean
+        changeShape: Boolean,
     ) {
         // Update the unread count and its visibility.
 

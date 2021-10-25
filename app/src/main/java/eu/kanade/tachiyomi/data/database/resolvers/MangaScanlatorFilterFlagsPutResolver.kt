@@ -26,6 +26,6 @@ class MangaScanlatorFilterFlagsPutResolver : PutResolver<Manga>() {
         .build()
 
     fun mapToContentValues(manga: Manga) = ContentValues(1).apply {
-        put(MangaTable.COL_SCANLATOR_FILTER_FLAG, manga.scanlator_filter)
+        put(MangaTable.COL_SCANLATOR_FILTER_FLAG, manga.filtered_scanlators)
     }
 }

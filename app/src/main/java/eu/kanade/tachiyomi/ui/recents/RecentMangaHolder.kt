@@ -18,14 +18,18 @@ import eu.kanade.tachiyomi.util.system.timeSpanFromNow
 
 class RecentMangaHolder(
     view: View,
-    val adapter: RecentMangaAdapter
+    val adapter: RecentMangaAdapter,
 ) : BaseChapterHolder(view, adapter) {
 
     private val binding = RecentMangaItemBinding.bind(view)
 
     init {
-        binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
-        binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
+        binding.cardLayout.setOnClickListener {
+            adapter.delegate.onCoverClick(flexibleAdapterPosition)
+        }
+        binding.removeHistory.setOnClickListener {
+            adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition)
+        }
     }
 
     fun bind(item: RecentMangaItem) {
@@ -70,7 +74,8 @@ class RecentMangaHolder(
         val freeformCovers = !isSmallUpdates && !adapter.uniformCovers
         with(binding.coverThumbnail) {
             adjustViewBounds = freeformCovers
-            scaleType = if (!freeformCovers) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
+            scaleType =
+                if (!freeformCovers) ImageView.ScaleType.CENTER_CROP else ImageView.ScaleType.FIT_CENTER
         }
         listOf(binding.coverThumbnail, binding.card).forEach {
             it.updateLayoutParams<ViewGroup.LayoutParams> {
@@ -149,7 +154,9 @@ class RecentMangaHolder(
     }
 
     private fun resetFrontView() {
-        if (binding.frontView.translationX != 0f) itemView.post { adapter.notifyItemChanged(flexibleAdapterPosition) }
+        if (binding.frontView.translationX != 0f) itemView.post {
+            adapter.notifyItemChanged(flexibleAdapterPosition)
+        }
     }
 
     override fun onLongClick(view: View?): Boolean {
@@ -158,14 +165,20 @@ class RecentMangaHolder(
         return item.mch.history.id != null
     }
 
-    fun notifyStatus(status: Download.State, progress: Int, isRead: Boolean, animated: Boolean = false) {
+    fun notifyStatus(
+        status: Download.State,
+        progress: Int,
+        isRead: Boolean,
+        animated: Boolean = false,
+    ) {
         binding.downloadButton.downloadButton.setDownloadStatus(status, progress, animated)
         val isChapterRead =
             if (adapter.showDownloads == RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded) isRead else false
         binding.downloadButton.downloadButton.isVisible =
             when (adapter.showDownloads) {
                 RecentMangaAdapter.ShowRecentsDLs.UnreadOrDownloaded,
-                RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded ->
+                RecentMangaAdapter.ShowRecentsDLs.OnlyDownloaded,
+                ->
                     status !in Download.State.CHECKED..Download.State.NOT_DOWNLOADED || !isChapterRead
                 else -> binding.downloadButton.downloadButton.isVisible
             }
@@ -176,6 +189,6 @@ class RecentMangaHolder(
     }
 
     override fun getRearRightView(): View {
-        return binding.rightView
+        return binding.endView
     }
 }

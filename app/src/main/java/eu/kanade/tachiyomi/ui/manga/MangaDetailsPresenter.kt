@@ -39,7 +39,6 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
-import eu.kanade.tachiyomi.ui.manga.track.SetTrackReadingDatesDialog
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
@@ -54,8 +53,8 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -144,8 +143,8 @@ class MangaDetailsPresenter(
             refreshAll()
         } else {
             runBlocking {
-                manga.scanlator_filter?.let {
-                    filteredScanlators = MdUtil.getScanlators(it).toSet()
+                manga.filtered_scanlators?.let {
+                    filteredScanlators = ChapterUtil.getScanlators(it).toSet()
                 }
                 getChapters()
             }
@@ -199,7 +198,7 @@ class MangaDetailsPresenter(
             val tempSet = filteredScanlators.toMutableSet()
             tempSet.remove(MergeSource.name)
             filteredScanlators = tempSet.toSet()
-            manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
+            manga.filtered_scanlators = ChapterUtil.getScanlatorString(filteredScanlators)
             db.insertManga(manga)
         }
         if (filteredScanlators.isEmpty()) {
@@ -213,9 +212,9 @@ class MangaDetailsPresenter(
         filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
 
         if (filteredScanlators.size == allChapterScanlators.size) {
-            manga.scanlator_filter = null
+            manga.filtered_scanlators = null
         } else {
-            manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
+            manga.filtered_scanlators = ChapterUtil.getScanlatorString(filteredScanlators)
         }
         db.insertManga(manga).executeAsBlocking()
         asyncUpdateMangaAndChapters()
@@ -404,7 +403,7 @@ class MangaDetailsPresenter(
         val tempSet = filteredScanlators.toMutableSet()
         tempSet.add(MergeSource.name)
         filteredScanlators = tempSet
-        manga.scanlator_filter = MdUtil.getScanlatorString(filteredScanlators)
+        manga.filtered_scanlators = ChapterUtil.getScanlatorString(filteredScanlators)
         db.insertManga(manga)
     }
 
@@ -833,8 +832,17 @@ class MangaDetailsPresenter(
         filtersId.add(if (manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED) R.string.not_downloaded else null)
         filtersId.add(if (manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED) R.string.bookmarked else null)
         filtersId.add(if (manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED) R.string.not_bookmarked else null)
-        filtersId.add(if (filteredScanlators.size != allChapterScanlators.size) R.string.scanlator_groups else null)
+        filtersId.add(if (manga.filtered_scanlators?.isNotEmpty() == true) R.string.scanlators else null)
         return filtersId.filterNotNull().joinToString(", ") { preferences.context.getString(it) }
+    }
+
+    fun setScanlatorFilter(filteredScanlators: Set<String>) {
+        val manga = manga
+        manga.filtered_scanlators =
+            if (filteredScanlators.size == allChapterScanlators.size || filteredScanlators.isEmpty()) null else ChapterUtil.getScanlatorString(
+                filteredScanlators)
+        db.updateMangaFilteredScanlators(manga).executeAsBlocking()
+        asyncUpdateMangaAndChapters()
     }
 
     fun afterFavorited() {
@@ -967,7 +975,9 @@ class MangaDetailsPresenter(
     }
 
     private fun saveCover(directory: File): File {
-        val cover = coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
+        val cover =
+            coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
+                manga)
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 

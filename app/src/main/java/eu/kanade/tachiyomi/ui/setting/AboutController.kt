@@ -6,10 +6,9 @@ import android.os.Build
 import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
-import com.google.android.gms.oss.licenses.OssLicensesMenuActivity
-import eu.kanade.tachiyomi.BuildConfig
 import com.elvishew.xlog.XLog
 import com.mikepenz.aboutlibraries.LibsBuilder
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.UpdateChecker

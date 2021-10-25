@@ -5,7 +5,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -19,10 +18,12 @@ class ChapterFilter(
         val readEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_READ
         val unreadEnabled = manga.readFilter(preferences) == Manga.CHAPTER_SHOW_UNREAD
         val downloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_DOWNLOADED
-        val notDownloadEnabled = manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
+        val notDownloadEnabled =
+            manga.downloadedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_DOWNLOADED
         val bookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_BOOKMARKED
-        val notBookmarkEnabled = manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
-        val listValidScanlators = MdUtil.getScanlators(manga.scanlator_filter.orEmpty())
+        val notBookmarkEnabled =
+            manga.bookmarkedFilter(preferences) == Manga.CHAPTER_SHOW_NOT_BOOKMARKED
+        val listValidScanlators = ChapterUtil.getScanlators(manga.filtered_scanlators.orEmpty())
         val scanlatorEnabled = listValidScanlators.isNotEmpty()
 
         // if none of the filters are enabled skip the filtering of them
@@ -49,7 +50,11 @@ class ChapterFilter(
     }
 
     // filter chapters for the reader
-    fun <T : Chapter> filterChaptersForReader(chapters: List<T>, manga: Manga, selectedChapter: T? = null): List<T> {
+    fun <T : Chapter> filterChaptersForReader(
+        chapters: List<T>,
+        manga: Manga,
+        selectedChapter: T? = null,
+    ): List<T> {
         // if neither preference is enabled don't even filter
         if (!preferences.skipRead() && !preferences.skipFiltered()) {
             return chapters

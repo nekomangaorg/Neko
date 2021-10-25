@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import androidx.annotation.StringRes
+import androidx.core.view.isVisible
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -19,7 +20,7 @@ import uy.kohesive.injekt.injectLazy
 
 abstract class LoginDialogPreference(
     @StringRes private val usernameLabelRes: Int? = null,
-    bundle: Bundle? = null
+    bundle: Bundle? = null,
 ) :
     DialogController(bundle) {
 

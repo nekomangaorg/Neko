@@ -102,7 +102,9 @@ interface MangaQueries : DbProvider {
 
     fun updateChapterFlags(manga: List<Manga>) = db.put()
         .objects(manga)
-        .withPutResolver(MangaFlagsPutResolver(MangaTable.COL_CHAPTER_FLAGS, Manga::chapter_flags, true))
+        .withPutResolver(MangaFlagsPutResolver(MangaTable.COL_CHAPTER_FLAGS,
+            Manga::chapter_flags,
+            true))
         .prepare()
 
     fun updateViewerFlags(manga: Manga) = db.put()
@@ -193,8 +195,11 @@ interface MangaQueries : DbProvider {
         .prepare()
 
     fun getTotalChapterManga() = db.get().listOfObjects(Manga::class.java)
-        .withQuery(
-            RawQuery.builder().query(getTotalChapterMangaQuery())
-                .observesTables(MangaTable.TABLE).build()
-        ).prepare()
+        .withQuery(RawQuery.builder().query(getTotalChapterMangaQuery())
+            .observesTables(MangaTable.TABLE).build()).prepare()
+
+    fun updateMangaFilteredScanlators(manga: Manga) = db.put()
+        .`object`(manga)
+        .withPutResolver(MangaScanlatorFilterFlagsPutResolver())
+        .prepare()
 }
