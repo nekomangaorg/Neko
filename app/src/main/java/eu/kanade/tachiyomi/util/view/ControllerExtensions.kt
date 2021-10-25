@@ -15,7 +15,6 @@ import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
-import android.view.WindowInsets
 import android.view.inputmethod.InputMethodManager
 import android.widget.FrameLayout
 import androidx.appcompat.widget.SearchView
@@ -24,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.math.MathUtils
 import androidx.core.net.toUri
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
@@ -191,7 +191,7 @@ fun Controller.scrollViewWith(
     padBottom: Boolean = false,
     customPadding: Boolean = false,
     swipeRefreshLayout: SwipeRefreshLayout? = null,
-    afterInsets: ((WindowInsets) -> Unit)? = null,
+    afterInsets: ((WindowInsetsCompat) -> Unit)? = null,
     liftOnScroll: ((Boolean) -> Unit)? = null,
     onLeavingController: (() -> Unit)? = null,
     onBottomNavUpdate: (() -> Unit)? = null,
@@ -245,7 +245,7 @@ fun Controller.scrollViewWith(
             headerHeight + 10.dpToPx
         )
         statusBarHeight = insets.getInsets(systemBars()).top
-        afterInsets?.invoke(insets.toWindowInsets()!!)
+        afterInsets?.invoke(insets)
     }
 
     var toolbarColorAnim: ValueAnimator? = null
