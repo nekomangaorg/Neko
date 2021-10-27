@@ -106,7 +106,7 @@ fun Controller.removeQueryListener() {
 
 fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) {
     if (padView) {
-        val attrsArray = intArrayOf(R.attr.actionBarSize)
+        val attrsArray = intArrayOf(R.attr.mainActionBarSize)
         val array = recycler.context.obtainStyledAttributes(attrsArray)
         var appBarHeight = (
             if (toolbarHeight ?: 0 > 0) toolbarHeight!!
@@ -200,7 +200,7 @@ fun Controller.scrollViewWith(
     var statusBarHeight = -1
     val tabBarHeight = 48.dpToPx
     activityBinding?.appBar?.y = 0f
-    val attrsArray = intArrayOf(R.attr.actionBarSize)
+    val attrsArray = intArrayOf(R.attr.mainActionBarSize)
     val array = recycler.context.obtainStyledAttributes(attrsArray)
     var appBarHeight = (
         if (toolbarHeight ?: 0 > 0) toolbarHeight!!
