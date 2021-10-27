@@ -18,6 +18,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.PopupMenu
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.net.toUri
+import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -43,6 +44,7 @@ import eu.kanade.tachiyomi.util.system.isPromptChecked
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
+import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toLocalCalendar
 import eu.kanade.tachiyomi.util.system.toUtcCalendar
 import eu.kanade.tachiyomi.util.system.toast
@@ -61,7 +63,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     val activity = controller.activity!!
 
     val presenter = controller.presenter
-    var searchingItem: TrackItem? = null
+    private var searchingItem: TrackItem? = null
 
     private var adapter: TrackAdapter? = null
     private val searchItemAdapter = ItemAdapter<TrackSearchItem>()
@@ -78,7 +80,8 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     override var recyclerView: RecyclerView? = binding.trackRecycler
 
     init {
-        val height = activity.window.decorView.rootWindowInsets.systemWindowInsetBottom
+        val insets = activity.window.decorView.rootWindowInsetsCompat?.getInsets(systemBars())
+        val height = insets?.bottom ?: 0
         sheetBehavior.peekHeight = 525.dpToPx + height
         sheetBehavior.expand()
         sheetBehavior.skipCollapsed = true
@@ -115,14 +118,11 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
         binding.displayBottomSheet.checkHeightThen {
             val fullHeight = activity.window.decorView.height
-            val insets = activity.window.decorView.rootWindowInsets
             binding.trackRecycler.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                matchConstraintMaxHeight =
-                    fullHeight - (insets?.systemWindowInsetTop ?: 0) - 30.dpToPx
+                matchConstraintMaxHeight = fullHeight - (insets?.top ?: 0) - 30.dpToPx
             }
             binding.trackSearchConstraintLayout.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                matchConstraintMaxHeight =
-                    fullHeight - (insets?.systemWindowInsetTop ?: 0) - 30.dpToPx
+                matchConstraintMaxHeight = fullHeight - (insets?.top ?: 0) - 30.dpToPx
             }
         }
 
