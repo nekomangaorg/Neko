@@ -48,15 +48,22 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         preferences.uniformGrid().register { uniformCovers = it }
-        preferences.outlineOnCovers().register { showOutline = it }
+        preferences.outlineOnCovers().register(false) {
+            showOutline = it
+            (0 until itemCount).forEach { i ->
+                (recyclerView.findViewHolderForAdapterPosition(i) as? RecentMangaHolder)?.updateCards()
+            }
+        }
     }
 
-    private fun <T> Preference<T>.register(onChanged: (T) -> Unit) {
+    private fun <T> Preference<T>.register(notify: Boolean = true, onChanged: (T) -> Unit) {
         asFlow()
             .drop(1)
             .onEach {
                 onChanged(it)
-                notifyDataSetChanged()
+                if (notify) {
+                    notifyDataSetChanged()
+                }
             }
             .launchIn(delegate.scope())
     }

@@ -3,9 +3,11 @@ package eu.kanade.tachiyomi.ui.library
 import android.view.View
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
+import com.google.android.material.card.MaterialCardView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import eu.kanade.tachiyomi.util.view.setCards
 
 /**
  * Generic class used to hold the displayed data of a manga in the library.
@@ -20,6 +22,14 @@ abstract class LibraryHolder(
 ) : BaseFlexibleViewHolder(view, adapter) {
 
     protected val color = ColorUtils.setAlphaComponent(itemView.context.getResourceColor(R.attr.colorSecondary), 75)
+
+    init {
+        val card = itemView.findViewById<MaterialCardView>(R.id.card)
+        val badgeView = itemView.findViewById<LibraryBadge>(R.id.badge_view)
+        if (card != null && badgeView != null) {
+            setCards(adapter.showOutline, card, badgeView)
+        }
+    }
 
     /**
      * Method called from [LibraryCategoryAdapter.onBindViewHolder]. It updates the data for this

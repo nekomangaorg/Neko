@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.setCards
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -79,7 +78,6 @@ class LibraryGridHolder(
         }
 
         setUnreadBadge(binding.unreadDownloadBadge.badgeView, item)
-        setCards(adapter.showOutline, binding.card, binding.unreadDownloadBadge.badgeView)
         setReadingButton(item)
         setSelected(adapter.isSelected(flexibleAdapterPosition))
 

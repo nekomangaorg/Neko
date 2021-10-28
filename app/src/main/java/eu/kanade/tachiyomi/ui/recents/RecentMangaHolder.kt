@@ -25,12 +25,13 @@ class RecentMangaHolder(
     private val binding = RecentMangaItemBinding.bind(view)
 
     init {
-        binding.cardLayout.setOnClickListener {
-            adapter.delegate.onCoverClick(flexibleAdapterPosition)
-        }
-        binding.removeHistory.setOnClickListener {
-            adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition)
-        }
+        binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
+        binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
+        updateCards()
+    }
+
+    fun updateCards() {
+        setCards(adapter.showOutline, binding.card, null)
     }
 
     fun bind(item: RecentMangaItem) {
@@ -87,7 +88,6 @@ class RecentMangaHolder(
                 }
             }
         }
-        setCards(adapter.showOutline, binding.card, null)
 
         binding.removeHistory.isVisible = item.mch.history.id != null && showRemoveHistory
         val chapterName = if (item.mch.manga.hideChapterTitle(adapter.preferences)) {
