@@ -211,7 +211,10 @@ class MangaDetailsController :
         binding.swipeRefresh.isRefreshing = presenter.isLoading
         binding.swipeRefresh.setOnRefreshListener { presenter.refreshAll() }
         updateToolbarTitleAlpha()
-        //requestFilePermissionsSafe(301, presenter.preferences, presenter.manga.isLocal())
+        if (presenter.preferences.themeMangaDetails()) {
+            setItemColors()
+        }
+        requestFilePermissionsSafe(301, presenter.preferences, presenter.manga.isLocal())
     }
 
     private fun setAccentColorValue(colorToUse: Int? = null) {
@@ -312,6 +315,22 @@ class MangaDetailsController :
                 satLumArray[2]
             )
         )
+    }
+
+    private fun setItemColors() {
+        getHeader()?.updateColors()
+        if (adapter?.itemCount ?: 0 > 1) {
+            (presenter.chapters).forEach { chapter ->
+                val chapterHolder =
+                    binding.recycler.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
+                        ?: return@forEach
+                chapterHolder.notifyStatus(
+                    chapter.status,
+                    isLocked(),
+                    chapter.progress
+                )
+            }
+        }
     }
 
     /** Check if device is tablet, and use a second recycler to hold the details header if so */
@@ -496,19 +515,7 @@ class MangaDetailsController :
                                     manga?.vibrantCoverColor = vibrantColor
                                     setAccentColorValue(vibrantColor)
                                     setHeaderColorValue(vibrantColor)
-                                    getHeader()?.updateColors()
-                                    if (adapter?.itemCount ?: 0 > 1) {
-                                        (presenter.chapters).forEach { chapter ->
-                                            val chapterHolder =
-                                                binding.recycler.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
-                                                    ?: return@forEach
-                                            chapterHolder.notifyStatus(
-                                                chapter.status,
-                                                isLocked(),
-                                                chapter.progress
-                                            )
-                                        }
-                                    }
+                                    setItemColors()
                                 }
                             } else {
                                 setCoverColorValue()
