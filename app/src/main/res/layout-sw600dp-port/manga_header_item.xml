@@ -57,12 +57,15 @@
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/cover_card"
-        android:layout_width="200dp"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         app:strokeWidth="0dp"
         app:cardElevation="2dp"
         android:layout_marginStart="16dp"
         android:layout_marginTop="12dp"
+        android:maxHeight="200dp"
+        app:layout_constraintWidth_max="200dp"
+        app:layout_constraintWidth_percent="0.25"
         android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/top_view"
