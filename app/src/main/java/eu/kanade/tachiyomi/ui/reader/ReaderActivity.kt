@@ -791,6 +791,19 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     insets.getInsets(systemBars())
                 }
             val vis = insets.isVisible(statusBars())
+            val isSplitScreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
+            binding.viewerContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                if (isSplitScreen) {
+                    topMargin = systemInsets.top
+                    bottomMargin = systemInsets.bottom
+                } else {
+                    topMargin = 0
+                    bottomMargin = 0
+                }
+            }
+            binding.pageNumber.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                bottomMargin = if (isSplitScreen) systemInsets.bottom else 0
+            }
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 if (!firstPass && lastVis != vis && preferences.fullscreen().get()) {
                     onVisibilityChange(vis)
@@ -818,8 +831,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 leftMargin = 12.dpToPx + systemInsets.left
                 rightMargin = 12.dpToPx + systemInsets.right
             }
+            val fullscreen = preferences.fullscreen().get()
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
-                peek + if (preferences.fullscreen().get()) {
+                peek + if (fullscreen || isSplitScreen) {
                     insets.getBottomGestureInsets()
                 } else {
                     val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
@@ -844,6 +858,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     fun setNavColor(insets: WindowInsetsCompat) {
         sheetManageNavColor = when {
+            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) -> {
+                window.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
+                window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
+                false
+            }
             Build.VERSION.SDK_INT < Build.VERSION_CODES.O_MR1 -> {
                 // basically if in landscape on a phone
                 // For lollipop, draw opaque nav bar
