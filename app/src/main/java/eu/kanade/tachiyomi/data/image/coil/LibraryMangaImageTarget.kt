@@ -13,6 +13,7 @@ import coil.request.ImageRequest
 import coil.target.ImageViewTarget
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.util.system.launchIO
 import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaImageTarget(
@@ -37,15 +38,17 @@ class LibraryMangaImageTarget(
     override fun onError(error: Drawable?) {
         super.onError(error)
         if (manga.favorite) {
-            val file = coverCache.getCoverFile(manga)
-            // if the file exists and the there was still an error then the file is corrupted
-            if (file.exists()) {
-                val options = BitmapFactory.Options()
-                options.inJustDecodeBounds = true
-                BitmapFactory.decodeFile(file.path, options)
-                if (options.outWidth == -1 || options.outHeight == -1) {
-                    file.delete()
-                    view.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
+            launchIO {
+                val file = coverCache.getCoverFile(manga)
+                // if the file exists and the there was still an error then the file is corrupted
+                if (file.exists()) {
+                    val options = BitmapFactory.Options()
+                    options.inJustDecodeBounds = true
+                    BitmapFactory.decodeFile(file.path, options)
+                    if (options.outWidth == -1 || options.outHeight == -1) {
+                        file.delete()
+                        view.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
+                    }
                 }
             }
         }

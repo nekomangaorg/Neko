@@ -84,17 +84,8 @@ class LibraryGridHolder(
         setSelected(adapter.isSelected(flexibleAdapterPosition))
 
         // Update the cover.
-        if (item.manga.thumbnail_url == null) binding.coverThumbnail.clear()
-        else {
-            if (binding.coverThumbnail.height == 0) {
-                val oldPos = flexibleAdapterPosition
-                adapter.recyclerView.post {
-                    if (oldPos == flexibleAdapterPosition) {
-                        setCover(item.manga)
-                    }
-                }
-            } else setCover(item.manga)
-        }
+        binding.coverThumbnail.clear()
+        setCover(item.manga)
     }
 
     override fun toggleActivation() {

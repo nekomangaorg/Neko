@@ -70,14 +70,15 @@ class LibraryListHolder(
         setUnreadBadge(binding.unreadDownloadBadge.badgeView, item)
         setCards(adapter.showOutline, binding.card, binding.unreadDownloadBadge.badgeView)
 
-        val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
-            item.manga.author?.trim() ?: ""
-        } else {
-            listOfNotNull(
-                item.manga.author?.trim()?.takeIf { it.isNotBlank() },
-                item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
-            ).joinToString(", ")
-        }
+        val authorArtist =
+            if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
+                item.manga.author?.trim() ?: ""
+            } else {
+                listOfNotNull(
+                    item.manga.author?.trim()?.takeIf { it.isNotBlank() },
+                    item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
+                ).joinToString(", ")
+            }
 
         binding.subtitle.text = authorArtist.highlightText(item.filter, color)
         binding.title.maxLines = 2
@@ -89,12 +90,8 @@ class LibraryListHolder(
         }
 
         // Update the cover.
-        if (item.manga.thumbnail_url == null) {
-            binding.coverThumbnail.clear()
-        } else {
-            item.manga.id ?: return
-            binding.coverThumbnail.loadManga(item.manga)
-        }
+        binding.coverThumbnail.clear()
+        binding.coverThumbnail.loadManga(item.manga)
     }
 
     override fun onActionStateChanged(position: Int, actionState: Int) {
