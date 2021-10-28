@@ -110,7 +110,7 @@ class SettingsAppearanceController : SettingsController() {
                     R.string.bottom,
                 )
                 entryRange = 0..2
-                defaultValue = 0
+                defaultValue = 1
                 isVisible = max(
                     context.resources.displayMetrics.widthPixels,
                     context.resources.displayMetrics.heightPixels
