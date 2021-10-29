@@ -6,7 +6,11 @@ import android.animation.ValueAnimator
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
+import android.content.BroadcastReceiver
+import android.content.Context
 import android.content.DialogInterface
+import android.content.Intent
+import android.content.IntentFilter
 import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.Point
@@ -14,6 +18,7 @@ import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.ColorDrawable
 import android.os.Build
+import android.os.PowerManager
 import android.view.Gravity
 import android.view.MenuItem
 import android.view.View
@@ -62,6 +67,7 @@ import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
@@ -454,21 +460,55 @@ fun Dialog.blurBehindWindow(
     onDismiss: DialogInterface.OnDismissListener? = null,
     onCancel: DialogInterface.OnCancelListener? = null
 ) {
+    var supportsBlur = false
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && window?.windowManager?.isCrossWindowBlurEnabled == true) {
+        supportsBlur = true
+    }
+    var registered = true
+    val powerSaverChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && window?.windowManager?.isCrossWindowBlurEnabled == true) {
+                return
+            }
+            val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                !this@blurBehindWindow.context.powerManager.isPowerSaveMode
+            window?.setDimAmount(if (canBlur) 0.45f else 0.77f)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+            if (canBlur) {
+                window?.decorView?.setRenderEffect(
+                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP)
+                )
+            } else {
+                window?.decorView?.setRenderEffect(null)
+            }
+        }
+    }
+    val filter = IntentFilter()
+    filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+    context.registerReceiver(powerSaverChangeReceiver, filter)
+    val unregister: () -> Unit = {
+        if (registered) {
+            context.unregisterReceiver(powerSaverChangeReceiver)
+            registered = false
+        }
+    }
     setOnShowListener {
         onShow?.onShow(it)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        if (!supportsBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(1f, blurAmount, 50)?.start()
         }
     }
     setOnDismissListener {
         onDismiss?.onDismiss(it)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        unregister()
+        if (!supportsBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
         }
     }
     setOnCancelListener {
         onCancel?.onCancel(it)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        unregister()
+        if (!supportsBlur && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             window?.decorView?.animateBlur(blurAmount, 1f, 50, true)?.start()
         }
     }
@@ -480,7 +520,13 @@ fun View.animateBlur(
     @FloatRange(from = 0.1) to: Float,
     duration: Long,
     removeBlurAtEnd: Boolean = false
-): ValueAnimator {
+): ValueAnimator? {
+    if (context.powerManager.isPowerSaveMode) {
+        if (to <= 0.1f) {
+            setRenderEffect(null)
+        }
+        return null
+    }
     return ValueAnimator.ofFloat(from, to).apply {
         interpolator = FastOutLinearInInterpolator()
         this.duration = duration

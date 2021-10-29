@@ -130,6 +130,9 @@
 
     <style name="OverflowDialogTheme" parent="BottomSheetDialogTheme">
         <item name="android:windowAnimationStyle">@style/Theme.Widget.Animation.DropFromAbove</item>
+        <item name="android:windowIsTranslucent">true</item>
+        <item name="android:windowBlurBehindEnabled" tools:targetApi="31">true</item>
+        <item name="android:windowBlurBehindRadius" tools:targetApi="31">10dp</item>
     </style>
 
     <style name="Theme.Widget.Animation.DropFromAbove" parent="android:Animation">

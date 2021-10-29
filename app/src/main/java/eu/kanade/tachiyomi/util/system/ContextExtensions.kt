@@ -249,7 +249,7 @@ val Context.wifiManager: WifiManager
  * Property to get the power manager from the context.
  */
 val Context.powerManager: PowerManager
-    get() = getSystemService(Context.POWER_SERVICE) as PowerManager
+    get() = getSystemService()!!
 
 /**
  * Function used to send a local broadcast asynchronous

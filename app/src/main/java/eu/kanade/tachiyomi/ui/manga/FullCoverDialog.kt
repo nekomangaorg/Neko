@@ -3,10 +3,17 @@ package eu.kanade.tachiyomi.ui.manga
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
 import android.app.Dialog
+import android.content.BroadcastReceiver
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Color
 import android.graphics.Rect
+import android.graphics.RenderEffect
+import android.graphics.Shader
 import android.graphics.drawable.Drawable
 import android.os.Build
+import android.os.PowerManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
@@ -24,6 +31,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.FullCoverDialogBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.system.powerManager
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.animateBlur
 import uy.kohesive.injekt.injectLazy
@@ -43,9 +51,32 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
         ) ?: 0
         ).toLong()
 
+    private val powerSaverChangeReceiver: BroadcastReceiver = object : BroadcastReceiver() {
+        override fun onReceive(context: Context?, intent: Intent?) {
+            val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
+                !this@FullCoverDialog.context.powerManager.isPowerSaveMode
+            window?.setDimAmount(if (canBlur) 0.45f else 0.77f)
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
+            if (canBlur) {
+                activity?.window?.decorView?.setRenderEffect(
+                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP)
+                )
+            } else {
+                activity?.window?.decorView?.setRenderEffect(null)
+            }
+        }
+    }
+
     init {
-        window?.setDimAmount(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) 0.45f else 0.77f)
+        val canBlur = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !context.powerManager.isPowerSaveMode
+        window?.setDimAmount(if (canBlur) 0.45f else 0.77f)
         setContentView(binding.root)
+
+        val filter = IntentFilter()
+        filter.addAction(PowerManager.ACTION_POWER_SAVE_MODE_CHANGED)
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            context.registerReceiver(powerSaverChangeReceiver, filter)
+        }
 
         binding.touchOutside.setOnClickListener {
             onBackPressed()
@@ -162,6 +193,11 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
     }
 
     private fun animateBack() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            try {
+                context.unregisterReceiver(powerSaverChangeReceiver)
+            } catch (_: Exception) { }
+        }
         val rect2 = Rect()
         thumbView.getGlobalVisibleRect(rect2)
         binding.mangaCoverFull.isClickable = false
