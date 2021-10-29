@@ -496,6 +496,7 @@ fun Controller.setAppBarBG(value: Float, includeTabView: Boolean = false) {
     val floatingBar =
         (this as? FloatingSearchInterface)?.showFloatingBar() == true && !includeTabView
     if ((this as? BottomSheetController)?.sheetIsFullscreen() == true) return
+    if (router.backstack.lastOrNull()?.controller != this) return
     if (floatingBar) {
         (activityBinding?.cardView as? CardView)?.setCardBackgroundColor(context.getResourceColor(R.attr.colorPrimaryVariant))
         activityBinding?.appBar?.setBackgroundColor(Color.TRANSPARENT)
