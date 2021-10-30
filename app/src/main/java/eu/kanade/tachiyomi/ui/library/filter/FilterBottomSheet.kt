@@ -118,7 +118,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
+                    ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(
+                        systemBars())?.bottom
                         ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
@@ -193,7 +194,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun stateChanged(state: Int) {
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight
+                ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -265,7 +267,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             preferences.filterTracked().get() > 0 ||
             preferences.filterMangaType().get() > 0 ||
             preferences.filterMerged().get() > 0 ||
-            preferences.filterMissingChapters()  > 0 ||
+            preferences.filterMissingChapters().get() > 0 ||
             FILTER_TRACKER.isNotEmpty()
     }
 

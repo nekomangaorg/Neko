@@ -54,7 +54,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
 
         fun doWorkNow(context: Context) {
 
-            val request = OneTimeWorkRequestBuilder<UpdaterJob>()
+            val request = OneTimeWorkRequestBuilder<AppUpdateJob>()
                 .build()
 
             WorkManager.getInstance(context)

@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.library.LibraryServiceListener
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.getOrDefault
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
@@ -475,8 +474,7 @@ class MangaDetailsPresenter(
                     manga.initialized = true
 
                     // force new cover if it exists
-                    if (networkManga.thumbnail_url != null || preferences.refreshCoversToo()
-                            .getOrDefault()
+                    if (networkManga.thumbnail_url != null || preferences.refreshCoversToo().get()
                     ) {
                         coverCache.deleteFromCache(thumbnailUrl)
                     }

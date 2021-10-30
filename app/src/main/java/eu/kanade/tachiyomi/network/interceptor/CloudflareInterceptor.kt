@@ -20,7 +20,6 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import eu.kanade.tachiyomi.source.online.HttpSource
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
 import java.util.concurrent.CountDownLatch
@@ -90,7 +89,8 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
         var isWebViewOutdated = false
 
         val origRequestUrl = request.url.toString()
-        val headers = request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
+        val headers =
+            request.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }.toMutableMap()
         headers["X-Requested-With"] = WebViewUtil.REQUESTED_WITH
 
         executor.execute {
@@ -100,7 +100,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
 
             // Avoid sending empty User-Agent, Chromium WebView will reset to default if empty
             webview.settings.userAgentString = request.header("User-Agent")
-                ?: HttpSource.DEFAULT_USER_AGENT
+                ?: "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36"
 
             webview.webViewClient = object : WebViewClientCompat() {
                 override fun onPageFinished(view: WebView, url: String) {
@@ -126,7 +126,7 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
                     errorCode: Int,
                     description: String?,
                     failingUrl: String,
-                    isMainFrame: Boolean
+                    isMainFrame: Boolean,
                 ) {
                     if (isMainFrame) {
                         if (errorCode in ERROR_CODES) {

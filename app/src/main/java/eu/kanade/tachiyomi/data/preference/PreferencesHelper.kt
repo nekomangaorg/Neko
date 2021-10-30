@@ -109,8 +109,11 @@ class PreferencesHelper(val context: Context) {
     fun themeDarkAmoled() = flowPrefs.getBoolean(Keys.themeDarkAmoled, false)
 
     val isOnA12 = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
-    fun lightTheme() = flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
-    fun darkTheme() = flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+    fun lightTheme() =
+        flowPrefs.getEnum(Keys.lightTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
+
+    fun darkTheme() =
+        flowPrefs.getEnum(Keys.darkTheme, if (isOnA12) Themes.MONET else Themes.DEFAULT)
 
     fun pageTransitions() = flowPrefs.getBoolean(Keys.enableTransitions, true)
 
@@ -136,9 +139,11 @@ class PreferencesHelper(val context: Context) {
 
     fun colorFilterMode() = flowPrefs.getInt(Keys.colorFilterMode, 0)
 
-    fun defaultReadingMode() = prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
+    fun defaultReadingMode() =
+        prefs.getInt(Keys.defaultReadingMode, ReadingModeType.RIGHT_TO_LEFT.flagValue)
 
-    fun defaultOrientationType() = flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
+    fun defaultOrientationType() =
+        flowPrefs.getInt(Keys.defaultOrientationType, OrientationType.FREE.flagValue)
 
     fun imageScaleType() = flowPrefs.getInt(Keys.imageScaleType, 1)
 
@@ -166,9 +171,11 @@ class PreferencesHelper(val context: Context) {
 
     fun navigationModeWebtoon() = flowPrefs.getInt(Keys.navigationModeWebtoon, 0)
 
-    fun pagerNavInverted() = flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+    fun pagerNavInverted() =
+        flowPrefs.getEnum(Keys.pagerNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
-    fun webtoonNavInverted() = flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
+    fun webtoonNavInverted() =
+        flowPrefs.getEnum(Keys.webtoonNavInverted, ViewerNavigation.TappingInvertMode.NONE)
 
     fun pageLayout() = flowPrefs.getInt(Keys.pageLayout, PageLayout.AUTOMATIC.value)
 
@@ -185,9 +192,11 @@ class PreferencesHelper(val context: Context) {
         ReaderBottomButton.BUTTONS_DEFAULTS
     )
 
-    fun showNavigationOverlayNewUser() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
+    fun showNavigationOverlayNewUser() =
+        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUser, true)
 
-    fun showNavigationOverlayNewUserWebtoon() = flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
+    fun showNavigationOverlayNewUserWebtoon() =
+        flowPrefs.getBoolean(Keys.showNavigationOverlayNewUserWebtoon, true)
 
     fun preloadSize() = flowPrefs.getInt(Keys.preloadSize, 6)
 
@@ -250,7 +259,8 @@ class PreferencesHelper(val context: Context) {
             else -> SimpleDateFormat(format, Locale.getDefault())
         }
 
-    fun downloadsDirectory() = flowPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
+    fun downloadsDirectory() =
+        flowPrefs.getString(Keys.downloadsDirectory, defaultDownloadsDir.toString())
 
     fun downloadOnlyOverWifi() = prefs.getBoolean(Keys.downloadOnlyOverWifi, true)
 
@@ -273,7 +283,8 @@ class PreferencesHelper(val context: Context) {
 
     fun libraryUpdateInterval() = flowPrefs.getInt(Keys.libraryUpdateInterval, 24)
 
-    fun libraryUpdateRestriction() = flowPrefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
+    fun libraryUpdateRestriction() =
+        flowPrefs.getStringSet(Keys.libraryUpdateRestriction, emptySet())
 
     fun libraryUpdateCategories() = flowPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
     fun libraryUpdateCategoriesExclude() =
@@ -306,7 +317,7 @@ class PreferencesHelper(val context: Context) {
 
     fun filterMerged() = flowPrefs.getInt(Keys.filterMerged, 0)
 
-    fun filterMissingChapters() = rxPrefs.getInteger(Keys.filterMissingChapters, 0)
+    fun filterMissingChapters() = flowPrefs.getInt(Keys.filterMissingChapters, 0)
 
     fun librarySortingMode() = flowPrefs.getInt(Keys.librarySortingMode, 0)
 
@@ -451,7 +462,8 @@ class PreferencesHelper(val context: Context) {
 
     fun sideNavMode() = flowPrefs.getInt(Keys.sideNavMode, 0)
 
-    fun appShouldAutoUpdate() = prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
+    fun appShouldAutoUpdate() =
+        prefs.getInt(Keys.shouldAutoUpdate, AutoUpdaterJob.ONLY_ON_UNMETERED)
 
     fun filterChapterByRead() = flowPrefs.getInt(Keys.defaultChapterFilterByRead, Manga.SHOW_ALL)
 

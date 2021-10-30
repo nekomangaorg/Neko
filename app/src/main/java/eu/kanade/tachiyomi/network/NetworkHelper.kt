@@ -9,6 +9,8 @@ import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFact
 import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
+import eu.kanade.tachiyomi.network.interceptor.UserAgentInterceptor
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.network.services.SimilarService
@@ -124,7 +126,10 @@ class NetworkHelper(val context: Context) {
 
     val client = buildRateLimitedClient()
 
-    val coilClient by lazy { buildNonRateLimitedClient().newBuilder().cache(CoilUtils.createDefaultCache(context)).build() }
+    val coilClient by lazy {
+        buildNonRateLimitedClient().newBuilder().cache(CoilUtils.createDefaultCache(context))
+            .build()
+    }
 
     val authClient = buildRateLimitedAuthenticatedClient()
 

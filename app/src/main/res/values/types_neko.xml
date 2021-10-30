@@ -103,16 +103,12 @@
         <item name="android:textSize">12sp</item>
     </style>
 
-    <style name="Neko.Overline" parent="TextAppearance.MaterialComponents.Overline">
+
+    <style name="TextAppearance.Neko.TitleMedium" parent="TextAppearance.Material3.TitleMedium">
         <item name="fontFamily">@font/montserrat_medium</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
+        <item name="android:letterSpacing">-.025</item>
         <!--Your custom type style here-->
     </style>
 
-    <style name="Neko.Overline_bold" parent="TextAppearance.MaterialComponents.Overline">
-        <item name="fontFamily">@font/montserrat_black</item>
-        <item name="android:textColor">?android:attr/textColorPrimary</item>
-        <!--Your custom type style here-->
-    </style>
 
 </resources>

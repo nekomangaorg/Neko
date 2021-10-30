@@ -34,11 +34,11 @@ import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
+import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.system.withIOContext
-import eu.kanade.tachiyomi.util.system.createFileInCacheDir
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
@@ -149,14 +149,14 @@ class LibraryUpdateService(
     }
 
     private fun addMangaToQueue(categoryId: Int, manga: List<LibraryManga>) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val mangaList = manga.sortedWith(rankingScheme[selectedScheme])
         categoryIds.add(categoryId)
         addManga(mangaList)
     }
 
     private fun addCategory(categoryId: Int) {
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val mangaList =
             getMangaToUpdate(categoryId, Target.CHAPTERS).sortedWith(
                 rankingScheme[selectedScheme]
@@ -263,7 +263,7 @@ class LibraryUpdateService(
 
         instance = this
 
-        val selectedScheme = preferences.libraryUpdatePrioritization().getOrDefault()
+        val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val savedMangaList = intent.getLongArrayExtra(KEY_MANGAS)?.asList()
 
         val mangaList = (
@@ -585,12 +585,13 @@ class LibraryUpdateService(
                     // ! Error
                     //   # Source
                     //     - Manga
-                    errors.toList().groupBy({ it.second }, { it.first }).forEach { (error, mangaList) ->
-                        out.write("! ${error}\n")
-                        mangaList.forEach {
+                    errors.toList().groupBy({ it.second }, { it.first })
+                        .forEach { (error, mangaList) ->
+                            out.write("! ${error}\n")
+                            mangaList.forEach {
                                 out.write("    - ${it.title}\n")
                             }
-                    }
+                        }
                 }
                 return file
             }
@@ -648,7 +649,7 @@ class LibraryUpdateService(
             context: Context,
             category: Category? = null,
             target: Target = Target.CHAPTERS,
-            mangaToUse: List<LibraryManga>? = null
+            mangaToUse: List<LibraryManga>? = null,
         ): Boolean {
             return if (!isRunning()) {
                 val intent = Intent(context, LibraryUpdateService::class.java).apply {

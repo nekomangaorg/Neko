@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.util.log.XLogSetup
 import eu.kanade.tachiyomi.util.system.AuthenticatorUtil
 import eu.kanade.tachiyomi.util.system.notification
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.onEach
 import org.conscrypt.Conscrypt
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.InjektScope
@@ -42,7 +43,7 @@ open class App : Application(), DefaultLifecycleObserver {
 
     @SuppressLint("LaunchActivityFromNotification")
     override fun onCreate() {
-        super.onCreate()
+        super<Application>.onCreate()
         XLogSetup(this)
 
         // TLS 1.3 support for Android < 10

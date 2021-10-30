@@ -102,6 +102,7 @@ import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getText
+import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
 import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
@@ -214,7 +215,7 @@ class MangaDetailsController :
         if (presenter.preferences.themeMangaDetails()) {
             setItemColors()
         }
-        requestFilePermissionsSafe(301, presenter.preferences, presenter.manga.isLocal())
+        requestFilePermissionsSafe(301, presenter.preferences)
     }
 
     private fun setAccentColorValue(colorToUse: Int? = null) {
@@ -254,17 +255,17 @@ class MangaDetailsController :
                     )
                 }
                 )?.let {
-                // this makes the color more consistent regardless of theme
-                val dominant = it
-                val domLum = ColorUtils.calculateLuminance(dominant)
-                val lumWrongForTheme =
-                    (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
-                ColorUtils.blendARGB(
-                    it,
-                    colorBack,
-                    if (lumWrongForTheme) 0.9f else 0.7f
-                )
-            }
+                    // this makes the color more consistent regardless of theme
+                    val dominant = it
+                    val domLum = ColorUtils.calculateLuminance(dominant)
+                    val lumWrongForTheme =
+                        (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
+                    ColorUtils.blendARGB(
+                        it,
+                        colorBack,
+                        if (lumWrongForTheme) 0.9f else 0.7f
+                    )
+                }
     }
 
     private fun setRefreshStyle() {
@@ -971,6 +972,7 @@ class MangaDetailsController :
 
     //region action bar menu methods
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        inflater.inflate(R.menu.manga_details, menu)
         colorToolbar(binding.recycler.canScrollVertically(-1))
         setActionBar(!toolbarIsColored)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
@@ -1412,13 +1414,12 @@ class MangaDetailsController :
             popupView.setOnTouchListener(null)
             return
         }
-        val popup = makeFavPopup(popupView, manga, presenter.getCategories())
+        val popup = makeFavPopup(popupView, presenter.getCategories())
         //  popupView.setOnTouchListener(popup?.dragToOpenListener)
     }
 
     private fun makeFavPopup(
         popupView: View,
-        manga: Manga,
         categories: List<Category>,
     ): CascadePopupMenu? {
         val view = view ?: return null

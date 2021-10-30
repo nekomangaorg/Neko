@@ -12,16 +12,14 @@ class GithubAppUpdateChecker : AppUpdateChecker() {
     override suspend fun checkForUpdate(): AppUpdateResult {
 
         if (BuildConfig.DEBUG) {
-            return GithubUpdateResult.NoNewUpdate()
+            return GithubAppUpdateResult.NoNewUpdate()
         }
 
         val release = service.getLatestVersion()
 
         // Check if latest version is different from current version
-        return if (newVersion != BuildConfig.VERSION_NAME) {
-            GithubAppUpdateResult.NewUpdate(release)
         return if (Version(release.version).isHigherThan(BuildConfig.VERSION_NAME)) {
-            GithubUpdateResult.NewUpdate(release)
+            GithubAppUpdateResult.NewUpdate(release)
         } else {
             GithubAppUpdateResult.NoNewUpdate()
         }

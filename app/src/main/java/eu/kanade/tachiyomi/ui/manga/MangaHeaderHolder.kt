@@ -577,6 +577,10 @@ class MangaHeaderHolder(
             shareButton.imageTintList = ColorStateList.valueOf(accentColor)
             webviewButton.imageTintList = ColorStateList.valueOf(accentColor)
             filterButton.imageTintList = ColorStateList.valueOf(accentColor)
+            mergeButton.imageTintList = ColorStateList.valueOf(accentColor)
+            trackButton.imageTintList = ColorStateList.valueOf(accentColor)
+            favoriteButton.imageTintList = ColorStateList.valueOf(accentColor)
+            similarButton.imageTintList = ColorStateList.valueOf(accentColor)
 
             val states = arrayOf(
                 intArrayOf(-android.R.attr.state_enabled),
@@ -597,7 +601,7 @@ class MangaHeaderHolder(
                 root.context.getResourceColor(android.R.attr.textColorPrimaryInverse)
             )
             startReadingButton.setTextColor(ColorStateList(states, textColors))
-            trackButton.icon!!.tint = ColorStateList.valueOf(accentColor)
+            //trackButton.icon!!.tint = ColorStateList.valueOf(accentColor)
             // favoriteButton.icon!!.tint = ColorStateList.valueOf(accentColor)
             if (updateAll) {
                 // trackButton.checked(trackButton.stateListAnimator != null)

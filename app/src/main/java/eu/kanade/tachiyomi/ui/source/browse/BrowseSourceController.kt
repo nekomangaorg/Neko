@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.util.system.connectivityManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.applyBottomAnimatedInsets
 import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
 import eu.kanade.tachiyomi.util.view.scrollViewWith
@@ -202,40 +203,14 @@ open class BrowseSourceController(bundle: Bundle) :
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
                     binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                         bottomMargin = insets.getInsets(systemBars() or ime()).bottom + 16.dpToPx
+                    }
+                }
+            },
+            onBottomNavUpdate = {
+                updateFab()
             }
         )
-
-        ViewCompat.setWindowInsetsAnimationCallback(view,
-            object : WindowInsetsAnimationCompat.Callback(
-                DISPATCH_MODE_STOP
-            ) {
-                override fun onPrepare(animation: WindowInsetsAnimationCompat) {
-                    handleInsets = false
-                    super.onPrepare(animation)
-                }
-
-                override fun onStart(
-                    animation: WindowInsetsAnimationCompat,
-                    bounds: WindowInsetsAnimationCompat.BoundsCompat,
-                ): WindowInsetsAnimationCompat.BoundsCompat {
-                    handleInsets = false
-                    updateFab()
-                    return bounds
-                }
-
-                override fun onProgress(
-                    insets: WindowInsetsCompat,
-                    runningAnimations: List<WindowInsetsAnimationCompat>,
-                ): WindowInsetsCompat {
-                    updateFab(insets.toWindowInsets())
-                    return insets
-                }
-
-                override fun onEnd(animation: WindowInsetsAnimationCompat) {
-                    handleInsets = true
-                    updateFab()
-                }
-            })
+        binding.fab.applyBottomAnimatedInsets(16.dpToPx)
 
         recycler.addOnScrollListener(
             object : RecyclerView.OnScrollListener() {

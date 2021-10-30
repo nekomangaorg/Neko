@@ -49,7 +49,8 @@
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
         <item name="textAppearanceButton">@style/TextAppearance.Tachiyomi.Button</item>
-        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary</item>
+        <item name="textAppearanceBodySecondary">@style/TextAppearance.Tachiyomi.BodySecondary
+        </item>
         <item name="android:textColorPrimaryInverse">@color/textColorPrimaryInverse</item>
         <item name="switchStyle">@style/Widget.Tachiyomi.CompoundButton.Switch</item>
         <item name="sliderStyle">@style/Widget.Tachiyomi.Slider</item>
@@ -58,8 +59,8 @@
         <item name="bottomNavigationStyle">@style/Widget.Tachiyomi.BottomNavigationView</item>
         <item name="navigationRailStyle">@style/Widget.Tachiyomi.NavigationRail</item>
         <item name="elevationOverlayEnabled">false</item>
-        <item name="android:fontFamily">@font/montserrat_regular</item>
-        <item name="fontFamily">@font/montserrat_regular</item>
+        <item name="android:fontFamily">@font/montserrat</item>
+        <item name="fontFamily">@font/montserrat</item>
         <item name="colorOnHopper">@color/md_white_1000</item>
         <item name="unreadBadgeColor">@color/md_black_1000</item>
         <item name="colorOnUnreadBadge">@color/md_white_1000</item>

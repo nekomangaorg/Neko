@@ -95,7 +95,7 @@
         android:maxLines="4"
         android:text="@string/title"
         android:textIsSelectable="false"
-        android:textSize="20sp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cover_card"
         app:layout_constraintTop_toTopOf="@id/cover_card"
@@ -196,7 +196,7 @@
 
     <TextView
         android:id="@+id/r18_badge"
-        style="@style/Neko.Overline_bold"
+        style="?textAppearanceLabelLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/material_red_500"
@@ -330,21 +330,6 @@
         </LinearLayout>
     </HorizontalScrollView>
 
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/manga_summary_label"
-        style="?textAppearanceTitleSmall"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="6dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/description"
-        android:textIsSelectable="false"
-        android:textSize="17sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/sub_button_scroll"
-        tools:text="About this manga" />
-
     <TextView
         android:id="@+id/manga_summary"
         style="?textAppearanceBodySecondary"
@@ -356,6 +341,7 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="3"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"

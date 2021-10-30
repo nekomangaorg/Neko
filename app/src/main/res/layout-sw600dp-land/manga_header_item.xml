@@ -96,7 +96,7 @@
         android:maxLines="4"
         android:text="@string/title"
         android:textIsSelectable="false"
-        android:textSize="20sp"
+        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cover_card"
         app:layout_constraintTop_toTopOf="@id/cover_card"
@@ -197,7 +197,7 @@
 
     <TextView
         android:id="@+id/r18_badge"
-        style="@style/Neko.Overline_bold"
+        style="?textAppearanceLabelLarge"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:background="@color/material_red_500"
@@ -341,6 +341,7 @@
         android:clickable="true"
         android:focusable="true"
         android:maxLines="3"
+        android:textSize="16sp"
         app:layout_constraintBottom_toTopOf="@id/less_button"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -363,7 +364,7 @@
         android:layout_height="0dp"
         app:layout_constraintStart_toStartOf="@+id/more_button"
         app:layout_constraintTop_toTopOf="@id/more_button"
-        app:layout_constraintBottom_toBottomOf="@id/more_button"/>
+        app:layout_constraintBottom_toBottomOf="@id/more_button" />
 
     <View
         android:id="@+id/more_bg_solid"

@@ -16,14 +16,6 @@ import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 
-/*
- * Copyright (C) 2020 The Neko Manga Open Source Project
- *
- * This Source Code Form is subject to the terms of the Mozilla Public
- * License, v. 2.0. If a copy of the MPL was not distributed with this
- * file, You can obtain one at http://mozilla.org/MPL/2.0/.
- */
-
 class MangaDexLoginHelper {
 
     val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }

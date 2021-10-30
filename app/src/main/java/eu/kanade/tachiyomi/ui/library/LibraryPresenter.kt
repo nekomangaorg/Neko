@@ -114,9 +114,9 @@ class LibraryPresenter(
 
         val filterMangaType = preferences.filterMangaType().get()
 
-        val filterMissingChapters = preferences.filterMissingChapters().getOrDefault()
+        val filterMissingChapters = preferences.filterMissingChapters().get()
 
-        val filterMerged = preferences.filterMerged().getOrDefault()
+        val filterMerged = preferences.filterMerged().get()
 
         !(filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0 && filterMissingChapters == 0 && filterMerged == 0)
     }
@@ -261,13 +261,14 @@ class LibraryPresenter(
 
         val filterMangaType = preferences.filterMangaType().get()
 
-        val showEmptyCategoriesWhileFiltering = preferences.showEmptyCategoriesWhileFiltering().get()
+        val showEmptyCategoriesWhileFiltering =
+            preferences.showEmptyCategoriesWhileFiltering().get()
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
-        val filterMerged = preferences.filterMerged().getOrDefault()
+        val filterMerged = preferences.filterMerged().get()
 
-        val filterMissingChapters = preferences.filterMissingChapters().getOrDefault()
+        val filterMissingChapters = preferences.filterMissingChapters().get()
 
         val filtersOff =
             filterDownloaded == 0 && filterUnread == 0 && filterCompleted == 0 && filterTracked == 0 && filterMangaType == 0
@@ -629,7 +630,9 @@ class LibraryPresenter(
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
-                            LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem)
+                            LibraryItem(LibraryManga.createHide(catId,
+                                mergedTitle,
+                                mangaToRemove.size), headerItem)
                         )
                     }
                 }
@@ -739,7 +742,8 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) items.add(
-                    LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem)
+                    LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size),
+                        headerItem)
                 )
             }
         }

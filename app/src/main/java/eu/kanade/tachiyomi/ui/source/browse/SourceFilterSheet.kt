@@ -17,8 +17,9 @@ import eu.kanade.tachiyomi.databinding.SourceFilterSheetBinding
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.checkHeightThen
-import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
+import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 
 class SourceFilterSheet(val activity: Activity) :

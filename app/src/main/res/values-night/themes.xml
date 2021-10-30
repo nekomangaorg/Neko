@@ -21,18 +21,6 @@
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
-    <style name="Theme.Tachiyomi.Strawberries">
-        <item name="colorPrimary">@color/primaryStrawberry</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
-        <item name="colorSecondary">@color/holo_red</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
-        <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
-        <item name="background">@color/backgroundChocolateStrawberries</item>
-        <item name="colorSurface">@color/backgroundChocolateStrawberries</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-    </style>
 
     <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>

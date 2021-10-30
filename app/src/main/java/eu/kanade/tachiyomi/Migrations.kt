@@ -6,7 +6,6 @@ import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.preference.plusAssign
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.AppUpdateJob
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
@@ -44,12 +43,7 @@ object Migrations {
             if (oldVersion == 0) {
                 return BuildConfig.DEBUG
             }
-
-            if (oldVersion < 38) {
-                if (preferences.automaticUpdates()) {
-                    UpdaterJob.setupTask(context)
-                }
-            }
+       
             if (oldVersion < 39) {
                 if (BuildConfig.INCLUDE_UPDATER) {
                     AppUpdateJob.setupTask(context)

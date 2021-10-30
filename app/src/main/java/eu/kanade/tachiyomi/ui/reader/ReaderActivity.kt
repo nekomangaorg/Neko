@@ -96,7 +96,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
-import eu.kanade.tachiyomi.util.system.setThemeAndNight
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.collapse
@@ -214,7 +213,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Called when the activity is created. Initializes the presenter and configuration.
      */
     override fun onCreate(savedInstanceState: Bundle?) {
-        setThemeAndNight(preferences)
         super.onCreate(savedInstanceState)
         binding = ReaderActivityBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -791,7 +789,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     insets.getInsets(systemBars())
                 }
             val vis = insets.isVisible(statusBars())
-            val isSplitScreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
+            val isSplitScreen =
+                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
             binding.viewerContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 if (isSplitScreen) {
                     topMargin = systemInsets.top

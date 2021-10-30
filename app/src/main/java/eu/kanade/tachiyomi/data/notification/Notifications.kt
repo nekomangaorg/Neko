@@ -118,8 +118,8 @@ object Notifications {
     fun createChannels(context: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
         listOf(
-            NotificationChannelGroup(GROUP_BACKUP_RESTORE, context.getString(R.string.backup_and_restore)),
-            NotificationChannelGroup(GROUP_EXTENSION_UPDATES, context.getString(R.string.extension_updates)),
+            NotificationChannelGroup(GROUP_BACKUP_RESTORE,
+                context.getString(R.string.backup_and_restore)),
             NotificationChannelGroup(GROUP_LIBRARY, context.getString(R.string.library)),
             NotificationChannelGroup(
                 GROUP_BACKUP_RESTORE,

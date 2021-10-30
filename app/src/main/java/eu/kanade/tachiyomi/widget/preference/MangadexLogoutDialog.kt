@@ -28,9 +28,9 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
         return activity!!.materialAlertDialog().apply {
-            setTitle(R.string.logout)
+            setTitle(R.string.log_out)
             setNegativeButton(android.R.string.cancel, null)
-            setPositiveButton(R.string.logout) { _, _ ->
+            setPositiveButton(R.string.log_out) { _, _ ->
                 launchNow {
                     runCatching {
                         // val loggedOut = source.logout()
