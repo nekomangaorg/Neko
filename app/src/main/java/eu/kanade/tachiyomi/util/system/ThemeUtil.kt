@@ -83,7 +83,11 @@ fun AppCompatActivity.setThemeByPref(preferences: PreferencesHelper) {
     setTheme(theme.styleRes)
 }
 
-fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: PreferencesHelper, oldTheme: Resources.Theme?): Resources.Theme {
+fun AppCompatActivity.getThemeWithExtras(
+    theme: Resources.Theme,
+    preferences: PreferencesHelper,
+    oldTheme: Resources.Theme?,
+): Resources.Theme {
     val useAmoled =
         (isInNightMode() || preferences.nightMode().get() == AppCompatDelegate.MODE_NIGHT_YES) &&
             preferences.themeDarkAmoled().get()
@@ -98,7 +102,6 @@ fun AppCompatActivity.getThemeWithExtras(theme: Resources.Theme, preferences: Pr
         theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_Amoled, true)
         val prefTheme = getPrefTheme(preferences)
         if (ThemeUtil.isColoredTheme(prefTheme)) {
-            theme.applyStyle(R.style.ThemeOverlay_Tachiyomi_AllBlue, true)
         }
     }
     return theme

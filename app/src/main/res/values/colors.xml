@@ -1,18 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Application Colors -->
-    <color name="primaryVariantTachiyomi">#E5ECF4</color>
+    <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
-    <color name="primaryInverseTachiyomi">#78bcff</color>
-    <color name="legacyBlue">#54759E</color>
+    <color name="primaryInverseTachiyomi">@color/neko_primary</color>
     <color name="splashBackground">@color/primaryTachiyomi</color>
     <color name="secondaryTachiyomi">@color/neko_accent</color>
-    <color name="rippleColorTachiyomi">#1F2979FF</color>
-    <color name="secondaryVariantTachiyomi">@color/md_white_1000</color>
+    <color name="rippleColorTachiyomi">@color/md_black_1000</color>
+    <color name="secondaryVariantTachiyomi">@color/neko_primary</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
-    <color name="legacyRippleColor">@color/md_black_1000_12</color>
 
     <color name="gray">#404040</color>
 

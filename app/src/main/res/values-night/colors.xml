@@ -5,7 +5,6 @@
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
     <color name="primaryTachiyomi">#78bcff</color>
     <color name="primaryInverseTachiyomi">#2c517f</color>
-    <color name="legacyRippleColor">@color/md_white_1000_20</color>
     <color name="colorOnSurface">@color/md_white_1000</color>
     <color name="colorOnBackground">@color/md_white_1000</color>
 

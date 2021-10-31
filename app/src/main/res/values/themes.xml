@@ -89,40 +89,6 @@
 
     <style name="Theme.Tachiyomi" parent="Theme.Base" />
 
-    <style name="Theme.Tachiyomi.AllBlue">
-        <item name="hasColoredActionBar">true</item>
-        <item name="colorPrimaryVariant">@color/legacyBlue</item>
-        <item name="tabBarIconColor">@color/md_white_1000</item>
-        <item name="colorSurface">@color/legacyBlue</item>
-        <item name="colorSecondaryVariant">@color/md_white_1000</item>
-        <item name="colorSecondaryContainer">@color/md_white_1000_20</item>
-        <item name="colorBackgroundFloating">?background</item>
-        <item name="android:colorBackgroundFloating">?background</item>
-        <item name="tabBarIconInactive">@color/md_white_1000_50</item>
-        <item name="materialAlertDialogTheme">
-            @style/ThemeOverlay.Tachiyomi.MaterialAlertDialog.Colored
-        </item>
-        <item name="tabHighlightBackground">@color/md_white_1000_50</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-        <item name="popupMenuBackground">@drawable/alt_popupmenu_background</item>
-        <item name="actionBarTheme">@style/Theme.ActionBar.Dark.DayNight</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-        <item name="android:statusBarColor">@color/surface_status_bar</item>
-    </style>
-
-    <style name="ThemeOverlay.Tachiyomi.AllBlue" parent="">
-        <item name="hasColoredActionBar">true</item>
-        <item name="colorPrimaryVariant">@color/legacyBlue</item>
-        <item name="colorSurface">@color/primaryTachiyomi</item>
-        <item name="colorBackgroundFloating">?background</item>
-        <item name="android:colorBackgroundFloating">?background</item>
-        <item name="actionBarTintColor">@color/md_white_1000</item>
-        <item name="android:windowLightStatusBar">false</item>
-        <item name="android:windowLightNavigationBar" tools:targetApi="27">false</item>
-        <item name="android:statusBarColor">@color/surface_status_bar</item>
-    </style>
-
     <style name="ThemeOverlay.Tachiyomi.Amoled" parent="">
         <item name="colorSurface">@color/md_black_1000</item>
         <item name="colorPrimaryVariant">@color/md_black_1000</item>
