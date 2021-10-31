@@ -8,7 +8,7 @@ import android.view.View
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.updater.AutoUpdaterJob
+import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 class SettingsGeneralController : SettingsController() {
@@ -106,7 +106,7 @@ class SettingsGeneralController : SettingsController() {
                     titleRes = R.string.auto_update_app
                     entryRange = 0..2
                     entriesRes = arrayOf(R.string.over_any_network, R.string.over_wifi_only, R.string.dont_auto_update)
-                    defaultValue = AutoUpdaterJob.ONLY_ON_UNMETERED
+                    defaultValue = AutoAppUpdaterJob.ONLY_ON_UNMETERED
                 }
             }
         }

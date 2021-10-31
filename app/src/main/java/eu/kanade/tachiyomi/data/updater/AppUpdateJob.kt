@@ -28,9 +28,9 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
             val result = AppUpdateChecker.getUpdateChecker().checkForUpdate()
             if (result is AppUpdateResult.NewUpdate<*>) {
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    preferences.appShouldAutoUpdate() != AutoUpdaterJob.NEVER
+                    preferences.appShouldAutoUpdate() != AutoAppUpdaterJob.NEVER
                 ) {
-                    AutoUpdaterJob.setupTask(context)
+                    AutoAppUpdaterJob.setupTask(context)
                 }
                 AppUpdateNotifier(context).promptUpdate(
                     result.release.info,

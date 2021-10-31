@@ -20,7 +20,7 @@ import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class AutoUpdaterJob(private val context: Context, workerParams: WorkerParameters) :
+class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParameters) :
     CoroutineWorker(context, workerParams) {
 
     override suspend fun doWork(): Result = coroutineScope {
@@ -74,7 +74,7 @@ class AutoUpdaterJob(private val context: Context, workerParams: WorkerParameter
                 .setRequiresDeviceIdle(true)
                 .build()
 
-            val request = OneTimeWorkRequestBuilder<AutoUpdaterJob>()
+            val request = OneTimeWorkRequestBuilder<AutoAppUpdaterJob>()
                 .addTag(TAG)
                 .setConstraints(constraints)
                 .build()
