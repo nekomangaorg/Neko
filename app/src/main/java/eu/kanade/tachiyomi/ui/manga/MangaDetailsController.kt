@@ -227,8 +227,8 @@ class MangaDetailsController :
                 if (if (!context.isInNightMode()) luminance > 0.4 else luminance <= 0.6) {
                     ColorUtils.blendARGB(
                         it,
-                        context.getResourceColor(R.attr.unreadBadgeColor),
-                        (if (!context.isInNightMode()) luminance else -(luminance - 1))
+                        context.getColor(if (context.isInNightMode()) R.color.md_white_1000 else R.color.md_black_1000),
+                        (if (context.isInNightMode().not()) luminance else -(luminance - 1))
                             .toFloat() * if (context.isInNightMode()) 0.33f else 0.5f
                     )
                 } else {

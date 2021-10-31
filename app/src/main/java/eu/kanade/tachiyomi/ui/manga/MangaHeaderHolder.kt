@@ -601,8 +601,6 @@ class MangaHeaderHolder(
                 root.context.getResourceColor(android.R.attr.textColorPrimaryInverse)
             )
             startReadingButton.setTextColor(ColorStateList(states, textColors))
-            //trackButton.icon!!.tint = ColorStateList.valueOf(accentColor)
-            // favoriteButton.icon!!.tint = ColorStateList.valueOf(accentColor)
             if (updateAll) {
                 // trackButton.checked(trackButton.stateListAnimator != null)
                 // favoriteButton.checked(favoriteButton.stateListAnimator != null)
