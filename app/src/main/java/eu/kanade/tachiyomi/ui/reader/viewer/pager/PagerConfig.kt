@@ -44,6 +44,9 @@ class PagerConfig(
     var cutoutBehavior = 0
         private set
 
+    var isFullscreen = true
+        private set
+
     var shiftDoublePage = false
 
     var doublePages = preferences.pageLayout().get() == PageLayout.DOUBLE_PAGES.value
@@ -62,8 +65,9 @@ class PagerConfig(
     var autoSplitPages = preferences.automaticSplitsPage().get()
 
     init {
-        preferences.pageTransitions()
-            .register({ usePageTransitions = it })
+        preferences.pageTransitions().register({ usePageTransitions = it })
+
+        preferences.fullscreen().register({ isFullscreen = it })
 
         preferences.imageScaleType()
             .register({ imageScaleType = it }, { imagePropertyChangedListener?.invoke() })

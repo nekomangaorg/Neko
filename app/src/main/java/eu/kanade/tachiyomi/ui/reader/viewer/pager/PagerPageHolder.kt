@@ -509,7 +509,9 @@ class PagerPageHolder(
             val bottomInsets = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
             setExtendPastCutout(config.cutoutBehavior == CUTOUT_START_EXTENDED && config.scaleTypeIsFullFit() && topInsets + bottomInsets > 0)
             if ((config.cutoutBehavior != CUTOUT_IGNORE || !config.scaleTypeIsFullFit()) &&
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
+                config.isFullscreen &&
+                !viewer.activity.isInMultiWindowMode
             ) {
                 val insets: WindowInsets? = viewer.activity.window.decorView.rootWindowInsets
                 setExtraSpace(

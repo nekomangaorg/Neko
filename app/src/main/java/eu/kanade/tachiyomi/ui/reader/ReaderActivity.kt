@@ -194,6 +194,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     private var lastCropRes = 0
 
+    val isSplitScreen: Boolean
+        get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
+
     companion object {
 
         const val SHIFT_DOUBLE_PAGES = "shiftingDoublePages"
@@ -789,29 +792,16 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     insets.getInsets(systemBars())
                 }
             val vis = insets.isVisible(statusBars())
-            val isSplitScreen =
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode
-            binding.viewerContainer.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                if (isSplitScreen) {
-                    topMargin = systemInsets.top
-                    bottomMargin = systemInsets.bottom
-                } else {
-                    topMargin = 0
-                    bottomMargin = 0
-                }
-            }
-            binding.pageNumber.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                bottomMargin = if (isSplitScreen) systemInsets.bottom else 0
-            }
+            val fullscreen = preferences.fullscreen().get() && !isSplitScreen
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                if (!firstPass && lastVis != vis && preferences.fullscreen().get()) {
+                if (!firstPass && lastVis != vis && fullscreen) {
                     onVisibilityChange(vis)
                 }
                 firstPass = false
                 lastVis = vis
             }
             wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
-            if (!preferences.fullscreen().get() && sheetManageNavColor) {
+            if (!fullscreen && sheetManageNavColor) {
                 window.navigationBarColor = getResourceColor(R.attr.colorSurface)
             }
             binding.appBar.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -830,9 +820,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 leftMargin = 12.dpToPx + systemInsets.left
                 rightMargin = 12.dpToPx + systemInsets.right
             }
-            val fullscreen = preferences.fullscreen().get()
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
-                peek + if (fullscreen || isSplitScreen) {
+                peek + if (fullscreen) {
                     insets.getBottomGestureInsets()
                 } else {
                     val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
@@ -857,7 +846,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     fun setNavColor(insets: WindowInsetsCompat) {
         sheetManageNavColor = when {
-            (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && isInMultiWindowMode) -> {
+            isSplitScreen -> {
                 window.statusBarColor = getResourceColor(R.attr.colorPrimaryVariant)
                 window.navigationBarColor = getResourceColor(R.attr.colorPrimaryVariant)
                 false
@@ -1705,7 +1694,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
          * Sets the fullscreen reading mode (immersive) according to [enabled].
          */
         private fun setFullscreen(enabled: Boolean) {
-            WindowCompat.setDecorFitsSystemWindows(window, !enabled)
+            WindowCompat.setDecorFitsSystemWindows(window, !enabled || isSplitScreen)
             wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
             binding.root.rootWindowInsetsCompat?.let { setNavColor(it) }
         }
