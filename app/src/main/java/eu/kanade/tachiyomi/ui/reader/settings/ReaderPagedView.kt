@@ -95,7 +95,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         } else {
             false
         }
-        binding.extendPastCutout.isVisible = show && isFullFit && hasCutout
+        binding.extendPastCutout.isVisible = show && isFullFit && hasCutout && preferences.fullscreen().get()
         binding.invertDoublePages.isVisible = show && preferences.pageLayout().get() != PageLayout.SINGLE_PAGE.value
     }
 }
