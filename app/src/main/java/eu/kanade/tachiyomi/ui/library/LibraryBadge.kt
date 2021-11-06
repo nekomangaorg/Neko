@@ -37,7 +37,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
 
         val unreadBadgeBackground = if (showTotalChapters) {
             context.contextCompatColor(R.color.total_badge)
-        } else context.getResourceColor(R.attr.colorSecondary)
+        } else context.getResourceColor(R.attr.unreadBadgeColor)
 
         with(binding.unreadText) {
             isVisible = unread > 0 || unread == -1 || showTotalChapters
@@ -79,7 +79,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 binding.downloadText.background =
                     MaterialShapeDrawable(makeShapeCorners(topStart = radius)).apply {
                         this.fillColor =
-                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorTertiary))
+                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorDownloadBadge))
                     }
                 binding.unreadText.background =
                     MaterialShapeDrawable(makeShapeCorners(bottomEnd = radius)).apply {
@@ -97,7 +97,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
                 binding.downloadText.background =
                     MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                         this.fillColor =
-                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorTertiary))
+                            ColorStateList.valueOf(context.getResourceColor(R.attr.colorDownloadBadge))
                     }
             }
         }
@@ -132,7 +132,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         binding.unreadText.background =
             MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                 this.fillColor =
-                    ColorStateList.valueOf(context.getResourceColor(R.attr.colorSecondary))
+                    ColorStateList.valueOf(context.getResourceColor(R.attr.unreadBadgeColor))
             }
     }
 
