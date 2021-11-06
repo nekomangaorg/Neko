@@ -132,7 +132,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         binding.unreadText.background =
             MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                 this.fillColor =
-                    ColorStateList.valueOf(context.getResourceColor(R.attr.colorOnUnreadBadge))
+                    ColorStateList.valueOf(context.getResourceColor(R.attr.unreadBadgeColor))
             }
     }
 
