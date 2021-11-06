@@ -129,7 +129,7 @@ class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeS
         binding.unreadText.updatePaddingRelative(start = 5.dpToPx)
         binding.unreadText.isVisible = inLibrary
         binding.unreadText.text = resources.getText(R.string.in_library)
-        binding.unreadText.binding.unreadText.background =
+        binding.unreadText.background =
             MaterialShapeDrawable(makeShapeCorners(radius, radius)).apply {
                 this.fillColor =
                     ColorStateList.valueOf(context.getResourceColor(R.attr.colorOnUnreadBadge))
