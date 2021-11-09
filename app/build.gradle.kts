@@ -131,7 +131,7 @@ dependencies {
     implementation("com.google.firebase:firebase-analytics-ktx:20.0.0")
     implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.4")
 
-    val lifecycleVersion = "2.4.0-rc01"
+    val lifecycleVersion = "2.4.0"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-process:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
