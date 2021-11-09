@@ -1,6 +1,6 @@
 plugins {
     id("org.jmailen.kotlinter") version "3.7.0"
-    id("org.jetbrains.kotlin.android") version "1.5.21" apply false
+    id("org.jetbrains.kotlin.android") version "1.5.31" apply false
 }
 allprojects {
     repositories {
