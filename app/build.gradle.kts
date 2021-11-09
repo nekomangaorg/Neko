@@ -71,7 +71,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.0.1"
+        kotlinCompilerExtensionVersion = "1.0.5"
     }
 
     flavorDimensions.add("default")

@@ -102,7 +102,7 @@ class MangaDetailsPresenter(
 
     private val trackManager: TrackManager by injectLazy()
 
-    private val loggedServices by lazy { trackManager.services.filter { it.isLogged() } }
+    val loggedServices by lazy { trackManager.services.filter { it.isLogged() } }
 
     var tracks = emptyList<Track>()
 

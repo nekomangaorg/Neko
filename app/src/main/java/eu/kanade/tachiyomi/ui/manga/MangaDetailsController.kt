@@ -1501,6 +1501,11 @@ class MangaDetailsController :
 
     override fun showTrackingSheet() {
         if (needsToBeUnlocked()) return
+        if (presenter.loggedServices.isEmpty()) {
+            activity?.toast("Not logged into any trackers")
+            return
+        }
+
         trackingBottomSheet =
             TrackingBottomSheet(this)
         trackingBottomSheet?.show()
