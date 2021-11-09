@@ -129,7 +129,7 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:20.0.0")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.3")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.4")
 
     val lifecycleVersion = "2.4.0-rc01"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
