@@ -71,7 +71,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
 import eu.kanade.tachiyomi.ui.manga.external.ExternalBottomSheet
-import eu.kanade.tachiyomi.ui.manga.merge.MergeSearchDialog
+import eu.kanade.tachiyomi.ui.manga.merge.MergeSearchBottomSheet
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -168,7 +168,7 @@ class MangaDetailsController :
     private var trackingBottomSheet: TrackingBottomSheet? = null
     private var startingRangeChapterPos: Int? = null
     private var rangeMode: RangeMode? = null
-    private var mergeSearchDialog: MergeSearchDialog? = null
+    private var mergeSearchBottomSheet: MergeSearchBottomSheet? = null
     private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
     var chapterPopupMenu: Pair<Int, CascadePopupMenu>? = null
@@ -355,7 +355,7 @@ class MangaDetailsController :
         trackingBottomSheet = null
         updateToolbarTitleAlpha(1f)
         externalBottomSheet = null
-        mergeSearchDialog = null
+        mergeSearchBottomSheet = null
         super.onDestroyView(view)
     }
 
@@ -1107,21 +1107,21 @@ class MangaDetailsController :
     override fun openMerge() {
         val context = view?.context ?: return
         if (presenter.manga.isMerged()) {
-            val items = listOf("Open merged source in WebView", "Remove merged Manga")
-            /* MaterialDialog(context).show {
-                 listItemsSingleChoice(items = items) { _, index, _ ->
-                     if (index == 0) {
-                         openInWebView(presenter.sourceManager.getMergeSource().baseUrl + presenter.manga.merge_manga_url!!)
-                     } else {
-                         presenter.removeMerged()
-                     }
-                 }
-                 negativeButton()
-                 positiveButton(android.R.string.yes)
-             }*/
+            val items = arrayOf("Open merged source in WebView", "Remove merged Manga")
+            context.materialAlertDialog()
+                .setItems(items) { dialog, index ->
+                    if (index == 0) {
+                        openInWebView(presenter.sourceManager.getMergeSource().baseUrl + presenter.manga.merge_manga_url!!)
+                    } else {
+                        presenter.removeMerged()
+                    }
+                    dialog.dismiss()
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .show()
         } else {
-            mergeSearchDialog = MergeSearchDialog(this)
-            mergeSearchDialog!!.showDialog(router, MergeSearchDialog.TAG)
+            mergeSearchBottomSheet = MergeSearchBottomSheet(this)
+            mergeSearchBottomSheet?.show()
         }
     }
 
@@ -1534,12 +1534,12 @@ class MangaDetailsController :
     }
 
     fun onMergeSearchResults(results: List<SManga>) {
-        mergeSearchDialog?.onSearchResults(results)
+        mergeSearchBottomSheet?.onSearchResults(results)
     }
 
     fun onMergeSearchError(error: Exception) {
         XLog.e(error)
-        mergeSearchDialog?.onSearchResultsError()
+        mergeSearchBottomSheet?.onSearchResultsError()
     }
 
     fun trackRefreshDone() {
