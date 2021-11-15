@@ -184,7 +184,7 @@ dependencies {
     // Icons
     implementation("com.mikepenz:iconics-core:5.3.2")
     implementation("com.mikepenz:iconics-views:5.3.2")
-    implementation("com.mikepenz:community-material-typeface:5.8.55.0-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
