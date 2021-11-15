@@ -9,11 +9,8 @@
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/external_recycler"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:padding="10dp"
-        android:layout_gravity="center"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:spanCount="3"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         tools:listitem="@layout/external_item" />
 </FrameLayout>

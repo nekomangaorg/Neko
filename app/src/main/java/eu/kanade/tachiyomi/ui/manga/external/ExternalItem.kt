@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.external
 
 import android.view.View
 import android.widget.ImageView
+import android.widget.TextView
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.items.AbstractItem
 import eu.kanade.tachiyomi.R
@@ -24,10 +25,12 @@ open class ExternalItem(val externalLink: ExternalLink) : AbstractItem<ExternalI
     class ViewHolder(view: View) : FastAdapter.ViewHolder<ExternalItem>(view) {
         var logo = view.findViewById<ImageView>(R.id.external_logo)!!
         var container = view.findViewById<View>(R.id.external_logo_container)!!
+        var title = view.findViewById<TextView>(R.id.external_title)!!
         override fun bindView(item: ExternalItem, payloads: List<Any>) {
             container.setBackgroundColor(item.externalLink.getLogoColor())
             logo.setImageResource(item.externalLink.getLogo())
             logo.contentDescription = item.externalLink.name
+            title.setText(item.externalLink.name)
         }
 
         override fun unbindView(item: ExternalItem) {

@@ -58,6 +58,8 @@ object MangaTable {
 
     const val COL_ANIME_PLANET_ID = "anime_planet_id"
 
+    const val COL_OTHER_URLS = "other_urls"
+
     const val COL_SCANLATOR_FILTER_FLAG = "scanlator_filter_flag"
 
     const val COL_MISSING_CHAPTERS = "missing_chapters"
@@ -95,9 +97,11 @@ object MangaTable {
             $COL_LANG_FLAG TEXT,
             $COL_ANILIST_ID TEXT,
             $COL_KITSU_ID TEXT,
+            $COL_OTHER_URLS TEXT,
             $COL_MY_ANIME_LIST_ID TEXT,
             $COL_ANIME_PLANET_ID TEXT,
             $COL_MANGA_UPDATES_ID TEXT,
+            $COL_OTHER_URLS TEXT,
             $COL_SCANLATOR_FILTER_FLAG TEXT,
             $COL_MISSING_CHAPTERS TEXT,
             $COL_RATING TEXT,
@@ -162,4 +166,7 @@ object MangaTable {
 
     val addMergeMangaImageCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_MERGE_MANGA_IMAGE_URL} TEXT DEFAULT NULL"
+
+    val addOtherUrlsCol: String
+        get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_OTHER_URLS} TEXT DEFAULT NULL"
 }

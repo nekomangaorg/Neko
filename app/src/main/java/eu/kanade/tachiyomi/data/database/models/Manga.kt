@@ -1,12 +1,15 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.AnimePlanet
 import eu.kanade.tachiyomi.data.external.Dex
+import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.external.MangaUpdates
+import eu.kanade.tachiyomi.data.external.Raw
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -174,6 +177,20 @@ interface Manga : SManga {
         manga_updates_id?.let {
             list.add(MangaUpdates(it))
         }
+
+        XLog.d("cesco $other_urls")
+
+        other_urls?.let { combinedString ->
+            combinedString.split("||").forEach { pairString ->
+                val split = pairString.split("~~")
+                when {
+                    split[0].equals("raw", true) -> list.add(Raw(split[1]))
+                    split[0].equals("engtl", true) -> list.add(Engtl(split[1]))
+                }
+            }
+        }
+
+
         return list.toList()
     }
 

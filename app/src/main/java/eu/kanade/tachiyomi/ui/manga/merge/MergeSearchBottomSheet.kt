@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga.merge
 
 import android.content.Context
+import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -48,14 +49,6 @@ class MergeSearchBottomSheet(controller: MangaDetailsController) :
         binding.searchCloseButton.setOnClickListener {
             onBackPressed()
         }
-        binding.textInputLayout.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
-
-        binding.mergeRecycler.adapter = mergeSearchAdapter
-        binding.mergeRecycler.layoutManager = GridLayoutManager(binding.root.context, 3)
-
-        binding.mergeRecycler.setHasFixedSize(false)
-        binding.mergeRecycler.addItemDecoration(MangaDetailsDivider(activity, 16.dpToPx))
-        binding.mergeRecycler.itemAnimator = null
 
         binding.mergeSearch.append(presenter.manga.title)
         binding.mergeSearch.setOnEditorActionListener { _, actionId, _ ->
@@ -79,6 +72,18 @@ class MergeSearchBottomSheet(controller: MangaDetailsController) :
             this.dismiss()
             true
         }
+    }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding.textInputLayout.setOnApplyWindowInsetsListener(RecyclerWindowInsetsListener)
+
+        binding.mergeRecycler.adapter = mergeSearchAdapter
+        binding.mergeRecycler.layoutManager = GridLayoutManager(binding.root.context, 3)
+
+        binding.mergeRecycler.setHasFixedSize(false)
+        binding.mergeRecycler.addItemDecoration(MangaDetailsDivider(activity, 16.dpToPx))
+        binding.mergeRecycler.itemAnimator = null
     }
 
     override fun onStart() {

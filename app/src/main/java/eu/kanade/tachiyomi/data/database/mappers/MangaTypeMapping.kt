@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MERGE_MANGA_URL
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MISSING_CHAPTERS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_MY_ANIME_LIST_ID
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_NEXT_UPDATE
+import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_OTHER_URLS
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_RATING
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SCANLATOR_FILTER_FLAG
 import eu.kanade.tachiyomi.data.database.tables.MangaTable.COL_SOURCE
@@ -89,6 +90,7 @@ class MangaPutResolver : DefaultPutResolver<Manga>() {
         put(COL_MY_ANIME_LIST_ID, obj.my_anime_list_id)
         put(COL_MANGA_UPDATES_ID, obj.manga_updates_id)
         put(COL_ANIME_PLANET_ID, obj.anime_planet_id)
+        put(COL_OTHER_URLS, obj.other_urls)
         put(COL_SCANLATOR_FILTER_FLAG, obj.filtered_scanlators)
         put(COL_MISSING_CHAPTERS, obj.missing_chapters)
         put(COL_RATING, obj.rating)
@@ -124,6 +126,7 @@ interface BaseMangaGetResolver {
         my_anime_list_id = cursor.getString(cursor.getColumnIndex(COL_MY_ANIME_LIST_ID))
         manga_updates_id = cursor.getString(cursor.getColumnIndex(COL_MANGA_UPDATES_ID))
         anime_planet_id = cursor.getString(cursor.getColumnIndex(COL_ANIME_PLANET_ID))
+        other_urls = cursor.getString(cursor.getColumnIndex(COL_OTHER_URLS))
         filtered_scanlators = cursor.getString(cursor.getColumnIndex(COL_SCANLATOR_FILTER_FLAG))
         missing_chapters = cursor.getString(cursor.getColumnIndex(COL_MISSING_CHAPTERS))
         rating = cursor.getString(cursor.getColumnIndex(COL_RATING))

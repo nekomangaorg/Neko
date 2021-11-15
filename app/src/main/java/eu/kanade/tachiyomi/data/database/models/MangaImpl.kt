@@ -56,6 +56,8 @@ open class MangaImpl : Manga {
 
     override var anime_planet_id: String? = null
 
+    override var other_urls: String? = null
+
     override var filtered_scanlators: String? = null
 
     override var missing_chapters: String? = null

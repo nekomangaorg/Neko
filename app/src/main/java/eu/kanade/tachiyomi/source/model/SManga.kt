@@ -39,6 +39,8 @@ interface SManga : Serializable {
 
     var anime_planet_id: String?
 
+    var other_urls: String?
+
     var missing_chapters: String?
 
     var rating: String?
@@ -99,6 +101,10 @@ interface SManga : Serializable {
             manga_updates_id = other.manga_updates_id
         }
 
+        if (other.other_urls != null) {
+            other_urls = other.other_urls
+        }
+
         if (other.rating != null) {
             rating = other.rating
         }
@@ -110,6 +116,7 @@ interface SManga : Serializable {
         if (other.last_chapter_number != null) {
             last_chapter_number = other.last_chapter_number
         }
+
 
         missing_chapters = other.missing_chapters
 

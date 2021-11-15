@@ -20,10 +20,24 @@ class MangaUpdates(id: String) : ExternalLink(id) {
 }
 
 class Dex(id: String) : ExternalLink(id) {
-    override val name = "Mangadex"
+    override val name = "MangaDex"
     override fun getLogo() = R.drawable.ic_tracker_mangadex_logo
     override fun getLogoColor() = Color.rgb(43, 48, 53)
     override fun getUrl() = "${MdUtil.baseUrl}/title/$id"
+}
+
+class Raw(id: String) : ExternalLink(id) {
+    override val name = "Raw"
+    override fun getLogo() = R.drawable.ic_other_text_logo
+    override fun getLogoColor() = Color.rgb(255, 209, 220)
+    override fun getUrl() = id
+}
+
+class Engtl(id: String) : ExternalLink(id) {
+    override val name = "EngTl"
+    override fun getLogo() = R.drawable.ic_other_text_logo
+    override fun getLogoColor() = Color.rgb(255, 209, 220)
+    override fun getUrl() = id
 }
 
 abstract class ExternalLink(val id: String) {
