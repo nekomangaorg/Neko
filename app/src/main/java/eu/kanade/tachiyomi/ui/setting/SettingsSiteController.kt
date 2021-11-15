@@ -2,7 +2,9 @@ package eu.kanade.tachiyomi.ui.setting
 
 import android.app.Dialog
 import android.os.Bundle
+import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -228,10 +230,36 @@ class SettingsSiteController :
             val activity = activity!!
 
             val options = MdLang.values().map { Pair(it.lang, it.prettyPrint) }
+            XLog.d("ESCO ${preferences!!.langsToShow().get()}")
+
             val initialLangs = preferences!!.langsToShow().get().split(",")
                 .map { lang -> options.indexOfFirst { it.first == lang } }.toIntArray()
 
-            return activity.materialAlertDialog().create()
+            val allLangs = (options.map { it.second }).toTypedArray()
+            val enabledLangs =
+                (options.mapIndexed { index, _ -> initialLangs.contains(index) }).toBooleanArray()
+
+            return activity.materialAlertDialog()
+                .setTitle(R.string.show_languages)
+                .setMultiChoiceItems(
+                    allLangs,
+                    enabledLangs
+                ) { dialog, position, _ ->
+
+                }
+                .setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(android.R.string.ok) { dialog, t ->
+                    val listView = (dialog as AlertDialog).listView
+                    val selected = mutableListOf<String>()
+                    for (i in 0 until listView.count) {
+                        if (listView.isItemChecked(i)) {
+                            selected.add(options[i].first)
+                        }
+                    }
+                    preferences!!.langsToShow().set(selected.joinToString(","))
+                }
+
+                .create()
 
             /*  return MaterialDialog(activity)
                   .title(R.string.show_languages)
