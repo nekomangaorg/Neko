@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.preference.PreferenceKeys
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.jobs.follows.StatusSyncJob
+import eu.kanade.tachiyomi.jobs.migrate.V5MigrationJob
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.FollowsHandler
@@ -190,12 +191,13 @@ class SettingsSiteController :
             titleRes = R.string.v5_migration_service
             summary = context.resources.getString(R.string.v5_migration_desc)
             onClick {
-                /*MaterialDialog(activity!!).show {
-                    title(text = "This will start legacy id migration (Note: This uses data)")
-                    positiveButton(android.R.string.ok) {
+                context.materialAlertDialog()
+                    .setTitle(R.string.v5_migration_notice)
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setPositiveButton(android.R.string.ok) { _, _ ->
                         V5MigrationJob.doWorkNow(activity!!)
                     }
-                }*/
+                    .show()
             }
         }
     }

@@ -1149,5 +1149,6 @@
     <!-- v5 migration -->
     <string name="v5_migration_service">V5 Migration</string>
     <string name="v5_migration_complete">V5 Migration Complete</string>
-    <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.</string>
+    <string name="v5_migration_notice">This will start legacy id migration (Note: This uses data)</string>
+    <string name="v5_migration_desc">Perform migration from old MangaDex to V5 site.  For real though why you still need this?</string>
 </resources>

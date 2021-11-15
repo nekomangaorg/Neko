@@ -41,7 +41,7 @@ class MangadexLogoutDialog(bundle: Bundle? = null) : DialogController(bundle) {
                             preferences.setTokens("", "")
                         }
                         activity?.toast(R.string.successfully_logged_out)
-                        //(targetController as? Listener)?.siteLogoutDialogClosed(source)
+                        (targetController as? Listener)?.siteLogoutDialogClosed(source)
                         /* } else {
                              activity?.toast(loggedOut.error)
                          }*/
