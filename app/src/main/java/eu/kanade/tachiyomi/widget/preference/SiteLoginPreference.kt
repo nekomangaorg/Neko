@@ -3,8 +3,11 @@ package eu.kanade.tachiyomi.widget.preference
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.ImageView
+import android.widget.TextView
+import androidx.core.view.isVisible
 import androidx.preference.Preference
 import androidx.preference.PreferenceViewHolder
+import com.elvishew.xlog.XLog
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -20,6 +23,8 @@ class SiteLoginPreference @JvmOverloads constructor(
     init {
         widgetLayoutResource = R.layout.pref_widget_imageview
     }
+
+    var username = ""
 
     private var onLoginClick: () -> Unit = {}
 
@@ -39,6 +44,18 @@ class SiteLoginPreference @JvmOverloads constructor(
                 )
             }
         )
+        XLog.d("ESCO username $username")
+        val summary = (holder.findViewById(android.R.id.summary) as? TextView)
+        summary?.isVisible = true
+        summary?.text =
+            if (username.isBlank()) {
+                XLog.d("ESCO username was blank")
+
+                ""
+            } else {
+                XLog.d("ESCO username was not blank")
+                "Logged in as $username"
+            }
     }
 
     fun setOnLoginClickListener(block: () -> Unit) {

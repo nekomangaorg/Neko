@@ -76,7 +76,8 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                             )
                         }
                         context.toast(R.string.successfully_logged_in)
-                        (targetController as? Listener)?.siteLoginDialogClosed(source)
+                        (targetController as? Listener)?.siteLoginDialogClosed(source,
+                            binding.username.text.toString())
                     } else {
                         errorResult()
                     }
@@ -99,6 +100,6 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
     }
 
     interface Listener {
-        fun siteLoginDialogClosed(source: Source)
+        fun siteLoginDialogClosed(source: Source, username: String)
     }
 }

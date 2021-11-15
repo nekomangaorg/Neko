@@ -4,7 +4,6 @@ import android.app.Dialog
 import android.os.Bundle
 import androidx.appcompat.app.AlertDialog
 import androidx.preference.PreferenceScreen
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -41,6 +40,9 @@ class SettingsSiteController :
 
         val sourcePreference = SiteLoginPreference(context, mdex).apply {
             title = mdex.name + " Login"
+
+            this.username = preferences.sourceUsername(mdex) ?: ""
+            
             key = getSourceKey(source.id)
             setOnLoginClickListener {
                 if (mdex.isLogged()) {
@@ -204,13 +206,15 @@ class SettingsSiteController :
         }
     }
 
-    override fun siteLoginDialogClosed(source: Source) {
+    override fun siteLoginDialogClosed(source: Source, username: String) {
         val pref = findPreference(getSourceKey(source.id)) as? SiteLoginPreference
+        pref?.username = username
         pref?.notifyChanged()
     }
 
-    override fun siteLogoutDialogClosed(source: Source) {
+    override fun siteLogoutDialogClosed(source: Source, username: String) {
         val pref = findPreference(getSourceKey(source.id)) as? SiteLoginPreference
+        pref?.username = username
         pref?.notifyChanged()
     }
 
@@ -230,7 +234,6 @@ class SettingsSiteController :
             val activity = activity!!
 
             val options = MdLang.values().map { Pair(it.lang, it.prettyPrint) }
-            XLog.d("ESCO ${preferences!!.langsToShow().get()}")
 
             val initialLangs = preferences!!.langsToShow().get().split(",")
                 .map { lang -> options.indexOfFirst { it.first == lang } }.toIntArray()
