@@ -47,9 +47,9 @@ class PageHandler {
                         "mangaplus".equals(chapter.scanlator, true) -> {
                             return@withContext mangaPlusHandler.fetchPageList(externalUrl)
                         }
-                        "comikey".equals(chapter.scanlator, true) -> {
+                        /*"comikey".equals(chapter.scanlator, true) -> {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
-                        }
+                        }*/
                         "bilibili comics".equals(chapter.scanlator, true) -> {
                             if (response.data.attributes.data.isEmpty()) {
                                 return@withContext bilibiliHandler.fetchPageList(externalUrl)
