@@ -275,19 +275,6 @@ class SettingsSiteController :
                 }
 
                 .create()
-
-            /*  return MaterialDialog(activity)
-                  .title(R.string.show_languages)
-                  .listItemsMultiChoice(
-                      items = options.map { it.second },
-                      initialSelection = initialLangs
-                  ) { _, selections, _ ->
-                      val selected = selections.map { options[it].first }
-                      preferences!!.langsToShow().set(selected.joinToString(","))
-                  }
-                  .positiveButton(android.R.string.ok) {
-                  }
-                  .negativeButton(android.R.string.cancel)*/
         }
     }
 }
