@@ -114,7 +114,7 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.4.0-rc01")
+    implementation("androidx.appcompat:appcompat:1.4.0")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.5.0-alpha05")
     implementation("androidx.webkit:webkit:1.4.0")
@@ -125,7 +125,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.1")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.2")
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:20.0.0")
@@ -170,7 +170,7 @@ dependencies {
     implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
 
     // Serialization
-    val kotlinSerialization = "1.3.0"
+    val kotlinSerialization = "1.3.1"
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
 
@@ -182,9 +182,9 @@ dependencies {
     implementation("org.jsoup:jsoup:1.14.3")
 
     // Icons
-    implementation("com.mikepenz:iconics-core:5.3.2")
+    implementation("com.mikepenz:iconics-core:5.3.3")
     implementation("com.mikepenz:iconics-views:5.3.2")
-    implementation("com.mikepenz:community-material-typeface:5.8.55.0-kotlin@aar")
+    implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
