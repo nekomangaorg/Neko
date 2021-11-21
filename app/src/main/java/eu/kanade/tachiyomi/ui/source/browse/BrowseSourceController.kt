@@ -138,7 +138,7 @@ open class BrowseSourceController(bundle: Bundle) :
         adapter = FlexibleAdapter(null, this)
         setupRecycler(view)
 
-        binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
+        //
 
         binding.fab.setOnClickListener { showFilters() }
         binding.swipeRefresh.isEnabled = false
@@ -740,6 +740,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
             ) + 16.dpToPx
         }
+        binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
     }
 
     companion object {
