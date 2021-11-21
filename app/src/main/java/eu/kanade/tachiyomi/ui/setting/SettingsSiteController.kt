@@ -42,7 +42,7 @@ class SettingsSiteController :
             title = mdex.name + " Login"
 
             this.username = preferences.sourceUsername(mdex) ?: ""
-            
+
             key = getSourceKey(source.id)
             setOnLoginClickListener {
                 if (mdex.isLogged()) {
@@ -136,19 +136,31 @@ class SettingsSiteController :
             summaryRes = R.string.sync_follows_to_library_summary
 
             onClick {
-                /* MaterialDialog(activity!!).show {
-                     listItemsMultiChoice(
-                         items = context.resources.getStringArray(R.array.follows_options).toList()
-                             .let { it.subList(1, it.size) },
-                         initialSelection = intArrayOf(0, 5)
-                     ) { _, indices, _ ->
-                         preferences.mangadexSyncToLibraryIndexes()
-                             .set(indices.map { (it + 1).toString() }.toSet())
-                         StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
-                     }
-                     positiveButton(android.R.string.ok)
-                     negativeButton(android.R.string.cancel)
-                 }*/
+                activity!!.materialAlertDialog()
+                    .setNegativeButton(android.R.string.cancel, null)
+                    .setMultiChoiceItems(
+                        context.resources.getStringArray(R.array.follows_options).drop(1)
+                            .toTypedArray(),
+                        booleanArrayOf(true, false, false, false, false, true)
+                    ) { dialog, position, bool ->
+                        val listView = (dialog as AlertDialog).listView
+                        listView.setItemChecked(position, bool)
+                    }
+                    .setPositiveButton(android.R.string.ok) { dialog, t ->
+                        val listView = (dialog as AlertDialog).listView
+                        val indiciesSelected = mutableListOf<String>()
+                        for (i in 0 until listView.count) {
+                            if (listView.isItemChecked(i)) {
+                                indiciesSelected.add((i + 1).toString())
+                            }
+                        }
+                        if (indiciesSelected.size > 0) {
+                            preferences.mangadexSyncToLibraryIndexes()
+                                .set(indiciesSelected.toSet())
+                            StatusSyncJob.doWorkNow(context, StatusSyncJob.entireFollowsFromDex)
+                        }
+                    }
+                    .show()
             }
         }
 
