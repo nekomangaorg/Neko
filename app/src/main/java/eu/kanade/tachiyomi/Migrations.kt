@@ -43,7 +43,7 @@ object Migrations {
             if (oldVersion == 0) {
                 return BuildConfig.DEBUG
             }
-       
+
             if (oldVersion < 39) {
                 if (BuildConfig.INCLUDE_UPDATER) {
                     AppUpdateJob.setupTask(context)
@@ -53,13 +53,13 @@ object Migrations {
                 LibraryUpdateJob.setupTask(context)
                 BackupCreatorJob.setupTask(context)
             }
-            if (oldVersion < 95 && oldVersion != 0) {
+            if (oldVersion < 95) {
                 // Force MAL log out due to login flow change
                 val trackManager = Injekt.get<TrackManager>()
                 trackManager.myAnimeList.logout()
                 context.toast(R.string.myanimelist_relogin)
             }
-            if (oldVersion < 113 && oldVersion != 0) {
+            if (oldVersion < 113) {
                 // Force MAL log out due to login flow change
                 // v67: switched from scraping to WebView
                 // v68: switched from WebView to OAuth

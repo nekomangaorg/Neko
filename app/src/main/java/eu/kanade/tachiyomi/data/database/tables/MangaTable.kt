@@ -169,4 +169,7 @@ object MangaTable {
 
     val addOtherUrlsCol: String
         get() = "ALTER TABLE ${MangaTable.TABLE} ADD COLUMN ${MangaTable.COL_OTHER_URLS} TEXT DEFAULT NULL"
+
+    val clearScanlators: String
+        get() = "UPDATE ${MangaTable.TABLE} SET ${MangaTable.COL_SCANLATOR_FILTER_FLAG} = NULL where _id in (select _id from ${MangaTable.TABLE} where ${MangaTable.COL_SCANLATOR_FILTER_FLAG} IS NOT NULL)"
 }

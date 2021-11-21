@@ -115,6 +115,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
 
         if (oldVersion < 28) {
             db.execSQL(MangaTable.addOtherUrlsCol)
+            db.execSQL(MangaTable.clearScanlators)
         }
     }
 
