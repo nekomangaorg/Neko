@@ -32,7 +32,6 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
-import eu.kanade.tachiyomi.source.online.MergeSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -41,7 +40,6 @@ import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
-import eu.kanade.tachiyomi.util.addNewScanlatorsToFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
@@ -52,7 +50,6 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
-import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.CoroutineScope
@@ -117,13 +114,11 @@ class MangaDetailsPresenter(
         private set
 
     var allChapterScanlators: Set<String> = emptySet()
-        private set
 
     var filteredScanlators: Set<String> = emptySet()
 
     var headerItem = MangaHeaderItem(manga, controller.fromCatalogue)
     var tabletChapterHeaderItem: MangaHeaderItem? = null
-
     fun onCreate() {
         headerItem.isTablet = controller.isTablet
         if (controller.isTablet) {
@@ -142,9 +137,6 @@ class MangaDetailsPresenter(
             refreshAll()
         } else {
             runBlocking {
-                manga.filtered_scanlators?.let {
-                    filteredScanlators = ChapterUtil.getScanlators(it).toSet()
-                }
                 getChapters()
             }
             controller.updateChapters(this.chapters)
@@ -177,8 +169,8 @@ class MangaDetailsPresenter(
     private suspend fun getChapters() {
         val chapters = db.getChapters(manga).executeOnIO().map { it.toModel() }
 
-        // update all scanlators
-        updateScanlators(chapters)
+        allChapterScanlators =
+            chapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
 
         // Find downloaded chapters
         setDownloadedChapters(chapters)
@@ -186,37 +178,6 @@ class MangaDetailsPresenter(
         // Store the last emission
         allChapters = chapters
         this.chapters = applyChapterFilters(chapters)
-    }
-
-    private fun updateScanlators(chapters: List<ChapterItem>) {
-        allChapterScanlators = chapters.flatMap { it -> it.chapter.scanlatorList() }.toSet()
-        if (filteredScanlators.contains(MergeSource.name) && !allChapterScanlators.contains(
-                MergeSource.name
-            )
-        ) {
-            val tempSet = filteredScanlators.toMutableSet()
-            tempSet.remove(MergeSource.name)
-            filteredScanlators = tempSet.toSet()
-            manga.filtered_scanlators = ChapterUtil.getScanlatorString(filteredScanlators)
-            db.insertManga(manga)
-        }
-        if (filteredScanlators.isEmpty()) {
-            filteredScanlators = allChapterScanlators
-        }
-    }
-
-    fun filterScanlatorsClicked(selectedScanlators: List<String>) {
-        allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
-
-        filteredScanlators = allChapterScanlators.filter { selectedScanlators.contains(it) }.toSet()
-
-        if (filteredScanlators.size == allChapterScanlators.size) {
-            manga.filtered_scanlators = null
-        } else {
-            manga.filtered_scanlators = ChapterUtil.getScanlatorString(filteredScanlators)
-        }
-        db.insertManga(manga).executeAsBlocking()
-        asyncUpdateMangaAndChapters()
     }
 
     /**
@@ -399,10 +360,6 @@ class MangaDetailsPresenter(
     fun attachMergeManga(mergeManga: SManga?) {
         manga.merge_manga_url = mergeManga?.url
         manga.merge_manga_image_url = mergeManga?.thumbnail_url
-        val tempSet = filteredScanlators.toMutableSet()
-        tempSet.add(MergeSource.name)
-        filteredScanlators = tempSet
-        manga.filtered_scanlators = ChapterUtil.getScanlatorString(filteredScanlators)
         db.insertManga(manga)
     }
 
@@ -506,7 +463,6 @@ class MangaDetailsPresenter(
             }
             val finChapters = deferredChapters.await() + deferredMergedChapters.await()
             if (!error) {
-                val originalChapters = db.getChapters(manga).executeAsBlocking()
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
                     val downloadNew = preferences.downloadNew().get()
@@ -523,12 +479,6 @@ class MangaDetailsPresenter(
                         }
                     }
                     mangaShortcutManager.updateShortcuts()
-
-                    launch {
-                        checkIfShouldUpdateScanlatorFilters(originalChapters,
-                            newChapters.first,
-                            mangaWasInitalized)
-                    }
                 }
                 if (newChapters.second.isNotEmpty()) {
                     val removedChaptersId = newChapters.second.map { it.id }
@@ -572,29 +522,6 @@ class MangaDetailsPresenter(
                         controller.showError("MergedSource error: " + trimException(errorFromMerged!!))
                     }
                 }
-            }
-        }
-    }
-
-    suspend fun checkIfShouldUpdateScanlatorFilters(
-        originalChapters: List<Chapter>,
-        newChapters: List<Chapter>,
-        mangaWasInitialized: Boolean,
-    ) {
-        if (mangaWasInitialized) {
-            val newScanlators = manga.addNewScanlatorsToFilter(
-                db,
-                originalChapters,
-                newChapters
-            )
-            if (newScanlators.isNotEmpty()) {
-                filteredScanlators = filteredScanlators + newScanlators
-                launchUI {
-                    controller.updatingScanlatorFilters()
-                }
-                val allChaps = db.getChapters(manga).executeOnIO()
-
-                updateScanlators(allChaps.map { it.toModel() })
             }
         }
     }

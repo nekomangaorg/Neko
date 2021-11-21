@@ -7,14 +7,11 @@ import com.google.android.material.snackbar.Snackbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
-import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
-import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.ui.category.addtolibrary.SetCategoriesSheet
-import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import java.util.Date
@@ -182,34 +179,6 @@ fun Manga.addOrRemoveToFavorites(
         }
     }
     return null
-}
-
-fun Manga.addNewScanlatorsToFilter(
-    db: DatabaseHelper,
-    existingChapters: List<Chapter>,
-    newChapters: List<Chapter>,
-): Set<String> {
-    val existingScanlators =
-        existingChapters.flatMap { it.scanlatorList() }.distinct()
-            .toSet()
-    val newScanlators =
-        newChapters.flatMap { it.scanlatorList() }.distinct()
-            .toSet()
-
-    //Add new scanlators to the existing filter just so they aren't hidden
-    val result = newScanlators.subtract(existingScanlators)
-    if (result.isNotEmpty()) {
-        if (this.filtered_scanlators != null) {
-            val scanlators =
-                ChapterUtil.getScanlators(this.filtered_scanlators!!).toSet() + newScanlators
-            this.filtered_scanlators = ChapterUtil.getScanlatorString(scanlators)
-        } else {
-            this.filtered_scanlators =
-                ChapterUtil.getScanlatorString(existingScanlators + newScanlators)
-        }
-        db.insertManga(this).executeAsBlocking()
-    }
-    return result
 }
 
 /**

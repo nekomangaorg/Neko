@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.ChapterSortBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
-import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.setNegativeStateItems
@@ -36,7 +35,7 @@ class ChaptersSortBottomSheet(controller: MangaDetailsController) :
     init {
         val height = activity.window.decorView.rootWindowInsetsCompat
             ?.getInsetsIgnoringVisibility(systemBars())?.bottom ?: 0
-        sheetBehavior.peekHeight = 470.dpToPx + height
+        //sheetBehavior.peekHeight = 470.dpToPx + height
 
         sheetBehavior.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {

@@ -34,7 +34,7 @@ class Raw(id: String) : ExternalLink(id) {
 }
 
 class Engtl(id: String) : ExternalLink(id) {
-    override val name = "EngTl"
+    override val name = "English Translation"
     override fun getLogo() = R.drawable.ic_other_text_logo
     override fun getLogoColor() = Color.rgb(255, 209, 220)
     override fun getUrl() = id

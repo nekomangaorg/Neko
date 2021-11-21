@@ -101,7 +101,6 @@ object MangaTable {
             $COL_MY_ANIME_LIST_ID TEXT,
             $COL_ANIME_PLANET_ID TEXT,
             $COL_MANGA_UPDATES_ID TEXT,
-            $COL_OTHER_URLS TEXT,
             $COL_SCANLATOR_FILTER_FLAG TEXT,
             $COL_MISSING_CHAPTERS TEXT,
             $COL_RATING TEXT,

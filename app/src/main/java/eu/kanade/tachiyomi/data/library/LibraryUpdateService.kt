@@ -29,7 +29,6 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
-import eu.kanade.tachiyomi.util.addNewScanlatorsToFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
@@ -448,17 +447,10 @@ class LibraryUpdateService(
             }
 
             if (fetchedChapters.isNotEmpty()) {
-                val originalChapters = db.getChapters(manga).executeAsBlocking()
                 val newChapters =
                     syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
 
                 if (newChapters.first.isNotEmpty()) {
-
-                    manga.addNewScanlatorsToFilter(
-                        db,
-                        originalChapters,
-                        newChapters.first
-                    )
 
                     if (shouldDownload) {
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
@@ -467,7 +459,7 @@ class LibraryUpdateService(
                             val scanlatorsToIgnore =
                                 ChapterUtil.getScanlators(manga.filtered_scanlators).toMutableSet()
 
-                            // only download scanlators we have filtered, unless a new scanlator starts uploading
+                            // only download scanlators not filtered out
                             chaptersToDl =
                                 chaptersToDl.filter { it.scanlator !in scanlatorsToIgnore }
                         }
