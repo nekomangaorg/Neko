@@ -146,7 +146,7 @@ dependencies {
     implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
 
     // Network client
-    val okhttpVersion = "4.9.2"
+    val okhttpVersion = "4.9.3"
     implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
     implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
     implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
