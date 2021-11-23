@@ -12,7 +12,7 @@ class SimilarToolTip(activity: Activity, context: Context, similarButton: Iconic
     init {
         ViewTooltip.on(activity, similarButton).autoHide(true, 3000).align(ViewTooltip.ALIGN.CENTER)
             .position(ViewTooltip.Position.BOTTOM).text(R.string.tap_to_show_similar_manga)
-            .color(context.getColor(R.color.neko_green))
+            .color(context.getColor(R.color.new_neko_accent))
             .textSize(TypedValue.COMPLEX_UNIT_SP, 15f).textColor(Color.BLACK).show()
     }
 }

@@ -164,4 +164,6 @@
     <!-- MangaDex Theme -->
     <color name="secondaryMangaDex">#FF6740</color>
 
+    <color name="new_neko_accent">#FF6784</color>
+
 </resources>

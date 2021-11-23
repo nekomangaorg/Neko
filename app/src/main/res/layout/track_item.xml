@@ -91,7 +91,7 @@
                 app:iiv_color="@color/text_color_secondary"
                 android:tooltipText="@string/remove_tracking"
                 app:layout_constraintBottom_toBottomOf="parent"
-                tools:background="@color/neko_green"
+                tools:background="@color/new_neko_accent"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
@@ -124,6 +124,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintBottom_toTopOf="@id/bottom_divider"
                 app:layout_constraintTop_toTopOf="parent">
+
                 <TextView
                     android:id="@+id/track_status"
                     style="?textAppearanceBodySecondary"
@@ -171,7 +172,7 @@
                     app:layout_constraintHeight_min="wrap"
                     app:layout_constraintStart_toEndOf="@id/track_chapters"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" >
+                    app:layout_constraintTop_toTopOf="parent">
 
                     <TextView
                         android:id="@+id/track_score"

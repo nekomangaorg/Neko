@@ -21,7 +21,8 @@ class RestoreHelper(val context: Context) {
      * Pending intent of action that cancels the library update
      */
     val cancelIntent by lazy {
-        NotificationReceiver.cancelRestorePendingBroadcast(context, Notifications.ID_RESTORE_PROGRESS)
+        NotificationReceiver.cancelRestorePendingBroadcast(context,
+            Notifications.ID_RESTORE_PROGRESS)
     }
 
     /**
@@ -34,8 +35,10 @@ class RestoreHelper(val context: Context) {
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
-            .setColor(ContextCompat.getColor(context, R.color.neko_green_darker))
-            .addAction(R.drawable.ic_close_24dp, context.getString(android.R.string.cancel), cancelIntent)
+            .setColor(ContextCompat.getColor(context, R.color.new_neko_accent))
+            .addAction(R.drawable.ic_close_24dp,
+                context.getString(android.R.string.cancel),
+                cancelIntent)
     }
 
     /**Get the PendingIntent for the error log
@@ -75,13 +78,15 @@ class RestoreHelper(val context: Context) {
      *
      */
     fun showErrorNotification(errorMessage: String) {
-        val resultNotification = NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_ERROR)
-            .setContentTitle(context.getString(R.string.restore_error))
-            .setContentText(errorMessage)
-            .setSmallIcon(R.drawable.ic_error_24dp)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-            .setColor(ContextCompat.getColor(context, R.color.md_red_500))
-        context.notificationManager.notify(Notifications.ID_BACKUP_RESTORE_ERROR, resultNotification.build())
+        val resultNotification =
+            NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_ERROR)
+                .setContentTitle(context.getString(R.string.restore_error))
+                .setContentText(errorMessage)
+                .setSmallIcon(R.drawable.ic_error_24dp)
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
+                .setColor(ContextCompat.getColor(context, R.color.md_red_500))
+        context.notificationManager.notify(Notifications.ID_BACKUP_RESTORE_ERROR,
+            resultNotification.build())
     }
 
     /**
@@ -147,13 +152,14 @@ class RestoreHelper(val context: Context) {
 
         val restoreString = content.joinToString("\n")
 
-        val resultNotification = NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE)
-            .setContentTitle(context.getString(R.string.restore_completed))
-            .setContentText(restoreString)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
-            .setSmallIcon(R.drawable.ic_neko_notification)
-            .setColor(ContextCompat.getColor(context, R.color.neko_green_darker))
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
+        val resultNotification =
+            NotificationCompat.Builder(context, Notifications.CHANNEL_BACKUP_RESTORE_COMPLETE)
+                .setContentTitle(context.getString(R.string.restore_completed))
+                .setContentText(restoreString)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(restoreString))
+                .setSmallIcon(R.drawable.ic_neko_notification)
+                .setColor(ContextCompat.getColor(context, R.color.new_neko_accent))
+                .setPriority(NotificationCompat.PRIORITY_HIGH)
         if (errors.isNotEmpty() && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
                 R.drawable.ic_close_24dp,
@@ -164,7 +170,8 @@ class RestoreHelper(val context: Context) {
                 getErrorLogIntent(path, file)
             )
         }
-        context.notificationManager.notify(Notifications.ID_RESTORE_COMPLETE, resultNotification.build())
+        context.notificationManager.notify(Notifications.ID_RESTORE_COMPLETE,
+            resultNotification.build())
     }
 
     /**
