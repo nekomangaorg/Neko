@@ -189,7 +189,7 @@ dependencies {
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
 
     // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.6.0")
+    implementation("androidx.work:work-runtime-ktx:2.7.1")
 
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
