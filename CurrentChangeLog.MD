@@ -1,11 +1,12 @@
+## 🥳 New
+Huge UI update - Material You, with new themes colors and UI (@Jays2Kings)
+Option to theme the buttons in manga details page based on the cover (@Jays2Kings)
+Option to split double pages in webtoon mode (@ghostbear, @uknfire)
+Using incognito mode now shows a notification (@ivaniskandar)
 ## 🏗️ Changes
-- Updated the selector ui for library, should be more clear whats being selected now (@Soitora)
-- (Android 8 and below) When using a dark theme, the no longer a translucent black and instead matches the nav bar background (@Jays2Kings)
-- (Android 9 and above) Haptics added when using the reader slider (@ivaniskandar)
+Scanlator filtering is now an exclude and not an include of the scanlator
+Moving multiple library entries when some categories are not shared between them will no longer remove them from their unique categories (@quangkieu)
+notification icon colors should now all match the main app icon color
 ## 🐜 Fixes
-- Fixed crash when using biometrics for Android 8 and below (@Jays2Kings)
-- Latest Chapter removes duplicates
-- swiping to mark read color was wrong on some themes
-- Fixed Appearance related settings not showing when searching through settings (@Jays2Kings)
-- Fixed split double pages mode having a flash when faced with back-to-back page spreads (@Jays2Kings)
-- Move to another category button now shows when selecting manga while using an ungrouped list (@Jays2Kings)
+Too many bug fixes to even list from upstream (@Jays2Kings)
+## 🛠️ Other
