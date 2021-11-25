@@ -220,7 +220,7 @@ dependencies {
     // UI
     implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
     implementation("br.com.simplepass:loading-button-android:2.2.0")
-    val fastAdapterVersion = "5.5.1"
+    val fastAdapterVersion = "5.6.0"
     implementation("com.mikepenz:fastadapter:$fastAdapterVersion")
     implementation("com.mikepenz:fastadapter-extensions-binding:$fastAdapterVersion")
     implementation("eu.davidea:flexible-adapter:5.1.0")
