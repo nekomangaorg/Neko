@@ -298,7 +298,6 @@
                 android:contentDescription="@string/share"
                 android:padding="5dp"
                 android:tooltipText="@string/merge_other"
-                android:visibility="gone"
                 app:iiv_icon="gmf_merge_type"
                 tools:background="@color/md_black_1000"
                 tools:visibility="visible" />
