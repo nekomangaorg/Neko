@@ -10,7 +10,7 @@ data class LegacyIdDto(
 
 @Serializable
 data class LegacyMappingDto(
-    val data: LegacyMappingDataDto,
+    val data: List<LegacyMappingDataDto>,
 )
 
 @Serializable

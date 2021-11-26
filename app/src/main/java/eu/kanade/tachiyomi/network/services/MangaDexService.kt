@@ -63,7 +63,7 @@ interface MangaDexService {
     suspend fun randomManga(): Response<MangaDto>
 
     @POST(MdApi.legacyMapping)
-    suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): Response<List<LegacyMappingDto>>
+    suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.atHomeServer}/{chapterId}")

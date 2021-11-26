@@ -3,6 +3,9 @@ package eu.kanade.tachiyomi.jobs.migrate
 import android.content.Context
 import android.net.Uri
 import androidx.core.text.isDigitsOnly
+import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -70,22 +73,32 @@ class V5MigrationService(
                     )
                 )
 
-                if (responseDto.isSuccessful) {
-                    val newId = responseDto.body()!!.first().data.attributes.newId
-                    manga.url = "/title/$newId"
-                    manga.initialized = false
-                    manga.thumbnail_url = null
-                    db.insertManga(manga).executeAsBlocking()
-                    val tracks = db.getTracks(manga).executeAsBlocking()
-                    tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
-                        it.tracking_url = MdUtil.baseUrl + manga.url
-                        db.insertTrack(it).executeAsBlocking()
+                when (responseDto) {
+                    is ApiResponse.Success -> {
+                        val newId = responseDto.getOrThrow().data.first().attributes.newId
+                        manga.url = "/title/$newId"
+                        manga.initialized = false
+                        manga.thumbnail_url = null
+                        db.insertManga(manga).executeAsBlocking()
+                        val tracks = db.getTracks(manga).executeAsBlocking()
+                        tracks.firstOrNull { it.sync_id == trackManager.mdList.id }?.let {
+                            it.tracking_url = MdUtil.baseUrl + manga.url
+                            db.insertTrack(it).executeAsBlocking()
+                        }
+                        actualMigrated++
                     }
-                    actualMigrated++
-                } else {
-                    failedUpdatesMangaList[manga] = "unable to find new manga id"
-                    failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed this manga or the id changed")
-                    mangaErroredOut = true
+                    is ApiResponse.Failure.Error,
+                    -> {
+                        failedUpdatesMangaList[manga] = "unable to find new manga id"
+                        failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed this manga or the id changed")
+                        mangaErroredOut = true
+                    }
+                    is ApiResponse.Failure.Exception<*> -> {
+                        XLog.e("Error", responseDto.exception)
+                        failedUpdatesMangaList[manga] = "error processing"
+                        failedUpdatesErrors.add(manga.title + ": error processing")
+                        mangaErroredOut = true
+                    }
                 }
             }
 
@@ -104,30 +117,33 @@ class V5MigrationService(
 
                 chapterChunks.asSequence().forEach { legacyIds ->
                     val responseDto =
-                        networkHelper.service.legacyMapping(LegacyIdDto("chapter", legacyIds))
-                    if (responseDto.isSuccessful) {
-                        responseDto.body()!!.forEach { legacyMappingDto ->
-                            /*   if (job?.isCancelled == true) {
-                                   return
-                               }*/
-                            val oldId = legacyMappingDto.data.attributes.legacyId
-                            val newId = legacyMappingDto.data.attributes.newId
-                            val chapter = chapterMap[oldId]!!
-                            chapter.mangadex_chapter_id = newId
-                            chapter.url = MdUtil.chapterSuffix + newId
-                            chapter.old_mangadex_id = oldId.toString()
-                            db.insertChapter(chapter).executeAsBlocking()
+                        networkHelper.service.legacyMapping(LegacyIdDto("chapter",
+                            legacyIds))
+
+                    when (responseDto) {
+                        is ApiResponse.Success -> {
+                            responseDto.getOrThrow().data.forEach { dataDto ->
+                                val oldId = dataDto.attributes.legacyId
+                                val newId = dataDto.attributes.newId
+                                val chapter = chapterMap[oldId]!!
+                                chapter.mangadex_chapter_id = newId
+                                chapter.url = MdUtil.chapterSuffix + newId
+                                chapter.old_mangadex_id = oldId.toString()
+                                db.insertChapter(chapter).executeAsBlocking()
+                            }
                         }
-                    } else {
-                        legacyIds.forEach {
-                            val failedChapter = chapterMap[it]!!
-                            failedUpdatesChapters[failedChapter] =
-                                "unable to find new chapter V5 id deleting chapter"
-                            chapterErrors.add(
-                                "\t- unable to find new chapter id for " +
-                                    "vol ${failedChapter.vol} - ${failedChapter.chapter_number} - ${failedChapter.name}"
-                            )
-                            db.deleteChapter(failedChapter).executeAsBlocking()
+                        is ApiResponse.Failure.Error,
+                        -> {
+                            legacyIds.forEach {
+                                val failedChapter = chapterMap[it]!!
+                                failedUpdatesChapters[failedChapter] =
+                                    "unable to find new chapter V5 id deleting chapter"
+                                chapterErrors.add(
+                                    "\t- unable to find new chapter id for " +
+                                        "vol ${failedChapter.vol} - ${failedChapter.chapter_number} - ${failedChapter.name}"
+                                )
+                                db.deleteChapter(failedChapter).executeAsBlocking()
+                            }
                         }
                     }
                 }
