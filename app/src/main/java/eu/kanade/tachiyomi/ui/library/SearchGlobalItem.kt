@@ -70,7 +70,7 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
             }
             binding.button.setOnClickListener {
                 val query = (adapter.getItem(flexibleAdapterPosition) as SearchGlobalItem).string
-                // (adapter as? LibraryCategoryAdapter)?.libraryListener?.globalSearch(query)
+                (adapter as? LibraryCategoryAdapter)?.libraryListener?.globalSearch(query)
             }
         }
 

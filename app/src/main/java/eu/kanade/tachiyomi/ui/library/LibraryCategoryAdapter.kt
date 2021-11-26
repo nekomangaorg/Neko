@@ -289,5 +289,6 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         fun allSelected(position: Int): Boolean
         fun toggleCategoryVisibility(position: Int)
         fun manageCategory(position: Int)
+        fun globalSearch(query: String)
     }
 }
