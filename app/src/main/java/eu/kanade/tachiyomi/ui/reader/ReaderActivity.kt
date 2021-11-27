@@ -1052,7 +1052,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         binding.toolbar.title = manga.title
 
         binding.readerNav.pageSeekbar.isRTL = newViewer is R2LPagerViewer
-
         binding.pleaseWait.isVisible = true
         binding.pleaseWait.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fade_in_long))
         invalidateOptionsMenu()
