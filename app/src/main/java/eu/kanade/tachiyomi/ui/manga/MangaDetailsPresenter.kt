@@ -937,7 +937,6 @@ class MangaDetailsPresenter(
 
     private fun fetchExternalLinks() {
         scope.launch {
-            XLog.d("cesco ${manga.getExternalLinks()}")
             externalLinksList = manga.getExternalLinks().map { external ->
                 ExternalItem(external)
             }

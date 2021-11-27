@@ -77,7 +77,6 @@ class ApiMangaParser {
 
             val otherUrls = mutableListOf<String>()
             mangaAttributesDto.links?.asMdMap()?.let { linkMap ->
-                XLog.d("cesco linkMap=$linkMap")
                 linkMap["al"]?.let { id -> manga.anilist_id = id }
                 linkMap["kt"]?.let { id -> manga.kitsu_id = id }
                 linkMap["mal"]?.let { id -> manga.my_anime_list_id = id }
@@ -89,7 +88,6 @@ class ApiMangaParser {
             if (otherUrls.isNotEmpty()) {
                 manga.other_urls = otherUrls.joinToString("||")
             }
-            XLog.d("cesco otherUrls=${manga.other_urls}")
 
             // val filteredChapters = filterChapterForChecking(networkApiManga)
 

@@ -79,6 +79,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -1364,6 +1365,10 @@ class LibraryController(
         lastClickPosition = position
     }
 
+    override fun globalSearch(query: String) {
+        router.pushController(BrowseSourceController(query).withFadeTransaction())
+    }
+
     override fun onActionStateChanged(viewHolder: RecyclerView.ViewHolder?, actionState: Int) {
         val position = viewHolder?.bindingAdapterPosition ?: return
         binding.swipeRefresh.isEnabled = actionState != ItemTouchHelper.ACTION_STATE_DRAG
@@ -1464,7 +1469,10 @@ class LibraryController(
         lastItemPosition = null
     }
 
-    private fun getSectionItems(header: IHeader<*>, skipItem: ISectionable<*, *>): List<ISectionable<*, *>> {
+    private fun getSectionItems(
+        header: IHeader<*>,
+        skipItem: ISectionable<*, *>,
+    ): List<ISectionable<*, *>> {
         val sectionItems: MutableList<ISectionable<*, *>> = ArrayList()
         var startPosition: Int = adapter.getGlobalPositionOf(header)
         var item = adapter.getItem(++startPosition) as? LibraryItem

@@ -7,7 +7,7 @@
     <color name="primaryInverseTachiyomi">@color/neko_primary</color>
     <color name="splashBackground">@color/primaryTachiyomi</color>
     <color name="secondaryTachiyomi">@color/neko_accent</color>
-    <color name="rippleColorTachiyomi">@color/md_black_1000</color>
+    <color name="rippleColorTachiyomi">@color/md_black_1000_54</color>
     <color name="secondaryVariantTachiyomi">@color/neko_primary</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>

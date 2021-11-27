@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.database.models
 
 import android.content.Context
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.external.AnimePlanet
@@ -177,8 +176,6 @@ interface Manga : SManga {
         manga_updates_id?.let {
             list.add(MangaUpdates(it))
         }
-
-        XLog.d("cesco $other_urls")
 
         other_urls?.let { combinedString ->
             combinedString.split("||").forEach { pairString ->

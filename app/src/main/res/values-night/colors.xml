@@ -3,12 +3,12 @@
     <!-- Application Colors -->
     <color name="primaryVariantTachiyomi">#292929</color>
     <color name="colorPrimaryInactive">@color/md_white_1000_76</color>
-    <color name="primaryTachiyomi">#78bcff</color>
+    <color name="primaryTachiyomi">@color/neko_green</color>
     <color name="primaryInverseTachiyomi">#2c517f</color>
     <color name="colorOnSurface">@color/md_white_1000</color>
     <color name="colorOnBackground">@color/md_white_1000</color>
 
-    <color name="rippleColorTachiyomi">#1F3399FF</color>
+    <color name="rippleColorTachiyomi">@color/neko_green</color>
     <color name="secondaryTachiyomi">@color/neko_green</color>
     <color name="secondaryVariantTachiyomi">@color/neko_green_darker</color>
     <color name="splashBackground">#212121</color>

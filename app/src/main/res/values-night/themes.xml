@@ -16,6 +16,7 @@
 
     <style name="Theme.Tachiyomi.GreyWolf">
         <item name="colorPrimary">@color/gray</item>
+        <item name="colorControlHighlight">@color/gray</item>
         <item name="colorSecondaryVariant">@color/gray_button</item>
         <item name="colorSecondary">@color/greyWolfSecondary</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
@@ -43,6 +44,7 @@
     <style name="Theme.Tachiyomi.Outrun">
         <item name="colorPrimary">@color/outrun_blush</item>
         <item name="colorSecondary">@color/outrun_pink</item>
+        <item name="colorControlHighlight">@color/outrun_blush</item>
         <item name="colorSecondaryVariant">@color/md_white_1000</item>
         <item name="colorPrimaryVariant">@color/outrun_dark_purple</item>
         <item name="colorSurface">@color/outrun_black</item>
@@ -52,4 +54,5 @@
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
     </style>
+
 </resources>
