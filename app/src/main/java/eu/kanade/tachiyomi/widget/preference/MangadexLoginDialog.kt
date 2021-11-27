@@ -4,6 +4,7 @@ import android.app.Dialog
 import android.os.Bundle
 import android.view.View
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.PrefAccountLoginBinding
 import eu.kanade.tachiyomi.source.Source
@@ -82,6 +83,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                         errorResult()
                     }
                 } catch (error: Exception) {
+                    XLog.e("error logging in ", error)
                     errorResult()
                     error.message?.let { context.toast(it) }
                 }
