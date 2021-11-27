@@ -488,13 +488,15 @@ class LibraryUpdateService(
                                 dbChapters.asSequence().filter { it.isMergedChapter().not() }
                                     .partition { chapterIds.contains(it.mangadex_chapter_id) }
 
-                            val markRead = split.first.map {
+                            val markRead = split.first.filter { it.read.not() }.map {
                                 it.read = true
                                 it.last_page_read = 0
                                 it.pages_left = 0
                                 it
                             }.toList()
-                            val markUnread = split.second.map {
+                            val markUnread = split.second.filter {
+                                it.read
+                            }.map {
                                 it.read = false
                                 it.last_page_read = 0
                                 it.pages_left = 0
