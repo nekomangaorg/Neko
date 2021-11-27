@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -43,6 +44,7 @@ import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withPermit
@@ -478,6 +480,32 @@ class LibraryUpdateService(
                         downloadManager.deleteChapters(removedChapters, manga, source)
                     }
                 }
+                if (preferences.readingSync()) {
+                    val dbChapters = db.getChapters(manga).executeAsBlocking()
+                    statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url))
+                        .collect { chapterIds ->
+                            val split =
+                                dbChapters.asSequence().filter { it.isMergedChapter().not() }
+                                    .partition { chapterIds.contains(it.mangadex_chapter_id) }
+
+                            val markRead = split.first.map {
+                                it.read = true
+                                it.last_page_read = 0
+                                it.pages_left = 0
+                                it
+                            }.toList()
+                            val markUnread = split.second.map {
+                                it.read = false
+                                it.last_page_read = 0
+                                it.pages_left = 0
+                                it
+                            }.toList()
+
+                            db.updateChaptersProgress(markRead + markUnread).executeAsBlocking()
+                        }
+                }
+
+
                 if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
                     manga
                 )

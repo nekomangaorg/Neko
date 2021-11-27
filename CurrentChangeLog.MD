@@ -1,4 +1,5 @@
 ## 🥳 New
+Updating library when read sync is enabled updates the manga entries
 ## 🏗️ Changes
 ## 🐜 Fixes
 V5 Migration for some of those users still needing that
