@@ -296,7 +296,8 @@ class MangaHeaderHolder(
             }
             return
         }
-        binding.title.text = manga.title
+        binding.title.text =
+            "This is a very long title, This is a very long title, This is a very long title, This is a very long title ,This is a very long title" //manga.title
 
         setGenreTags(binding, manga)
 

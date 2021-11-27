@@ -11,7 +11,6 @@ import androidx.core.view.WindowInsetsCompat
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
-import com.elvishew.xlog.XLog
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -98,7 +97,6 @@ class MergeSearchBottomSheet(controller: MangaDetailsController) :
     }
 
     private fun search(query: String) {
-        XLog.d("cesco searching $query")
         binding.progress.visibility = View.VISIBLE
         binding.mergeRecycler.visibility = View.INVISIBLE
         mergeSearchItemAdapter.clear()
@@ -106,7 +104,6 @@ class MergeSearchBottomSheet(controller: MangaDetailsController) :
     }
 
     fun onSearchResults(results: List<SManga>) {
-        XLog.d("cesco onsearchResult ${results.size}")
         binding.progress.visibility = View.GONE
         if (results.isEmpty()) {
             noResults()
