@@ -149,10 +149,10 @@
         <item name="colorControlHighlight">@color/rippleColorStrawberry</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
         <item name="background">@color/backgroundStrawberries</item>
+        <item name="colorSurface">@color/backgroundStrawberries</item>
         <item name="unreadBadgeColor">?attr/colorAccent</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
-
     </style>
 
     <!--== Tako Theme ==-->
@@ -181,9 +181,11 @@
 
 
     <style name="Theme.Tachiyomi.MangaDex">
+        <item name="colorPrimary">@color/secondaryMangaDex</item>
         <item name="colorSecondary">@color/secondaryMangaDex</item>
         <item name="colorSecondaryVariant">?attr/colorSecondary</item>
         <item name="colorOnSecondary">@color/md_black_1000</item>
+        <item name="colorControlHighlight">@color/secondaryMangaDex</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
         <item name="colorOnHopper">?attr/colorOnSecondary</item>
