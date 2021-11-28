@@ -484,26 +484,19 @@ class LibraryUpdateService(
                     val dbChapters = db.getChapters(manga).executeAsBlocking()
                     statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url))
                         .collect { chapterIds ->
-                            val split =
+                            val markRead =
                                 dbChapters.asSequence().filter { it.isMergedChapter().not() }
-                                    .partition { chapterIds.contains(it.mangadex_chapter_id) }
+                                    .filter { chapterIds.contains(it.mangadex_chapter_id) }
+                                    .filter { it.read.not() }
+                                    .map {
+                                        it.read = true
+                                        it.last_page_read = 0
+                                        it.pages_left = 0
+                                        it
+                                    }.toList()
 
-                            val markRead = split.first.filter { it.read.not() }.map {
-                                it.read = true
-                                it.last_page_read = 0
-                                it.pages_left = 0
-                                it
-                            }.toList()
-                            val markUnread = split.second.filter {
-                                it.read
-                            }.map {
-                                it.read = false
-                                it.last_page_read = 0
-                                it.pages_left = 0
-                                it
-                            }.toList()
 
-                            db.updateChaptersProgress(markRead + markUnread).executeAsBlocking()
+                            db.updateChaptersProgress(markRead).executeAsBlocking()
                         }
                 }
 
