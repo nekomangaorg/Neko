@@ -40,9 +40,9 @@ class ApiMangaParser {
                 val aggregateDto = network.service.aggregateChapters(mangaDto.id,
                     MdUtil.getLangsToShow(preferencesHelper))
                     .onError {
-                        XLog.e("error getting aggregate for ${mangaDto.id}")
+                        XLog.e("error getting aggregate for ${mangaDto.id} ${this.errorBody}")
                     }.onException {
-                        XLog.e("error getting aggregate for ${mangaDto.id}")
+                        XLog.e("error getting aggregate for ${mangaDto.id}", this.exception)
                     }.getOrNull()
 
                 aggregateDto?.volumes?.values
