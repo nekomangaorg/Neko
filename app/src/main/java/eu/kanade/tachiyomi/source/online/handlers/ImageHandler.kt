@@ -71,6 +71,7 @@ class ImageHandler {
 
                     if (!response.isSuccessful) {
                         response.close()
+                        log.e("response for image was not successful http status code ${response.code}")
                         throw Exception("HTTP error ${response.code}")
                     }
                     response
