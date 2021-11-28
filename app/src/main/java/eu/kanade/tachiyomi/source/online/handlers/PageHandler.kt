@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
+import eu.kanade.tachiyomi.util.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -32,15 +33,12 @@ class PageHandler {
             XLog.d("fetching page list")
 
             try {
-                val chapterResponse = network.service.viewChapter(chapter.mangadex_chapter_id)
-                val response = chapterResponse.onError {
-                    XLog.e(
-                        "error returned from chapterResponse ${
-                            this.errorBody
-                        }"
-                    )
-                    throw Exception("error returned from chapterResponse")
-                }.getOrThrow()
+                val response = network.service.viewChapter(chapter.mangadex_chapter_id)
+                    .onFailure {
+                        this.log("trying to fetch page list")
+                        throw Exception("error returned from chapterResponse")
+                    }.getOrThrow()
+
                 val externalUrl = response.data.attributes.externalUrl
                 if (externalUrl != null) {
                     when {

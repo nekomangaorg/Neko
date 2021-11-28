@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.jobs.migrate
 import android.content.Context
 import android.net.Uri
 import androidx.core.text.isDigitsOnly
-import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
@@ -14,6 +13,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -87,16 +87,16 @@ class V5MigrationService(
                         }
                         actualMigrated++
                     }
-                    is ApiResponse.Failure.Error,
+                    is ApiResponse.Failure<*>,
                     -> {
-                        failedUpdatesMangaList[manga] = "unable to find new manga id"
-                        failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed this manga or the id changed")
-                        mangaErroredOut = true
-                    }
-                    is ApiResponse.Failure.Exception<*> -> {
-                        XLog.e("Error", responseDto.exception)
-                        failedUpdatesMangaList[manga] = "error processing"
-                        failedUpdatesErrors.add(manga.title + ": error processing")
+                        responseDto.log(" trying to map legacy id")
+                        if (responseDto is ApiResponse.Failure.Exception<*>) {
+                            failedUpdatesMangaList[manga] = "error processing"
+                            failedUpdatesErrors.add(manga.title + ": error processing")
+                        } else {
+                            failedUpdatesMangaList[manga] = "unable to find new manga id"
+                            failedUpdatesErrors.add(manga.title + ": unable to find new manga id, MangaDex might have removed this manga or the id changed")
+                        }
                         mangaErroredOut = true
                     }
                 }

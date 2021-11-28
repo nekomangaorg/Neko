@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -14,12 +15,14 @@ import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Request
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
+import kotlin.collections.set
 import kotlin.time.Duration
 
 class ImageHandler {
@@ -108,10 +111,8 @@ class ImageHandler {
                 log.d("image is at CDN don't report to md@home node")
                 return@launchIO
             }
-            runCatching {
-                network.service.atHomeImageReport(atHomeImageReportDto)
-            }.onFailure { e ->
-                log.e("error trying to post to dex@home", e)
+            network.service.atHomeImageReport(atHomeImageReportDto).onFailure {
+                this.log("trying to post to dex@home")
             }
         }
     }
@@ -123,23 +124,24 @@ class ImageHandler {
             when (currentTime - tokenTracker[page.mangaDexChapterId]!! < MdConstants.mdAtHomeTokenLifespan) {
                 true -> data[0]
                 false -> {
-                    log
-                        .d("Time has expired get new at home url isLogged $isLogged")
+                    log.d("Time has expired get new at home url isLogged $isLogged")
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    val atHomeResponse = network.service.getAtHomeServer(page.mangaDexChapterId,
-                        preferences.usePort443Only())
-
-                    when (atHomeResponse) {
-                        is ApiResponse.Success -> {
+                    when (val atHomeResponse =
+                        network.service.getAtHomeServer(page.mangaDexChapterId,
+                            preferences.usePort443Only())) {
+                        is ApiResponse.Failure<*> -> {
+                            atHomeResponse.log(" getting image")
+                            if (atHomeResponse is ApiResponse.Failure.Exception<*>) {
+                                throw Exception("Error getting image ${atHomeResponse.message}")
+                            } else if (atHomeResponse is ApiResponse.Failure.Error<*>) {
+                                throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
+                            }
+                            throw Exception("Error getting image")
+                        }
+                        else -> {
                             updateTokenTracker(page.mangaDexChapterId, currentTime)
                             log.d("Successfully refresh page")
                             atHomeResponse.getOrThrow().baseUrl
-                        }
-                        is ApiResponse.Failure.Error -> {
-                            throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
-                        }
-                        is ApiResponse.Failure.Exception<*> -> {
-                            throw Exception("Error getting image ${atHomeResponse.message}")
                         }
                     }
                 }

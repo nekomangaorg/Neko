@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -10,9 +11,10 @@ import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Response
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -27,7 +29,13 @@ class SearchHandler {
         return withContext(Dispatchers.IO) {
             if (query.startsWith(PREFIX_ID_SEARCH)) {
                 val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
-                val response = service.viewManga(realQuery).getOrNull()!!
+                val response = service.viewManga(realQuery)
+                    .onFailure {
+                        val type = "trying to view manga $realQuery"
+                        this.log(type)
+                        this.throws(type)
+                    }.getOrThrow()
+
                 val details = apiMangaParser.mangaDetailsParse(response.data)
                 MangaListPage(listOf(details), false)
             } else {
@@ -43,19 +51,18 @@ class SearchHandler {
                 val additionalQueries = filterHandler.getQueryMap(filters)
                 queryParamters.putAll(additionalQueries)
 
-                val response = service.search(ProxyRetrofitQueryMap(queryParamters))
+                val response = service.search(ProxyRetrofitQueryMap(queryParamters)).onFailure {
+                    val type = "trying to search"
+                    this.log(type)
+                    this.throws(type)
+                }.getOrThrow()
 
                 searchMangaParse(response)
             }
         }
     }
 
-    private fun searchMangaParse(response: Response<MangaListDto>): MangaListPage {
-        if (response.isSuccessful.not()) {
-            throw Exception("Error getting search manga http code: ${response.code()}")
-        }
-
-        val mangaListDto = response.body()!!
+    private fun searchMangaParse(mangaListDto: MangaListDto): MangaListPage {
 
         val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 

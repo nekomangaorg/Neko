@@ -1,7 +1,8 @@
 package eu.kanade.tachiyomi.source.online
 
-import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.suspendOnFailure
+import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -21,7 +22,6 @@ import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
@@ -55,15 +55,13 @@ open class MangaDex : HttpSource() {
 
     fun getRandomManga(): Flow<SManga?> {
         return flow {
-            if (network.service.randomManga().isSuccessful) {
-                emit(network.service.randomManga().body()!!.data
-                    .toBasicManga(preferences.thumbnailQuality()))
-            } else {
-                emit(null)
-            }
-        }.catch { e ->
-            XLog.e("error getting random manga", e)
-            emit(null)
+            network.service.randomManga()
+                .suspendOnSuccess {
+                    emit(this.data.data.toBasicManga(preferences.thumbnailQuality()))
+                }.suspendOnFailure {
+                    this.log("trying to get random manga")
+                    emit(null)
+                }
         }.flowOn(Dispatchers.IO)
     }
 

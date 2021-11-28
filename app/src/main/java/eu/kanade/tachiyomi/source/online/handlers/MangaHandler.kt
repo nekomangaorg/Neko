@@ -1,10 +1,9 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
-import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -12,7 +11,9 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
+import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.withContext
@@ -48,8 +49,11 @@ class MangaHandler {
 
     suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         return withContext(Dispatchers.IO) {
-            val response = network.service.viewChapter(urlChapterId)
-            response.getOrThrow().data.relationships.first { it.type == MdConstants.Types.manga }.id
+            network.service.viewChapter(urlChapterId)
+                .onFailure {
+                    this.log("trying to get manga id from chapter id")
+                }.getOrThrow()
+                .data.relationships.first { it.type == MdConstants.Types.manga }.id
         }
     }
 
@@ -57,11 +61,11 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Manga Detail for  ${manga.title}") {
                 val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
-                    .onError {
-                        throw(Exception("Error from MangaDex ${this.statusCode.code} error body: ${this.errorBody}"))
-                    }.onException {
-                        throw(Exception("Error from MangaDex ${this.message}"))
-                    }.getOrNull()!!
+                    .onFailure {
+                        val type = "trying to view manga ${manga.title}"
+                        this.log(type)
+                        this.throws(type)
+                    }.getOrThrow()
 
                 apiMangaParser.mangaDetailsParse(response.data)
             }
@@ -73,16 +77,14 @@ class MangaHandler {
             logTimeTaken("Fetch Chapters for  ${manga.title}") {
                 val langs = MdUtil.getLangsToShow(preferencesHelper)
 
-                val response = logTimeTaken("fetching chapters from Dex") {
-                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
+                val chapterListDto = logTimeTaken("fetching chapters from Dex") {
+                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0).onFailure {
+                        val type = "trying to view chapters"
+                        this.log(type)
+                        this.throws(type)
+                    }.getOrThrow()
                 }
 
-                if (response.isSuccessful.not()) {
-                    XLog.e("error", response.errorBody()!!.string())
-                    throw Exception("error returned from MangaDex.  Http code : ${response.code()}")
-                }
-
-                val chapterListDto = response.body()!!
                 val results = chapterListDto.data.toMutableList()
 
                 var hasMoreResults =
@@ -93,20 +95,18 @@ class MangaHandler {
 
                 while (hasMoreResults) {
                     offset += limit
-                    val newResponse =
-                        network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
-
-                    hasMoreResults = if (newResponse.code() != 200) {
-                        false
-                    } else {
-                        val newChapterListDto = newResponse.body()!!
-                        results.addAll(newChapterListDto.data)
-                        newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
-                    }
+                    network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
+                        .onFailure {
+                            this.log("trying to get more results")
+                            hasMoreResults = false
+                        }.onSuccess {
+                            val newChapterListDto = this.data
+                            results.addAll(newChapterListDto.data)
+                            newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
+                        }
                 }
 
                 val groupMap = getGroupMap(results)
-
                 apiMangaParser.chapterListParse(results, groupMap)
             }
         }

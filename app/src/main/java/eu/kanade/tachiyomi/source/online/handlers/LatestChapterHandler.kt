@@ -1,5 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -9,10 +11,11 @@ import eu.kanade.tachiyomi.source.online.models.dto.ChapterListDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.logTimeTaken
+import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import retrofit2.Response
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
@@ -34,19 +37,18 @@ class LatestChapterHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
 
             val response = logTimeTaken("fetching latest chapters from dex") {
-                service.latestChapters(limit, offset, langs, contentRatings)
+                service.latestChapters(limit, offset, langs, contentRatings).onFailure {
+                    val type = "getting latest chapters"
+                    this.log(type)
+                    this.throws(type)
+                }.getOrThrow()
             }
 
             latestChapterParse(response)
         }
     }
 
-    private suspend fun latestChapterParse(response: Response<ChapterListDto>): MangaListPage {
-        if (response.isSuccessful.not()) {
-            throw Exception("Error getting latest chapters http code: ${response.code()}")
-        }
-
-        val chapterListDto = response.body()!!
+    private suspend fun latestChapterParse(chapterListDto: ChapterListDto): MangaListPage {
 
         val mangaIds = chapterListDto.data.asSequence().map { it.relationships }.flatten()
             .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct()
@@ -64,11 +66,15 @@ class LatestChapterHandler {
                 "limit" to mangaIds.size,
                 "contentRating[]" to allContentRating)
 
-        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters))
+        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters)).onFailure {
+            val type = "trying to search manga from latest chapters"
+            this.log(type)
+            this.throws(type)
+        }.getOrThrow()
 
         val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
-
-        val mangaDtoMap = mangaListDto.body()!!.data.associateBy({ it.id }, { it })
+        
+        val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
 
         val thumbQuality = preferencesHelper.thumbnailQuality()
         val mangaList = mangaIds.mapNotNull { mangaDtoMap[it] }.map {

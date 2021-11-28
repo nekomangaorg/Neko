@@ -6,6 +6,7 @@ import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
@@ -38,10 +39,8 @@ class MangaDexLoginHelper {
         authService.checkToken()
 
         val checkTokenResponse = authService.checkToken()
-            .onError {
-                log.e("error code returned ${this.statusCode}")
-            }.onException {
-                log.e("error exception", this.exception)
+            .onFailure {
+                this.log("checking token")
             }
 
         val authenticated = checkTokenResponse.getOrNull()?.isAuthenticated ?: false

@@ -2,8 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.getOrNull
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -17,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.lang.capitalized
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
@@ -39,10 +39,8 @@ class ApiMangaParser {
             val simpleChapters = withIOContext {
                 val aggregateDto = network.service.aggregateChapters(mangaDto.id,
                     MdUtil.getLangsToShow(preferencesHelper))
-                    .onError {
-                        XLog.e("error getting aggregate for ${mangaDto.id} ${this.errorBody}")
-                    }.onException {
-                        XLog.e("error getting aggregate for ${mangaDto.id}", this.exception)
+                    .onFailure {
+                        this.log("trying to aggregate for ${mangaDto.id}")
                     }.getOrNull()
 
                 aggregateDto?.volumes?.values

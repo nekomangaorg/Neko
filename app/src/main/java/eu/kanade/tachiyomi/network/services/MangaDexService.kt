@@ -14,7 +14,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
 import retrofit2.http.Headers
@@ -26,7 +25,7 @@ import retrofit2.http.QueryMap
 interface MangaDexService {
 
     @GET("${MdApi.manga}?includes[]=${MdConstants.Types.coverArt}")
-    suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): Response<MangaListDto>
+    suspend fun search(@QueryMap options: ProxyRetrofitQueryMap): ApiResponse<MangaListDto>
 
     @GET("${MdApi.manga}/{id}?includes[]=${MdConstants.Types.coverArt}&includes[]=${MdConstants.Types.author}&includes[]=${MdConstants.Types.artist}")
     suspend fun viewManga(@Path("id") id: String): ApiResponse<MangaDto>
@@ -43,7 +42,7 @@ interface MangaDexService {
         @Path("id") id: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
         @Query("offset") offset: Int,
-    ): Response<ChapterListDto>
+    ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.chapter}?order[publishAt]=desc")
@@ -52,7 +51,7 @@ interface MangaDexService {
         @Query("offset") offset: Int,
         @Query("translatedLanguage[]") translatedLanguages: List<String>,
         @Query("contentRating[]") contentRating: List<String>,
-    ): Response<ChapterListDto>
+    ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.chapter}/{id}")
@@ -60,7 +59,7 @@ interface MangaDexService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/random")
-    suspend fun randomManga(): Response<MangaDto>
+    suspend fun randomManga(): ApiResponse<MangaDto>
 
     @POST(MdApi.legacyMapping)
     suspend fun legacyMapping(@Body legacyMapping: LegacyIdDto): ApiResponse<LegacyMappingDto>
@@ -73,5 +72,5 @@ interface MangaDexService {
     ): ApiResponse<AtHomeDto>
 
     @POST(MdConstants.atHomeReportUrl)
-    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): Response<ResultDto>
+    suspend fun atHomeImageReport(@Body atHomeImageReportDto: AtHomeImageReportDto): ApiResponse<ResultDto>
 }

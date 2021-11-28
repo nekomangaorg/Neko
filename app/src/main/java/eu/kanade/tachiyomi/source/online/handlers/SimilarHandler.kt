@@ -1,6 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.getOrElse
+import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -14,10 +18,11 @@ import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDatabaseDto
 import eu.kanade.tachiyomi.source.online.models.dto.SimilarMangaDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.manga.MangaMappings
+import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
-import retrofit2.Response
 import uy.kohesive.injekt.injectLazy
 
 class SimilarHandler {
@@ -51,24 +56,26 @@ class SimilarHandler {
             }
         }
         // Main network request
-        val response = network.similarService.getSimilarManga(dexId)
+        val response = network.similarService.getSimilarManga(dexId).onFailure {
+            val type = "trying to get similar manga"
+            this.log(type)
+            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+                this.throws(type)
+            }
+        }.getOrElse { null }
         return similarMangaParse(dexId, response)
     }
 
     private suspend fun similarMangaParse(
         dexId: String,
-        response: Response<SimilarMangaDto>,
+        similarDto: SimilarMangaDto?,
     ): List<SManga> {
         // Error check http response
-        if (response.code() == 404) {
+        if (similarDto == null) {
             return emptyList()
-        }
-        if (response.isSuccessful.not() || response.code() != 200) {
-            throw Exception("Error getting similar manga http code: ${response.code()}")
         }
 
         // Get our page of mangaList
-        val similarDto = response.body()!!
         val ids = similarDto.matches.map { it.id }
         val mangaListDto = similarGetMangadexMangaList(ids)
 
@@ -145,24 +152,27 @@ class SimilarHandler {
         // Main network request
         val graphql =
             """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-        val response = network.similarService.getAniListGraphql(graphql)
+        val response = network.similarService.getAniListGraphql(graphql).onFailure {
+            val type = "trying to get similar manga anilist"
+            this.log(type)
+            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+                this.throws(type)
+            }
+        }.getOrElse { null }
         return similarMangaExternalAnilistParse(dexId, response)
     }
 
     private suspend fun similarMangaExternalAnilistParse(
         dexId: String,
-        response: Response<AnilistMangaRecommendationsDto>,
+        similarDto: AnilistMangaRecommendationsDto?,
     ): List<SManga> {
         // Error check http response
-        if (response.code() == 404) {
+        if (similarDto == null) {
             return emptyList()
-        }
-        if (response.isSuccessful.not() || response.code() != 200) {
-            throw Exception("Error getting Anilist http code: ${response.code()}")
         }
 
         // Get our page of mangaList
-        val similarDto = response.body()!!
+
         val ids = similarDto.data.Media.recommendations.edges.map {
             if (it.node.mediaRecommendation.format != "MANGA")
                 return@map null
@@ -248,24 +258,26 @@ class SimilarHandler {
             }
         }
         // Main network request
-        val response = network.similarService.getSimilarMalManga(malId)
+        val response = network.similarService.getSimilarMalManga(malId).onFailure {
+            val type = "trying to get similar manga mal"
+            this.log(type)
+            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+                this.throws(type)
+            }
+        }.getOrElse { null }
         return similarMangaExternalMalParse(dexId, response)
     }
 
     private suspend fun similarMangaExternalMalParse(
         dexId: String,
-        response: Response<MalMangaRecommendationsDto>,
+        similarDto: MalMangaRecommendationsDto?,
     ): List<SManga> {
         // Error check http response
-        if (response.code() == 404) {
+        if (similarDto == null) {
             return emptyList()
-        }
-        if (response.isSuccessful.not() || response.code() != 200) {
-            throw Exception("Error getting MyAnimeList http code: ${response.code()}")
         }
 
         // Get our page of mangaList
-        val similarDto = response.body()!!
         val ids = similarDto.recommendations.map {
             mappings.getMangadexID(it.mal_id.toString(), "mal")
         }.filterNotNull()
@@ -324,13 +336,14 @@ class SimilarHandler {
             "limit" to mangaIds.size,
             "ids[]" to mangaIds
         )
-        val response = network.service.search(ProxyRetrofitQueryMap(queryMap))
-        if (response.isSuccessful.not()) {
-            XLog.e("error ", response.errorBody()!!.string())
-            throw Exception("Error getting manga http code: ${response.code()}")
-        }
-        val responseBody = response.body()!!
+        val responseBody = network.service.search(ProxyRetrofitQueryMap(queryMap)).onFailure {
+            val type = "searching for manga in similar handler"
+            this.log(type)
+            this.throws(type)
+        }.getOrThrow()
+
         if (responseBody.data.size != mangaIds.size) {
+            XLog.e("manga returned doesn't match number of manga expected")
             throw Exception("Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }
         return responseBody
