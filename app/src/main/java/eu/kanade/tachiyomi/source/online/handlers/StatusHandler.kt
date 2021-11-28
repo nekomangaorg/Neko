@@ -1,26 +1,36 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
+import com.skydoves.sandwich.getOrThrow
+import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.suspendOnFailure
+import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
+import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.withContext
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 class StatusHandler {
     val preferences: PreferencesHelper by injectLazy()
-    val network: NetworkHelper by injectLazy()
+    val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
 
     suspend fun fetchReadingStatusForAllManga(): Map<String, String?> {
         return withContext(Dispatchers.IO) {
-            val response = network.authService.readingStatusAllManga()
-            if (response.isSuccessful.not()) {
-                return@withContext emptyMap()
-            } else {
-                return@withContext response.body()!!.statuses
+            return@withContext when (val response = authService.readingStatusAllManga()) {
+                is ApiResponse.Failure<*> -> {
+                    response.log("getting reading status")
+                    emptyMap()
+                }
+                else -> response.getOrThrow().statuses
+
             }
         }
     }
@@ -59,30 +69,28 @@ class StatusHandler {
 
     suspend fun markChapterRead(chapterId: String) {
         withIOContext {
-            runCatching {
-                network.authService.markChapterRead(chapterId)
-            }.onFailure {
-                XLog.e("error trying to mark chapter read", it)
+            authService.markChapterRead(chapterId).onFailure {
+                this.log("trying to mark chapter read")
             }
         }
     }
 
     suspend fun markChapterUnRead(chapterId: String) {
         withIOContext {
-            runCatching {
-                network.authService.markChapterUnRead(chapterId)
-            }.onFailure {
-                XLog.e("error trying to mark chapter unread", it)
+            authService.markChapterUnRead(chapterId).onFailure {
+                this.log("trying to mark chapter unread")
             }
         }
     }
 
-    suspend fun getReadChapterIds(mangaId: String) = flow {
-        val result = kotlin.runCatching {
-            network.authService.readChaptersForManga(mangaId).body()!!.data.toSet()
-        }.onFailure { throwable ->
-            XLog.e("error trying to get chapterIds", throwable)
+    suspend fun getReadChapterIds(mangaId: String) = flow<Set<String>> {
+
+        val response = authService.readChaptersForManga(mangaId)
+        response.suspendOnFailure {
+            this.log("trying to get chapterIds")
+            emit(emptySet())
+        }.suspendOnSuccess {
+            emit(this.data.data.toSet())
         }
-        emit(result.getOrDefault(emptySet()))
     }.flowOn(Dispatchers.IO)
 }

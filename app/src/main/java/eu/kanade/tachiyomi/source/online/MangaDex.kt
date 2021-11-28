@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.FilterList
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.source.online.handlers.PageHandler
 import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
+import eu.kanade.tachiyomi.util.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
@@ -145,7 +147,9 @@ open class MangaDex : HttpSource() {
 
     override suspend fun logout(): Logout {
         return withContext(Dispatchers.IO) {
-            network.authService.logout()
+            network.authService.logout().onFailure {
+                this.log("trying to logout")
+            }
             return@withContext Logout(true)
         }
     }

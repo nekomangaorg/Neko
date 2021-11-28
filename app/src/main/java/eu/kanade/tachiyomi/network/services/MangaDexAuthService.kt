@@ -13,7 +13,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
-import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -26,11 +25,11 @@ interface MangaDexAuthService {
 
     @Headers("Cache-Control: no-cache")
     @POST(MdApi.login)
-    suspend fun login(@Body request: LoginRequestDto): Response<LoginResponseDto>
+    suspend fun login(@Body request: LoginRequestDto): ApiResponse<LoginResponseDto>
 
     @Headers("Cache-Control: no-cache")
     @POST(MdApi.logout)
-    suspend fun logout(): Response<LogoutDto>
+    suspend fun logout(): ApiResponse<LogoutDto>
 
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.checkToken)
@@ -42,40 +41,40 @@ interface MangaDexAuthService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")
-    suspend fun userFollowList(@Query("offset") offset: Int): Response<MangaListDto>
+    suspend fun userFollowList(@Query("offset") offset: Int): ApiResponse<MangaListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/{id}/status")
-    suspend fun readingStatusForManga(@Path("id") mangaId: String): Response<ReadingStatusDto>
+    suspend fun readingStatusForManga(@Path("id") mangaId: String): ApiResponse<ReadingStatusDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/{id}/read")
-    suspend fun readChaptersForManga(@Path("id") mangaId: String): Response<ReadChapterDto>
+    suspend fun readChaptersForManga(@Path("id") mangaId: String): ApiResponse<ReadChapterDto>
 
     @Headers("Cache-Control: no-cache")
     @POST("${MdApi.manga}/{id}/status")
     suspend fun updateReadingStatusForManga(
         @Path("id") mangaId: String,
         @Body readingStatusDto: ReadingStatusDto,
-    ): Response<ResultDto>
+    ): ApiResponse<ResultDto>
 
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.readingStatusForAllManga)
-    suspend fun readingStatusAllManga(): Response<ReadingStatusMapDto>
+    suspend fun readingStatusAllManga(): ApiResponse<ReadingStatusMapDto>
 
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.readingStatusForAllManga)
-    suspend fun readingStatusByType(@Query("status") status: String): Response<ReadingStatusMapDto>
+    suspend fun readingStatusByType(@Query("status") status: String): ApiResponse<ReadingStatusMapDto>
 
     @POST("${MdApi.chapter}/{id}/read")
-    suspend fun markChapterRead(@Path("id") chapterId: String): Response<ResultDto>
+    suspend fun markChapterRead(@Path("id") chapterId: String): ApiResponse<ResultDto>
 
     @DELETE("${MdApi.chapter}/{id}/read")
-    suspend fun markChapterUnRead(@Path("id") chapterId: String): Response<ResultDto>
+    suspend fun markChapterUnRead(@Path("id") chapterId: String): ApiResponse<ResultDto>
 
     @POST("${MdApi.manga}/{id}/follow")
-    suspend fun followManga(@Path("id") mangaId: String): Response<ResultDto>
+    suspend fun followManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
 
     @DELETE("${MdApi.manga}/{id}/follow")
-    suspend fun unfollowManga(@Path("id") mangaId: String): Response<ResultDto>
+    suspend fun unfollowManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
 }

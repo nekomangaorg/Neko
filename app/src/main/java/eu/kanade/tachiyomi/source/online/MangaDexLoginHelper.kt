@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
+import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -9,6 +11,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
+import eu.kanade.tachiyomi.util.log
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -82,19 +85,21 @@ class MangaDexLoginHelper {
     ): Boolean {
         return withContext(Dispatchers.IO) {
             val loginRequest = LoginRequestDto(username, password)
-            val loginResponse = authService.login(loginRequest)
-
-            if (loginResponse.code() == 200) {
-                val loginResponseDto = loginResponse.body()!!
-                preferences.setTokens(
-                    loginResponseDto.token.refresh,
-                    loginResponseDto.token.session
-                )
-                preferences.setSourceCredentials(MangaDex(), username, password)
-                return@withContext true
-            } else {
-                preferences.setTokens("", "")
-                return@withContext false
+            return@withContext when (val loginResponse = authService.login(loginRequest)) {
+                is ApiResponse.Failure<*> -> {
+                    preferences.setTokens("", "")
+                    loginResponse.log("trying to login")
+                    false
+                }
+                else -> {
+                    val loginResponseDto = loginResponse.getOrThrow()
+                    preferences.setTokens(
+                        loginResponseDto.token.refresh,
+                        loginResponseDto.token.session
+                    )
+                    preferences.setSourceCredentials(MangaDex(), username, password)
+                    true
+                }
             }
         }
     }
@@ -104,7 +109,7 @@ class MangaDexLoginHelper {
         val username = preferences.sourceUsername(source)
         val password = preferences.sourcePassword(source)
         if (username.isNullOrBlank() || password.isNullOrBlank()) {
-            log.i("No username or password stored, can't login")
+            XLog.e("No username or password stored, can't login")
             return false
         }
         return login(username, password)
