@@ -15,6 +15,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
+import java.util.Locale
 import kotlin.math.floor
 
 /**
@@ -90,6 +91,14 @@ fun String.capitalizeWords(): String {
  */
 fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
     return String.CASE_INSENSITIVE_ORDER.then(naturalOrder()).compare(this, other)
+}
+
+fun String.capitalized(): String {
+    return this.replaceFirstChar {
+        if (it.isLowerCase())
+            it.titlecase(Locale.US)
+        else it.toString()
+    }
 }
 
 fun CharSequence.tintText(@ColorInt color: Int): Spanned {

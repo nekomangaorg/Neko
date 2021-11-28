@@ -16,10 +16,10 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
+import eu.kanade.tachiyomi.util.lang.capitalized
 import eu.kanade.tachiyomi.util.system.withIOContext
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
-import java.util.Locale
 import kotlin.math.floor
 
 class ApiMangaParser {
@@ -105,16 +105,16 @@ class ApiMangaParser {
 
             val tags = filterHandler.getTags()
 
-            val tempContentRating = mangaAttributesDto.contentRating?.capitalize(Locale.US)
+            val tempContentRating = mangaAttributesDto.contentRating?.capitalized()
 
             val contentRating = if (tempContentRating == null || tempContentRating == "Safe") {
                 null
             } else {
-                "Content rating: " + tempContentRating.capitalize(Locale.US)
+                "Content rating: " + tempContentRating.capitalized()
             }
 
             val genres = (
-                listOf(mangaAttributesDto.publicationDemographic?.capitalize(Locale.US)) +
+                listOf(mangaAttributesDto.publicationDemographic?.capitalized()) +
                     mangaAttributesDto.tags.map { it.id }
                         .map { dexTagId -> tags.firstOrNull { tag -> tag.id == dexTagId } }
                         .map { tag -> tag?.name } +
