@@ -74,7 +74,6 @@ class NetworkHelper(val context: Context) {
             .readTimeout(15, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .cookieJar(cookieManager)
-            .addNetworkInterceptor(HeadersInterceptor())
             .apply {
                 if (BuildConfig.DEBUG) {
                     addInterceptor(ChuckerInterceptor.Builder(context).alwaysReadResponseBody(true)
@@ -154,11 +153,11 @@ class NetworkHelper(val context: Context) {
 
     val service: MangaDexService =
         jsonRetrofitClient.baseUrl(MdApi.baseUrl)
-            .client(client).build()
+            .client(client.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
             .create(MangaDexService::class.java)
 
     val authService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
-        .client(authClient).build()
+        .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
         .create(MangaDexAuthService::class.java)
 
     val similarService =
@@ -177,10 +176,12 @@ class NetworkHelper(val context: Context) {
                 .build()
 
             return chain.proceed(request)
-            /*   response.request.headers.forEach {
-                   XLog.disableStackTrace().d("headers sent ${it.first} ${it.second}")
-               }
-               return response*/
+
+            /*  val response = chain.proceed(request)
+              response.request.headers.forEach {
+                  XLog.disableStackTrace().d("headers sent ${it.first} ${it.second}")
+              }
+              return response*/
         }
     }
 }
