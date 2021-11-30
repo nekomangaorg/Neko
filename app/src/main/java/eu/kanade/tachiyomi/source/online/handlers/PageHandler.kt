@@ -3,7 +3,8 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -14,6 +15,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -34,7 +36,10 @@ class PageHandler {
 
             try {
                 val response = network.service.viewChapter(chapter.mangadex_chapter_id)
-                    .onFailure {
+                    .onError {
+                        this.log("trying to fetch page list")
+                        throw Exception("error returned from chapterResponse")
+                    }.onException {
                         this.log("trying to fetch page list")
                         throw Exception("error returned from chapterResponse")
                     }.getOrThrow()
@@ -71,15 +76,9 @@ class PageHandler {
                     is ApiResponse.Success -> {
                         XLog.d("successfully got at home host")
                     }
-                    is ApiResponse.Failure.Error -> {
-                        XLog.e("error returned from atHomeResponse ${
-                            atHomeResponse.response.errorBody()?.string()
-                        }")
-                        throw Exception("Error getting image ${atHomeResponse.response.code()}: ${atHomeResponse.response.errorBody()}")
-                    }
-                    is ApiResponse.Failure.Exception<*> -> {
-                        XLog.e("error returned from atHomeResponse ${atHomeResponse.message}")
-                        throw Exception("Error getting image ${atHomeResponse.message}")
+                    is ApiResponse.Failure.Error, is ApiResponse.Failure.Exception<*> -> {
+                        atHomeResponse.log("trying to get at home response")
+                        atHomeResponse.throws("error getting image")
                     }
                 }
 

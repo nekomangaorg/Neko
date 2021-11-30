@@ -1,18 +1,17 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
-import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
-import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.util.log
+import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
@@ -39,7 +38,10 @@ class MangaDexLoginHelper {
         authService.checkToken()
 
         val checkTokenResponse = authService.checkToken()
-            .onFailure {
+            .onError {
+                this.log("checking token")
+            }
+            .onException {
                 this.log("checking token")
             }
 
@@ -59,9 +61,9 @@ class MangaDexLoginHelper {
 
         val refreshTokenResponse = authService.refreshToken(RefreshTokenDto(refreshToken))
             .onError {
-                log.e("error code returned ${this.statusCode}")
+                this.log("trying to refresh token")
             }.onException {
-                log.e("error exception", this.exception)
+                this.log("trying to refresh token")
             }
 
         val refreshTokenDto = refreshTokenResponse.getOrNull()
@@ -84,22 +86,26 @@ class MangaDexLoginHelper {
     ): Boolean {
         return withContext(Dispatchers.IO) {
             val loginRequest = LoginRequestDto(username, password)
-            return@withContext when (val loginResponse = authService.login(loginRequest)) {
-                is ApiResponse.Failure<*> -> {
-                    preferences.setTokens("", "")
-                    loginResponse.log("trying to login")
-                    false
-                }
-                else -> {
-                    val loginResponseDto = loginResponse.getOrThrow()
-                    preferences.setTokens(
-                        loginResponseDto.token.refresh,
-                        loginResponseDto.token.session
-                    )
-                    preferences.setSourceCredentials(MangaDex(), username, password)
-                    true
-                }
-            }
+
+            val loginResponseDto = authService.login(loginRequest).onError {
+                preferences.setTokens("", "")
+                val type = "trying to login"
+                this.log(type)
+                this.throws(type)
+            }.onException {
+                preferences.setTokens("", "")
+                val type = "trying to login"
+                this.log(type)
+                this.throws(type)
+            }.getOrThrow()
+
+            preferences.setTokens(
+                loginResponseDto.token.refresh,
+                loginResponseDto.token.session
+            )
+            preferences.setSourceCredentials(MangaDex(), username, password)
+            return@withContext true
+
         }
     }
 

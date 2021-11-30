@@ -87,7 +87,7 @@ class V5MigrationService(
                         }
                         actualMigrated++
                     }
-                    is ApiResponse.Failure<*>,
+                    is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
                     -> {
                         responseDto.log(" trying to map legacy id")
                         if (responseDto is ApiResponse.Failure.Exception<*>) {
@@ -132,7 +132,7 @@ class V5MigrationService(
                                 db.insertChapter(chapter).executeAsBlocking()
                             }
                         }
-                        is ApiResponse.Failure.Error,
+                        is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*>,
                         -> {
                             legacyIds.forEach {
                                 val failedChapter = chapterMap[it]!!

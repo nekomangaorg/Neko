@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
-import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrElse
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -56,12 +56,20 @@ class SimilarHandler {
             }
         }
         // Main network request
-        val response = network.similarService.getSimilarManga(dexId).onFailure {
+        val response = network.similarService.getSimilarManga(dexId).onError {
             val type = "trying to get similar manga"
             this.log(type)
-            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+            if (this.statusCode.code == 404) {
                 this.throws(type)
             }
+            /* can uncomment when this is onFailure again
+            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+                   this.throws(type)
+               }*/
+        }.onException {
+            val type = "trying to get similar manga"
+            this.log(type)
+            this.throws(type)
         }.getOrElse { null }
         return similarMangaParse(dexId, response)
     }
@@ -152,12 +160,20 @@ class SimilarHandler {
         // Main network request
         val graphql =
             """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-        val response = network.similarService.getAniListGraphql(graphql).onFailure {
+        val response = network.similarService.getAniListGraphql(graphql).onError {
             val type = "trying to get similar manga anilist"
             this.log(type)
-            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+            if (this.statusCode.code == 404) {
                 this.throws(type)
             }
+            /* can uncomment when this is onFailure again
+            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+                   this.throws(type)
+               }*/
+        }.onException {
+            val type = "trying to get similar manga"
+            this.log(type)
+            this.throws(type)
         }.getOrElse { null }
         return similarMangaExternalAnilistParse(dexId, response)
     }
@@ -258,12 +274,20 @@ class SimilarHandler {
             }
         }
         // Main network request
-        val response = network.similarService.getSimilarMalManga(malId).onFailure {
+        val response = network.similarService.getSimilarMalManga(malId).onError {
             val type = "trying to get similar manga mal"
             this.log(type)
-            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+            if (this.statusCode.code == 404) {
                 this.throws(type)
             }
+            /* can uncomment when this is onFailure again
+            if (this !is ApiResponse.Failure.Error<*> || this.statusCode.code != 404) {
+                   this.throws(type)
+               }*/
+        }.onException {
+            val type = "trying to get similar manga"
+            this.log(type)
+            this.throws(type)
         }.getOrElse { null }
         return similarMangaExternalMalParse(dexId, response)
     }
@@ -336,7 +360,11 @@ class SimilarHandler {
             "limit" to mangaIds.size,
             "ids[]" to mangaIds
         )
-        val responseBody = network.service.search(ProxyRetrofitQueryMap(queryMap)).onFailure {
+        val responseBody = network.service.search(ProxyRetrofitQueryMap(queryMap)).onError {
+            val type = "searching for manga in similar handler"
+            this.log(type)
+            this.throws(type)
+        }.onException {
             val type = "searching for manga in similar handler"
             this.log(type)
             this.throws(type)

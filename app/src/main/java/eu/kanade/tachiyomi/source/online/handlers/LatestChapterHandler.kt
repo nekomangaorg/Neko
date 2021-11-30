@@ -1,7 +1,8 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -37,7 +38,11 @@ class LatestChapterHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
 
             val response = logTimeTaken("fetching latest chapters from dex") {
-                service.latestChapters(limit, offset, langs, contentRatings).onFailure {
+                service.latestChapters(limit, offset, langs, contentRatings).onError {
+                    val type = "getting latest chapters"
+                    this.log(type)
+                    this.throws(type)
+                }.onException {
                     val type = "getting latest chapters"
                     this.log(type)
                     this.throws(type)
@@ -66,14 +71,18 @@ class LatestChapterHandler {
                 "limit" to mangaIds.size,
                 "contentRating[]" to allContentRating)
 
-        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters)).onFailure {
+        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters)).onError {
+            val type = "trying to search manga from latest chapters"
+            this.log(type)
+            this.throws(type)
+        }.onException {
             val type = "trying to search manga from latest chapters"
             this.log(type)
             this.throws(type)
         }.getOrThrow()
 
         val hasMoreResults = chapterListDto.limit + chapterListDto.offset < chapterListDto.total
-        
+
         val mangaDtoMap = mangaListDto.data.associateBy({ it.id }, { it })
 
         val thumbQuality = preferencesHelper.thumbnailQuality()

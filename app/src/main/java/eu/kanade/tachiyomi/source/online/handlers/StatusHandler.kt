@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnFailure
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.suspendOnError
+import com.skydoves.sandwich.suspendOnException
 import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -25,7 +27,7 @@ class StatusHandler {
     suspend fun fetchReadingStatusForAllManga(): Map<String, String?> {
         return withContext(Dispatchers.IO) {
             return@withContext when (val response = authService.readingStatusAllManga()) {
-                is ApiResponse.Failure<*> -> {
+                is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
                     response.log("getting reading status")
                     emptyMap()
                 }
@@ -69,7 +71,9 @@ class StatusHandler {
 
     suspend fun markChapterRead(chapterId: String) {
         withIOContext {
-            authService.markChapterRead(chapterId).onFailure {
+            authService.markChapterRead(chapterId).onError {
+                this.log("trying to mark chapter read")
+            }.onException {
                 this.log("trying to mark chapter read")
             }
         }
@@ -77,7 +81,9 @@ class StatusHandler {
 
     suspend fun markChapterUnRead(chapterId: String) {
         withIOContext {
-            authService.markChapterUnRead(chapterId).onFailure {
+            authService.markChapterUnRead(chapterId).onError {
+                this.log("trying to mark chapter unread")
+            }.onException {
                 this.log("trying to mark chapter unread")
             }
         }
@@ -86,7 +92,10 @@ class StatusHandler {
     suspend fun getReadChapterIds(mangaId: String) = flow<Set<String>> {
 
         val response = authService.readChaptersForManga(mangaId)
-        response.suspendOnFailure {
+        response.suspendOnError {
+            this.log("trying to get chapterIds")
+            emit(emptySet())
+        }.suspendOnException {
             this.log("trying to get chapterIds")
             emit(emptySet())
         }.suspendOnSuccess {

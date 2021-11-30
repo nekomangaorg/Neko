@@ -3,8 +3,10 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnFailure
+import com.skydoves.sandwich.onError
+import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.suspendOnError
+import com.skydoves.sandwich.suspendOnException
 import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -63,7 +65,10 @@ class FollowsHandler {
 
                     followsParseMangaPage(results, readingStatusResponse)
                 }
-            }.suspendOnFailure {
+            }.suspendOnError {
+                this.log("getting follows")
+                throw Exception("Failure to get follows")
+            }.suspendOnException {
                 this.log("getting follows")
                 throw Exception("Failure to get follows")
             }
@@ -104,11 +109,15 @@ class FollowsHandler {
 
             withIOContext {
                 if (followStatus == FollowStatus.UNFOLLOWED) {
-                    authService.unfollowManga(mangaId).onFailure {
+                    authService.unfollowManga(mangaId).onError {
+                        this.log("trying to unfollow manga $mangaId")
+                    }.onException {
                         this.log("trying to unfollow manga $mangaId")
                     }
                 } else {
-                    authService.followManga(mangaId).onFailure {
+                    authService.followManga(mangaId).onError {
+                        this.log("trying to follow manga $mangaId")
+                    }.onException {
                         this.log("trying to follow manga $mangaId")
                     }
                 }
@@ -116,7 +125,7 @@ class FollowsHandler {
 
             return@withContext when (val response =
                 authService.updateReadingStatusForManga(mangaId, readingStatusDto)) {
-                is ApiResponse.Failure<*> -> {
+                is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
                     response.log("trying to update reading status for manga $mangaId")
                     false
                 }
@@ -191,7 +200,7 @@ class FollowsHandler {
         return withContext(Dispatchers.IO) {
             val mangaId = getMangaId(url)
             when (val response = authService.readingStatusForManga(mangaId)) {
-                is ApiResponse.Failure<*> -> {
+                is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
                     response.log("trying to fetch tracking info")
                     throw Exception("error trying to get tracking info")
                 }
