@@ -102,7 +102,8 @@ class MangaHandler {
                         }.onSuccess {
                             val newChapterListDto = this.data
                             results.addAll(newChapterListDto.data)
-                            newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
+                            hasMoreResults =
+                                newChapterListDto.limit + newChapterListDto.offset < newChapterListDto.total
                         }
                 }
 

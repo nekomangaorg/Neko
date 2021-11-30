@@ -80,6 +80,7 @@ class DownloadCache(
      * @param manga the manga of the chapter.
      * @param skipCache whether to skip the directory cache and check in the filesystem.
      */
+
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
         if (skipCache) {
             val source = sourceManager.getMangadex()
@@ -88,8 +89,9 @@ class DownloadCache(
 
         checkRenew()
 
-        val fileNames = mangaFiles[manga.id]?.first?.toHashSet() ?: return false
-        val mangadexIds = mangaFiles[manga.id]?.second?.toHashSet() ?: return false
+        val fileNames = mangaFiles[manga.id]?.first ?: return false
+        val mangadexIds = mangaFiles[manga.id]?.second ?: return false
+
 
         if (!chapter.isMergedChapter() && chapter.mangadex_chapter_id.isNotEmpty() && chapter.mangadex_chapter_id in mangadexIds) {
             return true

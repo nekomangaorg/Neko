@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.Header
 import retrofit2.http.Headers
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -45,26 +46,33 @@ interface MangaDexAuthService {
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/{id}/status")
-    suspend fun readingStatusForManga(@Path("id") mangaId: String): ApiResponse<ReadingStatusDto>
+    suspend fun readingStatusForManga(
+        @Path("id") mangaId: String,
+        @Header("Cache-Control") cacheControl: String = "no-cache",
+    ): ApiResponse<ReadingStatusDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/{id}/read")
-    suspend fun readChaptersForManga(@Path("id") mangaId: String): ApiResponse<ReadChapterDto>
+    suspend fun readChaptersForManga(
+        @Path("id") mangaId: String,
+        @Header("Cache-Control") cacheControl: String = "no-cache",
+    ): ApiResponse<ReadChapterDto>
 
-    @Headers("Cache-Control: no-cache")
     @POST("${MdApi.manga}/{id}/status")
     suspend fun updateReadingStatusForManga(
         @Path("id") mangaId: String,
         @Body readingStatusDto: ReadingStatusDto,
+        @Header("Cache-Control") cacheControl: String = "no-cache",
     ): ApiResponse<ResultDto>
 
-    @Headers("Cache-Control: no-cache")
     @GET(MdApi.readingStatusForAllManga)
-    suspend fun readingStatusAllManga(): ApiResponse<ReadingStatusMapDto>
+    suspend fun readingStatusAllManga(@Header("Cache-Control") cacheControl: String = "no-cache"): ApiResponse<ReadingStatusMapDto>
 
-    @Headers("Cache-Control: no-cache")
     @GET(MdApi.readingStatusForAllManga)
-    suspend fun readingStatusByType(@Query("status") status: String): ApiResponse<ReadingStatusMapDto>
+    suspend fun readingStatusByType(
+        @Query("status") status: String,
+        @Header("Cache-Control") cacheControl: String = "no-cache",
+    ): ApiResponse<ReadingStatusMapDto>
 
     @POST("${MdApi.chapter}/{id}/read")
     suspend fun markChapterRead(@Path("id") chapterId: String): ApiResponse<ResultDto>

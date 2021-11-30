@@ -25,6 +25,7 @@ import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
+import okhttp3.Response
 import okhttp3.logging.HttpLoggingInterceptor
 import org.isomorphism.util.TokenBuckets
 import retrofit2.Retrofit
@@ -73,9 +74,11 @@ class NetworkHelper(val context: Context) {
             .readTimeout(15, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .cookieJar(cookieManager)
+            .addNetworkInterceptor(HeadersInterceptor())
             .apply {
                 if (BuildConfig.DEBUG) {
-                    addInterceptor(ChuckerInterceptor(context))
+                    addInterceptor(ChuckerInterceptor.Builder(context).alwaysReadResponseBody(true)
+                        .build())
                 }
                 when (preferences.dohProvider()) {
                     PREF_DOH_CLOUDFLARE -> dohCloudflare()
@@ -149,10 +152,13 @@ class NetworkHelper(val context: Context) {
         .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory.create())
         .client(client)
 
-    val service: MangaDexService = jsonRetrofitClient.baseUrl(MdApi.baseUrl).client(client).build()
-        .create(MangaDexService::class.java)
+    val service: MangaDexService =
+        jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+            .client(client).build()
+            .create(MangaDexService::class.java)
 
-    val authService = jsonRetrofitClient.baseUrl(MdApi.baseUrl).client(authClient).build()
+    val authService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+        .client(authClient).build()
         .create(MangaDexAuthService::class.java)
 
     val similarService =
@@ -160,4 +166,21 @@ class NetworkHelper(val context: Context) {
             .readTimeout(2, TimeUnit.SECONDS).build())
             .build()
             .create(SimilarService::class.java)
+
+    class HeadersInterceptor : Interceptor {
+        override fun intercept(chain: Interceptor.Chain): Response {
+            val request = chain.request().newBuilder()
+                .removeHeader("User-Agent")
+                .header("User-Agent", "Neko " + System.getProperty("http.agent"))
+                .header("Referer", MdUtil.baseUrl)
+                .header("Content-Type", "application/json")
+                .build()
+
+            return chain.proceed(request)
+            /*   response.request.headers.forEach {
+                   XLog.disableStackTrace().d("headers sent ${it.first} ${it.second}")
+               }
+               return response*/
+        }
+    }
 }
