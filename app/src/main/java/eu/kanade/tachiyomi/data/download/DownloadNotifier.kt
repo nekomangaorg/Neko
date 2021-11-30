@@ -34,7 +34,7 @@ internal class DownloadNotifier(private val context: Context) {
         context.notificationBuilder(Notifications.CHANNEL_DOWNLOADER_PROGRESS) {
             setLargeIcon(BitmapFactory.decodeResource(context.resources, R.mipmap.ic_launcher))
         }
-        
+
     }
 
     private val completeNotificationBuilder by lazy {
@@ -69,6 +69,7 @@ internal class DownloadNotifier(private val context: Context) {
      *
      * @param id the id of the notification.
      */
+    @Synchronized
     private fun NotificationCompat.Builder.show(id: Int) {
         context.notificationManager.notify(id, build())
     }
