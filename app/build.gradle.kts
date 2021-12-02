@@ -257,7 +257,7 @@ dependencies {
     implementation("com.google.accompanist:accompanist-placeholder:$accompanistVersion")
 
 // Conductor
-    implementation("com.bluelinelabs:conductor:3.1.1")
+    implementation("com.bluelinelabs:conductor:3.1.2")
     implementation("com.github.tachiyomiorg:conductor-support-preference:3.0.0")
 
 // RxBindings
