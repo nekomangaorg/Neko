@@ -34,6 +34,15 @@
     <color name="primaryVariantStrawberry">#2B2320</color>
     <color name="backgroundStrawberries">#1a1716</color>
 
+    <!-- Flat Lime Theme -->
+    <color name="primaryLime">#7CF7A5</color>
+    <color name="secondaryLime">#4AF88A</color>
+    <color name="primaryVariantLime">@color/primaryVariantTachiyomi</color>
+    <color name="primaryInverseLime">#09933c</color>
+    <color name="backgroundLime">#202125</color>
+    <color name="secondaryVariantLime">#cbffe0</color>
+    <color name="downloadBadgeLime">#304E51</color>
+
     <!-- Tako Theme -->
     <color name="primaryTako">#fccd9f</color>
     <color name="primaryVariantTako">#292828</color>

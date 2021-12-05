@@ -96,7 +96,19 @@
         <item name="readerBackground">@color/md_black_1000</item>
     </style>
 
-    <style name="Theme.Tachiyomi.FlatLime" />
+    <style name="Theme.Tachiyomi.FlatLime">
+        <item name="colorPrimary">@color/primaryLime</item>
+        <item name="colorPrimaryVariant">@color/primaryVariantLime</item>
+        <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
+        <item name="colorSecondary">@color/secondaryLime</item>
+        <item name="colorOnSecondary">@color/textColorPrimaryInverse</item>
+        <item name="colorControlHighlight">@color/rippleColorLime</item>
+        <item name="colorSecondaryVariant">@color/secondaryVariantLime</item>
+        <item name="colorSurface">@color/backgroundLime</item>
+        <item name="background">@color/backgroundLime</item>
+        <item name="colorTertiary">@color/downloadBadgeLime</item>
+        <item name="colorOnTertiary">@color/colorOnDownloadBadgeDayNight</item>
+    </style>
 
     <style name="Theme.Tachiyomi.Outrun" />
 

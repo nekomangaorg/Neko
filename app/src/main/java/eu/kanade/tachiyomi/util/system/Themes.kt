@@ -65,7 +65,8 @@ enum class Themes(
 
     LIME(
         R.style.Theme_Tachiyomi_FlatLime,
-        AppCompatDelegate.MODE_NIGHT_YES,
+        AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM,
+        R.string.lime_time,
         R.string.flat_lime
     );
 

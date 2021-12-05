@@ -94,17 +94,14 @@
     <color name="appBarTextTealSapphire">#DE0a302e</color>
 
     <!-- Flat Lime Theme -->
-    <color name="primaryLime">#7CF7A5</color>
-    <color name="primaryInverseLime">#09933c</color>
-    <color name="secondaryLime">#4AF88A</color>
+    <color name="primaryLime">#57BD79</color>
+    <color name="primaryVariantLime">#D9ECE0</color>
+    <color name="primaryInverseLime">#AEDFC0</color>
+    <color name="secondaryLime">#1DA750</color>
+    <color name="secondaryVariantLime">#065124</color>
     <color name="rippleColorLime">#1F4AF88A</color>
-    <color name="textColorPrimaryLime">@color/md_white_1000</color>
-    <color name="textColorSecondaryLime">@color/md_white_1000_76</color>
-    <color name="textColorHintLime">@color/md_white_1000_50</color>
-    <color name="backgroundLime">#202125</color>
-    <color name="secondaryVariantLime">#cbffe0</color>
-    <color name="dialogLime">#282A2E</color>
-    <color name="colorOnLime">#2C2D32</color>
+    <color name="backgroundLime">#E9EFEB</color>
+    <color name="downloadBadgeLime">#80CAD3</color>
 
     <!-- Grey Wolf -->
     <color name="greyWolfSecondary">#636363</color>
