@@ -65,6 +65,7 @@
         android:layout_marginTop="12dp"
         android:maxHeight="200dp"
         app:layout_constraintWidth_max="200dp"
+        app:layout_constraintWidth_min="50dp"
         app:layout_constraintWidth_percent="0.25"
         android:layout_marginBottom="16dp"
         app:layout_constraintStart_toStartOf="parent"
