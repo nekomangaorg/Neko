@@ -131,6 +131,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                     binding.progressBar.progress = newProgress
                     if (newProgress == 100) {
                         binding.progressBar.isInvisible = true
+                        invalidateOptionsMenu()
                     }
                     super.onProgressChanged(view, newProgress)
                 }
