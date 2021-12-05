@@ -62,10 +62,6 @@ object ThemeUtil {
         return context.isInNightMode() && preferences.themeDarkAmoled().get()
     }
 
-    fun hasDarkActionBarInLight(context: Context, theme: Themes): Boolean {
-        return !context.isInNightMode()
-    }
-
     fun readerBackgroundColor(theme: Int): Int {
         return when (theme) {
             1 -> Color.BLACK

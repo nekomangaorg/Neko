@@ -84,7 +84,6 @@ import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.hasColoredActionBar
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
 import eu.kanade.tachiyomi.util.system.isBottomTappable
@@ -259,9 +258,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         binding.chaptersSheet.chaptersBottomSheet.setup(this)
-        if (hasColoredActionBar) {
-            binding.chaptersSheet.chapterRecycler.setBackgroundColor(getResourceColor(R.attr.background))
-        }
         config = ReaderConfig()
         initializeMenu()
     }

@@ -24,10 +24,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.view.ActionMode
 import androidx.appcompat.widget.SearchView
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.DrawableCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.palette.graphics.Palette
@@ -60,6 +58,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MiniSearchView
+import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -83,11 +82,10 @@ import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
+import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLandscape
@@ -454,11 +452,6 @@ class MangaDetailsController :
             return
         }
         val scrollingColor = headerColor ?: activity.getResourceColor(R.attr.colorPrimaryVariant)
-        if (ThemeUtil.hasDarkActionBarInLight(activity,
-                activity.getPrefTheme(presenter.preferences))
-        ) {
-            setActionBar(!toolbarIsColored)
-        }
         val topColor = ColorUtils.setAlphaComponent(scrollingColor, 0)
         val scrollingStatusColor =
             ColorUtils.setAlphaComponent(scrollingColor, (0.87f * 255).roundToInt())
@@ -538,50 +531,6 @@ class MangaDetailsController :
         view.context.imageLoader.enqueue(request)
     }
 
-    /** Set toolbar theme for themes that are inverted (ie. light blue theme) */
-    private fun setActionBar(forThis: Boolean) {
-        val activity = activity as? MainActivity ?: return
-        val activityBinding = activityBinding ?: return
-        // if the theme is using inverted toolbar color
-        if (ThemeUtil.hasDarkActionBarInLight(activity,
-                activity.getPrefTheme(presenter.preferences))
-        ) {
-            val iconPrimary = view?.context?.getResourceColor(
-                if (forThis) R.attr.colorOnBackground
-                else R.attr.actionBarTintColor
-            ) ?: Color.BLACK
-            activityBinding.toolbar.setTitleTextColor(iconPrimary)
-            updateToolbarTitleAlpha()
-            activityBinding.toolbar.overflowIcon?.setTint(iconPrimary)
-            val wic = WindowInsetsControllerCompat(activity.window, activity.window.decorView)
-            wic.isAppearanceLightStatusBars = forThis
-            activityBinding.toolbar.setNavigationIconTint(iconPrimary)
-            activityBinding.toolbar.navigationIcon =
-                activity.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)
-            val menu = activityBinding.toolbar.menu ?: return
-            menu.findItem(R.id.action_download)?.tintIcon(iconPrimary)
-            menu.findItem(R.id.action_search)?.tintIcon(iconPrimary)
-            menu.findItem(R.id.action_mark_all_as_read)?.tintIcon(iconPrimary)
-            val searchView =
-                menu.findItem(R.id.action_search)?.actionView as? MiniSearchView ?: return
-            activityBinding.toolbar.collapseIcon =
-                activity.contextCompatDrawable(R.drawable.ic_arrow_back_24dp)?.apply {
-                    setTint(iconPrimary)
-                }
-            searchView.tintBar(iconPrimary)
-        }
-    }
-
-    private fun MenuItem.tintIcon(color: Int) {
-        val drawable = icon
-        if (drawable != null) {
-            val wrapped = DrawableCompat.wrap(drawable)
-            drawable.mutate()
-            DrawableCompat.setTint(wrapped, color)
-            icon = drawable
-        }
-    }
-
     private fun setStatusBarAndToolbar() {
         val topColor = Color.TRANSPARENT
         val scrollingColor = headerColor ?: activity!!.getResourceColor(R.attr.colorPrimaryVariant)
@@ -619,7 +568,6 @@ class MangaDetailsController :
     override fun onChangeStarted(handler: ControllerChangeHandler, type: ControllerChangeType) {
         super.onChangeStarted(handler, type)
         if (type.isEnter) {
-            setActionBar(true)
             updateToolbarTitleAlpha(0f)
             setStatusBarAndToolbar()
         } else {
@@ -627,7 +575,6 @@ class MangaDetailsController :
                 return
             }
             if (type == ControllerChangeType.POP_EXIT) {
-                setActionBar(false)
                 presenter.cancelScope()
             }
             colorAnimator?.cancel()
@@ -974,7 +921,6 @@ class MangaDetailsController :
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
         inflater.inflate(R.menu.manga_details, menu)
         colorToolbar(binding.recycler.canScrollVertically(-1))
-        setActionBar(!toolbarIsColored)
         menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
         menu.findItem(R.id.action_mark_all_as_read).isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch

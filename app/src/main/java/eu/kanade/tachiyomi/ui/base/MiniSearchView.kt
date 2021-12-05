@@ -45,18 +45,6 @@ class MiniSearchView @JvmOverloads constructor(context: Context, attrs: Attribut
         searchMagIconImageView?.layoutParams = LinearLayout.LayoutParams(0, 0)
     }
 
-    fun tintBar(color: Int) {
-        val clearButton = findViewById<ImageView>(androidx.appcompat.R.id.search_close_btn)
-        clearButton?.imageTintList = ColorStateList.valueOf(color)
-
-        val actionColorAlpha =
-            ColorUtils.setAlphaComponent(color, 200)
-        val searchTextView =
-            findViewById<SearchAutoComplete>(androidx.appcompat.R.id.search_src_text)
-        searchTextView?.setHintTextColor(actionColorAlpha)
-        searchTextView?.setTextColor(actionColorAlpha)
-    }
-
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)

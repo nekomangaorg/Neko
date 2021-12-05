@@ -29,7 +29,6 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import androidx.lifecycle.lifecycleScope
@@ -169,13 +168,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         setContentView(binding.root)
 
         binding.toolbar.overflowIcon?.setTint(getResourceColor(R.attr.actionBarTintColor))
-
-        val a = obtainStyledAttributes(intArrayOf(android.R.attr.windowLightStatusBar, android.R.attr.windowLightStatusBar))
-        val wic = WindowInsetsControllerCompat(window, window.decorView)
-        val isLight = a.getBoolean(0, false)
-        wic.isAppearanceLightStatusBars = isLight
-        wic.isAppearanceLightNavigationBars = isLight
-        a.recycle()
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) {
             window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN)
