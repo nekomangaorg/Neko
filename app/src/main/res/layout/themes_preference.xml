@@ -15,7 +15,7 @@
         app:layout_constraintBottom_toTopOf="@id/theme_recycler"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:textAppearance="?textAppearanceListItem"
         android:text="@string/light_theme"/>
 
     <androidx.recyclerview.widget.RecyclerView
@@ -45,7 +45,7 @@
         app:layout_constraintBottom_toTopOf="@id/theme_recycler_dark"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        android:textAppearance="@style/TextAppearance.AppCompat.Menu"
+        android:textAppearance="?textAppearanceListItem"
         android:text="@string/dark_theme"/>
 
     <androidx.recyclerview.widget.RecyclerView
