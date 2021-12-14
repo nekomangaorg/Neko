@@ -21,6 +21,7 @@ class OneWayFadeChangeHandler : FadeChangeHandler {
         removesFromViewOnPush
     )
 
+    var fadeOut = true
     override fun getAnimator(
         container: ViewGroup,
         from: View?,
@@ -36,7 +37,7 @@ class OneWayFadeChangeHandler : FadeChangeHandler {
 
         val hasSideNav = container.context.resources.configuration?.orientation == Configuration.ORIENTATION_LANDSCAPE
         if (from != null && (!isPush || removesFromViewOnPush())) {
-            if (!hasSideNav) {
+            if (!hasSideNav && fadeOut) {
                 animator.play(ObjectAnimator.ofFloat(from, View.ALPHA, 0f))
             } else {
                 container.removeView(from)

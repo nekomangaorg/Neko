@@ -90,6 +90,7 @@ import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import kotlinx.coroutines.Dispatchers
@@ -721,7 +722,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun setRoot(controller: Controller, id: Int) {
-        router.setRoot(controller.withFadeTransaction().tag(id.toString()))
+        router.setRoot(controller.withFadeInTransaction().tag(id.toString()))
     }
 
     override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
