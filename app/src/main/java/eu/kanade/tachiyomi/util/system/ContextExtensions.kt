@@ -19,6 +19,7 @@ import android.net.Uri
 import android.net.wifi.WifiManager
 import android.os.Build
 import android.os.PowerManager
+import android.provider.Settings
 import android.view.View
 import android.widget.Toast
 import androidx.annotation.AttrRes
@@ -167,6 +168,12 @@ val Resources.isLTR
     get() = configuration.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
 fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600
+
+/** Gets the duration multiplier for general animations on the device
+ * @see Settings.Global.ANIMATOR_DURATION_SCALE
+ */
+val Context.animatorDurationScale: Float
+    get() = Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
 
 /**
  * Helper method to create a notification builder.

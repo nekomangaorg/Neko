@@ -88,9 +88,8 @@ import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updatePadding
-import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import kotlinx.coroutines.Dispatchers

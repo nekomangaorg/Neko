@@ -10,26 +10,20 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.appcompat.widget.AppCompatButton
-import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import coil.clear
-import coil.loadAny
-import coil.request.CachePolicy
-import com.davemorrissey.labs.subscaleview.ImageSource
+import androidx.core.view.updatePaddingRelative
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import eu.kanade.tachiyomi.widget.GifViewTarget
 import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
@@ -46,7 +40,7 @@ import java.util.concurrent.TimeUnit
  * @constructor creates a new webtoon holder.
  */
 class WebtoonPageHolder(
-    private val frame: FrameLayout,
+    private val frame: ReaderPageImageView,
     viewer: WebtoonViewer
 ) : WebtoonBaseHolder(frame, viewer) {
 
@@ -60,17 +54,6 @@ class WebtoonPageHolder(
      * adapter would create more views to fill the screen, which is not wanted.
      */
     private lateinit var progressContainer: ViewGroup
-
-    /**
-     * Image view that supports subsampling on zoom.
-     */
-    private var subsamplingImageView: SubsamplingScaleImageView? = null
-    private var cropBorders: Boolean = false
-
-    /**
-     * Simple image view only used on GIFs.
-     */
-    private var imageView: ImageView? = null
 
     /**
      * Retry button container used to allow retrying.
@@ -112,6 +95,10 @@ class WebtoonPageHolder(
     init {
         refreshLayoutParams()
         frame.setBackgroundColor(Color.BLACK)
+
+        frame.onImageLoaded = { onImageDecoded() }
+        frame.onImageLoadError = { onImageDecodeError() }
+//        frame.onScaleChanged = { viewer.activity.hideMenu() }
     }
 
     /**
@@ -143,10 +130,11 @@ class WebtoonPageHolder(
         unsubscribeReadImageHeader()
 
         removeDecodeErrorLayout()
-        subsamplingImageView?.recycle()
-        subsamplingImageView?.isVisible = false
-        imageView?.clear()
-        imageView?.isVisible = false
+        frame.recycle()
+//        subsamplingImageView?.recycle()
+//        subsamplingImageView?.isVisible = false
+//        imageView?.clear()
+//        imageView?.isVisible = false
         progressBar.setProgress(0)
     }
 
@@ -287,15 +275,17 @@ class WebtoonPageHolder(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { isAnimated ->
-                if (!isAnimated) {
-                    val subsamplingView = initSubsamplingImageView()
-                    subsamplingView.isVisible = true
-                    subsamplingView.setImage(ImageSource.inputStream(openStream!!))
-                } else {
-                    val imageView = initImageView()
-                    imageView.isVisible = true
-                    imageView.setImage(openStream!!)
-                }
+                frame.setImage(
+                    openStream!!,
+                    isAnimated,
+                    ReaderPageImageView.Config(
+                        zoomDuration = viewer.config.doubleTapAnimDuration,
+                        minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
+                        cropBorders =
+                        if (viewer.hasMargins) viewer.config.verticalCropBorders
+                        else viewer.config.webtoonCropBorders
+                    )
+                )
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed
             .flatMap { Observable.never<Unit>() }
@@ -366,59 +356,6 @@ class WebtoonPageHolder(
         }
         progressContainer.addView(progress)
         return progress
-    }
-
-    /**
-     * Initializes a subsampling scale view.
-     */
-    private fun initSubsamplingImageView(): SubsamplingScaleImageView {
-        val config = viewer.config
-        val newCropBorders = if (viewer.hasMargins) config.verticalCropBorders else config.webtoonCropBorders
-
-        subsamplingImageView?.apply {
-            if (newCropBorders != cropBorders) {
-                cropBorders = newCropBorders
-                setCropBorders(newCropBorders)
-            }
-            return this
-        }
-
-        cropBorders = newCropBorders
-
-        subsamplingImageView = WebtoonSubsamplingImageView(context).apply {
-            setMaxTileSize(viewer.activity.maxBitmapSize)
-            setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
-            setMinimumScaleType(SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH)
-            setMinimumDpi(90)
-            setMinimumTileDpi(180)
-            setCropBorders(cropBorders)
-            setOnImageEventListener(
-                object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
-                    override fun onReady() {
-                        onImageDecoded()
-                    }
-
-                    override fun onImageLoadError(e: Exception) {
-                        onImageDecodeError()
-                    }
-                }
-            )
-        }
-        frame.addView(subsamplingImageView, MATCH_PARENT, MATCH_PARENT)
-        return subsamplingImageView!!
-    }
-
-    /**
-     * Initializes an image view, used for GIFs.
-     */
-    private fun initImageView(): ImageView {
-        if (imageView != null) return imageView!!
-
-        imageView = AppCompatImageView(context).apply {
-            adjustViewBounds = true
-        }
-        frame.addView(imageView, MATCH_PARENT, MATCH_PARENT)
-        return imageView!!
     }
 
     /**
@@ -512,17 +449,6 @@ class WebtoonPageHolder(
         if (layout != null) {
             frame.removeView(layout)
             decodeErrorLayout = null
-        }
-    }
-
-    /**
-     * Extension method to set a [stream] into this ImageView.
-     */
-    private fun ImageView.setImage(stream: InputStream) {
-        this.loadAny(stream.readBytes()) {
-            memoryCachePolicy(CachePolicy.DISABLED)
-            diskCachePolicy(CachePolicy.DISABLED)
-            target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))
         }
     }
 }
