@@ -376,7 +376,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
 
-        if (savedInstanceState == null) {
+        if (savedInstanceState == null && this !is SearchActivity) {
             // Reset Incognito Mode on relaunch
             preferences.incognitoMode().set(false)
 
