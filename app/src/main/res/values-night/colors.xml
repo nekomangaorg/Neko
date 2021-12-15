@@ -45,7 +45,7 @@
 
     <!-- Tako Theme -->
     <color name="primaryTako">#fccd9f</color>
-    <color name="primaryVariantTako">#292828</color>
+    <color name="primaryVariantTako">#342F40</color>
     <color name="primaryInverseTako">#a85d14</color>
     <color name="secondaryTako">#F3B375</color>
     <color name="onSecondaryTako">#242431</color>
