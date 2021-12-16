@@ -194,7 +194,7 @@ dependencies {
     implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
     // Database
-    implementation("androidx.sqlite:sqlite:2.1.0")
+    implementation("androidx.sqlite:sqlite:2.2.0")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
     implementation("io.requery:sqlite-android:3.31.0")
