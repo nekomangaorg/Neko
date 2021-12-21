@@ -988,7 +988,9 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             else -> R2LPagerViewer(this)
         }
 
-        if (noDefault && presenter.manga?.readingModeType!! > 0) {
+        if (noDefault && presenter.manga?.readingModeType!! > 0 &&
+            presenter.manga?.readingModeType!! != preferences.defaultReadingMode()
+        ) {
             snackbar = binding.readerLayout.snack(
                 getString(
                     R.string.reading_,
