@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network.interceptor
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Build
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.widget.Toast
@@ -22,6 +23,7 @@ import okhttp3.Request
 import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.io.IOException
+import java.util.Locale
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.TimeUnit
 
@@ -37,7 +39,14 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
      * Application class.
      */
     private val initWebView by lazy {
-        WebSettings.getDefaultUserAgent(context)
+        // Checked added due to crash https://bugs.chromium.org/p/chromium/issues/detail?id=1279562
+        if (!(
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.S &&
+                Build.MANUFACTURER.lowercase(Locale.ENGLISH) == "samsung"
+            )
+        ) {
+            WebSettings.getDefaultUserAgent(context)
+        }
     }
 
     @Synchronized
