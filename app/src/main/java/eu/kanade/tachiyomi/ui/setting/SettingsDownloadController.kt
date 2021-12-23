@@ -47,6 +47,11 @@ class SettingsDownloadController : SettingsController() {
             titleRes = R.string.only_download_over_wifi
             defaultValue = true
         }
+        switchPreference {
+            key = Keys.saveChaptersAsCBZ
+            titleRes = R.string.save_chapters_as_cbz
+            defaultValue = false
+        }
         preferenceCategory {
             titleRes = R.string.remove_after_read
 

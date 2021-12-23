@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
 import eu.kanade.tachiyomi.data.library.LibraryUpdateService
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -38,7 +39,11 @@ import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
 import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.injectLazy
+import java.io.BufferedOutputStream
 import java.io.File
+import java.util.zip.CRC32
+import java.util.zip.ZipEntry
+import java.util.zip.ZipOutputStream
 
 /**
  * This class is the one in charge of downloading chapters.
@@ -60,7 +65,7 @@ class Downloader(
     private val cache: DownloadCache,
     private val sourceManager: SourceManager,
 ) {
-
+    private val preferences: PreferencesHelper by injectLazy()
     private val chapterCache: ChapterCache by injectLazy()
 
     /**
@@ -530,9 +535,32 @@ class Downloader(
 
         // Only rename the directory if it's downloaded.
         if (download.status == Download.State.DOWNLOADED) {
-            tmpDir.renameTo(dirname)
-            cache.addChapter(dirname, download.manga)
+            if (preferences.saveChaptersAsCBZ().get()) {
+                val zip = mangaDir.createFile("$dirname.cbz.tmp")
+                val zipOut = ZipOutputStream(BufferedOutputStream(zip.openOutputStream()))
+                zipOut.setMethod(ZipEntry.STORED)
 
+                tmpDir.listFiles()?.forEach { img ->
+                    val input = img.openInputStream()
+                    val data = input.readBytes()
+                    val entry = ZipEntry(img.name)
+                    val crc = CRC32()
+                    val size = img.length()
+                    crc.update(data)
+                    entry.crc = crc.value
+                    entry.compressedSize = size
+                    entry.size = size
+                    zipOut.putNextEntry(entry)
+                    zipOut.write(data)
+                    input.close()
+                }
+                zipOut.close()
+                zip.renameTo("$dirname.cbz")
+                tmpDir.delete()
+            } else {
+                tmpDir.renameTo(dirname)
+            }
+            cache.addChapter(dirname, download.manga)
             DiskUtil.createNoMediaFile(tmpDir, context)
         }
     }

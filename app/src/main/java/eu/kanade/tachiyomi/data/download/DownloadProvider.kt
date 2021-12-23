@@ -116,6 +116,7 @@ class DownloadProvider(private val context: Context) {
         val oldIdHashSet = chapters.mapNotNull { it.old_mangadex_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
+        val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
@@ -127,6 +128,9 @@ class DownloadProvider(private val context: Context) {
                     return@filter oldIdHashSet.contains(mangadexId)
                 } else {
                     if (scanalatorNameHashSet.contains(fileName)) {
+                        return@filter true
+                    }
+                    if (scanalatorCbzNameHashSet.contains(fileName)) {
                         return@filter true
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
@@ -154,6 +158,7 @@ class DownloadProvider(private val context: Context) {
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
+        val scanalatorCbzNameHashSet = chapters.map { "${getChapterDirName(it)}.cbz" }.toHashSet()
 
         return mangaDir.listFiles()!!.asList().filter { file ->
             file.name?.let { fileName ->
@@ -167,6 +172,10 @@ class DownloadProvider(private val context: Context) {
                     if (scanalatorNameHashSet.contains(fileName)) {
                         return@filter false
                     }
+                    if (scanalatorCbzNameHashSet.contains(fileName)) {
+                        return@filter false
+                    }
+
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(
                         afterScanlatorCheck
