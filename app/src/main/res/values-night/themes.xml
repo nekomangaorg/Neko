@@ -24,23 +24,6 @@
         <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
     </style>
 
-    <style name="Theme.Tachiyomi.FlatLime">
-        <item name="colorPrimary">@color/primaryLime</item>
-        <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
-        <item name="colorSecondary">@color/secondaryLime</item>
-        <item name="colorControlHighlight">@color/rippleColorLime</item>
-        <item name="colorSecondaryVariant">@color/secondaryVariantLime</item>
-        <item name="colorPrimaryVariant">@color/dialogLime</item>
-        <item name="colorSurface">@color/backgroundLime</item>
-        <item name="background">@color/backgroundLime</item>
-        <item name="colorOnSecondary">@color/colorOnLime</item>
-        <item name="colorTertiary">?attr/colorSecondary</item>
-        <item name="colorOnTertiary">@color/md_white_1000</item>
-        <item name="unreadBadgeColor">?attr/colorSecondary</item>
-        <item name="colorOnHopper">?attr/colorOnSecondary</item>
-        <item name="colorOnUnreadBadge">?attr/colorOnSecondary</item>
-    </style>
-
     <style name="Theme.Tachiyomi.Outrun">
         <item name="colorPrimary">@color/outrun_blush</item>
         <item name="colorSecondary">@color/outrun_pink</item>
