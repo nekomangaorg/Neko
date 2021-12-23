@@ -101,7 +101,7 @@ class DownloadCache(
         }
         val validChapterDirNames = provider.getValidChapterDirNames(chapter)
         return validChapterDirNames.any {
-            it in fileNames
+            it in fileNames || "$it.cbz" in fileNames
         }
     }
 

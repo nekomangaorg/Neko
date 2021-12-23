@@ -95,17 +95,20 @@ class DownloadProvider(private val context: Context) {
      */
     fun findChapterDir(chapter: Chapter, manga: Manga, source: Source): UniFile? {
         val mangaDir = findMangaDir(manga, source)
-        return if (chapter.isMergedChapter()) {
-            mangaDir?.findFile(getJ2kChapterName(chapter))
-        } else {
-            var dir =
-                getValidChapterDirNames(chapter).mapNotNull { mangaDir?.findFile(it) }.firstOrNull()
-            if (dir == null) {
-                dir = mangaDir?.listFiles()
-                    ?.find { it.name != null && it.name!!.endsWith(chapter.mangadex_chapter_id) }
-            }
-            dir
-        }
+        /*   return if (chapter.isMergedChapter()) {
+               mangaDir?.findFile(getJ2kChapterName(chapter))
+           } else {
+               var dir =
+                   getValidChapterDirNames(chapter).mapNotNull { mangaDir?.findFile(it) }.firstOrNull()
+               if (dir == null) {
+                   dir = mangaDir?.listFiles()
+                       ?.find { it.name != null && it.name!!.endsWith(chapter.mangadex_chapter_id) }
+               }
+               dir
+           }*/
+        return getValidChapterDirNames(chapter).asSequence()
+            .mapNotNull { mangaDir?.findFile(it, true) ?: mangaDir?.findFile("$it.cbz", true) }
+            .firstOrNull()
     }
 
     /**
