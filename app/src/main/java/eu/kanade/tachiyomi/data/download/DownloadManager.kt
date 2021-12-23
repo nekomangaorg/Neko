@@ -158,7 +158,7 @@ class DownloadManager(val context: Context) {
      * @return an observable containing the list of pages from the chapter.
      */
     fun buildPageList(source: Source, manga: Manga, chapter: Chapter): Observable<List<Page>> {
-        return buildPageList(provider.findChapterDir(chapter, manga, sourceManager.getMangadex()))
+        return buildPageList(provider.findChapterDir(chapter, manga))
     }
 
     /**
@@ -250,12 +250,10 @@ class DownloadManager(val context: Context) {
                 val chapterDirs =
                     provider.findChapterDirs(
                         chapters,
-                        manga,
-                        source
+                        manga
                     ) + provider.findTempChapterDirs(
                         chapters,
-                        manga,
-                        source
+                        manga
                     )
                 chapterDirs.forEach { it.delete() }
                 cache.removeChapters(chapters, manga)
@@ -273,7 +271,7 @@ class DownloadManager(val context: Context) {
      * return the list of all manga folders
      */
     fun getMangaFolders(source: Source): List<UniFile> {
-        return provider.findSourceDir(source)?.listFiles()?.toList() ?: emptyList()
+        return provider.findSourceDir()?.listFiles()?.toList() ?: emptyList()
     }
 
     /**
@@ -293,28 +291,28 @@ class DownloadManager(val context: Context) {
         var cleaned = 0
 
         if (removeNonFavorite && !manga.favorite) {
-            val mangaFolder = provider.getMangaDir(manga, source)
+            val mangaFolder = provider.getMangaDir(manga)
             cleaned += 1 + (mangaFolder.listFiles()?.size ?: 0)
             mangaFolder.delete()
             cache.removeManga(manga)
             return cleaned
         }
 
-        val filesWithNoChapter = provider.findUnmatchedChapterDirs(allChapters, manga, source)
+        val filesWithNoChapter = provider.findUnmatchedChapterDirs(allChapters, manga)
         cleaned += filesWithNoChapter.size
         cache.removeFolders(filesWithNoChapter.mapNotNull { it.name }, manga)
         filesWithNoChapter.forEach { it.delete() }
 
         if (removeRead) {
             val readChapters = allChapters.filter { it.read }
-            val readChapterDirs = provider.findChapterDirs(readChapters, manga, source)
+            val readChapterDirs = provider.findChapterDirs(readChapters, manga)
             readChapterDirs.forEach { it.delete() }
             cleaned += readChapterDirs.size
             cache.removeChapters(readChapters, manga)
         }
 
         if (cache.getDownloadCount(manga) == 0) {
-            val mangaFolder = provider.getMangaDir(manga, source)
+            val mangaFolder = provider.getMangaDir(manga)
             val size = mangaFolder.listFiles()?.size ?: 0
             if (size == 0) {
                 mangaFolder.delete()
@@ -335,7 +333,7 @@ class DownloadManager(val context: Context) {
     fun deleteManga(manga: Manga, source: Source) {
         downloader.clearQueue(manga, true)
         queue.remove(manga)
-        provider.findMangaDir(manga, sourceManager.getMangadex())?.delete()
+        provider.findMangaDir(manga)?.delete()
         cache.removeManga(manga)
         queue.updateListeners()
     }
@@ -371,7 +369,7 @@ class DownloadManager(val context: Context) {
     fun renameChapter(manga: Manga, oldChapter: Chapter, newChapter: Chapter) {
         val oldName = provider.getChapterDirName(oldChapter)
         val newName = provider.getChapterDirName(newChapter)
-        val mangaDir = provider.getMangaDir(manga, sourceManager.getMangadex())
+        val mangaDir = provider.getMangaDir(manga)
 
         val oldFolder = mangaDir.findFile(oldName)
         if (oldFolder?.renameTo(newName) == true) {

@@ -84,7 +84,7 @@ class DownloadCache(
     fun isChapterDownloaded(chapter: Chapter, manga: Manga, skipCache: Boolean): Boolean {
         if (skipCache) {
             val source = sourceManager.getMangadex()
-            return provider.findChapterDir(chapter, manga, source) != null
+            return provider.findChapterDir(chapter, manga) != null
         }
 
         checkRenew()
@@ -114,7 +114,7 @@ class DownloadCache(
         checkRenew()
 
         if (forceCheckFolder) {
-            val mangaDir = provider.findMangaDir(manga, sourceManager.getMangadex())
+            val mangaDir = provider.findMangaDir(manga)
 
             if (mangaDir != null) {
                 val listFiles =
@@ -169,7 +169,7 @@ class DownloadCache(
 
         val sourceDirs = getDirectoryFromPreference().listFiles().orEmpty()
             .associate { it.name to SourceDirectory(it) }.mapNotNullKeys { entry ->
-                onlineSources.find { provider.getSourceDirName(it) == entry.key }?.id
+                onlineSources.find { provider.getSourceDirName() == entry.key }?.id
             }
 
         val db: DatabaseHelper by injectLazy()

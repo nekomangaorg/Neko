@@ -9,13 +9,14 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.onEach
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -30,6 +31,7 @@ class DownloadProvider(private val context: Context) {
      * Preferences helper.
      */
     private val preferences: PreferencesHelper by injectLazy()
+    private val source = Injekt.get<SourceManager>().getMangadex()
 
     /**
      * The root directory for downloads.
@@ -53,10 +55,10 @@ class DownloadProvider(private val context: Context) {
      * @param source the source of the manga.
      */
     @Synchronized
-    internal fun getMangaDir(manga: Manga, source: Source): UniFile {
+    internal fun getMangaDir(manga: Manga): UniFile {
         try {
             val mangaDirName = getMangaDirName(manga)
-            val sourceDirName = getSourceDirName(source)
+            val sourceDirName = getSourceDirName()
             XLog.d("creating directory for $sourceDirName : $mangaDirName")
             return downloadsDir.createDirectory(sourceDirName)
                 .createDirectory(mangaDirName)
@@ -71,8 +73,8 @@ class DownloadProvider(private val context: Context) {
      *
      * @param source the source to query.
      */
-    fun findSourceDir(source: Source): UniFile? {
-        return downloadsDir.findFile(getSourceDirName(source), true)
+    fun findSourceDir(): UniFile? {
+        return downloadsDir.findFile(getSourceDirName(), true)
     }
 
     /**
@@ -81,8 +83,8 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga to query.
      * @param source the source of the manga.
      */
-    fun findMangaDir(manga: Manga, source: Source): UniFile? {
-        val sourceDir = findSourceDir(source)
+    fun findMangaDir(manga: Manga): UniFile? {
+        val sourceDir = findSourceDir()
         return sourceDir?.findFile(getMangaDirName(manga), true)
     }
 
@@ -93,19 +95,8 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga of the chapter.
      * @param source the source of the chapter.
      */
-    fun findChapterDir(chapter: Chapter, manga: Manga, source: Source): UniFile? {
-        val mangaDir = findMangaDir(manga, source)
-        /*   return if (chapter.isMergedChapter()) {
-               mangaDir?.findFile(getJ2kChapterName(chapter))
-           } else {
-               var dir =
-                   getValidChapterDirNames(chapter).mapNotNull { mangaDir?.findFile(it) }.firstOrNull()
-               if (dir == null) {
-                   dir = mangaDir?.listFiles()
-                       ?.find { it.name != null && it.name!!.endsWith(chapter.mangadex_chapter_id) }
-               }
-               dir
-           }*/
+    fun findChapterDir(chapter: Chapter, manga: Manga): UniFile? {
+        val mangaDir = findMangaDir(manga)
         return getValidChapterDirNames(chapter).asSequence()
             .mapNotNull { mangaDir?.findFile(it, true) ?: mangaDir?.findFile("$it.cbz", true) }
             .firstOrNull()
@@ -118,8 +109,8 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga of the chapter.
      * @param source the source of the chapter.
      */
-    fun findChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
-        val mangaDir = findMangaDir(manga, source) ?: return emptyList()
+    fun findChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
+        val mangaDir = findMangaDir(manga) ?: return emptyList()
 
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
         val oldIdHashSet = chapters.mapNotNull { it.old_mangadex_id }.toHashSet()
@@ -158,9 +149,8 @@ class DownloadProvider(private val context: Context) {
     fun findUnmatchedChapterDirs(
         chapters: List<Chapter>,
         manga: Manga,
-        source: Source,
     ): List<UniFile> {
-        val mangaDir = findMangaDir(manga, source) ?: return emptyList()
+        val mangaDir = findMangaDir(manga) ?: return emptyList()
         val idHashSet = chapters.map { it.mangadex_chapter_id }.toHashSet()
         val chapterNameHashSet = chapters.map { it.name }.toHashSet()
         val scanalatorNameHashSet = chapters.map { getJ2kChapterName(it) }.toHashSet()
@@ -188,10 +178,8 @@ class DownloadProvider(private val context: Context) {
         }
     }
 
-    fun renameMangaFolder(from: String, to: String, sourceId: Long) {
-        val sourceManager by injectLazy<SourceManager>()
-        val source = sourceManager.get(sourceId) ?: return
-        val sourceDir = findSourceDir(source)
+    fun renameMangaFolder(from: String, to: String) {
+        val sourceDir = findSourceDir()
         val mangaDir = sourceDir?.findFile(DiskUtil.buildValidFilename(from))
         mangaDir?.renameTo(to)
     }
@@ -203,8 +191,8 @@ class DownloadProvider(private val context: Context) {
      * @param manga the manga of the chapter.
      * @param source the source of the chapter.
      */
-    fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga, source: Source): List<UniFile> {
-        val mangaDir = findMangaDir(manga, source) ?: return emptyList()
+    fun findTempChapterDirs(chapters: List<Chapter>, manga: Manga): List<UniFile> {
+        val mangaDir = findMangaDir(manga) ?: return emptyList()
         return chapters.mapNotNull { mangaDir.findFile("${getChapterDirName(it)}${Downloader.TMP_DIR_SUFFIX}") }
     }
 
@@ -213,7 +201,7 @@ class DownloadProvider(private val context: Context) {
      *
      * @param source the source to query.
      */
-    fun getSourceDirName(source: Source): String {
+    fun getSourceDirName(): String {
         return "$source (EN)"
     }
 

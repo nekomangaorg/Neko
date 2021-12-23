@@ -80,7 +80,7 @@ open class MangaImpl : Manga {
             title = other.title
             val db: DownloadManager by injectLazy()
             val provider = DownloadProvider(db.context)
-            provider.renameMangaFolder(oldTitle, title, source)
+            provider.renameMangaFolder(oldTitle, title)
         }
         super.copyFrom(other)
     }
