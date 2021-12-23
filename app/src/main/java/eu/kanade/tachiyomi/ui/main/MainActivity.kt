@@ -88,6 +88,7 @@ import eu.kanade.tachiyomi.util.view.blurBehindWindow
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.getItemView
 import eu.kanade.tachiyomi.util.view.snack
+import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.EndAnimatorListener
@@ -520,11 +521,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
                     getString(R.string.visit_recents_for_download_queue)
-                ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary)).outerCircleAlpha(0.95f)
+                ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary))
+                    .outerCircleAlpha(0.95f)
                     .titleTextSize(
                         20
                     )
-                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary)).descriptionTextSize(16)
+                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary))
+                    .descriptionTextSize(16)
                     .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
                     .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
                     .targetCircleColor(android.R.color.white)
