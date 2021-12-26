@@ -12,8 +12,6 @@ import eu.kanade.tachiyomi.util.lang.chop
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.notificationManager
 import java.io.File
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class RestoreHelper(val context: Context) {
 
@@ -102,7 +100,7 @@ class RestoreHelper(val context: Context) {
         totalAmount: Int,
         cancelled: Int,
         errors: List<String>,
-        trackingErrors: List<String>,
+        trackingErrorsInitial: List<String>,
     ) {
         val content = mutableListOf<String>()
         if (categoriesAmount > 0) {
@@ -141,7 +139,7 @@ class RestoreHelper(val context: Context) {
             )
         }
 
-        val trackingErrors = trackingErrors.distinct()
+        val trackingErrors = trackingErrorsInitial.distinct()
         if (trackingErrors.isNotEmpty()) {
             val trackingErrorsString = trackingErrors.distinct().joinToString("\n")
             content.add(trackingErrorsString)
@@ -160,12 +158,12 @@ class RestoreHelper(val context: Context) {
                 .setSmallIcon(R.drawable.ic_neko_notification)
                 .setColor(ContextCompat.getColor(context, R.color.new_neko_accent))
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
-        if (errors.isNotEmpty() && !path.isNullOrEmpty() && !file.isNullOrEmpty()) {
+        if (!path.isNullOrEmpty() && !file.isNullOrEmpty()) {
             resultNotification.addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(
                     R.string
-                        .view_all_errors
+                        .view_log
                 ),
                 getErrorLogIntent(path, file)
             )
@@ -177,11 +175,14 @@ class RestoreHelper(val context: Context) {
     /**
      * Write errors to error log
      */
-    fun writeErrorLog(errors: List<String>, skippedAmount: Int, skippedTitles: List<String>): File {
+    fun writeErrorLog(
+        errors: List<String>,
+        skippedAmount: Int,
+        skippedTitles: List<String>,
+    ): File? {
         try {
             if (errors.isNotEmpty() || skippedTitles.isNotEmpty()) {
                 val destFile = File(context.externalCacheDir, "neko_restore.log")
-                val sdf = SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS", Locale.getDefault())
 
                 destFile.bufferedWriter().use { out ->
                     if (skippedAmount > 0) {
@@ -202,6 +203,6 @@ class RestoreHelper(val context: Context) {
         } catch (e: Exception) {
             XLog.e(e)
         }
-        return File("")
+        return null
     }
 }

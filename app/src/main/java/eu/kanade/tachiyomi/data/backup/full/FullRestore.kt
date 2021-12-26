@@ -82,8 +82,8 @@ class FullRestore(val context: Context, val job: Job?) {
 
         val logFile = restoreHelper.writeErrorLog(errors, skippedAmount, skippedTitles)
         restoreHelper.showResultNotification(
-            logFile.parent,
-            logFile.name,
+            logFile?.parent,
+            logFile?.name,
             categoriesAmount,
             restoreProgress,
             restoreAmount,
