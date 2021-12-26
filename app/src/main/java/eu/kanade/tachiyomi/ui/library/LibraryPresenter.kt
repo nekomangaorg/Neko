@@ -1024,7 +1024,8 @@ class LibraryPresenter(
         getLibrary()
     }
 
-    private fun getDynamicCategoryName(category: Category): String = groupType.toString()
+    private fun getDynamicCategoryName(category: Category): String =
+        groupType.toString() + dynamicCategorySplitter + category.name
 
     fun toggleAllCategoryVisibility() {
         if (groupType == BY_DEFAULT) {
