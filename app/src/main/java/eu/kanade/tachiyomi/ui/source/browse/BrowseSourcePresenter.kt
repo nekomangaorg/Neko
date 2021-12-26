@@ -209,6 +209,9 @@ open class BrowseSourcePresenter(
                         view.goDirectlyForDeepLink(mangaList.first().manga)
                     } else {
                         view.onAddPage(page, mangaList)
+                        if (mangaList.isEmpty()) {
+                            requestNext()
+                        }
                     }
                 },
                 { _, error ->
