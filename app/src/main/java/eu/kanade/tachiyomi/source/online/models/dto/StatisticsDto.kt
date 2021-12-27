@@ -15,5 +15,5 @@ data class StatisticsDto(
 
 @Serializable
 data class RatingDto(
-    val average: Double,
+    val average: Double?,
 )
