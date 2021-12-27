@@ -119,4 +119,10 @@ class MangaDexLoginHelper {
         }
         return login(username, password)
     }
+
+    suspend fun reAuthIfNeeded() {
+        if (!isAuthenticated() && !refreshToken()) {
+            login()
+        }
+    }
 }

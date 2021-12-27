@@ -27,6 +27,7 @@ import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
+import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -70,6 +71,7 @@ class LibraryUpdateService(
     val preferences: PreferencesHelper = Injekt.get(),
     val downloadManager: DownloadManager = Injekt.get(),
     val trackManager: TrackManager = Injekt.get(),
+    val mangaDexLoginHelper: MangaDexLoginHelper = Injekt.get(),
 ) : Service() {
 
     /**
@@ -552,13 +554,15 @@ class LibraryUpdateService(
     }
 
     suspend fun updateReadingStatus(mangaList: List<LibraryManga>?) {
+        XLog.d("Attempting to update reading statuses")
         if (mangaList.isNullOrEmpty()) return
         if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
             runCatching {
+                mangaDexLoginHelper.reAuthIfNeeded()
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {
                     XLog.d("Updating follow statuses")
-                    mangaList!!.map { libraryManga ->
+                    mangaList.map { libraryManga ->
                         runCatching {
                             db.getTracks(libraryManga).executeOnIO()
                                 .toMutableList()
