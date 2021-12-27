@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 135
-    const val versionName = "2.7.2"
+    const val versionCode = 136
+    const val versionName = "2.7.3"
 }
 
 plugins {
