@@ -1,17 +1,15 @@
 ## 🥳 New
-Lime Time Theme (@Jays2Kings)
-Compress to cbz after downloading (@Seishirou101)
+Rating will now show again in MangaDex (once they fix the api)
+Related Manga from MangaDex now show in the similar page
 ## 🏗️ Changes
-Use official check if a12 device supports dynamic themes (@Jays2Kings)
-Bottom Nav animation is fade in but not fade out (@Jays2Kings)
-Updated mapping database for mal/anilist (@Goldbattle)
+Update chapter api logic to correspond to MangaDex api changes
 ## 🐜 Fixes
-Reading webtoon style no longer shows when default reading mode is webtoon (@Jays2Kings)
-Incognito turning off when entering series from reader (@Jays2Kings)
-Tako dark color (@Jays2Kings)
-Saving split images (@Jays2Kings)
-Split in webtoons when gif format is used (@Jays2Kings)
-Manga Covers on tablets (@Jays2Kings)
-Missing back/forward buttons on webview (@Jays2Kings)
+H badge shows on top of cover now
+Download notification was old green
+Browse items fail to load when having the first 20 in library, and hide library enabled
+Log file button didn't show on restore when only skipped titles and no errors
+Collapsing/Expanding a dynamic category was doing the action on all the categories
+Changing download folder was not working until app was restarted
+reauthorize login before attempting to get reading statuses on library update
+non visible error on aggregate endpoint
 ## 🛠️ Other
-update libraries

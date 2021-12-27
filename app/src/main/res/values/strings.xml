@@ -965,6 +965,7 @@
     <string name="unknown_error">Unknown error</string>
     <string name="unpin">Unpin</string>
     <string name="use_default">Use default</string>
+    <string name="view_log">View log</string>
     <string name="view_all_errors">View all errors</string>
     <string name="view_chapters">View chapters</string>
     <string name="wifi">Wi-Fi</string>
@@ -1056,6 +1057,7 @@
 
     <!-- Similar -->
     <string name="similar_type">Similar</string>
+    <string name="related_type">Related</string>
     <string name="similar">Similar manga</string>
     <string name="similar_settings">Similar Manga Settings</string>
     <string name="similar_screen_summary_message">

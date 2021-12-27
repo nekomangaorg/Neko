@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.getOrElse
+import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
@@ -20,6 +21,7 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.manga.MangaMappings
+import eu.kanade.tachiyomi.util.system.withIOContext
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.encodeToString
@@ -31,6 +33,28 @@ class SimilarHandler {
     private val db: DatabaseHelper by injectLazy()
     private val mappings: MangaMappings by injectLazy()
     private val preferencesHelper: PreferencesHelper by injectLazy()
+
+    suspend fun fetchRelated(dexId: String): List<SManga> {
+        val related = withIOContext {
+            network.service.relatedManga(dexId)
+                .onError {
+                    this.log("trying to get related manga")
+                }
+                .onException {
+                    this.log("trying to get related manga")
+                }
+                .getOrNull()
+        }
+        related ?: return emptyList()
+
+        val mangaIdList = related.data.mapNotNull { it.relationships.firstOrNull() }.map { it.id }
+
+        val mangaList = similarGetMangadexMangaList(mangaIdList, false)
+
+        val thumbQuality = preferencesHelper.thumbnailQuality()
+
+        return mangaList.data.map { it.toBasicManga(thumbQuality) }
+    }
 
     /**
      * fetch our similar mangaList
@@ -354,11 +378,11 @@ class SimilarHandler {
      * this will get the manga objects with cover_art for all the specified ids
      */
     private suspend fun similarGetMangadexMangaList(
-        mangaIds: List<String>,
+        mangaIds: List<String>, strictMatch: Boolean = true,
     ): MangaListDto {
         val queryMap = mutableMapOf(
             "limit" to mangaIds.size,
-            "ids[]" to mangaIds
+            "ids[]" to mangaIds,
         )
         val responseBody = network.service.search(ProxyRetrofitQueryMap(queryMap)).onError {
             val type = "searching for manga in similar handler"
@@ -370,7 +394,7 @@ class SimilarHandler {
             this.throws(type)
         }.getOrThrow()
 
-        if (responseBody.data.size != mangaIds.size) {
+        if (strictMatch && responseBody.data.size != mangaIds.size) {
             XLog.e("manga returned doesn't match number of manga expected")
             throw Exception("Unable to complete response ${responseBody.data.size} of ${mangaIds.size} returned")
         }

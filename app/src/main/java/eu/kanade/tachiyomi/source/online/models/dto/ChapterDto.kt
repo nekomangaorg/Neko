@@ -3,18 +3,18 @@ package eu.kanade.tachiyomi.source.online.models.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class ChapterDto(
+    val result: String,
+    val data: ChapterDataDto,
+)
+
+@Serializable
 data class ChapterListDto(
     val limit: Int,
     val offset: Int,
     val total: Int,
     val result: String,
     val data: List<ChapterDataDto>,
-)
-
-@Serializable
-data class ChapterDto(
-    val result: String,
-    val data: ChapterDataDto,
 )
 
 @Serializable
@@ -32,10 +32,7 @@ data class ChapterAttributesDto(
     val chapter: String?,
     val translatedLanguage: String,
     val publishAt: String,
-    val data: List<String>,
-    val dataSaver: List<String>,
     val externalUrl: String? = null,
-    val hash: String,
 )
 
 @Serializable

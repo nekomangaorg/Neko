@@ -4,6 +4,7 @@ import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
@@ -124,7 +125,7 @@ data class CoverAttributesDto(
 @Serializable
 data class AggregateDto(
     val result: String,
-    val volumes: Map<String, AggregateVolume>,
+    val volumes: JsonElement,
 )
 
 @Serializable
@@ -140,8 +141,15 @@ data class AggregateChapter(
     val count: String,
 )
 
+fun JsonElement.asMdAggregateVolumeMap(): Map<String, AggregateVolume> {
+    return runCatching {
+        (this as JsonObject).map { it.key to (it.value.jsonObject as AggregateVolume) }.toMap()
+    }.getOrElse { emptyMap() }
+}
+
 fun JsonElement.asMdMap(): Map<String, String> {
     return runCatching {
-        (this as JsonObject).map { it.key to (it.value.jsonPrimitive.contentOrNull ?: "") }.toMap()
+        (this as JsonObject).map { it.key to (it.value.jsonPrimitive.contentOrNull ?: "") }
+            .toMap()
     }.getOrElse { emptyMap() }
 }

@@ -41,7 +41,8 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             category?.isDynamic == false
         }
         binding.categoryTitle.setOnClickListener {
-            val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+            val category =
+                (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
             if (category?.isHidden == false && adapter.mode == SelectableAdapter.Mode.MULTI) {
                 selectAll()
             } else {
@@ -93,10 +94,16 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         val category = item.category
 
         binding.categoryTitle.text =
-            if (category.isAlone && !category.isDynamic) { "" } else { category.name } +
-            if (adapter.showNumber) {
-                " (${adapter.itemsPerCategory[item.catId]})"
-            } else { "" }
+            if (category.isAlone && !category.isDynamic) {
+                ""
+            } else {
+                category.name
+            } +
+                if (adapter.showNumber) {
+                    " (${adapter.itemsPerCategory[item.catId]})"
+                } else {
+                    ""
+                }
         binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
 
         val isAscending = category.isAscending()
@@ -196,7 +203,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         @DrawableRes defaultDrawableRes: Int = R.drawable.ic_check_24dp,
     ): Int {
         sortingMode ?: return defaultDrawableRes
-        return when (val sortMode = LibrarySort.valueOf(sortingMode)) {
+        return when (LibrarySort.valueOf(sortingMode)) {
             LibrarySort.DragAndDrop -> defaultDrawableRes
             else -> {
                 if (isAscending) {
