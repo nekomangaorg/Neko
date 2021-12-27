@@ -363,6 +363,7 @@ class LibraryUpdateService(
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
+        mangaDexLoginHelper.reAuthIfNeeded()
         while (currentCount < mangaToUpdateMap[source]!!.size) {
 
             val manga = mangaToUpdateMap[source]!![currentCount]
@@ -558,7 +559,6 @@ class LibraryUpdateService(
         if (mangaList.isNullOrEmpty()) return
         if (sourceManager.getMangadex().isLogged() && job?.isCancelled == false) {
             runCatching {
-                mangaDexLoginHelper.reAuthIfNeeded()
                 val readingStatus = statusHandler.fetchReadingStatusForAllManga()
                 if (readingStatus.isNotEmpty()) {
                     XLog.d("Updating follow statuses")
