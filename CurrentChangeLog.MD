@@ -1,5 +1,6 @@
 ## 🥳 New
 ## 🏗️ Changes
+Update chapter api logic to correspond to MangaDex api changes
 ## 🐜 Fixes
 H badge shows on top of cover now
 Download notification was old green

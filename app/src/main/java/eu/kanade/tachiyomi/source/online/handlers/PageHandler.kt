@@ -13,7 +13,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
-import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
@@ -35,16 +35,20 @@ class PageHandler {
             XLog.d("fetching page list")
 
             try {
-                val response = network.service.viewChapter(chapter.mangadex_chapter_id)
+                val chapterAttributesDto = network.service.viewChapter(chapter.mangadex_chapter_id)
                     .onError {
                         this.log("trying to fetch page list")
                         throw Exception("error returned from chapterResponse")
                     }.onException {
                         this.log("trying to fetch page list")
                         throw Exception("error returned from chapterResponse")
-                    }.getOrThrow()
+                    }.getOrThrow().data.attributes
+                
+                val externalUrl = chapterAttributesDto.externalUrl
+                val currentDate = System.currentTimeMillis()
+                val chapterDate = MdUtil.parseDate(chapterAttributesDto.publishAt)
+                val chapterDateNewer = chapterDate - currentDate > 0
 
-                val externalUrl = response.data.attributes.externalUrl
                 if (externalUrl != null) {
                     when {
                         "mangaplus".equals(chapter.scanlator, true) -> {
@@ -54,7 +58,7 @@ class PageHandler {
                             return@withContext comikeyHandler.fetchPageList(externalUrl)
                         }*/
                         "bilibili comics".equals(chapter.scanlator, true) -> {
-                            if (response.data.attributes.data.isEmpty()) {
+                            if (chapterDateNewer) {
                                 return@withContext bilibiliHandler.fetchPageList(externalUrl)
                             }
                         }
@@ -62,7 +66,7 @@ class PageHandler {
                     }
                 }
 
-                if (response.data.attributes.data.isEmpty()) {
+                if (chapterDateNewer) {
                     throw Exception("This chapter has no pages, it might not be release yet, try refreshing")
                 }
 
@@ -86,7 +90,7 @@ class PageHandler {
 
 
                 return@withContext pageListParse(
-                    response,
+                    chapter.mangadex_chapter_id,
                     atHomeDto,
                     preferences.dataSaver()
                 )
@@ -98,23 +102,23 @@ class PageHandler {
     }
 
     fun pageListParse(
-        chapterDto: ChapterDto,
+        chapterId: String,
         atHomeDto: AtHomeDto,
         dataSaver: Boolean,
     ): List<Page> {
-        val hash = chapterDto.data.attributes.hash
+        val hash = atHomeDto.chapter.hash
         val pageArray = if (dataSaver) {
-            chapterDto.data.attributes.dataSaver.map { "/data-saver/$hash/$it" }
+            atHomeDto.chapter.dataSaver.map { "/data-saver/$hash/$it" }
         } else {
-            chapterDto.data.attributes.data.map { "/data/$hash/$it" }
+            atHomeDto.chapter.data.map { "/data/$hash/$it" }
         }
         val now = Date().time
 
         val pages = pageArray.mapIndexed { pos, imgUrl ->
-            Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterDto.data.id)
+            Page(pos + 1, atHomeDto.baseUrl, imgUrl, chapterId)
         }
 
-        imageHandler.updateTokenTracker(chapterDto.data.id, now)
+        imageHandler.updateTokenTracker(chapterId, now)
 
         return pages
     }
