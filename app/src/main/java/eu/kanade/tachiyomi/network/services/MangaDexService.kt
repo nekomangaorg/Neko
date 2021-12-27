@@ -11,7 +11,9 @@ import eu.kanade.tachiyomi.source.online.models.dto.LegacyIdDto
 import eu.kanade.tachiyomi.source.online.models.dto.LegacyMappingDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.RelationListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
+import eu.kanade.tachiyomi.source.online.models.dto.StatisticResponseDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import retrofit2.http.Body
@@ -35,6 +37,14 @@ interface MangaDexService {
         @Path("id") mangaId: String,
         @Query(value = "translatedLanguage[]") translatedLanguages: List<String>,
     ): ApiResponse<AggregateDto>
+
+    @GET(MdApi.statistics)
+    suspend fun mangaStatistics(
+        @Query(value = "manga[]") mangaId: String,
+    ): ApiResponse<StatisticResponseDto>
+
+    @GET("${MdApi.manga}/{id}/relations?includes[]=${MdConstants.Types.manga}")
+    suspend fun relatedManga(@Path("id") id: String): ApiResponse<RelationListDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.manga}/{id}/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc")

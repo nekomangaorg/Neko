@@ -1,4 +1,5 @@
 ## 🥳 New
+Rating will now show again in MangaDex (once they fix the api)
 ## 🏗️ Changes
 Update chapter api logic to correspond to MangaDex api changes
 ## 🐜 Fixes
