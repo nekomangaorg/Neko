@@ -1,5 +1,6 @@
 ## 🥳 New
 Rating will now show again in MangaDex (once they fix the api)
+Related Manga from MangaDex now show in the similar page
 ## 🏗️ Changes
 Update chapter api logic to correspond to MangaDex api changes
 ## 🐜 Fixes
@@ -10,4 +11,5 @@ Log file button didn't show on restore when only skipped titles and no errors
 Collapsing/Expanding a dynamic category was doing the action on all the categories
 Changing download folder was not working until app was restarted
 reauthorize login before attempting to get reading statuses on library update
+non visible error on aggregate endpoint
 ## 🛠️ Other

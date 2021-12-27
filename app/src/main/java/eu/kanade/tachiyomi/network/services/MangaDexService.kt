@@ -43,7 +43,7 @@ interface MangaDexService {
         @Query(value = "manga[]") mangaId: String,
     ): ApiResponse<StatisticResponseDto>
 
-    @GET("${MdApi.manga}/{id}/relations?includes[]=${MdConstants.Types.manga}")
+    @GET("${MdApi.manga}/{id}/relation")
     suspend fun relatedManga(@Path("id") id: String): ApiResponse<RelationListDto>
 
     @Headers("Cache-Control: no-cache")

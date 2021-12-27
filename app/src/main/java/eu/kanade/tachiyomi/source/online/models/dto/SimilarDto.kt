@@ -3,6 +3,28 @@ package eu.kanade.tachiyomi.source.online.models.dto
 import kotlinx.serialization.Serializable
 
 @Serializable
+data class RelationListDto(
+    val response: String,
+    val data: List<RelationDto>,
+)
+
+@Serializable
+data class RelationDto(
+    val attributes: RelationAttributesDto,
+    val relationships: List<RelationMangaDto>,
+)
+
+@Serializable
+data class RelationMangaDto(
+    val id: String,
+)
+
+@Serializable
+data class RelationAttributesDto(
+    val relation: String,
+)
+
+@Serializable
 data class SimilarMangaDatabaseDto(
     var similarApi: SimilarMangaDto? = null,
     var similarMdexApi: MangaListDto? = null,
@@ -28,7 +50,6 @@ data class SimilarMangaMatchListDto(
     val contentRating: String,
     val score: Double,
 )
-
 
 @Serializable
 data class AnilistMangaRecommendationsDto(
@@ -66,7 +87,6 @@ data class AnilistMangaSimilarMediaRecommend(
     val id: Long,
     val format: String,
 )
-
 
 @Serializable
 data class MalMangaRecommendationsDto(

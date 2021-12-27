@@ -32,6 +32,15 @@ class SimilarRepository {
             val dexId = MdUtil.getMangaId(manga.url)
             val similarDbEntry = db.getSimilar(dexId).executeAsBlocking()
 
+            val related = async {
+                kotlin.runCatching {
+                    logTimeTaken(" Related Rec:") {
+                        createGroup(R.string.related_type,
+                            similarHandler.fetchRelated(dexId))
+                    }
+                }.getOrNull()
+            }
+
             val similar = async {
                 runCatching {
                     logTimeTaken("Similar Recs:") {
@@ -63,7 +72,7 @@ class SimilarRepository {
                 }.getOrNull()
             }
 
-            listOfNotNull(similar.await(), anilist.await(), mal.await())
+            listOfNotNull(related.await(), similar.await(), anilist.await(), mal.await())
 
         }
     }
