@@ -381,6 +381,13 @@ class MangaDetailsPresenter(
                 }
                 return@launch
             }
+            /*  if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+                  withContext(Dispatchers.Main) {
+                      controller.showError("Can't refresh this is a V3 manga entry")
+                  }
+                  return@launch
+              }*/
+
             XLog.d("begin processing chapters and manga refresh")
 
             val deferredManga = async {
@@ -995,7 +1002,7 @@ class MangaDetailsPresenter(
     }
 
     fun syncChapterReadStatus() {
-        if (preferences.readingSync().not()) return
+        if (preferences.readingSync().not() || source.isLogged().not()) return
 
         scope.launch {
             statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url)).collect { chapterIds ->
