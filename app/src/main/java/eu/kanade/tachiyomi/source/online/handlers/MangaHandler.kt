@@ -69,11 +69,13 @@ class MangaHandler {
             logTimeTaken("Manga Detail for  ${manga.title}") {
                 val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
                     .onError {
-                        val type = "trying to view manga ${manga.title}"
+                        val type =
+                            "trying to view manga ${manga.title} with id: ${MdUtil.getMangaId(manga.url)}"
                         this.log(type)
                         this.throws(type)
                     }.onException {
-                        val type = "trying to view manga ${manga.title}"
+                        val type =
+                            "trying to view manga ${manga.title} with id: ${MdUtil.getMangaId(manga.url)}"
                         this.log(type)
                         this.throws(type)
                     }.getOrThrow()
