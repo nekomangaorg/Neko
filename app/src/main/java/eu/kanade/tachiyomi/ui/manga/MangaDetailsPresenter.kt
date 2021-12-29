@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.app.Application
 import android.graphics.Bitmap
 import android.os.Environment
+import androidx.core.text.isDigitsOnly
 import coil.Coil
 import coil.imageLoader
 import coil.memory.MemoryCache
@@ -379,14 +380,16 @@ class MangaDetailsPresenter(
                 withContext(Dispatchers.Main) {
                     controller.showError("MangaDex appears to be down, or under heavy load")
                 }
+                isLoading = false
                 return@launch
             }
-            /*  if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
-                  withContext(Dispatchers.Main) {
-                      controller.showError("Can't refresh this is a V3 manga entry")
-                  }
-                  return@launch
-              }*/
+            if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+                withContext(Dispatchers.Main) {
+                    controller.showError("Can't refresh this is a V3 manga entry")
+                }
+                isLoading = false
+                return@launch
+            }
 
             XLog.d("begin processing chapters and manga refresh")
 

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track.mdlist
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Color
+import androidx.core.text.isDigitsOnly
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -100,12 +101,20 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun completedStatus() = FollowStatus.COMPLETED.int
 
     override suspend fun bind(track: Track): Track {
+        if (MdUtil.getMangaId(track.tracking_url).isDigitsOnly()) {
+            XLog.i("v3 tracking ${track.tracking_url} skipping bind")
+            return track
+        }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
         return update(track)
     }
 
     override suspend fun refresh(track: Track): Track {
+        if (MdUtil.getMangaId(track.tracking_url).isDigitsOnly()) {
+            XLog.i("v3 tracking ${track.tracking_url} skipping bind")
+            return track
+        }
         val remoteTrack = mdex.fetchTrackingInfo(track.tracking_url)
         track.copyPersonalFrom(remoteTrack)
         track.total_chapters = remoteTrack.total_chapters

@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
+import androidx.core.text.isDigitsOnly
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
@@ -90,16 +91,19 @@ class StatusHandler {
     }
 
     suspend fun getReadChapterIds(mangaId: String) = flow<Set<String>> {
-
-        val response = authService.readChaptersForManga(mangaId)
-        response.suspendOnError {
-            this.log("trying to get chapterIds")
+        if (mangaId.isDigitsOnly()) {
             emit(emptySet())
-        }.suspendOnException {
-            this.log("trying to get chapterIds")
-            emit(emptySet())
-        }.suspendOnSuccess {
-            emit(this.data.data.toSet())
+        } else {
+            val response = authService.readChaptersForManga(mangaId)
+            response.suspendOnError {
+                this.log("trying to get chapterIds")
+                emit(emptySet())
+            }.suspendOnException {
+                this.log("trying to get chapterIds")
+                emit(emptySet())
+            }.suspendOnSuccess {
+                emit(this.data.data.toSet())
+            }
         }
     }.flowOn(Dispatchers.IO)
 }
