@@ -6,10 +6,10 @@ import com.skydoves.sandwich.ApiResponse
 fun ApiResponse<*>.log(type: String) {
     when (this) {
         is ApiResponse.Failure.Exception -> {
-            XLog.e("Exception $type ${this.message}", this.exception)
+            XLog.enableStackTrace(10).e("Exception $type ${this.message}", this.exception)
         }
         is ApiResponse.Failure.Error -> {
-            XLog.e("error $type ${this.errorBody}")
+            XLog.e("error $type ${this.errorBody?.string()}")
             XLog.e("error response code ${this.statusCode.code}")
         }
         else -> {
