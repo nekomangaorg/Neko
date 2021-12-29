@@ -58,7 +58,7 @@ class V5MigrationService(
             // Update progress bar
             progressNotification(manga.title, index + 1, totalManga)
 
-            // Get the old id and check if it is a number
+            // Get the id and check if it is a number
             val oldMangaId = MdUtil.getMangaId(manga.url)
             val isNumericId = oldMangaId.isDigitsOnly()
 
@@ -103,15 +103,16 @@ class V5MigrationService(
             }
 
             // Now loop through the chapters for this manga and update them
-            val chapters = db.getChapters(manga).executeAsBlocking()
             val chapterErrors = mutableListOf<String>()
             if (!mangaErroredOut) {
+                val chapters = db.getChapters(manga).executeAsBlocking()
+
                 val chapterMap = chapters.filter { it.isMergedChapter().not() }
-                    .filter { it.mangadex_chapter_id.isDigitsOnly() }
+                    .filter { it.mangadex_chapter_id.isDigitsOnly() && it.mangadex_chapter_id.isNotBlank() }
                     .map { it.mangadex_chapter_id.toInt() to it }
                     .toMap()
                 val chapterChunks = chapters.filter { it.isMergedChapter().not() }
-                    .filter { it.mangadex_chapter_id.isDigitsOnly() }
+                    .filter { it.mangadex_chapter_id.isDigitsOnly() && it.mangadex_chapter_id.isNotBlank() }
                     .map { it.mangadex_chapter_id.toInt() }
                     .chunked(100)
 
