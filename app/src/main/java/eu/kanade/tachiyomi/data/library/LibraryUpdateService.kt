@@ -6,6 +6,7 @@ import android.content.Intent
 import android.os.Build
 import android.os.IBinder
 import android.os.PowerManager
+import androidx.core.text.isDigitsOnly
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -363,13 +364,18 @@ class LibraryUpdateService(
         if (mangaToUpdateMap[source] == null) return false
         var currentCount = 0
         var hasDownloads = false
-        mangaDexLoginHelper.reAuthIfNeeded()
+        if (sourceManager.getMangadex().isLogged()) {
+            mangaDexLoginHelper.reAuthIfNeeded()
+        }
+
         while (currentCount < mangaToUpdateMap[source]!!.size) {
 
             val manga = mangaToUpdateMap[source]!![currentCount]
             val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
             logTimeTaken("library manga ${manga.title}") {
-                if (updateMangaChapters(manga, this.count.andIncrement, shouldDownload)) {
+                if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
+                    XLog.i("Manga : ${manga.title} is not migrated to v5 skipping")
+                } else if (updateMangaChapters(manga, this.count.andIncrement, shouldDownload)) {
                     hasDownloads = true
                 }
             }
@@ -393,6 +399,8 @@ class LibraryUpdateService(
             if (job?.isCancelled == true) {
                 return@runCatching false
             }
+
+
 
             notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
 
@@ -483,7 +491,7 @@ class LibraryUpdateService(
                         downloadManager.deleteChapters(removedChapters, manga, source)
                     }
                 }
-                if (preferences.readingSync()) {
+                if (preferences.readingSync() && source.isLogged()) {
                     val dbChapters = db.getChapters(manga).executeAsBlocking()
                     statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url))
                         .collect { chapterIds ->
