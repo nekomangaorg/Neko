@@ -1,15 +1,6 @@
-## 🥳 New
-Rating will now show again in MangaDex (once they fix the api)
-Related Manga from MangaDex now show in the similar page
 ## 🏗️ Changes
-Update chapter api logic to correspond to MangaDex api changes
+Update chapter api logic to correspond to MangaDex api
+don't try to update things that are v3 entries
 ## 🐜 Fixes
-H badge shows on top of cover now
-Download notification was old green
-Browse items fail to load when having the first 20 in library, and hide library enabled
-Log file button didn't show on restore when only skipped titles and no errors
-Collapsing/Expanding a dynamic category was doing the action on all the categories
-Changing download folder was not working until app was restarted
-reauthorize login before attempting to get reading statuses on library update
-non visible error on aggregate endpoint
-## 🛠️ Other
+small bug fixes related to v5 migration
+downloaded chapters not marked downloaded on recents view
