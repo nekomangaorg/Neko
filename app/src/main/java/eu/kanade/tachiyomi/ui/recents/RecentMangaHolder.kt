@@ -25,8 +25,12 @@ class RecentMangaHolder(
     private val binding = RecentMangaItemBinding.bind(view)
 
     init {
-        binding.cardLayout.setOnClickListener { adapter.delegate.onCoverClick(flexibleAdapterPosition) }
-        binding.removeHistory.setOnClickListener { adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition) }
+        binding.cardLayout.setOnClickListener {
+            adapter.delegate.onCoverClick(flexibleAdapterPosition)
+        }
+        binding.removeHistory.setOnClickListener {
+            adapter.delegate.onRemoveHistoryClicked(flexibleAdapterPosition)
+        }
         updateCards()
     }
 
@@ -152,6 +156,11 @@ class RecentMangaHolder(
         if ((itemView.context as? Activity)?.isDestroyed != true) {
             binding.coverThumbnail.loadManga(item.mch.manga)
         }
+        notifyStatus(
+            if (adapter.isSelected(flexibleAdapterPosition)) Download.State.CHECKED else item.status,
+            item.progress,
+            item.chapter.read
+        )
 
         resetFrontView()
     }
