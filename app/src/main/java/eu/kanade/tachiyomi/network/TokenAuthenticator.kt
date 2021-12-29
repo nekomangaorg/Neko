@@ -14,9 +14,10 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
     Authenticator {
 
     private val mutext = Mutex()
+    val log = XLog.tag("||Neko-TokenAuthenticator")
 
     override fun authenticate(route: Route?, response: Response): Request? {
-        XLog.i("Detected Auth error ${response.code} on ${response.request.url}")
+        log.i("Detected Auth error ${response.code} on ${response.request.url}")
         val token = refreshToken(loginHelper)
         return if (token.isEmpty()) {
             null
@@ -32,17 +33,17 @@ class TokenAuthenticator(val loginHelper: MangaDexLoginHelper) :
                 val checkToken =
                     loginHelper.isAuthenticated()
                 if (checkToken) {
-                    XLog.i("Token is valid, other thread must have refreshed it")
+                    log.i("Token is valid, other thread must have refreshed it")
                     validated = true
                 }
                 if (validated.not()) {
-                    XLog.i("Token is invalid trying to refresh")
+                    log.i("Token is invalid trying to refresh")
                     validated =
                         loginHelper.refreshToken()
                 }
 
                 if (validated.not()) {
-                    XLog.i("Did not refresh token, trying to login")
+                    log.i("Did not refresh token, trying to login")
                     validated = loginHelper.login()
                 }
                 return@runBlocking when {
