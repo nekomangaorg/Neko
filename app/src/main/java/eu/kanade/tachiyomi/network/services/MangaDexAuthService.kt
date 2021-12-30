@@ -9,7 +9,6 @@ import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
-import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.source.online.models.dto.ResultDto
 import eu.kanade.tachiyomi.source.online.utils.MdApi
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -35,10 +34,6 @@ interface MangaDexAuthService {
     @Headers("Cache-Control: no-cache")
     @GET(MdApi.checkToken)
     suspend fun checkToken(): ApiResponse<CheckTokenDto>
-
-    @Headers("Cache-Control: no-cache")
-    @POST(MdApi.refreshToken)
-    suspend fun refreshToken(@Body request: RefreshTokenDto): ApiResponse<LoginResponseDto>
 
     @Headers("Cache-Control: no-cache")
     @GET("${MdApi.userFollows}?limit=100&includes[]=${MdConstants.Types.coverArt}")
