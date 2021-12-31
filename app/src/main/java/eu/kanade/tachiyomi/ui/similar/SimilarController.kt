@@ -16,6 +16,7 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.android.material.composethemeadapter.MdcTheme
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
@@ -25,6 +26,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.pxToDp
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
+import uy.kohesive.injekt.injectLazy
 
 /**
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
@@ -39,6 +41,8 @@ class SimilarController(bundle: Bundle? = null) :
     )
 
     override var presenter = SimilarPresenter(bundle!!.getLong(BrowseSourceController.MANGA_ID))
+
+    private val preferences: PreferencesHelper by injectLazy()
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.similar)
@@ -78,6 +82,7 @@ class SimilarController(bundle: Bundle? = null) :
                         //show empty view
                     } else {
                         MangaListWithHeader(groupedManga = groupedManga,
+                            shouldOutlineCover = preferences.outlineOnCovers().get(),
                             modifier = Modifier.padding(top = 10.dp)) { manga ->
                             router.pushController(MangaDetailsController(manga,
                                 true).withFadeTransaction())

@@ -8,20 +8,21 @@ import com.skydoves.sandwich.onException
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.network.services.MangaDexService
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 
 class MangaDexLoginHelper {
 
-    val authService: MangaDexAuthService by lazy { Injekt.get<NetworkHelper>().authService }
+    val networkHelper: NetworkHelper by injectLazy()
+    val authService: MangaDexAuthService by lazy { networkHelper.authService }
+    val service: MangaDexService by lazy { networkHelper.service }
     val preferences: PreferencesHelper by injectLazy()
 
     val log = XLog.tag("||LoginHelper")
@@ -59,16 +60,14 @@ class MangaDexLoginHelper {
         }
         log.i("refreshing token")
 
-        val refreshTokenResponse = authService.refreshToken(RefreshTokenDto(refreshToken))
+        val refreshTokenResponse = service.refreshToken(RefreshTokenDto(refreshToken))
             .onError {
                 this.log("trying to refresh token")
             }.onException {
                 this.log("trying to refresh token")
             }
-
         val refreshTokenDto = refreshTokenResponse.getOrNull()
         val result = refreshTokenDto?.result == "ok"
-        log.i("refresh token was succesful : $result")
         if (result) {
             preferences.setTokens(
                 refreshTokenDto!!.token.refresh,
