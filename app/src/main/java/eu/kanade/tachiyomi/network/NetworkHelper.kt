@@ -88,9 +88,14 @@ class NetworkHelper(val context: Context) {
                     val logger: HttpLoggingInterceptor.Logger =
                         HttpLoggingInterceptor.Logger { message ->
                             try {
-                                Gson().fromJson(message, Any::class.java)
-                                XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
-                                    .json(message)
+                                if (message.contains("username") && message.contains("password")) {
+                                    XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
+                                        .d("Not logging request because it contained username and password")
+                                } else {
+                                    Gson().fromJson(message, Any::class.java)
+                                    XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
+                                        .json(message)
+                                }
                             } catch (ex: Exception) {
                                 XLog.tag("||NEKO-NETWORK").disableBorder().disableStackTrace()
                                     .d(message)

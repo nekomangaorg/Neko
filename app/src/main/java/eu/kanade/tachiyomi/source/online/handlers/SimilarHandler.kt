@@ -47,13 +47,21 @@ class SimilarHandler {
         }
         related ?: return emptyList()
 
-        val mangaIdList = related.data.mapNotNull { it.relationships.firstOrNull() }.map { it.id }
+        val mangaIdMap = related.data.mapNotNull {
+            if (it.relationships.isEmpty()) return@mapNotNull null
+            it.relationships.first().id to it.attributes.relation
+        }.toMap()
 
-        val mangaList = similarGetMangadexMangaList(mangaIdList, false)
+        val mangaList = similarGetMangadexMangaList(mangaIdMap.keys.toList(), false)
 
         val thumbQuality = preferencesHelper.thumbnailQuality()
 
-        return mangaList.data.map { it.toBasicManga(thumbQuality) }
+        val list = mangaList.data.map {
+            it.toBasicManga(thumbQuality).apply {
+                this.relationship = mangaIdMap[MdUtil.getMangaId(this.url)]
+            }
+        }
+        return list
     }
 
     /**

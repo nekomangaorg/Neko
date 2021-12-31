@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.toLocalManga
 import kotlinx.coroutines.Dispatchers
@@ -81,7 +82,11 @@ class SimilarRepository {
         return if (manga.isEmpty()) {
             null
         } else {
-            SimilarMangaGroup(id, manga.map { it.toLocalManga(db, mangaDex.id) })
+            SimilarMangaGroup(id, manga.map {
+                it.toLocalManga(db, mangaDex.id).apply {
+                    this.relationship = it.relationship?.replace("_", " ")?.capitalizeWords()
+                }
+            })
         }
     }
 }

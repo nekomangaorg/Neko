@@ -53,6 +53,8 @@ interface SManga : Serializable {
 
     var last_chapter_number: Int?
 
+    var relationship: String?
+
     fun copyFrom(other: SManga) {
         if (other.author != null) {
             author = other.author
