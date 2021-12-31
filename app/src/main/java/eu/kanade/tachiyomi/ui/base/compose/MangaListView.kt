@@ -41,8 +41,8 @@ val montserrat = FontFamily(
 fun MangaTitle(text: String, modifier: Modifier) {
     Text(
         text = text,
-        fontSize = 16.sp, Cha
-            fontFamily = montserrat,
+        fontSize = 16.sp,
+        fontFamily = montserrat,
         fontWeight = FontWeight.Medium,
         maxLines = 2,
         overflow = TextOverflow.Ellipsis,
