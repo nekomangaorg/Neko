@@ -72,8 +72,8 @@ class SimilarHandler {
         dexId: String,
         forceRefresh: Boolean = false,
     ): List<SManga> {
-        // Get cache from database if we have it
         if (similarDbEntry != null && !forceRefresh) {
+            // Get cache from database if we have it
             try {
                 val dbDto =
                     MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(similarDbEntry.data)
@@ -81,8 +81,14 @@ class SimilarHandler {
                 val idsToManga = dbDto.similarMdexApi?.data?.map {
                     it.id to it.toBasicManga(thumbQuality)
                 }?.toMap() ?: emptyMap()
-
-                return dbDto.similarApi?.matches?.mapNotNull { idsToManga[it.id] } ?: emptyList()
+                val mangaList = dbDto.similarApi?.matches?.mapNotNull {
+                    idsToManga[it.id]?.relationship =
+                        String.format("%.2f", 100.0 * it.score) + "% similarity"
+                    idsToManga[it.id]
+                } ?: emptyList()
+                return mangaList.sortedByDescending {
+                    it.relationship?.split("%")?.get(0)?.toDouble()
+                }
             } catch (e: Exception) {
                 XLog.e(e)
             }
@@ -117,14 +123,16 @@ class SimilarHandler {
 
         // Get our page of mangaList
         val ids = similarDto.matches.map { it.id }
+        val scores = similarDto.matches.map { it.score }
         val mangaListDto = similarGetMangadexMangaList(ids)
 
         // Loop through our *sorted* related array and list in that order
         val idsToManga = hashMapOf<String, SManga>()
         val thumbQuality = preferencesHelper.thumbnailQuality()
-
-        mangaListDto.data.forEach {
+        mangaListDto.data.forEachIndexed { idx, it ->
             idsToManga[it.id] = it.toBasicManga(thumbQuality)
+            idsToManga[it.id]?.relationship =
+                String.format("%.2f", 100.0 * scores[idx]) + "% similarity"
         }
         val mangaList = ids.map { idsToManga[it]!! }
 
@@ -152,7 +160,7 @@ class SimilarHandler {
             mangaSimilar.id = mangaDb.id
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
-        return mangaList
+        return mangaList.sortedByDescending { it.relationship?.split("%")?.get(0)?.toDouble() }
     }
 
     /**
@@ -164,7 +172,6 @@ class SimilarHandler {
         forceRefresh: Boolean = false,
     ): List<SManga> {
         // See if we have a valid mapping for our Anlist service
-
         val anilistId = mappings.getExternalID(dexId, "al") ?: return emptyList()
         // Get the cache if we have it
         if (similarDbEntry != null && !forceRefresh) {
@@ -175,16 +182,19 @@ class SimilarHandler {
                 dbDto.anilistMdexApi!!.data.forEach {
                     idsToManga[it.id] = it.toBasicManga()
                 }
-                val ids = dbDto.anilistApi!!.data.Media.recommendations.edges.map {
+                val idPairs = dbDto.anilistApi!!.data.Media.recommendations.edges.map {
                     if (it.node.mediaRecommendation.format != "MANGA")
                         return@map null
-                    mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+                    val id = mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+                    val text = it.node.rating.toString() + " rating"
+                    Pair(id, text)
                 }.filterNotNull()
-                val mangaList = ids.map {
-                    val tmp = idsToManga[it]!!
-                    tmp
+                val mangaList = idPairs.map {
+                    idsToManga[it.first]!!.apply{this.relationship = it.second}
                 }
-                return mangaList
+                return mangaList.sortedByDescending {
+                    it.relationship?.split(" ")?.get(0)?.toDouble()
+                }
             } catch (e: Exception) {
                 XLog.e(e)
             }
@@ -193,7 +203,7 @@ class SimilarHandler {
         val graphql =
             """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
         val response = network.similarService.getAniListGraphql(graphql).onError {
-            val type = "trying to get similar manga anilist"
+            val type = "trying to get Anilist similar manga"
             this.log(type)
             if (this.statusCode.code == 404) {
                 this.throws(type)
@@ -203,7 +213,7 @@ class SimilarHandler {
                    this.throws(type)
                }*/
         }.onException {
-            val type = "trying to get similar manga"
+            val type = "trying to get Anilist similar manga"
             this.log(type)
             this.throws(type)
         }.getOrElse { null }
@@ -220,28 +230,26 @@ class SimilarHandler {
         }
 
         // Get our page of mangaList
-
-        val ids = similarDto.data.Media.recommendations.edges.map {
+        val idPairs = similarDto.data.Media.recommendations.edges.map {
             if (it.node.mediaRecommendation.format != "MANGA")
                 return@map null
-            mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+            val id = mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
+            val text = it.node.rating.toString() + " rating"
+            Pair(id, text)
         }.filterNotNull()
-        val mangaListDto = similarGetMangadexMangaList(ids)
+        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.first })
 
         // Convert to lookup array
-        // TODO: We should probably sort this based on score from MAL!!!
-        // TODO: Also filter out manga here that are already presented
+        // TODO: Also filter out manga here that are already presented?
         val idsToManga = hashMapOf<String, SManga>()
         val thumbQuality = preferencesHelper.thumbnailQuality()
-
         mangaListDto.data.forEach {
             idsToManga[it.id] = it.toBasicManga(thumbQuality)
         }
 
-        // Loop through our *sorted* related array and list in that order
-        val mangaList = ids.map {
-            val tmp = idsToManga[it]!!
-            tmp
+        // Loop through our related array and list in that order
+        val mangaList = idPairs.map {
+            idsToManga[it.first]!!.apply{this.relationship = it.second}
         }
 
         // Convert to a database type that has both images and similar api response
@@ -268,7 +276,7 @@ class SimilarHandler {
             mangaSimilar.id = mangaDb.id
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
-        return mangaList
+        return mangaList.sortedByDescending { it.relationship?.split(" ")?.get(0)?.toDouble() }
     }
 
     /**
@@ -289,25 +297,27 @@ class SimilarHandler {
                     MdUtil.jsonParser.decodeFromString<SimilarMangaDatabaseDto>(similarDbEntry.data)
                 val idsToManga = hashMapOf<String, SManga>()
                 val thumbQuality = preferencesHelper.thumbnailQuality()
-
                 dbDto.myanimelistMdexApi!!.data.forEach {
                     idsToManga[it.id] = it.toBasicManga(thumbQuality)
                 }
-                val ids = dbDto.myanimelistApi!!.recommendations.mapNotNull {
-                    mappings.getMangadexID(it.mal_id.toString(), "mal")
+                val idPairs = dbDto.myanimelistApi!!.recommendations.mapNotNull {
+                    val id = mappings.getMangadexID(it.mal_id.toString(), "mal")
+                    val text = it.recommendation_count.toString() + " rating"
+                    Pair(id, text)
                 }
-                val mangaList = ids.map {
-                    val tmp = idsToManga[it]!!
-                    tmp
+                val mangaList = idPairs.map {
+                    idsToManga[it.first]!!.apply{this.relationship = it.second}
                 }
-                return mangaList
+                return mangaList.sortedByDescending {
+                    it.relationship?.split(" ")?.get(0)?.toDouble()
+                }
             } catch (e: Exception) {
                 XLog.enableStackTrace(10).e(e)
             }
         }
         // Main network request
         val response = network.similarService.getSimilarMalManga(malId).onError {
-            val type = "trying to get similar manga mal"
+            val type = "trying to get MAL similar manga"
             this.log(type)
             if (this.statusCode.code == 404) {
                 this.throws(type)
@@ -317,7 +327,7 @@ class SimilarHandler {
                    this.throws(type)
                }*/
         }.onException {
-            val type = "trying to get similar manga"
+            val type = "trying to get MAL similar manga"
             this.log(type)
             this.throws(type)
         }.getOrElse { null }
@@ -334,25 +344,24 @@ class SimilarHandler {
         }
 
         // Get our page of mangaList
-        val ids = similarDto.recommendations.map {
-            mappings.getMangadexID(it.mal_id.toString(), "mal")
+        val idPairs = similarDto.recommendations.map {
+            val id = mappings.getMangadexID(it.mal_id.toString(), "mal")
+            val text = it.recommendation_count.toString() + " rating"
+            Pair(id, text)
         }.filterNotNull()
-        val mangaListDto = similarGetMangadexMangaList(ids)
+        val mangaListDto = similarGetMangadexMangaList(idPairs.mapNotNull { it.first })
 
         // Convert to lookup array
-        // TODO: We should probably sort this based on score from MAL!!!
         // TODO: Also filter out manga here that are already presented
         val idsToManga = hashMapOf<String, SManga>()
         val thumbQuality = preferencesHelper.thumbnailQuality()
-
         mangaListDto.data.forEach {
             idsToManga[it.id] = it.toBasicManga(thumbQuality)
         }
 
         // Loop through our *sorted* related array and list in that order
-        val mangaList = ids.map {
-            val tmp = idsToManga[it]!!
-            tmp
+        val mangaList = idPairs.map {
+            idsToManga[it.first]!!.apply{this.relationship = it.second}
         }
 
         // Convert to a database type that has both images and similar api response
@@ -379,7 +388,7 @@ class SimilarHandler {
             mangaSimilar.id = mangaDb.id
         }
         db.insertSimilar(mangaSimilar).executeAsBlocking()
-        return mangaList
+        return mangaList.sortedByDescending { it.relationship?.split(" ")?.get(0)?.toDouble() }
     }
 
     /**
