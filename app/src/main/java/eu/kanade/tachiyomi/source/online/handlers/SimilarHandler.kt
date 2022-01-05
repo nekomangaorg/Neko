@@ -190,9 +190,7 @@ class SimilarHandler {
                     Pair(id, text)
                 }.filterNotNull()
                 val mangaList = idPairs.map {
-                    val tmp = idsToManga[it.first]!!
-                    tmp.relationship = it.second
-                    tmp
+                    idsToManga[it.first]!!.apply{this.relationship = it.second}
                 }
                 return mangaList.sortedByDescending {
                     it.relationship?.split(" ")?.get(0)?.toDouble()
@@ -251,9 +249,7 @@ class SimilarHandler {
 
         // Loop through our related array and list in that order
         val mangaList = idPairs.map {
-            val tmp = idsToManga[it.first]!!
-            tmp.relationship = it.second
-            tmp
+            idsToManga[it.first]!!.apply{this.relationship = it.second}
         }
 
         // Convert to a database type that has both images and similar api response
@@ -310,9 +306,7 @@ class SimilarHandler {
                     Pair(id, text)
                 }
                 val mangaList = idPairs.map {
-                    val tmp = idsToManga[it.first]!!
-                    tmp.relationship = it.second
-                    tmp
+                    idsToManga[it.first]!!.apply{this.relationship = it.second}
                 }
                 return mangaList.sortedByDescending {
                     it.relationship?.split(" ")?.get(0)?.toDouble()
@@ -367,9 +361,7 @@ class SimilarHandler {
 
         // Loop through our *sorted* related array and list in that order
         val mangaList = idPairs.map {
-            val tmp = idsToManga[it.first]!!
-            tmp.relationship = it.second
-            tmp
+            idsToManga[it.first]!!.apply{this.relationship = it.second}
         }
 
         // Convert to a database type that has both images and similar api response
