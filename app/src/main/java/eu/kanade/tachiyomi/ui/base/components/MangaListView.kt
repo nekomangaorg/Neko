@@ -23,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.ui.base.compose.HeaderCard
-import eu.kanade.tachiyomi.ui.base.compose.MangaCover
+import eu.kanade.tachiyomi.ui.base.components.HeaderCard
+import eu.kanade.tachiyomi.ui.base.components.MangaCover
 
 val montserrat = FontFamily(
     Font(R.font.montserrat_thin, FontWeight.Thin),

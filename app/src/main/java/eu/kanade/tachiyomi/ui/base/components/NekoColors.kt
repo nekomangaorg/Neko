@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.compose
+package eu.kanade.tachiyomi.ui.base.components
 
 import androidx.compose.ui.graphics.Color
 
