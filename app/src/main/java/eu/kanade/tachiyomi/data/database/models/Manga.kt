@@ -3,10 +3,13 @@ package eu.kanade.tachiyomi.data.database.models
 import android.content.Context
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.external.AniList
 import eu.kanade.tachiyomi.data.external.AnimePlanet
 import eu.kanade.tachiyomi.data.external.Dex
 import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
+import eu.kanade.tachiyomi.data.external.Kitsu
+import eu.kanade.tachiyomi.data.external.Mal
 import eu.kanade.tachiyomi.data.external.MangaUpdates
 import eu.kanade.tachiyomi.data.external.Raw
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -34,7 +37,7 @@ interface Manga : SManga {
     var viewer_flags: Int
 
     var chapter_flags: Int
-    
+
     var filtered_scanlators: String?
 
     fun isBlank() = id == Long.MIN_VALUE
@@ -169,12 +172,22 @@ interface Manga : SManga {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaId(url)))
 
+        kitsu_id?.let {
+            list.add(Kitsu(it))
+        }
+
+        anilist_id?.let {
+            list.add(AniList(it))
+        }
         anime_planet_id?.let {
             list.add(AnimePlanet(it))
         }
-
         manga_updates_id?.let {
             list.add(MangaUpdates(it))
+        }
+
+        my_anime_list_id?.let {
+            list.add(Mal(it))
         }
 
         other_urls?.let { combinedString ->
@@ -187,8 +200,7 @@ interface Manga : SManga {
             }
         }
 
-
-        return list.toList()
+        return list.toList().sortedBy { it.name }
     }
 
     // Used to display the chapter's title one way or another

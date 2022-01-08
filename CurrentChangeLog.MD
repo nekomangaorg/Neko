@@ -1,5 +1,6 @@
+## 🥳 New
+Similar rating, and number of votes show now for anilist, mal, similar manga in the similar view
+AniList, MAL, Kitsu links now show in external link sheets
 ## 🏗️ Changes
-Add the relationship type under the related section on similar page
-cleaned up similar page ui, and outline covers when its enabled
 ## 🐜 Fixes
-Authentication refresh was not actually working
+## 🛠️ Other

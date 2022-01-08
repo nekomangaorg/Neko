@@ -34,13 +34,34 @@ class Raw(id: String) : ExternalLink(id) {
 }
 
 class Engtl(id: String) : ExternalLink(id) {
-    override val name = "English Translation"
+    override val name = "English TL"
     override fun getLogo() = R.drawable.ic_other_text_logo
     override fun getLogoColor() = Color.rgb(255, 209, 220)
     override fun getUrl() = id
 }
 
-abstract class ExternalLink(val id: String) {
+class AniList(id: String) : ExternalLink(id) {
+    override val name = "AniList"
+    override fun getLogo() = R.drawable.ic_tracker_anilist_logo
+    override fun getLogoColor() = Color.rgb(18, 25, 35)
+    override fun getUrl() = "https://anilist.co/manga/$id"
+}
+
+class Mal(id: String) : ExternalLink(id) {
+    override val name = "MyAnimeList"
+    override fun getLogo() = R.drawable.ic_tracker_mal_logo
+    override fun getLogoColor() = Color.rgb(46, 81, 162)
+    override fun getUrl() = "https://myanimelist.net/manga/$id"
+}
+
+class Kitsu(id: String) : ExternalLink(id) {
+    override val name = "Kitsu"
+    override fun getLogo() = R.drawable.ic_tracker_kitsu_logo
+    override fun getLogoColor() = Color.rgb(51, 37, 50)
+    override fun getUrl() = "https://kitsu.io/manga/$id"
+}
+
+sealed class ExternalLink(val id: String) {
     abstract val name: String
 
     @DrawableRes
