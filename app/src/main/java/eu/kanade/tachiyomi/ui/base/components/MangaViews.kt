@@ -13,6 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
 import coil.transform.RoundedCornersTransformation
@@ -20,7 +21,7 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.Manga
 
 @Composable
-fun MangaCover(manga: Manga, modifier: Modifier, shouldOutlineCover: Boolean) {
+fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
     Box {
 
         val outlineModifier = when (shouldOutlineCover) {
@@ -56,4 +57,12 @@ fun MangaCover(manga: Manga, modifier: Modifier, shouldOutlineCover: Boolean) {
             )
         }
     }
+}
+
+@Preview
+@Composable
+private fun MangaGridItemPreviewLongTitleWithOtherText() {
+    MangaCover(manga = Manga.create("test",
+        "Title",
+        1L), true)
 }

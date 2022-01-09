@@ -71,8 +71,8 @@ fun MangaRow(
 ) {
     Row(modifier = modifier.padding(4.dp)) {
         MangaCover(manga,
-            Modifier.align(alignment = Alignment.CenterVertically),
-            shouldOutlineCover)
+            shouldOutlineCover,
+            Modifier.align(alignment = Alignment.CenterVertically))
         if (manga.relationship.isNullOrBlank()) {
             MangaTitle(manga.title, Modifier.align(alignment = Alignment.CenterVertically))
         } else {
