@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -16,14 +17,17 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.android.material.composethemeadapter.MdcTheme
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
+import eu.kanade.tachiyomi.ui.base.components.MangaComfortableGridWithHeader
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.system.pxToDp
+import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
@@ -75,17 +79,31 @@ class SimilarController(bundle: Bundle? = null) :
                     }
                 ) {
 
-                    val groupedManga: Map<String, List<Manga>> by presenter.mangaMap.observeAsState(
+                    val groupedManga: Map<String, List<DisplayManga>> by presenter.mangaMap.observeAsState(
                         emptyMap())
                     if (groupedManga.isEmpty() && refreshing.value.not()) {
-
+                        Text(text = "No Results")
                         //show empty view
                     } else {
-                        MangaListWithHeader(groupedManga = groupedManga,
-                            shouldOutlineCover = preferences.outlineOnCovers().get(),
-                            modifier = Modifier.padding(top = 10.dp)) { manga ->
-                            router.pushController(MangaDetailsController(manga,
-                                true).withFadeTransaction())
+                        if (preferences.browseAsList().get()) {
+                            MangaListWithHeader(groupedManga = groupedManga,
+                                shouldOutlineCover = preferences.outlineOnCovers().get(),
+                                modifier = Modifier.padding(top = 10.dp)) { manga ->
+                                router.pushController(MangaDetailsController(manga,
+                                    true).withFadeTransaction())
+                            }
+                        } else {
+
+                            val columns =
+                                view.measuredWidth.numberOfColumnsForCompose(preferences.gridSize()
+                                    .get())
+
+                            MangaComfortableGridWithHeader(groupedManga = groupedManga,
+                                shouldOutlineCover = preferences.outlineOnCovers().get(),
+                                columns = columns) { manga ->
+                                router.pushController(MangaDetailsController(manga,
+                                    true).withFadeTransaction())
+                            }
                         }
                     }
                 }

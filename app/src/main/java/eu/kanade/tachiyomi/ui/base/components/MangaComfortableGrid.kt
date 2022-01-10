@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -50,7 +51,9 @@ fun MangaComfortableGridWithHeader(
             }
             gridItems(items = allGrids,
                 columns = columns,
-                modifier = modifier.padding(horizontal = 8.dp),
+                modifier = modifier
+                    .padding(horizontal = 8.dp),
+                itemModifier = Modifier.clip(RoundedCornerShape(Shapes.coverRadius)),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) { displayManga ->
                 MangaComfortableGridItem(
                     displayManga = displayManga,
@@ -128,7 +131,7 @@ private fun MangaComfortableGridItem(
             )
             val shouldShowDisplayText = displayManga.displayText.isNullOrEmpty().not()
 
-            val bottomPadding = if (shouldShowDisplayText) 2.dp else 4.dp
+            val bottomPadding = if (shouldShowDisplayText) 0.dp else 4.dp
 
             Text(
                 text = displayManga.manga.title,
@@ -150,7 +153,9 @@ private fun MangaComfortableGridItem(
                         letterSpacing = (-.5).sp,
                         color = MaterialTheme.colors.onSurface.copy(.6f)),
                     maxLines = 1,
-                    modifier = Modifier.padding(top = 0.dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
+                    modifier = Modifier
+                        .padding(top = 0.dp, bottom = 4.dp)
+                        .align(alignment = Alignment.CenterHorizontally)
                 )
             }
         }

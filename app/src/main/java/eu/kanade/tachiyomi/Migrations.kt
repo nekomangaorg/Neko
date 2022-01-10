@@ -109,6 +109,7 @@ object Migrations {
                     remove("pref_default_viewer_key")
                 }
             }
+            
             return true
         }
         return false
