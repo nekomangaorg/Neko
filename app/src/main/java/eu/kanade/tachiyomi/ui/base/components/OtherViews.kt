@@ -17,7 +17,7 @@ import eu.kanade.tachiyomi.ui.base.montserrat
 
 @Composable
 fun HeaderCard(text: String) {
-    Card(shape = RoundedCornerShape(4.dp),
+    Card(shape = RoundedCornerShape(8.dp),
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),

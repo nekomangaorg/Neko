@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.ui.base.components.HeaderCard
 import eu.kanade.tachiyomi.ui.base.components.MangaCover
 
@@ -65,20 +66,22 @@ fun MangaRelationship(text: String, modifier: Modifier) {
 
 @Composable
 fun MangaRow(
-    manga: Manga,
+    displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     modifier: Modifier,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
-        MangaCover(manga,
+        MangaCover(displayManga.manga,
             shouldOutlineCover,
             Modifier.align(alignment = Alignment.CenterVertically))
-        if (manga.relationship.isNullOrBlank()) {
-            MangaTitle(manga.title, Modifier.align(alignment = Alignment.CenterVertically))
+        if (displayManga.displayText.isNullOrBlank()) {
+            MangaTitle(displayManga.manga.title,
+                Modifier.align(alignment = Alignment.CenterVertically))
         } else {
             Column {
-                MangaTitle(manga.title, Modifier)
-                MangaRelationship(text = manga.relationship!!, Modifier.padding(bottom = 4.dp))
+                MangaTitle(displayManga.manga.title, Modifier)
+                MangaRelationship(text = displayManga.displayText!!,
+                    Modifier.padding(bottom = 4.dp))
             }
         }
     }
@@ -86,7 +89,7 @@ fun MangaRow(
 
 @Composable
 fun MangaList(
-    mangaList: List<Manga>,
+    mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean,
     onClick: (manga: Manga) -> Unit = {},
 ) {
@@ -94,14 +97,14 @@ fun MangaList(
         Modifier
             .fillMaxWidth()
     ) {
-        itemsIndexed(mangaList) { index, manga ->
-            MangaRow(manga = manga,
+        itemsIndexed(mangaList) { index, displayManga ->
+            MangaRow(displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .clickable {
-                        onClick(manga)
+                        onClick(displayManga.manga)
                     })
             if (index + 1 < mangaList.size) {
                 Divider()
@@ -112,7 +115,7 @@ fun MangaList(
 
 @Composable
 fun MangaListWithHeader(
-    groupedManga: Map<String, List<Manga>>,
+    groupedManga: Map<String, List<DisplayManga>>,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
     onClick: (manga: Manga) -> Unit = {},
@@ -124,14 +127,14 @@ fun MangaListWithHeader(
             stickyHeader {
                 HeaderCard(text)
             }
-            itemsIndexed(mangaList) { index, manga ->
-                MangaRow(manga = manga,
+            itemsIndexed(mangaList) { index, displayManga ->
+                MangaRow(displayManga = displayManga,
                     shouldOutlineCover,
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .clickable {
-                            onClick(manga)
+                            onClick(displayManga.manga)
                         })
                 if (index + 1 < mangaList.size) {
                     Divider()
@@ -145,27 +148,27 @@ fun MangaListWithHeader(
 @Preview
 @Composable
 fun MangaListPreview() {
-    MangaList(listOf(Manga.create(0L).apply {
+    MangaList(listOf(DisplayManga(Manga.create(0L).apply {
         url = ""
         title = "test 1"
         relationship = "doujinshi"
-    }, Manga.create(0L).apply {
+    }), DisplayManga(Manga.create(0L).apply {
         url = ""
         title =
             "This is a very very very very very very very very long text that ellipses because its too long"
-    }), true, onClick = { })
+    })), true, onClick = { })
 }
 
 @Preview
 @Composable
 fun MangaHeaderPreview() {
-    MangaListWithHeader(mapOf("abc" to listOf(Manga.create(0L).apply {
+    MangaListWithHeader(mapOf("abc" to listOf(DisplayManga(Manga.create(0L).apply {
         url = ""
         title = "test 1"
-    }, Manga.create(0L).apply {
+    }), DisplayManga(Manga.create(0L).apply {
         url = ""
         title =
             "This is a very very very very very very very very long text that ellipses because its too long"
-        relationship = "doujinshi"
-    })), true, onClick = { })
+    }, "doujinshi")
+    )), true)
 }

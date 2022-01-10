@@ -19,5 +19,5 @@ object Typefaces {
 
         )
 
-    val body = 16.sp
+    val bodySmall = 12.sp
 }
