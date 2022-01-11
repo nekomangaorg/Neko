@@ -1,5 +1,5 @@
 ## 🥳 New
-Similar rating, and number of votes show now for anilist, mal, similar manga in the similar view
+Similar rating, and number of votes show now for anilist, mal, similar manga in the similar view (@goldbattle)
 AniList, MAL, Kitsu links now show in external link sheets
 Grid view returns to similar manga view
 ## 🏗️ Changes

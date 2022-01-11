@@ -18,7 +18,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
@@ -154,8 +153,7 @@ private fun MangaComfortableGridItem(
                         color = MaterialTheme.colors.onSurface.copy(.6f)),
                     maxLines = 1,
                     modifier = Modifier
-                        .padding(top = 0.dp, bottom = 4.dp)
-                        .align(alignment = Alignment.CenterHorizontally)
+                        .padding(top = 0.dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
                 )
             }
         }

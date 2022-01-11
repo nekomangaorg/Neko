@@ -159,7 +159,7 @@ class SimilarHandler {
         val thumbQuality = preferencesHelper.thumbnailQuality()
         val similarMangaList = mangaListDto.data.mapIndexed { index, it ->
             it.toRelatedMangaDto(thumbQuality,
-                String.format("%f.2", 100.0 * scores[index]) + "% match")
+                String.format("%.2f", 100.0 * scores[index]) + "% match")
         }
 
         //insert the new info into the db
