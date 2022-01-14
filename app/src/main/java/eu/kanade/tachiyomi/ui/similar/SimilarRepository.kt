@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.similar
 
 import androidx.annotation.StringRes
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -44,7 +45,8 @@ class SimilarRepository {
                         createGroup(R.string.related_type,
                             similarHandler.fetchRelated(dexId, actualRefresh))
                     }
-                }.getOrNull()
+                }.onFailure { XLog.e("Failed to get related", it) }
+                    .getOrNull()
             }
 
             val similar = async {
@@ -53,7 +55,8 @@ class SimilarRepository {
                         createGroup(R.string.similar_type,
                             similarHandler.fetchSimilar(dexId, actualRefresh))
                     }
-                }.getOrNull()
+                }.onFailure { XLog.e("Failed to get similar", it) }
+                    .getOrNull()
             }
 
             val anilist = async {
@@ -63,7 +66,8 @@ class SimilarRepository {
                             similarHandler.fetchAnilist(dexId,
                                 actualRefresh))
                     }
-                }.getOrNull()
+                }.onFailure { XLog.e("Failed to get anilist recs", it) }
+                    .getOrNull()
             }
 
             val mal = async {
@@ -73,7 +77,8 @@ class SimilarRepository {
                             similarHandler.fetchSimilarExternalMalManga(dexId,
                                 actualRefresh))
                     }
-                }.getOrNull()
+                }.onFailure { XLog.e("Failed to get mal recs", it) }
+                    .getOrNull()
             }
 
             listOfNotNull(related.await(), similar.await(), anilist.await(), mal.await())
