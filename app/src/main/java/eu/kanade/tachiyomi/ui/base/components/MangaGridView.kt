@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -42,10 +43,11 @@ import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
 import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
 
 @Composable
-fun MangaComfortableGridWithHeader(
+fun MangaGridWithHeader(
     groupedManga: Map<String, List<DisplayManga>>,
     shouldOutlineCover: Boolean,
     columns: Int,
+    isComfortable: Boolean = true,
     modifier: Modifier = Modifier,
     onClick: (manga: Manga) -> Unit = {},
 ) {
@@ -61,9 +63,10 @@ fun MangaComfortableGridWithHeader(
                 modifier = modifier
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) { displayManga ->
-                MangaComfortableGridItem(
+                MangaGridItem(
                     displayManga = displayManga,
                     shouldOutlineCover = shouldOutlineCover,
+                    isComfortable = isComfortable,
                     onClick = onClick
                 )
             }
@@ -72,10 +75,11 @@ fun MangaComfortableGridWithHeader(
 }
 
 @Composable
-fun MangaComfortableGrid(
+fun MangaGrid(
     mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean,
     columns: Int,
+    isComfortable: Boolean = true,
     onClick: (Manga) -> Unit = {},
 ) {
     val cells = if (columns > 1) {
@@ -92,9 +96,10 @@ fun MangaComfortableGrid(
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
         items(mangaList) { displayManga ->
-            MangaComfortableGridItem(
+            MangaGridItem(
                 displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
+                isComfortable = isComfortable,
                 onClick = { onClick(displayManga.manga) },
             )
         }
@@ -102,10 +107,10 @@ fun MangaComfortableGrid(
 }
 
 @Composable
-private fun MangaComfortableGridItem(
+private fun MangaGridItem(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
-    isComfortable: Boolean = false,
+    isComfortable: Boolean = true,
     onClick: (Manga) -> Unit = {},
 ) {
 
@@ -122,56 +127,51 @@ private fun MangaComfortableGridItem(
                     .clickable { onClick(displayManga.manga) }
                     .padding(2.dp)
             ) {
-                Column {
-                    GridCover(displayManga.manga, outlineModifier)
-                    Image(painter = rememberImagePainter(
-                        data = displayManga.manga,
-                        builder = {
-                            placeholder(Pastel.getColorLight())
-                            transformations(RoundedCornersTransformation(0f))
-                        }),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .aspectRatio(3f / 4f)
-                            .clip(RoundedCornerShape(Shapes.coverRadius))
-                            .then(outlineModifier),
-                        contentScale = ContentScale.Crop
-                    )
-                    val shouldShowDisplayText = displayManga.displayText.isNullOrEmpty().not()
 
-                    val bottomPadding = if (shouldShowDisplayText) 0.dp else 4.dp
+                val shouldShowDisplayText = displayManga.displayText.isNotBlank()
+                val bottomPadding = if (shouldShowDisplayText) 0.dp else 4.dp
 
-                    Text(
-                        text = displayManga.manga.title,
-                        style = TextStyle(fontFamily = Typefaces.montserrat,
-                            fontSize = Typefaces.bodySmall,
-                            fontWeight = FontWeight.Medium,
-                            letterSpacing = (-.8).sp),
-                        maxLines = 2,
-                        modifier = Modifier.padding(top = 4.dp,
-                            bottom = bottomPadding,
-                            start = 4.dp,
-                            end = 4.dp)
-                    )
-                    if (shouldShowDisplayText) {
-                        Text(
-                            text = displayManga.displayText!!,
-                            style = TextStyle(fontFamily = Typefaces.montserrat,
-                                fontSize = Typefaces.bodySmall,
-                                letterSpacing = (-.5).sp,
-                                color = MaterialTheme.colors.onSurface.copy(.6f)),
-                            maxLines = 1,
-                            modifier = Modifier
-                                .padding(top = 0.dp, bottom = 4.dp, start = 4.dp, end = 4.dp)
-                        )
+                if (isComfortable) {
+                    Column {
+                        GridCover(displayManga.manga, outlineModifier)
+                        MangaTitle(title = displayManga.manga.title,
+                            modifier = Modifier.padding(top = 4.dp,
+                                bottom = bottomPadding,
+                                start = 4.dp,
+                                end = 4.dp))
+
+                        if (shouldShowDisplayText) {
+                            DisplayText(displayText = displayManga.displayText, modifier = Modifier
+                                .padding(top = 0.dp, bottom = 4.dp, start = 4.dp, end = 4.dp))
+                        }
+                    }
+                } else {
+                    Box {
+                        GridCover(displayManga.manga, outlineModifier)
+                        Column(Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.BottomStart)) {
+                            MangaTitle(title = displayManga.manga.title,
+                                modifier = Modifier.padding(top = 4.dp,
+                                    bottom = bottomPadding,
+                                    start = 4.dp,
+                                    end = 4.dp))
+
+                            if (shouldShowDisplayText) {
+                                DisplayText(displayText = displayManga.displayText,
+                                    modifier = Modifier
+                                        .padding(top = 0.dp,
+                                            bottom = 4.dp,
+                                            start = 4.dp,
+                                            end = 4.dp))
+                            }
+                        }
                     }
                 }
             }
             if (displayManga.manga.favorite) {
-                val offset = when (isComfortable) {
-                    true -> (-6).dp
-                    false -> 0.dp
-                }
+                val offset = (-6).dp
+                
                 Image(
                     asset = CommunityMaterial.Icon2.cmd_heart,
                     colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
@@ -186,7 +186,7 @@ private fun MangaComfortableGridItem(
 }
 
 @Composable
-private fun GridCover(manga: Manga, modifier: Modifier) {
+private fun GridCover(manga: Manga, modifier: Modifier = Modifier) {
     Image(painter = rememberImagePainter(
         data = manga,
         builder = {
@@ -202,6 +202,32 @@ private fun GridCover(manga: Manga, modifier: Modifier) {
     )
 }
 
+@Composable
+private fun MangaTitle(title: String, modifier: Modifier = Modifier) {
+    Text(
+        text = title,
+        style = TextStyle(fontFamily = Typefaces.montserrat,
+            fontSize = Typefaces.bodySmall,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = (-.8).sp),
+        maxLines = 2,
+        modifier = modifier
+    )
+}
+
+@Composable
+private fun DisplayText(displayText: String, modifier: Modifier = Modifier) {
+    Text(
+        text = displayText,
+        style = TextStyle(fontFamily = Typefaces.montserrat,
+            fontSize = Typefaces.bodySmall,
+            letterSpacing = (-.5).sp,
+            color = MaterialTheme.colors.onSurface.copy(.6f)),
+        maxLines = 1,
+        modifier = modifier
+    )
+}
+
 @Preview
 @Composable
 private fun MangaGridHeaderPreview() {
@@ -212,19 +238,31 @@ private fun MangaGridHeaderPreview() {
         DisplayManga(manga),
         DisplayManga(manga))
     val mangaMap = mapOf("Test" to mangaList)
-    MangaComfortableGridWithHeader(groupedManga = mangaMap, shouldOutlineCover = true, columns = 2)
+    MangaGridWithHeader(groupedManga = mangaMap, shouldOutlineCover = true, columns = 2)
 }
 
 @Preview
 @Composable
-private fun MangaGridPreview() {
+private fun MangaComfotableGridPreview() {
     val manga = Manga.create("test", "One Piece", 1L)
     val mangaList = listOf(DisplayManga(manga, "related"),
         DisplayManga(manga, "Sequel"),
         DisplayManga(manga),
         DisplayManga(manga),
         DisplayManga(manga))
-    MangaComfortableGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 2)
+    MangaGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 2, isComfortable = false)
+}
+
+@Preview
+@Composable
+private fun MangaCompactGridPreview() {
+    val manga = Manga.create("test", "One Piece", 1L)
+    val mangaList = listOf(DisplayManga(manga, "related"),
+        DisplayManga(manga, "Sequel"),
+        DisplayManga(manga),
+        DisplayManga(manga),
+        DisplayManga(manga))
+    MangaGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 2)
 }
 
 @Preview
@@ -238,13 +276,13 @@ private fun MangaGridPreviewLongTitles() {
         DisplayManga(manga, "Sequel"),
         DisplayManga(manga.apply { favorite = true }),
         DisplayManga(manga))
-    MangaComfortableGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 4)
+    MangaGrid(mangaList = mangaList, shouldOutlineCover = true, columns = 4)
 }
 
 @Preview
 @Composable
 private fun MangaGridItemPreviewLongTitleWithOtherText() {
-    MangaComfortableGridItem(displayManga = DisplayManga(Manga.create("test",
+    MangaGridItem(displayManga = DisplayManga(Manga.create("test",
         "Really Really Long Title Really Really Long Title Really Really Long Title Really Really Long TitleReally Really Long Title",
         1L).apply { favorite = true }, "Sequel"), true)
 }

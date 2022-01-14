@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
-import eu.kanade.tachiyomi.ui.base.components.MangaComfortableGridWithHeader
+import eu.kanade.tachiyomi.ui.base.components.MangaGridWithHeader
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
@@ -98,9 +98,13 @@ class SimilarController(bundle: Bundle? = null) :
                                 view.measuredWidth.numberOfColumnsForCompose(preferences.gridSize()
                                     .get())
 
-                            MangaComfortableGridWithHeader(groupedManga = groupedManga,
+                            val comfortable = preferences.libraryLayout().get() == 0
+
+                            MangaGridWithHeader(
+                                groupedManga = groupedManga,
                                 shouldOutlineCover = preferences.outlineOnCovers().get(),
-                                columns = columns) { manga ->
+                                columns = columns,
+                                isComfortable = comfortable) { manga ->
                                 router.pushController(MangaDetailsController(manga,
                                     true).withFadeTransaction())
                             }
