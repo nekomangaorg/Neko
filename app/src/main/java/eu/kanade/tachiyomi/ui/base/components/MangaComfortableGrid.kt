@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.GridCells
@@ -171,10 +172,10 @@ private fun MangaComfortableGridItem(
                 asset = CommunityMaterial.Icon2.cmd_heart,
                 colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
                 modifier = Modifier
-                    .size((24.dp)
-                        .align(alignment = Alignment.TopStart)
-                        .offset(x = (-6).dp, y = (-6).dp)
-                    )
+                    .size(24.dp)
+                    .align(alignment = Alignment.TopStart)
+                    .offset(x = (-6).dp, y = (-6).dp)
+            )
         }
     }
 }
