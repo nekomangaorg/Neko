@@ -16,7 +16,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -26,6 +26,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberImagePainter
@@ -149,10 +150,12 @@ private fun ComfortableGridItem(
         MangaTitle(
             title = manga.title,
             modifier = Modifier.padding(
-                top = 4.dp,
+                top = 0.dp,
                 bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
                 start = 4.dp,
-                end = 4.dp))
+                end = 4.dp),
+            fontSize = MaterialTheme.typography.caption.fontSize,
+            fontWeight = FontWeight.Medium)
 
         if (displayText.isNotBlank()) {
             DisplayText(
@@ -161,7 +164,8 @@ private fun ComfortableGridItem(
                     top = 0.dp,
                     bottom = 4.dp,
                     start = 4.dp,
-                    end = 4.dp))
+                    end = 4.dp),
+                fontSize = MaterialTheme.typography.caption.fontSize)
         }
     }
 }
@@ -189,10 +193,9 @@ private fun CompactGridItem(
                     top = 4.dp,
                     bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
                     start = 4.dp,
-                    end = 4.dp))
-            Card {
+                    end = 4.dp),
+                fontWeight = FontWeight.Medium)
 
-            }
             if (displayText.isNotBlank()) {
                 DisplayText(
                     displayText = displayText,
@@ -201,7 +204,9 @@ private fun CompactGridItem(
                             top = 0.dp,
                             bottom = 4.dp,
                             start = 4.dp,
-                            end = 4.dp))
+                            end = 4.dp),
+                    fontSize = MaterialTheme.typography.caption.fontSize,
+                    fontWeight = FontWeight.Medium)
             }
         }
     }

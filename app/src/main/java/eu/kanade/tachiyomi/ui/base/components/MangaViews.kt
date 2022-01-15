@@ -13,7 +13,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
@@ -24,13 +23,13 @@ internal fun MangaTitle(
     modifier: Modifier = Modifier,
     maxLines: Int = 2,
     fontSize: TextUnit = MaterialTheme.typography.body2.fontSize,
+    fontWeight: FontWeight = FontWeight.Normal,
 ) {
     Text(
         text = title,
         style = TextStyle(fontFamily = Typefaces.montserrat,
             fontSize = fontSize,
-            fontWeight = FontWeight.Medium,
-            letterSpacing = (-.8).sp),
+            fontWeight = fontWeight),
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
@@ -41,13 +40,14 @@ internal fun MangaTitle(
 internal fun DisplayText(
     displayText: String,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = Typefaces.bodySmall,
+    fontSize: TextUnit = MaterialTheme.typography.body2.fontSize,
+    fontWeight: FontWeight = FontWeight.Normal,
 ) {
     Text(
         text = displayText,
         style = TextStyle(fontFamily = Typefaces.montserrat,
             fontSize = fontSize,
-            letterSpacing = (-.5).sp,
+            fontWeight = fontWeight,
             color = MaterialTheme.colors.onSurface.copy(.6f)),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
