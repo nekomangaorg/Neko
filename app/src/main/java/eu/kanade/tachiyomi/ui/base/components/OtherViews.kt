@@ -12,12 +12,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import eu.kanade.tachiyomi.ui.base.montserrat
+import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
+import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
 
 @Composable
 fun HeaderCard(text: String) {
-    Card(shape = RoundedCornerShape(8.dp),
+    Card(shape = RoundedCornerShape(Shapes.coverRadius),
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
@@ -25,12 +25,12 @@ fun HeaderCard(text: String) {
         backgroundColor = MaterialTheme.colors.secondary) {
         Text(
             text = text,
-            fontSize = 18.sp,
-            fontFamily = montserrat,
-            fontWeight = FontWeight.Medium,
+            fontSize = MaterialTheme.typography.h6.fontSize,
+            fontFamily = Typefaces.montserrat,
+            fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colors.onSecondary,
-            modifier = Modifier.padding(all = 8.dp)
+            modifier = Modifier.padding(all = 4.dp)
         )
     }
 }

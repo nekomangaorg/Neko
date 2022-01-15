@@ -1,87 +1,70 @@
 package eu.kanade.tachiyomi.ui.base
 
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.Font
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import eu.kanade.tachiyomi.R
+import coil.compose.rememberImagePainter
+import coil.transform.RoundedCornersTransformation
+import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
+import eu.kanade.tachiyomi.ui.base.components.CoverRippleTheme
+import eu.kanade.tachiyomi.ui.base.components.DisplayText
+import eu.kanade.tachiyomi.ui.base.components.Favorited
 import eu.kanade.tachiyomi.ui.base.components.HeaderCard
-import eu.kanade.tachiyomi.ui.base.components.MangaCover
-
-val montserrat = FontFamily(
-    Font(R.font.montserrat_thin, FontWeight.Thin),
-    Font(R.font.montserrat_black, FontWeight.Black),
-    Font(R.font.montserrat_bold, FontWeight.Bold),
-    Font(R.font.montserrat_extra_bold, FontWeight.ExtraBold),
-    Font(R.font.montserrat_medium, FontWeight.Medium),
-    Font(R.font.montserrat_semi_bold, FontWeight.SemiBold),
-    Font(R.font.montserrat_regular, FontWeight.Normal),
-
-    )
-
-@Composable
-fun MangaTitle(text: String, modifier: Modifier) {
-    Text(
-        text = text,
-        fontSize = 16.sp,
-        fontFamily = montserrat,
-        fontWeight = FontWeight.Medium,
-        maxLines = 2,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier.padding(start = 4.dp, top = 4.dp, end = 4.dp)
-    )
-}
-
-@Composable
-fun MangaRelationship(text: String, modifier: Modifier) {
-    Text(
-        text = text,
-        fontSize = 12.sp,
-        fontFamily = montserrat,
-        fontWeight = FontWeight.Normal,
-        maxLines = 1,
-        overflow = TextOverflow.Ellipsis,
-        modifier = modifier.padding(all = 4.dp)
-    )
-}
+import eu.kanade.tachiyomi.ui.base.components.MangaTitle
+import eu.kanade.tachiyomi.ui.base.components.NekoColors
+import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
 
 @Composable
 fun MangaRow(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
-    modifier: Modifier,
+    modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
         MangaCover(displayManga.manga,
             shouldOutlineCover,
             Modifier.align(alignment = Alignment.CenterVertically))
-        if (displayManga.displayText.isNullOrBlank()) {
-            MangaTitle(displayManga.manga.title,
-                Modifier.align(alignment = Alignment.CenterVertically))
+        if (displayManga.displayText.isBlank()) {
+            MangaTitle(
+                title = displayManga.manga.title,
+                modifier = Modifier.align(
+                    alignment = Alignment.CenterVertically),
+                fontSize = MaterialTheme.typography.body1.fontSize)
         } else {
-            Column {
-                MangaTitle(displayManga.manga.title, Modifier)
-                MangaRelationship(text = displayManga.displayText!!,
-                    Modifier.padding(bottom = 4.dp))
+            Column(Modifier
+                .padding(4.dp)
+                .align(
+                    alignment = Alignment.CenterVertically)) {
+                MangaTitle(
+                    title = displayManga.manga.title,
+                    maxLines = 1,
+                    fontSize = MaterialTheme.typography.body1.fontSize)
+                DisplayText(
+                    displayText = displayManga.displayText,
+                    modifier = Modifier.padding(bottom = 4.dp))
             }
         }
     }
@@ -128,19 +111,52 @@ fun MangaListWithHeader(
                 HeaderCard(text)
             }
             itemsIndexed(mangaList) { index, displayManga ->
-                MangaRow(displayManga = displayManga,
-                    shouldOutlineCover,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .wrapContentHeight()
-                        .clickable {
-                            onClick(displayManga.manga)
-                        })
-                if (index + 1 < mangaList.size) {
-                    Divider()
+                CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+                    MangaRow(displayManga = displayManga,
+                        shouldOutlineCover,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .wrapContentHeight()
+                            .clickable {
+                                onClick(displayManga.manga)
+                            })
+                    if (index + 1 < mangaList.size) {
+                        Divider()
+                    }
                 }
             }
 
+        }
+    }
+}
+
+@Composable
+private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
+    Box {
+
+        val outlineModifier = when (shouldOutlineCover) {
+            true -> Modifier.border(.75.dp, NekoColors.outline,
+                RoundedCornerShape(Shapes.coverRadius))
+            else -> Modifier
+        }
+        Image(painter = rememberImagePainter(
+            data = manga,
+            builder = {
+                placeholder(Pastel.getColorLight())
+                transformations(RoundedCornersTransformation(0f))
+
+            }),
+            contentDescription = null,
+            modifier = modifier
+                .size(48.dp)
+                .padding(4.dp)
+                .clip(RoundedCornerShape(Shapes.coverRadius))
+                .then(outlineModifier)
+
+        )
+        if (manga.favorite) {
+            val offset = (-4).dp
+            Favorited(offset)
         }
     }
 }
@@ -171,4 +187,12 @@ fun MangaHeaderPreview() {
             "This is a very very very very very very very very long text that ellipses because its too long"
     }, "doujinshi")
     )), true)
+}
+
+@Preview
+@Composable
+private fun MangaCoverPreview() {
+    MangaCover(manga = Manga.create("test",
+        "Title",
+        1L).apply { favorite = true }, true)
 }

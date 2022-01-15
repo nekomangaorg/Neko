@@ -4,4 +4,5 @@ AniList, MAL, Kitsu links now show in external link sheets
 Grid view returns to similar manga view
 ## 🏗️ Changes
 ## 🐜 Fixes
+H tag not showing correctly on tablets
 ## 🛠️ Other

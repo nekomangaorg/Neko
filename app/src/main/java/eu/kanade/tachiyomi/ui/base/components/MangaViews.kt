@@ -1,67 +1,67 @@
 package eu.kanade.tachiyomi.ui.base.components
 
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
-import coil.compose.rememberImagePainter
-import coil.transform.RoundedCornersTransformation
+import androidx.compose.ui.unit.sp
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.zedlabs.pastelplaceholder.Pastel
-import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
 
 @Composable
-fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
-    Box {
-
-        val outlineModifier = when (shouldOutlineCover) {
-            true -> Modifier.border(.75.dp, NekoColors.outline,
-                RoundedCornerShape(12.dp))
-            else -> Modifier
-        }
-
-        Image(painter = rememberImagePainter(
-            data = manga,
-            builder = {
-                placeholder(Pastel.getColorLight())
-                transformations(RoundedCornersTransformation(0f))
-
-            }),
-            contentDescription = null,
-            modifier = modifier
-                .size(64.dp)
-                .padding(4.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .then(outlineModifier)
-
-        )
-        Image(
-            asset = CommunityMaterial.Icon2.cmd_heart,
-            colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
-            modifier = Modifier
-                .size(24.dp)
-                .align(alignment = Alignment.TopStart)
-                .offset(x = (-4).dp, y = (-4).dp)
-        )
-    }
+internal fun MangaTitle(
+    title: String,
+    modifier: Modifier = Modifier,
+    maxLines: Int = 2,
+    fontSize: TextUnit = MaterialTheme.typography.body2.fontSize,
+) {
+    Text(
+        text = title,
+        style = TextStyle(fontFamily = Typefaces.montserrat,
+            fontSize = fontSize,
+            fontWeight = FontWeight.Medium,
+            letterSpacing = (-.8).sp),
+        maxLines = maxLines,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+    )
 }
 
-@Preview
 @Composable
-private fun MangaCoverPreview() {
-    MangaCover(manga = Manga.create("test",
-        "Title",
-        1L).apply { favorite = true }, true)
+internal fun DisplayText(
+    displayText: String,
+    modifier: Modifier = Modifier,
+    fontSize: TextUnit = Typefaces.bodySmall,
+) {
+    Text(
+        text = displayText,
+        style = TextStyle(fontFamily = Typefaces.montserrat,
+            fontSize = fontSize,
+            letterSpacing = (-.5).sp,
+            color = MaterialTheme.colors.onSurface.copy(.6f)),
+        maxLines = 1,
+        overflow = TextOverflow.Ellipsis,
+        modifier = modifier
+    )
+}
+
+@Composable
+internal fun Favorited(offset: Dp) {
+    Image(
+        asset = CommunityMaterial.Icon2.cmd_heart,
+        colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
+        modifier = Modifier
+            .size(24.dp)
+            .offset(x = offset, y = offset)
+    )
 }

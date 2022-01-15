@@ -98,7 +98,7 @@ class SimilarController(bundle: Bundle? = null) :
                                 view.measuredWidth.numberOfColumnsForCompose(preferences.gridSize()
                                     .get())
 
-                            val comfortable = preferences.libraryLayout().get() == 0
+                            val comfortable = preferences.libraryLayout().get() == 2
 
                             MangaGridWithHeader(
                                 groupedManga = groupedManga,

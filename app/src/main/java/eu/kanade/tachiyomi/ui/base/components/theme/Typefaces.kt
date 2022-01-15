@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.base.components.theme
 import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 
@@ -20,4 +21,5 @@ object Typefaces {
         )
 
     val bodySmall = 12.sp
+    val body = 14.dp
 }
