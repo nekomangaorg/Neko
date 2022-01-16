@@ -6,6 +6,8 @@ import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.LogoutDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
+import eu.kanade.tachiyomi.source.online.models.dto.RatingResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusMapDto
@@ -80,4 +82,16 @@ interface MangaDexAuthService {
 
     @DELETE("${MdApi.manga}/{id}/follow")
     suspend fun unfollowManga(@Path("id") mangaId: String): ApiResponse<ResultDto>
+
+    @GET(MdApi.rating)
+    suspend fun retrieveRating(@Query("manga[]") mangaId: String): ApiResponse<RatingResponseDto>
+
+    @POST("${MdApi.rating}/{id}")
+    suspend fun updateRating(
+        @Path("id") mangaId: String,
+        @Body ratingDto: RatingDto,
+    ): ApiResponse<ResultDto>
+
+    @DELETE("${MdApi.rating}/{id}")
+    suspend fun removeRating(@Query("id") mangaId: String): ApiResponse<ResultDto>
 }

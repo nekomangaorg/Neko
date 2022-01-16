@@ -8,10 +8,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
+import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
-import eu.kanade.tachiyomi.source.online.models.dto.asMdAggregateVolumeMap
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -47,7 +47,7 @@ class ApiMangaParser {
                         this.log("trying to aggregate for ${mangaDto.id}")
                     }.getOrNull()
 
-                aggregateDto?.volumes?.asMdAggregateVolumeMap()?.values
+                aggregateDto?.volumes?.asMdMap<AggregateVolume>()?.values
                     ?.flatMap { it.chapters.values }
                     ?.map { it.chapter }
                     ?: emptyList()
@@ -65,7 +65,7 @@ class ApiMangaParser {
                     if (rating > 0) {
                         manga.rating = rating.toString()
                     }
-                 
+
                     manga.users = stats.follows?.toString()
 
                 }
@@ -74,7 +74,8 @@ class ApiMangaParser {
 
 
             manga.description =
-                MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap()["en"] ?: "")
+                MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap<String>()["en"]
+                    ?: "")
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
@@ -91,14 +92,9 @@ class ApiMangaParser {
             lastChapter?.let {
                 manga.last_chapter_number = floor(it).toInt()
             }
-
-            /*networkManga.rating?.let {
-                manga.rating = it.bayesian ?: it.mean
-                manga.users = it.users
-            }*/
-
+            
             val otherUrls = mutableListOf<String>()
-            mangaAttributesDto.links?.asMdMap()?.let { linkMap ->
+            mangaAttributesDto.links?.asMdMap<String>()?.let { linkMap ->
                 linkMap["al"]?.let { id -> manga.anilist_id = id }
                 linkMap["kt"]?.let { id -> manga.kitsu_id = id }
                 linkMap["mal"]?.let { id -> manga.my_anime_list_id = id }

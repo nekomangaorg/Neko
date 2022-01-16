@@ -4,6 +4,7 @@ AniList, MAL, Kitsu, Bookwalker, EBookJapan, CdJapan links now show in external 
 Grid view returns to similar manga view
 Support Azuki and MangaHot chapters (@jopejoe1)
 Number of follows is shown on the manga info page again
+Ability to add/view personal ratings on MDList
 ## 🏗️ Changes
 ## 🐜 Fixes
 H tag not showing correctly on tablets
