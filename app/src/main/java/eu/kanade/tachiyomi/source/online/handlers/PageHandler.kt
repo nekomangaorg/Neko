@@ -9,8 +9,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
+import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
+import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -27,6 +29,8 @@ class PageHandler {
     val preferences: PreferencesHelper by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
     val comikeyHandler: ComikeyHandler by injectLazy()
+    val azukiHandler: AzukiHandler by injectLazy()
+    val mangaHotHandler: MangaHotHandler by injectLazy()
     val bilibiliHandler: BilibiliHandler by injectLazy()
     val imageHandler: ImageHandler by injectLazy()
 
@@ -43,7 +47,7 @@ class PageHandler {
                         this.log("trying to fetch page list")
                         throw Exception("error returned from chapterResponse")
                     }.getOrThrow().data.attributes
-                
+
                 val externalUrl = chapterAttributesDto.externalUrl
                 val currentDate = System.currentTimeMillis()
                 val chapterDate = MdUtil.parseDate(chapterAttributesDto.publishAt)
@@ -51,6 +55,12 @@ class PageHandler {
 
                 if (externalUrl != null) {
                     when {
+                        "azuki manga".equals(chapter.scanlator, true) -> {
+                            return@withContext azukiHandler.fetchPageList(externalUrl)
+                        }
+                        "mangahot".equals(chapter.scanlator, true) -> {
+                            return@withContext mangaHotHandler.fetchPageList(externalUrl)
+                        }
                         "mangaplus".equals(chapter.scanlator, true) -> {
                             return@withContext mangaPlusHandler.fetchPageList(externalUrl)
                         }
