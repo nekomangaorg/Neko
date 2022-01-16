@@ -3,6 +3,7 @@ Similar rating, and number of votes show now for anilist, mal, similar manga in 
 AniList, MAL, Kitsu, Bookwalker, EBookJapan, CdJapan links now show in external link sheets
 Grid view returns to similar manga view
 Support Azuki and MangaHot chapters (@jopejoe1)
+Number of follows is shown on the manga info page again
 ## 🏗️ Changes
 ## 🐜 Fixes
 H tag not showing correctly on tablets

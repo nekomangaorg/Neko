@@ -54,16 +54,22 @@ class ApiMangaParser {
             }
 
             withIOContext {
-                val stats = network.service.mangaStatistics(mangaDto.id)
+                val statResult = network.service.mangaStatistics(mangaDto.id)
                     .onError {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.onException {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.getOrNull()
-                val rating = stats?.statistics?.get(mangaDto.id)?.rating?.average ?: 0.0
-                if (rating > 0) {
-                    manga.rating = rating.toString()
+                statResult?.statistics?.get(mangaDto.id)?.let { stats ->
+                    val rating = stats.rating?.average ?: 0.0
+                    if (rating > 0) {
+                        manga.rating = rating.toString()
+                    }
+                 
+                    manga.users = stats.follows?.toString()
+
                 }
+
             }
 
 

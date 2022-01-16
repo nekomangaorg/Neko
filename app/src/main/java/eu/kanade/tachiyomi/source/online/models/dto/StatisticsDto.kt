@@ -11,6 +11,7 @@ data class StatisticResponseDto(
 @Serializable
 data class StatisticsDto(
     val rating: RatingDto,
+    val follows: Int?,
 )
 
 @Serializable
