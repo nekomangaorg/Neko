@@ -54,7 +54,7 @@ class MdUtil {
                 useArrayPolymorphism = true
                 prettyPrint = true
             }
-        
+
         val validOneShotFinalChapters = listOf("0", "1")
 
         val englishDescriptionTags = listOf(
@@ -204,7 +204,7 @@ class MdUtil {
                 newDescription = newDescription.substringBefore(it)
             }
 
-            englishDescriptionTags.forEach { it ->
+            englishDescriptionTags.forEach {
                 newDescription = newDescription.replace(it, "")
             }
             return cleanString(newDescription)

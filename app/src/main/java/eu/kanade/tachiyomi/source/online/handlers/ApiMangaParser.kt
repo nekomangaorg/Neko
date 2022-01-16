@@ -92,7 +92,7 @@ class ApiMangaParser {
             lastChapter?.let {
                 manga.last_chapter_number = floor(it).toInt()
             }
-            
+
             val otherUrls = mutableListOf<String>()
             mangaAttributesDto.links?.asMdMap<String>()?.let { linkMap ->
                 linkMap["al"]?.let { id -> manga.anilist_id = id }
@@ -116,8 +116,7 @@ class ApiMangaParser {
             val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
             val publishedOrCancelled =
                 (tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED)
-            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter
-                    ?: "zzzzzz")
+            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter)
             ) {
                 manga.status = SManga.COMPLETED
                 manga.missing_chapters = null

@@ -412,6 +412,7 @@ class MangaHeaderHolder(
         }
 
         binding.mangaStatus.isVisible = manga.status != 0
+
         binding.mangaStatus.text = (
             itemView.context.getString(
                 when (manga.status) {
