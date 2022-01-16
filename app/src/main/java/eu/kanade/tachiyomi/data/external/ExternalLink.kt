@@ -12,6 +12,34 @@ class AnimePlanet(id: String) : ExternalLink(id) {
     override fun getUrl() = "https://www.anime-planet.com/manga/$id"
 }
 
+class BookWalker(id: String) : ExternalLink(id) {
+    override val name = "Book Walker"
+    override fun getLogo() = R.drawable.ic_tracker_bookwalker_logo
+    override fun getLogoColor() = Color.rgb(255, 255, 255)
+    override fun getUrl() = "https://bookwalker.jp/$id"
+}
+
+class EBookJapan(id: String) : ExternalLink(id) {
+    override val name = "ebook Japan"
+    override fun getLogo() = R.drawable.ic_tracker_ebj_logo
+    override fun getLogoColor() = Color.rgb(255, 255, 255)
+    override fun getUrl() = id
+}
+
+class CdJapan(id: String) : ExternalLink(id) {
+    override val name = "CDJapan"
+    override fun getLogo() = R.drawable.ic_tracker_cdj_logo
+    override fun getLogoColor() = Color.rgb(0, 153, 204)
+    override fun getUrl() = id
+}
+
+class Amazon(id: String) : ExternalLink(id) {
+    override val name = "Amazon"
+    override fun getLogo() = R.drawable.ic_tracker_amazon_logo
+    override fun getLogoColor() = Color.rgb(25, 47, 62)
+    override fun getUrl() = id
+}
+
 class MangaUpdates(id: String) : ExternalLink(id) {
     override val name = "MangaUpdates"
     override fun getLogo() = R.drawable.ic_tracker_manga_updates_logo

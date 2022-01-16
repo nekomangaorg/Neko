@@ -100,6 +100,10 @@ class ApiMangaParser {
                 linkMap["ap"]?.let { id -> manga.anime_planet_id = id }
                 linkMap["raw"]?.let { id -> otherUrls.add("raw~~$id") }
                 linkMap["engtl"]?.let { id -> otherUrls.add("engtl~~$id") }
+                linkMap["bw"]?.let { id -> otherUrls.add("bw~~$id") }
+                linkMap["amz"]?.let { id -> otherUrls.add("amz~~$id") }
+                linkMap["ebj"]?.let { id -> otherUrls.add("ebj~~$id") }
+                linkMap["cdj"]?.let { id -> otherUrls.add("cdj~~$id") }
             }
             if (otherUrls.isNotEmpty()) {
                 manga.other_urls = otherUrls.joinToString("||")

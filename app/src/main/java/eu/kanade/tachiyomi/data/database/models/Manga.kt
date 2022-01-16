@@ -3,9 +3,13 @@ package eu.kanade.tachiyomi.data.database.models
 import android.content.Context
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.external.Amazon
 import eu.kanade.tachiyomi.data.external.AniList
 import eu.kanade.tachiyomi.data.external.AnimePlanet
+import eu.kanade.tachiyomi.data.external.BookWalker
+import eu.kanade.tachiyomi.data.external.CdJapan
 import eu.kanade.tachiyomi.data.external.Dex
+import eu.kanade.tachiyomi.data.external.EBookJapan
 import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.external.Kitsu
@@ -194,8 +198,13 @@ interface Manga : SManga {
             combinedString.split("||").forEach { pairString ->
                 val split = pairString.split("~~")
                 when {
-                    split[0].equals("raw", true) -> list.add(Raw(split[1]))
-                    split[0].equals("engtl", true) -> list.add(Engtl(split[1]))
+                    split[0] == "raw" -> list.add(Raw(split[1]))
+                    split[0] == "engtl" -> list.add(Engtl(split[1]))
+                    split[0] == "bw" -> list.add(BookWalker(split[1]))
+                    split[0] == "cdj" -> list.add(CdJapan(split[1]))
+                    split[0] == "ebj" -> list.add(EBookJapan(split[1]))
+                    split[0] == "amz" -> list.add(Amazon(split[1]))
+
                 }
             }
         }
