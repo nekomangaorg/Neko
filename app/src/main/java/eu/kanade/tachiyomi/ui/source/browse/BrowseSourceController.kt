@@ -740,7 +740,8 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
             ) + 16.dpToPx
         }
-        binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
+        binding.fab.isVisible =
+            presenter.sourceFilters.isNotEmpty() && presenter.shouldHideFab.not()
     }
 
     companion object {

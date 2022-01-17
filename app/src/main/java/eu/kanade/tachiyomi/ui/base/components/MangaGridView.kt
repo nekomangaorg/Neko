@@ -7,6 +7,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -41,20 +42,24 @@ fun MangaGridWithHeader(
     groupedManga: Map<String, List<DisplayManga>>,
     shouldOutlineCover: Boolean,
     columns: Int,
-    isComfortable: Boolean = true,
     modifier: Modifier = Modifier,
+    isComfortable: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(),
     onClick: (manga: Manga) -> Unit = {},
 ) {
 
-    LazyColumn(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-
+    LazyColumn(
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        modifier = modifier,
+        contentPadding = contentPadding,
+    ) {
         groupedManga.forEach { (headerText, allGrids) ->
             stickyHeader {
                 HeaderCard(headerText)
             }
             gridItems(items = allGrids,
                 columns = columns,
-                modifier = modifier
+                modifier = Modifier
                     .padding(horizontal = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)) { displayManga ->
                 MangaGridItem(

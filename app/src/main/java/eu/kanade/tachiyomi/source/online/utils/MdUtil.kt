@@ -200,7 +200,7 @@ class MdUtil {
 
         fun cleanDescription(string: String): String {
             var newDescription = string
-            descriptionLanguages.forEach { it ->
+            descriptionLanguages.forEach {
                 newDescription = newDescription.substringBefore(it)
             }
 

@@ -9,5 +9,6 @@ Ability to add/view personal ratings on MDList
 ## 🐜 Fixes
 H tag not showing correctly on tablets
 Completed manga not being marked complete in status
+Stopped showing the filter fab in latest and follows view
 
 ## 🛠️ Other
