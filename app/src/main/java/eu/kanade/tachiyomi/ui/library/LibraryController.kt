@@ -1786,7 +1786,7 @@ class LibraryController(
         val mangaList = selectedMangaSet.toList()
         val urlList = presenter.getMangaUrls(mangaList)
         if (urlList.isEmpty()) return
-        val urls = presenter.getMangaUrls(mangaList).joinToString("\n")
+        val urls = urlList.joinToString("\n")
         val intent = Intent(Intent.ACTION_SEND).apply {
             type = "text/*"
             putExtra(Intent.EXTRA_TEXT, urls)

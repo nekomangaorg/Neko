@@ -34,6 +34,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
 import eu.kanade.tachiyomi.util.lang.removeArticles
@@ -845,7 +846,7 @@ class LibraryPresenter(
     fun getMangaUrls(mangaList: List<Manga>): List<String> {
         return mangaList.mapNotNull { manga ->
             val source = sourceManager.get(manga.source) as? HttpSource ?: return@mapNotNull null
-            source.mangaDetailsRequest(manga).url.toString()
+            source.mangaDetailsRequest(manga).url.toString() + "/" + manga.getSlug()
         }
     }
 
