@@ -4,9 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -19,12 +17,15 @@ import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import com.google.android.material.composethemeadapter.MdcTheme
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
+import eu.kanade.tachiyomi.ui.base.components.Action
+import eu.kanade.tachiyomi.ui.base.components.EmptyView
 import eu.kanade.tachiyomi.ui.base.components.MangaGridWithHeader
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -66,16 +67,25 @@ class SimilarController(bundle: Bundle? = null) :
                 ProvideWindowInsets {
 
                     val isRefreshing by presenter.isRefreshing.observeAsState(initial = true)
+
+                    val refreshing: () -> Unit = {
+                        viewScope.launch {
+                            presenter.getSimilarManga(true)
+                        }
+                    }
+
+                    val mangaClicked: (Manga) -> Unit = { manga ->
+                        router.pushController(MangaDetailsController(manga,
+                            true).withFadeTransaction())
+                    }
+
+
                     SwipeRefresh(
                         state = rememberSwipeRefreshState(isRefreshing),
                         modifier = Modifier
                             .statusBarsPadding()
                             .fillMaxSize(),
-                        onRefresh = {
-                            viewScope.launch {
-                                presenter.getSimilarManga(true)
-                            }
-                        },
+                        onRefresh = refreshing,
                         indicator = { state, trigger ->
                             SwipeRefreshIndicator(
                                 state = state,
@@ -90,16 +100,18 @@ class SimilarController(bundle: Bundle? = null) :
                             emptyMap())
                         if (isRefreshing.not()) {
                             if (groupedManga.isEmpty()) {
-                                Text(text = "No Results")
-                                //show empty view
+                                EmptyView(
+                                    iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+                                    iconSize = 176.dp,
+                                    message = R.string.no_results_found,
+                                    actions = listOf(Action(R.string.retry, refreshing))
+                                )
                             } else {
                                 if (preferences.browseAsList().get()) {
                                     MangaListWithHeader(groupedManga = groupedManga,
                                         shouldOutlineCover = preferences.outlineOnCovers().get(),
-                                        modifier = Modifier.padding(top = 10.dp)) { manga ->
-                                        router.pushController(MangaDetailsController(manga,
-                                            true).withFadeTransaction())
-                                    }
+                                        modifier = Modifier,
+                                        onClick = mangaClicked)
                                 } else {
 
                                     val columns =
@@ -118,10 +130,8 @@ class SimilarController(bundle: Bundle? = null) :
                                         columns = columns,
                                         isComfortable = comfortable,
                                         contentPadding = contentPadding,
-                                    ) { manga ->
-                                        router.pushController(MangaDetailsController(manga,
-                                            true).withFadeTransaction())
-                                    }
+                                        onClick = mangaClicked
+                                    )
                                 }
                             }
                         }
