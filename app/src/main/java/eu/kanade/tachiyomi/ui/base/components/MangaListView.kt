@@ -5,6 +5,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -101,11 +102,13 @@ fun MangaListWithHeader(
     groupedManga: Map<String, List<DisplayManga>>,
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
+    contentPadding: PaddingValues = PaddingValues(),
     onClick: (manga: Manga) -> Unit = {},
 ) {
-    LazyColumn(modifier
-        .wrapContentWidth(align = Alignment.CenterHorizontally)
-        .padding(bottom = 48.dp)) {
+    LazyColumn(
+        modifier = modifier
+            .wrapContentWidth(align = Alignment.CenterHorizontally),
+        contentPadding = contentPadding) {
         groupedManga.forEach { (text, mangaList) ->
             stickyHeader {
                 HeaderCard(text)

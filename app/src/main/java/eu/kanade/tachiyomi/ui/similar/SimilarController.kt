@@ -107,10 +107,15 @@ class SimilarController(bundle: Bundle? = null) :
                                     actions = listOf(Action(R.string.retry, refreshing))
                                 )
                             } else {
+                                val contentPadding = rememberInsetsPaddingValues(
+                                    insets = LocalWindowInsets.current.navigationBars,
+                                    applyBottom = true,
+                                    applyTop = false)
+
                                 if (preferences.browseAsList().get()) {
                                     MangaListWithHeader(groupedManga = groupedManga,
                                         shouldOutlineCover = preferences.outlineOnCovers().get(),
-                                        modifier = Modifier,
+                                        contentPadding = contentPadding,
                                         onClick = mangaClicked)
                                 } else {
 
@@ -119,10 +124,6 @@ class SimilarController(bundle: Bundle? = null) :
                                             .get())
 
                                     val comfortable = preferences.libraryLayout().get() == 2
-                                    val contentPadding = rememberInsetsPaddingValues(
-                                        insets = LocalWindowInsets.current.navigationBars,
-                                        applyBottom = true,
-                                        applyTop = false)
 
                                     MangaGridWithHeader(
                                         groupedManga = groupedManga,
