@@ -5,10 +5,11 @@ Grid view returns to similar manga view
 Support Azuki and MangaHot chapters (@jopejoe1)
 Number of follows is shown on the manga info page again
 Ability to add/view personal ratings on MDList
+Sharing a manga from the library view now adds a slug to the url (@henrik9999)
 ## 🏗️ Changes
 ## 🐜 Fixes
 H tag not showing correctly on tablets
 Completed manga not being marked complete in status
 Stopped showing the filter fab in latest and follows view
-
 ## 🛠️ Other
+bump some libraries
