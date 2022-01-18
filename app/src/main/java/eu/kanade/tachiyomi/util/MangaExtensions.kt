@@ -202,3 +202,20 @@ fun SManga.toLocalManga(db: DatabaseHelper, sourceId: Long): Manga {
     }
     return localManga
 }
+
+fun SManga.getSlug(): String {
+    val title = this.title.trim().lowercase().replace("[^a-z0-9]+".toRegex(), "-").replace("-+$".toRegex(), "")
+
+    val wordList = title.split('-')
+    val slug = mutableListOf<String>()
+
+    for(i in wordList) {
+        if((slug.joinToString("-","","-") + i).count() < 100) {
+            slug.add(i)
+        } else {
+            break;
+        }
+    }
+
+    return slug.joinToString("-")
+}

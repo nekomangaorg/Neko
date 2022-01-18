@@ -114,7 +114,7 @@ dependencies {
     implementation("tachiyomi.sourceapi:source-api:1.1")
 
     // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.4.0")
+    implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.cardview:cardview:1.0.0")
     implementation("com.google.android.material:material:1.5.0-beta01")
     implementation("androidx.webkit:webkit:1.4.0")
@@ -125,7 +125,7 @@ dependencies {
     implementation("androidx.biometric:biometric:1.1.0")
     implementation("androidx.palette:palette:1.0.0")
     implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.2")
+    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:20.0.2")
@@ -297,7 +297,7 @@ dependencies {
     val kahelpersVersion = "3.0.5"
     implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:$kahelpersVersion")
     implementation("com.github.FunkyMuse.KAHelpers:activity:$kahelpersVersion")
-    implementation("com.github.skydoves:sandwich:1.2.2")
+    implementation("com.github.skydoves:sandwich:1.2.3")
 
     implementation("com.mikepenz:aboutlibraries:8.9.4")
     debugImplementation("com.squareup.leakcanary:leakcanary-android:2.8.1")
