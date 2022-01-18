@@ -80,6 +80,7 @@ import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
+import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
@@ -1028,7 +1029,8 @@ class MangaDetailsController :
         val source = presenter.source as? HttpSource ?: return
         val stream = cover?.getUriCompat(context)
         try {
-            val url = source.mangaDetailsRequest(presenter.manga).url.toString()
+            var url = source.mangaDetailsRequest(presenter.manga).url.toString()
+            url = "$url/" + presenter.manga.getSlug()
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/*"
                 putExtra(Intent.EXTRA_TEXT, url)
