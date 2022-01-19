@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material.MaterialTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
@@ -16,7 +16,7 @@ import com.google.accompanist.insets.statusBarsPadding
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
-import com.google.android.material.composethemeadapter.MdcTheme
+import com.google.android.material.composethemeadapter3.Mdc3Theme
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -63,7 +63,7 @@ class SimilarController(bundle: Bundle? = null) :
         }
 
         binding.holder.setContent {
-            MdcTheme {
+            Mdc3Theme {
                 ProvideWindowInsets {
 
                     val isRefreshing by presenter.isRefreshing.observeAsState(initial = true)
@@ -90,8 +90,8 @@ class SimilarController(bundle: Bundle? = null) :
                             SwipeRefreshIndicator(
                                 state = state,
                                 refreshTriggerDistance = trigger,
-                                backgroundColor = MaterialTheme.colors.secondary,
-                                contentColor = MaterialTheme.colors.onSecondary
+                                backgroundColor = MaterialTheme.colorScheme.secondary,
+                                contentColor = MaterialTheme.colorScheme.onSecondary
                             )
                         }
                     ) {

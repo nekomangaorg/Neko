@@ -244,11 +244,13 @@ dependencies {
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Design
+    implementation("androidx.compose.material3:material3:1.0.0-alpha03")
+    implementation("com.google.android.material:compose-theme-adapter-3:1.0.3")
     implementation("androidx.compose.material:material:$composeVersion")
+
     // Material design icons
     implementation("androidx.compose.material:material-icons-core:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-    implementation("com.google.android.material:compose-theme-adapter:1.1.2")
 
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 

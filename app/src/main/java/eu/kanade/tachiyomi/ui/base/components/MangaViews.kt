@@ -2,8 +2,8 @@ package eu.kanade.tachiyomi.ui.base.components
 
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
@@ -22,7 +22,7 @@ internal fun MangaTitle(
     title: String,
     modifier: Modifier = Modifier,
     maxLines: Int = 2,
-    fontSize: TextUnit = MaterialTheme.typography.body2.fontSize,
+    fontSize: TextUnit = MaterialTheme.typography.bodyMedium.fontSize,
     fontWeight: FontWeight = FontWeight.Normal,
 ) {
     Text(
@@ -40,7 +40,7 @@ internal fun MangaTitle(
 internal fun DisplayText(
     displayText: String,
     modifier: Modifier = Modifier,
-    fontSize: TextUnit = MaterialTheme.typography.body2.fontSize,
+    fontSize: TextUnit = MaterialTheme.typography.bodyMedium.fontSize,
     fontWeight: FontWeight = FontWeight.Normal,
 ) {
     Text(
@@ -48,7 +48,7 @@ internal fun DisplayText(
         style = TextStyle(fontFamily = Typefaces.montserrat,
             fontSize = fontSize,
             fontWeight = fontWeight,
-            color = MaterialTheme.colors.onSurface.copy(.6f)),
+            color = MaterialTheme.colorScheme.onSurface.copy(.6f)),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
         modifier = modifier
@@ -59,7 +59,7 @@ internal fun DisplayText(
 internal fun Favorited(offset: Dp) {
     Image(
         asset = CommunityMaterial.Icon2.cmd_heart,
-        colorFilter = ColorFilter.tint(MaterialTheme.colors.secondary),
+        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
         modifier = Modifier
             .size(24.dp)
             .offset(x = offset, y = offset)

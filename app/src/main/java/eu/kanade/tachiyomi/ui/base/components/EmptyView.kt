@@ -8,10 +8,10 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.paddingFromBaseline
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -36,7 +36,7 @@ fun EmptyView(
     @StringRes message: Int? = null,
     actions: List<Action> = emptyList(),
 ) {
-    val iconColor = MaterialTheme.colors.onSurface.copy(alpha = .45f)
+    val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val top = maxHeight / 2
         Column(modifier = Modifier
@@ -53,7 +53,7 @@ fun EmptyView(
                     color = iconColor,
                     style = TextStyle(
                         fontFamily = Typefaces.montserrat,
-                        fontSize = MaterialTheme.typography.body2.fontSize)
+                        fontSize = MaterialTheme.typography.bodyMedium.fontSize)
                 )
             }
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
@@ -61,10 +61,10 @@ fun EmptyView(
                     Spacer(modifier = Modifier.size(16.dp))
                     TextButton(onClick = action.onClick) {
                         Text(text = stringResource(id = action.resId),
-                            color = MaterialTheme.colors.secondary,
+                            color = MaterialTheme.colorScheme.secondary,
                             style = TextStyle(
                                 fontFamily = Typefaces.montserrat,
-                                fontSize = MaterialTheme.typography.body1.fontSize,
+                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
                                 fontWeight = FontWeight.Medium)
                         )
                     }

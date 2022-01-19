@@ -17,8 +17,8 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -159,7 +159,7 @@ private fun ComfortableGridItem(
                 bottom = if (displayText.isNotBlank()) 0.dp else 4.dp,
                 start = 4.dp,
                 end = 4.dp),
-            fontSize = MaterialTheme.typography.caption.fontSize,
+            fontSize = MaterialTheme.typography.bodySmall.fontSize,
             fontWeight = FontWeight.Medium)
 
         if (displayText.isNotBlank()) {
@@ -170,7 +170,7 @@ private fun ComfortableGridItem(
                     bottom = 4.dp,
                     start = 4.dp,
                     end = 4.dp),
-                fontSize = MaterialTheme.typography.caption.fontSize)
+                fontSize = MaterialTheme.typography.bodySmall.fontSize)
         }
     }
 }
@@ -210,7 +210,7 @@ private fun CompactGridItem(
                             bottom = 4.dp,
                             start = 4.dp,
                             end = 4.dp),
-                    fontSize = MaterialTheme.typography.caption.fontSize,
+                    fontSize = MaterialTheme.typography.bodySmall.fontSize,
                     fontWeight = FontWeight.Medium)
             }
         }

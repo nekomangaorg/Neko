@@ -15,9 +15,8 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Divider
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
@@ -53,7 +52,7 @@ fun MangaRow(
                 title = displayManga.manga.title,
                 modifier = Modifier.align(
                     alignment = Alignment.CenterVertically),
-                fontSize = MaterialTheme.typography.body1.fontSize)
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize)
         } else {
             Column(Modifier
                 .padding(4.dp)
@@ -62,7 +61,7 @@ fun MangaRow(
                 MangaTitle(
                     title = displayManga.manga.title,
                     maxLines = 1,
-                    fontSize = MaterialTheme.typography.body1.fontSize)
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize)
                 DisplayText(
                     displayText = displayManga.displayText,
                     modifier = Modifier.padding(bottom = 4.dp))
@@ -90,9 +89,8 @@ fun MangaList(
                     .clickable {
                         onClick(displayManga.manga)
                     })
-            if (index + 1 < mangaList.size) {
-                Divider()
-            }
+            /*if (index + 1 < mangaList.size) {
+            }*/
         }
     }
 }
@@ -123,9 +121,9 @@ fun MangaListWithHeader(
                             .clickable {
                                 onClick(displayManga.manga)
                             })
-                    if (index + 1 < mangaList.size) {
+                    /*if (index + 1 < mangaList.size) {
                         Divider()
-                    }
+                    }*/
                 }
             }
 
