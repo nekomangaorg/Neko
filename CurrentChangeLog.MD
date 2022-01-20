@@ -13,5 +13,6 @@ Completed manga not being marked complete in status
 Stopped showing the filter fab in latest and follows view
 ## 🛠️ Other
 Removed some of the legcy cache table
+enabled proguard to shrink app size
 cleaned up Similar code
 bump some libraries
