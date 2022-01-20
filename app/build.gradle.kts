@@ -63,13 +63,13 @@ android {
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
-            isShrinkResources = true
-            isMinifyEnabled = true
+            /* isShrinkResources = true
+             isMinifyEnabled = true
 
-            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
-            configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
-                mappingFileUploadEnabled = false
-            }
+             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
+             configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                 mappingFileUploadEnabled = false
+             }*/
         }
         getByName("release") {
             isShrinkResources = true

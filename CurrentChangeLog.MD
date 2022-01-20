@@ -11,6 +11,7 @@ Sharing a manga url now adds a slug to the url (@henrik9999)
 H tag not showing correctly on tablets
 Completed manga not being marked complete in status
 Stopped showing the filter fab in latest and follows view
+Some titles showing as blank
 ## 🛠️ Other
 Removed some of the legcy cache table
 enabled proguard to shrink app size

@@ -253,8 +253,12 @@ class MdUtil {
         fun getLangsToShow(preferences: PreferencesHelper) =
             preferences.langsToShow().get().split(",")
 
-        fun getTitle(titleMap: Map<String, String?>, originalLanguage: String): String {
-            return titleMap["en"] ?: titleMap[originalLanguage] ?: titleMap["jp"] ?: titleMap["ja"]
+        fun getTitle(
+            titleMap: Map<String, String?>,
+            originalLanguage: String,
+        ): String {
+            return titleMap["en"] ?: titleMap[originalLanguage] ?: titleMap["$originalLanguage-ro"]
+            ?: titleMap["jp"] ?: titleMap["ja"]
             ?: titleMap["kr"] ?: titleMap["zh"] ?: ""
         }
     }
