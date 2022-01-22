@@ -58,14 +58,13 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="*.mangadex.org"/>
-                <data android:host="mangadex.org"/>
-                <data android:host="*.mangadex.cc"/>
+                <data android:host="*.mangadex.org" />
+                <data android:host="mangadex.org" />
+                <data android:host="*.mangadex.cc" />
                 <data android:host="mangadex.cc" />
 
-                <data
-                    android:pathPattern="/chapter/..*"
-                    android:scheme="https" />
+                <data android:pathPattern="/chapter/..*" />
+                <data android:scheme="https" />
             </intent-filter>
 
             <intent-filter>
@@ -124,26 +123,15 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="*.mangadex.org"/>
-                <data android:host="mangadex.org"/>
-                <data android:host="*.mangadex.cc"/>
-                <data android:host="mangadex.cc"/>
+                <data android:scheme="https" />
 
-                <data
-                    android:pathPattern="/manga/..*"
-                    android:scheme="https" />
+                <data android:host="*.mangadex.org" />
+                <data android:host="mangadex.org" />
+                <data android:host="*.mangadex.cc" />
+                <data android:host="mangadex.cc" />
 
-                <data android:host="*.mangadex.org"/>
-                <data android:host="mangadex.org"/>
-                <data android:host="*.mangadex.cc"/>
-                <data android:host="mangadex.cc"/>
-
-                <data android:host="*.mangodicks.org"/>
-                <data android:host="mangodicks.org"/>
-
-                <data
-                    android:pathPattern="/title/..*"
-                    android:scheme="https" />
+                <data android:pathPattern="/manga/..*" />
+                <data android:pathPattern="/title/..*" />
             </intent-filter>
 
 
