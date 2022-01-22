@@ -52,26 +52,18 @@
         <activity
             android:name=".ui.reader.ReaderActivity"
             android:theme="@style/Theme.Splash">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:host="*.mangadex.org"/>
+                <data android:host="mangadex.org"/>
+                <data android:host="*.mangadex.cc"/>
+                <data android:host="mangadex.cc" />
+
                 <data
-                    android:host="www.mangadex.org"
-                    android:pathPattern="/chapter/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="mangadex.org"
-                    android:pathPattern="/chapter/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="www.mangadex.cc"
-                    android:pathPattern="/chapter/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="mangadex.cc"
                     android:pathPattern="/chapter/..*"
                     android:scheme="https" />
             </intent-filter>
@@ -126,43 +118,30 @@
             android:name=".ui.main.DeepLinkActivity"
             android:launchMode="singleTask"
             android:theme="@android:style/Theme.NoDisplay">
-            <intent-filter>
+            <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:host="*.mangadex.org"/>
+                <data android:host="mangadex.org"/>
+                <data android:host="*.mangadex.cc"/>
+                <data android:host="mangadex.cc"/>
+
                 <data
-                    android:host="www.mangadex.org"
-                    android:pathPattern="/manga/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="mangadex.org"
-                    android:pathPattern="/manga/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="www.mangadex.cc"
-                    android:pathPattern="/manga/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="www.mangadex.cc"
                     android:pathPattern="/manga/..*"
                     android:scheme="https" />
 
+                <data android:host="*.mangadex.org"/>
+                <data android:host="mangadex.org"/>
+                <data android:host="*.mangadex.cc"/>
+                <data android:host="mangadex.cc"/>
+
+                <data android:host="*.mangodicks.org"/>
+                <data android:host="mangodicks.org"/>
+
                 <data
-                    android:host="www.mangadex.org"
-                    android:pathPattern="/title/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="mangadex.org"
-                    android:pathPattern="/title/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="www.mangadex.cc"
-                    android:pathPattern="/title/..*"
-                    android:scheme="https" />
-                <data
-                    android:host="www.mangadex.cc"
                     android:pathPattern="/title/..*"
                     android:scheme="https" />
             </intent-filter>
