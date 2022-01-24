@@ -328,6 +328,7 @@ tasks {
         kotlinOptions.freeCompilerArgs += listOf(
             "-Xopt-in=kotlin.Experimental",
             "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-Xopt-in=kotlin.time.ExperimentalTime",
             "-Xopt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
