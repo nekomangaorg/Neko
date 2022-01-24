@@ -272,7 +272,8 @@ dependencies {
     val accompanistVersion = "0.20.3"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
+    //implementation("com.google.accompanist:accompanist-insets-ui:$accompanistVersion")
+    //implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
 
 // Conductor
     implementation("com.bluelinelabs:conductor:3.1.2")
