@@ -30,7 +30,7 @@ fun HeaderCard(text: String) {
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSecondary,
-            modifier = Modifier.padding(all = 4.dp)
+            modifier = Modifier.padding(all = 12.dp)
         )
     }
 }

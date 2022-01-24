@@ -745,13 +745,11 @@ open class BrowseSourceController(bundle: Bundle) :
     }
 
     companion object {
-        const val SOURCE_ID_KEY = "sourceId"
         const val APPLY_INSET = "applyInset"
         const val DEEP_LINK = "deepLink"
         const val FOLLOWS = "follows"
         const val MANGA_ID = "mangaId"
 
         const val SEARCH_QUERY_KEY = "searchQuery"
-        const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"
     }
 }

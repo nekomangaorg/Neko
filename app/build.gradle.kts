@@ -264,12 +264,15 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
 
+
+
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 
     //accompianist
     val accompanistVersion = "0.20.3"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
 
 // Conductor
     implementation("com.bluelinelabs:conductor:3.1.2")
