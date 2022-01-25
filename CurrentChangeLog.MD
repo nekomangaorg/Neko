@@ -1,5 +1,6 @@
 ## 🥳 New
 Similar rating, and number of votes show now for anilist, mal, similar manga in the similar screen (@goldbattle)
+Auto verify deeplinking for mangadex links (@curche)
 GridView returns to similar screen
 AniList, MAL, Kitsu, Bookwalker, EBookJapan, CdJapan links now show in external link sheets
 Grid view returns to similar manga view
