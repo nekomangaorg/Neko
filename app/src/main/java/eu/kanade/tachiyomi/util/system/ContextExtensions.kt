@@ -173,7 +173,9 @@ fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 val Context.animatorDurationScale: Float
-    get() = Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    get() = Settings.Global.getFloat(this.contentResolver,
+        Settings.Global.ANIMATOR_DURATION_SCALE,
+        1f)
 
 /**
  * Helper method to create a notification builder.
@@ -313,7 +315,8 @@ fun Context.isConnectedToWifi(): Boolean {
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
 
         networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
             networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -347,10 +350,21 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
                     .build()
             )
             .build()
+        // Force allowing browser selection for Android 12+ so that verified extensions don't
+        // re-open Tachiyomi
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            intent.intent.setPackage(defaultBrowserPackageName())
+        }
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
     }
+}
+
+fun Context.defaultBrowserPackageName(): String? {
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
+    return packageManager.resolveActivity(browserIntent,
+        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName
 }
 
 /**
