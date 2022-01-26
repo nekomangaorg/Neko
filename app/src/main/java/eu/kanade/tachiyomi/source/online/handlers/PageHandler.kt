@@ -72,7 +72,7 @@ class PageHandler {
                                 return@withContext bilibiliHandler.fetchPageList(externalUrl)
                             }
                         }
-                        else -> throw Exception("${chapter.scanlator} not supported")
+                        else -> throw Exception("${chapter.scanlator} not supported, try webview")
                     }
                 }
 

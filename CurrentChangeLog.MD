@@ -8,6 +8,7 @@ Support Azuki and MangaHot chapters (@jopejoe1)
 Number of follows is shown on the manga info page again
 Ability to add/view personal ratings on MDList
 Sharing a manga url now adds a slug to the url (@henrik9999)
+Can now long press and open chapters in webview
 ## 🏗️ Changes
 Donation button now links to the loot.moe to support MangaDex by purchasing swag
 ## 🐜 Fixes
@@ -16,7 +17,7 @@ Completed manga not being marked complete in status
 Stopped showing the filter fab in latest and follows view
 Some titles showing as blank
 ## 🛠️ Other
-Removed some of the legcy cache table
+Removed some of the legacy cache table
 enabled proguard to shrink app size
 cleaned up Similar code
 bump some libraries
