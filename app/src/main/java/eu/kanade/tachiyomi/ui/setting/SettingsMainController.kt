@@ -108,9 +108,9 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                     context,
                     colorAttr = R.attr.colorOnSurface
                 )
-            titleRes = R.string.dex_donations
+            titleRes = R.string.dex_loot
             onClick {
-                val intent = Intent(Intent.ACTION_VIEW, "https://mangadex.org/support".toUri())
+                val intent = Intent(Intent.ACTION_VIEW, "https://loot.moe/".toUri())
                 startActivity(intent)
             }
         }
