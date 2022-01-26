@@ -44,19 +44,19 @@ class SearchHandler {
                 val details = apiMangaParser.mangaDetailsParse(response.data)
                 MangaListPage(listOf(details), false)
             } else {
-                val queryParamters = mutableMapOf<String, Any>()
+                val queryParameters = mutableMapOf<String, Any>()
 
-                queryParamters["limit"] = MdUtil.mangaLimit.toString()
-                queryParamters["offset"] = (MdUtil.getMangaListOffset(page))
+                queryParameters["limit"] = MdUtil.mangaLimit.toString()
+                queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
                 val actualQuery = query.replace(WHITESPACE_REGEX, " ")
 
                 if (actualQuery.isNotBlank()) {
-                    queryParamters["title"] = actualQuery
+                    queryParameters["title"] = actualQuery
                 }
                 val additionalQueries = filterHandler.getQueryMap(filters)
-                queryParamters.putAll(additionalQueries)
+                queryParameters.putAll(additionalQueries)
 
-                val response = service.search(ProxyRetrofitQueryMap(queryParamters))
+                val response = service.search(ProxyRetrofitQueryMap(queryParameters))
                     .onError {
                         val type = "trying to search"
                         this.log(type)

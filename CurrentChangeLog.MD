@@ -11,6 +11,7 @@ Sharing a manga url now adds a slug to the url (@henrik9999)
 Can now long press and open chapters in webview
 ## 🏗️ Changes
 Donation button now links to the loot.moe to support MangaDex by purchasing swag
+default sort mode in browse and search is now relevance
 ## 🐜 Fixes
 H tag not showing correctly on tablets
 Completed manga not being marked complete in status
