@@ -7,10 +7,22 @@
     android:background="@drawable/bottom_sheet_rounded_background"
     android:layout_height="match_parent">
 
+    <ImageView
+        android:id="@+id/pill"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center|top"
+        android:layout_marginTop="5dp"
+        android:alpha="0.25"
+        android:contentDescription="@string/drag_handle"
+        android:src="@drawable/draggable_pill"
+        app:tint="?attr/colorOnBackground" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/external_recycler"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+        android:paddingTop="20dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior"
         tools:listitem="@layout/external_item" />
 </FrameLayout>
