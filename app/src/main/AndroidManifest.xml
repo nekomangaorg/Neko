@@ -58,10 +58,7 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="*.mangadex.org" />
                 <data android:host="mangadex.org" />
-                <data android:host="*.mangadex.cc" />
-                <data android:host="mangadex.cc" />
 
                 <data android:pathPattern="/chapter/..*" />
                 <data android:scheme="https" />
