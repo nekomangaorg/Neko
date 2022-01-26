@@ -363,8 +363,12 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
 
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-    return packageManager.resolveActivity(browserIntent,
-        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName
+    val default = packageManager.resolveActivity(browserIntent,
+        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName ?: ""
+    return default.ifBlank {
+        this.toast("No default browser found, trying chrome")
+        "com.android.chrome"
+    }
 }
 
 /**
