@@ -8,6 +8,8 @@ Support Azuki and MangaHot chapters (@jopejoe1)
 Number of follows is shown on the manga info page again
 Ability to add/view personal ratings on MDList
 Sharing a manga url now adds a slug to the url (@henrik9999)
+## 🏗️ Changes
+Donation button now links to the loot.moe to support MangaDex by purchasing swag
 ## 🐜 Fixes
 H tag not showing correctly on tablets
 Completed manga not being marked complete in status
