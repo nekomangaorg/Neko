@@ -257,9 +257,14 @@ class MdUtil {
             titleMap: Map<String, String?>,
             originalLanguage: String,
         ): String {
-            return titleMap["en"] ?: titleMap[originalLanguage] ?: titleMap["$originalLanguage-ro"]
-            ?: titleMap["jp"] ?: titleMap["ja"]
-            ?: titleMap["kr"] ?: titleMap["zh"] ?: ""
+            return titleMap["en"]
+                ?: titleMap[originalLanguage]
+                ?: titleMap["$originalLanguage-ro"]
+                ?: titleMap["jp"]
+                ?: titleMap["ja"]
+                ?: titleMap["kr"]
+                ?: titleMap["zh"]
+                ?: titleMap.entries.firstOrNull()?.value ?: ""
         }
     }
 }
