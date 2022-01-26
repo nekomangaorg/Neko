@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.external.AnimePlanet
 import eu.kanade.tachiyomi.data.external.BookWalker
 import eu.kanade.tachiyomi.data.external.CdJapan
 import eu.kanade.tachiyomi.data.external.Dex
+import eu.kanade.tachiyomi.data.external.DexApi
 import eu.kanade.tachiyomi.data.external.EBookJapan
 import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
@@ -175,7 +176,8 @@ interface Manga : SManga {
     fun getExternalLinks(): List<ExternalLink> {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaId(url)))
-
+        list.add(DexApi(MdUtil.getMangaId(url)))
+        
         kitsu_id?.let {
             list.add(Kitsu(it))
         }

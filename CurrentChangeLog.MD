@@ -2,7 +2,7 @@
 Similar rating, and number of votes show now for anilist, mal, similar manga in the similar screen (@goldbattle)
 Auto verify deeplinking for mangadex links (@curche)
 GridView returns to similar screen
-AniList, MAL, Kitsu, Bookwalker, EBookJapan, CdJapan links now show in external link sheets
+AniList, MAL, Kitsu, Bookwalker, EBookJapan, CdJapan, API links now show in external link sheets
 Grid view returns to similar manga view
 Support Azuki and MangaHot chapters (@jopejoe1)
 Number of follows is shown on the manga info page again
