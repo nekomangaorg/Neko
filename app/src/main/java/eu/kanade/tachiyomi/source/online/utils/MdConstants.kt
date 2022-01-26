@@ -22,6 +22,6 @@ object MdConstants {
         const val erotica = "erotica"
         const val pornographic = "pornographic"
     }
-
+    
     val mdAtHomeTokenLifespan = TimeUnit.MINUTES.toMillis(5)
 }

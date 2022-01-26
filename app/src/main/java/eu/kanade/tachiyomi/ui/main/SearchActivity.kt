@@ -12,7 +12,7 @@ import com.bluelinelabs.conductor.changehandler.SimpleSwapChangeHandler
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
-import eu.kanade.tachiyomi.source.online.handlers.SearchHandler
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
@@ -69,7 +69,7 @@ class SearchActivity : MainActivity() {
         to: Controller?,
         from: Controller?,
         isPush:
-            Boolean
+        Boolean,
     ) {
         if (from is DialogController || to is DialogController) {
             return
@@ -95,7 +95,8 @@ class SearchActivity : MainActivity() {
                 // or the Google-specific search intent (triggered by saying or typing "search *query* on *Tachiyomi*" in Google Search/Google Assistant)
 
                 // Get the search query provided in extras, and if not null, perform a global search with it.
-                val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(Intent.EXTRA_TEXT)
+                val query = intent.getStringExtra(SearchManager.QUERY) ?: intent.getStringExtra(
+                    Intent.EXTRA_TEXT)
                 if (query != null && query.isNotEmpty()) {
                     router.replaceTopController(BrowseSourceController(query).withFadeTransaction())
                 } else {
@@ -106,13 +107,20 @@ class SearchActivity : MainActivity() {
                 val pathSegments = intent?.data?.pathSegments
                 if (pathSegments != null && pathSegments.size > 1) {
                     XLog.e(pathSegments[0])
+                    val path = pathSegments[0]
                     val id = pathSegments[1]
                     if (id != null && id.isNotEmpty()) {
                         if (router.backstackSize > 1) {
                             router.popToRoot()
                         }
-                        val query = "${SearchHandler.PREFIX_ID_SEARCH}$id"
-                        router.replaceTopController(BrowseSourceController(query, true, true).withFadeTransaction())
+                        val (query, mangaDeepLink) = if (path.equals("GROUP", true)) {
+                            Pair("${MdUtil.PREFIX_GROUP_ID_SEARCH}$id", false)
+                        } else {
+                            Pair("${MdUtil.PREFIX_ID_SEARCH}$id", true)
+                        }
+                        router.replaceTopController(BrowseSourceController(query,
+                            mangaDeepLink,
+                            mangaDeepLink).withFadeTransaction())
                     }
                 }
             }
@@ -124,7 +132,8 @@ class SearchActivity : MainActivity() {
                         val db = Injekt.get<DatabaseHelper>()
                         val chapters = db.getChapters(mangaId).executeAsBlocking()
                         db.getManga(mangaId).executeAsBlocking()?.let { manga ->
-                            val nextUnreadChapter = ChapterSort(manga).getNextUnreadChapter(chapters, false)
+                            val nextUnreadChapter =
+                                ChapterSort(manga).getNextUnreadChapter(chapters, false)
                             if (nextUnreadChapter != null) {
                                 val activity =
                                     ReaderActivity.newIntent(this, manga, nextUnreadChapter)

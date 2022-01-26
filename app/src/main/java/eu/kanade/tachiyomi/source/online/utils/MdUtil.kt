@@ -18,13 +18,11 @@ class MdUtil {
         const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound =
             "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
-        const val chapterUrl = "$apiUrl/chapter/"
         const val chapterSuffix = "/chapter/"
-        const val loginUrl = "$apiUrl/auth/login"
-        const val groupUrl = "$apiUrl/group"
+
         const val mangaUrl = "$apiUrl/manga"
-        const val userFollowsUrl = "$apiUrl/user/follows/manga"
-        const val readingStatusesUrl = "$apiUrl/manga/status"
+        const val PREFIX_ID_SEARCH = "id:"
+        const val PREFIX_GROUP_ID_SEARCH = "grp:"
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
         fun coverUrl(mangaId: String, coverId: String) =
