@@ -23,6 +23,7 @@ import androidx.core.widget.TextViewCompat
 import androidx.transition.TransitionSet
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
+import com.elvishew.xlog.XLog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
 import com.mikepenz.iconics.typeface.IIcon
@@ -431,8 +432,13 @@ class MangaHeaderHolder(
         binding.mangaRating.text = "  " + manga.rating
 
         binding.mangaUsers.isVisible = manga.users != null
-        binding.mangaUsers.text =
-            "  " + NumberFormat.getNumberInstance(Locale.US).format(manga.users?.toInt() ?: 0)
+        val users = kotlin.runCatching {
+            NumberFormat.getNumberInstance(Locale.US).format(manga.users?.toInt() ?: 0)
+        }.getOrElse {
+            XLog.e("number couldnt be formatted for ${manga.url}")
+            0
+        }
+        binding.mangaUsers.text = "  $users"
 
         binding.mangaMissingChapters.isVisible = manga.missing_chapters != null
 
