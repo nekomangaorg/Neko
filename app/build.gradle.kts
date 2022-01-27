@@ -10,7 +10,7 @@ object Configs {
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     const val versionCode = 139
-    const val versionName = "2.7.4"
+    const val versionName = "2.8.0"
 }
 
 plugins {
@@ -141,7 +141,7 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:20.0.2")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.6")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.7")
 
     val lifecycleVersion = "2.4.0"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
