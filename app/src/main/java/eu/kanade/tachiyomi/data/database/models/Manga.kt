@@ -3,10 +3,18 @@ package eu.kanade.tachiyomi.data.database.models
 import android.content.Context
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.external.Amazon
+import eu.kanade.tachiyomi.data.external.AniList
 import eu.kanade.tachiyomi.data.external.AnimePlanet
+import eu.kanade.tachiyomi.data.external.BookWalker
+import eu.kanade.tachiyomi.data.external.CdJapan
 import eu.kanade.tachiyomi.data.external.Dex
+import eu.kanade.tachiyomi.data.external.DexApi
+import eu.kanade.tachiyomi.data.external.EBookJapan
 import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
+import eu.kanade.tachiyomi.data.external.Kitsu
+import eu.kanade.tachiyomi.data.external.Mal
 import eu.kanade.tachiyomi.data.external.MangaUpdates
 import eu.kanade.tachiyomi.data.external.Raw
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -34,7 +42,7 @@ interface Manga : SManga {
     var viewer_flags: Int
 
     var chapter_flags: Int
-    
+
     var filtered_scanlators: String?
 
     fun isBlank() = id == Long.MIN_VALUE
@@ -168,27 +176,42 @@ interface Manga : SManga {
     fun getExternalLinks(): List<ExternalLink> {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaId(url)))
+        list.add(DexApi(MdUtil.getMangaId(url)))
+        
+        kitsu_id?.let {
+            list.add(Kitsu(it))
+        }
 
+        anilist_id?.let {
+            list.add(AniList(it))
+        }
         anime_planet_id?.let {
             list.add(AnimePlanet(it))
         }
-
         manga_updates_id?.let {
             list.add(MangaUpdates(it))
+        }
+
+        my_anime_list_id?.let {
+            list.add(Mal(it))
         }
 
         other_urls?.let { combinedString ->
             combinedString.split("||").forEach { pairString ->
                 val split = pairString.split("~~")
                 when {
-                    split[0].equals("raw", true) -> list.add(Raw(split[1]))
-                    split[0].equals("engtl", true) -> list.add(Engtl(split[1]))
+                    split[0] == "raw" -> list.add(Raw(split[1]))
+                    split[0] == "engtl" -> list.add(Engtl(split[1]))
+                    split[0] == "bw" -> list.add(BookWalker(split[1]))
+                    split[0] == "cdj" -> list.add(CdJapan(split[1]))
+                    split[0] == "ebj" -> list.add(EBookJapan(split[1]))
+                    split[0] == "amz" -> list.add(Amazon(split[1]))
+
                 }
             }
         }
 
-
-        return list.toList()
+        return list.toList().sortedBy { it.name }
     }
 
     // Used to display the chapter's title one way or another

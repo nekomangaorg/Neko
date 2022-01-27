@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
+import java.text.NumberFormat
 import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
@@ -411,6 +412,7 @@ class MangaHeaderHolder(
         }
 
         binding.mangaStatus.isVisible = manga.status != 0
+
         binding.mangaStatus.text = (
             itemView.context.getString(
                 when (manga.status) {
@@ -429,7 +431,8 @@ class MangaHeaderHolder(
         binding.mangaRating.text = "  " + manga.rating
 
         binding.mangaUsers.isVisible = manga.users != null
-        binding.mangaUsers.text = "  " + manga.users
+        binding.mangaUsers.text =
+            "  " + NumberFormat.getNumberInstance(Locale.US).format(manga.users?.toInt() ?: 0)
 
         binding.mangaMissingChapters.isVisible = manga.missing_chapters != null
 

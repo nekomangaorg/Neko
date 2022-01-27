@@ -27,43 +27,6 @@ interface CachedMangaQueries : DbProvider {
         }
     }
 
-    fun insertCachedManga2Single(cachedManga: CachedManga) = db.inTransaction {
-        val query = RawQuery.builder()
-            .query(
-                "INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
-                    "(${CachedMangaTable.COL_MANGA_TITLE}, ${CachedMangaTable.COL_MANGA_UUID}," +
-                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);"
-            )
-        db.lowLevel().executeSQL(
-            query.args(cachedManga.title, cachedManga.uuid, cachedManga.rating)
-                .build()
-        )
-    }
-
-    fun getCachedMangaCount() = db.get().numberOfResults().withQuery(
-        RawQuery.builder()
-            .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS}")
-            .build()
-    ).prepare()
-
-    fun getCachedMangaRange(page: Int, limit: Int = 20) = db.get()
-        .listOfObjects(CachedManga::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query("SELECT * FROM ${CachedMangaTable.TABLE_FTS} LIMIT ${limit + 1} OFFSET ${page * limit}")
-                .build()
-        )
-        .prepare()
-
-    fun searchCachedManga(query: String, page: Int, limit: Int = 20) = db.get()
-        .listOfObjects(CachedManga::class.java)
-        .withQuery(
-            RawQuery.builder()
-                .query(searchCachedMangaQuery(query, page, limit))
-                .build()
-        )
-        .prepare()
-
     fun deleteAllCached() = db.delete()
         .byQuery(
             DeleteQuery.builder()
@@ -71,12 +34,4 @@ interface CachedMangaQueries : DbProvider {
                 .build()
         )
         .prepare()
-
-    fun optimizeCachedManga() = db.inTransaction {
-        val query = RawQuery.builder()
-            .query("INSERT INTO ${CachedMangaTable.TABLE_FTS}(${CachedMangaTable.TABLE_FTS}) VALUES('optimize');")
-        db.lowLevel().executeSQL(
-            query.build()
-        )
-    }
 }

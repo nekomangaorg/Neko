@@ -72,6 +72,8 @@ open class BrowseSourcePresenter(
 
     var isFollows = false
 
+    var shouldHideFab = false
+
     /**
      * Modifiable list of filters.
      */

@@ -16,17 +16,17 @@ import okhttp3.HttpUrl.Companion.toHttpUrl
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import uy.kohesive.injekt.injectLazy
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class ComikeyHandler {
     val baseUrl = "https://comikey.com"
     private val apiUrl = "$baseUrl/sapi"
-    val networkHelper: NetworkHelper by injectLazy()
     val headers = Headers.Builder()
         .add("User-Agent", USER_AGENT)
         .build()
-
-    val client: OkHttpClient = networkHelper.cloudFlareClient
+    
+    val client: OkHttpClient by lazy { Injekt.get<NetworkHelper>().client }
 
     private val urlForbidden =
         "https://fakeimg.pl/1800x2252/FFFFFF/000000/?font_size=120&text=This%20chapter%20is%20not%20available%20for%20free.%0A%0AIf%20you%20have%20purchased%20this%20chapter%2C%20please%20%0Aopen%20the%20website%20in%20web%20view%20and%20log%20in."

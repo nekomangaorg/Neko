@@ -3,8 +3,6 @@ package eu.kanade.tachiyomi.ui.follows
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuInflater
-import android.view.View
-import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourcePresenter
@@ -22,16 +20,14 @@ class FollowsController(bundle: Bundle) : BrowseSourceController(bundle) {
     )
 
     override fun createPresenter(): BrowseSourcePresenter {
-        return FollowsPresenter()
+        return FollowsPresenter().apply {
+            shouldHideFab = true
+            isFollows = true
+        }
     }
 
     override fun getTitle(): String? {
         return view?.context?.getString(R.string.follows)
-    }
-
-    override fun onViewCreated(view: View) {
-        super.onViewCreated(view)
-        binding.fab.isVisible = false
     }
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {

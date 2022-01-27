@@ -9,8 +9,8 @@ object Configs {
     const val minSdkVersion = 24
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-    const val versionCode = 138
-    const val versionName = "2.7.3.2"
+    const val versionCode = 139
+    const val versionName = "2.8.0"
 }
 
 plugins {
@@ -63,6 +63,18 @@ android {
     buildTypes {
         getByName("debug") {
             applicationIdSuffix = ".debug"
+            /* isShrinkResources = true
+             isMinifyEnabled = true
+
+             proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
+             configure<com.google.firebase.crashlytics.buildtools.gradle.CrashlyticsExtension> {
+                 mappingFileUploadEnabled = false
+             }*/
+        }
+        getByName("release") {
+            isShrinkResources = true
+            isMinifyEnabled = true
+            proguardFiles("proguard-android-optimize.txt", "proguard-rules.pro")
         }
     }
 
@@ -71,7 +83,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.0.5"
+        kotlinCompilerExtensionVersion = "1.1.0-rc02"
     }
 
     flavorDimensions.add("default")
@@ -116,7 +128,7 @@ dependencies {
     // Android X libraries
     implementation("androidx.appcompat:appcompat:1.4.1")
     implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.5.0-beta01")
+    implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.webkit:webkit:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
     implementation("androidx.preference:preference:1.1.1")
@@ -129,7 +141,7 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:20.0.2")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.6")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.7")
 
     val lifecycleVersion = "2.4.0"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -184,6 +196,7 @@ dependencies {
     // Icons
     implementation("com.mikepenz:iconics-core:5.3.3")
     implementation("com.mikepenz:iconics-views:5.3.3")
+    implementation("com.mikepenz:iconics-compose:5.3.3")
     implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
@@ -235,7 +248,7 @@ dependencies {
     implementation("me.saket.cascade:cascade:1.3.0")
 
     //Compose
-    val composeVersion = "1.0.5"
+    val composeVersion = "1.1.0-rc01"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     // Tooling support (Previews, etc.)
@@ -243,17 +256,24 @@ dependencies {
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Design
+    implementation("androidx.compose.material3:material3:1.0.0-alpha03")
+    implementation("com.google.android.material:compose-theme-adapter-3:1.0.3")
     implementation("androidx.compose.material:material:$composeVersion")
+
     // Material design icons
     implementation("androidx.compose.material:material-icons-core:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-    implementation("com.google.android.material:compose-theme-adapter:$composeVersion")
+
+
 
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 
     //accompianist
     val accompanistVersion = "0.20.3"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
+    //implementation("com.google.accompanist:accompanist-insets-ui:$accompanistVersion")
+    //implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
 
 // Conductor
     implementation("com.bluelinelabs:conductor:3.1.2")
@@ -308,6 +328,7 @@ tasks {
         kotlinOptions.freeCompilerArgs += listOf(
             "-Xopt-in=kotlin.Experimental",
             "-Xopt-in=kotlin.RequiresOptIn",
+            "-Xopt-in=androidx.compose.material3.ExperimentalMaterial3Api",
             "-Xopt-in=kotlin.time.ExperimentalTime",
             "-Xopt-in=kotlinx.coroutines.DelicateCoroutinesApi",
             "-Xopt-in=androidx.compose.foundation.ExperimentalFoundationApi",
