@@ -246,6 +246,7 @@ dependencies {
     implementation("com.github.florent37:viewtooltip:1.2.2")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade:1.3.0")
+    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     //Compose
     val composeVersion = "1.1.0-rc01"
