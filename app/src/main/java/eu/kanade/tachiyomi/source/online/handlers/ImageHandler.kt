@@ -10,10 +10,8 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
-import eu.kanade.tachiyomi.source.online.handlers.external.AzukiHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.BilibiliHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
-import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.source.online.models.dto.AtHomeImageReportDto
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
@@ -31,8 +29,6 @@ import kotlin.time.Duration
 class ImageHandler {
     val network: NetworkHelper by injectLazy()
     val preferences: PreferencesHelper by injectLazy()
-    val azukiHandler: AzukiHandler by injectLazy()
-    val mangaHotHandler: MangaHotHandler by injectLazy()
     val mangaPlusHandler: MangaPlusHandler by injectLazy()
     val bilibiliHandler: BilibiliHandler by injectLazy()
     val comikeyHandler: ComikeyHandler by injectLazy()
@@ -52,14 +48,6 @@ class ImageHandler {
                 }
                 page.imageUrl!!.contains("comikey", true) -> {
                     comikeyHandler.client.newCall(GET(page.imageUrl!!, comikeyHandler.headers))
-                        .await()
-                }
-                page.imageUrl!!.contains("azuki", true) -> {
-                    azukiHandler.client.newCall(GET(page.imageUrl!!, comikeyHandler.headers))
-                        .await()
-                }
-                page.imageUrl!!.contains("mangahot", true) -> {
-                    mangaHotHandler.client.newCall(GET(page.imageUrl!!, comikeyHandler.headers))
                         .await()
                 }
                 page.imageUrl!!.contains("/bfs/comic/", true)

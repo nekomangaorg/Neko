@@ -19,11 +19,11 @@ import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
 import okhttp3.Response
 import org.isomorphism.util.TokenBuckets
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 
 class BilibiliHandler {
+    val networkHelper: NetworkHelper by injectLazy()
     val baseUrl = "https://www.bilibilicomics.com"
     val headers = Headers.Builder()
         .add("Accept", ACCEPT_JSON)
@@ -39,10 +39,8 @@ class BilibiliHandler {
         it.proceed(it.request())
     }
 
-    val client: OkHttpClient by lazy {
-        Injekt.get<NetworkHelper>().cloudFlareClient.newBuilder()
-            .addInterceptor(rateLimitInterceptor).build()
-    }
+    val client: OkHttpClient =
+        networkHelper.cloudFlareClient.newBuilder().addInterceptor(rateLimitInterceptor).build()
 
     private fun getChapterUrl(externalUrl: String): String {
         val comicId = externalUrl.substringAfterLast("/mc")
@@ -91,7 +89,7 @@ class BilibiliHandler {
 
         return imageUrlParse(imageResponse)
     }
-
+    
     private fun imageUrlParse(response: Response): List<Page> {
         val result = response.parseAs<BilibiliResultDto<List<BilibiliPageDto>>>()
         return result.data!!.mapIndexed { index, page ->

@@ -209,7 +209,7 @@
         android:text="H"
         android:textColor="@color/md_white_1000"
         android:textSize="14sp"
-        android:translationZ="2dp"
+        android:translationZ="1dp"
         android:layout_marginStart="4dp"
         android:visibility="gone"
         app:layout_constraintBottom_toTopOf="@+id/cover_card"

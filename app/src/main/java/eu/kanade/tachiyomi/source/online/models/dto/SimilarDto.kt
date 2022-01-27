@@ -27,12 +27,11 @@ data class RelationAttributesDto(
 @Serializable
 data class SimilarMangaDatabaseDto(
     var similarApi: SimilarMangaDto? = null,
-    var similarManga: List<RelatedMangaDto>? = null,
-    var relatedManga: List<RelatedMangaDto>? = null,
-    var aniListApi: AnilistMangaRecommendationsDto? = null,
-    var aniListManga: List<RelatedMangaDto>? = null,
-    var myAnimelistApi: MalMangaRecommendationsDto? = null,
-    var myAnimeListManga: List<RelatedMangaDto>? = null,
+    var similarMdexApi: MangaListDto? = null,
+    var anilistApi: AnilistMangaRecommendationsDto? = null,
+    var anilistMdexApi: MangaListDto? = null,
+    var myanimelistApi: MalMangaRecommendationsDto? = null,
+    var myanimelistMdexApi: MangaListDto? = null,
 )
 
 @Serializable
@@ -42,14 +41,6 @@ data class SimilarMangaDto(
     val contentRating: String,
     val matches: List<SimilarMangaMatchListDto>,
     val updatedAt: String,
-)
-
-@Serializable
-data class RelatedMangaDto(
-    val url: String,
-    val title: String,
-    val thumbnail: String,
-    val relation: String,
 )
 
 @Serializable

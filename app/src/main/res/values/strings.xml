@@ -762,7 +762,7 @@
     <string name="whats_new">What\'s new</string>
     <string name="whats_new_this_release">What\'s new in this release</string>
     <string name="website">Website</string>
-    <string name="dex_loot">Buy loot from MangaDex</string>
+    <string name="dex_donations">Donate to MangaDex</string>
     <string name="open_source_licenses">Open source licenses</string>
 
     <!-- Login/Logout dialog -->
@@ -1059,6 +1059,13 @@
     <string name="similar_type">Similar</string>
     <string name="related_type">Related</string>
     <string name="similar">Similar manga</string>
+    <string name="similar_settings">Similar Manga Settings</string>
+    <string name="similar_screen_summary_message">
+        This is a feature where one can get manga recommendations.
+        This is a recommendation system outside of MangaDex, and works by matching by genres,
+        demographics, content type, themes, and then using term frequency–inverse document frequency (tf–idf) to get the
+        similarity of two manga\'s descriptions. When enabled this file will download immediately!! The file is about 9 MB in size.
+    </string>
     <string name="similar_credit_title">Similar Manga Credits</string>
     <string name="similar_credit_message">
         For more information and to view the source code:\n%s

@@ -5,7 +5,6 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
@@ -31,8 +30,8 @@ class SimilarPresenter(
     private val _isRefreshing = MutableLiveData(false)
     val isRefreshing: LiveData<Boolean> = _isRefreshing
 
-    private val _mangaMap = MutableLiveData(emptyMap<String, List<DisplayManga>>())
-    val mangaMap: LiveData<Map<String, List<DisplayManga>>> = _mangaMap
+    private val _mangaMap = MutableLiveData(emptyMap<String, List<Manga>>())
+    val mangaMap: LiveData<Map<String, List<Manga>>> = _mangaMap
 
     var scope = CoroutineScope(Job() + Dispatchers.Default)
 

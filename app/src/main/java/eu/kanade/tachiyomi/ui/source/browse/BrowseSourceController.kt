@@ -740,16 +740,17 @@ open class BrowseSourceController(bundle: Bundle) :
                 }
             ) + 16.dpToPx
         }
-        binding.fab.isVisible =
-            presenter.sourceFilters.isNotEmpty() && presenter.shouldHideFab.not()
+        binding.fab.isVisible = presenter.sourceFilters.isNotEmpty()
     }
 
     companion object {
+        const val SOURCE_ID_KEY = "sourceId"
         const val APPLY_INSET = "applyInset"
         const val DEEP_LINK = "deepLink"
         const val FOLLOWS = "follows"
         const val MANGA_ID = "mangaId"
 
         const val SEARCH_QUERY_KEY = "searchQuery"
+        const val SMART_SEARCH_CONFIG_KEY = "smartSearchConfig"
     }
 }

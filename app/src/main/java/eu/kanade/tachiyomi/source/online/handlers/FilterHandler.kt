@@ -104,7 +104,7 @@ class FilterHandler {
 
         )
 
-    class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(1, false))
+    class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(0, false))
 
     fun getQueryMap(filters: FilterList): Map<String, Any> {
         val queryMap = mutableMapOf<String, Any>()

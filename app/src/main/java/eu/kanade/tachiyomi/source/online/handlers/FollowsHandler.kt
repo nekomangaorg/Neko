@@ -1,12 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
-import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
 import com.skydoves.sandwich.onException
-import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.suspendOnError
 import com.skydoves.sandwich.suspendOnException
 import com.skydoves.sandwich.suspendOnSuccess
@@ -18,9 +16,7 @@ import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
-import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadingStatusDto
-import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.baseUrl
 import eu.kanade.tachiyomi.source.online.utils.MdUtil.Companion.getMangaId
@@ -168,18 +164,29 @@ class FollowsHandler {
     }
 
     suspend fun updateRating(track: Track): Boolean {
-        return withContext(Dispatchers.IO) {
+        return true
+        /*return withContext(Dispatchers.IO) {
             val mangaID = getMangaId(track.tracking_url)
-            val response = if (track.score == 0f) {
-                authService.removeRating(mangaID)
-            } else {
-                authService.updateRating(mangaID, RatingDto(track.score.toInt()))
+            val result = runCatching {
+                network.authClient.newCall(
+                    GET(
+                        "$baseUrl/ajax/actions.ajax.php?function=manga_rating&id=$mangaID&rating=${track.score.toInt()}",
+                        headers
+                    )
+                )
+                    .execute()
             }
 
-            response.onFailure {
-                XLog.e("error updating rating")
-            }.getOrNull()?.result == "ok"
-        }
+            result.exceptionOrNull()?.let {
+                if (it is EOFException) {
+                    return@withContext true
+                } else {
+                    XLog.e("error updating rating", it)
+                    return@withContext false
+                }
+            }
+            return@withContext result.isSuccess
+        }*/
     }
 
     /**
@@ -192,23 +199,16 @@ class FollowsHandler {
     suspend fun fetchTrackingInfo(url: String): Track {
         return withContext(Dispatchers.IO) {
             val mangaId = getMangaId(url)
-            val readingStatusResponse = authService.readingStatusForManga(mangaId)
-            val ratingResponse = authService.retrieveRating(mangaId)
-
-            when (readingStatusResponse) {
+            when (val response = authService.readingStatusForManga(mangaId)) {
                 is ApiResponse.Failure.Error<*>, is ApiResponse.Failure.Exception<*> -> {
-                    readingStatusResponse.log("trying to fetch tracking info")
+                    response.log("trying to fetch tracking info")
                     throw Exception("error trying to get tracking info")
                 }
                 else -> {
-                    val followStatus =
-                        FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
-                    val rating =
-                        ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>().get(mangaId)
+                    val followStatus = FollowStatus.fromDex(response.getOrThrow().status)
                     val track = Track.create(TrackManager.MDLIST).apply {
                         status = followStatus.int
                         tracking_url = "$baseUrl/title/$mangaId"
-                        score = rating?.rating?.toFloat() ?: 0f
                     }
                     return@withContext track
                 }

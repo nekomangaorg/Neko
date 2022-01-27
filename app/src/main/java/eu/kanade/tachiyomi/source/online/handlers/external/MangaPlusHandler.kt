@@ -14,11 +14,11 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.UUID
 
 class MangaPlusHandler {
+    val networkHelper: NetworkHelper by injectLazy()
     val baseUrl = "https://jumpg-webapi.tokyo-cdn.com/api"
     val headers = Headers.Builder()
         .add("Origin", WEB_URL)
@@ -26,11 +26,9 @@ class MangaPlusHandler {
         .add("User-Agent", USER_AGENT)
         .add("SESSION-TOKEN", UUID.randomUUID().toString()).build()
 
-    val client: OkHttpClient by lazy {
-        Injekt.get<NetworkHelper>().nonRateLimitedClient.newBuilder()
-            .addInterceptor { imageIntercept(it) }
-            .build()
-    }
+    val client: OkHttpClient = networkHelper.nonRateLimitedClient.newBuilder()
+        .addInterceptor { imageIntercept(it) }
+        .build()
 
     suspend fun fetchPageList(chapterId: String): List<Page> {
         val response = client.newCall(pageListRequest(chapterId.substringAfterLast("/"))).await()

@@ -9,13 +9,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
-import androidx.core.view.isVisible
 import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.elvishew.xlog.XLog
-import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.removeQueryListener
 import kotlinx.coroutines.CoroutineScope
@@ -30,7 +28,6 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
     var isDragging = false
 
     val isBindingInitialized get() = this::binding.isInitialized
-
     init {
         addLifecycleListener(
             object : LifecycleListener() {
@@ -59,11 +56,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         )
     }
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup,
-        savedViewState: Bundle?,
-    ): View {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
         binding = createBinding(inflater)
         return binding.root
     }
@@ -94,14 +87,6 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         removeQueryListener()
     }
 
-    fun hideToolbar() {
-        (activity as? AppCompatActivity)?.findViewById<View>(R.id.app_bar)?.isVisible = false
-    }
-
-    fun showToolbar() {
-        (activity as? AppCompatActivity)?.findViewById<View>(R.id.app_bar)?.isVisible = true
-    }
-
     fun setTitle() {
         var parentController = parentController
         while (parentController != null) {
@@ -126,10 +111,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
      * Issue link: https://issuetracker.google.com/issues/37657375
      */
     var expandActionViewFromInteraction = false
-    fun MenuItem.fixExpand(
-        onExpand: ((MenuItem) -> Boolean)? = null,
-        onCollapse: ((MenuItem) -> Boolean)? = null,
-    ) {
+    fun MenuItem.fixExpand(onExpand: ((MenuItem) -> Boolean)? = null, onCollapse: ((MenuItem) -> Boolean)? = null) {
         setOnActionExpandListener(
             object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {

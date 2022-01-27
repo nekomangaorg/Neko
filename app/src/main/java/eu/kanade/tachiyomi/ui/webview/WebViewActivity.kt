@@ -49,8 +49,7 @@ open class WebViewActivity : BaseWebViewActivity() {
         binding.swipeRefresh.isEnabled = false
 
         if (bundle == null) {
-            val source =
-                sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
+            val source = sourceManager.get(intent.extras!!.getLong(SOURCE_KEY)) as? HttpSource ?: return
             val url = intent.extras!!.getString(URL_KEY) ?: return
             val headers = source.headers.toMultimap().mapValues { it.value.getOrNull(0) ?: "" }
 
@@ -109,11 +108,10 @@ open class WebViewActivity : BaseWebViewActivity() {
         val translucentWhite = ColorUtils.setAlphaComponent(tintColor, 127)
 
         val backwardColor = if (binding.webview.canGoBack()) tintColor else translucentWhite
-        backItem?.icon = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back)
-            .apply { colorInt = backwardColor }
+        backItem?.icon = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back).apply { colorInt = backwardColor }
 
-        forwardItem?.icon = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_forward)
-            .apply { colorInt = backwardColor }
+        val forwardColor = if (binding.webview.canGoForward()) tintColor else translucentWhite
+        forwardItem?.icon = this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_forward).apply { colorInt = backwardColor }
 
         return super.onPrepareOptionsMenu(menu)
     }
