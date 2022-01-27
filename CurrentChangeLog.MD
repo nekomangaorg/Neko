@@ -1,4 +1,4 @@
-#Note: read the 2.8.0 change log for the majority of recent changes
+# Note: read the 2.8.0 change log for the majority of recent changes
 ## 🏗️ Changes
 Change layout for the external sheet
 ## 🐜 Fixes
