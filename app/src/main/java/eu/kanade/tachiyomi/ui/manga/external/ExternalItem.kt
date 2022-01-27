@@ -30,7 +30,7 @@ open class ExternalItem(val externalLink: ExternalLink) : AbstractItem<ExternalI
             container.setBackgroundColor(item.externalLink.getLogoColor())
             logo.setImageResource(item.externalLink.getLogo())
             logo.contentDescription = item.externalLink.name
-            title.setText(item.externalLink.name)
+            title.text = item.externalLink.name
         }
 
         override fun unbindView(item: ExternalItem) {

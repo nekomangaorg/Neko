@@ -35,6 +35,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import com.elvishew.xlog.XLog
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
@@ -173,7 +174,9 @@ fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 val Context.animatorDurationScale: Float
-    get() = Settings.Global.getFloat(this.contentResolver, Settings.Global.ANIMATOR_DURATION_SCALE, 1f)
+    get() = Settings.Global.getFloat(this.contentResolver,
+        Settings.Global.ANIMATOR_DURATION_SCALE,
+        1f)
 
 /**
  * Helper method to create a notification builder.
@@ -313,7 +316,8 @@ fun Context.isConnectedToWifi(): Boolean {
 
     return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
         val activeNetwork = connectivityManager.activeNetwork ?: return false
-        val networkCapabilities = connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
+        val networkCapabilities =
+            connectivityManager.getNetworkCapabilities(activeNetwork) ?: return false
 
         networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) &&
             networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)
@@ -347,9 +351,21 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
                     .build()
             )
             .build()
+        // Force allowing browser selection  so that verified extensions don't re-open in Neko
+        intent.intent.setPackage(defaultBrowserPackageName())
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
+    }
+}
+
+fun Context.defaultBrowserPackageName(): String? {
+    val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
+    val default = packageManager.resolveActivity(browserIntent,
+        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName ?: ""
+    return default.ifBlank {
+        XLog.e("No default browser found, trying chrome")
+        "com.android.chrome"
     }
 }
 

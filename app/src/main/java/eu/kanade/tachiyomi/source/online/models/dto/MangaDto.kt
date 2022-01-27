@@ -1,11 +1,10 @@
 package eu.kanade.tachiyomi.source.online.models.dto
 
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.json.JsonElement
-import kotlinx.serialization.json.JsonObject
-import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.decodeFromJsonElement
 import kotlinx.serialization.json.jsonObject
-import kotlinx.serialization.json.jsonPrimitive
 
 @Serializable
 data class MangaListDto(
@@ -141,15 +140,8 @@ data class AggregateChapter(
     val count: String,
 )
 
-fun JsonElement.asMdAggregateVolumeMap(): Map<String, AggregateVolume> {
+inline fun <reified T> JsonElement.asMdMap(): Map<String, T> {
     return runCatching {
-        (this as JsonObject).map { it.key to (it.value.jsonObject as AggregateVolume) }.toMap()
-    }.getOrElse { emptyMap() }
-}
-
-fun JsonElement.asMdMap(): Map<String, String> {
-    return runCatching {
-        (this as JsonObject).map { it.key to (it.value.jsonPrimitive.contentOrNull ?: "") }
-            .toMap()
+        MdUtil.jsonParser.decodeFromJsonElement<Map<String, T>>(jsonObject)
     }.getOrElse { emptyMap() }
 }

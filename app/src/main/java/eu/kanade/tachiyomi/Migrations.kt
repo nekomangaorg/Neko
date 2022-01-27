@@ -94,7 +94,6 @@ object Migrations {
                     2 -> OrientationType.PORTRAIT.flagValue
                     3 -> OrientationType.LANDSCAPE.flagValue
                     4 -> OrientationType.LOCKED_PORTRAIT.flagValue
-                    4 -> OrientationType.LOCKED_PORTRAIT.flagValue
                     5 -> OrientationType.LOCKED_LANDSCAPE.flagValue
                     else -> OrientationType.FREE.flagValue
                 }
@@ -109,6 +108,7 @@ object Migrations {
                     remove("pref_default_viewer_key")
                 }
             }
+
             return true
         }
         return false
