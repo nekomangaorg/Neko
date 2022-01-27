@@ -2,7 +2,6 @@
 Similar rating, and number of votes show now for anilist, mal, similar manga in the similar screen (@goldbattle)
 Auto verify deeplinking for mangadex links (@curche)
 Add support for deeplinking for group links
-GridView returns to similar screen
 AniList, MAL, Kitsu, Bookwalker, EBookJapan, CdJapan, API links now show in external link sheets
 Grid view returns to similar manga view
 Support Azuki and MangaHot chapters (@jopejoe1)
@@ -13,6 +12,7 @@ Can now long press and open chapters in webview
 ## 🏗️ Changes
 Donation button now links to the loot.moe to support MangaDex by purchasing swag
 default sort mode in browse and search is now relevance
+Deeplinking now only works for https://mangadex.org no more www.mangadex.org support
 ## 🐜 Fixes
 H tag not showing correctly on tablets
 Completed manga not being marked complete in status
@@ -21,5 +21,5 @@ Some titles showing as blank
 ## 🛠️ Other
 Removed some of the legacy cache table
 enabled proguard to shrink app size
-cleaned up Similar code
+rewrote similar logic and code
 bump some libraries
