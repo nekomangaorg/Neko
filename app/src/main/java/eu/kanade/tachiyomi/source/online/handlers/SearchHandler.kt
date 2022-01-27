@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.source.model.MangaListPage
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.source.online.utils.toBasicManga
-import eu.kanade.tachiyomi.util.lang.isUUID
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
@@ -29,8 +28,8 @@ class SearchHandler {
 
     suspend fun search(page: Int, query: String, filters: FilterList): MangaListPage {
         return withContext(Dispatchers.IO) {
-            if (query.startsWith(MdUtil.PREFIX_ID_SEARCH)) {
-                val realQuery = query.removePrefix(MdUtil.PREFIX_ID_SEARCH)
+            if (query.startsWith(PREFIX_ID_SEARCH)) {
+                val realQuery = query.removePrefix(PREFIX_ID_SEARCH)
                 val response = service.viewManga(realQuery)
                     .onError {
                         val type = "trying to view manga $realQuery"
@@ -45,27 +44,19 @@ class SearchHandler {
                 val details = apiMangaParser.mangaDetailsParse(response.data)
                 MangaListPage(listOf(details), false)
             } else {
-                val queryParameters = mutableMapOf<String, Any>()
+                val queryParamters = mutableMapOf<String, Any>()
 
-                queryParameters["limit"] = MdUtil.mangaLimit.toString()
-                queryParameters["offset"] = (MdUtil.getMangaListOffset(page))
-                if (query.startsWith(MdUtil.PREFIX_GROUP_ID_SEARCH)) {
-                    val groupId = query.removePrefix(MdUtil.PREFIX_GROUP_ID_SEARCH)
-                    if (groupId.isUUID().not()) {
-                        throw Exception("Invalid Group ID must be UUID")
-                    }
-                    queryParameters["group"] = groupId
-                } else {
-                    val actualQuery = query.replace(WHITESPACE_REGEX, " ")
-                    if (actualQuery.isNotBlank()) {
-                        queryParameters["title"] = actualQuery
-                    }
+                queryParamters["limit"] = MdUtil.mangaLimit.toString()
+                queryParamters["offset"] = (MdUtil.getMangaListOffset(page))
+                val actualQuery = query.replace(WHITESPACE_REGEX, " ")
+
+                if (actualQuery.isNotBlank()) {
+                    queryParamters["title"] = actualQuery
                 }
-
                 val additionalQueries = filterHandler.getQueryMap(filters)
-                queryParameters.putAll(additionalQueries)
+                queryParamters.putAll(additionalQueries)
 
-                val response = service.search(ProxyRetrofitQueryMap(queryParameters))
+                val response = service.search(ProxyRetrofitQueryMap(queryParamters))
                     .onError {
                         val type = "trying to search"
                         this.log(type)
@@ -95,6 +86,7 @@ class SearchHandler {
     }
 
     companion object {
+        const val PREFIX_ID_SEARCH = "id:"
         val WHITESPACE_REGEX = "\\s".toRegex()
     }
 }

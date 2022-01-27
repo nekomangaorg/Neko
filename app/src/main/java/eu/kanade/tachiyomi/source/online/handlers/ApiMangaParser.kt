@@ -8,10 +8,10 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.source.online.models.dto.AggregateVolume
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDataDto
 import eu.kanade.tachiyomi.source.online.models.dto.ChapterDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaDataDto
+import eu.kanade.tachiyomi.source.online.models.dto.asMdAggregateVolumeMap
 import eu.kanade.tachiyomi.source.online.models.dto.asMdMap
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
@@ -47,35 +47,28 @@ class ApiMangaParser {
                         this.log("trying to aggregate for ${mangaDto.id}")
                     }.getOrNull()
 
-                aggregateDto?.volumes?.asMdMap<AggregateVolume>()?.values
+                aggregateDto?.volumes?.asMdAggregateVolumeMap()?.values
                     ?.flatMap { it.chapters.values }
                     ?.map { it.chapter }
                     ?: emptyList()
             }
 
             withIOContext {
-                val statResult = network.service.mangaStatistics(mangaDto.id)
+                val stats = network.service.mangaStatistics(mangaDto.id)
                     .onError {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.onException {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.getOrNull()
-                statResult?.statistics?.get(mangaDto.id)?.let { stats ->
-                    val rating = stats.rating?.average ?: 0.0
-                    if (rating > 0) {
-                        manga.rating = rating.toString()
-                    }
-
-                    manga.users = stats.follows?.toString()
-
+                val rating = stats?.statistics?.get(mangaDto.id)?.rating?.average ?: 0.0
+                if (rating > 0) {
+                    manga.rating = rating.toString()
                 }
-
             }
 
 
             manga.description =
-                MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap<String>()["en"]
-                    ?: "")
+                MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap()["en"] ?: "")
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
@@ -93,8 +86,13 @@ class ApiMangaParser {
                 manga.last_chapter_number = floor(it).toInt()
             }
 
+            /*networkManga.rating?.let {
+                manga.rating = it.bayesian ?: it.mean
+                manga.users = it.users
+            }*/
+
             val otherUrls = mutableListOf<String>()
-            mangaAttributesDto.links?.asMdMap<String>()?.let { linkMap ->
+            mangaAttributesDto.links?.asMdMap()?.let { linkMap ->
                 linkMap["al"]?.let { id -> manga.anilist_id = id }
                 linkMap["kt"]?.let { id -> manga.kitsu_id = id }
                 linkMap["mal"]?.let { id -> manga.my_anime_list_id = id }
@@ -102,10 +100,6 @@ class ApiMangaParser {
                 linkMap["ap"]?.let { id -> manga.anime_planet_id = id }
                 linkMap["raw"]?.let { id -> otherUrls.add("raw~~$id") }
                 linkMap["engtl"]?.let { id -> otherUrls.add("engtl~~$id") }
-                linkMap["bw"]?.let { id -> otherUrls.add("bw~~$id") }
-                linkMap["amz"]?.let { id -> otherUrls.add("amz~~$id") }
-                linkMap["ebj"]?.let { id -> otherUrls.add("ebj~~$id") }
-                linkMap["cdj"]?.let { id -> otherUrls.add("cdj~~$id") }
             }
             if (otherUrls.isNotEmpty()) {
                 manga.other_urls = otherUrls.joinToString("||")
@@ -116,7 +110,8 @@ class ApiMangaParser {
             val tempStatus = parseStatus(mangaAttributesDto.status ?: "")
             val publishedOrCancelled =
                 (tempStatus == SManga.PUBLICATION_COMPLETE || tempStatus == SManga.CANCELLED)
-            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter)
+            if (publishedOrCancelled && simpleChapters.contains(mangaAttributesDto.lastChapter
+                    ?: "zzzzzz")
             ) {
                 manga.status = SManga.COMPLETED
                 manga.missing_chapters = null

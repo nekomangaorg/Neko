@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga.external
 import android.os.Bundle
 import android.view.LayoutInflater
 import androidx.core.view.WindowInsetsCompat
-import androidx.recyclerview.widget.GridLayoutManager
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
 import eu.kanade.tachiyomi.databinding.ExternalBottomSheetBinding
@@ -32,7 +31,6 @@ class ExternalBottomSheet(private val controller: MangaDetailsController) :
         sheetBehavior.expand()
         sheetBehavior.skipCollapsed = true
 
-        binding.externalRecycler.layoutManager = GridLayoutManager(context, 2)
         binding.externalRecycler.adapter = fastAdapter
 
         itemAdapter.add(controller.presenter.externalLinksList)

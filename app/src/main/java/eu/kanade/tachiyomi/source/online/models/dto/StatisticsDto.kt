@@ -10,11 +10,10 @@ data class StatisticResponseDto(
 
 @Serializable
 data class StatisticsDto(
-    val rating: StatisticRatingDto,
-    val follows: Int?,
+    val rating: RatingDto,
 )
 
 @Serializable
-data class StatisticRatingDto(
+data class RatingDto(
     val average: Double?,
 )

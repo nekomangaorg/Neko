@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.ui.source.browse.Pager
 class FollowsPresenter : BrowseSourcePresenter() {
 
     override fun createPager(query: String, filters: FilterList): Pager {
+        isFollows = true
         return FollowsPager(source)
     }
 }

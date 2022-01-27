@@ -22,7 +22,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         /**
          * Version of the database.
          */
-        const val DATABASE_VERSION = 29
+        const val DATABASE_VERSION = 28
     }
 
     override fun onCreate(db: SupportSQLiteDatabase) = with(db) {
@@ -116,12 +116,6 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
         if (oldVersion < 28) {
             db.execSQL(MangaTable.addOtherUrlsCol)
             db.execSQL(MangaTable.clearScanlators)
-        }
-
-        if (oldVersion < 29) {
-            db.execSQL(CachedMangaTable.dropVirtualTableQuery)
-            db.execSQL(SimilarTable.dropTableQuery)
-            db.execSQL(SimilarTable.createTableQuery)
         }
     }
 

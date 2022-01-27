@@ -35,6 +35,7 @@ import androidx.annotation.IdRes
 import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import androidx.appcompat.view.menu.MenuBuilder
+import androidx.appcompat.widget.PopupMenu
 import androidx.core.animation.addListener
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -72,6 +73,7 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
+import uy.kohesive.injekt.api.get
 import kotlin.math.max
 import kotlin.math.pow
 import kotlin.math.roundToInt
@@ -145,7 +147,7 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
 fun View.applyBottomAnimatedInsets(
     bottomMargin: Int = 0,
     setPadding: Boolean = false,
-    onApplyInsets: ((View, WindowInsetsCompat) -> Unit)? = null,
+    onApplyInsets: ((View, WindowInsetsCompat) -> Unit)? = null
 ) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.R) return
     val setInsets: ((WindowInsetsCompat) -> Unit) = { insets ->
@@ -364,14 +366,6 @@ fun Int.numberOfRowsForValue(rawValue: Float): Int {
     return max(1, (dpWidth / trueSize).roundToInt())
 }
 
-fun Int.numberOfColumnsForCompose(rawValue: Float): Int {
-    val size = 1.5f.pow(rawValue)
-    val trueSize =
-        AutofitRecyclerView.MULTIPLE * ((size * 100 / AutofitRecyclerView.MULTIPLE).roundToInt()) / 100f
-    val dpWidth = (this.pxToDp / 100f).roundToInt()
-    return max(1, (dpWidth / trueSize).roundToInt())
-}
-
 var View.compatToolTipText: CharSequence?
     get() = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
         tooltipText
@@ -427,7 +421,7 @@ inline fun View.popupMenu(
 
 fun MaterialCardView.makeShapeCorners(
     @Dimension topStart: Float = 0f,
-    @Dimension bottomEnd: Float = 0f,
+    @Dimension bottomEnd: Float = 0f
 ): ShapeAppearanceModel {
     return shapeAppearanceModel.toBuilder()
         .apply {
@@ -449,7 +443,7 @@ fun MaterialCardView.makeShapeCorners(
 fun setCards(
     showOutline: Boolean,
     mainCard: MaterialCardView,
-    badgeView: MaterialCardView?,
+    badgeView: MaterialCardView?
 ) {
     badgeView?.strokeWidth = if (showOutline) 0.75f.dpToPx.toInt() else 0
     badgeView?.cardElevation = if (showOutline) 0f else 3f.dpToPx
@@ -464,7 +458,7 @@ fun Dialog.blurBehindWindow(
     blurAmount: Float = 20f,
     onShow: DialogInterface.OnShowListener? = null,
     onDismiss: DialogInterface.OnDismissListener? = null,
-    onCancel: DialogInterface.OnCancelListener? = null,
+    onCancel: DialogInterface.OnCancelListener? = null
 ) {
     var supportsBlur = false
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && window?.windowManager?.isCrossWindowBlurEnabled == true) {
@@ -525,7 +519,7 @@ fun View.animateBlur(
     @FloatRange(from = 0.1) from: Float,
     @FloatRange(from = 0.1) to: Float,
     duration: Long,
-    removeBlurAtEnd: Boolean = false,
+    removeBlurAtEnd: Boolean = false
 ): ValueAnimator? {
     if (context.powerManager.isPowerSaveMode) {
         if (to <= 0.1f) {
@@ -542,8 +536,7 @@ fun View.animateBlur(
                 setRenderEffect(
                     RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP)
                 )
-            } catch (_: Exception) {
-            }
+            } catch (_: Exception) {}
         }
         if (removeBlurAtEnd) {
             addListener(

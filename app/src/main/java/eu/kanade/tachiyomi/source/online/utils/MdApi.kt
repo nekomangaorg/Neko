@@ -13,7 +13,6 @@ object MdApi {
     const val author = "/author"
     const val userFollows = "/user/follows/manga"
     const val readingStatusForAllManga = "/manga/status"
-    const val rating = "/rating"
     const val atHomeServer = "/at-home/server"
 
     const val legacyMapping = "/legacy/mapping"

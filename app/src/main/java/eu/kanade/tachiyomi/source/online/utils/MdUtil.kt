@@ -18,11 +18,13 @@ class MdUtil {
         const val apiUrl = "https://api.mangadex.org"
         const val imageUrlCacheNotFound =
             "https://cdn.statically.io/img/raw.githubusercontent.com/CarlosEsco/Neko/master/.github/manga_cover_not_found.png"
+        const val chapterUrl = "$apiUrl/chapter/"
         const val chapterSuffix = "/chapter/"
-
+        const val loginUrl = "$apiUrl/auth/login"
+        const val groupUrl = "$apiUrl/group"
         const val mangaUrl = "$apiUrl/manga"
-        const val PREFIX_ID_SEARCH = "id:"
-        const val PREFIX_GROUP_ID_SEARCH = "grp:"
+        const val userFollowsUrl = "$apiUrl/user/follows/manga"
+        const val readingStatusesUrl = "$apiUrl/manga/status"
         fun getReadingStatusUrl(id: String) = "$apiUrl/manga/$id/status"
 
         fun coverUrl(mangaId: String, coverId: String) =
@@ -52,7 +54,7 @@ class MdUtil {
                 useArrayPolymorphism = true
                 prettyPrint = true
             }
-
+        
         val validOneShotFinalChapters = listOf("0", "1")
 
         val englishDescriptionTags = listOf(
@@ -198,11 +200,11 @@ class MdUtil {
 
         fun cleanDescription(string: String): String {
             var newDescription = string
-            descriptionLanguages.forEach {
+            descriptionLanguages.forEach { it ->
                 newDescription = newDescription.substringBefore(it)
             }
 
-            englishDescriptionTags.forEach {
+            englishDescriptionTags.forEach { it ->
                 newDescription = newDescription.replace(it, "")
             }
             return cleanString(newDescription)
@@ -251,18 +253,9 @@ class MdUtil {
         fun getLangsToShow(preferences: PreferencesHelper) =
             preferences.langsToShow().get().split(",")
 
-        fun getTitle(
-            titleMap: Map<String, String?>,
-            originalLanguage: String,
-        ): String {
-            return titleMap["en"]
-                ?: titleMap[originalLanguage]
-                ?: titleMap["$originalLanguage-ro"]
-                ?: titleMap["jp"]
-                ?: titleMap["ja"]
-                ?: titleMap["kr"]
-                ?: titleMap["zh"]
-                ?: titleMap.entries.firstOrNull()?.value ?: ""
+        fun getTitle(titleMap: Map<String, String?>, originalLanguage: String): String {
+            return titleMap["en"] ?: titleMap[originalLanguage] ?: titleMap["jp"] ?: titleMap["ja"]
+            ?: titleMap["kr"] ?: titleMap["zh"] ?: ""
         }
     }
 }
