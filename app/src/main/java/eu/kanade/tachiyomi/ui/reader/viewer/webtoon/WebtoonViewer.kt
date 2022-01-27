@@ -75,6 +75,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         recycler.setBackgroundColor(Color.BLACK)
         recycler.isVisible = false // Don't let the recycler layout yet
         recycler.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
+        recycler.isFocusable = false
         recycler.itemAnimator = null
         recycler.layoutManager = layoutManager
         recycler.adapter = adapter
@@ -137,7 +138,8 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
             val showOnStart = config.navigationOverlayForNewUser
             activity.binding.navigationOverlay.setNavigation(config.navigator, showOnStart)
         }
-        config.navigationModeInvertedListener = { activity.binding.navigationOverlay.showNavigationAgain() }
+        config.navigationModeInvertedListener =
+            { activity.binding.navigationOverlay.showNavigationAgain() }
 
         frame.layoutParams = ViewGroup.LayoutParams(MATCH_PARENT, MATCH_PARENT)
         frame.addView(recycler)
@@ -151,7 +153,8 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         currentPage ?: return true
 
         val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
-        val nextChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
+        val nextChapter =
+            (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
 
         // Allow preload for
         // 1. Going between pages of same chapter
@@ -193,7 +196,8 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         if (inPreloadRange && allowPreload && page.chapter == adapter.currentChapter) {
             XLog.d("Request preload next chapter because we're at page ${page.number} of ${pages.size}")
             val nextItem = adapter.items.getOrNull(adapter.items.size - 1)
-            val transitionChapter = (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
+            val transitionChapter =
+                (nextItem as? ChapterTransition.Next)?.to ?: (nextItem as? ReaderPage)?.chapter
             if (transitionChapter != null) {
                 XLog.d("Requesting to preload chapter ${transitionChapter.chapter.chapter_number}")
                 activity.requestPreloadChapter(transitionChapter)
@@ -302,11 +306,13 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
 
             KeyEvent.KEYCODE_DPAD_RIGHT,
             KeyEvent.KEYCODE_DPAD_UP,
-            KeyEvent.KEYCODE_PAGE_UP -> if (isUp) moveToPrevious()
+            KeyEvent.KEYCODE_PAGE_UP,
+            -> if (isUp) moveToPrevious()
 
             KeyEvent.KEYCODE_DPAD_LEFT,
             KeyEvent.KEYCODE_DPAD_DOWN,
-            KeyEvent.KEYCODE_PAGE_DOWN -> if (isUp) moveToNext()
+            KeyEvent.KEYCODE_PAGE_DOWN,
+            -> if (isUp) moveToNext()
             else -> return false
         }
         return true
