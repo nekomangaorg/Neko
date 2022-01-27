@@ -4,26 +4,24 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/track"
     style="@style/Widget.Tachiyomi.CardView.Tracker"
-    android:layout_width="wrap_content"
+    android:layout_width="110dp"
     android:layout_height="wrap_content"
     android:layout_margin="8dp"
     android:padding="0dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/external_details"
-        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_weight="1"
+        android:layout_width="match_parent"
         android:background="@color/dialog">
 
         <FrameLayout
             android:id="@+id/external_logo_container"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:foreground="?selectableItemBackgroundBorderless"
             android:orientation="vertical"
             android:padding="4dp"
-            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="#2E51A2">
 
@@ -35,23 +33,23 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent"
                 tools:ignore="ContentDescription"
-                tools:src="@drawable/tracker_mal" />
+                tools:src="@drawable/ic_tracker_mal" />
 
         </FrameLayout>
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/external_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/external_logo_container"
+            app:layout_constraintTop_toBottomOf="@id/external_logo_container"
             app:layout_constraintBottom_toBottomOf="parent"
-            android:paddingTop="8dp"
-            android:paddingBottom="8dp"
-            android:paddingStart="16dp"
-            android:paddingEnd="16dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:paddingHorizontal="0dp"
+            android:paddingVertical="4dp"
+            android:textAlignment="center"
             style="?textAppearanceListItem"
-            android:textSize="12sp"
+            android:textSize="11sp"
             app:fontFamily="@font/montserrat_medium"
             tools:text="MangaDex" />
 

@@ -25,11 +25,11 @@ open class ExternalItem(val externalLink: ExternalLink) : AbstractItem<ExternalI
     class ViewHolder(view: View) : FastAdapter.ViewHolder<ExternalItem>(view) {
         var logo = view.findViewById<ImageView>(R.id.external_logo)!!
         var container = view.findViewById<View>(R.id.external_logo_container)!!
+
         var title = view.findViewById<TextView>(R.id.external_title)!!
         override fun bindView(item: ExternalItem, payloads: List<Any>) {
             container.setBackgroundColor(item.externalLink.getLogoColor())
             logo.setImageResource(item.externalLink.getLogo())
-            logo.contentDescription = item.externalLink.name
             title.text = item.externalLink.name
         }
 
