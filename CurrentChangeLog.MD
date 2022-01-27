@@ -1,5 +1,6 @@
+#Note: read the 2.8.0 change log for the majority of recent changes
 ## 🏗️ Changes
 Change layout for the external sheet
 ## 🐜 Fixes
-Fix pages turning theme color when using hardware keys (@arkon)
-other minor bug fixes
+pages turning theme color when using hardware keys (@arkon)
+crash when MangaDex returns a already formatted user count
