@@ -35,6 +35,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
+import com.elvishew.xlog.XLog
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
@@ -350,11 +351,8 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
                     .build()
             )
             .build()
-        // Force allowing browser selection for Android 12+ so that verified extensions don't
-        // re-open Tachiyomi
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            intent.intent.setPackage(defaultBrowserPackageName())
-        }
+        // Force allowing browser selection  so that verified extensions don't re-open in Neko
+        intent.intent.setPackage(defaultBrowserPackageName())
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
@@ -366,7 +364,7 @@ fun Context.defaultBrowserPackageName(): String? {
     val default = packageManager.resolveActivity(browserIntent,
         PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName ?: ""
     return default.ifBlank {
-        this.toast("No default browser found, trying chrome")
+        XLog.e("No default browser found, trying chrome")
         "com.android.chrome"
     }
 }
