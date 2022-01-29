@@ -17,10 +17,12 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
@@ -77,11 +79,6 @@ class SimilarController(bundle: Bundle? = null) :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
 
-        viewScope.launch {
-            presenter.getSimilarManga()
-        }
-
-
         binding.holder.setContent {
             /*
             doesnt work as the appbar has the padding added to it, and so does not ever draw under.  Need to use accompianst appbar, but it doesnt have scroll effects
@@ -95,6 +92,12 @@ class SimilarController(bundle: Bundle? = null) :
 
             Mdc3Theme {
                 ProvideWindowInsets {
+                    val scope = rememberCoroutineScope()
+                    LaunchedEffect(key1 = Unit) {
+                        scope.launch {
+                            presenter.getSimilarManga()
+                        }
+                    }
 
                     val scrollBehavior = remember { TopAppBarDefaults.enterAlwaysScrollBehavior() }
                     val isRefreshing by presenter.isRefreshing.observeAsState(initial = true)
