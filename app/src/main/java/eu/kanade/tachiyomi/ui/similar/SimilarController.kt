@@ -74,7 +74,6 @@ class SimilarController(bundle: Bundle? = null) :
 
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        hideToolbar()
 
         viewScope.launch {
             presenter.getSimilarManga()
@@ -233,11 +232,6 @@ class SimilarController(bundle: Bundle? = null) :
                 }
             }
         }
-    }
-
-    override fun onDestroyView(view: View) {
-        showToolbar()
-        super.onDestroyView(view)
     }
 }
 
