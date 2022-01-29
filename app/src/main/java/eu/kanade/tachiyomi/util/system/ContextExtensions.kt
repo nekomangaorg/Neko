@@ -35,7 +35,6 @@ import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
 import androidx.core.net.toUri
-import com.elvishew.xlog.XLog
 import com.mikepenz.iconics.IconicsDrawable
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.utils.colorInt
@@ -344,16 +343,12 @@ fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
 
 fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
     try {
-        val intent = CustomTabsIntent.Builder()
-            .setDefaultColorSchemeParams(
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
-                    .build()
-            )
-            .build()
-        // Force allowing browser selection  so that verified extensions don't re-open in Neko
-        intent.intent.setPackage(defaultBrowserPackageName())
-        intent.launchUrl(this, uri)
+        startActivity(Intent(Intent.ACTION_VIEW).apply {
+            data = uri
+            setPackage(defaultBrowserPackageName())
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+        )
     } catch (e: Exception) {
         toast(e.message)
     }
@@ -361,12 +356,8 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
 
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-    val default = packageManager.resolveActivity(browserIntent,
-        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName ?: ""
-    return default.ifBlank {
-        XLog.e("No default browser found, trying chrome")
-        "com.android.chrome"
-    }
+    return packageManager.resolveActivity(browserIntent,
+        PackageManager.MATCH_ALL)?.activityInfo?.packageName
 }
 
 /**
