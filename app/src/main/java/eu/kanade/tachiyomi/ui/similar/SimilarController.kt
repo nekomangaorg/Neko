@@ -41,6 +41,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
 import eu.kanade.tachiyomi.ui.base.components.Action
 import eu.kanade.tachiyomi.ui.base.components.CoverRippleTheme
@@ -64,11 +65,12 @@ class SimilarController(bundle: Bundle? = null) :
 
     constructor(manga: Manga) : this(
         Bundle().apply {
-            putLong(BrowseSourceController.MANGA_ID, manga.id!!)
+            putString(BrowseSourceController.MANGA_ID, MdUtil.getMangaId(manga.url))
         }
     )
 
-    override var presenter = SimilarPresenter(bundle!!.getLong(BrowseSourceController.MANGA_ID))
+    override var presenter =
+        SimilarPresenter(bundle!!.getString(BrowseSourceController.MANGA_ID) ?: "")
 
     private val preferences: PreferencesHelper by injectLazy()
 
@@ -191,7 +193,7 @@ class SimilarController(bundle: Bundle? = null) :
         mangaClicked: (Manga) -> Unit,
         view: View,
     ) {
-        val groupedManga: Map<String, List<DisplayManga>> by presenter.mangaMap.observeAsState(
+        val groupedManga: Map<Int, List<DisplayManga>> by presenter.mangaMap.observeAsState(
             emptyMap())
         if (isRefreshing.not()) {
             if (groupedManga.isEmpty()) {
@@ -207,8 +209,11 @@ class SimilarController(bundle: Bundle? = null) :
                     applyBottom = true,
                     applyTop = false)
 
+                val groupedMangaRedux =
+                    groupedManga.entries.map { stringResource(id = it.key) to it.value }.toMap()
+
                 if (isList) {
-                    MangaListWithHeader(groupedManga = groupedManga,
+                    MangaListWithHeader(groupedManga = groupedMangaRedux,
                         shouldOutlineCover = preferences.outlineOnCovers()
                             .get(),
                         contentPadding = contentPadding,
@@ -221,7 +226,7 @@ class SimilarController(bundle: Bundle? = null) :
                                 .get())
 
                     MangaGridWithHeader(
-                        groupedManga = groupedManga,
+                        groupedManga = groupedMangaRedux,
                         shouldOutlineCover = preferences.outlineOnCovers()
                             .get(),
                         columns = columns,
