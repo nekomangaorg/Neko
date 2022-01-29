@@ -4,13 +4,11 @@ import androidx.annotation.StringRes
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.models.DisplaySManga
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.SimilarHandler
-import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.system.logTimeTaken
 import eu.kanade.tachiyomi.util.toLocalManga
@@ -28,11 +26,10 @@ class SimilarRepository {
     private val mangaDex: MangaDex by lazy { Injekt.get<SourceManager>().getMangadex() }
 
     suspend fun fetchSimilar(
-        manga: Manga,
+        dexId: String,
         forceRefresh: Boolean = false,
     ): List<SimilarMangaGroup> {
         return withContext(Dispatchers.IO) {
-            val dexId = MdUtil.getMangaId(manga.url)
             val similarDbEntry = db.getSimilar(dexId).executeAsBlocking()
             val actualRefresh = when (similarDbEntry == null) {
                 true -> true
