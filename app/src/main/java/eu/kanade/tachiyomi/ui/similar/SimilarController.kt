@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.similar
 
 import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
@@ -42,14 +41,13 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.databinding.SimilarControllerBinding
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
 import eu.kanade.tachiyomi.ui.base.components.Action
 import eu.kanade.tachiyomi.ui.base.components.CoverRippleTheme
 import eu.kanade.tachiyomi.ui.base.components.EmptyView
 import eu.kanade.tachiyomi.ui.base.components.MangaGridWithHeader
 import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
-import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
+import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
@@ -62,7 +60,7 @@ import uy.kohesive.injekt.injectLazy
  * Controller that shows the latest manga from the catalogue. Inherit [BrowseCatalogueController].
  */
 class SimilarController(bundle: Bundle? = null) :
-    BaseCoroutineController<SimilarControllerBinding, SimilarPresenter>(bundle) {
+    BaseComposeController<SimilarPresenter>(bundle) {
 
     constructor(manga: Manga) : this(
         Bundle().apply {
@@ -241,8 +239,5 @@ class SimilarController(bundle: Bundle? = null) :
         showToolbar()
         super.onDestroyView(view)
     }
-
-    override fun createBinding(inflater: LayoutInflater) =
-        SimilarControllerBinding.inflate(inflater)
 }
 
