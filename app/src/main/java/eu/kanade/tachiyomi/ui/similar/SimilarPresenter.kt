@@ -12,7 +12,7 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 /**
- * Presenter of [SimilarController]. Inherit BrowseSourcePresenter.
+ * Presenter of [SimilarController]
  */
 class SimilarPresenter(
     val mangaId: String = "",
