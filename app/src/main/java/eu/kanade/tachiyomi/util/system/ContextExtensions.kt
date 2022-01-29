@@ -343,12 +343,16 @@ fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
 
 fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
     try {
-        startActivity(Intent(Intent.ACTION_VIEW).apply {
-            data = uri
-            setPackage(defaultBrowserPackageName())
-            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
-        }
-        )
+        val intent = CustomTabsIntent.Builder()
+            .setDefaultColorSchemeParams(
+                CustomTabColorSchemeParams.Builder()
+                    .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
+                    .build()
+            )
+            .build()
+        // Force allowing browser selection  so that verified extensions don't re-open in Neko
+        intent.intent.setPackage(defaultBrowserPackageName())
+        intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
     }
@@ -357,7 +361,7 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
     return packageManager.resolveActivity(browserIntent,
-        PackageManager.MATCH_ALL)?.activityInfo?.packageName
+        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName
 }
 
 /**
