@@ -31,6 +31,7 @@ import eu.kanade.tachiyomi.source.online.handlers.external.ComikeyHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaHotHandler
 import eu.kanade.tachiyomi.source.online.handlers.external.MangaPlusHandler
 import eu.kanade.tachiyomi.ui.similar.SimilarRepository
+import eu.kanade.tachiyomi.ui.source.LatestRepository
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.manga.MangaMappings
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
@@ -109,6 +110,8 @@ class AppModule(val app: Application) : InjektModule {
         addSingleton(TrackingSyncService())
 
         addSingleton(SimilarRepository())
+
+        addSingleton(LatestRepository())
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }
 

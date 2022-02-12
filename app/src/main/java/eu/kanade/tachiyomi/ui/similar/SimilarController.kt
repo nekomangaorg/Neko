@@ -222,7 +222,6 @@ class SimilarController(bundle: Bundle? = null) :
                         contentPadding = contentPadding,
                         onClick = mangaClicked)
                 } else {
-
                     val columns =
                         view.measuredWidth.numberOfColumnsForCompose(
                             preferences.gridSize()
