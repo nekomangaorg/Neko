@@ -3,7 +3,7 @@ package eu.kanade.tachiyomi.ui.base.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -30,6 +30,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
 import coil.compose.rememberImagePainter
 import coil.transform.RoundedCornersTransformation
 import com.zedlabs.pastelplaceholder.Pastel
@@ -45,7 +46,8 @@ fun MangaGridWithHeader(
     modifier: Modifier = Modifier,
     isComfortable: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (manga: Manga) -> Unit = {},
+    onClick: (Manga) -> Unit = {},
+    onLongClick: (Manga) -> Unit = {},
 ) {
 
     LazyColumn(
@@ -66,7 +68,42 @@ fun MangaGridWithHeader(
                     displayManga = displayManga,
                     shouldOutlineCover = shouldOutlineCover,
                     isComfortable = isComfortable,
-                    onClick = onClick
+                    onClick = { onClick(displayManga.manga) },
+                    onLongClick = { onLongClick(displayManga.manga) }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun PagingMangaGrid(
+    mangaList: LazyPagingItems<DisplayManga>,
+    shouldOutlineCover: Boolean,
+    columns: Int,
+    contentPadding: PaddingValues = PaddingValues(),
+    isComfortable: Boolean = true,
+    onClick: (Manga) -> Unit = {},
+    onLongClick: (Manga) -> Unit = {},
+) {
+    val cells = GridCells.Fixed(columns)
+    LazyVerticalGrid(
+        cells = cells,
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(4.dp),
+        contentPadding = contentPadding,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items(mangaList) { displayManga ->
+            displayManga?.let {
+                MangaGridItem(
+                    displayManga = displayManga,
+                    shouldOutlineCover = shouldOutlineCover,
+                    isComfortable = isComfortable,
+                    onClick = { onClick(displayManga.manga) },
+                    onLongClick = { onLongClick(displayManga.manga) }
                 )
             }
         }
@@ -78,19 +115,18 @@ fun MangaGrid(
     mangaList: List<DisplayManga>,
     shouldOutlineCover: Boolean,
     columns: Int,
+    contentPadding: PaddingValues = PaddingValues(),
     isComfortable: Boolean = true,
     onClick: (Manga) -> Unit = {},
 ) {
-    val cells = if (columns > 1) {
-        GridCells.Fixed(columns)
-    } else {
-        GridCells.Adaptive(160.dp)
-    }
+    val cells = GridCells.Fixed(columns)
+
     LazyVerticalGrid(
         cells = cells,
         modifier = Modifier
             .fillMaxSize()
             .padding(4.dp),
+        contentPadding = contentPadding,
         verticalArrangement = Arrangement.spacedBy(4.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp),
     ) {
@@ -110,7 +146,8 @@ private fun MangaGridItem(
     displayManga: DisplayManga,
     shouldOutlineCover: Boolean,
     isComfortable: Boolean = true,
-    onClick: (Manga) -> Unit = {},
+    onClick: () -> Unit = {},
+    onLongClick: () -> Unit = {},
 ) {
 
     CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
@@ -118,7 +155,10 @@ private fun MangaGridItem(
             Box(
                 modifier = Modifier
                     .clip(RoundedCornerShape(Shapes.coverRadius))
-                    .clickable { onClick(displayManga.manga) }
+                    .combinedClickable(
+                        onClick = onClick,
+                        onLongClick = onLongClick
+                    )
                     .padding(2.dp)
             ) {
 

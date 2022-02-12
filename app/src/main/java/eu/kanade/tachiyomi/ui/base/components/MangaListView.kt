@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.base
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -24,6 +25,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.compose.LazyPagingItems
+import androidx.paging.compose.items
 import coil.compose.rememberImagePainter
 import coil.transform.RoundedCornersTransformation
 import com.zedlabs.pastelplaceholder.Pastel
@@ -71,14 +74,41 @@ fun MangaRow(
 }
 
 @Composable
-fun MangaList(
-    mangaList: List<DisplayManga>,
-    shouldOutlineCover: Boolean,
+fun PagingListManga(
+    mangaList: LazyPagingItems<DisplayManga>,
+    shouldOutlineCover: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(),
     onClick: (manga: Manga) -> Unit = {},
 ) {
     LazyColumn(
-        Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = contentPadding,
+    ) {
+        items(mangaList) { displayManga ->
+            displayManga?.let {
+                MangaRow(displayManga = displayManga,
+                    shouldOutlineCover = shouldOutlineCover,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .clickable {
+                            onClick(displayManga.manga)
+                        })
+            }
+        }
+    }
+}
+
+@Composable
+fun MangaList(
+    mangaList: List<DisplayManga>,
+    shouldOutlineCover: Boolean = true,
+    contentPadding: PaddingValues = PaddingValues(),
+    onClick: (manga: Manga) -> Unit = {},
+) {
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = contentPadding,
     ) {
         itemsIndexed(mangaList) { index, displayManga ->
             MangaRow(displayManga = displayManga,
@@ -89,8 +119,6 @@ fun MangaList(
                     .clickable {
                         onClick(displayManga.manga)
                     })
-            /*if (index + 1 < mangaList.size) {
-            }*/
         }
     }
 }
@@ -101,7 +129,8 @@ fun MangaListWithHeader(
     shouldOutlineCover: Boolean,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(),
-    onClick: (manga: Manga) -> Unit = {},
+    onClick: (Manga) -> Unit = {},
+    onLongClick: (Manga) -> Unit = {},
 ) {
     LazyColumn(
         modifier = modifier
@@ -118,12 +147,10 @@ fun MangaListWithHeader(
                         modifier = Modifier
                             .fillMaxWidth()
                             .wrapContentHeight()
-                            .clickable {
-                                onClick(displayManga.manga)
-                            })
-                    /*if (index + 1 < mangaList.size) {
-                        Divider()
-                    }*/
+                            .combinedClickable(
+                                onClick = { onClick(displayManga.manga) },
+                                onLongClick = { onLongClick(displayManga.manga) },
+                            ))
                 }
             }
 

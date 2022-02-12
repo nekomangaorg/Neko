@@ -3,7 +3,13 @@ package eu.kanade.tachiyomi.ui.source.browse
 import android.app.Activity
 import android.os.Build
 import android.os.Bundle
-import android.view.*
+import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
+import android.view.View
+import android.view.ViewGroup
+import android.view.WindowInsets
 import androidx.appcompat.widget.SearchView
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
@@ -31,7 +37,7 @@ import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.source.LatestSourceController
+import eu.kanade.tachiyomi.ui.source.LatestController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.system.connectivityManager
@@ -381,7 +387,7 @@ open class BrowseSourceController(bundle: Bundle) :
         sheet.onLatestChapterClicked = {
             sheet.dismiss()
             adapter?.clear()
-            router.pushController(LatestSourceController().withFadeTransaction())
+            router.pushController(LatestController().withFadeTransaction())
         }
 
         sheet.show()

@@ -252,12 +252,13 @@ dependencies {
     val composeVersion = "1.1.0-rc01"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha14")
     // Tooling support (Previews, etc.)
     implementation("androidx.compose.ui:ui-tooling:$composeVersion")
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Design
-    implementation("androidx.compose.material3:material3:1.0.0-alpha03")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha04")
     implementation("com.google.android.material:compose-theme-adapter-3:1.0.3")
     implementation("androidx.compose.material:material:$composeVersion")
 

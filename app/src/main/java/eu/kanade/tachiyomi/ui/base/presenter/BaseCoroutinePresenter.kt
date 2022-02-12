@@ -7,7 +7,7 @@ import kotlinx.coroutines.cancel
 
 open class BaseCoroutinePresenter {
     lateinit var presenterScope: CoroutineScope
-
+  
     open fun onCreate() {
         presenterScope = CoroutineScope(Job() + Dispatchers.Default)
     }
