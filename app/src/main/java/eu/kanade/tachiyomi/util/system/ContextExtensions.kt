@@ -350,8 +350,9 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
                     .build()
             )
             .build()
-        // Force allowing browser selection  so that verified extensions don't re-open in Neko
-        intent.intent.setPackage(defaultBrowserPackageName())
+        // Force allowing browser selection  so that verified links don't re-open in Neko
+        // Force default browser so that verified links don't re-open in Neko
+        defaultBrowserPackageName()?.let { intent.intent.setPackage(it) }
         intent.launchUrl(this, uri)
     } catch (e: Exception) {
         toast(e.message)
@@ -360,8 +361,9 @@ fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
 
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
-    return packageManager.resolveActivity(browserIntent,
-        PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.packageName
+    return packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
+        ?.activityInfo?.packageName
+        ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
 
 /**
