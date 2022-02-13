@@ -29,6 +29,7 @@ internal fun MangaTitle(
         text = title,
         style = TextStyle(fontFamily = Typefaces.montserrat,
             fontSize = fontSize,
+            color = MaterialTheme.colorScheme.onSurface,
             fontWeight = fontWeight),
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
