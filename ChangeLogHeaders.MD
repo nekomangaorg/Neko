@@ -2,4 +2,3 @@
 ## 🏗️ Changes
 ## 🐜 Fixes
 ## 🛠️ Other
-Switch Latest view to Compose
