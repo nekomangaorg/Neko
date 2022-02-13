@@ -1,5 +1,8 @@
-# Note: read the 2.8.0 change log for the majority of recent changes
+## 🥳 New
 ## 🏗️ Changes
-
 ## 🐜 Fixes
 open in browser for MangaDex links
+## 🛠️ Other
+Switch Latest view to Compose
+update to gradle 7.2
+

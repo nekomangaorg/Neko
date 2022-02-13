@@ -98,11 +98,11 @@ android {
         }
     }
 
-    lint {
-        disable("MissingTranslation")
-        isAbortOnError = false
-        isCheckReleaseBuilds = false
-    }
+    /* lint {
+         disable("MissingTranslation")
+         isAbortOnError = false
+         isCheckReleaseBuilds = false
+     }*/
 
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_1_8
