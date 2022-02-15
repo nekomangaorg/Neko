@@ -12,6 +12,10 @@ import android.os.Build
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
@@ -23,10 +27,9 @@ import androidx.core.widget.TextViewCompat
 import androidx.transition.TransitionSet
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
-import com.elvishew.xlog.XLog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
-import com.mikepenz.iconics.typeface.IIcon
+import com.google.android.material.composethemeadapter3.Mdc3Theme
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
@@ -34,11 +37,11 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.ui.manga.header.InformationHeader
 import eu.kanade.tachiyomi.util.system.create
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
@@ -46,8 +49,6 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
-import java.text.NumberFormat
-import java.util.Locale
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -72,6 +73,7 @@ class MangaHeaderHolder(
     private var showMoreButton = true
     var hadSelection = false
     private var canCollapse = true
+    val expandedState = IsExpandedState(startExpanded)
 
     init {
 
@@ -112,7 +114,7 @@ class MangaHeaderHolder(
             }
             mangaSummary.setOnTouchListener { _, event ->
                 if (event.action == MotionEvent.ACTION_DOWN) {
-                    view.requestFocus()
+                    mangaSummary.requestFocus()
                 }
                 if (event.actionMasked == MotionEvent.ACTION_UP) {
                     hadSelection = mangaSummary.hasSelection()
@@ -137,25 +139,14 @@ class MangaHeaderHolder(
                 adapter.delegate.favoriteManga(false)
             }
 
-            title.setOnLongClickListener {
-                adapter.delegate.copyToClipboard(title.text.toString(), R.string.title)
-                true
-            }
-            /*mangaAuthor.setOnClickListener {
-                mangaAuthor.text?.let { adapter.delegate.globalSearch(it.toString()) }
-            }*/
-            mangaAuthor.setOnLongClickListener {
-                adapter.delegate.copyToClipboard(
-                    mangaAuthor.text.toString(),
-                    R.string.author
-                )
-                true
-            }
             applyBlur()
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
-            if (startExpanded) expandDesc()
-            else collapseDesc()
+            when (startExpanded) {
+                true -> expandDesc()
+                false -> collapseDesc()
+            }
+
             if (isTablet) {
                 chapterLayout.isVisible = false
                 expandDesc()
@@ -179,6 +170,7 @@ class MangaHeaderHolder(
     private fun expandDesc(animated: Boolean = false) {
         binding ?: return
         if (binding.moreButton.visibility == View.VISIBLE || isTablet) {
+            expandedState.isExpanded = true
             androidx.transition.TransitionManager.endTransitions(adapter.controller.binding.recycler)
             binding.mangaSummary.maxLines = Integer.MAX_VALUE
             binding.mangaSummary.setTextIsSelectable(true)
@@ -195,8 +187,7 @@ class MangaHeaderHolder(
                     null)
                 animVector?.start()
             }
-            binding.title.maxLines = Integer.MAX_VALUE
-            binding.mangaAuthor.maxLines = Integer.MAX_VALUE
+
             binding.mangaSummary.requestFocus()
             if (animated) {
                 val transition = TransitionSet()
@@ -242,33 +233,31 @@ class MangaHeaderHolder(
                 transition
             )
         }
+        expandedState.isExpanded = false
         binding.mangaSummary.setTextIsSelectable(false)
         binding.mangaSummary.isClickable = true
         binding.mangaSummary.maxLines = 3
         setDescription()
         binding.mangaGenresTags.isVisible = isTablet
         binding.lessButton.isVisible = false
-        binding.title.maxLines = 4
-        binding.mangaAuthor.maxLines = 2
         adapter.recyclerView.post {
             adapter.delegate.updateScroll()
         }
     }
 
     private fun setDescription() {
-        if (binding != null) {
-            val desc = adapter.controller.mangaPresenter().manga.description
-            binding.mangaSummary.text = when {
-                desc.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
-                binding.mangaSummary.maxLines != Int.MAX_VALUE -> desc.replace(
-                    Regex(
-                        "[\\r\\n\\s*]{2,}",
-                        setOf(RegexOption.MULTILINE)
-                    ),
-                    "\n"
-                )
-                else -> desc.trim()
-            }
+        binding ?: return
+        val desc = adapter.controller.mangaPresenter().manga.description
+        binding.mangaSummary.text = when {
+            desc.isNullOrBlank() -> itemView.context.getString(R.string.no_description)
+            binding.mangaSummary.maxLines != Int.MAX_VALUE -> desc.replace(
+                Regex(
+                    "[\\r\\n\\s*]{2,}",
+                    setOf(RegexOption.MULTILINE)
+                ),
+                "\n"
+            )
+            else -> desc.trim()
         }
     }
 
@@ -298,17 +287,26 @@ class MangaHeaderHolder(
             }
             return
         }
-        binding.title.text = manga.title
+
+        //composeStuff
+        binding.compose.setContent {
+            Mdc3Theme {
+                val isExpanded = remember { expandedState }
+                InformationHeader(
+                    manga = manga,
+                    titleLongClick = { title ->
+                        adapter.delegate.copyToClipboard(title, R.string.title)
+                    },
+                    creatorLongClicked = { creator ->
+                        adapter.delegate.copyToClipboard(creator, R.string.author)
+                    },
+                    isExpanded = isExpanded.isExpanded
+                )
+            }
+        }
+
 
         setGenreTags(binding, manga)
-
-
-        if (manga.author == manga.artist || manga.artist.isNullOrBlank()) {
-            binding.mangaAuthor.text = manga.author?.trim()
-        } else {
-            binding.mangaAuthor.text =
-                listOfNotNull(manga.author?.trim(), manga.artist?.trim()).joinToString(", ")
-        }
 
         if (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
             manga.description = "THIS MANGA IS NOT MIGRATED TO V5"
@@ -336,8 +334,8 @@ class MangaHeaderHolder(
         with(binding.favoriteButton) {
             val icon = when {
                 item.isLocked -> MaterialDesignDx.Icon.gmf_lock
-                item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart as IIcon
-                else -> CommunityMaterial.Icon2.cmd_heart_outline as IIcon
+                item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart
+                else -> CommunityMaterial.Icon2.cmd_heart_outline
             }
             setImageDrawable(icon.create(context, 24f))
             adapter.delegate.setFavButtonPopup(this)
@@ -412,51 +410,12 @@ class MangaHeaderHolder(
             height = adapter.delegate.topCoverHeight()
         }
 
-        binding.mangaStatus.isVisible = manga.status != 0
-
-        binding.mangaStatus.text = (
-            itemView.context.getString(
-                when (manga.status) {
-                    SManga.ONGOING -> R.string.ongoing
-                    SManga.COMPLETED -> R.string.completed
-                    SManga.LICENSED -> R.string.licensed
-                    SManga.PUBLICATION_COMPLETE -> R.string.publication_complete
-                    SManga.HIATUS -> R.string.hiatus
-                    SManga.CANCELLED -> R.string.cancelled
-                    else -> R.string.unknown
-                }
-            )
-            )
-
-        binding.mangaRating.isVisible = manga.rating != null
-        binding.mangaRating.text = "  " + manga.rating
-
-        binding.mangaUsers.isVisible = manga.users != null
-        val users = kotlin.runCatching {
-            NumberFormat.getNumberInstance(Locale.US).format(manga.users?.toInt() ?: 0)
-        }.getOrElse {
-            XLog.e("number couldnt be formatted for ${manga.url}")
-            0
-        }
-        binding.mangaUsers.text = "  $users"
-
-        binding.mangaMissingChapters.isVisible = manga.missing_chapters != null
-
-        binding.mangaMissingChapters.text =
-            itemView.context.getString(R.string.missing_chapters, manga.missing_chapters)
 
         manga.genre?.let {
             binding.r18Badge.isVisible = (it.contains("pornographic", true))
         }
 
-        binding.mangaLangFlag.visibility = View.VISIBLE
-        when (manga.lang_flag?.lowercase(Locale.US)) {
-            "zh-hk" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_china)
-            "zh" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_china)
-            "ko" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_korea)
-            "ja" -> binding.mangaLangFlag.setImageResource(R.drawable.ic_flag_japan)
-            else -> binding.mangaLangFlag.visibility = View.GONE
-        }
+
 
         binding.filtersText.text = presenter.currentFilters()
 
@@ -693,4 +652,8 @@ class MangaHeaderHolder(
         super.onLongClick(view)
         return false
     }
+}
+
+class IsExpandedState(initalState: Boolean) {
+    var isExpanded by mutableStateOf(initalState)
 }
