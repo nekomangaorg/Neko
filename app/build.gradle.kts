@@ -266,6 +266,7 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core:$composeVersion")
     implementation("androidx.compose.material:material-icons-extended:$composeVersion")
 
+    implementation("jp.wasabeef:gap:1.1.0")
 
 
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
@@ -274,6 +275,9 @@ dependencies {
     val accompanistVersion = "0.20.3"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-drawablepainter:$accompanistVersion")
+
     //implementation("com.google.accompanist:accompanist-insets-ui:$accompanistVersion")
     //implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
 
@@ -317,6 +321,7 @@ dependencies {
     val kahelpersVersion = "3.0.5"
     implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:$kahelpersVersion")
     implementation("com.github.FunkyMuse.KAHelpers:activity:$kahelpersVersion")
+    implementation("com.github.FunkyMuse.KAHelpers:string:$kahelpersVersion")
     implementation("com.github.skydoves:sandwich:1.2.3")
 
     implementation("com.mikepenz:aboutlibraries:8.9.4")

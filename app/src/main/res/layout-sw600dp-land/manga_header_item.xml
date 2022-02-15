@@ -82,118 +82,13 @@
             tools:src="@mipmap/ic_launcher" />
     </com.google.android.material.card.MaterialCardView>
 
-
-    <TextView
-        android:id="@+id/title"
-        style="?textAppearanceTitleMedium"
-        android:layout_width="wrap_content"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constrainedWidth="true"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="12dp"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="4"
-        android:text="@string/title"
-        android:textIsSelectable="false"
-        android:textSize="18sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@id/cover_card"
-        app:layout_constraintTop_toTopOf="@id/cover_card"
-        tools:text="Title Example" />
-
-    <TextView
-        android:id="@+id/manga_author"
-        android:layout_height="wrap_content"
-        android:layout_width="wrap_content"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constrainedWidth="true"
-        android:layout_marginEnd="16dp"
-        android:ellipsize="end"
-        android:maxLines="2"
-        android:text="@string/author"
-        style="?textAppearanceLabelLarge"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textIsSelectable="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@+id/title" />
-
-    <TextView
-        android:id="@+id/manga_status"
-        style="?textAppearanceBodySecondary"
-        android:layout_width="wrap_content"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constrainedWidth="true"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/unknown_status"
-        android:textIsSelectable="false"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_author" />
-
-    <com.mikepenz.iconics.view.IconicsTextView
-        android:id="@+id/manga_rating"
-        style="@style/Neko.Subtitle1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:textIsSelectable="false"
-        android:visibility="gone"
-        app:iiv_start_color="?android:attr/textColorSecondary"
-        app:iiv_start_icon="gmf_bar_chart"
-        app:iiv_start_size="15dp"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_status"
-        tools:text="rating 4.82"
-        tools:visibility="visible" />
-
-    <com.mikepenz.iconics.view.IconicsTextView
-        android:id="@+id/manga_users"
-        style="@style/Neko.Subtitle1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:paddingStart="8dp"
-        android:textIsSelectable="false"
-        android:visibility="gone"
-        app:iiv_start_color="?android:attr/textColorSecondary"
-        app:iiv_start_icon="gmf_person"
-        app:iiv_start_size="15dp"
-        app:layout_constraintStart_toEndOf="@id/manga_rating"
-        app:layout_constraintTop_toBottomOf="@+id/manga_status"
-        tools:text="user 4.82"
-        tools:visibility="visible" />
-
-    <com.google.android.material.textview.MaterialTextView
-        android:id="@+id/manga_missing_chapters"
-        style="@style/Neko.Subtitle1"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/missing_chapters"
-        android:textIsSelectable="false"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@+id/manga_rating"
-        tools:visibility="visible" />
-
-
-    <ImageView
-        android:id="@+id/manga_lang_flag"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="16dp"
-        app:layout_constraintStart_toStartOf="@id/title"
-        app:layout_constraintTop_toBottomOf="@id/manga_missing_chapters"
-        tools:src="@drawable/ic_flag_japan" />
+        app:layout_constraintTop_toTopOf="@id/cover_card" />
 
     <TextView
         android:id="@+id/r18_badge"
@@ -220,7 +115,7 @@
         android:layout_margin="6dp"
         android:orientation="horizontal"
         app:barrierDirection="bottom"
-        app:constraint_referenced_ids="manga_lang_flag,cover_card" />
+        app:constraint_referenced_ids="compose,cover_card" />
 
     <HorizontalScrollView
         android:id="@+id/sub_button_scroll"
@@ -472,6 +367,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintTop_toBottomOf="@id/less_button">
+
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chapters_title"
