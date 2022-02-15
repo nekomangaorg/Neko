@@ -50,7 +50,7 @@ class PageHandler {
 
                 val externalUrl = chapterAttributesDto.externalUrl
                 val currentDate = System.currentTimeMillis()
-                val chapterDate = MdUtil.parseDate(chapterAttributesDto.publishAt)
+                val chapterDate = MdUtil.parseDate(chapterAttributesDto.readableAt)
                 val chapterDateNewer = chapterDate - currentDate > 0
 
                 if (externalUrl != null) {

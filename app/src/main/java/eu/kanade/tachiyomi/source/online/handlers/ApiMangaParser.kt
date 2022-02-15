@@ -255,7 +255,7 @@ class ApiMangaParser {
         chapter.name = MdUtil.cleanString(chapterName.joinToString(" "))
         // Convert from unix time
 
-        chapter.date_upload = MdUtil.parseDate(attributes.publishAt)
+        chapter.date_upload = MdUtil.parseDate(attributes.readableAt)
 
         val scanlatorName =
             networkChapter.relationships.filter { it.type == MdConstants.Types.scanlator }
