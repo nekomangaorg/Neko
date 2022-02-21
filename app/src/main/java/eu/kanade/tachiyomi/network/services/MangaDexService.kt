@@ -57,7 +57,7 @@ interface MangaDexService {
     ): ApiResponse<ChapterListDto>
 
     @Headers("Cache-Control: no-cache")
-    @GET("${MdApi.chapter}?order[publishAt]=desc")
+    @GET("${MdApi.chapter}?order[readableAt]=desc&includeFutureUpdates=0")
     suspend fun latestChapters(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,

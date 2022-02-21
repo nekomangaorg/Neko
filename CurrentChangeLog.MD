@@ -2,6 +2,7 @@
 ## 🏗️ Changes
 Switched Information section manga header to compose
 Opening a deeplink group will hide manga if there are no chapters in your selected language
+Latest manga screen now sorts by readableAt date, and hides future chapters
 ## 🐜 Fixes
 MangaPlus chapters won't show Dec 2037 anymore
 open in browser for MangaDex links
