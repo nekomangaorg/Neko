@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.GridCells
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyVerticalGrid
@@ -21,6 +22,10 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -30,10 +35,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import coil.compose.rememberImagePainter
 import coil.transform.RoundedCornersTransformation
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.zedlabs.pastelplaceholder.Pastel
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
@@ -78,7 +87,7 @@ fun MangaGridWithHeader(
 
 @Composable
 fun PagingMangaGrid(
-    mangaList: LazyPagingItems<DisplayManga>,
+    mangaListPagingItems: LazyPagingItems<DisplayManga>,
     shouldOutlineCover: Boolean,
     columns: Int,
     contentPadding: PaddingValues = PaddingValues(),
@@ -87,24 +96,75 @@ fun PagingMangaGrid(
     onLongClick: (Manga) -> Unit = {},
 ) {
     val cells = GridCells.Fixed(columns)
-    LazyVerticalGrid(
-        cells = cells,
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(4.dp),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(4.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items(mangaList) { displayManga ->
-            displayManga?.let {
-                MangaGridItem(
-                    displayManga = displayManga,
-                    shouldOutlineCover = shouldOutlineCover,
-                    isComfortable = isComfortable,
-                    onClick = { onClick(displayManga.manga) },
-                    onLongClick = { onLongClick(displayManga.manga) }
+
+    var isLoading by remember { mutableStateOf(true) }
+    var initialLoading = true
+
+    Box(modifier = Modifier
+        .fillMaxSize()
+        .padding(contentPadding)) {
+
+        when {
+            mangaListPagingItems.loadState.refresh == LoadState.Loading -> {
+                initialLoading = true
+                isLoading = true
+            }
+            mangaListPagingItems.loadState.append == LoadState.Loading -> {
+                initialLoading = false
+                isLoading = true
+            }
+            mangaListPagingItems.loadState.append is LoadState.Error && mangaListPagingItems.itemCount == 0 -> {
+                isLoading = false
+                EmptyView(
+                    iconicImage = CommunityMaterial.Icon.cmd_compass_off,
+                    iconSize = 176.dp,
+                    message = R.string.no_results_found,
                 )
+            }
+            else -> {
+                isLoading = false
+            }
+        }
+
+        if (initialLoading) {
+            Loading(isLoading,
+                Modifier
+                    .zIndex(1f)
+                    .padding(8.dp)
+                    .align(Alignment.TopCenter))
+        } else {
+
+        }
+
+
+        LazyVerticalGrid(
+            cells = cells,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(4.dp),
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+
+            items(mangaListPagingItems) { displayManga ->
+                displayManga?.let {
+                    MangaGridItem(
+                        displayManga = displayManga,
+                        shouldOutlineCover = shouldOutlineCover,
+                        isComfortable = isComfortable,
+                        onClick = { onClick(displayManga.manga) },
+                        onLongClick = { onLongClick(displayManga.manga) }
+                    )
+                }
+            }
+            if (initialLoading.not() && isLoading) {
+                item {
+                    Loading(isLoading,
+                        Modifier
+                            .padding(8.dp)
+                            .wrapContentSize())
+                }
             }
         }
     }

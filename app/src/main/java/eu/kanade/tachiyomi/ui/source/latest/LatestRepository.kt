@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.source
+package eu.kanade.tachiyomi.ui.source.latest
 
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.models.DisplayManga

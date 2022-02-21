@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
 import coil.compose.rememberImagePainter
@@ -36,6 +37,7 @@ import eu.kanade.tachiyomi.ui.base.components.CoverRippleTheme
 import eu.kanade.tachiyomi.ui.base.components.DisplayText
 import eu.kanade.tachiyomi.ui.base.components.Favorited
 import eu.kanade.tachiyomi.ui.base.components.HeaderCard
+import eu.kanade.tachiyomi.ui.base.components.Loading
 import eu.kanade.tachiyomi.ui.base.components.MangaTitle
 import eu.kanade.tachiyomi.ui.base.components.NekoColors
 import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
@@ -75,7 +77,7 @@ fun MangaRow(
 
 @Composable
 fun PagingListManga(
-    mangaList: LazyPagingItems<DisplayManga>,
+    mangaListPagingItems: LazyPagingItems<DisplayManga>,
     shouldOutlineCover: Boolean = true,
     contentPadding: PaddingValues = PaddingValues(),
     onClick: (manga: Manga) -> Unit = {},
@@ -84,7 +86,7 @@ fun PagingListManga(
         modifier = Modifier.fillMaxWidth(),
         contentPadding = contentPadding,
     ) {
-        items(mangaList) { displayManga ->
+        items(mangaListPagingItems) { displayManga ->
             displayManga?.let {
                 MangaRow(displayManga = displayManga,
                     shouldOutlineCover = shouldOutlineCover,
@@ -94,6 +96,18 @@ fun PagingListManga(
                         .clickable {
                             onClick(displayManga.manga)
                         })
+            }
+        }
+        mangaListPagingItems.apply {
+            when {
+                loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
+                    item {
+                        Box(modifier = Modifier.fillMaxWidth()) {
+                            Loading(isLoading = true,
+                                modifier = Modifier.align(Alignment.Center))
+                        }
+                    }
+                }
             }
         }
     }
