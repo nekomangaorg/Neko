@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.source
+package eu.kanade.tachiyomi.ui.source.latest
 
 import android.os.Bundle
 import android.view.View
@@ -115,10 +115,10 @@ class LatestController(bundle: Bundle? = null) :
                             applyBottom = true,
                             applyTop = false)
 
-                        val mangaList = presenter.mangaList.collectAsLazyPagingItems()
+                        val mangaListPagingItems = presenter.mangaList.collectAsLazyPagingItems()
 
                         if (isList) {
-                            PagingListManga(mangaList = mangaList,
+                            PagingListManga(mangaListPagingItems = mangaListPagingItems,
                                 shouldOutlineCover = preferences.outlineOnCovers()
                                     .get(),
                                 contentPadding = contentPadding,
@@ -131,7 +131,7 @@ class LatestController(bundle: Bundle? = null) :
                                         .get())
 
                             PagingMangaGrid(
-                                mangaList = mangaList,
+                                mangaListPagingItems = mangaListPagingItems,
                                 shouldOutlineCover = preferences.outlineOnCovers()
                                     .get(),
                                 columns = columns,

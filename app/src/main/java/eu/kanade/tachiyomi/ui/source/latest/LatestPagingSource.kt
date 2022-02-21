@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.source
+package eu.kanade.tachiyomi.ui.source.latest
 
 import androidx.paging.PagingSource
 import androidx.paging.PagingState
