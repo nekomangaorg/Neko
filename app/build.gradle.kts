@@ -259,7 +259,7 @@ dependencies {
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Design
     implementation("androidx.compose.material3:material3:1.0.0-alpha04")
-    implementation("com.google.android.material:compose-theme-adapter-3:1.0.3")
+    implementation("com.google.android.material:compose-theme-adapter-3:1.0.4")
     implementation("androidx.compose.material:material:$composeVersion")
 
     // Material design icons
