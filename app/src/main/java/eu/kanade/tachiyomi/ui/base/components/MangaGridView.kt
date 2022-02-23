@@ -132,10 +132,7 @@ fun PagingMangaGrid(
                     .zIndex(1f)
                     .padding(8.dp)
                     .align(Alignment.TopCenter))
-        } else {
-
         }
-
 
         LazyVerticalGrid(
             cells = cells,
