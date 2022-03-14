@@ -272,7 +272,7 @@ dependencies {
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 
     //accompianist
-    val accompanistVersion = "0.23.0"
+    val accompanistVersion = "0.23.1"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
