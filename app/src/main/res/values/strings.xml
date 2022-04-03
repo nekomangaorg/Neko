@@ -505,7 +505,7 @@
     <string name="tracked">Tracked</string>
     <string name="not_tracked">Not tracked</string>
     <string name="services">Services</string>
-    <string name="sync_chapters_after_reading">Sync chapters after reading</string>
+    <string name="update_tracking_after_reading">Update tracking when marked as read</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="dropped">Dropped</string>
@@ -533,6 +533,9 @@
     <string name="anilist" translatable="false">AniList</string>
     <string name="myanimelist" translatable="false">MyAnimeList</string>
     <string name="kitsu" translatable="false">Kitsu</string>
+    <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
+    <string name="scoring_type_updated">Scoring type updated</string>
+    <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>
     <string name="started_reading_date">Started reading date</string>
     <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please log in to MAL again</string>

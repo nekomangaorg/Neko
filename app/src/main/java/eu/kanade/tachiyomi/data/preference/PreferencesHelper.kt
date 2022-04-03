@@ -92,7 +92,7 @@ class PreferencesHelper(val context: Context) {
     )
 
     fun getInt(key: String, default: Int) = flowPrefs.getInt(key, default)
-    fun getStringPref(key: String, default: String) = flowPrefs.getString(key, default)
+    fun getStringPref(key: String, default: String = "") = flowPrefs.getString(key, default)
     fun getStringSet(key: String, default: Set<String>) = flowPrefs.getStringSet(key, default)
 
     fun startingTab() = flowPrefs.getInt(Keys.startingTab, 0)
