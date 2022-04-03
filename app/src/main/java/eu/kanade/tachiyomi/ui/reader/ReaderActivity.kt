@@ -1231,7 +1231,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             binding.chaptersSheet.chaptersBottomSheet.refreshList()
         }
         // Set seekbar progress
-        binding.readerNav.pageSeekbar.valueTo = pages.lastIndex.toFloat()
+        binding.readerNav.pageSeekbar.valueTo = max(pages.lastIndex.toFloat(), 1f)
         val progress = page.index + if (hasExtraPage) 1 else 0
         // For a double page, show the last 2 pages as if it was the final part of the seekbar
         binding.readerNav.pageSeekbar.value =
