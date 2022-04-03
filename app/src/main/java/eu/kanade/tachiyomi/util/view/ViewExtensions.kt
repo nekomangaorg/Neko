@@ -44,6 +44,7 @@ import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.descendants
 import androidx.core.view.forEach
 import androidx.core.view.updateLayoutParams
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
@@ -458,6 +459,13 @@ fun setCards(
 
 val View.backgroundColor
     get() = (background as? ColorDrawable)?.color
+
+/**
+ * Returns this ViewGroup's first descendant of specified class
+ */
+inline fun <reified T> ViewGroup.findDescendant(): T? {
+    return descendants.find { it is T } as? T
+}
 
 fun Dialog.blurBehindWindow(
     window: Window?,
