@@ -28,7 +28,7 @@ buildscript {
         val kotlinVersion = "1.6.10"
         classpath("org.jetbrains.kotlin:kotlin-android-extensions:$kotlinVersion")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
-        classpath("com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:10.0.0")
+        classpath("com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin:10.1.0")
         classpath("org.jetbrains.kotlin:kotlin-serialization:$kotlinVersion")
     }
     repositories {
