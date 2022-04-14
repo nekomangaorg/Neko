@@ -46,6 +46,7 @@ import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.descendants
 import androidx.core.view.forEach
+import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -126,12 +127,6 @@ fun Snackbar.getText(): CharSequence {
     val textView: TextView = view.findViewById(com.google.android.material.R.id.snackbar_text)
     return textView.text
 }
-
-inline val View.marginTop: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.topMargin ?: 0
-
-inline val View.marginBottom: Int
-    get() = (layoutParams as? ViewGroup.MarginLayoutParams)?.bottomMargin ?: 0
 
 object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
