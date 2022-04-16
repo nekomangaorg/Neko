@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.setCards
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the title.
@@ -56,6 +57,7 @@ class LibraryGridHolder(
      */
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
+        setCards(adapter.showOutline, binding.card, binding.unreadDownloadBadge.root)
         binding.constraintLayout.isVisible = !item.manga.isBlank()
         binding.title.text = item.manga.title.highlightText(item.filter, color)
         val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {

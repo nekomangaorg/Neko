@@ -10,6 +10,7 @@ import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
 import eu.kanade.tachiyomi.util.lang.highlightText
 import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.util.view.setCards
 
 /**
  * Class used to hold the displayed data of a manga in the library, like the cover or the binding.title.
@@ -34,6 +35,7 @@ class LibraryListHolder(
      * @param item the manga item to bind.
      */
     override fun onSetValues(item: LibraryItem) {
+        setCards(adapter.showOutline, binding.card, binding.unreadDownloadBadge.root)
         binding.title.isVisible = true
         binding.constraintLayout.minHeight = 56.dpToPx
         if (item.manga.isBlank()) {

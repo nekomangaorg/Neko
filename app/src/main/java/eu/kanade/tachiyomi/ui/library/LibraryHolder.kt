@@ -25,7 +25,7 @@ abstract class LibraryHolder(
 
     init {
         val card = itemView.findViewById<MaterialCardView>(R.id.card)
-        val badgeView = itemView.findViewById<LibraryBadge>(R.id.badge_view)
+        val badgeView = itemView.findViewById<LibraryBadge>(R.id.unread_download_badge)
         if (card != null && badgeView != null) {
             setCards(adapter.showOutline, card, badgeView)
         }
