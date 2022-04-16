@@ -37,7 +37,7 @@ fun CompoundButton.bindToPreference(pref: Preference<Boolean>, block: ((Boolean)
  * Binds a radio group with a int preference.
  */
 fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = null) {
-    (getChildAt(pref.get()) as RadioButton).isChecked = true
+    (getChildAt(pref.get()) as? RadioButton)?.isChecked = true
     setOnCheckedChangeListener { _, checkedId ->
         val index = indexOfChild(findViewById(checkedId))
         pref.set(index)
