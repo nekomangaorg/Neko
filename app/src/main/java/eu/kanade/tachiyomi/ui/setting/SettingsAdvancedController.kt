@@ -28,6 +28,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.PREF_DOH_ADGUARD
 import eu.kanade.tachiyomi.network.PREF_DOH_CLOUDFLARE
 import eu.kanade.tachiyomi.network.PREF_DOH_GOOGLE
+import eu.kanade.tachiyomi.network.PREF_DOH_QUAD9
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.CrashLogUtil
@@ -207,9 +208,16 @@ class SettingsAdvancedController : SettingsController() {
                     R.string.disabled,
                     R.string.cloudflare,
                     R.string.google,
-                    R.string.ad_guard
+                    R.string.ad_guard,
+                    R.string.quad9,
                 )
-                entryValues = listOf(-1, PREF_DOH_CLOUDFLARE, PREF_DOH_GOOGLE, PREF_DOH_ADGUARD)
+                entryValues = listOf(
+                    -1,
+                    PREF_DOH_CLOUDFLARE,
+                    PREF_DOH_GOOGLE,
+                    PREF_DOH_ADGUARD,
+                    PREF_DOH_QUAD9,
+                )
 
                 defaultValue = -1
                 onChange {
