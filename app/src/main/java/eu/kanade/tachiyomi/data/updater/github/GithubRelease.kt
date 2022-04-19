@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.data.updater.github
 
+import android.os.Build
 import com.google.gson.annotations.SerializedName
 import eu.kanade.tachiyomi.data.updater.Release
 
@@ -23,7 +24,17 @@ class GithubRelease(
      * @return download link of latest release.
      */
     override val downloadLink: String
-        get() = assets[0].downloadLink
+        get() {
+            val apkVariant = when (Build.SUPPORTED_ABIS[0]) {
+                "arm64-v8a" -> "-arm64-v8a"
+                "armeabi-v7a" -> "-armeabi-v7a"
+                "x86", "x86_64" -> "-x86"
+                else -> ""
+            }
+
+            return assets.find { it.downloadLink.contains("tachiyomij2k$apkVariant-") }?.downloadLink
+                ?: assets[0].downloadLink
+        }
 
     /**
      * Assets class containing download url.
