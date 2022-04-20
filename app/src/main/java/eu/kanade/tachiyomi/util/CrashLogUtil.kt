@@ -23,8 +23,8 @@ class CrashLogUtil(private val context: Context) {
     fun dumpLogs() {
         try {
             val file = context.createFileInCacheDir("neko_crash_logs.txt")
-            Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
             file.appendText(getDebugInfo())
+            Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
 
             showNotification(file.getUriCompat(context))
         } catch (e: IOException) {
@@ -33,7 +33,6 @@ class CrashLogUtil(private val context: Context) {
     }
     fun getDebugInfo(): String {
         return """
-
             App version: ${BuildConfig.VERSION_NAME} (${BuildConfig.FLAVOR}, ${BuildConfig.COMMIT_SHA}, ${BuildConfig.VERSION_CODE}, ${BuildConfig.BUILD_TIME})
             Android version: ${Build.VERSION.RELEASE} (SDK ${Build.VERSION.SDK_INT})
             Android build ID: ${Build.DISPLAY}
@@ -42,6 +41,7 @@ class CrashLogUtil(private val context: Context) {
             Device name: ${Build.DEVICE}
             Device model: ${Build.MODEL}
             Device product name: ${Build.PRODUCT}
+            
         """.trimIndent()
     }
     private fun showNotification(uri: Uri) {
