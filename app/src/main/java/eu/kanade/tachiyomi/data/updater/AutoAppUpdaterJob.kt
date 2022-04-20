@@ -31,8 +31,8 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
             ) {
                 return@coroutineScope Result.failure()
             }
-            val result = AppUpdateChecker.getUpdateChecker().checkForUpdate()
-            if (result is AppUpdateResult.NewUpdate<*> && !AppUpdateService.isRunning()) {
+            val result = AppUpdateChecker().checkForUpdate(context, doExtrasAfterNewUpdate = false)
+            if (result is AppUpdateResult.NewUpdate && !AppUpdateService.isRunning()) {
                 AppUpdateNotifier(context).cancel()
                 AppUpdateNotifier.releasePageUrl = result.release.releaseLink
                 AppUpdateService.start(context, result.release.downloadLink, false)

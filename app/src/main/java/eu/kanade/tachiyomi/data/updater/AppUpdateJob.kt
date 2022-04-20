@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.data.updater
 
 import android.content.Context
-import android.os.Build
 import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
@@ -13,10 +12,9 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import eu.kanade.tachiyomi.data.notification.Notifications
-import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.coroutineScope
-import uy.kohesive.injekt.injectLazy
+import timber.log.Timber
 import java.util.concurrent.TimeUnit
 
 class AppUpdateJob(private val context: Context, workerParams: WorkerParameters) :
@@ -24,22 +22,10 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
 
     override suspend fun doWork(): Result = coroutineScope {
         try {
-            val preferences: PreferencesHelper by injectLazy()
-            val result = AppUpdateChecker.getUpdateChecker().checkForUpdate()
-            if (result is AppUpdateResult.NewUpdate<*>) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S &&
-                    preferences.appShouldAutoUpdate() != AutoAppUpdaterJob.NEVER
-                ) {
-                    AutoAppUpdaterJob.setupTask(context)
-                }
-                AppUpdateNotifier(context).promptUpdate(
-                    result.release.info,
-                    result.release.downloadLink,
-                    result.release.releaseLink
-                )
-            }
+            AppUpdateChecker().checkForUpdate(context)
             Result.success()
         } catch (e: Exception) {
+            Timber.e(e)
             Result.failure()
         }
     }

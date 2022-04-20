@@ -54,6 +54,7 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import eu.kanade.tachiyomi.data.updater.RELEASE_TAG
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
@@ -78,6 +79,7 @@ import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.prepareSideNavContext
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -127,7 +129,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val hideBottomNav
         get() = router.backstackSize > 1 && router.backstack[1].controller !is DialogController
 
-    private val updateChecker by lazy { AppUpdateChecker.getUpdateChecker() }
+    private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     private var tabAnimation: ValueAnimator? = null
     private var overflowDialog: Dialog? = null
@@ -504,7 +506,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     override fun onResume() {
         super.onResume()
-        getAppUpdates()
+        checkForAppUpdates()
         DownloadService.callListeners()
         showDLQueueTutorial()
     }
@@ -550,15 +552,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         mangaShortcutManager.updateShortcuts()
     }
 
-    private fun getAppUpdates() {
-        if (isUpdaterEnabled &&
-            Date().time >= preferences.lastAppCheck().get() + TimeUnit.DAYS.toMillis(1)
-        ) {
-            lifecycleScope.launch(Dispatchers.IO) {
+    private fun checkForAppUpdates() {
+        if (isUpdaterEnabled) {
+            lifecycleScope.launchIO {
                 try {
-                    val result = updateChecker.checkForUpdate()
-                    preferences.lastAppCheck().set(Date().time)
-                    if (result is AppUpdateResult.NewUpdate<*>) {
+                    val result = updateChecker.checkForUpdate(this@MainActivity)
+                    if (result is AppUpdateResult.NewUpdate) {
                         val body = result.release.info
                         val url = result.release.downloadLink
 
@@ -903,7 +902,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 try {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        "https://github.com/CarlosEsco/Neko/releases/tag/${BuildConfig.VERSION_NAME}".toUri()
+                        RELEASE_TAG.toUri()
                     )
                     startActivity(intent)
                 } catch (e: Throwable) {
