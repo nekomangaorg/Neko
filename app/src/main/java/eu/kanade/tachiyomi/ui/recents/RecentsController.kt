@@ -178,6 +178,11 @@ class RecentsController(bundle: Bundle? = null) :
             }
         )
 
+        if (!isReturning && adapter.itemCount == 0) {
+            activityBinding?.appBar?.y = 0f
+            activityBinding?.appBar?.updateAppBarAfterY(binding.recycler)
+            activityBinding?.appBar?.lockYPos = true
+        }
         viewScope.launchUI {
             val height =
                 activityBinding?.bottomNav?.height ?: view.rootWindowInsetsCompat?.getInsets(
