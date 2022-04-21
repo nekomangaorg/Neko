@@ -293,7 +293,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         val forceTransition = config.alwaysShowChapterTransition || adapter.joinedItems.getOrNull(
             pager
                 .currentItem
-        ) is ChapterTransition
+        )?.first is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
         // Layout the pager once a chapter is being set

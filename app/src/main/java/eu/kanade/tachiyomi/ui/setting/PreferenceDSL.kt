@@ -141,7 +141,7 @@ fun initDialog(dialogPreference: DialogPreference) {
     }
 }
 
-inline fun <P : Preference> PreferenceGroup.add(p: P): P {
+fun <P : Preference> PreferenceGroup.add(p: P): P {
     return p.apply {
         this.isIconSpaceReserved = false
         this.isSingleLineTitle = false
