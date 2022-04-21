@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY_MASK
 import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CHAPTER
@@ -75,7 +76,7 @@ class FullBackupManager(val context: Context) {
                     dir = dir.createDirectory("automatic")
 
                     // Delete older backups
-                    val numberOfBackups = preferences.numberOfBackups().get()!!
+                    val numberOfBackups = preferences.numberOfBackups().get()
                     val backupRegex = Regex("""neko_\d+-\d+-\d+_\d+-\d+.proto.gz""")
                     dir.listFiles { _, filename -> backupRegex.matches(filename) }
                         .orEmpty()
@@ -92,6 +93,10 @@ class FullBackupManager(val context: Context) {
                 ?: throw Exception("Couldn't create backup file")
 
             val byteArray = parser.encodeToByteArray(BackupSerializer, backup!!)
+            if (byteArray.isEmpty()) {
+                throw IllegalStateException(context.getString(R.string.empty_backup_error))
+            }
+
             file.openOutputStream().sink().gzip().buffer().use { it.write(byteArray) }
             return file.uri.toString()
         } catch (e: Exception) {
