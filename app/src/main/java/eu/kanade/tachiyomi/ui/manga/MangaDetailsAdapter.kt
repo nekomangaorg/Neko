@@ -29,7 +29,7 @@ class MangaDetailsAdapter(
     val decimalFormat = DecimalFormat(
         "#.###",
         DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' }
+            .apply { decimalSeparator = '.' },
     )
 
     fun setChapters(items: List<ChapterItem>?) {
@@ -54,7 +54,7 @@ class MangaDetailsAdapter(
                 items.filter {
                     it.name.contains(s, true) ||
                         it.scanlator?.contains(s, true) == true
-                }
+                },
             )
         }
     }
@@ -77,7 +77,7 @@ class MangaDetailsAdapter(
                     recyclerView.context.getString(
                         if (scrollType == MangaDetailsPresenter.MULTIPLE_SEASONS) R.string.season_
                         else R.string.volume_,
-                        volume
+                        volume,
                     )
                 } else {
                     getChapterName(chapter)
@@ -85,7 +85,7 @@ class MangaDetailsAdapter(
             }
             MangaDetailsPresenter.TENS_OF_CHAPTERS -> recyclerView.context.getString(
                 R.string.chapters_,
-                get10sRange(chapter.chapter_number)
+                get10sRange(chapter.chapter_number),
             )
             else -> getChapterName(chapter)
         }
@@ -95,7 +95,7 @@ class MangaDetailsAdapter(
         return if (item.chapter_number > 0) {
             recyclerView.context.getString(
                 R.string.chapter_,
-                decimalFormat.format(item.chapter_number)
+                decimalFormat.format(item.chapter_number),
             )
         } else {
             item.name
@@ -126,6 +126,7 @@ class MangaDetailsAdapter(
         fun showChapterFilter()
         fun favoriteManga(longPress: Boolean)
         fun copyToClipboard(content: String, label: Int, useToast: Boolean = false)
+        fun copyToClipboard(content: String, label: String, useToast: Boolean = false)
         fun zoomImageFromThumb(thumbView: View)
         fun showTrackingSheet()
         fun updateScroll()

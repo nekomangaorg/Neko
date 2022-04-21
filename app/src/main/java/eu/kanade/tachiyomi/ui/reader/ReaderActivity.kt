@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.reader
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.assist.AssistContent
 import android.content.ClipData
 import android.content.Context
@@ -28,6 +29,7 @@ import android.view.WindowManager
 import android.view.animation.Animation
 import android.view.animation.AnimationUtils
 import android.widget.Toast
+import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.transition.addListener
@@ -41,6 +43,7 @@ import androidx.core.view.WindowInsetsControllerCompat
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
@@ -94,6 +97,7 @@ import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
@@ -113,7 +117,6 @@ import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.popupMenu
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.SimpleAnimationListener
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -220,6 +223,20 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             intent.putExtra("chapter", chapter.id)
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
             return intent
+        }
+
+        fun newIntentWithTransitionOptions(
+            activity: Activity,
+            manga: Manga,
+            chapter: Chapter,
+            sharedElement: View,
+        ): Pair<Intent, Bundle?> {
+            val intent = newIntent(activity, manga, chapter)
+            intent.putExtra(TRANSITION_NAME, sharedElement.transitionName)
+            val activityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                activity, sharedElement, sharedElement.transitionName
+            )
+            return intent to activityOptions.toBundle()
         }
     }
 
@@ -826,12 +843,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         var firstPass = true
         binding.readerLayout.doOnApplyWindowInsetsCompat { _, insets, _ ->
             setNavColor(insets)
-            val systemInsets =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    insets.getInsetsIgnoringVisibility(systemBars())
-                } else {
-                    insets.getInsets(systemBars())
-                }
+            val systemInsets = insets.ignoredSystemInsets
             val vis = insets.isVisible(statusBars())
             val fullscreen = preferences.fullscreen().get() && !isSplitScreen
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {

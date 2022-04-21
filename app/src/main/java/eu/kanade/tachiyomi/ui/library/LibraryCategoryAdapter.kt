@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.os.Build
+import android.view.View
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
@@ -280,7 +281,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     }
 
     interface LibraryListener {
-        fun startReading(position: Int)
+        fun startReading(position: Int, view: View?)
         fun onItemReleased(position: Int)
         fun canDrag(): Boolean
         fun updateCategory(catId: Int): Boolean

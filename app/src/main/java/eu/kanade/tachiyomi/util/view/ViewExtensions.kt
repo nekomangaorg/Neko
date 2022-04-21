@@ -19,6 +19,7 @@ import android.graphics.Rect
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import android.os.PowerManager
 import android.view.Gravity
@@ -34,7 +35,6 @@ import android.widget.TextView
 import androidx.annotation.Dimension
 import androidx.annotation.FloatRange
 import androidx.annotation.IdRes
-import androidx.annotation.Px
 import androidx.annotation.RequiresApi
 import androidx.appcompat.view.menu.MenuBuilder
 import androidx.core.animation.addListener
@@ -46,6 +46,7 @@ import androidx.core.view.WindowInsetsAnimationCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.WindowInsetsCompat.Type.ime
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.children
 import androidx.core.view.descendants
 import androidx.core.view.forEach
 import androidx.core.view.marginBottom
@@ -79,6 +80,7 @@ import eu.kanade.tachiyomi.widget.StaggeredGridLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
 import kotlin.math.max
+import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -136,7 +138,7 @@ object RecyclerWindowInsetsListener : View.OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
         v.updatePaddingRelative(
             bottom = WindowInsetsCompat.toWindowInsetsCompat(insets)
-                .getInsets(systemBars()).bottom
+                .getInsets(systemBars()).bottom,
         )
         return insets
     }
@@ -196,17 +198,14 @@ fun View.applyBottomAnimatedInsets(
                 handleInsets = true
                 rootWindowInsetsCompat?.let { insets -> setInsets(insets) }
             }
-        }
+        },
     )
 }
 
-object ControllerViewWindowInsetsListener : OnApplyWindowInsetsListener {
+class ControllerViewWindowInsetsListener(private val topHeight: Int) : OnApplyWindowInsetsListener {
     override fun onApplyWindowInsets(v: View, insets: WindowInsetsCompat): WindowInsetsCompat {
         v.updateLayoutParams<FrameLayout.LayoutParams> {
-            val attrsArray = intArrayOf(R.attr.mainActionBarSize)
-            val array = v.context.obtainStyledAttributes(attrsArray)
-            topMargin = insets.getInsets(systemBars()).top + array.getDimensionPixelSize(0, 0)
-            array.recycle()
+            topMargin = insets.getInsets(systemBars()).top + topHeight
         }
         return insets
     }
@@ -232,8 +231,8 @@ fun View.doOnApplyWindowInsetsCompat(f: (View, WindowInsetsCompat, ViewPaddingSt
     requestApplyInsetsWhenAttached()
 }
 
-fun View.applyWindowInsetsForController() {
-    ViewCompat.setOnApplyWindowInsetsListener(this, ControllerViewWindowInsetsListener)
+fun View.applyWindowInsetsForController(topHeight: Int) {
+    ViewCompat.setOnApplyWindowInsetsListener(this, ControllerViewWindowInsetsListener(topHeight))
     requestApplyInsetsWhenAttached()
 }
 
@@ -246,7 +245,7 @@ fun View.checkHeightThen(f: () -> Unit) {
                     f()
                 }
             }
-        }
+        },
     )
 }
 
@@ -261,18 +260,9 @@ fun View.requestApplyInsetsWhenAttached() {
                 }
 
                 override fun onViewDetachedFromWindow(v: View) = Unit
-            }
+            },
         )
     }
-}
-
-inline fun View.updatePadding(
-    @Px left: Int = paddingLeft,
-    @Px top: Int = paddingTop,
-    @Px right: Int = paddingRight,
-    @Px bottom: Int = paddingBottom,
-) {
-    setPadding(left, top, right, bottom)
 }
 
 private fun createStateForView(view: View) = ViewPaddingState(
@@ -281,7 +271,7 @@ private fun createStateForView(view: View) = ViewPaddingState(
     view.paddingRight,
     view.paddingBottom,
     view.paddingStart,
-    view.paddingEnd
+    view.paddingEnd,
 )
 
 data class ViewPaddingState(
@@ -292,15 +282,6 @@ data class ViewPaddingState(
     val start: Int,
     val end: Int,
 )
-
-inline fun View.updatePaddingRelative(
-    @Px start: Int = paddingStart,
-    @Px top: Int = paddingTop,
-    @Px end: Int = paddingEnd,
-    @Px bottom: Int = paddingBottom,
-) {
-    setPaddingRelative(start, top, end, bottom)
-}
 
 fun setBottomEdge(view: View, activity: Activity) {
     val marginB = view.marginBottom
@@ -320,7 +301,7 @@ fun SwipeRefreshLayout.setStyle() {
 
 fun MaterialButton.resetStrokeColor() {
     strokeColor = ColorStateList.valueOf(
-        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31)
+        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorOnSurface), 31),
     )
 }
 
@@ -469,6 +450,13 @@ var View.backgroundColor: Int?
 /**
  * Returns this ViewGroup's first descendant of specified class
  */
+inline fun <reified T> ViewGroup.findChild(): T? {
+    return children.find { it is T } as? T
+}
+
+/**
+ * Returns this ViewGroup's first descendant of specified class
+ */
 inline fun <reified T> ViewGroup.findDescendant(): T? {
     return descendants.find { it is T } as? T
 }
@@ -496,7 +484,7 @@ fun Dialog.blurBehindWindow(
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
             if (canBlur) {
                 window?.decorView?.setRenderEffect(
-                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP)
+                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP),
                 )
             } else {
                 window?.decorView?.setRenderEffect(null)
@@ -534,6 +522,28 @@ fun Dialog.blurBehindWindow(
     }
 }
 
+fun TextView.setTextColorAlpha(alpha: Int) {
+    setTextColor(ColorUtils.setAlphaComponent(currentTextColor, alpha))
+}
+
+fun View.updateGradiantBGRadius(
+    ogRadius: Float,
+    deviceRadius: Float,
+    progress: Float,
+    vararg updateOtherViews: View,
+) {
+    (background as? GradientDrawable)?.let { drawable ->
+        val lerp = min(ogRadius, deviceRadius) * (1 - progress) +
+            max(ogRadius, deviceRadius) * progress
+        drawable.shape = GradientDrawable.RECTANGLE
+        drawable.cornerRadii = floatArrayOf(lerp, lerp, lerp, lerp, 0f, 0f, 0f, 0f)
+        background = drawable
+        updateOtherViews.forEach {
+            it.background = drawable
+        }
+    }
+}
+
 @RequiresApi(31)
 fun View.animateBlur(
     @FloatRange(from = 0.1) from: Float,
@@ -554,7 +564,7 @@ fun View.animateBlur(
             val amount = animator.animatedValue as Float
             try {
                 setRenderEffect(
-                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP)
+                    RenderEffect.createBlurEffect(amount, amount, Shader.TileMode.CLAMP),
                 )
             } catch (_: Exception) {
             }
@@ -563,7 +573,7 @@ fun View.animateBlur(
             addListener(
                 onEnd = {
                     setRenderEffect(null)
-                }
+                },
             )
         }
     }
@@ -584,4 +594,3 @@ fun View?.isVisibleOnScreen(): Boolean {
         Resources.getSystem().displayMetrics.heightPixels)
     return actualPosition.intersect(screen)
 }
-

@@ -28,7 +28,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
     var columnWidth = -1f
         set(value) {
             field = value
-            if (measuredWidth > 0) {
+            if (width > 0) {
                 setSpan(true)
             }
         }
@@ -43,8 +43,8 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     val itemWidth: Int
         get() {
-            return if (spanCount == 0) measuredWidth / getTempSpan()
-            else measuredWidth / managerSpanCount
+            return if (width == 0) measuredWidth / getTempSpan()
+            else width / managerSpanCount
         }
 
     init {
@@ -62,8 +62,8 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         }
 
     private fun getTempSpan(): Int {
-        if (spanCount == 0 && columnWidth > 0) {
-            val dpWidth = (measuredWidth.pxToDp / 100f).roundToInt()
+        if (columnWidth > 0) {
+            val dpWidth = (measuredWidth.toFloat().pxToDp / 100f).roundToInt()
             return max(1, (dpWidth / columnWidth).roundToInt())
         }
         return 3
@@ -87,7 +87,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         useStaggered(
             preferences.useStaggeredGrid().get() &&
                 !preferences.uniformGrid().get() &&
-                preferences.libraryLayout().get() != LibraryItem.LAYOUT_LIST
+                preferences.libraryLayout().get() != LibraryItem.LAYOUT_LIST,
         )
     }
 
@@ -97,7 +97,7 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
                 context,
                 null,
                 1,
-                StaggeredGridLayoutManager.VERTICAL
+                StaggeredGridLayoutManager.VERTICAL,
             )
             setNewManager()
         } else if (!use && manager !is GridLayoutManagerAccurateOffset) {
@@ -149,8 +149,9 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
                         3 -> 1.5f
                         2 -> 1f
                         1 -> 0f
+                        0 -> -.5f
                         else -> .5f
-                    }
+                    },
                 )
                 prefs.edit {
                     remove("grid_size")

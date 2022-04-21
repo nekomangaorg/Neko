@@ -126,6 +126,9 @@ fun Context.contextCompatDrawable(@DrawableRes resource: Int): Drawable? {
 val Int.pxToDp: Int
     get() = (this / Resources.getSystem().displayMetrics.density).toInt()
 
+val Float.pxToDp: Float
+    get() = (this / Resources.getSystem().displayMetrics.density)
+
 /**
  * Converts to px.
  */

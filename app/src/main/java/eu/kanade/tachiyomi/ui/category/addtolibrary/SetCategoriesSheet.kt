@@ -7,6 +7,7 @@ import android.view.View
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetBehavior
@@ -23,7 +24,6 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import uy.kohesive.injekt.injectLazy
@@ -37,7 +37,7 @@ class SetCategoriesSheet(
     var categories: MutableList<Category>,
     var preselected: Array<TriStateCheckBox.State>,
     private val addingToLibrary: Boolean,
-    val onMangaAdded: (() -> Unit) = { }
+    val onMangaAdded: (() -> Unit) = { },
 ) : E2EBottomSheetDialog<SetCategoriesSheetBinding>(activity) {
 
     constructor(
@@ -46,7 +46,7 @@ class SetCategoriesSheet(
         categories: MutableList<Category>,
         preselected: Array<Int>,
         addingToLibrary: Boolean,
-        onMangaAdded: () -> Unit
+        onMangaAdded: () -> Unit,
     ) : this(
         activity, listOf(manga), categories,
         categories.map {
@@ -77,10 +77,12 @@ class SetCategoriesSheet(
         get() = itemAdapter.adapterItems.filter { it.isSelected }.toSet()
 
     private val checkedItems: Set<AddCategoryItem>
-        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.CHECKED }.toSet()
+        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.CHECKED }
+            .toSet()
 
     private val indeterminateItems: Set<AddCategoryItem>
-        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.IGNORE }.toSet()
+        get() = itemAdapter.adapterItems.filter { it.state == TriStateCheckBox.State.IGNORE }
+            .toSet()
 
     private val uncheckedItems: Set<AddCategoryItem>
         get() = itemAdapter.adapterItems.filter { !it.isSelected }.toSet()
@@ -120,7 +122,7 @@ class SetCategoriesSheet(
                 val insets = activity.window.decorView.rootWindowInsetsCompat
                 matchConstraintMaxHeight =
                     fullHeight - (insets?.getInsets(systemBars())?.top ?: 0) -
-                    binding.titleLayout.height - binding.buttonLayout.height - 45.dpToPx
+                        binding.titleLayout.height - binding.buttonLayout.height - 45.dpToPx
             }
         }
 
@@ -211,7 +213,8 @@ class SetCategoriesSheet(
 
     fun updateBottomButtons() {
         val bottomSheet = binding.root.parent as View
-        val bottomSheetVisibleHeight = -bottomSheet.top + (activity.window.decorView.height - bottomSheet.height)
+        val bottomSheetVisibleHeight =
+            -bottomSheet.top + (activity.window.decorView.height - bottomSheet.height)
 
         binding.buttonLayout.translationY = bottomSheetVisibleHeight.toFloat()
     }

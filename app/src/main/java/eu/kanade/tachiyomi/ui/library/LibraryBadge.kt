@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.res.ColorStateList
 import android.util.AttributeSet
 import androidx.core.view.isVisible
+import androidx.core.view.updatePaddingRelative
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.shape.MaterialShapeDrawable
 import eu.kanade.tachiyomi.R
@@ -13,7 +14,6 @@ import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.makeShapeCorners
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 
 class LibraryBadge @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     MaterialCardView(context, attrs) {

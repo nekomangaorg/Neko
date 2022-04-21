@@ -7,6 +7,8 @@ import kotlinx.coroutines.cancel
 
 open class BaseCoroutinePresenter<T> {
     lateinit var presenterScope: CoroutineScope
+    val isScopeInitialized get() = this::presenterScope.isInitialized
+
     protected var controller: T? = null
 
     /**

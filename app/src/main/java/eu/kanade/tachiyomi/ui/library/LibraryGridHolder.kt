@@ -65,6 +65,7 @@ class LibraryGridHolder(
     override fun onSetValues(item: LibraryItem) {
         // Update the title and subtitle of the manga.
         setCards(adapter.showOutline, binding.card, binding.unreadDownloadBadge.root)
+        binding.playButton.transitionName = "library chapter $bindingAdapterPosition transition"
         binding.constraintLayout.isVisible = !item.manga.isBlank()
         binding.title.text = item.manga.title.highlightText(item.filter, color)
         binding.behindTitle.text = item.manga.title
@@ -142,7 +143,7 @@ class LibraryGridHolder(
     }
 
     private fun playButtonClicked() {
-        adapter.libraryListener.startReading(flexibleAdapterPosition)
+        adapter.libraryListener.startReading(flexibleAdapterPosition, binding.playButton)
     }
 
     override fun onActionStateChanged(position: Int, actionState: Int) {

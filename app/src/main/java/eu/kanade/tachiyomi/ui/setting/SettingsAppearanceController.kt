@@ -4,6 +4,8 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.core.view.doOnNextLayout
+import androidx.core.view.isVisible
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
@@ -13,6 +15,8 @@ import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
+import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.moveRecyclerViewUp
 import kotlinx.coroutines.flow.launchIn
 import kotlin.math.max
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -83,6 +87,34 @@ class SettingsAppearanceController : SettingsController() {
         }
 
         preferenceCategory {
+            switchPreference {
+                bindTo(preferences.useLargeToolbar())
+                titleRes = R.string.expanded_toolbar
+                summaryRes = R.string.show_larger_toolbar
+
+                onChange {
+                    val useLarge = it as Boolean
+                    activityBinding?.appBar?.setToolbarModeBy(this@SettingsAppearanceController, !useLarge)
+                    activityBinding?.appBar?.hideBigView(!useLarge, !useLarge)
+                    activityBinding?.toolbar?.alpha = 1f
+                    activityBinding?.toolbar?.translationY = 0f
+                    activityBinding?.toolbar?.isVisible = true
+                    activityBinding?.appBar?.doOnNextLayout {
+                        listView.requestApplyInsets()
+                        listView.post {
+                            if (useLarge) {
+                                moveRecyclerViewUp(true)
+                            } else {
+                                activityBinding?.appBar?.updateAppBarAfterY(listView)
+                            }
+                        }
+                    }
+                    true
+                }
+            }
+        }
+
+        preferenceCategory {
             titleRes = R.string.details_page
             switchPreference {
                 key = Keys.themeMangaDetails
@@ -104,16 +136,12 @@ class SettingsAppearanceController : SettingsController() {
             intListPreference(activity) {
                 key = Keys.sideNavIconAlignment
                 titleRes = R.string.side_nav_icon_alignment
-                entriesRes = arrayOf(
-                    R.string.top,
-                    R.string.center,
-                    R.string.bottom,
-                )
+                entriesRes = arrayOf(R.string.top, R.string.center, R.string.bottom)
                 entryRange = 0..2
                 defaultValue = 1
                 isVisible = max(
                     context.resources.displayMetrics.widthPixels,
-                    context.resources.displayMetrics.heightPixels
+                    context.resources.displayMetrics.heightPixels,
                 ) >= 720.dpToPx
             }
 

@@ -13,9 +13,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.updater.AutoAppUpdaterJob
-import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.online.utils.MdConstants
+import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
@@ -454,11 +454,9 @@ class PreferencesHelper(val context: Context) {
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)
 
-    fun showNsfwSource() = flowPrefs.getBoolean(Keys.showNsfwSource, true)
-    fun showNsfwExtension() = flowPrefs.getBoolean(Keys.showNsfwExtension, true)
-    fun labelNsfwExtension() = prefs.getBoolean(Keys.labelNsfwExtension, true)
-
     fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
+
+    fun useLargeToolbar() = flowPrefs.getBoolean("use_large_toolbar", true)
 
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 
@@ -489,7 +487,8 @@ class PreferencesHelper(val context: Context) {
 
     fun chaptersDescAsDefault() = flowPrefs.getBoolean(Keys.chaptersDescAsDefault, true)
 
-    fun sortChapterByAscendingOrDescending() = prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
+    fun sortChapterByAscendingOrDescending() =
+        prefs.getInt(Keys.defaultChapterSortByAscendingOrDescending, Manga.CHAPTER_SORT_DESC)
 
     fun coverRatios() = flowPrefs.getStringSet(Keys.coverRatios, emptySet())
 

@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadBottomSheetBinding
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
@@ -31,7 +32,7 @@ import eu.kanade.tachiyomi.util.view.toolbarHeight
 class DownloadBottomSheet @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? =
-        null
+        null,
 ) : LinearLayout(context, attrs),
     DownloadAdapter.DownloadItemListener,
     FlexibleAdapter.OnActionStateListener {
@@ -69,17 +70,13 @@ class DownloadBottomSheet @JvmOverloads constructor(
         binding.dlRecycler.adapter = adapter
         adapter?.isHandleDragEnabled = true
         adapter?.isSwipeEnabled = true
-        adapter?.isSwipeEnabled = true
         adapter?.fastScroller = binding.fastScroller
         binding.fastScroller.controller = controller
         binding.dlRecycler.setHasFixedSize(true)
         this.controller = controller
         updateDLTitle()
 
-        val attrsArray = intArrayOf(android.R.attr.actionBarSize)
-        val array = context.obtainStyledAttributes(attrsArray)
-        val headerHeight = array.getDimensionPixelSize(0, 0)
-        array.recycle()
+        val headerHeight = (activity as? MainActivity)?.toolbarHeight ?: 0
         binding.recyclerLayout.doOnApplyWindowInsetsCompat { v, windowInsets, _ ->
             v.updateLayoutParams<MarginLayoutParams> {
                 topMargin = windowInsets.getInsets(systemBars()).top +
@@ -103,7 +100,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
             }
             updateFab()
         }
-        update()
+        update(!presenter.downloadManager.isPaused())
         setInformationView()
         if (!controller.hasQueue()) {
             sheetBehavior?.isHideable = true
@@ -111,17 +108,18 @@ class DownloadBottomSheet @JvmOverloads constructor(
         }
     }
 
-    fun update() {
+    fun update(isRunning: Boolean) {
         presenter.getItems()
-        onQueueStatusChange(!presenter.downloadManager.isPaused())
+        onQueueStatusChange(isRunning)
         binding.downloadFab.isInvisible = presenter.downloadQueue.isEmpty()
+        activity?.invalidateOptionsMenu()
     }
 
     private fun updateDLTitle() {
         val extCount = presenter.downloadQueue.firstOrNull()
         binding.titleText.text = if (extCount != null) resources.getString(
             R.string.downloading_,
-            extCount.chapter.name
+            extCount.chapter.name,
         )
         else ""
     }

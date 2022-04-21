@@ -46,9 +46,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
-import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
-import eu.kanade.tachiyomi.util.lang.trimOrNull
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -70,7 +68,7 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.util.Date
+import java.util.*
 
 class MangaDetailsPresenter(
     val manga: Manga,
@@ -164,6 +162,11 @@ class MangaDetailsPresenter(
             }
             withContext(Dispatchers.Main) { controller?.updateChapters(chapters) }
         }
+    }
+
+    suspend fun getChaptersNow(): List<ChapterItem> {
+        getChapters()
+        return chapters
     }
 
     private suspend fun getChapters() {
@@ -616,9 +619,11 @@ class MangaDetailsPresenter(
                     .map { it.mangadex_chapter_id }
                 if (nonMergedChapterIds.isNotEmpty()) {
                     launchIO {
-                        statusHandler.marksChaptersStatus(MdUtil.getMangaId(manga.url),
+                        statusHandler.marksChaptersStatus(
+                            MdUtil.getMangaId(manga.url),
                             nonMergedChapterIds,
-                            read)
+                            read
+                        )
                     }
                 }
             }
@@ -646,8 +651,10 @@ class MangaDetailsPresenter(
      * Sets the sorting order and requests an UI update.
      */
     fun setSortOrder(sort: Int, descend: Boolean) {
-        manga.setChapterOrder(sort,
-            if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC)
+        manga.setChapterOrder(
+            sort,
+            if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC
+        )
         if (mangaSortMatchesDefault()) {
             manga.setSortToGlobal()
         }
@@ -786,7 +793,8 @@ class MangaDetailsPresenter(
         val manga = manga
         manga.filtered_scanlators =
             if (filteredScanlators.size == allChapterScanlators.size || filteredScanlators.isEmpty()) null else ChapterUtil.getScanlatorString(
-                filteredScanlators)
+                filteredScanlators
+            )
         db.updateMangaFilteredScanlators(manga).executeAsBlocking()
         asyncUpdateMangaAndChapters()
     }
@@ -923,7 +931,8 @@ class MangaDetailsPresenter(
     private fun saveCover(directory: File): File {
         val cover =
             coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
-                manga)
+                manga
+            )
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 

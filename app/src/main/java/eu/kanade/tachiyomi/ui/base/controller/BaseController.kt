@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
 import android.app.Activity
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.Menu
@@ -10,13 +11,16 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.forEach
 import androidx.core.view.isVisible
+import androidx.recyclerview.widget.RecyclerView
 import androidx.viewbinding.ViewBinding
 import com.bluelinelabs.conductor.Controller
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.view.activityBinding
+import eu.kanade.tachiyomi.util.view.isControllerVisible
 import eu.kanade.tachiyomi.util.view.removeQueryListener
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -55,7 +59,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
                     viewScope.cancel()
                     XLog.d("Destroy view for ${controller.instance()}")
                 }
-            }
+            },
         )
     }
 
@@ -89,9 +93,24 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         return null
     }
 
+    open fun getSearchTitle(): String? {
+        return null
+    }
+
+    open fun getBigIcon(): Drawable? {
+        return null
+    }
+
+    open fun canStillGoBack(): Boolean {
+        return false
+    }
+
+    open val mainRecycler: RecyclerView?
+        get() = null
+
     override fun onActivityPaused(activity: Activity) {
         super.onActivityPaused(activity)
-        removeQueryListener()
+        removeQueryListener(false)
     }
 
     fun hideToolbar() {
@@ -111,8 +130,16 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             parentController = parentController.parentController
         }
 
-        if (router.backstack.lastOrNull()?.controller == this) {
-            (activity as? AppCompatActivity)?.supportActionBar?.title = getTitle()
+        if (isControllerVisible) {
+            (activity as? AppCompatActivity)?.title = getTitle()
+            (activity as? MainActivity)?.searchTitle = getSearchTitle()
+            val icon = getBigIcon()
+            activityBinding?.bigIconLayout?.isVisible = icon != null
+            if (icon != null) {
+                activityBinding?.bigIcon?.setImageDrawable(getBigIcon())
+            } else {
+                activityBinding?.bigIcon?.setImageDrawable(getBigIcon())
+            }
         }
     }
 
@@ -133,7 +160,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         setOnActionExpandListener(
             object : MenuItem.OnActionExpandListener {
                 override fun onMenuItemActionExpand(item: MenuItem): Boolean {
-                    hideItemsIfExpanded(item, activityBinding?.cardToolbar?.menu, true)
+                    hideItemsIfExpanded(item, activityBinding?.searchToolbar?.menu, true)
                     return onExpand?.invoke(item) ?: true
                 }
 
@@ -142,7 +169,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
 
                     return onCollapse?.invoke(item) ?: true
                 }
-            }
+            },
         )
 
         if (expandActionViewFromInteraction) {
@@ -150,6 +177,10 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
             expandActionView()
         }
     }
+
+    open fun onActionViewExpand(item: MenuItem?) {}
+    open fun onActionViewCollapse(item: MenuItem?) {}
+    open fun onSearchActionViewLongClickQuery(): String? = null
 
     fun hideItemsIfExpanded(searchItem: MenuItem?, menu: Menu?, isExpanded: Boolean = false) {
         menu ?: return

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base
+package eu.kanade.tachiyomi.widget
 
 import android.content.Context
 import android.util.AttributeSet
@@ -13,6 +13,7 @@ import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
 import com.google.android.material.textview.MaterialTextView
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.base.BaseToolbar
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.getResourceColor
 

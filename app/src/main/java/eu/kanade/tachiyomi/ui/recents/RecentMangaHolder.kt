@@ -40,6 +40,7 @@ class RecentMangaHolder(
 
     fun bind(item: RecentMangaItem) {
         val showDLs = adapter.showDownloads
+        itemView.transitionName = "recents chapter $bindingAdapterPosition transition"
         val showRemoveHistory = adapter.showRemoveHistory
         val showTitleFirst = adapter.showTitleFirst
         binding.downloadButton.downloadButton.isVisible = when (showDLs) {

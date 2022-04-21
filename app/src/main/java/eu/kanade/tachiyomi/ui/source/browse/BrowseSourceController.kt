@@ -524,7 +524,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         if (BuildConfig.DEBUG && presenter.query.isBlank()) {
             val searchItem =
-                (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
+                (activity as? MainActivity)?.binding?.searchToolbar?.menu?.findItem(R.id.action_search)
             val searchView = searchItem?.actionView as? SearchView ?: return
             setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
                 searchWithQuery(it ?: "")
@@ -632,7 +632,7 @@ open class BrowseSourceController(bundle: Bundle) :
 
         val isListMode = !presenter.prefs.browseAsList().get()
         presenter.prefs.browseAsList().set(isListMode)
-        listOf(activityBinding?.toolbar?.menu, activityBinding?.cardToolbar?.menu).forEach {
+        listOf(activityBinding?.toolbar?.menu, activityBinding?.searchToolbar?.menu).forEach {
             updateDisplayMenuItem(it, isListMode)
         }
         setupRecycler(view)
@@ -651,7 +651,7 @@ open class BrowseSourceController(bundle: Bundle) :
     fun swapLibraryVisibility() {
         val showLibraryManga = !presenter.prefs.browseShowLibrary().get()
         presenter.prefs.browseShowLibrary().set(showLibraryManga)
-        listOf(activityBinding?.toolbar?.menu, activityBinding?.cardToolbar?.menu).forEach {
+        listOf(activityBinding?.toolbar?.menu, activityBinding?.searchToolbar?.menu).forEach {
             updateDisplayMenuItem(it, null, showLibraryManga)
         }
         // Initialize manga if not on a metered connection

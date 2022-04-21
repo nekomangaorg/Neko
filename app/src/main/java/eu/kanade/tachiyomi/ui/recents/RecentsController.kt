@@ -14,8 +14,9 @@ import androidx.core.graphics.ColorUtils
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import androidx.core.view.updatePaddingRelative
 import androidx.recyclerview.widget.ItemTouchHelper
-import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
@@ -24,7 +25,6 @@ import com.google.android.material.snackbar.BaseTransientBottomBar
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.tabs.TabLayout
 import eu.davidea.flexibleadapter.FlexibleAdapter
-import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.backup.BackupRestoreService
 import eu.kanade.tachiyomi.data.database.models.History
@@ -35,12 +35,14 @@ import eu.kanade.tachiyomi.data.library.LibraryUpdateService
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.databinding.RecentsControllerBinding
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
+import eu.kanade.tachiyomi.ui.main.TabbedInterface
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.recents.options.TabbedRecentsOptionsSheet
@@ -49,7 +51,7 @@ import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.isLTR
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.spToPx
@@ -58,6 +60,7 @@ import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.util.view.expand
+import eu.kanade.tachiyomi.util.view.fullAppBarHeight
 import eu.kanade.tachiyomi.util.view.hide
 import eu.kanade.tachiyomi.util.view.isCollapsed
 import eu.kanade.tachiyomi.util.view.isExpanded
@@ -67,9 +70,9 @@ import eu.kanade.tachiyomi.util.view.setOnQueryTextChangeListener
 import eu.kanade.tachiyomi.util.view.setStyle
 import eu.kanade.tachiyomi.util.view.smoothScrollToTop
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updatePaddingRelative
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import java.util.Locale
+import eu.kanade.tachiyomi.widget.LinearLayoutManagerAccurateOffset
+import java.util.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -85,6 +88,7 @@ class RecentsController(bundle: Bundle? = null) :
     FlexibleAdapter.OnItemLongClickListener,
     FlexibleAdapter.OnItemMoveListener,
     FlexibleAdapter.EndlessScrollListener,
+    TabbedInterface,
     RootSearchInterface,
     FloatingSearchInterface,
     BottomSheetController,
@@ -107,23 +111,31 @@ class RecentsController(bundle: Bundle? = null) :
     private var lastChapterId: Long? = null
     private var showingDownloads = false
     var headerHeight = 0
+    private var ogRadius = 0f
+    private var deviceRadius = 0f
+
     private var query = ""
         set(value) {
             field = value
             presenter.query = value
         }
 
+    override val mainRecycler: RecyclerView
+        get() = binding.recycler
+
     override fun getTitle(): String? {
-        return if (showingDownloads) {
-            resources?.getString(R.string.download_queue)
-        } else searchTitle(
+        return view?.context?.getString(R.string.recents)
+    }
+
+    override fun getSearchTitle(): String? {
+        return searchTitle(
             view?.context?.getString(
                 when (presenter.viewType) {
                     RecentsPresenter.VIEW_TYPE_ONLY_HISTORY -> R.string.history
                     RecentsPresenter.VIEW_TYPE_ONLY_UPDATES -> R.string.updates
                     else -> R.string.updates_and_history
-                }
-            )?.lowercase(Locale.ROOT)
+                },
+            )?.lowercase(Locale.ROOT),
         )
     }
 
@@ -138,14 +150,15 @@ class RecentsController(bundle: Bundle? = null) :
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         // Initialize adapter
+        val isReturning = this::adapter.isInitialized
         adapter = RecentMangaAdapter(this)
         adapter.setPreferenceFlows()
         binding.recycler.adapter = adapter
-        binding.recycler.layoutManager = LinearLayoutManager(view.context)
+        binding.recycler.layoutManager = LinearLayoutManagerAccurateOffset(view.context)
         binding.recycler.setHasFixedSize(true)
         binding.recycler.recycledViewPool.setMaxRecycledViews(0, 0)
         binding.recycler.addItemDecoration(
-            RecentMangaDivider(view.context)
+            RecentMangaDivider(view.context),
         )
         adapter.isSwipeEnabled = true
         adapter.itemTouchHelperCallback.setSwipeFlags(
@@ -159,16 +172,25 @@ class RecentsController(bundle: Bundle? = null) :
         scrollViewWith(
             binding.recycler,
             swipeRefreshLayout = binding.swipeRefresh,
-            includeTabView = true,
+            ignoreInsetVisibility = true,
             afterInsets = {
-                headerHeight = it.getInsets(systemBars()).top + appBarHeight + 48.dpToPx
+                val appBarHeight = activityBinding?.appBar?.attrToolbarHeight ?: 0
+                val systemInsets = it.ignoredSystemInsets
+                headerHeight = systemInsets.top + appBarHeight + 48.dpToPx
                 binding.recycler.updatePaddingRelative(
-                    bottom = activityBinding?.bottomNav?.height ?: it.getInsets(systemBars()).bottom
+                    bottom = activityBinding?.bottomNav?.height ?: systemInsets.bottom
                 )
-                binding.recentsEmptyView.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                    topMargin = headerHeight
-                    bottomMargin =
-                        activityBinding?.bottomNav?.height ?: it.getInsets(systemBars()).bottom
+                binding.downloadBottomSheet.sheetLayout.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    height = appBarHeight + systemInsets.top
+                }
+                val bigToolbarHeight = fullAppBarHeight ?: 0
+
+                binding.recentsEmptyView.updatePadding(
+                    top = bigToolbarHeight + systemInsets.top,
+                    bottom = activityBinding?.bottomNav?.height ?: systemInsets.bottom
+                )
+                binding.progress.updateLayoutParams<ViewGroup.MarginLayoutParams> {
+                    topMargin = (bigToolbarHeight + systemInsets.top) / 2
                 }
                 if (activityBinding?.bottomNav == null) {
                     setBottomPadding()
@@ -422,7 +444,12 @@ class RecentsController(bundle: Bundle? = null) :
             binding.swipeRefresh.isRefreshing
     }
 
-    override fun handleSheetBack(): Boolean {
+    override fun canStillGoBack(): Boolean {
+        return showingDownloads || presenter.preferences.recentsViewType()
+            .get() != presenter.viewType
+    }
+
+    override fun handleBack(): Boolean {
         if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
             return true
@@ -442,7 +469,7 @@ class RecentsController(bundle: Bundle? = null) :
                 activityBinding?.bottomNav?.height ?: cInsets.getInsets(systemBars()).bottom
             } else {
                 peekHeight
-            }
+            },
         )
     }
 
@@ -453,22 +480,7 @@ class RecentsController(bundle: Bundle? = null) :
             refresh()
         }
         setBottomPadding()
-        binding.downloadBottomSheet.dlBottomSheet.update()
-
-        if (BuildConfig.DEBUG && query.isBlank()) {
-            val searchItem =
-                (activity as? MainActivity)?.binding?.cardToolbar?.menu?.findItem(R.id.action_search)
-            val searchView = searchItem?.actionView as? SearchView ?: return
-            if (router.backstack.lastOrNull()?.controller != this) return
-            setOnQueryTextChangeListener(searchView) {
-                if (query != it) {
-                    query = it ?: return@setOnQueryTextChangeListener false
-                    resetProgressItem()
-                    refresh()
-                }
-                true
-            }
-        }
+        binding.downloadBottomSheet.dlBottomSheet.update(!presenter.downloadManager.isPaused())
     }
 
     override fun onDestroy() {
@@ -531,7 +543,7 @@ class RecentsController(bundle: Bundle? = null) :
     fun updateChapterDownload(download: Download, updateDLSheet: Boolean = true) {
         if (view == null) return
         if (updateDLSheet) {
-            binding.downloadBottomSheet.dlBottomSheet.update()
+            binding.downloadBottomSheet.dlBottomSheet.update(!presenter.downloadManager.isPaused())
             binding.downloadBottomSheet.dlBottomSheet.onUpdateProgress(download)
             binding.downloadBottomSheet.dlBottomSheet.onUpdateDownloadedPages(download)
         }
@@ -540,8 +552,8 @@ class RecentsController(bundle: Bundle? = null) :
         holder.notifyStatus(download.status, download.progress, download.chapter.read, true)
     }
 
-    fun updateDownloadStatus() {
-        binding.downloadBottomSheet.dlBottomSheet.update()
+    fun updateDownloadStatus(isRunning: Boolean) {
+        binding.downloadBottomSheet.dlBottomSheet.update(isRunning)
     }
 
     private fun refreshItem(chapterId: Long) {
@@ -610,8 +622,17 @@ class RecentsController(bundle: Bundle? = null) :
                 )
             } else {
                 val activity = activity ?: return false
-                val intent = ReaderActivity.newIntent(activity, item.mch.manga, item.chapter)
-                startActivity(intent)
+                activity.apply {
+                    val (manga, chapter) = item.mch.manga to item.chapter
+                    if (view != null) {
+                        val (intent, bundle) = ReaderActivity
+                            .newIntentWithTransitionOptions(activity, manga, chapter, view)
+                        startActivity(intent, bundle)
+                    } else {
+                        val intent = ReaderActivity.newIntent(activity, manga, chapter)
+                        startActivity(intent)
+                    }
+                }
             }
         } else if (item is RecentMangaHeaderItem) return false
         return true
@@ -682,7 +703,7 @@ class RecentsController(bundle: Bundle? = null) :
     override fun isSearching() = query.isNotEmpty()
 
     override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
-        if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingDownloads)
+        // if (onRoot) (activity as? MainActivity)?.setDismissIcon(showingDownloads)
         if (showingDownloads) {
             inflater.inflate(R.menu.download_queue, menu)
         } else {
@@ -729,31 +750,34 @@ class RecentsController(bundle: Bundle? = null) :
                     R.string.grouped,
                     R.string.all,
                     R.string.history,
-                    R.string.updates
+                    R.string.updates,
                 ).forEachIndexed { index, resId ->
                     tabs.addTab(
                         tabs.newTab().setText(resId).also { tab ->
                             tab.view.compatToolTipText = null
                         },
-                        index == selectedTab
+                        index == selectedTab,
                     )
                 }
-                tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
-                    override fun onTabSelected(tab: TabLayout.Tab?) {
-                        setViewType(tab?.position ?: 0)
-                    }
+                tabs.addOnTabSelectedListener(
+                    object : TabLayout.OnTabSelectedListener {
+                        override fun onTabSelected(tab: TabLayout.Tab?) {
+                            setViewType(tab?.position ?: 0)
+                        }
 
-                    override fun onTabUnselected(tab: TabLayout.Tab?) {}
-                    override fun onTabReselected(tab: TabLayout.Tab?) {
-                        binding.recycler.smoothScrollToTop()
-                    }
-                })
+                        override fun onTabUnselected(tab: TabLayout.Tab?) {}
+                        override fun onTabReselected(tab: TabLayout.Tab?) {
+                            binding.recycler.smoothScrollToTop()
+                        }
+                    },
+                )
                 (activity as? MainActivity)?.showTabBar(true)
             }
         } else {
             if (type == ControllerChangeType.POP_EXIT) presenter.onDestroy()
-            if (router.backstack.lastOrNull()?.controller !is DialogController) {
-                (activity as? MainActivity)?.showTabBar(false)
+            val lastController = router.backstack.lastOrNull()?.controller
+            if (lastController !is DialogController) {
+                (activity as? MainActivity)?.showTabBar(show = false, animate = lastController !is SmallToolbarInterface)
             }
             snack?.dismiss()
         }
@@ -793,14 +817,11 @@ class RecentsController(bundle: Bundle? = null) :
         else binding.downloadBottomSheet.dlBottomSheet.sheetBehavior?.expand()
     }
 
-    override fun sheetIsFullscreen(): Boolean =
-        binding.downloadBottomSheet.dlBottomSheet.sheetBehavior.isExpanded()
-
     override fun expandSearch() {
         if (showingDownloads) {
             binding.downloadBottomSheet.dlBottomSheet.dismiss()
         } else {
-            activityBinding?.cardToolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
+            activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.expandActionView()
         }
     }
 
@@ -812,7 +833,7 @@ class RecentsController(bundle: Bundle? = null) :
             R.id.display_options -> {
                 displaySheet = TabbedRecentsOptionsSheet(
                     this,
-                    (presenter.viewType - 1).coerceIn(0, 2)
+                    (presenter.viewType - 1).coerceIn(0, 2),
                 )
                 displaySheet?.show()
             }

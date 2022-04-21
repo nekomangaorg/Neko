@@ -14,7 +14,7 @@ import eu.kanade.tachiyomi.util.system.dpToPx
 
 class CategoryRecyclerView @JvmOverloads constructor(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : RecyclerView(context, attrs) {
 
     val manager = LinearLayoutManager(context)
@@ -39,7 +39,7 @@ class CategoryRecyclerView @JvmOverloads constructor(
                     override fun onBindViewHolder(
                         viewHolder: ViewHolder,
                         position: Int,
-                        payloads: List<Any>
+                        payloads: List<Any>,
                     ) {
                         super.onBindViewHolder(viewHolder, position, payloads)
                         (viewHolder as? CategoryItem.ViewHolder)?.categoryTitle?.isSelected =
@@ -60,7 +60,7 @@ class CategoryRecyclerView @JvmOverloads constructor(
         if (index > -1) {
             manager.scrollToPositionWithOffset(
                 index,
-                (height - 38.dpToPx) / 2
+                (height - 38.dpToPx) / 2,
             )
         }
     }

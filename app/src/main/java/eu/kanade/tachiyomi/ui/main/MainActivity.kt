@@ -2,8 +2,10 @@ package eu.kanade.tachiyomi.ui.main
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
+import android.annotation.SuppressLint
 import android.app.Dialog
 import android.app.assist.AssistContent
+import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
@@ -21,17 +23,26 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import androidx.annotation.IdRes
+import androidx.appcompat.view.menu.ActionMenuItemView
+import androidx.appcompat.view.menu.MenuItemImpl
+import androidx.appcompat.widget.ActionMenuView
 import androidx.appcompat.widget.Toolbar
+import androidx.core.animation.doOnEnd
+import androidx.core.content.getSystemService
 import androidx.core.graphics.ColorUtils
 import androidx.core.net.toUri
 import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.WindowInsetsCompat.Type.systemBars
+import androidx.core.view.children
+import androidx.core.view.forEach
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
 import androidx.lifecycle.lifecycleScope
 import com.bluelinelabs.conductor.Conductor
 import com.bluelinelabs.conductor.Controller
@@ -43,6 +54,7 @@ import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
+import com.google.common.primitives.Ints.max
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -56,15 +68,15 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
-import eu.kanade.tachiyomi.data.updater.RELEASE_TAG
+import eu.kanade.tachiyomi.data.updater.RELEASE_URL
 import eu.kanade.tachiyomi.databinding.MainActivityBinding
 import eu.kanade.tachiyomi.source.Source
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.activity.BaseActivity
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
-import eu.kanade.tachiyomi.ui.follows.FollowsController
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.recents.RecentsController
@@ -73,13 +85,14 @@ import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.ui.setting.AboutController
 import eu.kanade.tachiyomi.ui.setting.SettingsController
 import eu.kanade.tachiyomi.ui.setting.SettingsMainController
-import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.hasSideNavBar
+import eu.kanade.tachiyomi.util.system.ignoredSystemInsets
 import eu.kanade.tachiyomi.util.system.isBottomTappable
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -89,13 +102,14 @@ import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.blurBehindWindow
+import eu.kanade.tachiyomi.util.view.canStillGoBack
 import eu.kanade.tachiyomi.util.view.doOnApplyWindowInsetsCompat
+import eu.kanade.tachiyomi.util.view.findChild
 import eu.kanade.tachiyomi.util.view.getItemView
+import eu.kanade.tachiyomi.util.view.mainRecyclerView
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.util.view.updatePadding
 import eu.kanade.tachiyomi.util.view.withFadeInTransaction
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
-import eu.kanade.tachiyomi.widget.EndAnimatorListener
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -106,15 +120,16 @@ import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.abs
-import kotlin.math.max
 import kotlin.math.min
+import kotlin.math.roundToLong
 
+@SuppressLint("ResourceType")
 open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceListener {
 
     protected lateinit var router: Router
 
     val source: Source by lazy { Injekt.get<SourceManager>().getMangadex() }
-    private val searchDrawable by lazy { contextCompatDrawable(R.drawable.ic_search_24dp) }
+    val searchDrawable by lazy { contextCompatDrawable(R.drawable.ic_search_24dp) }
     protected val backDrawable by lazy { contextCompatDrawable(R.drawable.ic_arrow_back_24dp) }
     private val dismissDrawable by lazy { contextCompatDrawable(R.drawable.ic_close_24dp) }
     private var gestureDetector: GestureDetectorCompat? = null
@@ -132,9 +147,20 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     private val updateChecker by lazy { AppUpdateChecker() }
     private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
     private var tabAnimation: ValueAnimator? = null
+    private var searchBarAnimation: ValueAnimator? = null
     private var overflowDialog: Dialog? = null
     var currentToolbar: Toolbar? = null
     var ogWidth: Int = Int.MAX_VALUE
+
+    private val actionButtonSize: Pair<Int, Int> by lazy {
+        val attrs = intArrayOf(android.R.attr.minWidth, android.R.attr.minHeight)
+        val ta =
+            obtainStyledAttributes(androidx.appcompat.R.style.Widget_AppCompat_ActionButton, attrs)
+        val dimenW = ta.getDimensionPixelSize(0, 0.dpToPx)
+        val dimenH = ta.getDimensionPixelSize(1, 0.dpToPx)
+        ta.recycle()
+        dimenW to dimenH
+    }
 
     fun setUndoSnackBar(snackBar: Snackbar?, extraViewToCheck: View? = null) {
         this.snackBar = snackBar
@@ -154,31 +180,61 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     val toolbarHeight: Int
-        get() = max(binding.toolbar.height, binding.cardFrame.height)
+        get() = max(
+            binding.toolbar.height,
+            binding.cardFrame.height,
+            binding.appBar.attrToolbarHeight
+        )
+
+    var backPressedCallback: OnBackPressedCallback? = null
+    private val backCallback = {
+        pressingBack()
+        reEnableBackPressedCallBack()
+    }
+
+    fun bigToolbarHeight(
+        includeSearchToolbar: Boolean,
+        includeTabs: Boolean,
+        includeLargeToolbar: Boolean,
+    ): Int {
+        return if (!includeLargeToolbar || !binding.appBar.useLargeToolbar) {
+            toolbarHeight + if (includeTabs) 48.dpToPx else 0
+        } else {
+            binding.appBar.getEstimatedLayout(
+                includeSearchToolbar,
+                includeTabs,
+                includeLargeToolbar
+            )
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         // Set up shared element transition and disable overlay so views don't show above system bars
         window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
-        setExitSharedElementCallback(object : MaterialContainerTransformSharedElementCallback() {
-            override fun onMapSharedElements(
-                names: MutableList<String>,
-                sharedElements: MutableMap<String, View>
-            ) {
-                val mangaController = router.backstack.lastOrNull()?.controller as? MangaDetailsController
-                if (mangaController == null || chapterIdToExitTo == 0L) {
-                    super.onMapSharedElements(names, sharedElements)
-                    return
+        setExitSharedElementCallback(
+            object : MaterialContainerTransformSharedElementCallback() {
+                override fun onMapSharedElements(
+                    names: MutableList<String>,
+                    sharedElements: MutableMap<String, View>,
+                ) {
+                    val mangaController =
+                        router.backstack.lastOrNull()?.controller as? MangaDetailsController
+                    if (mangaController == null || chapterIdToExitTo == 0L) {
+                        super.onMapSharedElements(names, sharedElements)
+                        return
+                    }
+                    val recyclerView = mangaController.binding.recycler
+                    val selectedViewHolder =
+                        recyclerView.findViewHolderForItemId(chapterIdToExitTo) ?: return
+                    sharedElements[names[0]] = selectedViewHolder.itemView
+                    chapterIdToExitTo = 0L
                 }
-                val recyclerView = mangaController.binding.recycler
-                val selectedViewHolder =
-                    recyclerView.findViewHolderForItemId(chapterIdToExitTo) ?: return
-                sharedElements[names[0]] = selectedViewHolder.itemView
-                chapterIdToExitTo = 0L
-            }
-        })
+            },
+        )
         window.sharedElementsUseOverlay = false
 
         super.onCreate(savedInstanceState)
+        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
         if (!isTaskRoot && this !is SearchActivity) {
@@ -206,7 +262,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         lifecycleScope.launchUI {
                             NotificationReceiver.dismissNotification(
                                 context,
-                                Notifications.ID_LIBRARY_PROGRESS
+                                Notifications.ID_LIBRARY_PROGRESS,
                             )
                         }
                     }
@@ -231,18 +287,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val content: ViewGroup = binding.mainContent
         DownloadService.addListener(this)
         WindowCompat.setDecorFitsSystemWindows(window, false)
+        setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayShowCustomEnabled(true)
 
         setNavBarColor(content.rootWindowInsetsCompat)
+        binding.appBar.mainActivity = this
         nav.isVisible = false
         content.doOnApplyWindowInsetsCompat { v, insets, _ ->
             setNavBarColor(insets)
-            val systemInsets =
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    insets.getInsetsIgnoringVisibility(systemBars())
-                } else {
-                    insets.getInsets(systemBars())
-                }
+            val systemInsets = insets.ignoredSystemInsets
             val contextView = window?.decorView?.findViewById<View>(R.id.action_mode_bar)
             contextView?.updateLayoutParams<ViewGroup.MarginLayoutParams> {
                 leftMargin = systemInsets.left
@@ -252,19 +305,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             // with horizontal insets
             v.updatePadding(
                 left = systemInsets.left,
-                right = systemInsets.right
+                right = systemInsets.right,
             )
             binding.appBar.updatePadding(
-                top = systemInsets.top
+                top = systemInsets.top,
             )
             binding.bottomNav?.updatePadding(
-                bottom = systemInsets.bottom
+                bottom = systemInsets.bottom,
             )
             binding.sideNav?.updatePadding(
                 left = 0,
                 right = 0,
                 bottom = systemInsets.bottom,
-                top = systemInsets.top
+                top = systemInsets.top,
             )
             binding.bottomView?.isVisible = systemInsets.bottom > 0
             binding.bottomView?.updateLayoutParams<ViewGroup.LayoutParams> {
@@ -276,7 +329,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         router = Conductor.attachRouter(this, container, savedInstanceState)
 
-        arrayOf(binding.toolbar, binding.cardToolbar).forEach { toolbar ->
+        arrayOf(binding.toolbar, binding.searchToolbar).forEach { toolbar ->
             toolbar.setNavigationIconTint(getResourceColor(R.attr.actionBarTintColor))
             toolbar.router = router
         }
@@ -308,7 +361,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         R.id.nav_recents -> RecentsController()
                         else -> BrowseSourceController()
                     },
-                    id
+                    id,
                 )
             } else if (currentRoot.tag()?.toIntOrNull() == id) {
                 if (router.backstackSize == 1) {
@@ -332,21 +385,63 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         }
 
         binding.toolbar.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (rootSearchController is RootSearchInterface) {
-                rootSearchController.expandSearch()
-            } else onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
-        binding.cardToolbar.setNavigationOnClickListener {
+        binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (rootSearchController is RootSearchInterface) {
-                rootSearchController.expandSearch()
-            } else onBackPressed()
+            if ((
+                    rootSearchController is RootSearchInterface ||
+                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                    ) &&
+                rootSearchController !is SmallToolbarInterface
+            ) {
+                binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            } else onBackPressedDispatcher.onBackPressed()
         }
 
-        binding.cardToolbar.setOnClickListener {
-            binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        binding.searchToolbar.searchItem?.setOnActionExpandListener(
+            object : MenuItem.OnActionExpandListener {
+                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
+                    val controller = router.backstack.lastOrNull()?.controller
+                    binding.appBar.compactSearchMode =
+                        binding.appBar.useLargeToolbar && resources.configuration.screenHeightDp < 600
+                    if (binding.appBar.compactSearchMode) {
+                        setFloatingToolbar(true)
+                        controller?.mainRecyclerView?.requestApplyInsets()
+                        binding.appBar.y = 0f
+                        binding.appBar.updateAppBarAfterY(controller?.mainRecyclerView)
+                    }
+                    (controller as? BaseController<*>)?.onActionViewExpand(item)
+                    (controller as? SettingsController)?.onActionViewExpand(item)
+                    binding.searchToolbar.menu.forEach { it.isVisible = false }
+                    lifecycleScope.launchUI { reEnableBackPressedCallBack() }
+                    return true
+                }
+
+                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
+                    val controller = router.backstack.lastOrNull()?.controller
+                    binding.appBar.compactSearchMode = false
+                    controller?.mainRecyclerView?.requestApplyInsets()
+                    setupSearchTBMenu(binding.toolbar.menu, true)
+                    (controller as? BaseController<*>)?.onActionViewCollapse(item)
+                    (controller as? SettingsController)?.onActionViewCollapse(item)
+                    lifecycleScope.launchUI { reEnableBackPressedCallBack() }
+                    return true
+                }
+            },
+        )
+
+        binding.appBar.alpha = 1f
+
+        binding.searchToolbar.setOnClickListener {
+            binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+        }
+
+        binding.searchToolbar.setOnMenuItemClickListener {
+            if (router.backstack.lastOrNull()?.controller?.onOptionsItemSelected(it) == true) {
+                return@setOnMenuItemClickListener true
+            } else return@setOnMenuItemClickListener onOptionsItemSelected(it)
         }
 
         nav.isVisible = !hideBottomNav
@@ -364,7 +459,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     handler: ControllerChangeHandler,
                 ) {
                     syncActivityViewWithController(to, from, isPush)
-                    binding.appBar.y = 0f
+                    binding.appBar.isVisible = true
+                    binding.appBar.alpha = 1f
                     if (!isPush || router.backstackSize == 1) {
                         nav.translationY = 0f
                     }
@@ -378,7 +474,6 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     container: ViewGroup,
                     handler: ControllerChangeHandler,
                 ) {
-                    binding.appBar.y = 0f
                     nav.translationY = 0f
                     showDLQueueTutorial()
                     if (router.backstackSize == 1) {
@@ -390,12 +485,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         window?.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE)
                     }
                 }
-            }
+            },
         )
 
         syncActivityViewWithController(router.backstack.lastOrNull()?.controller)
 
-        val navIcon = if (router.backstackSize > 1) backDrawable else searchDrawable
+        val navIcon = if (router.backstackSize > 1) backDrawable else null
         binding.toolbar.navigationIcon = navIcon
         (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.setTitle()
         (router.backstack.lastOrNull()?.controller as? SettingsController)?.setTitle()
@@ -417,7 +512,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         preferences.incognitoMode()
             .asImmediateFlowIn(lifecycleScope) {
                 binding.toolbar.setIncognitoMode(it)
-                binding.cardToolbar.setIncognitoMode(it)
+                binding.searchToolbar.setIncognitoMode(it)
+                SecureActivityDelegate.setSecure(this)
             }
         preferences.sideNavIconAlignment()
             .asImmediateFlowIn(lifecycleScope) {
@@ -433,40 +529,119 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         )
     }
 
-    open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false, changeBG: Boolean = true) {
-        val oldTB = currentToolbar
-        currentToolbar = if (show) {
-            binding.cardToolbar
-        } else {
-            binding.toolbar
+    fun reEnableBackPressedCallBack() {
+        val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
+        backPressedCallback?.isEnabled =
+            (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
+                router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
+    }
+
+    override fun onTitleChanged(title: CharSequence?, color: Int) {
+        super.onTitleChanged(title, color)
+        binding.searchToolbar.title = searchTitle
+        val onExpandedController =
+            if (this::router.isInitialized) router.backstack.lastOrNull()?.controller !is SmallToolbarInterface else false
+        binding.appBar.setTitle(title, onExpandedController)
+    }
+
+    var searchTitle: String?
+        get() {
+            return try {
+                (router.backstack.lastOrNull()?.controller as? BaseController<*>)?.getSearchTitle()
+                    ?: (router.backstack.lastOrNull()?.controller as? SettingsController)?.getSearchTitle()
+            } catch (_: Exception) {
+                binding.searchToolbar.title?.toString()
+            }
         }
-        if (oldTB != currentToolbar) {
-            setSupportActionBar(currentToolbar)
+        set(title) {
+            binding.searchToolbar.title = title
         }
-        binding.toolbar.isVisible = !show
-        binding.cardFrame.isVisible = show
+
+    open fun setFloatingToolbar(
+        show: Boolean,
+        solidBG: Boolean = false,
+        changeBG: Boolean = true,
+        showSearchAnyway: Boolean = false,
+    ) {
+        val controller =
+            if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
+        val useLargeTB = binding.appBar.useLargeToolbar
+        val onSearchController = canShowFloatingToolbar(controller)
+        val onSmallerController = controller is SmallToolbarInterface || !useLargeTB
+        currentToolbar =
+            if (show && ((showSearchAnyway && onSearchController) || onSmallerController)) {
+                binding.searchToolbar
+            } else {
+                binding.toolbar
+            }
+        binding.toolbar.isVisible = !(onSmallerController && onSearchController)
+        setSearchTBLongClick()
+        val showSearchBar = (show || showSearchAnyway) && onSearchController
+        val isAppBarVisible = binding.appBar.isVisible
+        val needsAnim =
+            if (showSearchBar) !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
+            else binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
+        if (this::router.isInitialized && needsAnim && binding.appBar.useLargeToolbar && !onSmallerController &&
+            (showSearchAnyway || isAppBarVisible)
+        ) {
+            binding.appBar.background = null
+            searchBarAnimation?.cancel()
+            if (showSearchBar && !binding.cardFrame.isVisible) {
+                binding.cardFrame.alpha = 0f
+                binding.cardFrame.isVisible = true
+            }
+            val endValue = if (showSearchBar) 1f else 0f
+            val tA = ValueAnimator.ofFloat(binding.cardFrame.alpha, endValue)
+            tA.addUpdateListener { binding.cardFrame.alpha = it.animatedValue as Float }
+            tA.doOnEnd { binding.cardFrame.isVisible = showSearchBar }
+            tA.duration = (abs(binding.cardFrame.alpha - endValue) * 150).roundToLong()
+            searchBarAnimation = tA
+            tA.start()
+        } else if (this::router.isInitialized &&
+            (!binding.appBar.useLargeToolbar || onSmallerController || !isAppBarVisible)
+        ) {
+            binding.cardFrame.alpha = 1f
+            binding.cardFrame.isVisible = showSearchBar
+        }
         val bgColor = binding.appBar.backgroundColor ?: Color.TRANSPARENT
         if (changeBG && (if (solidBG) bgColor == Color.TRANSPARENT else false)) {
             binding.appBar.setBackgroundColor(
-                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface)
+                if (show && !solidBG) Color.TRANSPARENT else getResourceColor(R.attr.colorSurface),
             )
         }
-        currentToolbar?.setNavigationOnClickListener {
-            val rootSearchController = router.backstack.lastOrNull()?.controller
-            if (rootSearchController is RootSearchInterface && rootSearchController !is FollowsController && rootSearchController !is SimilarController) {
-                rootSearchController.expandSearch()
-            } else {
-                onBackPressed()
+        setupSearchTBMenu(binding.toolbar.menu)
+        if (currentToolbar != binding.searchToolbar) {
+            binding.searchToolbar.menu?.children?.toList()?.forEach {
+                it.isVisible = false
             }
         }
-        if (oldTB != currentToolbar) {
-            invalidateOptionsMenu()
+        val onRoot = !this::router.isInitialized || router.backstackSize == 1
+        if (!useLargeTB) {
+            binding.searchToolbar.navigationIcon = if (onRoot) searchDrawable else backDrawable
+        } else if (showSearchAnyway) {
+            binding.searchToolbar.navigationIcon =
+                if (!show || onRoot) searchDrawable else backDrawable
         }
+        binding.searchToolbar.title = searchTitle
     }
 
-    fun setDismissIcon(enabled: Boolean) {
-        binding.cardToolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
-        binding.toolbar.navigationIcon = if (enabled) dismissDrawable else searchDrawable
+    private fun setSearchTBLongClick() {
+        binding.searchToolbar.setOnLongClickListener {
+            binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            val visibleController = router.backstack.lastOrNull()?.controller as? BaseController<*>
+            val longClickQuery = visibleController?.onSearchActionViewLongClickQuery()
+            if (longClickQuery != null) {
+                binding.searchToolbar.searchView?.setQuery(longClickQuery, true)
+                return@setOnLongClickListener true
+            }
+            val clipboard: ClipboardManager? = getSystemService()
+            if (clipboard != null && clipboard.hasPrimaryClip()) {
+                clipboard.primaryClip?.getItemAt(0)?.text?.let { text ->
+                    binding.searchToolbar.searchView?.setQuery(text, true)
+                }
+            }
+            true
+        }
     }
 
     private fun setNavBarColor(insets: WindowInsetsCompat?) {
@@ -479,7 +654,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     insets.hasSideNavBar() -> Color.BLACK
                     isInNightMode() -> ColorUtils.setAlphaComponent(
                         getResourceColor(R.attr.colorPrimaryVariant),
-                        179
+                        179,
                     )
                     else -> Color.argb(179, 0, 0, 0)
                 }
@@ -497,7 +672,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             else -> {
                 ColorUtils.setAlphaComponent(
                     getResourceColor(R.attr.colorPrimaryVariant),
-                    179
+                    179,
                 )
             }
         }
@@ -513,17 +688,26 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val scale = Settings.Global.getFloat(
                 contentResolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE,
-                1.0f
+                1.0f,
             )
             val duration = resources.getInteger(android.R.integer.config_mediumAnimTime) * scale
             delay(duration.toLong())
             delay(100)
             if (Color.alpha(window?.statusBarColor ?: Color.BLACK) >= 255) window?.statusBarColor =
                 getResourceColor(
-                    android.R.attr.statusBarColor
+                    android.R.attr.statusBarColor,
                 )
         }
         super.onSupportActionModeFinished(mode)
+    }
+
+    fun setStatusBarColorTransparent(show: Boolean) {
+        window?.statusBarColor = if (show) {
+            ColorUtils.setAlphaComponent(window?.statusBarColor ?: Color.TRANSPARENT, 0)
+        } else {
+            val color = getResourceColor(android.R.attr.statusBarColor)
+            ColorUtils.setAlphaComponent(window?.statusBarColor ?: color, Color.alpha(color))
+        }
     }
 
     override fun onResume() {
@@ -545,11 +729,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 TapTarget.forView(
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
-                    getString(R.string.visit_recents_for_download_queue)
+                    getString(R.string.visit_recents_for_download_queue),
                 ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary))
                     .outerCircleAlpha(0.95f)
                     .titleTextSize(
-                        20
+                        20,
                     )
                     .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary))
                     .descriptionTextSize(16)
@@ -562,7 +746,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         super.onTargetClick(view)
                         nav.selectedItemId = R.id.nav_recents
                     }
-                }
+                },
             )
         }
     }
@@ -576,7 +760,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     fun saveExtras() {
         mangaShortcutManager.updateShortcuts()
-        // MangaCoverMetadata.savePrefs()
+        MangaCoverMetadata.savePrefs()
     }
 
     private fun checkForAppUpdates() {
@@ -612,7 +796,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (notificationId > -1) NotificationReceiver.dismissNotification(
             applicationContext,
             notificationId,
-            intent.getIntExtra("groupId", 0)
+            intent.getIntExtra("groupId", 0),
         )
         when (intent.action) {
             SHORTCUT_LIBRARY -> nav.selectedItemId = R.id.nav_library
@@ -629,7 +813,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         when (intent.action) {
                             SHORTCUT_RECENTLY_UPDATED -> RecentsPresenter.VIEW_TYPE_ONLY_UPDATES
                             else -> RecentsPresenter.VIEW_TYPE_ONLY_HISTORY
-                        }
+                        },
                     )
                 }
             }
@@ -690,27 +874,38 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         overflowDialog = null
         DownloadService.removeListener(this)
         if (isBindingInitialized) {
+            binding.appBar.mainActivity = null
             binding.toolbar.setNavigationOnClickListener(null)
-            binding.cardToolbar.setNavigationOnClickListener(null)
+            binding.searchToolbar.setNavigationOnClickListener(null)
         }
     }
 
-    override fun onBackPressed() {
-        val sheetController = router.backstack.lastOrNull()?.controller as? BottomSheetController
-        if (if (router.backstackSize == 1) !(sheetController?.handleSheetBack() ?: false)
-            else !router.handleBack()
-        ) {
+    private fun pressingBack() {
+        if (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) {
+            binding.searchToolbar.collapseActionView()
+            return
+        }
+        backPress()
+    }
+
+    override fun finish() {
+        if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
+            setStartingTab()
+        }
+        if (this !is SearchActivity) {
+            SecureActivityDelegate.locked = true
+        }
+        saveExtras()
+        super.finish()
+    }
+
+    protected open fun backPress() {
+        val controller = router.backstack.lastOrNull()?.controller
+        if (if (router.backstackSize == 1) controller?.handleBack() != true else !router.handleBack()) {
             if (preferences.backReturnsToStart().get() && this !is SearchActivity &&
                 startingTab() != nav.selectedItemId
             ) {
                 goToStartingTab()
-            } else {
-                if (!preferences.backReturnsToStart().get() && this !is SearchActivity) {
-                    setStartingTab()
-                }
-                SecureActivityDelegate.locked = this !is SearchActivity
-                saveExtras()
-                super.onBackPressed()
             }
         }
     }
@@ -719,7 +914,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         get() = binding.bottomNav ?: binding.sideNav!!
 
     private fun setStartingTab() {
-        if (this is SearchActivity) return
+        if (this is SearchActivity || !isBindingInitialized) return
         if (nav.selectedItemId != R.id.nav_browse &&
             preferences.startingTab().get() >= 0
         ) {
@@ -727,7 +922,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 when (nav.selectedItemId) {
                     R.id.nav_library -> 0
                     else -> 1
-                }
+                },
             )
         }
     }
@@ -754,12 +949,136 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         router.setRoot(controller.withFadeInTransaction().tag(id.toString()))
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
-        val searchItem = menu.findItem(R.id.action_search)
-        if (currentToolbar == binding.cardToolbar) {
+    override fun onPreparePanel(featureId: Int, view: View?, menu: Menu): Boolean {
+        val prepare = super.onPreparePanel(featureId, view, menu)
+        if (canShowFloatingToolbar(router.backstack.lastOrNull()?.controller)) {
+            val searchItem = menu.findItem(R.id.action_search)
             searchItem?.isVisible = false
         }
-        return super.onPrepareOptionsMenu(menu)
+        setupSearchTBMenu(menu)
+        return prepare
+    }
+
+    fun setSearchTBMenuIfInvalid() = setupSearchTBMenu(binding.toolbar.menu)
+
+    private fun setupSearchTBMenu(menu: Menu?, showAnyway: Boolean = false) {
+        val toolbar = binding.searchToolbar
+        val currentItemsId = toolbar.menu.children.toList().map { it.itemId }
+        val newMenuIds = menu?.children?.toList()?.map { it.itemId }.orEmpty()
+        menu?.children?.toList()?.let { menuItems ->
+            val searchActive = toolbar.isSearchExpanded
+            menuItems.forEachIndexed { index, oldMenuItem ->
+                if (oldMenuItem.itemId == R.id.action_search) return@forEachIndexed
+                val isVisible = oldMenuItem.isVisible &&
+                    (currentToolbar == toolbar || !binding.appBar.useLargeToolbar) && (!searchActive || showAnyway)
+                addOrUpdateMenuItem(oldMenuItem, toolbar.menu, isVisible, currentItemsId, index)
+            }
+        }
+        toolbar.menu.children.toList().forEach {
+            if (it.itemId != R.id.action_search && !newMenuIds.contains(it.itemId)) {
+                toolbar.menu.removeItem(it.itemId)
+            }
+        }
+
+        // Done because sometimes ActionMenuItemViews have a width/height of 0 and never update
+        val actionMenuView = toolbar.findChild<ActionMenuView>()
+        if (binding.appBar.isVisible && toolbar.isVisible &&
+            toolbar.width > 0 && actionMenuView?.children?.any { it.width == 0 } == true
+        ) {
+            actionMenuView.children.forEach {
+                if (it !is ActionMenuItemView) return@forEach
+                it.updateLayoutParams<ViewGroup.LayoutParams> {
+                    width = actionButtonSize.first
+                    height = actionButtonSize.second
+                }
+            }
+            actionMenuView.requestLayout()
+        }
+
+        val controller =
+            if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
+        if (canShowFloatingToolbar(controller)) {
+            binding.toolbar.menu.removeItem(R.id.action_search)
+        }
+    }
+
+    private fun addOrUpdateMenuItem(
+        oldMenuItem: MenuItem,
+        menu: Menu,
+        isVisible: Boolean,
+        currentItemsId: List<Int>,
+        index: Int,
+    ) {
+        if (currentItemsId.contains(oldMenuItem.itemId)) {
+            val newItem = menu.findItem(oldMenuItem.itemId) ?: return
+            if (newItem.icon != oldMenuItem.icon) {
+                newItem.icon = oldMenuItem.icon
+            }
+            if (newItem.isVisible != isVisible) {
+                newItem.isVisible = isVisible
+            }
+            updateSubMenu(oldMenuItem, newItem)
+            return
+        }
+        val menuItem = if (oldMenuItem.hasSubMenu()) {
+            menu.addSubMenu(
+                oldMenuItem.groupId,
+                oldMenuItem.itemId,
+                index,
+                oldMenuItem.title,
+            ).item
+        } else {
+            menu.add(
+                oldMenuItem.groupId,
+                oldMenuItem.itemId,
+                index,
+                oldMenuItem.title,
+            )
+        }
+        menuItem.isVisible = isVisible
+        menuItem.actionView = oldMenuItem.actionView
+        menuItem.icon = oldMenuItem.icon
+        menuItem.isChecked = oldMenuItem.isChecked
+        updateSubMenu(oldMenuItem, menuItem)
+        menuItem.setShowAsAction(MenuItem.SHOW_AS_ACTION_IF_ROOM)
+    }
+
+    @SuppressLint("RestrictedApi")
+    private fun updateSubMenu(oldMenuItem: MenuItem, menuItem: MenuItem) {
+        if (oldMenuItem.hasSubMenu()) {
+            val oldSubMenu = oldMenuItem.subMenu
+            val newMenuIds = oldSubMenu.children.toList().map { it.itemId }
+            val currentItemsId = menuItem.subMenu.children.toList().map { it.itemId }
+            var isExclusiveCheckable = false
+            var isCheckable = false
+            oldSubMenu.children.toList().forEachIndexed { index, oldSubMenuItem ->
+                val isSubVisible = oldSubMenuItem.isVisible
+                addOrUpdateMenuItem(
+                    oldSubMenuItem,
+                    menuItem.subMenu,
+                    isSubVisible,
+                    currentItemsId,
+                    index
+                )
+                if (!isExclusiveCheckable) {
+                    isExclusiveCheckable =
+                        (oldSubMenuItem as? MenuItemImpl)?.isExclusiveCheckable ?: false
+                }
+                if (!isCheckable) {
+                    isCheckable = oldSubMenuItem.isCheckable
+                }
+            }
+            menuItem.subMenu.setGroupCheckable(
+                oldSubMenu.children.first().groupId,
+                isCheckable,
+                isExclusiveCheckable
+            )
+            menuItem.subMenu.children.toList().forEach {
+                if (!newMenuIds.contains(it.itemId)) {
+                    menuItem.subMenu.removeItem(it.itemId)
+                }
+            }
+        }
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -773,7 +1092,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     window,
                     onDismiss = {
                         this.overflowDialog = null
-                    }
+                    },
                 )
                 overflowDialog.show()
             }
@@ -790,9 +1109,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         router.pushController(AboutController().withFadeTransaction())
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
-        gestureDetector?.onTouchEvent(ev)
-        if (ev.action == MotionEvent.ACTION_DOWN) {
+    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+        ev?.let { gestureDetector?.onTouchEvent(it) }
+        if (ev?.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
                 snackBar!!.view.getGlobalVisibleRect(sRect)
@@ -828,12 +1147,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (from is DialogController || to is DialogController) {
             return
         }
+        reEnableBackPressedCallBack()
         setFloatingToolbar(canShowFloatingToolbar(to))
         val onRoot = router.backstackSize == 1
         val navIcon = if (onRoot) searchDrawable else backDrawable
-        binding.toolbar.navigationIcon = navIcon
-        binding.cardToolbar.navigationIcon = navIcon
-        binding.cardToolbar.subtitle = null
+        binding.toolbar.navigationIcon = if (onRoot) null else backDrawable
+        binding.searchToolbar.navigationIcon =
+            if (binding.appBar.useLargeToolbar) searchDrawable else navIcon
+        binding.searchToolbar.subtitle = null
 
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility
         if (nav == binding.sideNav) {
@@ -845,19 +1166,17 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             animationSet = AnimatorSet()
             val alphaAnimation = ValueAnimator.ofFloat(
                 nav.alpha,
-                if (hideBottomNav) 0f else 1f
+                if (hideBottomNav) 0f else 1f,
             )
             alphaAnimation.addUpdateListener { valueAnimator ->
                 nav.alpha = valueAnimator.animatedValue as Float
             }
-            alphaAnimation.addListener(
-                EndAnimatorListener {
-                    nav.isVisible = !hideBottomNav
-                    binding.bottomView?.visibility =
-                        if (hideBottomNav) View.GONE else binding.bottomView?.visibility
-                            ?: View.GONE
-                }
-            )
+            alphaAnimation.doOnEnd {
+                nav.isVisible = !hideBottomNav
+                binding.bottomView?.visibility =
+                    if (hideBottomNav) View.GONE else binding.bottomView?.visibility
+                        ?: View.GONE
+            }
             alphaAnimation.duration = 200
             alphaAnimation.startDelay = 50
             animationSet?.playTogether(alphaAnimation)
@@ -866,7 +1185,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     private fun updateControllersWithSideNavChanges(extraController: Controller? = null) {
-        if (!isBindingInitialized || !this::router.isInitialized) return
+        if (!isBindingInitialized || !this::router.isInitialized || this is SearchActivity) return
         binding.sideNav?.let { sideNav ->
             val controllers = (router.backstack.map { it?.controller } + extraController)
                 .filterNotNull()
@@ -895,21 +1214,19 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             }
             val tA = ValueAnimator.ofFloat(
                 binding.tabsFrameLayout.alpha,
-                if (show) 1f else 0f
+                if (show) 1f else 0f,
             )
             tA.addUpdateListener { valueAnimator ->
                 binding.tabsFrameLayout.alpha = valueAnimator.animatedValue as Float
             }
-            tA.addListener(
-                EndAnimatorListener {
-                    binding.tabsFrameLayout.isVisible = show
-                    if (!show) {
-                        binding.mainTabs.clearOnTabSelectedListeners()
-                        binding.mainTabs.removeAllTabs()
-                    }
+            tA.doOnEnd {
+                binding.tabsFrameLayout.isVisible = show
+                if (!show) {
+                    binding.mainTabs.clearOnTabSelectedListeners()
+                    binding.mainTabs.removeAllTabs()
                 }
-            )
-            tA.duration = 200
+            }
+            tA.duration = 100
             tabAnimation = tA
             tA.start()
         } else {
@@ -935,13 +1252,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             MaterialMenuSheet.MenuSheetItem(
                 0,
                 textRes = R.string.whats_new_this_release,
-                drawable = R.drawable.ic_new_releases_24dp
+                drawable = R.drawable.ic_new_releases_24dp,
             ),
             MaterialMenuSheet.MenuSheetItem(
                 1,
                 textRes = R.string.close,
-                drawable = R.drawable.ic_close_24dp
-            )
+                drawable = R.drawable.ic_close_24dp,
+            ),
         ),
         title = getString(R.string.updated_to_, BuildConfig.VERSION_NAME),
         showDivider = true,
@@ -951,7 +1268,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 try {
                     val intent = Intent(
                         Intent.ACTION_VIEW,
-                        RELEASE_TAG.toUri()
+                        RELEASE_URL.toUri(),
                     )
                     startActivity(intent)
                 } catch (e: Throwable) {
@@ -959,7 +1276,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                 }
             }
             true
-        }
+        },
     )
 
     private inner class GestureListener : GestureDetector.SimpleOnGestureListener() {
@@ -1037,10 +1354,12 @@ interface RootSearchInterface {
     fun expandSearch() {
         if (this is Controller) {
             val mainActivity = activity as? MainActivity ?: return
-            mainActivity.binding.cardToolbar.menu.findItem(R.id.action_search)?.expandActionView()
+            mainActivity.binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
         }
     }
 }
+
+interface TabbedInterface
 
 interface FloatingSearchInterface {
     fun searchTitle(title: String?): String? {
@@ -1057,6 +1376,4 @@ interface BottomSheetController {
     fun showSheet()
     fun hideSheet()
     fun toggleSheet()
-    fun handleSheetBack(): Boolean
-    fun sheetIsFullscreen(): Boolean
 }
