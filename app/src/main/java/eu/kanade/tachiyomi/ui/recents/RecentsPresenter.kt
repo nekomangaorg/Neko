@@ -512,6 +512,10 @@ class RecentsPresenter(
     companion object {
         private var lastRecents: List<RecentMangaItem>? = null
 
+        fun onLowMemory() {
+            lastRecents = null
+        }
+
         const val VIEW_TYPE_GROUP_ALL = 0
         const val VIEW_TYPE_UNGROUP_ALL = 1
         const val VIEW_TYPE_ONLY_HISTORY = 2

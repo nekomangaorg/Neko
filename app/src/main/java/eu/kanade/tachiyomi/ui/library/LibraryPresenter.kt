@@ -1171,6 +1171,11 @@ class LibraryPresenter(
         private const val randomGroupOfTagsNormal = 1
         private const val randomGroupOfTagsNegate = 2
 
+        fun onLowMemory() {
+            lastLibraryItems = null
+            lastCategories = null
+        }
+
         suspend fun setSearchSuggestion(
             preferences: PreferencesHelper,
             db: DatabaseHelper,
