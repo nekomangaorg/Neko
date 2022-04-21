@@ -53,7 +53,6 @@ import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import eu.kanade.tachiyomi.widget.EmptyView
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
@@ -172,7 +171,7 @@ open class BrowseSourceController(bundle: Bundle) :
             binding.catalogueView.removeView(oldRecycler)
         }
 
-        val recycler = if (presenter.isListMode) {
+        val recycler = if (presenter.prefs.browseAsList().get()) {
             RecyclerView(view.context).apply {
                 id = R.id.recycler
                 layoutManager = LinearLayoutManager(context)
@@ -265,23 +264,30 @@ open class BrowseSourceController(bundle: Bundle) :
         )
 
         // Show next display mode
-        menu.findItem(R.id.action_display_mode).apply {
-            val icon = if (presenter.isListMode) {
+        updateDisplayMenuItem(menu)
+    }
+
+    private fun updateDisplayMenuItem(
+        menu: Menu?,
+        isListMode: Boolean? = null,
+        hideLibraryManga: Boolean? = null,
+    ) {
+        menu?.findItem(R.id.action_display_mode)?.apply {
+            val icon = if (isListMode ?: presenter.prefs.browseAsList().get()) {
                 R.drawable.ic_view_module_24dp
             } else {
                 R.drawable.ic_view_list_24dp
             }
             setIcon(icon)
         }
-        menu.findItem(R.id.action_toggle_have_already).apply {
-            val icon = if (preferences.browseShowLibrary().get()) {
+        menu?.findItem(R.id.action_toggle_have_already)?.apply {
+            val icon = if (hideLibraryManga ?: presenter.prefs.browseShowLibrary().get()) {
                 R.drawable.ic_eye_off_24dp
             } else {
                 R.drawable.ic_eye_24dp
             }
             setIcon(icon)
         }
-        hideItemsIfExpanded(searchItem, menu)
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
@@ -415,6 +421,7 @@ open class BrowseSourceController(bundle: Bundle) :
                         when (filter) {
                             is Filter.TriState -> filter.state = 1
                             is Filter.CheckBox -> filter.state = true
+                            else -> break
                         }
                         filterList = presenter.sourceFilters
                         break@filter
@@ -623,12 +630,14 @@ open class BrowseSourceController(bundle: Bundle) :
         val view = view ?: return
         val adapter = adapter ?: return
 
-        presenter.swapDisplayMode()
-        val isListMode = presenter.isListMode
-        activity?.invalidateOptionsMenu()
+        val isListMode = !presenter.prefs.browseAsList().get()
+        presenter.prefs.browseAsList().set(isListMode)
+        listOf(activityBinding?.toolbar?.menu, activityBinding?.cardToolbar?.menu).forEach {
+            updateDisplayMenuItem(it, isListMode)
+        }
         setupRecycler(view)
-        if (!isListMode || !view.context.connectivityManager.isActiveNetworkMetered) {
-            // Initialize mangaList if going to grid view or if over wifi when going to list view
+        // Initialize manga if not on a metered connection
+        if (!view.context.connectivityManager.isActiveNetworkMetered) {
             val mangaList = (0 until adapter.itemCount).mapNotNull {
                 (adapter.getItem(it) as? BrowseSourceItem)?.manga
             }
@@ -640,8 +649,13 @@ open class BrowseSourceController(bundle: Bundle) :
      * Toggle if our library is already seen
      */
     fun swapLibraryVisibility() {
-        presenter.swapLibraryVisibility()
-        activity?.invalidateOptionsMenu()
+        val showLibraryManga = !presenter.prefs.browseShowLibrary().get()
+        presenter.prefs.browseShowLibrary().set(showLibraryManga)
+        listOf(activityBinding?.toolbar?.menu, activityBinding?.cardToolbar?.menu).forEach {
+            updateDisplayMenuItem(it, null, showLibraryManga)
+        }
+        // Initialize manga if not on a metered connection
+        presenter.restartPager()
     }
 
     /**

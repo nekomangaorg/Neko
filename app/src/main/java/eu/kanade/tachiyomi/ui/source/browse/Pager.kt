@@ -8,7 +8,7 @@ import rx.Observable
 /**
  * A general pager for source requests (latest updates, popular, search)
  */
-abstract class Pager(var currentPage: Int = 1, var checkForEmpty: Boolean = true) {
+abstract class Pager(var currentPage: Int = 1) {
 
     var hasNextPage = true
         private set
@@ -19,12 +19,12 @@ abstract class Pager(var currentPage: Int = 1, var checkForEmpty: Boolean = true
         return results.asObservable()
     }
 
-    abstract fun requestNext(): Observable<MangaListPage>
+    abstract suspend fun requestNextPage()
 
     fun onPageReceived(mangaListPage: MangaListPage) {
         val page = currentPage
         currentPage++
-        hasNextPage = mangaListPage.hasNextPage && (!checkForEmpty || mangaListPage.manga.isNotEmpty())
+        hasNextPage = mangaListPage.hasNextPage && mangaListPage.manga.isNotEmpty()
         results.call(Pair(page, mangaListPage.manga))
     }
 }

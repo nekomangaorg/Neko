@@ -54,7 +54,7 @@ abstract class ReducedHttpSource : HttpSource() {
         TODO("Not yet implemented")
     }
 
-    override suspend fun fetchMangaDetails(manga: SManga): SManga {
+    override suspend fun getMangaDetails(manga: SManga): SManga {
         TODO("Not yet implemented")
     }
 

@@ -395,7 +395,7 @@ class MangaDetailsPresenter(
 
             val deferredManga = async {
                 runCatching {
-                    source.fetchMangaDetails(manga)
+                    source.getMangaDetails(manga)
                 }.getOrElse { e ->
                     XLog.e("error with mangadex getting manga", e)
                     error = true

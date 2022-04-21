@@ -193,7 +193,7 @@ class FullBackupManager(val context: Context) {
      */
     suspend fun restoreMangaFetch(source: Source, manga: Manga): Manga {
         return withContext(Dispatchers.IO) {
-            val networkManga = source.fetchMangaDetails(manga)
+            val networkManga = source.getMangaDetails(manga)
             manga.copyFrom(networkManga)
             manga.favorite = true
             manga.initialized = true

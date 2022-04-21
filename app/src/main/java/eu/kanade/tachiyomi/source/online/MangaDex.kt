@@ -84,7 +84,7 @@ open class MangaDex : HttpSource() {
         return followsHandler.fetchFollows()
     }
 
-    override suspend fun fetchMangaDetails(manga: SManga): SManga {
+    override suspend fun getMangaDetails(manga: SManga): SManga {
         return mangaHandler.fetchMangaDetails(manga)
     }
 

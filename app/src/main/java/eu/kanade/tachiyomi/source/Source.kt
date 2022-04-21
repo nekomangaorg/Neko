@@ -32,7 +32,7 @@ interface Source {
      *
      * @param manga the manga to update.
      */
-    suspend fun fetchMangaDetails(manga: SManga): SManga
+    suspend fun getMangaDetails(manga: SManga): SManga
 
     /**
      * Returns a updated details for a manga and the chapter list
