@@ -1,6 +1,9 @@
 package eu.kanade.tachiyomi.ui.download
 
 import android.view.View
+import androidx.appcompat.widget.PopupMenu
+import androidx.core.view.isVisible
+import androidx.recyclerview.widget.ItemTouchHelper
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadItemBinding
@@ -78,9 +81,18 @@ class DownloadHolder(private val view: View, val adapter: DownloadAdapter) :
         binding.downloadProgressText.text = "${download.downloadedImages}/${pages.size}"
     }
 
+    override fun onActionStateChanged(position: Int, actionState: Int) {
+        super.onActionStateChanged(position, actionState)
+        if (actionState == ItemTouchHelper.ACTION_STATE_DRAG) {
+            binding.root.isDragged = true
+        }
+    }
+
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
         adapter.downloadItemListener.onItemReleased(position)
+        binding.root.isDragged = false
+        binding.root.cardElevation = 0f
     }
 
     private fun showPopupMenu(view: View) {

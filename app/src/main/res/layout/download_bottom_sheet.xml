@@ -12,7 +12,7 @@
     app:behavior_peekHeight="48sp"
     app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/sheet_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -44,9 +44,10 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_marginStart="10dp"
-            android:layout_marginTop="6dp"
+            android:paddingTop="6dp"
             android:layout_marginEnd="10dp"
-            android:layout_marginBottom="10dp"
+            android:paddingBottom="10dp"
+            app:layout_constraintTop_toBottomOf="@id/pill"
             android:ellipsize="end"
             android:gravity="center"
             android:maxLines="1"
@@ -54,7 +55,23 @@
             android:textColor="?actionBarTintColor"
             android:textSize="18sp"
             tools:text="Downloads" />
-    </LinearLayout>
+
+        <eu.kanade.tachiyomi.ui.base.CenteredToolbar
+            android:id="@+id/sheet_toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?mainActionBarSize"
+            android:background="@android:color/transparent"
+            app:collapseIcon="@drawable/ic_arrow_back_24dp"
+            app:layout_constraintTop_toBottomOf="@id/pill"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintVertical_bias="1.0"
+            app:menu="@menu/download_queue"
+            app:navigationIcon="@drawable/ic_close_24dp"
+            app:navigationIconTint="?actionBarTintColor"
+            app:titleTextColor="?actionBarTintColor">
+
+        </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <androidx.coordinatorlayout.widget.CoordinatorLayout
         android:id="@+id/recycler_layout"
@@ -86,6 +103,6 @@
             android:id="@+id/download_fab"
             style="@style/Theme.Widget.FAB"
             android:text="@string/resume"
-            app:icon="@drawable/ic_play_arrow_24dp"/>
+            app:icon="@drawable/ic_play_arrow_24dp" />
     </androidx.coordinatorlayout.widget.CoordinatorLayout>
 </eu.kanade.tachiyomi.ui.download.DownloadBottomSheet>

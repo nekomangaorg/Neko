@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Tachiyomi.CardView.Draggable"
     xmlns:tools="http://schemas.android.com/tools">
 
     <FrameLayout
@@ -130,4 +129,4 @@
             app:srcCompat="@drawable/ic_more_vert_24dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-</FrameLayout>
+</com.google.android.material.card.MaterialCardView>

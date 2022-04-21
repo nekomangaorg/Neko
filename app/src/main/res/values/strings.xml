@@ -811,6 +811,7 @@
     <string name="download_queue">Download queue</string>
     <string name="downloading_">Downloading: %1$s</string>
     <string name="cancel_all">Cancel all</string>
+    <string name="move_series_to_top">Move series to top</string>
     <string name="cancel_all_for_series">Cancel all for this series</string>
     <string name="downloaded">Downloaded</string>
     <string name="not_downloaded">Not downloaded</string>
@@ -893,6 +894,7 @@
     <string name="alphabetically">Alphabetically</string>
     <string name="always">Always</string>
     <string name="always_ask">Always ask</string>
+    <string name="ascending">Ascending</string>
     <string name="automatic">Automatic</string>
     <string name="back">Back</string>
     <string name="beta">BETA</string>
@@ -907,6 +909,8 @@
     <string name="common">Common</string>
     <string name="cover_of_image">Cover of manga</string>
     <string name="create">Create</string>
+    <string name="date">Date</string>
+    <string name="descending">Descending</string>
     <string name="default_value">Default</string>
     <string name="delete">Delete</string>
     <string name="deleted_">Deleted: %1$s</string>

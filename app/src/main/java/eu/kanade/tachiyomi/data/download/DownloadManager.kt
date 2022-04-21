@@ -69,7 +69,9 @@ class DownloadManager(val context: Context) {
      * @return true if it's started, false otherwise (empty queue).
      */
     fun startDownloads(): Boolean {
-        return downloader.start()
+        val hasStarted = downloader.start()
+        DownloadService.callListeners(hasStarted)
+        return hasStarted
     }
 
     /**
@@ -108,6 +110,7 @@ class DownloadManager(val context: Context) {
         if (isPaused()) {
             if (DownloadService.isRunning(context)) {
                 downloader.start()
+                DownloadService.callListeners(true)
             } else {
                 DownloadService.start(context)
             }
@@ -131,6 +134,7 @@ class DownloadManager(val context: Context) {
         downloader.queue.addAll(downloads)
         if (!wasPaused) {
             downloader.start()
+            DownloadService.callListeners(true)
         }
     }
 
@@ -240,6 +244,7 @@ class DownloadManager(val context: Context) {
                 downloader.queue.remove(chapters)
                 if (!wasPaused && downloader.queue.isNotEmpty()) {
                     downloader.start()
+                DownloadService.callListeners(true)
                 } else if (downloader.queue.isEmpty() && DownloadService.isRunning(context)) {
                     DownloadService.stop(context)
                 } else if (downloader.queue.isEmpty()) {

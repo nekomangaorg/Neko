@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto">
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
     <item
         android:id="@+id/reorder"
@@ -9,11 +9,31 @@
         app:showAsAction="never">
         <menu>
             <item
-                android:id="@+id/newest"
-                android:title="@string/newest"/>
+                android:id="@+id/action_sort_date"
+                android:title="@string/by_update_date"
+                app:showAsAction="never">
+                <menu>
+                    <item
+                        android:id="@+id/newest"
+                        android:title="@string/newest" />
+                    <item
+                        android:id="@+id/oldest"
+                        android:title="@string/oldest" />
+                </menu>
+            </item>
             <item
-                android:id="@+id/oldest"
-                android:title="@string/oldest"/>
+                android:id="@+id/action_sort_chapter"
+                android:title="@string/by_chapter_number"
+                app:showAsAction="never">
+                <menu>
+                    <item
+                        android:id="@+id/asc"
+                        android:title="@string/ascending" />
+                    <item
+                        android:id="@+id/desc"
+                        android:title="@string/descending" />
+                </menu>
+            </item>
         </menu>
     </item>
 

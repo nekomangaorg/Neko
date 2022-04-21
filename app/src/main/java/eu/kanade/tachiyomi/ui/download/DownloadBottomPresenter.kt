@@ -18,7 +18,7 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
      * Download manager.
      */
     val downloadManager: DownloadManager by injectLazy()
-    var items = listOf<DownloadItem>()
+    var items = listOf<DownloadHeaderItem>()
 
     /**
      * Property to get the queue from the download manager.
@@ -28,13 +28,27 @@ class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
 
     fun getItems() {
         presenterScope.launch {
-            val items = downloadQueue.map(::DownloadItem)
-            val hasChanged = if (this@DownloadBottomPresenter.items.size != items.size) true
+            val items = downloadQueue
+                .groupBy { it.source }
+                .map { entry ->
+                    DownloadHeaderItem(entry.key.id, entry.key.name, entry.value.size).apply {
+                        addSubItems(0, entry.value.map { DownloadItem(it, this) })
+                    }
+                }
+            val hasChanged = if (this@DownloadBottomPresenter.items.size != items.size ||
+                this@DownloadBottomPresenter.items.sumOf { it.subItemsCount } != items.sumOf { it.subItemsCount }
+            ) true
             else {
-                val oldItemsIds = this@DownloadBottomPresenter.items.mapNotNull {
-                    it.download.chapter.id
-                }.toLongArray()
-                val newItemsIds = items.mapNotNull { it.download.chapter.id }.toLongArray()
+                val oldItemsIds = this@DownloadBottomPresenter.items.map { header ->
+                    header.subItems.mapNotNull { it.download.chapter.id }
+                }
+                    .flatten()
+                    .toLongArray()
+                val newItemsIds = items.map { header ->
+                    header.subItems.mapNotNull { it.download.chapter.id }
+                }
+                    .flatten()
+                    .toLongArray()
                 !oldItemsIds.contentEquals(newItemsIds)
             }
             this@DownloadBottomPresenter.items = items

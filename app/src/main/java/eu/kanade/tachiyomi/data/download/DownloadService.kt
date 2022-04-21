@@ -52,7 +52,7 @@ class DownloadService : Service() {
         fun callListeners(downloading: Boolean? = null) {
             val downloadManager: DownloadManager by injectLazy()
             listeners.forEach {
-                it.downloadStatusChanged(downloading ?: downloadManager.hasQueue())
+                it.downloadStatusChanged(downloading ?: !downloadManager.isPaused())
             }
         }
 
@@ -154,7 +154,7 @@ class DownloadService : Service() {
         subscriptions.unsubscribe()
         connectivityManager.unregisterNetworkCallback(networkCallback)
         downloadManager.stopDownloads()
-        callListeners(downloadManager.hasQueue())
+        callListeners(false)
         wakeLock.releaseIfNeeded()
         super.onDestroy()
     }
