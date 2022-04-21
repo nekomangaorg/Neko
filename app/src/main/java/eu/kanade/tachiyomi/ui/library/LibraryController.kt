@@ -108,6 +108,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
@@ -770,11 +771,11 @@ class LibraryController(
             binding.filterBottomSheet.filterBottomSheet.y,
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
         )
-        val insetBottom = insets?.getInsets(systemBars())?.bottom ?: 0
+        val insetBottom = insets.getInsets(systemBars()).bottom
         if (!preferences.autohideHopper().get() || activityBinding?.bottomNav == null) {
             listOfYs.add(view.height - (insetBottom).toFloat())
         }
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets?.isImeVisible() == true) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R && insets.isImeVisible() == true) {
             val insetKey = insets.getInsets(ime() or systemBars()).bottom
             listOfYs.add(view.height - (insetKey).toFloat())
         }
@@ -1060,6 +1061,9 @@ class LibraryController(
             }
         )
         with(binding.filterBottomSheet.root) {
+            viewScope.launch {
+                checkForManhwa()
+            }
             updateGroupTypeButton(presenter.groupType)
             setExpandText(canCollapseOrExpandCategory())
         }
@@ -1160,7 +1164,7 @@ class LibraryController(
         if (headerPosition > -1) {
             val appbar = activityBinding?.appBar
             binding.libraryGridRecycler.recycler.suppressLayout(true)
-            val appbarOffset = if (appbar?.y ?: 0f > -20) 0 else (
+            val appbarOffset = if ((appbar?.y ?: 0f) > -20) 0 else (
                 appbar?.y?.plus(
                     view?.rootWindowInsetsCompat?.getInsets(systemBars())?.top ?: 0
                 ) ?: 0f

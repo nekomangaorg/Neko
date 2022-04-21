@@ -12,7 +12,6 @@ import androidx.core.view.isVisible
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import com.google.android.material.bottomsheet.BottomSheetBehavior
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
@@ -22,6 +21,8 @@ import eu.kanade.tachiyomi.ui.library.LibraryGroup
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
+import eu.kanade.tachiyomi.util.system.withIOContext
+import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.collapse
 import eu.kanade.tachiyomi.util.view.compatToolTipText
@@ -30,9 +31,7 @@ import eu.kanade.tachiyomi.util.view.inflate
 import eu.kanade.tachiyomi.util.view.isExpanded
 import eu.kanade.tachiyomi.util.view.isHidden
 import eu.kanade.tachiyomi.util.view.updatePaddingRelative
-import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -120,7 +119,6 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 controller.activityBinding?.bottomNav?.height
                     ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(
                         systemBars())?.bottom
-                        ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -271,7 +269,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             FILTER_TRACKER.isNotEmpty()
     }
 
-    private fun createTags() {
+    fun createTags() {
         downloaded = inflate(R.layout.filter_tag_group) as FilterTagGroup
         downloaded.setup(this, R.string.downloaded, R.string.not_downloaded)
 
@@ -297,21 +295,21 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         reSortViews()
 
-        checkForManhwa()
+        controller?.viewScope?.launch {
+            setFilterStates()
+        }
     }
 
-    private fun checkForManhwa() {
-        GlobalScope.launch(Dispatchers.IO, CoroutineStart.DEFAULT) {
-            val db: DatabaseHelper by injectLazy()
-            val showCategoriesCheckBox = withContext(Dispatchers.IO) {
-                db.getCategories().executeAsBlocking()
-                    .isNotEmpty()
-            }
-            val libraryManga = db.getLibraryMangaList().executeAsBlocking()
+    var checked = false
+    suspend fun checkForManhwa() {
+        if (checked) return
+        withIOContext {
+            val libraryManga = controller?.presenter?.allLibraryItems ?: return@withIOContext
+            checked = true
             val types = mutableListOf<Int>()
-            if (libraryManga.any { it.seriesType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
-            if (libraryManga.any { it.seriesType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
-            if (libraryManga.any { it.seriesType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
+            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHWA }) types.add(R.string.manhwa)
+            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_MANHUA }) types.add(R.string.manhua)
+            if (libraryManga.any { it.manga.seriesType() == Manga.TYPE_COMIC }) types.add(R.string.comic)
             if (types.isNotEmpty()) {
                 launchUI {
                     val mangaType = inflate(R.layout.filter_tag_group) as FilterTagGroup
@@ -327,16 +325,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     reSortViews()
                 }
             }
-            withContext(Dispatchers.Main) {
-                downloaded.setState(preferences.filterDownloaded())
-                completed.setState(preferences.filterCompleted())
-                val unreadP = preferences.filterUnread().get()
-                if (unreadP <= 2) {
-                    unread.state = unreadP - 1
-                } else if (unreadP >= 3) {
-                    unreadProgress.state = unreadP - 3
-                }
-                tracked?.setState(preferences.filterTracked())
+            withUIContext {
                 mangaType?.setState(
                     when (preferences.filterMangaType().get()) {
                         Manga.TYPE_MANGA -> context.getString(R.string.manga)
@@ -357,7 +346,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 val loggedServices = Injekt.get<TrackManager>().services.filter { it.isLogged() }
                 if (loggedServices.isNotEmpty()) {
                     val serviceNames = loggedServices.map { context.getString(it.nameRes()) }
-                    withContext(Dispatchers.Main) {
+                    withUIContext {
                         trackers = inflate(R.layout.filter_tag_group) as FilterTagGroup
                         trackers?.setup(
                             this@FilterBottomSheet,
@@ -374,6 +363,22 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     }
                 }
             }
+        }
+    }
+
+    private suspend fun setFilterStates() {
+        withContext(Dispatchers.Main) {
+            downloaded.setState(preferences.filterDownloaded())
+            completed.setState(preferences.filterCompleted())
+            val unreadP = preferences.filterUnread().get()
+            if (unreadP <= 2) {
+                unread.state = unreadP - 1
+            } else if (unreadP >= 3) {
+                unreadProgress.state = unreadP - 3
+            }
+            tracked?.setState(preferences.filterTracked())
+            reorderFilters()
+            reSortViews()
         }
     }
 
