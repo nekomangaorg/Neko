@@ -349,6 +349,8 @@
     <string name="reduces_banding_impacts_performance">Reduces banding, but impacts
         performance</string>
     <string name="invert_double_pages">Invert double pages</string>
+    <string name="zoom_double_page_spreads">Zoom into double page spreads</string>
+    <string name="navigate_pan">Navigate to pan</string>
     <string name="split_double_pages_portrait">Split double pages in portrait</string>
     <string name="crop_borders">Crop borders</string>
     <string name="crop_borders_paged">Crop borders (Paged)</string>

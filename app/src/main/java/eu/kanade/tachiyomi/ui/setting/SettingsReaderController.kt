@@ -225,7 +225,11 @@ class SettingsReaderController : SettingsController() {
                     }
                 }
             }
-
+            switchPreference {
+                bindTo(preferences.landscapeZoom())
+                titleRes = R.string.zoom_double_page_spreads
+                visibleIf(preferences.imageScaleType()) { it == 1 }
+            }
             intListPreference(activity) {
                 key = Keys.zoomStart
                 titleRes = R.string.zoom_start_position
@@ -242,6 +246,10 @@ class SettingsReaderController : SettingsController() {
                 key = Keys.cropBorders
                 titleRes = R.string.crop_borders
                 defaultValue = false
+            }
+            switchPreference {
+                bindTo(preferences.navigateToPan())
+                titleRes = R.string.navigate_pan
             }
             intListPreference(activity) {
                 key = Keys.pageLayout

@@ -40,6 +40,23 @@
             app:title="@string/scale_type"
             android:entries="@array/image_scale_type" />
 
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/landscape_zoom"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/zoom_double_page_spreads"
+            android:textColor="?attr/colorOnBackground" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/navigate_pan"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="@string/navigate_pan"
+            android:textColor="?attr/colorOnBackground" />
+
         <eu.kanade.tachiyomi.widget.MaterialSpinnerView
             android:id="@+id/page_layout"
             android:layout_width="match_parent"

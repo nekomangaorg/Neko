@@ -11,6 +11,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
+import androidx.preference.Preference
 import androidx.preference.PreferenceController
 import androidx.preference.PreferenceGroup
 import androidx.preference.PreferenceScreen
@@ -18,6 +19,7 @@ import com.bluelinelabs.conductor.ControllerChangeHandler
 import com.bluelinelabs.conductor.ControllerChangeType
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.util.system.getResourceColor
@@ -29,6 +31,7 @@ import rx.subscriptions.CompositeSubscription
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Locale
+import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 
 abstract class SettingsController : PreferenceController() {
 
@@ -135,5 +138,12 @@ abstract class SettingsController : PreferenceController() {
 
     fun <T> Observable<T>.subscribeUntilDestroy(onNext: (T) -> Unit): Subscription {
         return subscribe(onNext).also { untilDestroySubscriptions.add(it) }
+    }
+
+    inline fun <T> Preference.visibleIf(
+        preference: FlowPreference<T>,
+        crossinline block: (T) -> Boolean,
+    ) {
+        preference.asImmediateFlowIn(viewScope) { isVisible = block(it) }
     }
 }

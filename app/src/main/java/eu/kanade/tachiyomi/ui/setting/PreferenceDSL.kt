@@ -10,6 +10,7 @@ import androidx.preference.CheckBoxPreference
 import androidx.preference.DialogPreference
 import androidx.preference.DropDownPreference
 import androidx.preference.EditTextPreference
+import androidx.preference.ListPreference
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
 import androidx.preference.PreferenceGroup
@@ -28,6 +29,7 @@ import eu.kanade.tachiyomi.widget.preference.IntListMatPreference
 import eu.kanade.tachiyomi.widget.preference.ListMatPreference
 import eu.kanade.tachiyomi.widget.preference.MultiListMatPreference
 import eu.kanade.tachiyomi.widget.preference.TriStateListPreference
+import com.fredporciuncula.flow.preferences.Preference as FlowPreference
 
 @DslMarker
 @Target(AnnotationTarget.TYPE)
@@ -173,6 +175,22 @@ inline fun Preference.onClick(crossinline block: () -> Unit) {
 
 inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
     setOnPreferenceChangeListener { _, newValue -> block(newValue) }
+}
+
+fun <T> Preference.bindTo(preference: FlowPreference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue
+}
+
+fun <T> ListPreference.bindTo(preference: FlowPreference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue.toString()
+}
+
+fun <T> ListMatPreference.bindTo(preference: FlowPreference<T>) {
+    key = preference.key
+    val defValue = preference.defaultValue
+    defaultValue = if (defValue is Set<*>) defValue else defValue.toString()
 }
 
 fun SwitchPreferenceCompat.requireAuthentication(

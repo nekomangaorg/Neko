@@ -22,7 +22,10 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
                 val mangaViewer = (context as? ReaderActivity)?.presenter?.getMangaReadingMode() ?: 0
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
                 updatePagedGroup(!isWebtoonView)
+                landscapeZoom.isVisible = it == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE - 1
             }
+            binding.navigatePan.bindToPreference(preferences.navigateToPan())
+            binding.landscapeZoom.bindToPreference(preferences.landscapeZoom())
             zoomStart.bindToPreference(preferences.zoomStart(), 1)
             cropBorders.bindToPreference(preferences.cropBorders())
             pageTransitions.bindToPreference(preferences.pageTransitions())
@@ -34,6 +37,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
                 val isWebtoonView = ReadingModeType.isWebtoonType(mangaViewer)
                 updatePagedGroup(!isWebtoonView)
             }
+
             invertDoublePages.bindToPreference(preferences.invertDoublePages())
 
             pageLayout.title = pageLayout.title.toString().addBetaTag(context)
@@ -72,7 +76,9 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             binding.pageTransitions,
             binding.pagerNav,
             binding.pagerInvert,
-            binding.pageLayout
+            binding.pageLayout,
+            binding.landscapeZoom,
+            binding.navigatePan,
         ).forEach { it.isVisible = show }
         listOf(
             binding.cropBordersWebtoon,
@@ -95,6 +101,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
         } else {
             false
         }
+        binding.landscapeZoom.isVisible = show && preferences.imageScaleType().get() == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
         binding.extendPastCutout.isVisible = show && isFullFit && hasCutout && preferences.fullscreen().get()
         binding.invertDoublePages.isVisible = show && preferences.pageLayout().get() != PageLayout.SINGLE_PAGE.value
     }
