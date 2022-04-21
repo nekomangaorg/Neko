@@ -236,7 +236,7 @@
             app:tickVisible="false"
             android:layout_marginEnd="8dp"
             android:padding="@dimen/material_component_text_fields_floating_label_padding_between_label_and_input_text"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/grayscale"
             app:layout_constraintEnd_toStartOf="@id/txt_brightness_slider_value"
             app:layout_constraintStart_toEndOf="@id/txt_brightness_slider_icon"
             app:layout_constraintTop_toBottomOf="@id/custom_brightness"
@@ -264,6 +264,22 @@
             app:layout_constraintBottom_toBottomOf="@id/brightness_slider"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="@id/brightness_slider" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/grayscale"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/grayscale"
+            app:layout_constraintTop_toBottomOf="@id/brightness_slider" />
+
+        <com.google.android.material.switchmaterial.SwitchMaterial
+            android:id="@+id/inverted_colors"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/pref_inverted_colors"
+            app:layout_constraintTop_toBottomOf="@id/grayscale" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </eu.kanade.tachiyomi.ui.reader.settings.ReaderFilterView>

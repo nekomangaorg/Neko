@@ -152,6 +152,14 @@ class PreferencesHelper(val context: Context) {
 
     fun cropBordersWebtoon() = flowPrefs.getBoolean(Keys.cropBordersWebtoon, false)
 
+    fun navigateToPan() = flowPrefs.getBoolean("navigate_pan", true)
+
+    fun landscapeZoom() = flowPrefs.getBoolean("landscape_zoom", false)
+
+    fun grayscale() = flowPrefs.getBoolean("pref_grayscale", false)
+
+    fun invertedColors() = flowPrefs.getBoolean("pref_inverted_colors", false)
+
     fun webtoonSidePadding() = flowPrefs.getInt(Keys.webtoonSidePadding, 0)
 
     fun webtoonEnableZoomOut() = flowPrefs.getBoolean(Keys.webtoonEnableZoomOut, false)

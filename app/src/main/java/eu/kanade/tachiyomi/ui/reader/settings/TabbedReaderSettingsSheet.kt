@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.settings
 
+import android.animation.ValueAnimator
 import android.view.View
 import android.view.WindowManager
 import androidx.core.content.ContextCompat
@@ -42,6 +43,16 @@ class TabbedReaderSettingsSheet(
     }
 
     override var offset = 0
+
+    private val backgroundDimAnimator by lazy {
+        val sheetBackgroundDim = window?.attributes?.dimAmount ?: 0.25f
+        ValueAnimator.ofFloat(sheetBackgroundDim, 0f).also { valueAnimator ->
+            valueAnimator.duration = 250
+            valueAnimator.addUpdateListener {
+                window?.setDimAmount(it.animatedValue as Float)
+            }
+        }
+    }
 
     override fun getTabViews(): List<View> = listOf(
         generalView,
@@ -93,7 +104,18 @@ class TabbedReaderSettingsSheet(
         binding.pager.adapter?.notifyDataSetChanged()
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
             override fun onTabSelected(tab: TabLayout.Tab?) {
-                window?.setDimAmount(if (tab?.position == filterTabIndex) 0f else ogDim)
+                val isFilterTab = tab?.position == filterTabIndex
+
+                // Remove dimmed backdrop so color filter changes can be previewed
+                backgroundDimAnimator.run {
+                    if (isFilterTab) {
+                        if (animatedFraction < 1f) {
+                            start()
+                        }
+                    } else if (animatedFraction > 0f) {
+                        reverse()
+                    }
+                }
                 readerActivity.binding.appBar.isInvisible = tab?.position == filterTabIndex
                 if (tab?.position == 2) {
                     sheetBehavior.skipCollapsed = false

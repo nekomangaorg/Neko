@@ -9,6 +9,7 @@ import android.view.WindowManager
 import androidx.annotation.ColorInt
 import eu.kanade.tachiyomi.databinding.ReaderColorFilterBinding
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
+import eu.kanade.tachiyomi.util.bindToPreference
 import eu.kanade.tachiyomi.widget.BaseReaderSettingsView
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
@@ -36,6 +37,9 @@ class ReaderFilterView @JvmOverloads constructor(context: Context, attrs: Attrib
         preferences.customBrightness().asFlow()
             .onEach { setCustomBrightness(it) }
             .launchIn(activity.scope)
+
+        binding.grayscale.bindToPreference(preferences.grayscale())
+        binding.invertedColors.bindToPreference(preferences.invertedColors())
 
         // Get color and update values
         val color = preferences.colorFilterValue().get()
