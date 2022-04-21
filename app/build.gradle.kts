@@ -249,7 +249,7 @@ dependencies {
     implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     //Compose
-    val composeVersion = "1.1.0-rc01"
+    val composeVersion = "1.2.0-alpha08"
     implementation("androidx.compose.ui:ui:$composeVersion")
     implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
     implementation("androidx.paging:paging-compose:1.0.0-alpha14")
