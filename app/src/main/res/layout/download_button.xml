@@ -13,6 +13,7 @@
         android:layout_width="30dp"
         android:layout_height="30dp"
         android:layout_gravity="center"
+        android:contentDescription="@string/download"
         android:src="@drawable/border_circle"
         android:padding="3dp"/>
 
@@ -43,6 +44,7 @@
         app:tint="?attr/colorSecondary"
         android:layout_gravity="center"
         android:layout_width="30dp"
+        android:contentDescription="@string/download"
         android:layout_height="30dp"
         android:background="@drawable/round_ripple"
         android:padding="5dp"

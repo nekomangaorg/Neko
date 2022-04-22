@@ -117,27 +117,29 @@ class MangaDetailsPresenter(
     var allChapterScanlators: Set<String> = emptySet()
 
     fun onFirstLoad() {
-        val isTablet = controller?.isTablet == true
+        val controller = controller ?: return
+        val isTablet = controller.isTablet == true
         headerItem.isTablet = isTablet
         if (isTablet) {
             tabletChapterHeaderItem = MangaHeaderItem(manga, false)
             tabletChapterHeaderItem?.isChapterHeader = true
         }
-        isLockedFromSearch = controller.shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
+        isLockedFromSearch =
+            controller.shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
         headerItem.isLocked = isLockedFromSearch
         downloadManager.addListener(this)
         LibraryUpdateService.setListener(this)
         tracks = db.getTracks(manga).executeAsBlocking()
         if (!manga.initialized) {
             isLoading = true
-            controller?.setRefresh(true)
-            controller?.updateHeader()
+            controller.setRefresh(true)
+            controller.updateHeader()
             refreshAll()
         } else {
             runBlocking {
                 getChapters()
             }
-            controller?.updateChapters(this.chapters)
+            controller.updateChapters(this.chapters)
         }
         fetchExternalLinks()
         setTrackItems()
