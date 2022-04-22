@@ -3,9 +3,8 @@ package eu.kanade.tachiyomi.ui.download
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.data.download.model.DownloadQueue
-import kotlinx.coroutines.CoroutineScope
+import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.injectLazy
@@ -13,15 +12,13 @@ import uy.kohesive.injekt.injectLazy
 /**
  * Presenter of [DownloadBottomSheet].
  */
-class DownloadBottomPresenter(val sheet: DownloadBottomSheet) {
+class DownloadBottomPresenter : BaseCoroutinePresenter<DownloadBottomSheet>() {
 
     /**
      * Download manager.
      */
     val downloadManager: DownloadManager by injectLazy()
     var items = listOf<DownloadItem>()
-
-    private var scope = CoroutineScope(Job() + Dispatchers.Default)
 
     /**
      * Property to get the queue from the download manager.
@@ -30,7 +27,7 @@ class DownloadBottomPresenter(val sheet: DownloadBottomSheet) {
         get() = downloadManager.queue
 
     fun getItems() {
-        scope.launch {
+        presenterScope.launch {
             val items = downloadQueue.map(::DownloadItem)
             val hasChanged = if (this@DownloadBottomPresenter.items.size != items.size) true
             else {
@@ -42,7 +39,7 @@ class DownloadBottomPresenter(val sheet: DownloadBottomSheet) {
             }
             this@DownloadBottomPresenter.items = items
             if (hasChanged) {
-                withContext(Dispatchers.Main) { sheet.onNextDownloads(items) }
+                withContext(Dispatchers.Main) { controller?.onNextDownloads(items) }
             }
         }
     }
