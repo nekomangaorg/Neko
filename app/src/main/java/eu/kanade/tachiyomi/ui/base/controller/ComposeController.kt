@@ -8,8 +8,8 @@ import eu.kanade.tachiyomi.databinding.EmptyComposeControllerBinding
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import org.nekomanga.presentation.theme.NekoTheme
 
-abstract class BaseComposeController<PS : BaseCoroutinePresenter>(bundle: Bundle? = null) :
-    BaseCoroutineController<EmptyComposeControllerBinding, PS>(bundle) {
+abstract class BaseComposeController<PS : BaseCoroutinePresenter<*>>(bundle: Bundle? = null) :
+    BaseCoroutineController<EmptyComposeControllerBinding, BaseCoroutinePresenter<*>>(bundle) {
 
     override fun onViewCreated(view: View) {
         hideToolbar()

@@ -12,7 +12,7 @@ import uy.kohesive.injekt.api.get
 
 class LatestPresenter(
     private val latestRepository: LatestRepository = Injekt.get(),
-) : BaseCoroutinePresenter() {
+) : BaseCoroutinePresenter<LatestController>() {
 
     lateinit var mangaList: Flow<PagingData<DisplayManga>>
 

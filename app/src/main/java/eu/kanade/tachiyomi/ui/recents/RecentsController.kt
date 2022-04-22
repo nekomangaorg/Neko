@@ -101,7 +101,7 @@ class RecentsController(bundle: Bundle? = null) :
     var displaySheet: TabbedRecentsOptionsSheet? = null
 
     private var progressItem: ProgressItem? = null
-    override var presenter = RecentsPresenter(this)
+    override var presenter = RecentsPresenter()
     private var snack: Snackbar? = null
     private var lastChapterId: Long? = null
     private var showingDownloads = false

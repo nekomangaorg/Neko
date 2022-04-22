@@ -172,7 +172,7 @@ class LibraryController(
     private var lastItemPosition: Int? = null
     private var lastItem: IFlexible<*>? = null
 
-    override var presenter = LibraryPresenter(this)
+    override var presenter = LibraryPresenter()
 
     private var observeLater: Boolean = false
     var searchItem = SearchGlobalItem()
