@@ -52,6 +52,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.Dispatchers
@@ -192,7 +193,7 @@ class MangaDetailsPresenter(
 
     override fun updateDownload(download: Download) {
         chapters.find { it.id == download.chapter.id }?.download = download
-        presenterScope.launchIO {
+        presenterScope.launchUI {
             controller?.updateChapterDownload(download)
         }
     }
