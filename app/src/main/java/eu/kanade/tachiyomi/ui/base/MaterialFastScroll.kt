@@ -17,7 +17,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
     FastScroller(context, attrs) {
 
     var canScroll = false
-    var startY = 0f
+    var startY = -1f
     var scrollOffset = 0
     init {
         setViewsToUse(
@@ -33,7 +33,12 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
     // Overriding to force a distance moved before scrolling
     override fun onTouchEvent(event: MotionEvent): Boolean {
         if (recyclerView.computeVerticalScrollRange() <= recyclerView.computeVerticalScrollExtent()) {
-            return super.onTouchEvent(event)
+            return if (startY > -1f) {
+                dispatchTouchToRecycler(event)
+                false
+            } else {
+                super.onTouchEvent(event)
+            }
         }
 
         when (event.action) {
@@ -72,7 +77,7 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
                 return true
             }
             MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                startY = 0f
+                startY = -1f
                 if (!canScroll) {
                     dispatchTouchToRecycler(event)
                 }
