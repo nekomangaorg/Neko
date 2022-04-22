@@ -295,7 +295,7 @@ dependencies {
 // Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.assertj:assertj-core:3.22.0")
-    testImplementation("org.mockito:mockito-core:4.4.0")
+    testImplementation("org.mockito:mockito-core:4.5.1")
 
     val roboElectricVersion = "3.3.2"
     testImplementation("org.robolectric:robolectric:$roboElectricVersion")
