@@ -127,6 +127,7 @@ class MangaDetailsController :
         manga: Manga,
         fromCatalogue: Boolean = false,
         update: Boolean = false,
+        shouldLockIfNeeded: Boolean = false,
     ) : super(
         Bundle().apply {
             putLong(MANGA_EXTRA, manga.id ?: 0)
@@ -135,6 +136,7 @@ class MangaDetailsController :
         }
     ) {
         this.manga = manga
+        this.shouldLockIfNeeded = shouldLockIfNeeded
         presenter = MangaDetailsPresenter(manga)
     }
 
@@ -160,6 +162,7 @@ class MangaDetailsController :
     private var headerColor: Int? = null
     private var toolbarIsColored = false
     private var snack: Snackbar? = null
+    val shouldLockIfNeeded: Boolean
     val fromCatalogue = args.getBoolean(FROM_CATALOGUE_EXTRA, false)
     private var trackingBottomSheet: TrackingBottomSheet? = null
     private var startingRangeChapterPos: Int? = null
@@ -544,7 +547,7 @@ class MangaDetailsController :
     //region Lifecycle methods
     override fun onActivityResumed(activity: Activity) {
         super.onActivityResumed(activity)
-        presenter.isLockedFromSearch = SecureActivityDelegate.shouldBeLocked()
+        presenter.isLockedFromSearch = shouldLockIfNeeded && SecureActivityDelegate.shouldBeLocked()
         presenter.headerItem.isLocked = presenter.isLockedFromSearch
         manga!!.thumbnail_url = presenter.refreshMangaFromDb().thumbnail_url
         presenter.fetchChapters(refreshTracker == null)
