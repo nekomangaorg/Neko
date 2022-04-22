@@ -450,6 +450,8 @@ class PreferencesHelper(val context: Context) {
 
     fun shownHopperSwipeTutorial() = flowPrefs.getBoolean("shown_hopper_swipe", false)
 
+    fun shownDownloadSwipeTutorial() = flowPrefs.getBoolean("shown_download_tutorial", false)
+
     fun hideBottomNavOnScroll() = flowPrefs.getBoolean(Keys.hideBottomNavOnScroll, true)
 
     fun sideNavIconAlignment() = flowPrefs.getInt(Keys.sideNavIconAlignment, 1)

@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    style="@style/Widget.Tachiyomi.CardView.Draggable"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <FrameLayout
+        android:id="@+id/end_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/material_red_500">
+
+        <ImageView
+            android:id="@+id/close_right"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:tint="@color/md_white_1000"
+            android:layout_gravity="end|center"
+            android:contentDescription="@string/cancel"
+            android:layout_marginEnd="21dp"
+            android:src="@drawable/ic_close_24dp" />
+    </FrameLayout>
+
+    <FrameLayout
+        android:id="@+id/start_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        android:background="@color/material_red_500">
+
+        <ImageView
+            android:id="@+id/close_left"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:contentDescription="@string/cancel"
+            android:layout_gravity="start|center"
+            android:layout_marginStart="21dp"
+            app:tint="@color/md_white_1000"
+            android:src="@drawable/ic_close_24dp" />
+    </FrameLayout>
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:minHeight="52dp"
+        android:id="@+id/front_view"
+        android:layout_height="wrap_content"
+        android:background="?attr/background">
+
+    <ImageView
+        android:id="@+id/reorder"
+        android:layout_width="48dp"
+        android:layout_height="0dp"
+        android:layout_alignParentStart="true"
+        android:layout_gravity="start"
+        android:contentDescription="@string/reorder"
+        android:scaleType="center"
+        app:tint="?attr/colorOnBackground"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/title"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_help_24dp" />
+
+    <TextView
+        android:background="?background"
+        android:paddingStart="0dp"
+        android:paddingEnd="8dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="16dp"
+        android:id="@+id/title"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text="@string/downloads_swipe_tutorial"
+        android:textAlignment="textStart"
+        android:layout_toEndOf="@id/reorder"
+        android:ellipsize="end"
+        android:textStyle="italic"
+        android:textAppearance="?textAppearanceBodyMedium"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@+id/reorder"
+        app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

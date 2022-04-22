@@ -31,7 +31,8 @@ class DownloadAdapter(controller: DownloadItemListener) : FlexibleAdapter<Abstra
 
     override fun shouldMove(fromPosition: Int, toPosition: Int): Boolean {
         // Don't let sub-items changing group
-        return getHeaderOf(getItem(fromPosition)) == getHeaderOf(getItem(toPosition))
+        return getHeaderOf(getItem(fromPosition)) == getHeaderOf(getItem(toPosition)) &&
+            getItem(toPosition) !is DownloadSwipeTutorialItem
     }
 
     override fun onItemSwiped(position: Int, direction: Int) {
