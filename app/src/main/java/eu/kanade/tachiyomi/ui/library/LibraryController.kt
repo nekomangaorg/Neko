@@ -527,6 +527,7 @@ class LibraryController(
         binding.libraryGridRecycler.recycler.adapter = adapter
 
         adapter.fastScroller = binding.fastScroller
+        binding.fastScroller.controller = this
         binding.libraryGridRecycler.recycler.addOnScrollListener(scrollListener)
 
         binding.swipeRefresh.setStyle()
@@ -1008,6 +1009,7 @@ class LibraryController(
         destroyActionModeIfNeeded()
         if (isBindingInitialized) {
             binding.libraryGridRecycler.recycler.removeOnScrollListener(scrollListener)
+            binding.fastScroller.controller = null
         }
         displaySheet?.dismiss()
         displaySheet = null
