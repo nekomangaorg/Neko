@@ -79,10 +79,10 @@ class BrowseSourceItem(
                 binding.constraintLayout.minHeight = 0
                 binding.coverThumbnail.scaleType = ImageView.ScaleType.CENTER_CROP
                 binding.coverThumbnail.adjustViewBounds = false
-                binding.coverThumbnail.layoutParams = FrameLayout.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    (parent.itemWidth / 3f * 3.7f).toInt()
-                )
+                binding.coverThumbnail.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                    height = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
+                    dimensionRatio = "15:22"
+                }
             }
             BrowseSourceGridHolder(view, adapter, listType == 1, outlineOnCovers.get(), isFollows)
         } else {

@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.library
 
 import android.view.View
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractHeaderItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -32,6 +33,8 @@ class LibraryHeaderItem(
         payloads: MutableList<Any?>?
     ) {
         holder.bind(this)
+        val layoutParams = holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams
+        layoutParams?.isFullSpan = true
     }
 
     val category: Category

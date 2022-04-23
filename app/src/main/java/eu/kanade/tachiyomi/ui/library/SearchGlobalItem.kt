@@ -5,6 +5,7 @@ import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.StaggeredGridLayoutManager
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -49,6 +50,8 @@ class SearchGlobalItem : AbstractFlexibleItem<SearchGlobalItem.Holder>() {
         payloads: MutableList<Any>,
     ) {
         holder.bind(string)
+        val layoutParams = holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams
+        layoutParams?.isFullSpan = true
     }
 
     override fun equals(other: Any?): Boolean {

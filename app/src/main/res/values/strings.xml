@@ -172,11 +172,13 @@
     <string name="can_be_found_in_library_filters">Can also be found by expanding library filters</string>
     <string name="list">List</string>
     <string name="comfortable_grid">Comfortable Grid</string>
+    <string name="cover_only_grid">Cover-only grid</string>
     <string name="compact_grid">Compact Grid</string>
     <string name="download_badge">Download badges</string>
     <string name="hide_start_reading_button">Hide start reading button</string>
     <string name="badges">Badges</string>
     <string name="uniform_grid_covers">Uniform grid covers</string>
+    <string name="use_staggered_grid">Use staggered grid</string>
     <string name="show_outline_around_covers">Show outline around covers</string>
     <string name="grid_size">Grid size</string>
     <string name="_per_row">%d per row</string>

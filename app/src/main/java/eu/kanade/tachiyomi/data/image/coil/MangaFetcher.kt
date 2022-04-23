@@ -1,6 +1,8 @@
 package eu.kanade.tachiyomi.data.image.coil
 
+import android.graphics.BitmapFactory
 import android.webkit.MimeTypeMap
+import androidx.palette.graphics.Palette
 import coil.bitmap.BitmapPool
 import coil.decode.DataSource
 import coil.decode.Options
@@ -14,7 +16,12 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -40,6 +47,7 @@ class MangaFetcher : Fetcher<Manga> {
     private val coverCache: CoverCache by injectLazy()
     private val sourceManager: SourceManager by injectLazy()
     private val defaultClient = Injekt.get<NetworkHelper>().client
+    val fileScope = CoroutineScope(Job() + Dispatchers.IO)
 
     override fun key(data: Manga): String? {
         if (data.thumbnail_url.isNullOrBlank()) return null
@@ -65,6 +73,7 @@ class MangaFetcher : Fetcher<Manga> {
         if (!shouldFetchRemotely) {
             val customCoverFile = coverCache.getCustomCoverFile(manga)
             if (customCoverFile.exists() && options.parameters.value(realCover) != true) {
+                setRatioAndColorsInScope(manga, customCoverFile)
                 return fileLoader(customCoverFile)
             }
         }
@@ -73,6 +82,7 @@ class MangaFetcher : Fetcher<Manga> {
             if (!manga.favorite) {
                 coverFile.setLastModified(Date().time)
             }
+            setRatioAndColorsInScope(manga, coverFile)
             return fileLoader(coverFile)
         }
         val (response, body) = awaitGetCall(
@@ -104,7 +114,48 @@ class MangaFetcher : Fetcher<Manga> {
                 coverCache.deleteCachedCovers()
             }
         }
+        setRatioAndColorsInScope(manga, coverFile, true)
         return fileLoader(coverFile)
+    }
+
+    private fun setRatioAndColorsInScope(manga: Manga, ogFile: File? = null, force: Boolean = false) {
+        fileScope.launch {
+            setRatioAndColors(manga, ogFile, force)
+        }
+    }
+
+    fun setRatioAndColors(manga: Manga, ogFile: File? = null, force: Boolean = false) {
+        if (!manga.favorite) {
+            MangaCoverMetadata.remove(manga)
+        }
+        if (manga.vibrantCoverColor != null && !manga.favorite) return
+        val file = ogFile ?: coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
+        // if the file exists and the there was still an error then the file is corrupted
+        if (file.exists()) {
+            val options = BitmapFactory.Options()
+            val hasVibrantColor = if (manga.favorite) manga.vibrantCoverColor != null else true
+            if (manga.dominantCoverColors != null && hasVibrantColor && !force) {
+                options.inJustDecodeBounds = true
+            } else {
+                options.inSampleSize = 4
+            }
+            val bitmap = BitmapFactory.decodeFile(file.path, options) ?: return
+            if (!options.inJustDecodeBounds) {
+                Palette.from(bitmap).generate {
+                    if (it == null) return@generate
+                    if (manga.favorite) {
+                        it.dominantSwatch?.let { swatch ->
+                            manga.dominantCoverColors = swatch.rgb to swatch.titleTextColor
+                        }
+                    }
+                    val color = it.getBestColor() ?: return@generate
+                    manga.vibrantCoverColor = color
+                }
+            }
+            if (manga.favorite && !(options.outWidth == -1 || options.outHeight == -1)) {
+                MangaCoverMetadata.addCoverRatio(manga, options.outWidth / options.outHeight.toFloat())
+            }
+        }
     }
 
     private suspend fun awaitGetCall(manga: Manga, onlyCache: Boolean = false, forceNetwork: Boolean): Pair<Response,
