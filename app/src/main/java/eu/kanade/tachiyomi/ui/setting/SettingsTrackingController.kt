@@ -34,6 +34,11 @@ class SettingsTrackingController :
             titleRes = R.string.update_tracking_after_reading
             defaultValue = true
         }
+        switchPreference {
+            key = Keys.trackMarkedAsRead
+            titleRes = R.string.update_tracking_marked_read
+            defaultValue = false
+        }
         preferenceCategory {
             titleRes = R.string.services
 

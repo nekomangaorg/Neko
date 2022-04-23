@@ -19,8 +19,6 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.data.track.TrackManager
-import eu.kanade.tachiyomi.jobs.tracking.DelayedTrackingUpdateJob
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.isMergedChapter
@@ -38,9 +36,9 @@ import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.chapter.updateTrackChapterRead
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
-import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.withUIContext
@@ -466,7 +464,7 @@ class ReaderPresenter(
         ) {
             if (preferences.incognitoMode().get().not()) {
                 selectedChapter.chapter.read = true
-                updateTrackChapterRead(selectedChapter)
+                updateTrackChapterAfterReading(selectedChapter)
                 updateReadingStatus(selectedChapter)
                 deleteChapterIfNeeded(selectedChapter)
             }
@@ -788,8 +786,8 @@ class ReaderPresenter(
 
             // Pictures directory.
             val baseDir = Environment.getExternalStorageDirectory().absolutePath +
-                    File.separator + Environment.DIRECTORY_PICTURES +
-                    File.separator + context.getString(R.string.app_name)
+                File.separator + Environment.DIRECTORY_PICTURES +
+                File.separator + context.getString(R.string.app_name)
             val destDir = if (preferences.folderPerManga()) {
                 File(baseDir + File.separator + DiskUtil.buildValidFilename(manga.title))
             } else {
@@ -906,41 +904,12 @@ class ReaderPresenter(
      * Starts the service that updates the last chapter read in sync services. This operation
      * will run in a background thread and errors are ignored.
      */
-    private fun updateTrackChapterRead(readerChapter: ReaderChapter) {
+    private fun updateTrackChapterAfterReading(readerChapter: ReaderChapter) {
         if (!preferences.autoUpdateTrack()) return
-        val manga = manga ?: return
 
-        val chapterRead = readerChapter.chapter.chapter_number.toInt()
-
-        val trackManager = Injekt.get<TrackManager>()
-
-        // We wan't these to execute even if the presenter is destroyed so launch on GlobalScope
         launchIO {
-            val trackList = db.getTracks(manga).executeAsBlocking()
-            trackList.map { track ->
-                val service = trackManager.getService(track.sync_id)
-                if (service != null && service.isLogged() && chapterRead > track.last_chapter_read) {
-                    if (!preferences.context.isOnline()) {
-                        XLog.d("offline adding tracker info to update later")
-                        val mangaId = manga.id ?: return@map
-                        val trackings = preferences.trackingsToAddOnline().get().toMutableSet()
-                        val currentTracking =
-                            trackings.find { it.startsWith("$mangaId:${track.sync_id}:") }
-                        trackings.remove(currentTracking)
-                        trackings.add("$mangaId:${track.sync_id}:$chapterRead")
-                        preferences.trackingsToAddOnline().set(trackings)
-                        DelayedTrackingUpdateJob.setupTask(preferences.context)
-                    } else {
-                        try {
-                            track.last_chapter_read = chapterRead
-                            service.update(track, true)
-                            db.insertTrack(track).executeAsBlocking()
-                        } catch (e: Exception) {
-                            XLog.e(e)
-                        }
-                    }
-                }
-            }
+            val newChapterRead = readerChapter.chapter.chapter_number.toInt()
+            updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
         }
     }
 

@@ -46,6 +46,9 @@ import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.chapter.syncChaptersWithTrackServiceTwoWay
+import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
+import eu.kanade.tachiyomi.util.lang.trimOrNull
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -630,6 +633,12 @@ class MangaDetailsPresenter(
 
             getChapters()
             withContext(Dispatchers.Main) { controller?.updateChapters(chapters) }
+            if (read && deleteNow) {
+                val latestReadChapter = selectedChapters.maxByOrNull { it.chapter_number.toInt() }?.chapter
+                updateTrackChapterMarkedAsRead(db, preferences, latestReadChapter, manga.id) {
+                    fetchTracks()
+                }
+            }
         }
     }
 
@@ -955,7 +964,7 @@ class MangaDetailsPresenter(
         }
     }
 
-    private suspend fun fetchTracks() {
+    suspend fun fetchTracks() {
         tracks = withContext(Dispatchers.IO) { db.getTracks(manga).executeAsBlocking() }
         trackList = loggedServices.map { service ->
             TrackItem(tracks.find { it.sync_id == service.id }, service)

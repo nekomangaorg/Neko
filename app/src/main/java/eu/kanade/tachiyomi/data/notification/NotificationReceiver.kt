@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.setting.AboutController
+import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -270,6 +271,8 @@ class NotificationReceiver : BroadcastReceiver() {
                 }
             }
         }
+        val newLastChapter = dbChapters.maxByOrNull { it.chapter_number.toInt() }
+        updateTrackChapterMarkedAsRead(db, preferences, newLastChapter, mangaId, 0)
     }
 
     /** Method called when user wants to stop a restore

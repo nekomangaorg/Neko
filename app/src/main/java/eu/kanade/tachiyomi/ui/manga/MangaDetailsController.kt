@@ -80,6 +80,7 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
 import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
@@ -878,6 +879,8 @@ class MangaDetailsController :
     }
 
     fun toggleReadChapter(position: Int) {
+        val preferences = presenter.preferences
+        val db = presenter.db
         val item = adapter?.getItem(position) as? ChapterItem ?: return
         val chapter = item.chapter
         val lastRead = chapter.last_page_read
@@ -900,7 +903,12 @@ class MangaDetailsController :
                     override fun onDismissed(transientBottomBar: Snackbar?, event: Int) {
                         super.onDismissed(transientBottomBar, event)
                         if (!undoing && !read && presenter.preferences.removeAfterMarkedAsRead() && item.chapter.bookmark.not()) {
-                            presenter.deleteChapters(listOf(item))
+                            if (preferences.removeAfterMarkedAsRead()) {
+                                presenter.deleteChapters(listOf(item))
+                            }
+                            updateTrackChapterMarkedAsRead(db, preferences, chapter, manga?.id) {
+                                presenter.fetchTracks()
+                            }
                         }
                     }
                 }
