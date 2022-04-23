@@ -279,7 +279,7 @@ class PreferencesHelper(val context: Context) {
 
     fun lastLibrarySuggestion() = flowPrefs.getLong("last_library_suggestion", 0L)
 
-    fun numberOfBackups() = flowPrefs.getInt(Keys.numberOfBackups, 1)
+    fun numberOfBackups() = flowPrefs.getInt(Keys.numberOfBackups, 2)
 
     fun backupInterval() = flowPrefs.getInt(Keys.backupInterval, 0)
 
