@@ -95,20 +95,12 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
             }
         )
         recycler.tapListener = f@{ event ->
-            if (!config.tappingEnabled) {
-                activity.toggleMenu()
-                return@f
-            }
-
             val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
-            if (!config.tappingEnabled) activity.toggleMenu()
-            else {
-                val navigator = config.navigator
-                when (navigator.getAction(pos)) {
-                    ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
-                    ViewerNavigation.NavigationRegion.NEXT, ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
-                    ViewerNavigation.NavigationRegion.PREV, ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
-                }
+            val navigator = config.navigator
+            when (navigator.getAction(pos)) {
+                ViewerNavigation.NavigationRegion.MENU -> activity.toggleMenu()
+                ViewerNavigation.NavigationRegion.NEXT, ViewerNavigation.NavigationRegion.RIGHT -> moveToNext()
+                ViewerNavigation.NavigationRegion.PREV, ViewerNavigation.NavigationRegion.LEFT -> moveToPrevious()
             }
         }
         recycler.longTapListener = f@{ event ->

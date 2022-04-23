@@ -106,6 +106,7 @@
         <item>@string/kindlish_nav</item>
         <item>@string/edge_nav</item>
         <item>@string/right_and_left_nav</item>
+        <item>@string/disabled</item>
     </string-array>
 
     <string-array name="page_layouts">

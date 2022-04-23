@@ -17,7 +17,6 @@ abstract class ViewerConfig(preferences: PreferencesHelper, protected val scope:
     var navigationModeChangedListener: (() -> Unit)? = null
     var navigationModeInvertedListener: (() -> Unit)? = null
 
-    var tappingEnabled = true
     var longTapEnabled = true
     var tappingInverted = ViewerNavigation.TappingInvertMode.NONE
     var doubleTapAnimDuration = 500
@@ -33,9 +32,6 @@ abstract class ViewerConfig(preferences: PreferencesHelper, protected val scope:
         protected set
 
     init {
-        preferences.readWithTapping()
-            .register({ tappingEnabled = it })
-
         preferences.readWithLongTap()
             .register({ longTapEnabled = it })
 

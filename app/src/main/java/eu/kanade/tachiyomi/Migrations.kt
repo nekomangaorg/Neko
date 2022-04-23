@@ -108,6 +108,13 @@ object Migrations {
                     remove("pref_default_viewer_key")
                 }
             }
+            if (oldVersion < 142) {
+                val oldReaderTap = prefs.getBoolean("reader_tap", false)
+                if (!oldReaderTap) {
+                    preferences.navigationModePager().set(5)
+                    preferences.navigationModeWebtoon().set(5)
+                }
+            }
 
             return true
         }
