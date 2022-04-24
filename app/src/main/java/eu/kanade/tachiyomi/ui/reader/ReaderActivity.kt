@@ -234,7 +234,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 MainActivity.chapterIdToExitTo = 0L
                 contentView.transitionName = intent.extras?.getString(TRANSITION_NAME)
                 visibleChapterRange = intent.extras?.getLongArray(VISIBLE_CHAPTERS) ?: longArrayOf()
-                didTransistionFromChapter = !contentView.transitionName.contains("start")
+                didTransistionFromChapter = contentView.transitionName.contains("details chapter")
                 setEnterSharedElementCallback(MaterialContainerTransformSharedElementCallback())
                 window.sharedElementEnterTransition = buildContainerTransform(true)
                 window.sharedElementReturnTransition = buildContainerTransform(false)
@@ -570,7 +570,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     private fun buildContainerTransform(entering: Boolean): MaterialContainerTransform {
         return MaterialContainerTransform(this, entering).apply {
-            duration = 350 // ms
+            duration = (
+                resources?.getInteger(
+                    if (entering) android.R.integer.config_longAnimTime
+                    else android.R.integer.config_mediumAnimTime
+                ) ?: 500
+                ).toLong()
             addTarget(android.R.id.content)
         }
     }
