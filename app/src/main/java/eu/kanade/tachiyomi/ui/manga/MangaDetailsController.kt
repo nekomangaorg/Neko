@@ -80,8 +80,8 @@ import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.addOrRemoveToFavorites
-import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
+import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
@@ -381,7 +381,7 @@ class MangaDetailsController :
             val tHeight = toolbarHeight.takeIf { it ?: 0 > 0 } ?: appbarHeight
             val insetsCompat =
                 view.rootWindowInsetsCompat ?: activityBinding?.root?.rootWindowInsetsCompat
-            headerHeight = tHeight + insetsCompat.getInsets(systemBars()).top
+            headerHeight = tHeight + (insetsCompat?.getInsets(systemBars())?.top ?: 0)
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
             binding.recycler.doOnApplyWindowInsetsCompat { _, insets, _ ->
                 setInsets(insets, appbarHeight, offset)
@@ -688,12 +688,12 @@ class MangaDetailsController :
     }
 
     private fun getHolder(chapter: Chapter): ChapterHolder? {
-        return binding.recycler.findViewHolderForItemId(chapter.id!!)
+        return binding.recycler.findViewHolderForItemId(chapter.id!!) as? ChapterHolder
     }
 
     private fun getHeader(): MangaHeaderHolder? {
-        return if (isTablet) binding.tabletRecycler.findViewHolderForAdapterPosition(0)
-        else binding.recycler.findViewHolderForAdapterPosition(0)
+        return if (isTablet) binding.tabletRecycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
+        else binding.recycler.findViewHolderForAdapterPosition(0) as? MangaHeaderHolder
     }
 
     @SuppressLint("NotifyDataSetChanged")
@@ -948,8 +948,10 @@ class MangaDetailsController :
                     this, sharedElement, sharedElement.transitionName
                 )
 
-                val firstPos = (binding.recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
-                val lastPos = (binding.recycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
+                val firstPos =
+                    (binding.recycler.layoutManager as LinearLayoutManager).findFirstVisibleItemPosition()
+                val lastPos =
+                    (binding.recycler.layoutManager as LinearLayoutManager).findLastVisibleItemPosition()
                 val chapterRange = if (firstPos > -1 && lastPos > -1) {
                     (firstPos..lastPos).mapNotNull {
                         (adapter?.getItem(it) as? ChapterItem)?.chapter?.id

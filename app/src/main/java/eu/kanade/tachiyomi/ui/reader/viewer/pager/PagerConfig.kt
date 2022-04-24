@@ -23,7 +23,7 @@ import uy.kohesive.injekt.api.get
 class PagerConfig(
     scope: CoroutineScope,
     private val viewer: PagerViewer,
-    preferences: PreferencesHelper = Injekt.get()
+    preferences: PreferencesHelper = Injekt.get(),
 ) :
     ViewerConfig(preferences, scope) {
 
@@ -37,6 +37,12 @@ class PagerConfig(
         private set
 
     var imageCropBorders = false
+        private set
+
+    var navigateToPan = false
+        private set
+
+    var landscapeZoom = false
         private set
 
     var readerTheme = 0
@@ -81,7 +87,7 @@ class PagerConfig(
                 { tappingInverted = it },
                 {
                     navigator.invertMode = it
-                }
+                },
             )
 
         preferences.pagerNavInverted().asFlow()
@@ -99,6 +105,12 @@ class PagerConfig(
 
         preferences.cropBorders()
             .register({ imageCropBorders = it }, { imagePropertyChangedListener?.invoke() })
+
+        preferences.navigateToPan()
+            .register({ navigateToPan = it })
+
+        preferences.landscapeZoom()
+            .register({ landscapeZoom = it }, { imagePropertyChangedListener?.invoke() })
 
         preferences.readerTheme()
             .register({ readerTheme = it }, { imagePropertyChangedListener?.invoke() })
@@ -119,13 +131,15 @@ class PagerConfig(
             }
             .launchIn(scope)
         preferences.pageLayout()
-            .register({
-                autoDoublePages = it == PageLayout.AUTOMATIC.value
-                if (!autoDoublePages) {
-                    doublePages = it == PageLayout.DOUBLE_PAGES.value
-                    splitPages = it == PageLayout.SPLIT_PAGES.value
-                }
-            })
+            .register(
+                {
+                    autoDoublePages = it == PageLayout.AUTOMATIC.value
+                    if (!autoDoublePages) {
+                        doublePages = it == PageLayout.DOUBLE_PAGES.value
+                        splitPages = it == PageLayout.SPLIT_PAGES.value
+                    }
+                },
+            )
 
         preferences.automaticSplitsPage()
             .register({ autoSplitPages = it })
@@ -168,7 +182,8 @@ class PagerConfig(
         return when (imageScaleType) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
-            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
+            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP,
+            -> true
             else -> false
         }
     }

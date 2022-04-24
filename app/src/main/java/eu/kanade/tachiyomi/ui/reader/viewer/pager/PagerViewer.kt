@@ -6,12 +6,14 @@ import android.view.KeyEvent
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams
+import androidx.core.view.children
 import androidx.core.view.isVisible
 import androidx.viewpager.widget.ViewPager
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
+import eu.kanade.tachiyomi.ui.reader.model.InsertPage
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
 import eu.kanade.tachiyomi.ui.reader.model.ViewerChapters
@@ -63,18 +65,29 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         set(value) {
             field = value
             if (value) {
-                awaitingIdleViewerChapters?.let {
-                    XLog.d("Setting is idle")
-                    setChaptersDoubleShift(it)
-                    XLog.d("finished setting is idle")
+                awaitingIdleViewerChapters?.let { viewerChapters ->
+                    setChaptersDoubleShift(viewerChapters)
                     awaitingIdleViewerChapters = null
+                    if (viewerChapters.currChapter.pages?.size == 1) {
+                        adapter.nextTransition?.to?.let {
+                            activity.requestPreloadChapter(it)
+                        }
+                    }
                 }
             }
         }
 
+    /**
+     * Variable used to hold the forward pos for reader activity shared transitions
+     * Without this var landscapezoom wont work with activity transitions
+     * */
+    var heldForwardZoom: Pair<Int, Boolean>? = null
+
     private var pagerListener = object : ViewPager.SimpleOnPageChangeListener() {
         override fun onPageSelected(position: Int) {
-            XLog.d("about to on page change from pagerListener")
+            if (activity.isScrollingThroughPagesOrChapters.not()) {
+                activity.hideMenu()
+            }
             onPageChange(position)
             XLog.d("finished on page change from pagerListener")
         }
@@ -152,22 +165,45 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
     }
 
     /**
+     * Returns the PagerPageHolder for the provided page
+     */
+    private fun getPageHolder(page: ReaderPage): PagerPageHolder? =
+        pager.children
+            .filterIsInstance(PagerPageHolder::class.java)
+            .firstOrNull { it.item.first.index == page.index || it.item.second?.index == page.index }
+
+    /**
      * Called when a new page (either a [ReaderPage] or [ChapterTransition]) is marked as active
      */
     fun onPageChange(position: Int) {
         val page = adapter.joinedItems.getOrNull(position)
         if (page != null && currentPage != page) {
-            val allowPreload = checkAllowPreload(page.first as? ReaderPage)
-            currentPage = page.first
-            when (val aPage = page.first) {
-                is ReaderPage -> onReaderPageSelected(
-                    aPage,
-                    allowPreload,
-                    page.second is ReaderPage
-                )
-                is ChapterTransition -> onTransitionSelected(aPage)
+            val pageF = page.first
+            val allowPreload = checkAllowPreload(pageF as? ReaderPage)
+            val forward =
+                // if both pages have the same number, it's a split page with an InsertPage
+                when {
+                    // Use case happens on new chapter load
+                    currentPage == pageF -> null
+                    currentPage is ReaderPage && pageF is ReaderPage -> if (pageF.number == (currentPage as ReaderPage).number) {
+                        // the InsertPage is always the second in the reading direction
+                        pageF is InsertPage
+                    } else {
+                        pageF.number > (currentPage as ReaderPage).number
+                    }
+                    currentPage is ChapterTransition.Prev && pageF is ReaderPage ->
+                        (currentPage as ChapterTransition).from == pageF.chapter
+                    currentPage is ChapterTransition.Next && pageF is ReaderPage ->
+                        (currentPage as ChapterTransition).to == pageF.chapter
+                    else -> true
+                }
+            currentPage = pageF
+            when (pageF) {
+                is ReaderPage -> {
+                    onReaderPageSelected(pageF, allowPreload, page.second is ReaderPage, forward)
+                }
+                is ChapterTransition -> onTransitionSelected(pageF)
             }
-            XLog.d("finished on page change method")
         }
     }
 
@@ -198,9 +234,17 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         page: ReaderPage,
         allowPreload: Boolean,
         hasExtraPage: Boolean,
+        forward: Boolean?,
     ) {
         activity.onPageSelected(page, hasExtraPage)
 
+        // Notify holder of page change
+        val holder = getPageHolder(page)
+        if (holder == null && forward != null && heldForwardZoom == null) {
+            heldForwardZoom = page.index to forward
+        } else {
+            holder?.onPageSelected(forward)
+        }
         val offset = if (hasExtraPage) 1 else 0
         val pages = page.chapter.pages ?: return
         if (hasExtraPage) {

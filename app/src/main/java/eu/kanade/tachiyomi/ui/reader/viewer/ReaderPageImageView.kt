@@ -10,13 +10,13 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup.LayoutParams.MATCH_PARENT
+import android.view.WindowInsets
 import android.widget.FrameLayout
 import androidx.annotation.AttrRes
 import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
-import coil.clear
 import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -24,10 +24,12 @@ import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE
 import com.github.chrisbanes.photoview.PhotoView
+import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonSubsamplingImageView
 import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.animatorDurationScale
 import java.io.InputStream
+import java.nio.ByteBuffer
 
 /**
  * A wrapper view for showing page image.
@@ -42,15 +44,19 @@ open class ReaderPageImageView @JvmOverloads constructor(
     attrs: AttributeSet? = null,
     @AttrRes defStyleAttrs: Int = 0,
     @StyleRes defStyleRes: Int = 0,
-    private val isWebtoon: Boolean = false
+    private val isWebtoon: Boolean = false,
 ) : FrameLayout(context, attrs, defStyleAttrs, defStyleRes) {
 
-    private var pageView: View? = null
+    protected var pageView: View? = null
+
+    private var config: Config? = null
 
     var onImageLoaded: (() -> Unit)? = null
     var onImageLoadError: (() -> Unit)? = null
     var onScaleChanged: ((newScale: Float) -> Unit)? = null
     var onViewClicked: (() -> Unit)? = null
+
+    open fun onNeedsLandscapeZoom() {}
 
     @CallSuper
     open fun onImageLoaded() {
@@ -73,6 +79,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
     }
 
     fun setImage(drawable: Drawable, config: Config) {
+        this.config = config
         if (drawable is Animatable) {
             prepareAnimatedImageView()
             setAnimatedImage(drawable, config)
@@ -95,7 +102,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
     fun recycle() = pageView?.let {
         when (it) {
             is SubsamplingScaleImageView -> it.recycle()
-            is AppCompatImageView -> it.clear()
+            //is AppCompatImageView -> it.dispose()
         }
         it.isVisible = false
     }
@@ -122,40 +129,89 @@ open class ReaderPageImageView @JvmOverloads constructor(
                     override fun onCenterChanged(newCenter: PointF?, origin: Int) {
                         // Not used
                     }
-                }
+                },
             )
             setOnClickListener { this@ReaderPageImageView.onViewClicked() }
         }
         addView(pageView, MATCH_PARENT, MATCH_PARENT)
     }
 
+    protected fun SubsamplingScaleImageView.setupZoom(config: Config?) {
+        // 5x zoom
+        maxScale = scale * MAX_ZOOM_SCALE
+        setDoubleTapZoomScale(scale * 2)
+
+        config ?: return
+
+        var centerV = 0f
+        when (config.zoomStartPosition) {
+            PagerConfig.ZoomType.Left -> {
+                setScaleAndCenter(scale, PointF(0f, 0f))
+            }
+            PagerConfig.ZoomType.Right -> {
+                setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
+                centerV = sWidth.toFloat()
+            }
+            PagerConfig.ZoomType.Center -> {
+                setScaleAndCenter(scale, center.also { it?.y = 0f })
+                centerV = center?.x ?: 0f
+            }
+        }
+        val insetInfo = config.insetInfo ?: return
+        val topInsets = insetInfo.topCutoutInset
+        val bottomInsets = insetInfo.bottomCutoutInset
+        if (insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
+            topInsets + bottomInsets > 0 &&
+            insetInfo.scaleTypeIsFullFit
+        ) {
+            setScaleAndCenter(
+                scale,
+                PointF(centerV, (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f)),
+            )
+        }
+    }
+
     private fun setNonAnimatedImage(
         image: Any,
-        config: Config
+        config: Config,
     ) = (pageView as? SubsamplingScaleImageView)?.apply {
         setDoubleTapZoomDuration(config.zoomDuration.getSystemScaledDuration())
         setMinimumScaleType(config.minimumScaleType)
         setMinimumDpi(1) // Just so that very small image will be fit for initial load
         setCropBorders(config.cropBorders)
+        if (config.insetInfo != null) {
+            val topInsets = config.insetInfo.topCutoutInset
+            val bottomInsets = config.insetInfo.bottomCutoutInset
+            setExtendPastCutout(
+                config.insetInfo.cutoutBehavior == PagerConfig.CUTOUT_START_EXTENDED &&
+                    config.insetInfo.scaleTypeIsFullFit && topInsets + bottomInsets > 0,
+            )
+            if ((config.insetInfo.cutoutBehavior != PagerConfig.CUTOUT_IGNORE || !config.insetInfo.scaleTypeIsFullFit) &&
+                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
+                config.insetInfo.isFullscreen
+            ) {
+                val insets: WindowInsets? = config.insetInfo.insets
+                setExtraSpace(
+                    0f,
+                    insets?.displayCutout?.boundingRectTop?.height()?.toFloat() ?: 0f,
+                    0f,
+                    insets?.displayCutout?.boundingRectBottom?.height()?.toFloat() ?: 0f,
+                )
+            }
+        }
         setOnImageEventListener(
             object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
                 override fun onReady() {
                     // 5x zoom
-                    maxScale = scale * MAX_ZOOM_SCALE
-                    setDoubleTapZoomScale(scale * 2)
-
-                    when (config.zoomStartPosition) {
-                        ZoomStartPosition.LEFT -> setScaleAndCenter(scale, PointF(0F, 0F))
-                        ZoomStartPosition.RIGHT -> setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0F))
-                        ZoomStartPosition.CENTER -> setScaleAndCenter(scale, center.also { it?.y = 0F })
-                    }
+                    setupZoom(config)
+                    this@ReaderPageImageView.onNeedsLandscapeZoom()
                     this@ReaderPageImageView.onImageLoaded()
                 }
 
                 override fun onImageLoadError(e: Exception) {
                     this@ReaderPageImageView.onImageLoadError()
                 }
-            }
+            },
         )
 
         when (image) {
@@ -198,7 +254,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
                             this@ReaderPageImageView.onViewClicked()
                             return super.onSingleTapConfirmed(e)
                         }
-                    }
+                    },
                 )
                 setOnScaleChangeListener { _, _, _ ->
                     this@ReaderPageImageView.onScaleChanged(scale)
@@ -210,7 +266,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
 
     private fun setAnimatedImage(
         image: Any,
-        config: Config
+        config: Config,
     ) = (pageView as? AppCompatImageView)?.apply {
         if (this is PhotoView) {
             setZoomTransitionDuration(config.zoomDuration.getSystemScaledDuration())
@@ -218,7 +274,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
 
         val data = when (image) {
             is Drawable -> image
-            is InputStream -> image.readBytes()
+            is InputStream -> ByteBuffer.wrap(image.readBytes())
             else -> throw IllegalArgumentException("Not implemented for class ${image::class.simpleName}")
         }
         val request = ImageRequest.Builder(context)
@@ -234,7 +290,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
                 },
                 onError = {
                     this@ReaderPageImageView.onImageLoadError()
-                }
+                },
             )
             .crossfade(false)
             .build()
@@ -252,12 +308,20 @@ open class ReaderPageImageView @JvmOverloads constructor(
         val zoomDuration: Int,
         val minimumScaleType: Int = SCALE_TYPE_CENTER_INSIDE,
         val cropBorders: Boolean = false,
-        val zoomStartPosition: ZoomStartPosition = ZoomStartPosition.CENTER
+        val zoomStartPosition: PagerConfig.ZoomType = PagerConfig.ZoomType.Center,
+        val landscapeZoom: Boolean = false,
+        val insetInfo: InsetInfo? = null,
     )
 
-    enum class ZoomStartPosition {
-        LEFT, CENTER, RIGHT
-    }
+    data class InsetInfo(
+        val cutoutBehavior: Int,
+        val topCutoutInset: Float,
+        val bottomCutoutInset: Float,
+        val scaleTypeIsFullFit: Boolean,
+        val isFullscreen: Boolean,
+        val isSplitScreen: Boolean,
+        val insets: WindowInsets?,
+    )
 }
 
 private const val MAX_ZOOM_SCALE = 5F

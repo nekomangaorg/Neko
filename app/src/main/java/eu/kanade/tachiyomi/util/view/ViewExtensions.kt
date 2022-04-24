@@ -12,8 +12,10 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.res.ColorStateList
+import android.content.res.Resources
 import android.graphics.Color
 import android.graphics.Point
+import android.graphics.Rect
 import android.graphics.RenderEffect
 import android.graphics.Shader
 import android.graphics.drawable.ColorDrawable
@@ -48,6 +50,7 @@ import androidx.core.view.descendants
 import androidx.core.view.forEach
 import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePaddingRelative
 import androidx.interpolator.view.animation.FastOutLinearInInterpolator
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSmoothScroller
@@ -565,3 +568,20 @@ fun View.animateBlur(
         }
     }
 }
+
+fun View?.isVisibleOnScreen(): Boolean {
+    if (this == null) {
+        return false
+    }
+    if (!this.isShown) {
+        return false
+    }
+    val actualPosition = Rect()
+    this.getGlobalVisibleRect(actualPosition)
+    val screen = Rect(0,
+        0,
+        Resources.getSystem().displayMetrics.widthPixels,
+        Resources.getSystem().displayMetrics.heightPixels)
+    return actualPosition.intersect(screen)
+}
+

@@ -52,8 +52,8 @@ import com.google.android.material.slider.Slider
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.transition.platform.MaterialContainerTransform
 import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
-import eu.kanade.tachiyomi.BuildConfig
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
+import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -202,6 +202,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     var didTransistionFromChapter = false
     var visibleChapterRange = longArrayOf()
+
+    var isScrollingThroughPagesOrChapters = false
 
     companion object {
 
@@ -950,6 +952,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
     }
 
+    fun hideMenu() {
+        if (menuVisible) {
+            setMenuVisibility(false)
+        }
+    }
+
     /**
      * Sets the visibility of the menu according to [visible] and with an optional parameter to
      * [animate] the views.
@@ -1694,7 +1702,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
 
             merge(preferences.grayscale().asFlow(), preferences.invertedColors().asFlow())
-                .onEach { setLayerPaint(preferences.grayscale().get(), preferences.invertedColors().get()) }
+                .onEach {
+                    setLayerPaint(preferences.grayscale().get(),
+                        preferences.invertedColors().get())
+                }
                 .launchIn(lifecycleScope)
 
             preferences.alwaysShowChapterTransition().asImmediateFlowIn(scope) {
@@ -1848,7 +1859,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         private fun setLayerPaint(grayscale: Boolean, invertedColors: Boolean) {
-            val paint = if (grayscale || invertedColors) getCombinedPaint(grayscale, invertedColors) else null
+            val paint = if (grayscale || invertedColors) getCombinedPaint(grayscale,
+                invertedColors) else null
             binding.viewerContainer.setLayerType(View.LAYER_TYPE_HARDWARE, paint)
         }
     }

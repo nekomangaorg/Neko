@@ -7,36 +7,25 @@ import android.content.res.ColorStateList
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.graphics.PointF
+import android.graphics.RectF
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.Drawable
-import android.view.GestureDetector
+import android.os.Build
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.ViewGroup
-import android.view.ViewGroup.LayoutParams.MATCH_PARENT
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.view.WindowInsets
-import android.widget.FrameLayout
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import coil.loadAny
-import coil.request.CachePolicy
-import com.davemorrissey.labs.subscaleview.ImageSource
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
-import com.elvishew.xlog.XLog
-import com.github.chrisbanes.photoview.PhotoView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderPageImageView
 import eu.kanade.tachiyomi.ui.reader.viewer.ReaderProgressBar
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.Companion.CUTOUT_IGNORE
-import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.Companion.CUTOUT_START_EXTENDED
 import eu.kanade.tachiyomi.ui.reader.viewer.pager.PagerConfig.ZoomType
-import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.ThemeUtil
 import eu.kanade.tachiyomi.util.system.bottomCutoutInset
@@ -46,7 +35,7 @@ import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
-import eu.kanade.tachiyomi.widget.GifViewTarget
+import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
@@ -58,9 +47,11 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
+import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
+import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
@@ -71,7 +62,7 @@ class PagerPageHolder(
     val viewer: PagerViewer,
     val page: ReaderPage,
     private var extraPage: ReaderPage? = null,
-) : FrameLayout(viewer.activity), ViewPagerAdapter.PositionableView {
+) : ReaderPageImageView(viewer.activity), ViewPagerAdapter.PositionableView {
 
     /**
      * Item that identifies this view. Needed by the adapter to not recreate views.
@@ -83,16 +74,6 @@ class PagerPageHolder(
      * Loading progress bar to indicate the current progress.
      */
     private val progressBar = createProgressBar()
-
-    /**
-     * Image view that supports subsampling on zoom.
-     */
-    private var subsamplingImageView: SubsamplingScaleImageView? = null
-
-    /**
-     * Simple image view only used on GIFs.
-     */
-    private var imageView: ImageView? = null
 
     /**
      * Retry button used to allow retrying.
@@ -126,16 +107,16 @@ class PagerPageHolder(
 
     /**
      * Subscription used to read the header of the image. This is needed in order to instantiate
-     * the appropiate image view depending if the image is animated (GIF).
+     * the appropriate image view depending if the image is animated (GIF).
      */
     private var readImageHeaderSubscription: Subscription? = null
 
-    var status: Int = 0
-    var extraStatus: Int = 0
-    var progress: Int = 0
-    var extraProgress: Int = 0
+    private var status: Int = 0
+    private var extraStatus: Int = 0
+    private var progress: Int = 0
+    private var extraProgress: Int = 0
 
-    var scope: CoroutineScope? = null
+    private var scope: CoroutineScope? = null
 
     init {
         addView(progressBar)
@@ -145,14 +126,48 @@ class PagerPageHolder(
             when (val theme = viewer.config.readerTheme) {
                 3 -> Color.TRANSPARENT
                 else -> ThemeUtil.readerBackgroundColor(theme)
-            }
+            },
         )
         progressBar.foregroundTintList = ColorStateList.valueOf(
             context.getResourceColor(
                 if (isInvertedFromTheme()) R.attr.colorPrimaryInverse
-                else R.attr.colorPrimary
-            )
+                else R.attr.colorPrimary,
+            ),
         )
+    }
+
+    override fun onImageLoaded() {
+        super.onImageLoaded()
+        (pageView as? SubsamplingScaleImageView)?.apply {
+            if (this@PagerPageHolder.extraPage == null &&
+                this@PagerPageHolder.page.longPage == null &&
+                sHeight < sWidth
+            ) {
+                this@PagerPageHolder.page.longPage = true
+            }
+        }
+        onImageDecoded()
+    }
+
+    override fun onNeedsLandscapeZoom() {
+        (pageView as? SubsamplingScaleImageView)?.apply {
+            if (viewer.heldForwardZoom?.first == page.index) {
+                landscapeZoom(viewer.heldForwardZoom?.second)
+                viewer.heldForwardZoom = null
+            } else if (isVisibleOnScreen()) {
+                landscapeZoom(true)
+            }
+        }
+    }
+
+    override fun onScaleChanged(newScale: Float) {
+        super.onScaleChanged(newScale)
+        viewer.activity.hideMenu()
+    }
+
+    override fun onImageLoadError() {
+        super.onImageLoadError()
+        onImageDecodeError()
     }
 
     /**
@@ -168,7 +183,116 @@ class PagerPageHolder(
         unsubscribeReadImageHeader()
         scope?.cancel()
         scope = null
-        subsamplingImageView?.setOnImageEventListener(null)
+        (pageView as? SubsamplingScaleImageView)?.setOnImageEventListener(null)
+    }
+
+    fun onPageSelected(forward: Boolean?) {
+        (pageView as? SubsamplingScaleImageView)?.apply {
+            if (isReady) {
+                landscapeZoom(forward)
+            } else {
+                forward ?: return@apply
+                setOnImageEventListener(
+                    object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
+                        override fun onReady() {
+                            setupZoom(imageConfig)
+                            landscapeZoom(forward)
+                            this@PagerPageHolder.onImageLoaded()
+                        }
+
+                        override fun onImageLoadError(e: Exception) {
+                            onImageDecodeError()
+                        }
+                    },
+                )
+            }
+        }
+    }
+
+    /**
+     * Check if the image can be panned to the left
+     */
+    fun canPanLeft(): Boolean = canPan { it.left }
+
+    /**
+     * Check if the image can be panned to the right
+     */
+    fun canPanRight(): Boolean = canPan { it.right }
+
+    /**
+     * Check whether the image can be panned.
+     * @param fn a function that returns the direction to check for
+     */
+    private fun canPan(fn: (RectF) -> Float): Boolean {
+        (pageView as? SubsamplingScaleImageView)?.let { view ->
+            RectF().let {
+                view.getPanRemaining(it)
+                return fn(it) > 0.01f
+            }
+        }
+        return false
+    }
+
+    /**
+     * Pans the image to the left by a screen's width worth.
+     */
+    fun panLeft() {
+        pan { center, view -> center.also { it.x -= view.width / view.scale } }
+    }
+
+    /**
+     * Pans the image to the right by a screen's width worth.
+     */
+    fun panRight() {
+        pan { center, view -> center.also { it.x += view.width / view.scale } }
+    }
+
+    /**
+     * Pans the image.
+     * @param fn a function that computes the new center of the image
+     */
+    private fun pan(fn: (PointF, SubsamplingScaleImageView) -> PointF) {
+        (pageView as? SubsamplingScaleImageView)?.let { view ->
+            val target = fn(view.center ?: return, view)
+            view.animateCenter(target)!!
+                .withEasing(SubsamplingScaleImageView.EASE_OUT_QUAD)
+                .withDuration(250)
+                .withInterruptible(true)
+                .start()
+        }
+    }
+
+    private fun SubsamplingScaleImageView.landscapeZoom(forward: Boolean?) {
+        forward ?: return
+        if (viewer.config.landscapeZoom && viewer.config.imageScaleType == SubsamplingScaleImageView.SCALE_TYPE_CENTER_INSIDE && sWidth > sHeight && scale == minScale) {
+            handler.postDelayed(
+                {
+                    val point = when (viewer.config.imageZoomType) {
+                        ZoomType.Left -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(),
+                            0F)
+                        ZoomType.Right -> if (forward) PointF(sWidth.toFloat(), 0F) else PointF(0F,
+                            0F)
+                        ZoomType.Center -> center.also { it?.y = 0F }
+                    }
+
+                    val topInsets = if (viewer.activity.isSplitScreen) 0f else {
+                        viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
+                    }
+                    val bottomInsets = if (viewer.activity.isSplitScreen) 0f else {
+                        viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset()
+                            .toFloat()
+                    }
+                    val targetScale =
+                        (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
+                    animateScaleAndCenter(min(targetScale, minScale * 2), point)!!
+                        .withDuration(500)
+                        .withEasing(SubsamplingScaleImageView.EASE_IN_OUT_QUAD)
+                        .withInterruptible(true)
+                        .start()
+                },
+                500,
+            )
+        }
     }
 
     /**
@@ -369,45 +493,42 @@ class PagerPageHolder(
             .doOnNext { isAnimated ->
                 if (!isAnimated) {
                     if (viewer.config.readerTheme >= 2) {
-                        val imageView = initSubsamplingImageView()
                         if (page.bg != null &&
                             page.bgType == getBGType(viewer.config.readerTheme,
                                 context) + item.hashCode()
                         ) {
-                            imageView.setImage(ImageSource.inputStream(openStream!!))
-                            imageView.background = page.bg
+                            setImage(openStream!!, false, imageConfig)
+                            pageView?.background = page.bg
                         }
                         // if the user switches to automatic when pages are already cached, the bg needs to be loaded
                         else {
                             val bytesArray = openStream!!.readBytes()
                             val bytesStream = bytesArray.inputStream()
-                            imageView.setImage(ImageSource.inputStream(bytesStream))
+                            setImage(bytesStream, false, imageConfig)
                             bytesStream.close()
 
-                            launchUI {
+                            scope?.launchUI {
                                 try {
-                                    imageView.background = setBG(bytesArray)
+                                    pageView?.background = setBG(bytesArray)
                                 } catch (e: Exception) {
-                                    XLog.e(e.localizedMessage)
-                                    imageView.background = ColorDrawable(Color.WHITE)
+                                    Timber.e(e.localizedMessage)
+                                    pageView?.background = ColorDrawable(Color.WHITE)
                                 } finally {
-                                    page.bg = imageView.background
+                                    page.bg = pageView?.background
                                     page.bgType = getBGType(
                                         viewer.config.readerTheme,
-                                        context
+                                        context,
                                     ) + item.hashCode()
                                 }
                             }
                         }
                     } else {
-                        val imageView = initSubsamplingImageView()
-                        imageView.setImage(ImageSource.inputStream(openStream!!))
+                        setImage(openStream!!, false, imageConfig)
                     }
                 } else {
-                    val imageView = initImageView()
-                    imageView.setImage(openStream!!)
+                    setImage(openStream!!, true, imageConfig)
                     if (viewer.config.readerTheme >= 2 && page.bg != null) {
-                        imageView.background = page.bg
+                        pageView?.background = page.bg
                     }
                 }
             }
@@ -417,18 +538,37 @@ class PagerPageHolder(
                 try {
                     openStream?.close()
                 } catch (e: Exception) {
-                    XLog.e(e)
                 }
             }
             .doOnError {
                 try {
                     openStream?.close()
                 } catch (e: Exception) {
-                    XLog.e(e)
                 }
             }
             .subscribe({}, {})
     }
+
+    private val imageConfig: Config
+        get() = Config(
+            zoomDuration = viewer.config.doubleTapAnimDuration,
+            minimumScaleType = viewer.config.imageScaleType,
+            cropBorders = viewer.config.imageCropBorders,
+            zoomStartPosition = viewer.config.imageZoomType,
+            landscapeZoom = viewer.config.landscapeZoom,
+            insetInfo = InsetInfo(
+                cutoutBehavior = viewer.config.cutoutBehavior,
+                topCutoutInset = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset()
+                    .toFloat(),
+                bottomCutoutInset = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset()
+                    .toFloat(),
+                scaleTypeIsFullFit = viewer.config.scaleTypeIsFullFit(),
+                isFullscreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
+                    viewer.config.isFullscreen && !viewer.activity.isInMultiWindowMode,
+                isSplitScreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && viewer.activity.isInMultiWindowMode,
+                insets = viewer.activity.window.decorView.rootWindowInsets,
+            ),
+        )
 
     private suspend fun setBG(bytesArray: ByteArray): Drawable {
         return withContext(Default) {
@@ -437,10 +577,10 @@ class PagerPageHolder(
                 BitmapFactory.decodeByteArray(
                     bytesArray,
                     0,
-                    bytesArray.size
+                    bytesArray.size,
                 ),
                 preferences.readerTheme().get() == 2,
-                context
+                context,
             )
         }
     }
@@ -486,118 +626,6 @@ class PagerPageHolder(
             Color.BLACK -> !context.isInNightMode()
             else -> false
         }
-    }
-
-    /**
-     * Initializes a subsampling scale view.
-     */
-    private fun initSubsamplingImageView(): SubsamplingScaleImageView {
-        if (subsamplingImageView != null) return subsamplingImageView!!
-
-        val config = viewer.config
-
-        subsamplingImageView = SubsamplingScaleImageView(context).apply {
-            setMaxTileSize(GLUtil.maxTextureSize)
-            setDoubleTapZoomStyle(SubsamplingScaleImageView.ZOOM_FOCUS_CENTER)
-            setDoubleTapZoomDuration(config.doubleTapAnimDuration)
-            setPanLimit(SubsamplingScaleImageView.PAN_LIMIT_INSIDE)
-            setMinimumScaleType(config.imageScaleType)
-            setMinimumTileDpi(180)
-            setMinimumDpi(1)
-            setCropBorders(config.imageCropBorders)
-            val topInsets = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
-            val bottomInsets = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
-            setExtendPastCutout(config.cutoutBehavior == CUTOUT_START_EXTENDED && config.scaleTypeIsFullFit() && topInsets + bottomInsets > 0)
-            if ((config.cutoutBehavior != CUTOUT_IGNORE || !config.scaleTypeIsFullFit()) &&
-                android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q &&
-                config.isFullscreen &&
-                !viewer.activity.isInMultiWindowMode
-            ) {
-                val insets: WindowInsets? = viewer.activity.window.decorView.rootWindowInsets
-                setExtraSpace(
-                    0f,
-                    insets?.displayCutout?.boundingRectTop?.height()?.toFloat() ?: 0f,
-                    0f,
-                    insets?.displayCutout?.boundingRectBottom?.height()?.toFloat() ?: 0f
-                )
-            }
-            setOnImageEventListener(
-                object : SubsamplingScaleImageView.DefaultOnImageEventListener() {
-
-                    override fun onImageLoaded() {
-                        if (this@PagerPageHolder.extraPage == null &&
-                            this@PagerPageHolder.page.longPage == null &&
-                            sHeight < sWidth
-                        ) {
-                            this@PagerPageHolder.page.longPage = true
-                        }
-                    }
-
-                    override fun onReady() {
-                        var centerV = 0f
-                        when (config.imageZoomType) {
-                            ZoomType.Left -> {
-                                setScaleAndCenter(scale, PointF(0f, 0f))
-                            }
-                            ZoomType.Right -> {
-                                setScaleAndCenter(scale, PointF(sWidth.toFloat(), 0f))
-                                centerV = sWidth.toFloat()
-                            }
-                            ZoomType.Center -> {
-                                setScaleAndCenter(scale, center.also { it?.y = 0f })
-                                centerV = center?.x ?: 0f
-                            }
-                        }
-                        if (config.cutoutBehavior == CUTOUT_START_EXTENDED &&
-                            topInsets + bottomInsets > 0 &&
-                            config.scaleTypeIsFullFit()
-                        ) {
-                            setScaleAndCenter(
-                                scale,
-                                PointF(centerV,
-                                    (center?.y?.plus(topInsets)?.minus(bottomInsets) ?: 0f))
-                            )
-                        }
-                        onImageDecoded()
-                    }
-
-                    override fun onImageLoadError(e: Exception) {
-                        onImageDecodeError()
-                    }
-                }
-            )
-        }
-        addView(subsamplingImageView)
-        return subsamplingImageView!!
-    }
-
-    /**
-     * Initializes an image view, used for GIFs.
-     */
-    private fun initImageView(): ImageView {
-        if (imageView != null) return imageView!!
-
-        imageView = PhotoView(context, null).apply {
-            layoutParams = LayoutParams(MATCH_PARENT, MATCH_PARENT)
-            adjustViewBounds = true
-            setZoomTransitionDuration(viewer.config.doubleTapAnimDuration)
-            setScaleLevels(1f, 2f, 3f)
-            // Force 2 scale levels on double tap
-            setOnDoubleTapListener(
-                object : GestureDetector.SimpleOnGestureListener() {
-                    override fun onDoubleTap(e: MotionEvent): Boolean {
-                        if (scale > 1f) {
-                            setScale(1f, e.x, e.y, true)
-                        } else {
-                            setScale(2f, e.x, e.y, true)
-                        }
-                        return true
-                    }
-                }
-            )
-        }
-        addView(imageView)
-        return imageView!!
     }
 
     /**
@@ -688,7 +716,7 @@ class PagerPageHolder(
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             } catch (e: Exception) {
                 imageStream.close()
-                XLog.e("Cannot split page ${e.message}")
+                Timber.e("Cannot split page ${e.message}")
                 return imageBytes.inputStream()
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
@@ -711,7 +739,7 @@ class PagerPageHolder(
                     imageStream.close()
                     page.longPage = true
                     splitDoublePages()
-                    XLog.e("Cannot split page ${e.message}")
+                    Timber.e("Cannot split page ${e.message}")
                     return imageBytes.inputStream()
                 }
                 val height = imageBitmap.height
@@ -756,7 +784,7 @@ class PagerPageHolder(
             imageStream.close()
             page.fullPage = true
             splitDoublePages()
-            XLog.e("Cannot combine pages ${e.message}")
+            Timber.e("Cannot combine pages ${e.message}")
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(96) }
@@ -780,7 +808,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             page.isolatedPage = true
             splitDoublePages()
-            XLog.e("Cannot combine pages ${e.message}")
+            Timber.e("Cannot combine pages ${e.message}")
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(97) }
@@ -823,17 +851,6 @@ class PagerPageHolder(
             if (extraPage?.fullPage == true || page.fullPage == true) {
                 extraPage = null
             }
-        }
-    }
-
-    /**
-     * Extension method to set a [stream] into this ImageView.
-     */
-    private fun ImageView.setImage(stream: InputStream) {
-        this.loadAny(stream.readBytes()) {
-            memoryCachePolicy(CachePolicy.DISABLED)
-            diskCachePolicy(CachePolicy.DISABLED)
-            target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))
         }
     }
 
