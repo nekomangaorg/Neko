@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.source.browse
 
-import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
@@ -16,6 +15,7 @@ import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
+import eu.kanade.tachiyomi.ui.library.LibraryItem
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
@@ -46,13 +46,7 @@ class BrowseSourceItem(
             val listType = catalogueListType.get()
             view.apply {
                 val binding = MangaGridItemBinding.bind(this)
-                val coverHeight = (parent.itemWidth / 3 * 4f).toInt()
-                if (listType == 1) {
-                    binding.gradient.layoutParams = FrameLayout.LayoutParams(
-                        FrameLayout.LayoutParams.MATCH_PARENT,
-                        (coverHeight * 0.66f).toInt(),
-                        Gravity.BOTTOM
-                    )
+                if (listType == LibraryItem.LAYOUT_COMPACT_GRID) {
                     binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
                         bottomMargin = 6.dpToPx
                     }
@@ -84,7 +78,7 @@ class BrowseSourceItem(
                     dimensionRatio = "15:22"
                 }
             }
-            BrowseSourceGridHolder(view, adapter, listType == 1, outlineOnCovers.get(), isFollows)
+            BrowseSourceGridHolder(view, adapter, listType == LibraryItem.LAYOUT_COMPACT_GRID, outlineOnCovers.get())
         } else {
             BrowseSourceListHolder(view, adapter, outlineOnCovers.get(), isFollows)
         }
