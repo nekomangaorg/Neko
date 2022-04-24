@@ -86,7 +86,7 @@ class MangaHeaderHolder(
         with(binding) {
             this ?: return@with
             chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
-            startReadingButton.setOnClickListener { adapter.delegate.readNextChapter() }
+            startReadingButton.setOnClickListener { adapter.delegate.readNextChapter(it) }
             topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
                 height = adapter.delegate.topCoverHeight()
             }

@@ -19,6 +19,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
+import android.view.Window
 import android.view.WindowManager
 import androidx.annotation.IdRes
 import androidx.appcompat.widget.Toolbar
@@ -41,6 +42,7 @@ import com.getkeepsafe.taptargetview.TapTarget
 import com.getkeepsafe.taptargetview.TapTargetView
 import com.google.android.material.navigation.NavigationBarView
 import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.transition.platform.MaterialContainerTransformSharedElementCallback
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.Migrations
 import eu.kanade.tachiyomi.R
@@ -155,6 +157,27 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         get() = max(binding.toolbar.height, binding.cardFrame.height)
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        // Set up shared element transition and disable overlay so views don't show above system bars
+        window.requestFeature(Window.FEATURE_ACTIVITY_TRANSITIONS)
+        setExitSharedElementCallback(object : MaterialContainerTransformSharedElementCallback() {
+            override fun onMapSharedElements(
+                names: MutableList<String>,
+                sharedElements: MutableMap<String, View>
+            ) {
+                val mangaController = router.backstack.lastOrNull()?.controller as? MangaDetailsController
+                if (mangaController == null || chapterIdToExitTo == 0L) {
+                    super.onMapSharedElements(names, sharedElements)
+                    return
+                }
+                val recyclerView = mangaController.binding.recycler
+                val selectedViewHolder =
+                    recyclerView.findViewHolderForItemId(chapterIdToExitTo) ?: return
+                sharedElements[names[0]] = selectedViewHolder.itemView
+                chapterIdToExitTo = 0L
+            }
+        })
+        window.sharedElementsUseOverlay = false
+
         super.onCreate(savedInstanceState)
 
         // Do not let the launcher create a new activity http://stackoverflow.com/questions/16283079
@@ -1001,6 +1024,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         const val INTENT_SEARCH = "neko.SEARCH"
         const val INTENT_SEARCH_QUERY = "query"
         const val INTENT_SEARCH_FILTER = "filter"
+
+        var chapterIdToExitTo = 0L
     }
 }
 

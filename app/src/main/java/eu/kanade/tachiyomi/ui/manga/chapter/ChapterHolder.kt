@@ -37,6 +37,7 @@ class ChapterHolder(
     fun bind(item: ChapterItem, manga: Manga) {
         val chapter = item.chapter
         val isLocked = item.isLocked
+        itemView.transitionName = "details chapter ${chapter.id ?: 0L} transition"
         binding.chapterTitle.text = if (manga.hideChapterTitle(adapter.preferences)) {
             val number = adapter.decimalFormat.format(chapter.chapter_number.toDouble())
             itemView.context.getString(R.string.chapter_, number)
