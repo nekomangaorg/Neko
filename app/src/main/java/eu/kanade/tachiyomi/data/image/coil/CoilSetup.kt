@@ -3,19 +3,19 @@ package eu.kanade.tachiyomi.data.image.coil
 import android.app.ActivityManager
 import android.content.Context
 import android.os.Build
-import androidx.core.content.ContextCompat.getSystemService
 import androidx.core.content.getSystemService
 import coil.Coil
 import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import eu.kanade.tachiyomi.network.NetworkHelper
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
+import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import eu.kanade.tachiyomi.BuildConfig
+import eu.kanade.tachiyomi.network.NetworkHelper
 import okhttp3.OkHttpClient
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
 
 class CoilSetup(context: Context) {
     init {

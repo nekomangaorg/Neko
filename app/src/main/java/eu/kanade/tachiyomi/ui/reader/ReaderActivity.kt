@@ -83,7 +83,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.pager.VerticalPagerViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.webtoon.WebtoonViewer
 import eu.kanade.tachiyomi.ui.webview.WebViewActivity
 import eu.kanade.tachiyomi.util.storage.getUriCompat
-import eu.kanade.tachiyomi.util.system.GLUtil
 import eu.kanade.tachiyomi.util.system.contextCompatColor
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getBottomGestureInsets
@@ -144,11 +143,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Preferences helper.
      */
     private val preferences by injectLazy<PreferencesHelper>()
-
-    /**
-     * The maximum bitmap size supported by the device.
-     */
-    val maxBitmapSize by lazy { GLUtil.maxTextureSize }
 
     /**
      * Viewer used to display the pages (pager, webtoon, ...).
