@@ -284,6 +284,10 @@ class MangaHeaderHolder(
                 chapterBinding.chaptersTitle.text =
                     itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
                 chapterBinding.filtersText.text = presenter.currentFilters()
+                if (adapter.preferences.themeMangaDetails()) {
+                    val accentColor = adapter.delegate.accentColor() ?: return
+                    chapterBinding.filterButton.imageTintList = ColorStateList.valueOf(accentColor)
+                }
             }
             return
         }
@@ -528,8 +532,13 @@ class MangaHeaderHolder(
     }
 
     fun updateColors(updateAll: Boolean = true) {
-        binding ?: return
         val accentColor = adapter.delegate.accentColor() ?: return
+        if (binding == null) {
+            if (chapterBinding != null) {
+                chapterBinding.filterButton.imageTintList = ColorStateList.valueOf(accentColor)
+            }
+            return
+        }
         val manga = adapter.presenter.manga
         with(binding) {
             trueBackdrop.setBackgroundColor(
