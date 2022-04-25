@@ -73,6 +73,11 @@ class LibraryItem(
                         }
                     } else if (libraryLayout >= LAYOUT_COMFORTABLE_GRID) {
                         binding.textLayout.isVisible = libraryLayout == LAYOUT_COMFORTABLE_GRID
+                        if (libraryLayout >= LAYOUT_COVER_ONLY_GRID) {
+                            binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                                bottomMargin = 6.dpToPx
+                            }
+                        }
                         binding.constraintLayout.background = context.contextCompatDrawable(
                             R.drawable.library_comfortable_grid_selector
                         )
