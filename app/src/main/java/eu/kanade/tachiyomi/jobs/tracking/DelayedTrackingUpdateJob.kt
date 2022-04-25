@@ -34,7 +34,7 @@ class DelayedTrackingUpdateJob(context: Context, workerParams: WorkerParameters)
             } else {
                 val mangaId = items[0].toLongOrNull() ?: return@mapNotNull null
                 val trackId = items[1].toIntOrNull() ?: return@mapNotNull null
-                val chapterNumber = items[2].toIntOrNull() ?: return@mapNotNull null
+                val chapterNumber = items[2].toFloatOrNull() ?: return@mapNotNull null
                 mangaId to (trackId to chapterNumber)
             }
         }.groupBy { it.first }

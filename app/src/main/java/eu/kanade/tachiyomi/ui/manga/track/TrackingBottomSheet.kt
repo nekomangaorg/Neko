@@ -453,7 +453,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
         val np = binding.chaptersPicker
         // Set initial value
-        np.progress = item.track.last_chapter_read
+        np.progress = item.track.last_chapter_read.toInt()
         if (item.track.total_chapters > 0) {
             np.maxValue = item.track.total_chapters
         }

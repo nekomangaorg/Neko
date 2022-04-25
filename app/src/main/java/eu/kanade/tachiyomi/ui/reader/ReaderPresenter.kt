@@ -908,7 +908,7 @@ class ReaderPresenter(
         if (!preferences.autoUpdateTrack()) return
 
         launchIO {
-            val newChapterRead = readerChapter.chapter.chapter_number.toInt()
+            val newChapterRead = readerChapter.chapter.chapter_number
             updateTrackChapterRead(db, preferences, manga?.id, newChapterRead, true)
         }
     }

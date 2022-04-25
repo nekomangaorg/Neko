@@ -46,6 +46,8 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus() = COMPLETED
+    override fun readingStatus() = READING
+    override fun planningStatus() = PLANNING
 
     override fun getStatus(status: Int): String = with(context) {
         when (status) {
@@ -134,11 +136,12 @@ class Anilist(private val context: Context, id: Int) : TrackService(id) {
         return api.addLibManga(track)
     }
 
-    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
-        if (setToReadStatus && track.status == PLANNING && track.last_chapter_read != 0) {
+    override suspend fun update(track: Track, setToRead: Boolean): Track {
+        updateTrackStatus(track, setToRead, setToComplete = true, mustReadToComplete = true)
+        if (setToRead && track.status == PLANNING && track.last_chapter_read != 0f) {
             track.status = READING
         }
-        if (track.status == READING && track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+        if (track.status == READING && track.total_chapters != 0 && track.last_chapter_read.toInt() == track.total_chapters) {
             track.status = COMPLETED
         }
         // If user was using API v1 fetch library_id

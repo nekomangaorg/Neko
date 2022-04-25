@@ -59,17 +59,17 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             binding.trackRemove.isVisible = item.service.isMdList().not()
             with(binding.trackChapters) {
                 text = when {
-                    track.total_chapters > 0 && track.last_chapter_read == track.total_chapters -> context.getString(
+                    track.total_chapters > 0 && track.last_chapter_read.toInt() == track.total_chapters -> context.getString(
                         R.string.all_chapters_read
                     )
                     track.total_chapters > 0 -> context.getString(
                         R.string.chapter_x_of_y,
-                        track.last_chapter_read,
+                        track.last_chapter_read.toInt(),
                         track.total_chapters
                     )
                     track.last_chapter_read > 0 -> context.getString(
                         R.string.chapter_,
-                        track.last_chapter_read.toString()
+                        track.last_chapter_read.toInt().toString()
                     )
                     else -> context.getString(R.string.not_started)
                 }

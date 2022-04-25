@@ -31,15 +31,12 @@ fun syncChaptersWithTrackServiceTwoWay(
 ) {
     val sortedChapters = chapters.sortedBy { it.chapter_number }
     sortedChapters
-        .filterIndexed { index, chapter -> index < remoteTrack.last_chapter_read && !chapter.read }
+        .filter { chapter -> chapter.chapter_number <= remoteTrack.last_chapter_read && !chapter.read }
         .forEach { it.read = true }
     db.updateChaptersProgress(sortedChapters).executeAsBlocking()
 
-    val localLastRead = when {
-        sortedChapters.all { it.read } -> sortedChapters.size
-        sortedChapters.any { !it.read } -> sortedChapters.indexOfFirst { !it.read }
-        else -> 0
-    }
+    // only take into account continuous reading
+    val localLastRead = sortedChapters.takeWhile { it.read }.lastOrNull()?.chapter_number ?: 0F
 
     // update remote
     remoteTrack.last_chapter_read = localLastRead
@@ -54,7 +51,7 @@ fun syncChaptersWithTrackServiceTwoWay(
     }
 }
 
-private var trackingJobs = HashMap<Long, Pair<Job?, Int?>>()
+private var trackingJobs = HashMap<Long, Pair<Job?, Float?>>()
 
 /**
  * Starts the service that updates the last chapter read in sync services. This operation
@@ -71,10 +68,10 @@ fun updateTrackChapterMarkedAsRead(
     if (!preferences.trackMarkedAsRead()) return
     mangaId ?: return
 
-    val newChapterRead = newLastChapter?.chapter_number?.toInt() ?: 0
+    val newChapterRead = newLastChapter?.chapter_number ?: 0f
 
     // To avoid unnecessary calls if multiple marked as read for same manga
-    if (trackingJobs[mangaId]?.second ?: 0 < newChapterRead) {
+    if (trackingJobs[mangaId]?.second ?: 0f < newChapterRead) {
         trackingJobs[mangaId]?.first?.cancel()
 
         // We want these to execute even if the presenter is destroyed
@@ -91,7 +88,7 @@ suspend fun updateTrackChapterRead(
     db: DatabaseHelper,
     preferences: PreferencesHelper,
     mangaId: Long?,
-    newChapterRead: Int,
+    newChapterRead: Float,
     retryWhenOnline: Boolean = false,
 ) {
     val trackManager = Injekt.get<TrackManager>()
@@ -108,7 +105,7 @@ suspend fun updateTrackChapterRead(
                 DelayedTrackingUpdateJob.setupTask(preferences.context)
             } else if (preferences.context.isOnline()) {
                 try {
-                    track.last_chapter_read = newChapterRead
+                    track.last_chapter_read = newChapterRead.toFloat()
                     service.update(track, true)
                     db.insertTrack(track).executeAsBlocking()
                 } catch (e: Exception) {

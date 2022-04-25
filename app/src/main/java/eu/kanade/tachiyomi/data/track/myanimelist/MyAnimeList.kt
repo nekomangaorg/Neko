@@ -59,6 +59,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
     override fun isCompletedStatus(index: Int) = getStatusList()[index] == COMPLETED
 
     override fun completedStatus(): Int = COMPLETED
+    override fun readingStatus() = READING
+    override fun planningStatus() = PLAN_TO_READ
 
     override fun getScoreList(): List<String> {
         return IntRange(0, 10).map(Int::toString)
@@ -75,10 +77,8 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         return api.updateItem(track)
     }
 
-    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
-        if (setToReadStatus && track.status == PLAN_TO_READ && track.last_chapter_read != 0) {
-            track.status = READING
-        }
+    override suspend fun update(track: Track, setToRead: Boolean): Track {
+        updateTrackStatus(track, setToRead)
         return api.updateItem(track)
     }
 

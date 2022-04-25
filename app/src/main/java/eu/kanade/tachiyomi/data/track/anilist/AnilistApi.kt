@@ -36,7 +36,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return withContext(Dispatchers.IO) {
             val variables = jsonObject(
                 "mangaId" to track.media_id,
-                "progress" to track.last_chapter_read,
+                "progress" to track.last_chapter_read.toInt(),
                 "status" to track.toAnilistStatus()
             )
             createDate(track.started_reading_date)?.let {
@@ -69,7 +69,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
         return withContext(Dispatchers.IO) {
             val variables = jsonObject(
                 "listId" to track.library_id,
-                "progress" to track.last_chapter_read,
+                "progress" to track.last_chapter_read.toInt(),
                 "status" to track.toAnilistStatus(),
                 "score" to track.score.toInt()
             )

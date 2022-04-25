@@ -46,7 +46,7 @@ object TrackTypeAdapter {
                             SYNC -> track.sync_id = nextInt()
                             MEDIA -> track.media_id = nextInt()
                             LIBRARY -> track.library_id = nextLong()
-                            LAST_READ -> track.last_chapter_read = nextInt()
+                            LAST_READ -> track.last_chapter_read = nextInt().toFloat()
                             TRACKING_URL -> track.tracking_url = nextString()
                         }
                     }
