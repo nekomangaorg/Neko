@@ -268,10 +268,8 @@ class PagerPageHolder(
             handler.postDelayed(
                 {
                     val point = when (viewer.config.imageZoomType) {
-                        ZoomType.Left -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(),
-                            0F)
-                        ZoomType.Right -> if (forward) PointF(sWidth.toFloat(), 0F) else PointF(0F,
-                            0F)
+                        ZoomType.Left -> if (forward) PointF(0F, 0F) else PointF(sWidth.toFloat(), 0F)
+                        ZoomType.Right -> if (forward) PointF(sWidth.toFloat(), 0F) else PointF(0F, 0F)
                         ZoomType.Center -> center.also { it?.y = 0F }
                     }
 
@@ -279,11 +277,9 @@ class PagerPageHolder(
                         viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat()
                     }
                     val bottomInsets = if (viewer.activity.isSplitScreen) 0f else {
-                        viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset()
-                            .toFloat()
+                        viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat()
                     }
-                    val targetScale =
-                        (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
+                    val targetScale = (height.toFloat() - topInsets - bottomInsets) / sHeight.toFloat()
                     animateScaleAndCenter(min(targetScale, minScale * 2), point)!!
                         .withDuration(500)
                         .withEasing(SubsamplingScaleImageView.EASE_IN_OUT_QUAD)
@@ -494,8 +490,7 @@ class PagerPageHolder(
                 if (!isAnimated) {
                     if (viewer.config.readerTheme >= 2) {
                         if (page.bg != null &&
-                            page.bgType == getBGType(viewer.config.readerTheme,
-                                context) + item.hashCode()
+                            page.bgType == getBGType(viewer.config.readerTheme, context) + item.hashCode()
                         ) {
                             setImage(openStream!!, false, imageConfig)
                             pageView?.background = page.bg
@@ -558,10 +553,8 @@ class PagerPageHolder(
             landscapeZoom = viewer.config.landscapeZoom,
             insetInfo = InsetInfo(
                 cutoutBehavior = viewer.config.cutoutBehavior,
-                topCutoutInset = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset()
-                    .toFloat(),
-                bottomCutoutInset = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset()
-                    .toFloat(),
+                topCutoutInset = viewer.activity.window.decorView.rootWindowInsets.topCutoutInset().toFloat(),
+                bottomCutoutInset = viewer.activity.window.decorView.rootWindowInsets.bottomCutoutInset().toFloat(),
                 scaleTypeIsFullFit = viewer.config.scaleTypeIsFullFit(),
                 isFullscreen = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q &&
                     viewer.config.isFullscreen && !viewer.activity.isInMultiWindowMode,
@@ -706,10 +699,7 @@ class PagerPageHolder(
         return decodeLayout
     }
 
-    private fun mergeOrSplitPages(
-        imageStream: InputStream,
-        imageStream2: InputStream?,
-    ): InputStream {
+    private fun mergeOrSplitPages(imageStream: InputStream, imageStream2: InputStream?): InputStream {
         if (page.longPage == true && viewer.config.splitPages) {
             val imageBytes = imageStream.readBytes()
             val imageBitmap = try {
