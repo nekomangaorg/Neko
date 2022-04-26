@@ -99,7 +99,6 @@ class TabbedReaderSettingsSheet(
         }
 
         val attrs = window?.attributes
-        val ogDim = attrs?.dimAmount ?: 0.25f
         val filterTabIndex = getTabViews().indexOf(filterView)
         binding.pager.adapter?.notifyDataSetChanged()
         binding.tabs.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {

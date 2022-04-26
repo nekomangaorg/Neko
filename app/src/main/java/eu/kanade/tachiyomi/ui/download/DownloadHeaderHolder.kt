@@ -28,8 +28,8 @@ class DownloadHeaderHolder(view: View, adapter: FlexibleAdapter<*>) : Expandable
     override fun onItemReleased(position: Int) {
         super.onItemReleased(position)
         binding.container.isDragged = false
-        mAdapter as DownloadAdapter
-        mAdapter.expandAll()
-        mAdapter.downloadItemListener.onItemReleased(position)
+        val adapter = mAdapter as? DownloadAdapter ?: return
+        adapter.expandAll()
+        adapter.downloadItemListener.onItemReleased(position)
     }
 }
