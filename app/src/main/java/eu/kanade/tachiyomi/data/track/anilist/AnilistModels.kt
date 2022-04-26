@@ -8,36 +8,26 @@ import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-data class OAuth(
-    val access_token: String,
-    val token_type: String,
-    val expires: Long,
-    val expires_in: Long
-) {
-
-    fun isExpired() = System.currentTimeMillis() > expires
-}
-
 data class ALManga(
     val media_id: Int,
-    val title_romaji: String,
+    val title_user_pref: String,
     val image_url_lge: String,
     val description: String?,
-    val type: String,
+    val format: String,
     val publishing_status: String,
     val start_date_fuzzy: Long,
-    val total_chapters: Int
+    val total_chapters: Int,
 ) {
 
     fun toTrack() = TrackSearch.create(TrackManager.ANILIST).apply {
         media_id = this@ALManga.media_id
-        title = title_romaji
+        title = title_user_pref
         total_chapters = this@ALManga.total_chapters
         cover_url = image_url_lge
         summary = description ?: ""
         tracking_url = AnilistApi.mangaUrl(media_id)
         publishing_status = this@ALManga.publishing_status
-        publishing_type = type
+        publishing_type = format
         if (start_date_fuzzy != 0L) {
             start_date = try {
                 val outputDf = SimpleDateFormat("yyyy-MM-dd", Locale.US)
@@ -56,11 +46,12 @@ data class ALUserManga(
     val chapters_read: Int,
     val start_date_fuzzy: Long,
     val completed_date_fuzzy: Long,
-    val manga: ALManga
+    val manga: ALManga,
 ) {
 
     fun toTrack() = Track.create(TrackManager.ANILIST).apply {
         media_id = manga.media_id
+        title = manga.title_user_pref
         status = toTrackStatus()
         score = score_raw.toFloat()
         started_reading_date = start_date_fuzzy
@@ -75,8 +66,8 @@ data class ALUserManga(
         "COMPLETED" -> Anilist.COMPLETED
         "PAUSED" -> Anilist.PAUSED
         "DROPPED" -> Anilist.DROPPED
-        "PLANNING" -> Anilist.PLANNING
-        "REPEATING" -> Anilist.REPEATING
+        "PLANNING" -> Anilist.PLAN_TO_READ
+        "REPEATING" -> Anilist.REREADING
         else -> Anilist.READING
     }
 }
@@ -86,8 +77,8 @@ fun Track.toAnilistStatus() = when (status) {
     Anilist.COMPLETED -> "COMPLETED"
     Anilist.PAUSED -> "PAUSED"
     Anilist.DROPPED -> "DROPPED"
-    Anilist.PLANNING -> "PLANNING"
-    Anilist.REPEATING -> "REPEATING"
+    Anilist.PLAN_TO_READ -> "PLANNING"
+    Anilist.REREADING -> "REPEATING"
     else -> "CURRENT"
 }
 

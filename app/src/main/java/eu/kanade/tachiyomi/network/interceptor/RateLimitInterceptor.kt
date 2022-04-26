@@ -1,8 +1,9 @@
 package eu.kanade.tachiyomi.network.interceptor
 
-import android.os.SystemClock
 import okhttp3.Interceptor
+import okhttp3.OkHttpClient
 import okhttp3.Response
+import org.isomorphism.util.TokenBuckets
 import java.util.concurrent.TimeUnit
 
 /**
@@ -17,42 +18,23 @@ import java.util.concurrent.TimeUnit
  * @param period {Long}   The limiting duration. Defaults to 1.
  * @param unit {TimeUnit} The unit of time for the period. Defaults to seconds.
  */
-class RateLimitInterceptor(
-    private val permits: Int,
-    private val period: Long = 1,
-    private val unit: TimeUnit = TimeUnit.SECONDS
+fun OkHttpClient.Builder.rateLimit(
+    permits: Long,
+    period: Long = 1,
+    unit: TimeUnit = TimeUnit.SECONDS,
+) = addInterceptor(RateLimitInterceptor(permits, period, unit))
+
+private class RateLimitInterceptor(
+    permits: Long,
+    period: Long = 1,
+    unit: TimeUnit = TimeUnit.SECONDS
 ) : Interceptor {
 
-    private val requestQueue = ArrayList<Long>(permits)
-    private val rateLimitMillis = unit.toMillis(period)
+    private val bucket = TokenBuckets.builder().withCapacity(permits)
+        .withFixedIntervalRefillStrategy(permits, period, unit).build()
 
     override fun intercept(chain: Interceptor.Chain): Response {
-        synchronized(requestQueue) {
-            val now = SystemClock.elapsedRealtime()
-            val waitTime = if (requestQueue.size < permits) {
-                0
-            } else {
-                val oldestReq = requestQueue[0]
-                val newestReq = requestQueue[permits - 1]
-
-                if (newestReq - oldestReq > rateLimitMillis) {
-                    0
-                } else {
-                    oldestReq + rateLimitMillis - now // Remaining time
-                }
-            }
-
-            if (requestQueue.size == permits) {
-                requestQueue.removeAt(0)
-            }
-            if (waitTime > 0) {
-                requestQueue.add(now + waitTime)
-                Thread.sleep(waitTime) // Sleep inside synchronized to pause queued requests
-            } else {
-                requestQueue.add(now)
-            }
-        }
-
+        bucket.consume()
         return chain.proceed(chain.request())
     }
 }
