@@ -5,14 +5,14 @@ import android.net.Uri
 import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CATEGORY_MASK
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CHAPTER
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_CHAPTER_MASK
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_HISTORY
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_HISTORY_MASK
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_TRACK
-import eu.kanade.tachiyomi.data.backup.BackupCreateService.Companion.BACKUP_TRACK_MASK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CATEGORY_MASK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CHAPTER
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_CHAPTER_MASK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_HISTORY_MASK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK
+import eu.kanade.tachiyomi.data.backup.BackupConst.BACKUP_TRACK_MASK
 import eu.kanade.tachiyomi.data.backup.full.models.Backup
 import eu.kanade.tachiyomi.data.backup.full.models.BackupCategory
 import eu.kanade.tachiyomi.data.backup.full.models.BackupChapter
@@ -38,6 +38,7 @@ import okio.buffer
 import okio.gzip
 import okio.sink
 import uy.kohesive.injekt.injectLazy
+import java.io.FileOutputStream
 import kotlin.math.max
 
 class FullBackupManager(val context: Context) {
@@ -53,9 +54,9 @@ class FullBackupManager(val context: Context) {
      * Create backup Json file from database
      *
      * @param uri path of Uri
-     * @param isJob backup called from job
+     * @param isAutoBackup backup called from scheduled backup job
      */
-    fun createBackup(uri: Uri, flags: Int, isJob: Boolean): String {
+    fun createBackup(uri: Uri, flags: Int, isAutoBackup: Boolean): String {
         // Create root object
         var backup: Backup? = null
 
@@ -68,9 +69,10 @@ class FullBackupManager(val context: Context) {
             )
         }
 
+        var file: UniFile? = null
         try {
-            val file: UniFile = (
-                if (isJob) {
+            file = (
+                if (isAutoBackup) {
                     // Get dir of file and create
                     var dir = UniFile.fromUri(context, uri)
                     dir = dir.createDirectory("automatic")
@@ -92,15 +94,28 @@ class FullBackupManager(val context: Context) {
                 )
                 ?: throw Exception("Couldn't create backup file")
 
+            if (!file.isFile) {
+                throw IllegalStateException("Failed to get handle on file")
+            }
+
             val byteArray = parser.encodeToByteArray(BackupSerializer, backup!!)
             if (byteArray.isEmpty()) {
                 throw IllegalStateException(context.getString(R.string.empty_backup_error))
             }
 
-            file.openOutputStream().sink().gzip().buffer().use { it.write(byteArray) }
-            return file.uri.toString()
+            file.openOutputStream().also {
+                // Force overwrite old file
+                (it as? FileOutputStream)?.channel?.truncate(0)
+            }.sink().gzip().buffer().use { it.write(byteArray) }
+            val fileUri = file.uri
+
+            // Make sure it's a valid backup file
+            FullBackupRestoreValidator().validate(context, fileUri)
+
+            return fileUri.toString()
         } catch (e: Exception) {
             XLog.e(e)
+            file?.delete()
             throw e
         }
     }
@@ -293,7 +308,7 @@ class FullBackupManager(val context: Context) {
                 }
             }
         }
-        databaseHelper.updateHistoryLastRead(historyToBeUpdated).executeAsBlocking()
+        databaseHelper.upsertHistoryLastRead(historyToBeUpdated).executeAsBlocking()
     }
 
     /**

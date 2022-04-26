@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.data.database.DbProvider
 import eu.kanade.tachiyomi.data.database.models.History
 import eu.kanade.tachiyomi.data.database.models.MangaChapterHistory
 import eu.kanade.tachiyomi.data.database.resolvers.HistoryLastReadPutResolver
+import eu.kanade.tachiyomi.data.database.resolvers.HistoryUpsertResolver
 import eu.kanade.tachiyomi.data.database.resolvers.MangaChapterHistoryGetResolver
 import eu.kanade.tachiyomi.data.database.tables.HistoryTable
 import eu.kanade.tachiyomi.util.lang.sqLite
@@ -47,7 +48,7 @@ interface HistoryQueries : DbProvider {
                 .query(getRecentMangaListLimitQuery(search.sqLite, offset, isResuming))
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
@@ -64,7 +65,7 @@ interface HistoryQueries : DbProvider {
                 .query(getRecentHistoryUngrouped(search.sqLite, offset, isResuming))
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
@@ -74,13 +75,7 @@ interface HistoryQueries : DbProvider {
      * @param date recent date range
      * @offset offset the db by
      */
-    fun getAllRecentsTypes(
-        search: String = "",
-        includeRead: Boolean,
-        endless: Boolean,
-        offset: Int,
-        isResuming: Boolean,
-    ) = db.get()
+    fun getAllRecentsTypes(search: String = "", includeRead: Boolean, endless: Boolean, offset: Int, isResuming: Boolean) = db.get()
         .listOfObjects(MangaChapterHistory::class.java)
         .withQuery(
             RawQuery.builder()
@@ -90,12 +85,12 @@ interface HistoryQueries : DbProvider {
                         includeRead,
                         endless,
                         offset,
-                        isResuming
-                    )
+                        isResuming,
+                    ),
                 )
 //                .args(date.time, startDate.time)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .withGetResolver(MangaChapterHistoryGetResolver.INSTANCE)
         .prepare()
@@ -107,7 +102,7 @@ interface HistoryQueries : DbProvider {
                 .query(getHistoryByMangaId())
                 .args(mangaId)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -118,7 +113,7 @@ interface HistoryQueries : DbProvider {
                 .query(getHistoryByChapterUrl())
                 .args(chapterUrl)
                 .observesTables(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -137,6 +132,16 @@ interface HistoryQueries : DbProvider {
      * Inserts history object if not yet in database
      * @param historyList history object list
      */
+    fun upsertHistoryLastRead(historyList: List<History>) = db.put()
+        .objects(historyList)
+        .withPutResolver(HistoryUpsertResolver())
+        .prepare()
+
+    /**
+     * Updates the history last read.
+     * Inserts history object if not yet in database
+     * @param historyList history object list
+     */
     fun updateHistoryLastRead(historyList: List<History>) = db.put()
         .objects(historyList)
         .withPutResolver(HistoryLastReadPutResolver())
@@ -146,7 +151,7 @@ interface HistoryQueries : DbProvider {
         .byQuery(
             DeleteQuery.builder()
                 .table(HistoryTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -156,7 +161,7 @@ interface HistoryQueries : DbProvider {
                 .table(HistoryTable.TABLE)
                 .where("${HistoryTable.COL_LAST_READ} = ?")
                 .whereArgs(0)
-                .build()
+                .build(),
         )
         .prepare()
 }
