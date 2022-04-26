@@ -54,14 +54,18 @@ class TrackSearchItem(val trackSearch: TrackSearch) : AbstractItem<TrackSearchIt
                 binding.trackSearchStatus.isVisible = false
                 binding.trackSearchStatusResult.isVisible = false
             } else {
-                binding.trackSearchStatusResult.text = track.publishing_status.capitalize(Locale.ROOT)
+                binding.trackSearchStatusResult.text = track.publishing_status.replaceFirstChar {
+                    it.titlecase(Locale.getDefault())
+                }
             }
 
             if (track.publishing_type.isBlank()) {
                 binding.trackSearchType.isVisible = false
                 binding.trackSearchTypeResult.isVisible = false
             } else {
-                binding.trackSearchTypeResult.text = track.publishing_type.capitalize(Locale.ROOT)
+                binding.trackSearchTypeResult.text = track.publishing_type.replaceFirstChar {
+                    it.titlecase(Locale.getDefault())
+                }
             }
 
             if (track.start_date.isBlank()) {

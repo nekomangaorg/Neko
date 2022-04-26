@@ -68,7 +68,8 @@ import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
-import java.util.*
+import java.util.Date
+import java.util.Locale
 
 class MangaDetailsPresenter(
     val manga: Manga,

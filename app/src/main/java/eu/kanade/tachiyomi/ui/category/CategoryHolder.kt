@@ -18,6 +18,7 @@ import eu.kanade.tachiyomi.ui.category.CategoryPresenter.Companion.CREATE_CATEGO
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.system.iconicsDrawable
 import eu.kanade.tachiyomi.util.system.iconicsDrawableMedium
+import java.util.Locale
 
 /**
  * Holder used to display category items.
@@ -45,7 +46,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
      */
     fun bind(category: Category) {
         // Set capitalized title.
-        binding.title.text = category.name.capitalize()
+        binding.title.text = category.name.replaceFirstChar { it.titlecase(Locale.getDefault()) }
         binding.editText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_DONE) {
                 submitChanges()
