@@ -15,9 +15,6 @@ import androidx.annotation.ColorInt
 import androidx.annotation.StringRes
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import net.greypanther.natsort.CaseInsensitiveSimpleNaturalComparator
-import java.net.URI
-import java.net.URISyntaxException
 import java.util.Locale
 import kotlin.math.floor
 
@@ -122,10 +119,12 @@ fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {
     val wordToSpan: Spannable = SpannableString(this)
     if (highlight.isBlank()) return wordToSpan
     indexesOf(highlight).forEach {
-        wordToSpan.setSpan(BackgroundColorSpan(color),
+        wordToSpan.setSpan(
+            BackgroundColorSpan(color),
             it,
             it + highlight.length,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
     }
     return wordToSpan
 }
@@ -161,22 +160,30 @@ fun String.withSubtitle(context: Context, subtitle: String): Spanned {
 fun String.addBetaTag(context: Context): Spanned {
     val betaText = context.getString(R.string.beta)
     val betaSpan = SpannableStringBuilder(this + betaText)
-    betaSpan.setSpan(SuperscriptSpan(),
+    betaSpan.setSpan(
+        SuperscriptSpan(),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(RelativeSizeSpan(0.75f),
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+    )
+    betaSpan.setSpan(
+        RelativeSizeSpan(0.75f),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(StyleSpan(Typeface.BOLD),
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+    )
+    betaSpan.setSpan(
+        StyleSpan(Typeface.BOLD),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
-    betaSpan.setSpan(ForegroundColorSpan(context.getResourceColor(R.attr.colorSecondary)),
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+    )
+    betaSpan.setSpan(
+        ForegroundColorSpan(context.getResourceColor(R.attr.colorSecondary)),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+    )
     return betaSpan
 }
 

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.main
+package eu.kanade.tachiyomi.ui.more
 
 import android.app.Dialog
 import android.content.res.ColorStateList
@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.toggle
 import eu.kanade.tachiyomi.databinding.TachiOverflowLayoutBinding
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.lang.withSubtitle
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor

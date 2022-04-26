@@ -23,7 +23,7 @@ class CrashLogUtil(private val context: Context) {
     fun dumpLogs() {
         try {
             val file = context.createFileInCacheDir("neko_crash_logs.txt")
-            file.appendText(getDebugInfo())
+            file.appendText(getDebugInfo() + "\n")
             Runtime.getRuntime().exec("logcat *:E -d -f ${file.absolutePath}")
 
             showNotification(file.getUriCompat(context))
@@ -41,7 +41,6 @@ class CrashLogUtil(private val context: Context) {
             Device name: ${Build.DEVICE}
             Device model: ${Build.MODEL}
             Device product name: ${Build.PRODUCT}
-            
         """.trimIndent()
     }
     private fun showNotification(uri: Uri) {

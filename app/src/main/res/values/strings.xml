@@ -302,6 +302,7 @@
 
     <!-- Other Screens -->
 
+    <string name="app_info">App info</string>
 
     <!-- Reader -->
     <string name="set_as_cover">Set as cover</string>
