@@ -19,7 +19,6 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
@@ -65,25 +64,11 @@ class LibraryItem(
                 LibraryListHolder(view, adapter as LibraryCategoryAdapter)
             } else {
                 view.apply {
+                    val isStaggered = parent.layoutManager is StaggeredGridLayoutManager
                     val binding = MangaGridItemBinding.bind(this)
                     binding.behindTitle.isVisible = libraryLayout == LAYOUT_COVER_ONLY_GRID
-                    if (libraryLayout == LAYOUT_COMPACT_GRID) {
-                        binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                            bottomMargin = 6.dpToPx
-                        }
-                    } else if (libraryLayout >= LAYOUT_COMFORTABLE_GRID) {
+                    if (libraryLayout >= LAYOUT_COMFORTABLE_GRID) {
                         binding.textLayout.isVisible = libraryLayout == LAYOUT_COMFORTABLE_GRID
-                        if (libraryLayout >= LAYOUT_COVER_ONLY_GRID) {
-                            binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                                bottomMargin = 6.dpToPx
-                            }
-                        }
-                        binding.constraintLayout.background = context.contextCompatDrawable(
-                            R.drawable.library_comfortable_grid_selector
-                        )
-                        binding.constraintLayout.foreground = context.contextCompatDrawable(
-                            R.drawable.library_comfortable_grid_selector_overlay
-                        )
                         binding.card.setCardForegroundColor(
                             ContextCompat.getColorStateList(
                                 context,
@@ -106,6 +91,12 @@ class LibraryItem(
                             dimensionRatio = "15:22"
                         }
                     }
+                    if (libraryLayout != LAYOUT_COMFORTABLE_GRID) {
+                        binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
+                            bottomMargin = (if (isStaggered) 2 else 6).dpToPx
+                        }
+                    }
+                    binding.setBGAndFG(libraryLayout)
                 }
                 val gridHolder = LibraryGridHolder(
                     view,

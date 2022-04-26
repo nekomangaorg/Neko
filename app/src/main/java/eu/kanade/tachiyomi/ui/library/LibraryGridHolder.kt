@@ -1,12 +1,14 @@
 package eu.kanade.tachiyomi.ui.library
 
 import android.app.Activity
+import android.graphics.drawable.RippleDrawable
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.view.isVisible
+import androidx.core.view.marginBottom
 import androidx.core.view.updateLayoutParams
 import coil.clear
 import coil.size.Precision
@@ -184,6 +186,28 @@ fun MangaGridItemBinding.setFreeformCoverRatio(manga: Manga?, parent: AutofitRec
         } else {
             height = ViewGroup.LayoutParams.WRAP_CONTENT
             dimensionRatio = null
+        }
+    }
+}
+
+fun MangaGridItemBinding.setBGAndFG(libraryLayout: Int) {
+    val bottom =
+        if (libraryLayout == LibraryItem.LAYOUT_COMFORTABLE_GRID) 2.dpToPx
+        else card.marginBottom - 2.dpToPx
+    val others =
+        if (libraryLayout == LibraryItem.LAYOUT_COMPACT_GRID) 4.dpToPx
+        else 5.dpToPx
+    (constraintLayout.background as? RippleDrawable)?.apply {
+        for (i in 0 until numberOfLayers) {
+            setLayerInset(i, others, others, others, bottom)
+        }
+    }
+    (constraintLayout.foreground as? RippleDrawable)?.apply {
+        if (libraryLayout == LibraryItem.LAYOUT_COMFORTABLE_GRID) {
+            setLayerSize(1, 0, 0)
+        }
+        for (i in 0 until numberOfLayers) {
+            setLayerInset(i, others, others, others, bottom)
         }
     }
 }

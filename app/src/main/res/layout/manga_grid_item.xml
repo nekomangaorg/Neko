@@ -12,8 +12,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@drawable/library_compact_grid_selector"
-        android:foreground="@drawable/library_compact_grid_selector_overlay"
+        android:background="@drawable/library_grid_selector"
+        android:foreground="@drawable/library_grid_selector_overlay"
         android:orientation="vertical">
 
         <com.google.android.material.card.MaterialCardView

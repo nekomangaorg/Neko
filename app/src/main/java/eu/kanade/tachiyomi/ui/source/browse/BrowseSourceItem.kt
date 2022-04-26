@@ -16,8 +16,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
 import eu.kanade.tachiyomi.ui.library.LibraryItem
-import eu.kanade.tachiyomi.util.system.contextCompatDrawable
-import eu.kanade.tachiyomi.util.system.dpToPx
+import eu.kanade.tachiyomi.ui.library.setBGAndFG
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 
 class BrowseSourceItem(
@@ -46,17 +45,7 @@ class BrowseSourceItem(
             val listType = catalogueListType.get()
             view.apply {
                 val binding = MangaGridItemBinding.bind(this)
-                if (listType == LibraryItem.LAYOUT_COMPACT_GRID) {
-                    binding.card.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                        bottomMargin = 6.dpToPx
-                    }
-                } else {
-                    binding.constraintLayout.background = context.contextCompatDrawable(
-                        R.drawable.library_comfortable_grid_selector
-                    )
-                    binding.constraintLayout.foreground = context.contextCompatDrawable(
-                        R.drawable.library_comfortable_grid_selector_overlay
-                    )
+                if (listType != LibraryItem.LAYOUT_COMPACT_GRID) {
                     binding.card.setCardForegroundColor(
                         ContextCompat.getColorStateList(
                             context,
@@ -64,6 +53,7 @@ class BrowseSourceItem(
                         )
                     )
                 }
+                binding.setBGAndFG(listType)
                 binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.WRAP_CONTENT
