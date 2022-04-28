@@ -411,6 +411,7 @@ class SettingsAdvancedController : SettingsController() {
             webview.clearHistory()
             webview.clearSslPreferences()
             WebStorage.getInstance().deleteAllData()
+            activity?.applicationInfo?.dataDir?.let { File("$it/app_webview/").deleteRecursively() }
             activity?.toast(R.string.webview_data_deleted)
         } catch (e: Throwable) {
             Timber.e(e)
