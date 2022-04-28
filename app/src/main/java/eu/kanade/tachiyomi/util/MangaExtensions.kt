@@ -35,6 +35,9 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
 
     if (categoriesForManga.any { it in excludedCategories }) return false
 
+    // Included category not selected
+    if (includedCategories.isEmpty()) return true
+
     return categoriesForManga.any { it in includedCategories }
 }
 
