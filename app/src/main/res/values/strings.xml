@@ -206,6 +206,8 @@
         <item quantity="one">and %1$d more chapter</item>
         <item quantity="other">and %1$d more chapters</item>
     </plurals>
+    <string name="notification_update_error">%1$d update(s) failed</string>
+
     <plurals name="notification_update_failed">
         <item quantity="one">1 update failed</item>
         <item quantity="other">%1$d updates failed</item>
@@ -994,6 +996,7 @@
     <string name="start">Start</string>
     <string name="stop">Stop</string>
     <string name="tag">Tag</string>
+    <string name="tap_to_see_details">Tap to see details</string>
     <string name="top">Top</string>
     <string name="undo">Undo</string>
     <string name="unknown_error">Unknown error</string>

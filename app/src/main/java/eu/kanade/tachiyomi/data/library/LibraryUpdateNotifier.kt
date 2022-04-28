@@ -105,27 +105,18 @@ class LibraryUpdateNotifier(private val context: Context) {
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
             context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
-                if (uri == null) {
-                    setContentTitle("502: MangaDex appears to be down")
-                } else {
-                    setContentTitle(
-                        context.resources.getQuantityString(
-                            R.plurals.notification_update_failed,
-                            errors.size,
-                            errors.size
-                        )
+                setContentTitle(context.getString(R.string.notification_update_error, errorCount))
+                setContentText(context.getString(R.string.tap_to_see_details))
+                setContentIntent(NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri))
+                setSmallIcon(R.drawable.ic_neko_notification)
+            }
+                .build()
                     )
                     addAction(
-                        R.drawable.ic_folder_24dp,
-                        context.getString(R.string.view_all_errors),
-                        NotificationReceiver.openErrorLogPendingActivity(context, uri)
-                    )
-                }
-                setStyle(
-                    NotificationCompat.BigTextStyle().bigText(
-                        errors.joinToString("\n") {
-                            it.chop(TITLE_MAX_LEN)
-                        }
+                    R.drawable.ic_help_24dp,
+                    context.getString(R.string.open_log),
+                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
+
                     )
                 )
                 setSmallIcon(R.drawable.ic_neko_notification)
