@@ -62,9 +62,11 @@ class LibraryUpdateNotifier(private val context: Context) {
             setOngoing(true)
             setOnlyAlertOnce(true)
             color = ContextCompat.getColor(context, R.color.new_neko_accent)
-            addAction(R.drawable.ic_close_24dp,
+            addAction(
+                R.drawable.ic_close_24dp,
                 context.getString(android.R.string.cancel),
-                cancelIntent)
+                cancelIntent
+            )
         }
     }
 
@@ -97,29 +99,32 @@ class LibraryUpdateNotifier(private val context: Context) {
      * @param errors List of entry titles that failed to update.
      * @param uri Uri for error log file containing all titles that failed.
      */
-    fun showUpdateErrorNotification(errors: List<String>, uri: Uri?) {
+    fun showUpdateErrorNotification(errors: List<String>, uri: Uri) {
         if (errors.isEmpty()) {
             return
         }
 
+        val pendingIntent = NotificationReceiver.openErrorLogPendingActivity(context, uri)
+
         context.notificationManager.notify(
             Notifications.ID_LIBRARY_ERROR,
             context.notificationBuilder(Notifications.CHANNEL_LIBRARY_ERROR) {
-                setContentTitle(context.getString(R.string.notification_update_error, errorCount))
+                setContentTitle(context.getString(R.string.notification_update_error, errors.size))
                 setContentText(context.getString(R.string.tap_to_see_details))
-                setContentIntent(NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri))
-                setSmallIcon(R.drawable.ic_neko_notification)
-            }
-                .build()
-                    )
-                    addAction(
-                    R.drawable.ic_help_24dp,
-                    context.getString(R.string.open_log),
-                    NotificationReceiver.openErrorOrSkippedLogPendingActivity(context, uri)
-
+                setStyle(
+                    NotificationCompat.BigTextStyle().bigText(
+                        errors.joinToString("\n") {
+                            it.chop(TITLE_MAX_LEN)
+                        }
                     )
                 )
+                setContentIntent(pendingIntent)
                 setSmallIcon(R.drawable.ic_neko_notification)
+                addAction(
+                    R.drawable.ic_help_24dp,
+                    context.getString(R.string.open_log),
+                    pendingIntent
+                )
             }
                 .build()
         )
@@ -269,10 +274,12 @@ class LibraryUpdateNotifier(private val context: Context) {
             flags = Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP
             action = MainActivity.SHORTCUT_RECENTLY_UPDATED
         }
-        return PendingIntent.getActivity(context,
+        return PendingIntent.getActivity(
+            context,
             0,
             intent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
     }
 
     companion object {

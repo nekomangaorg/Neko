@@ -321,10 +321,10 @@ class LibraryUpdateService(
             mangaToUpdateMap.clear()
         }
         jobCount.andDecrement
-        finishUpdates(isDexUp)
+        finishUpdates()
     }
 
-    private fun finishUpdates(isDexUp: Boolean = true) {
+    private fun finishUpdates() {
         if (jobCount.get() != 0) return
         if (newUpdates.isNotEmpty()) {
             notifier.showResultNotification(newUpdates)
@@ -340,12 +340,7 @@ class LibraryUpdateService(
                 errorFile.getUriCompat(this)
             )
         }
-        if (isDexUp.not()) {
-            notifier.showUpdateErrorNotification(
-                listOf("Skipping library update"),
-                null
-            )
-        }
+
         failedUpdates.clear()
         notifier.cancelProgressNotification()
     }
