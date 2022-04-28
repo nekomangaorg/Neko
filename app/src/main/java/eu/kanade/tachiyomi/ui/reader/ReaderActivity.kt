@@ -1093,14 +1093,12 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         viewer = newViewer
         binding.viewerContainer.addView(newViewer.getView())
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if (newViewer is R2LPagerViewer) {
-                binding.readerNav.leftChapter.tooltipText = getString(R.string.next_chapter)
-                binding.readerNav.rightChapter.tooltipText = getString(R.string.previous_chapter)
-            } else {
-                binding.readerNav.leftChapter.tooltipText = getString(R.string.previous_chapter)
-                binding.readerNav.rightChapter.tooltipText = getString(R.string.next_chapter)
-            }
+        if (newViewer is R2LPagerViewer) {
+            binding.readerNav.leftChapter.compatToolTipText = getString(R.string.next_chapter)
+            binding.readerNav.rightChapter.compatToolTipText = getString(R.string.previous_chapter)
+        } else {
+            binding.readerNav.leftChapter.compatToolTipText = getString(R.string.previous_chapter)
+            binding.readerNav.rightChapter.compatToolTipText = getString(R.string.next_chapter)
         }
 
         if (newViewer is PagerViewer) {
