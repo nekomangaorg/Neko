@@ -31,7 +31,6 @@ import eu.kanade.tachiyomi.widget.AutofitRecyclerView
  *
  * @param view the inflated view for this holder.
  * @param adapter the adapter handling this holder.
- * @param listener a listener to react to single tap and long tap events.
  * @constructor creates a new library holder.
  */
 class LibraryGridHolder(
@@ -44,17 +43,17 @@ class LibraryGridHolder(
     private val binding = MangaGridItemBinding.bind(view)
     init {
         binding.playLayout.setOnClickListener { playButtonClicked() }
+        binding.playLayout.setOnLongClickListener { itemView.performLongClick() }
         if (compact) {
             binding.textLayout.isVisible = false
         } else {
             binding.compactTitle.isVisible = false
             binding.gradient.isVisible = false
-            val playLayout = binding.playLayout.layoutParams as FrameLayout.LayoutParams
-            val buttonLayout = binding.playButton.layoutParams as FrameLayout.LayoutParams
-            playLayout.gravity = Gravity.BOTTOM or Gravity.END
-            buttonLayout.gravity = Gravity.BOTTOM or Gravity.END
-            binding.playLayout.layoutParams = playLayout
-            binding.playButton.layoutParams = buttonLayout
+            listOf(binding.playLayout, binding.playButton).forEach {
+                it.updateLayoutParams<FrameLayout.LayoutParams> {
+                    gravity = Gravity.BOTTOM or Gravity.END
+                }
+            }
         }
     }
 
