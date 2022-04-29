@@ -22,7 +22,7 @@ import java.util.Locale
  *
  * @param view the fragment containing this adapter.
  */
-class LibraryCategoryAdapter(val controller: LibraryController) :
+class LibraryCategoryAdapter(val controller: LibraryController?) :
     FlexibleAdapter<IFlexible<*>>(null, controller, true) {
 
     val sourceManager by injectLazy<SourceManager>()
@@ -34,7 +34,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     var showOutline = preferences.outlineOnCovers().get()
 
     val hasActiveFilters: Boolean
-        get() = controller.hasActiveFilters
+        get() = controller?.hasActiveFilters == true
 
     init {
         setDisplayHeadersAtStartUp(true)
@@ -50,10 +50,10 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
      */
     private var mangaList: List<LibraryItem> = emptyList()
 
-    val libraryListener: LibraryListener = controller
+    val libraryListener: LibraryListener? = controller
 
     val isSingleCategory
-        get() = controller.singleCategory || !controller.presenter.showAllCategories
+        get() = controller?.singleCategory == true || controller?.presenter?.showAllCategories == false
 
     /**
      * Sets a list of manga in the adapter.
@@ -68,7 +68,8 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
     }
 
     private fun setItemsPerCategoryMap() {
-        itemsPerCategory = headerItems.map { header ->
+        val controller = controller ?: return
+        itemsPerCategory = headerItems.associate { header ->
             (header as LibraryHeaderItem).catId to
                 controller.presenter.getItemCountInCategories(header.catId)
         }.toMap()
@@ -138,7 +139,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         } else {
             updateDataSet(mangaList.filter { it.filter(s) })
         }
-        isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
+        isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
         setItemsPerCategoryMap()
     }
 
@@ -153,7 +154,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
             val filteredManga = withDefContext { mangaList.filter { it.filter(s) } }
             updateDataSet(filteredManga)
         }
-        isLongPressDragEnabled = libraryListener.canDrag() && s.isNullOrBlank()
+        isLongPressDragEnabled = libraryListener?.canDrag() == true && s.isNullOrBlank()
         setItemsPerCategoryMap()
     }
 

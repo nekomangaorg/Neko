@@ -144,7 +144,7 @@ class LibraryGridHolder(
     }
 
     private fun playButtonClicked() {
-        adapter.libraryListener.startReading(flexibleAdapterPosition, binding.playButton)
+        adapter.libraryListener?.startReading(flexibleAdapterPosition, binding.playButton)
     }
 
     override fun onActionStateChanged(position: Int, actionState: Int) {

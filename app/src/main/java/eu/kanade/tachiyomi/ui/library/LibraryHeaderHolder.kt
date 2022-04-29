@@ -34,12 +34,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     init {
         binding.categoryHeaderLayout.setOnClickListener { toggleCategory() }
         binding.updateButton.setOnClickListener { addCategoryToUpdate() }
-        binding.categoryTitle.setOnLongClickListener {
-            val category =
-                (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
-            adapter.libraryListener.manageCategory(flexibleAdapterPosition)
-            category?.isDynamic == false
-        }
+        binding.categoryTitle.setOnLongClickListener { manageCategory() }
         binding.categoryTitle.setOnClickListener {
             val category =
                 (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
@@ -56,7 +51,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
     }
 
     private fun toggleCategory() {
-        adapter.libraryListener.toggleCategoryVisibility(flexibleAdapterPosition)
+        adapter.libraryListener?.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
             ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle)
@@ -145,17 +140,23 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         }
     }
 
-    private fun addCategoryToUpdate() {
-        if (adapter.libraryListener.updateCategory(flexibleAdapterPosition)) {
+    fun addCategoryToUpdate() {
+        if (adapter.libraryListener?.updateCategory(flexibleAdapterPosition) == true) {
             binding.catProgress.isVisible = true
             binding.updateButton.isInvisible = true
         }
     }
 
+    fun manageCategory(): Boolean {
+        val category = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+        adapter.libraryListener?.manageCategory(flexibleAdapterPosition)
+        return category?.isDynamic == false
+    }
+
     private fun showCatSortOptions() {
         val category =
             (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category ?: return
-        adapter.controller.activity?.let { activity ->
+        adapter.controller?.activity?.let { activity ->
             val items = LibrarySort.values().map { it.menuSheetItem(category.isDynamic) }
             val sortingMode = category.sortingMode(true)
             val sheet = MaterialMenuSheet(
@@ -231,15 +232,15 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
             }
             sortingMode.categoryValue
         }
-        adapter.libraryListener.sortCategory(category.id!!, modType)
+        adapter.libraryListener?.sortCategory(category.id!!, modType)
     }
 
     private fun selectAll() {
-        adapter.libraryListener.selectAll(flexibleAdapterPosition)
+        adapter.libraryListener?.selectAll(flexibleAdapterPosition)
     }
 
     fun setSelection() {
-        val allSelected = adapter.libraryListener.allSelected(flexibleAdapterPosition)
+        val allSelected = adapter.libraryListener?.allSelected(flexibleAdapterPosition) == true
         val drawable = ContextCompat.getDrawable(
             contentView.context,
             if (allSelected) R.drawable.ic_check_circle_24dp else R.drawable.ic_radio_button_unchecked_24dp
