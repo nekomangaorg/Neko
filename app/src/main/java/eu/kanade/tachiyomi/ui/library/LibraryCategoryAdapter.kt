@@ -284,7 +284,7 @@ class LibraryCategoryAdapter(val controller: LibraryController) :
         fun startReading(position: Int, view: View?)
         fun onItemReleased(position: Int)
         fun canDrag(): Boolean
-        fun updateCategory(catId: Int): Boolean
+        fun updateCategory(position: Int): Boolean
         fun sortCategory(catId: Int, sortBy: Char)
         fun selectAll(position: Int)
         fun allSelected(position: Int): Boolean
