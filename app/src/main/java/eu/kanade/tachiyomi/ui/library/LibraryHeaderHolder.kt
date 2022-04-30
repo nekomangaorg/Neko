@@ -4,13 +4,17 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.graphics.Color
 import android.util.TypedValue
+import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.DrawableRes
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
-import androidx.core.view.isInvisible
+import androidx.core.view.GestureDetectorCompat
 import androidx.core.view.isVisible
+import androidx.core.view.marginTop
 import androidx.core.view.updateLayoutParams
+import androidx.core.view.updatePadding
+import androidx.swiperefreshlayout.widget.CircularProgressDrawable
 import com.github.florent37.viewtooltip.ViewTooltip
 import eu.davidea.flexibleadapter.SelectableAdapter
 import eu.kanade.tachiyomi.R
@@ -20,19 +24,29 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.LibraryCategoryHeaderItemBinding
 import eu.kanade.tachiyomi.ui.base.MaterialMenuSheet
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
-class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAdapter) :
+class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
     BaseFlexibleViewHolder(view, adapter, true) {
 
     private val binding = LibraryCategoryHeaderItemBinding.bind(view)
+    val progressDrawableStart = CircularProgressDrawable(itemView.context)
+    val progressDrawableEnd = CircularProgressDrawable(itemView.context)
+    private val runningDrawable = CircularProgressDrawable(itemView.context)
+    private val refreshDrawable = itemView.context.contextCompatDrawable(R.drawable.ic_refresh_24dp)
+    var locked = false
+    private val headerGestureDetector = LibraryHeaderGestureDetector(this, binding)
 
     init {
-        binding.categoryHeaderLayout.setOnClickListener { toggleCategory() }
+        binding.categoryHeaderLayout.setOnClickListener {
+            if (!locked) toggleCategory()
+            locked = false
+        }
         binding.updateButton.setOnClickListener { addCategoryToUpdate() }
         binding.categoryTitle.setOnLongClickListener { manageCategory() }
         binding.categoryTitle.setOnClickListener {
@@ -47,7 +61,64 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
         binding.categorySort.setOnClickListener { it.post { showCatSortOptions() } }
         binding.categorySort.compatToolTipText = view.context.getString(R.string.sort)
         binding.checkbox.setOnClickListener { selectAll() }
-        binding.updateButton.drawable.mutate()
+
+        runningDrawable.setStyle(CircularProgressDrawable.DEFAULT)
+        runningDrawable.centerRadius = 6f.dpToPx
+        runningDrawable.strokeWidth = 2f.dpToPx
+        runningDrawable.setColorSchemeColors(itemView.context.getResourceColor(R.attr.colorSecondary))
+
+        binding.endRefresh.setImageDrawable(progressDrawableEnd)
+        binding.startRefresh.setImageDrawable(progressDrawableStart)
+        binding.startRefresh.scaleX = -1f
+        listOf(progressDrawableStart, progressDrawableEnd).forEach {
+            it.setColorSchemeColors(itemView.context.getResourceColor(R.attr.colorOnSecondary))
+            it.centerRadius = 1f
+            it.arrowEnabled = true
+            it.setStyle(CircularProgressDrawable.DEFAULT)
+        }
+        binding.setTouchEvents()
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private fun LibraryCategoryHeaderItemBinding.setTouchEvents() {
+        val gestureDetector = GestureDetectorCompat(root.context, headerGestureDetector)
+        listOf(categoryHeaderLayout, categorySort, categoryTitle, updateButton).forEach {
+            var isCancelling = false
+            it.setOnTouchListener { _, event ->
+                if (event?.action == MotionEvent.ACTION_DOWN) {
+                    locked = false
+                }
+                when (event?.action) {
+                    MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_UP -> {
+                        itemView.parent.requestDisallowInterceptTouchEvent(false)
+                        if (isCancelling) {
+                            isCancelling = false
+                            return@setOnTouchListener false
+                        }
+                        val result = gestureDetector.onTouchEvent(event)
+                        if (!result) {
+                            val anim = binding.categoryHeaderLayout.animate().setDuration(150L)
+                                .translationX(0f)
+                            anim.withEndAction { rearView.isVisible = true }
+                            anim.start()
+                            if (headerGestureDetector.vibrated) {
+                                addCategoryToUpdate()
+                            }
+                        } else {
+                            isCancelling = true
+                            val ev2 = MotionEvent.obtain(event)
+                            ev2.action = MotionEvent.ACTION_CANCEL
+                            it.dispatchTouchEvent(ev2)
+                            ev2.recycle()
+                        }
+                        result
+                    }
+                    else -> {
+                        gestureDetector.onTouchEvent(event)
+                    }
+                }
+            }
+        }
     }
 
     private fun toggleCategory() {
@@ -86,6 +157,7 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 }
                 ).dpToPx
         }
+        binding.rearView.updatePadding(top = binding.categoryTitle.marginTop - 6)
         val category = item.category
 
         binding.categoryTitle.text =
@@ -116,34 +188,48 @@ class LibraryHeaderHolder(val view: View, private val adapter: LibraryCategoryAd
                 binding.checkbox.isVisible = !category.isHidden
                 binding.collapseArrow.isVisible = category.isHidden && !adapter.isSingleCategory
                 binding.updateButton.isVisible = false
-                binding.catProgress.isVisible = false
                 setSelection()
             }
             category.id ?: -1 < 0 -> {
                 binding.collapseArrow.isVisible = false
                 binding.checkbox.isVisible = false
-                binding.catProgress.isVisible = false
+                setRefreshing(false)
                 binding.updateButton.isVisible = false
             }
             LibraryUpdateService.categoryInQueue(category.id) -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
                 binding.checkbox.isVisible = false
-                binding.catProgress.isVisible = true
-                binding.updateButton.isInvisible = true
+                binding.updateButton.isVisible = true
+                setRefreshing(true)
             }
             else -> {
                 binding.collapseArrow.isVisible = !adapter.isSingleCategory
-                binding.catProgress.isVisible = false
                 binding.checkbox.isVisible = false
+                setRefreshing(false)
                 binding.updateButton.isVisible = !adapter.isSingleCategory
             }
         }
     }
 
+    fun setRefreshing(refreshing: Boolean) {
+        binding.updateButton.isClickable = !refreshing
+        if (refreshing) {
+            if (!runningDrawable.isRunning) {
+                binding.updateButton.setImageDrawable(runningDrawable)
+                runningDrawable.arrowEnabled = false
+                runningDrawable.start()
+            }
+        } else {
+            runningDrawable.stop()
+            runningDrawable.setStartEndTrim(0f, 0.8f)
+            runningDrawable.arrowEnabled = true
+            binding.updateButton.setImageDrawable(refreshDrawable)
+        }
+    }
+
     fun addCategoryToUpdate() {
         if (adapter.libraryListener?.updateCategory(flexibleAdapterPosition) == true) {
-            binding.catProgress.isVisible = true
-            binding.updateButton.isInvisible = true
+            setRefreshing(true)
         }
     }
 

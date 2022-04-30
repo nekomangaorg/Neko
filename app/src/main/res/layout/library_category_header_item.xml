@@ -1,148 +1,179 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/category_header_layout"
-    android:layout_width="match_parent"
+    android:id="@+id/main_header_layout"
+    android:layout_width="fill_parent"
     android:layout_height="wrap_content"
-    android:background="@drawable/list_item_selector"
-    android:gravity="center_vertical">
+    android:background="?attr/background">
 
-    <Space
-        android:id="@+id/start_space"
-        android:layout_width="6dp"
-        android:layout_height="1dp"
-        app:layout_constraintBottom_toBottomOf="@+id/category_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/category_title" />
-
-    <ImageView
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="2dp"
-        android:clickable="true"
-        android:contentDescription="@string/select_all"
-        android:focusable="true"
-        android:padding="5dp"
-        android:src="@drawable/ic_check_circle_24dp"
+    <FrameLayout
+        android:id="@+id/rear_view"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@+id/category_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/category_title"
-        tools:tint="?attr/colorSecondary"
-        tools:visibility="gone" />
-
-    <ImageView
-        android:id="@+id/collapse_arrow"
-        android:layout_width="14dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:contentDescription="@string/select_all"
-        android:src="@drawable/ic_expand_less_24dp"
-        app:tint="?attr/colorOnBackground"
-        app:layout_constraintBottom_toBottomOf="@+id/category_title"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/category_title" />
-
-    <androidx.constraintlayout.widget.Barrier
-        android:id="@+id/start_barrier"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:barrierDirection="right"
-        app:constraint_referenced_ids="start_space,collapse_arrow,checkbox" />
-
-    <Space
-        android:id="@+id/space"
-        android:layout_width="0dp"
-        android:layout_height="20dp"
+        tools:visibility="visible"
+        android:background="?attr/colorSecondary"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/category_sort"
-        app:layout_constraintStart_toEndOf="@id/category_title"
-        app:layout_constraintWidth_min="1dp" />
-
-    <TextView
-        android:id="@+id/category_title"
-        style="?textAppearanceTitleMedium"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="28dp"
-        android:layout_marginBottom="6dp"
-        android:background="@drawable/square_ripple"
-        android:drawablePadding="6dp"
-        android:ellipsize="end"
-        android:gravity="center|start"
-        android:inputType="none"
-        android:maxLines="2"
-        android:paddingStart="0dp"
-        android:paddingTop="4dp"
-        android:paddingEnd="4dp"
-        android:paddingBottom="4dp"
-        android:textColor="?attr/colorOnBackground"
-        android:textSize="18sp"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/space"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toEndOf="@+id/start_barrier"
-        app:layout_constraintTop_toTopOf="parent"
-        tools:text="Title dfdsfsfsfsfsfdsfsfsfs" />
-
-
-    <TextView
-        android:id="@+id/category_sort"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="0dp"
-        android:background="@drawable/rounded_ripple"
-        android:clickable="true"
-        android:drawablePadding="6dp"
-        app:drawableTint="?attr/colorOnBackground"
-        android:ellipsize="start"
-        android:focusable="true"
-        android:gravity="center|end"
-        android:maxLines="2"
-        android:padding="6dp"
-        android:textAlignment="textEnd"
-        style="?textAppearanceBodyMedium"
-        android:textColor="?attr/colorOnBackground"
-        android:textSize="12sp"
-        android:textStyle="normal"
-        app:layout_constrainedWidth="true"
-        app:layout_constraintBottom_toBottomOf="@id/category_title"
-        app:layout_constraintEnd_toStartOf="@id/update_button"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toEndOf="@id/space"
-        app:layout_constraintTop_toTopOf="@id/category_title"
-        tools:text="Drag and Drop"
-        app:drawableEndCompat="@drawable/ic_sort_24dp" />
-
-    <ImageButton
-        android:id="@+id/update_button"
-        style="@style/Theme.Widget.ImageBorderless"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="6dp"
-        android:clickable="true"
-        android:focusable="true"
-        android:padding="4dp"
-        android:src="@drawable/ic_refresh_24dp"
-        app:tint="?attr/colorOnBackground"
-        android:tooltipText="@string/update"
-        app:layout_constraintBottom_toBottomOf="@id/category_title"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@id/category_sort"
-        app:layout_constraintTop_toTopOf="@id/category_title" />
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
 
-    <ProgressBar
-        android:id="@+id/cat_progress"
-        android:layout_width="0dp"
-        android:layout_height="0dp"
-        android:layout_margin="5dp"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/update_button"
-        app:layout_constraintEnd_toEndOf="@id/update_button"
-        app:layout_constraintStart_toStartOf="@id/update_button"
-        app:layout_constraintTop_toTopOf="@id/update_button"
-        tools:visibility="visible" />
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <ImageView
+            android:id="@+id/end_refresh"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            app:tint="@color/md_white_1000"
+            android:contentDescription="@string/update"
+            android:layout_gravity="end|center"
+            android:layout_marginEnd="6dp"
+            android:src="@drawable/ic_refresh_24dp" />
+
+        <ImageView
+            android:id="@+id/start_refresh"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="start|center"
+            android:layout_marginStart="6dp"
+            android:contentDescription="@string/edit"
+            app:tint="?colorOnSecondary"
+            android:src="@drawable/ic_edit_24dp" />
+    </FrameLayout>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/category_header_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:alpha="0.5"
+        android:background="@drawable/list_item_selector"
+        android:gravity="center_vertical">
+
+        <Space
+            android:id="@+id/start_space"
+            android:layout_width="6dp"
+            android:layout_height="1dp"
+            app:layout_constraintBottom_toBottomOf="@+id/category_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/category_title" />
+
+        <ImageView
+            android:id="@+id/checkbox"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="2dp"
+            android:clickable="true"
+            android:contentDescription="@string/select_all"
+            android:focusable="true"
+            android:padding="5dp"
+            android:src="@drawable/ic_check_circle_24dp"
+            android:visibility="gone"
+            app:layout_constraintBottom_toBottomOf="@+id/category_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/category_title"
+            tools:tint="?attr/colorSecondary"
+            tools:visibility="gone" />
+
+        <ImageView
+            android:id="@+id/collapse_arrow"
+            android:layout_width="14dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:contentDescription="@string/select_all"
+            android:src="@drawable/ic_expand_less_24dp"
+            app:tint="?attr/colorOnBackground"
+            app:layout_constraintBottom_toBottomOf="@+id/category_title"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/category_title" />
+
+        <androidx.constraintlayout.widget.Barrier
+            android:id="@+id/start_barrier"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:barrierDirection="right"
+            app:constraint_referenced_ids="start_space,collapse_arrow,checkbox" />
+
+        <Space
+            android:id="@+id/space"
+            android:layout_width="0dp"
+            android:layout_height="20dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/category_sort"
+            app:layout_constraintStart_toEndOf="@id/category_title"
+            app:layout_constraintWidth_min="1dp" />
+
+        <TextView
+            android:id="@+id/category_title"
+            style="?textAppearanceTitleMedium"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="28dp"
+            android:layout_marginBottom="6dp"
+            android:background="@drawable/square_ripple"
+            android:drawablePadding="6dp"
+            android:ellipsize="end"
+            android:gravity="center|start"
+            android:inputType="none"
+            android:maxLines="2"
+            android:paddingStart="0dp"
+            android:paddingTop="4dp"
+            android:paddingEnd="4dp"
+            android:paddingBottom="4dp"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="18sp"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/space"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintStart_toEndOf="@+id/start_barrier"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Title dfdsfsfsfsfsfdsfsfsfs" />
+
+
+        <TextView
+            android:id="@+id/category_sort"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="0dp"
+            android:background="@drawable/rounded_ripple"
+            android:clickable="true"
+            android:drawablePadding="6dp"
+            app:drawableTint="?attr/colorOnBackground"
+            android:ellipsize="start"
+            android:focusable="true"
+            android:gravity="center|end"
+            android:maxLines="2"
+            android:padding="6dp"
+            android:textAlignment="textEnd"
+            style="?textAppearanceBodyMedium"
+            android:textColor="?attr/colorOnBackground"
+            android:textSize="12sp"
+            android:textStyle="normal"
+            app:layout_constrainedWidth="true"
+            app:layout_constraintBottom_toBottomOf="@id/category_title"
+            app:layout_constraintEnd_toStartOf="@id/update_button"
+            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintStart_toEndOf="@id/space"
+            app:layout_constraintTop_toTopOf="@id/category_title"
+            tools:text="Drag and Drop"
+            app:drawableEndCompat="@drawable/ic_sort_24dp" />
+
+        <ImageButton
+            android:id="@+id/update_button"
+            style="@style/Theme.Widget.ImageBorderless"
+            android:layout_width="42dp"
+            android:layout_height="32dp"
+            android:clickable="true"
+            android:contentDescription="@string/update"
+            android:focusable="true"
+            android:padding="6dp"
+            android:paddingEnd="16dp"
+            android:paddingStart="6dp"
+            android:src="@drawable/ic_refresh_24dp"
+            app:tint="?attr/colorOnBackground"
+            android:tooltipText="@string/update"
+            app:layout_constraintBottom_toBottomOf="@id/category_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/category_sort"
+            app:layout_constraintTop_toTopOf="@id/category_title" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</FrameLayout>
