@@ -83,9 +83,8 @@ class SettingsDownloadController : SettingsController() {
             titleRes = R.string.download_new_chapters
 
             switchPreference {
-                key = Keys.downloadNew
+                bindTo(preferences.downloadNewChapters())
                 titleRes = R.string.download_new_chapters
-                defaultValue = false
             }
             triStateListPreference(activity) {
                 key = Keys.downloadNewCategories
@@ -97,21 +96,39 @@ class SettingsDownloadController : SettingsController() {
 
                 preferences.downloadNewChapters().asImmediateFlowIn(viewScope) { isVisible = it }
             }
-            preferenceCategory {
-                titleRes = R.string.automatic_removal
+        }
 
-                intListPreference(activity) {
-                    key = Keys.deleteRemovedChapters
-                    titleRes = R.string.delete_removed_chapters
-                    summary = activity?.getString(R.string.delete_downloaded_if_removed_online)
-                    entriesRes = arrayOf(
-                        R.string.ask_on_chapters_page,
-                        R.string.always_keep,
-                        R.string.always_delete
-                    )
-                    entryRange = 0..2
-                    defaultValue = 0
-                }
+        preferenceCategory {
+            titleRes = R.string.download_ahead
+
+            intListPreference(activity) {
+                bindTo(preferences.autoDownloadAfterReading())
+                titleRes = R.string.auto_download_after_reading
+                entriesRes = arrayOf(
+                    R.string.never,
+                    R.string.next_1_unread,
+                    R.string.next_2_unread,
+                    R.string.next_3_unread,
+                    R.string.next_5_unread,
+                )
+                entryValues = listOf(0, 1, 2, 3, 5)
+            }
+            infoPreference(R.string.download_ahead_info)
+        }
+
+        preferenceCategory {
+            titleRes = R.string.automatic_removal
+
+            intListPreference(activity) {
+                bindTo(preferences.deleteRemovedChapters())
+                titleRes = R.string.delete_removed_chapters
+                summary = activity?.getString(R.string.delete_downloaded_if_removed_online)
+                entriesRes = arrayOf(
+                    R.string.ask_on_chapters_page,
+                    R.string.always_keep,
+                    R.string.always_delete
+                )
+                entryRange = 0..2
             }
         }
     }

@@ -26,6 +26,7 @@ import eu.kanade.tachiyomi.source.online.MangaDex
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BasePresenter
+import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.reader.chapter.ReaderChapterItem
 import eu.kanade.tachiyomi.ui.reader.loader.ChapterLoader
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
@@ -41,6 +42,7 @@ import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.toInt
 import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -171,8 +173,14 @@ class ReaderPresenter(
         val currentChapters = viewerChaptersRelay.value
         if (currentChapters != null) {
             currentChapters.unref()
-            saveChapterProgress(currentChapters.currChapter)
-            saveChapterHistory(currentChapters.currChapter)
+            val currentChapter = currentChapters.currChapter
+            saveChapterProgress(currentChapter)
+            saveChapterHistory(currentChapter)
+            val currentChapterPageCount = currentChapter.chapter.last_page_read + currentChapter.chapter.pages_left
+            if ((currentChapter.chapter.last_page_read + 1.0) / currentChapterPageCount > 0.33 || isAnyPrevChapterDownloaded) {
+                downloadNextChapters()
+            }
+            isAnyPrevChapterDownloaded = false
         }
     }
 
@@ -462,6 +470,9 @@ class ReaderPresenter(
                     (hasExtraPage && selectedChapter.pages?.lastIndex?.minus(1) == page.index)
                 )
         ) {
+            if (!isAnyPrevChapterDownloaded) {
+                isAnyPrevChapterDownloaded = downloadManager.isChapterDownloaded(selectedChapter.chapter, manga!!)
+            }
             if (preferences.incognitoMode().get().not()) {
                 selectedChapter.chapter.read = true
                 updateTrackChapterAfterReading(selectedChapter)
@@ -474,6 +485,45 @@ class ReaderPresenter(
             onChapterChanged(currentChapters.currChapter)
             loadNewChapter(selectedChapter)
         }
+    }
+
+    private fun downloadNextChapters() {
+        val manga = manga ?: return
+        val chaptersNumberToDownload = preferences.autoDownloadAfterReading().get()
+        if (chaptersNumberToDownload == 0 || !manga.favorite) return
+        val currentChapter = viewerChapters?.currChapter ?: return
+        val isChapterDownloaded = downloadManager.isChapterDownloaded(currentChapter.chapter, manga)
+        if (isChapterDownloaded || isAnyPrevChapterDownloaded) {
+            downloadAutoNextChapters(chaptersNumberToDownload, !isChapterDownloaded && !currentChapter.chapter.read)
+        }
+    }
+
+    private fun downloadAutoNextChapters(choice: Int, includeCurrentChapter: Boolean) {
+        val chaptersToDownload = getNextUnreadChaptersSorted(includeCurrentChapter).take(choice)
+        if (chaptersToDownload.isNotEmpty()) {
+            downloadChapters(chaptersToDownload)
+        }
+    }
+
+    private fun getNextUnreadChaptersSorted(includeCurrentChapter: Boolean): List<ChapterItem> {
+        val currentChapterId = getCurrentChapter()?.chapter?.id
+        val chapterSort = ChapterSort(manga!!, chapterFilter, preferences)
+
+        val chapters = chapterList.map { ChapterItem(it.chapter, manga!!) }
+            .filter { !it.read || it.id == currentChapterId }
+            .distinctBy { it.name }
+            .sortedWith(chapterSort.sortComparator(true))
+
+        val currentChapterIndex = chapters.indexOfFirst { it.id == currentChapterId }
+        return chapters.takeLast(chapters.lastIndex - currentChapterIndex + includeCurrentChapter.toInt())
+    }
+
+    /**
+     * Downloads the given list of chapters with the manager.
+     * @param chapters the list of chapters to download.
+     */
+    private fun downloadChapters(chapters: List<ChapterItem>) {
+        downloadManager.downloadChapters(manga!!, chapters.filter { !it.isDownloaded })
     }
 
     /**
@@ -939,5 +989,12 @@ class ReaderPresenter(
             .onErrorComplete()
             .subscribeOn(Schedulers.io())
             .subscribe()
+    }
+
+    companion object {
+        /**
+         * To check if any chapter of the current reading session was downloaded
+         */
+        private var isAnyPrevChapterDownloaded = false
     }
 }

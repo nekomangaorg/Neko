@@ -355,6 +355,8 @@ class PreferencesHelper(val context: Context) {
 
     fun langsToShow() = flowPrefs.getString(Keys.langToShow, "en")
 
+    fun autoDownloadAfterReading() = flowPrefs.getInt("auto_download_after_reading", 0)
+
     fun defaultCategory() = prefs.getInt(Keys.defaultCategory, -1)
 
     fun skipRead() = prefs.getBoolean(Keys.skipRead, false)
