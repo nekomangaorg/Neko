@@ -1,14 +1,15 @@
 package eu.kanade.tachiyomi.ui.reader.viewer
 
 import android.content.Context
-import android.graphics.drawable.Drawable
+import android.text.SpannableStringBuilder
+import android.text.style.ImageSpan
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.widget.LinearLayout
-import android.widget.TextView
 import androidx.annotation.ColorInt
 import androidx.core.text.bold
 import androidx.core.text.buildSpannedString
+import androidx.core.text.inSpans
 import androidx.core.view.isVisible
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -17,6 +18,7 @@ import eu.kanade.tachiyomi.databinding.ReaderTransitionViewBinding
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.util.system.contextCompatDrawable
 import eu.kanade.tachiyomi.util.system.dpToPx
+import kotlin.math.roundToInt
 
 class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     LinearLayout(context, attrs) {
@@ -48,27 +50,20 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
     ) {
         val prevChapter = transition.to
 
-        val hasPrevChapter = prevChapter != null
-        binding.lowerText.isVisible = hasPrevChapter
-        if (hasPrevChapter) {
+        binding.lowerText.isVisible = prevChapter != null
+        if (prevChapter != null) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
-            val isPrevDownloaded = downloadManager.isChapterDownloaded(prevChapter!!.chapter, manga)
+            val isPrevDownloaded = downloadManager.isChapterDownloaded(prevChapter.chapter, manga)
             val isCurrentDownloaded = downloadManager.isChapterDownloaded(transition.from.chapter, manga)
-
-            val downloadIcon = context.contextCompatDrawable(R.drawable.ic_file_download_24dp)?.mutate()
-            val cloudIcon = context.contextCompatDrawable(R.drawable.ic_cloud_24dp)?.mutate()
             binding.upperText.text = buildSpannedString {
                 bold { append(context.getString(R.string.previous_title)) }
                 append("\n${prevChapter.chapter.name}")
+                if (isPrevDownloaded != isCurrentDownloaded) addDLImageSpan(isPrevDownloaded)
             }
             binding.lowerText.text = buildSpannedString {
                 bold { append(context.getString(R.string.current_chapter)) }
                 append("\n${transition.from.chapter.name}")
             }
-
-            binding.lowerText.setDrawable(null)
-            if (isPrevDownloaded && !isCurrentDownloaded) binding.upperText.setDrawable(downloadIcon)
-            else if (!isPrevDownloaded && isCurrentDownloaded) binding.upperText.setDrawable(cloudIcon)
         } else {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_CENTER
             binding.upperText.text = context.getString(R.string.theres_no_previous_chapter)
@@ -85,12 +80,11 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
     ) {
         val nextChapter = transition.to
 
-        val hasNextChapter = nextChapter != null
-        binding.lowerText.isVisible = hasNextChapter
-        if (hasNextChapter) {
+        binding.lowerText.isVisible = nextChapter != null
+        if (nextChapter != null) {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_TEXT_START
             val isCurrentDownloaded = downloadManager.isChapterDownloaded(transition.from.chapter, manga)
-            val isNextDownloaded = downloadManager.isChapterDownloaded(nextChapter!!.chapter, manga)
+            val isNextDownloaded = downloadManager.isChapterDownloaded(nextChapter.chapter, manga)
             binding.upperText.text = buildSpannedString {
                 bold { append(context.getString(R.string.finished_chapter)) }
                 append("\n${transition.from.chapter.name}")
@@ -98,24 +92,26 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
             binding.lowerText.text = buildSpannedString {
                 bold { append(context.getString(R.string.next_title)) }
                 append("\n${nextChapter.chapter.name}")
+                if (isNextDownloaded != isCurrentDownloaded) addDLImageSpan(isNextDownloaded)
             }
-
-            val downloadIcon = context.contextCompatDrawable(R.drawable.ic_file_download_24dp)?.mutate()
-            val cloudIcon = context.contextCompatDrawable(R.drawable.ic_cloud_24dp)?.mutate()
-
-            binding.upperText.setDrawable(null)
-            if (!isCurrentDownloaded && isNextDownloaded) binding.lowerText.setDrawable(downloadIcon)
-            else if (isCurrentDownloaded && !isNextDownloaded) binding.lowerText.setDrawable(cloudIcon)
         } else {
             binding.upperText.textAlignment = TEXT_ALIGNMENT_CENTER
             binding.upperText.text = context.getString(R.string.theres_no_next_chapter)
         }
     }
 
-    private fun TextView.setDrawable(drawable: Drawable?) {
-        drawable?.setTint(binding.lowerText.currentTextColor)
-        setCompoundDrawablesRelativeWithIntrinsicBounds(null, null, drawable, null)
-        compoundDrawablePadding = 8.dpToPx
+    private fun SpannableStringBuilder.addDLImageSpan(isDownloaded: Boolean) {
+        val icon = context.contextCompatDrawable(
+            if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp
+        )
+            ?.mutate()
+            ?.apply {
+                val size = binding.lowerText.textSize + 4f.dpToPx
+                setTint(binding.lowerText.currentTextColor)
+                setBounds(0, 0, size.roundToInt(), size.roundToInt())
+            } ?: return
+        append(" ")
+        inSpans(ImageSpan(icon)) { append("image") }
     }
 
     fun setTextColors(@ColorInt color: Int) {
