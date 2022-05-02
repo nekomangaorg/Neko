@@ -4,7 +4,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
-import coil.clear
+import coil.dispose
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.MangaListItemBinding
@@ -90,7 +90,7 @@ class LibraryListHolder(
         }
 
         // Update the cover.
-        binding.coverThumbnail.clear()
+        binding.coverThumbnail.dispose()
         binding.coverThumbnail.loadManga(item.manga)
     }
 

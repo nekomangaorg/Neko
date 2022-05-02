@@ -422,14 +422,14 @@ class LibraryUpdateService(
             withIOContext {
                 // dont refresh covers while using cached source
                 if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                    .get()
+                        .get()
                 ) {
                     coverCache.deleteFromCache(thumbnailUrl)
                     // load new covers in background
                     val request =
                         ImageRequest.Builder(this@LibraryUpdateService).data(manga)
                             .memoryCachePolicy(CachePolicy.DISABLED).build()
-                    Coil.imageLoader(this@LibraryUpdateService).enqueue(request)
+                    Coil.imageLoader(this@LibraryUpdateService).execute(request)
                 }
             }
             db.insertManga(manga).executeOnIO()

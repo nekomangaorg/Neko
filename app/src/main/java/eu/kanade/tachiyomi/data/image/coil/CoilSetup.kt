@@ -9,47 +9,56 @@ import coil.ImageLoader
 import coil.decode.GifDecoder
 import coil.decode.ImageDecoderDecoder
 import coil.decode.SvgDecoder
-import com.chuckerteam.chucker.api.ChuckerCollector
-import com.chuckerteam.chucker.api.ChuckerInterceptor
-import eu.kanade.tachiyomi.BuildConfig
+import coil.disk.DiskCache
+import coil.memory.MemoryCache
 import eu.kanade.tachiyomi.network.NetworkHelper
-import okhttp3.OkHttpClient
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
 class CoilSetup(context: Context) {
     init {
-        val imageLoader = ImageLoader.Builder(context)
-            .availableMemoryPercentage(0.40)
-            .crossfade(true)
-            .allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
-            .allowHardware(true)
-            .componentRegistry {
-                if (Build.VERSION.SDK_INT >= 28) {
-                    add(ImageDecoderDecoder(context))
+        val imageLoader = ImageLoader.Builder(context).apply {
+            val callFactoryInit = { Injekt.get<NetworkHelper>().client }
+            val diskCacheInit = { CoilDiskCache.get(context) }
+            components {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                    add(ImageDecoderDecoder.Factory())
                 } else {
-                    add(GifDecoder())
+                    add(GifDecoder.Factory())
                 }
-                add(SvgDecoder(context))
-                add(MangaFetcher())
-                add(ByteArrayFetcher())
-            }.okHttpClient {
-                OkHttpClient.Builder().apply {
-                    if (BuildConfig.DEBUG) {
-                        addInterceptor(
-                            ChuckerInterceptor.Builder(context)
-                                .collector(ChuckerCollector(context))
-                                .maxContentLength(250000L)
-                                .redactHeaders(emptySet())
-                                .alwaysReadResponseBody(false)
-                                .build(),
-                        )
-                    }
-                }.build()
+                add(SvgDecoder.Factory())
+                add(TachiyomiImageDecoder.Factory())
+                add(MangaCoverFetcher.Factory(lazy(callFactoryInit), lazy(diskCacheInit)))
+                add(MangaCoverKeyer())
             }
-            .okHttpClient(Injekt.get<NetworkHelper>().coilClient)
-            .build()
-
+            callFactory(callFactoryInit)
+            diskCache(diskCacheInit)
+            memoryCache { MemoryCache.Builder(context).maxSizePercent(0.40).build() }
+            crossfade(true)
+            allowRgb565(context.getSystemService<ActivityManager>()!!.isLowRamDevice)
+            allowHardware(true)
+        }.build()
         Coil.setImageLoader(imageLoader)
+    }
+}
+
+/**
+ * Direct copy of Coil's internal SingletonDiskCache so that [MangaCoverFetcher] can access it.
+ */
+internal object CoilDiskCache {
+
+    private const val FOLDER_NAME = "image_cache"
+    private var instance: DiskCache? = null
+
+    @Synchronized
+    fun get(context: Context): DiskCache {
+        return instance ?: run {
+            val safeCacheDir = context.cacheDir.apply { mkdirs() }
+            // Create the singleton disk cache instance.
+            DiskCache.Builder()
+                .directory(safeCacheDir.resolve(FOLDER_NAME))
+                .build()
+                .also { instance = it }
+        }
     }
 }

@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.track
 
 import android.view.View
 import androidx.core.view.isVisible
-import coil.clear
+import coil.dispose
 import coil.load
 import com.google.android.material.shape.CornerFamily
 import com.mikepenz.fastadapter.FastAdapter
@@ -45,7 +45,7 @@ class TrackSearchItem(val trackSearch: TrackSearch) : AbstractItem<TrackSearchIt
             binding.trackSearchTitle.text = track.title
             binding.trackSearchSummary.text = track.summary
             binding.trackSearchSummary.isVisible = track.summary.isNotBlank()
-            binding.trackSearchCover.clear()
+            binding.trackSearchCover.dispose()
             if (track.cover_url.isNotEmpty()) {
                 binding.trackSearchCover.load(track.cover_url)
             }

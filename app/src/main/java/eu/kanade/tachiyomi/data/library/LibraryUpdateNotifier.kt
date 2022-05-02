@@ -13,12 +13,12 @@ import androidx.core.content.ContextCompat
 import coil.Coil
 import coil.request.CachePolicy
 import coil.request.ImageRequest
-import coil.request.Parameters
 import coil.transform.CircleCropTransformation
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Chapter
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.NotificationHandler
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -151,11 +151,8 @@ class LibraryUpdateNotifier(private val context: Context) {
                                 setSmallIcon(R.drawable.ic_neko_notification)
                                 try {
                                     val request = ImageRequest.Builder(context).data(manga)
-                                        .parameters(
-                                            Parameters.Builder().set(MangaFetcher.onlyCache, true)
-                                                .build(),
-                                        )
-                                        .networkCachePolicy(CachePolicy.READ_ONLY)
+                                        .networkCachePolicy(CachePolicy.DISABLED)
+                                        .diskCachePolicy(CachePolicy.ENABLED)
                                         .transformations(CircleCropTransformation())
                                         .size(width = ICON_SIZE, height = ICON_SIZE).build()
 

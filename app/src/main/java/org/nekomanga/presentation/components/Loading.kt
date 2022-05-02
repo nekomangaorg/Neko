@@ -35,6 +35,6 @@ fun Loading(isLoading: Boolean, modifier: Modifier = Modifier) {
 
 @Preview
 @Composable
-private fun loading() {
+private fun Loading() {
     Loading(isLoading = true)
 }

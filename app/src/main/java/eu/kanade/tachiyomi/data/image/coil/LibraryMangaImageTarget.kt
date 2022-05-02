@@ -34,7 +34,7 @@ class LibraryMangaImageTarget(
                     BitmapFactory.decodeFile(file.path, options)
                     if (options.outWidth == -1 || options.outHeight == -1) {
                         file.delete()
-                        view.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
+                        view.context.imageLoader.memoryCache?.remove(MemoryCache.Key(manga.key()))
                     }
                 }
             }

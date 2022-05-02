@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.download.DownloadManager
-import eu.kanade.tachiyomi.data.image.coil.MangaFetcher
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
 import eu.kanade.tachiyomi.data.preference.plusAssign
@@ -348,8 +347,8 @@ class LibraryPresenter(
 
         if (filterMangaType > 0) {
             if (if (filterMangaType == Manga.TYPE_MANHWA) {
-                (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
-            } else {
+                    (filterMangaType != item.manga.seriesType() && filterMangaType != Manga.TYPE_WEBTOON)
+                } else {
                     filterMangaType != item.manga.seriesType()
                 }
             ) return false
@@ -372,9 +371,9 @@ class LibraryPresenter(
             val hasTrack = loggedServices.any { service ->
                 tracks.any {
                     if (service.isMdList() && (
-                        source.isLogged()
-                            .not() || it.status == FollowStatus.UNFOLLOWED.int
-                        )
+                            source.isLogged()
+                                .not() || it.status == FollowStatus.UNFOLLOWED.int
+                            )
                     ) {
                         false
                     } else {
@@ -617,9 +616,9 @@ class LibraryPresenter(
                 categories.forEach { category ->
                     val catId = category.id ?: return@forEach
                     if (catId > 0 && !categorySet.contains(catId) && (
-                        catId !in categoriesHidden ||
-                            !showAll
-                        )
+                            catId !in categoriesHidden ||
+                                !showAll
+                            )
                     ) {
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
@@ -668,8 +667,10 @@ class LibraryPresenter(
         return items
     }
 
-    private fun getCustomMangaItems(libraryManga: List<LibraryManga>): Pair<List<LibraryItem>,
-        List<Category>,> {
+    private fun getCustomMangaItems(libraryManga: List<LibraryManga>): Pair<
+        List<LibraryItem>,
+        List<Category>,
+        > {
         val tagItems: MutableMap<String, LibraryHeaderItem> = mutableMapOf()
 
         // internal function to make headers
@@ -1273,10 +1274,12 @@ class LibraryPresenter(
 
         suspend fun updateRatiosAndColors() {
             val db: DatabaseHelper = Injekt.get()
-            val mangaFetcher = MangaFetcher()
             val libraryManga = db.getFavoriteMangaList().executeOnIO()
             libraryManga.forEach { manga ->
-                try { withUIContext { mangaFetcher.setRatioAndColors(manga) } } catch (_: Exception) { }
+                try {
+                    withUIContext { MangaCoverMetadata.setRatioAndColors(manga) }
+                } catch (_: Exception) {
+                }
             }
             MangaCoverMetadata.savePrefs()
         }

@@ -2,7 +2,7 @@ package eu.kanade.tachiyomi.ui.manga.merge
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import coil.clear
+import coil.dispose
 import coil.load
 import coil.transform.RoundedCornersTransformation
 import com.mikepenz.fastadapter.binding.AbstractBindingItem
@@ -22,7 +22,7 @@ class MergeSearchItem(val manga: SManga) : AbstractBindingItem<MergeSearchItemBi
 
     override fun bindView(binding: MergeSearchItemBinding, payloads: List<Any>) {
         binding.mergeSearchTitle.text = manga.title
-        binding.mergeSearchCover.clear()
+        binding.mergeSearchCover.dispose()
         if (!manga.thumbnail_url.isNullOrEmpty()) {
             binding.mergeSearchCover.load(manga.thumbnail_url) {
                 transformations(RoundedCornersTransformation(2f))
@@ -31,6 +31,6 @@ class MergeSearchItem(val manga: SManga) : AbstractBindingItem<MergeSearchItemBi
     }
 
     override fun unbindView(binding: MergeSearchItemBinding) {
-        binding.mergeSearchCover.clear()
+        binding.mergeSearchCover.dispose()
     }
 }

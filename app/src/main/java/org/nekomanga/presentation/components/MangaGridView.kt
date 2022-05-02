@@ -32,18 +32,20 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import coil.compose.rememberImagePainter
-import coil.transform.RoundedCornersTransformation
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import org.nekomanga.presentation.screens.EmptyScreen
 import org.nekomanga.presentation.theme.Shapes
@@ -342,12 +344,12 @@ private fun GridCover(manga: Manga, shouldOutlineCover: Boolean) {
     }
 
     Image(
-        painter = rememberImagePainter(
-            data = manga,
-            builder = {
-                placeholder(Pastel.getColorLight())
-                transformations(RoundedCornersTransformation(0f))
-            },
+        painter = rememberAsyncImagePainter(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(manga)
+                .setParameter(MangaCoverFetcher.useCustomCover, false)
+                .placeholder(Pastel.getColorLight())
+                .build(),
         ),
         contentDescription = null,
         modifier = Modifier

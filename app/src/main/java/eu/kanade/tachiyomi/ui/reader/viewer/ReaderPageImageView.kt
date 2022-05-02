@@ -17,6 +17,7 @@ import androidx.annotation.CallSuper
 import androidx.annotation.StyleRes
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
+import coil.dispose
 import coil.imageLoader
 import coil.request.CachePolicy
 import coil.request.ImageRequest
@@ -102,7 +103,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
     fun recycle() = pageView?.let {
         when (it) {
             is SubsamplingScaleImageView -> it.recycle()
-            // is AppCompatImageView -> it.dispose()
+            is AppCompatImageView -> it.dispose()
         }
         it.isVisible = false
     }

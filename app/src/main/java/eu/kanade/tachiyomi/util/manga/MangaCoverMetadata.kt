@@ -1,9 +1,14 @@
 package eu.kanade.tachiyomi.util.manga
 
+import android.graphics.BitmapFactory
 import androidx.annotation.ColorInt
+import androidx.palette.graphics.Palette
+import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import uy.kohesive.injekt.injectLazy
+import java.io.File
 import java.util.concurrent.ConcurrentHashMap
 
 /** Object that holds info about a covers size ratio + dominant colors */
@@ -11,6 +16,7 @@ object MangaCoverMetadata {
     private var coverRatioMap = ConcurrentHashMap<Long, Float>()
     private var coverColorMap = ConcurrentHashMap<Long, Pair<Int, Int>>()
     val preferences by injectLazy<PreferencesHelper>()
+    val coverCache by injectLazy<CoverCache>()
 
     fun load() {
         val ratios = preferences.coverRatios().get()
@@ -40,6 +46,40 @@ object MangaCoverMetadata {
                 }
             }.toMap(),
         )
+    }
+
+    fun setRatioAndColors(manga: Manga, ogFile: File? = null, force: Boolean = false) {
+        if (!manga.favorite) {
+            MangaCoverMetadata.remove(manga)
+        }
+        if (manga.vibrantCoverColor != null && !manga.favorite) return
+        val file = ogFile ?: coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
+        // if the file exists and the there was still an error then the file is corrupted
+        if (file.exists()) {
+            val options = BitmapFactory.Options()
+            val hasVibrantColor = if (manga.favorite) manga.vibrantCoverColor != null else true
+            if (manga.dominantCoverColors != null && hasVibrantColor && !force) {
+                options.inJustDecodeBounds = true
+            } else {
+                options.inSampleSize = 4
+            }
+            val bitmap = BitmapFactory.decodeFile(file.path, options) ?: return
+            if (!options.inJustDecodeBounds) {
+                Palette.from(bitmap).generate {
+                    if (it == null) return@generate
+                    if (manga.favorite) {
+                        it.dominantSwatch?.let { swatch ->
+                            manga.dominantCoverColors = swatch.rgb to swatch.titleTextColor
+                        }
+                    }
+                    val color = it.getBestColor() ?: return@generate
+                    manga.vibrantCoverColor = color
+                }
+            }
+            if (manga.favorite && !(options.outWidth == -1 || options.outHeight == -1)) {
+                addCoverRatio(manga, options.outWidth / options.outHeight.toFloat())
+            }
+        }
     }
 
     fun remove(manga: Manga) {

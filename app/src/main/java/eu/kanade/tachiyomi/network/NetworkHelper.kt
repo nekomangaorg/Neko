@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.network
 
 import android.content.Context
-import coil.util.CoilUtils
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
@@ -145,11 +144,6 @@ class NetworkHelper(val context: Context) {
     val cloudFlareClient = buildCloudFlareClient()
 
     val client = buildRateLimitedClient()
-
-    val coilClient by lazy {
-        buildNonRateLimitedClient().newBuilder().cache(CoilUtils.createDefaultCache(context))
-            .build()
-    }
 
     private val authClient = buildRateLimitedAuthenticatedClient()
 

@@ -23,15 +23,17 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
-import coil.compose.rememberImagePainter
-import coil.transform.RoundedCornersTransformation
+import coil.compose.rememberAsyncImagePainter
+import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
 import org.nekomanga.presentation.components.CoverRippleTheme
 import org.nekomanga.presentation.components.DisplayText
@@ -200,12 +202,12 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
             else -> Modifier
         }
         Image(
-            painter = rememberImagePainter(
-                data = manga,
-                builder = {
-                    placeholder(Pastel.getColorLight())
-                    transformations(RoundedCornersTransformation(0f))
-                },
+            painter = rememberAsyncImagePainter(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(manga)
+                    .setParameter(MangaCoverFetcher.useCustomCover, false)
+                    .placeholder(Pastel.getColorLight())
+                    .build(),
             ),
             contentDescription = null,
             modifier = modifier
@@ -214,7 +216,7 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
                 .clip(RoundedCornerShape(Shapes.coverRadius))
                 .then(outlineModifier),
 
-        )
+            )
         if (manga.favorite) {
             val offset = (-4).dp
             Favorited(offset)
