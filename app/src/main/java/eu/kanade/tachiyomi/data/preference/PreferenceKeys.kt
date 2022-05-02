@@ -135,7 +135,7 @@ object PreferenceKeys {
 
     const val libraryUpdateInterval = "pref_library_update_interval_key"
 
-    const val libraryUpdateRestriction = "library_update_restriction"
+    const val libraryUpdateDeviceRestriction = "library_update_restriction"
 
     const val libraryUpdateCategories = "library_update_categories"
     const val libraryUpdateCategoriesExclude = "library_update_categories_exclude"

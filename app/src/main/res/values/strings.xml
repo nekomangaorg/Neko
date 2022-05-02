@@ -915,6 +915,7 @@
     <string name="center">Center</string>
     <string name="change">Change</string>
     <string name="charging">Charging</string>
+    <string name="battery_not_low">Battery not low</string>
     <string name="clear">Clear</string>
     <string name="clear_filters">Clear filters</string>
     <string name="close">Close</string>
