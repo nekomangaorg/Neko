@@ -877,7 +877,7 @@ class ReaderPresenter(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeFirst(
                 { view, file -> view.onShareImageResult(file, page) },
-                { _, _ -> /* Empty */ },
+                { _, _ -> },
             )
     }
 
