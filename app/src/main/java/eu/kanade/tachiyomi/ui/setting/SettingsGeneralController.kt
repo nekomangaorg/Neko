@@ -79,6 +79,18 @@ class SettingsGeneralController : SettingsController() {
             summaryRes = R.string.pressing_back_to_start
             defaultValue = true
         }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            preference {
+                key = "pref_manage_notifications"
+                titleRes = R.string.pref_manage_notifications
+                onClick {
+                    val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
+                        putExtra(Settings.EXTRA_APP_PACKAGE, context.packageName)
+                    }
+                    startActivity(intent)
+                }
+            }
+        }
 
         preferenceCategory {
             titleRes = R.string.app_shortcuts
