@@ -6,6 +6,7 @@ import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import android.widget.FrameLayout
+import androidx.core.animation.doOnEnd
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
 import androidx.core.view.isVisible
@@ -14,7 +15,6 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.download.model.Download
 import eu.kanade.tachiyomi.databinding.DownloadButtonBinding
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.widget.EndAnimatorListener
 
 class DownloadButton @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
     FrameLayout(context, attrs) {
@@ -158,12 +158,10 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                     alphaAnimation.addUpdateListener { valueAnimator ->
                         binding.downloadIcon.drawable.setTint(valueAnimator.animatedValue as Int)
                     }
-                    alphaAnimation.addListener(
-                        EndAnimatorListener {
-                            binding.downloadIcon.drawable.setTint(downloadedTextColor)
-                            checkAnim?.start()
-                        },
-                    )
+                    alphaAnimation.doOnEnd {
+                        binding.downloadIcon.drawable.setTint(downloadedTextColor)
+                        checkAnim?.start()
+                    }
                     alphaAnimation.duration = 150
                     alphaAnimation.start()
                     binding.downloadBorder.drawable.setTint(downloadedColor)

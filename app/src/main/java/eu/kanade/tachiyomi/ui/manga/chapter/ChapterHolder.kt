@@ -4,6 +4,8 @@ import android.animation.AnimatorSet
 import android.animation.ObjectAnimator
 import android.content.res.ColorStateList
 import android.view.View
+import androidx.core.animation.doOnEnd
+import androidx.core.animation.doOnStart
 import androidx.core.view.isVisible
 import androidx.core.widget.TextViewCompat
 import coil.load
@@ -16,8 +18,6 @@ import eu.kanade.tachiyomi.ui.manga.MangaDetailsAdapter
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.widget.EndAnimatorListener
-import eu.kanade.tachiyomi.widget.StartAnimatorListener
 
 class ChapterHolder(
     view: View,
@@ -118,7 +118,7 @@ class ChapterHolder(
         val animatorSet = AnimatorSet()
         val anim1 = slideAnimation(0f, slide)
         anim1.startDelay = 1000
-        anim1.addListener(StartAnimatorListener { binding.startView.isVisible = true })
+        anim1.doOnStart { binding.startView.isVisible = true }
         val anim2 = slideAnimation(slide, -slide)
         anim2.duration = 600
         anim2.startDelay = 500
@@ -131,11 +131,7 @@ class ChapterHolder(
         val anim3 = slideAnimation(-slide, 0f)
         anim3.startDelay = 750
         animatorSet.playSequentially(anim1, anim2, anim3)
-        animatorSet.addListener(
-            EndAnimatorListener {
-                adapter.hasShownSwipeTut.set(true)
-            },
-        )
+        animatorSet.doOnEnd { adapter.hasShownSwipeTut.set(true) }
         animatorSet.start()
     }
 

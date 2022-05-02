@@ -1,36 +1,32 @@
 package eu.kanade.tachiyomi.widget
 
-import android.animation.Animator
 import android.view.animation.Animation
 
-open class SimpleAnimationListener : Animation.AnimationListener {
-    override fun onAnimationRepeat(animation: Animation) {}
+/** Add an action which will be invoked when the animation has ended. */
+inline fun Animation.doOnEnd(
+    crossinline action: (animation: Animation) -> Unit,
+): Animation.AnimationListener = setListener(onEnd = action)
 
-    override fun onAnimationEnd(animation: Animation) {}
+/** Add an action which will be invoked when the animation has started. */
+inline fun Animation.doOnStart(
+    crossinline action: (animation: Animation) -> Unit,
+): Animation.AnimationListener = setListener(onStart = action)
 
-    override fun onAnimationStart(animation: Animation) {}
-}
-
-open class SimpleAnimatorListener : Animator.AnimatorListener {
-
-    override fun onAnimationCancel(animation: Animator?) {}
-    override fun onAnimationRepeat(animator: Animator) {}
-
-    override fun onAnimationEnd(animator: Animator) {}
-
-    override fun onAnimationStart(animator: Animator) {}
-}
-
-class StartAnimatorListener(private val startAnimationListener: (animator: Animator) -> Unit) :
-    SimpleAnimatorListener() {
-    override fun onAnimationStart(animator: Animator) {
-        startAnimationListener(animator)
+/**
+ * Add a listener to this Animation using the provided actions.
+ *
+ * @return the [Animation.AnimationListener] added to the Animator
+ */
+inline fun Animation.setListener(
+    crossinline onEnd: (animation: Animation) -> Unit = {},
+    crossinline onStart: (animation: Animation) -> Unit = {},
+    crossinline onRepeat: (animation: Animation) -> Unit = {},
+): Animation.AnimationListener {
+    val listener = object : Animation.AnimationListener {
+        override fun onAnimationRepeat(animation: Animation) = onRepeat(animation)
+        override fun onAnimationEnd(animation: Animation) = onEnd(animation)
+        override fun onAnimationStart(animation: Animation) = onStart(animation)
     }
-}
-
-class EndAnimatorListener(private val endAnimationListener: (animator: Animator) -> Unit) :
-    SimpleAnimatorListener() {
-    override fun onAnimationEnd(animator: Animator) {
-        endAnimationListener(animator)
-    }
+    setAnimationListener(listener)
+    return listener
 }
