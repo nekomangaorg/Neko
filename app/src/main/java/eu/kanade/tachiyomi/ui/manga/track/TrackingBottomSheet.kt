@@ -8,6 +8,7 @@ import android.text.Spannable
 import android.text.SpannableString
 import android.text.style.StyleSpan
 import android.view.Gravity
+import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -101,8 +102,10 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
             activity.openInBrowser(item.trackSearch.tracking_url)
         }
 
-        binding.trackSearch.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH) {
+        binding.trackSearch.setOnEditorActionListener { _, actionId, keyEvent ->
+            if (actionId == EditorInfo.IME_ACTION_DONE || actionId == EditorInfo.IME_ACTION_SEARCH ||
+                keyEvent.keyCode == KeyEvent.KEYCODE_ENTER
+            ) {
                 val text = binding.trackSearch.text?.toString() ?: ""
                 if (text.isNotBlank()) {
                     startTransition()
