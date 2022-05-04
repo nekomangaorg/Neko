@@ -54,8 +54,9 @@ rxbinding-appcompat-v7 = { module = "com.jakewharton.rxbinding:rxbinding-appcomp
 rxbinding-appcompat-v4 = { module = "com.jakewharton.rxbinding:rxbinding-support-v4-kotlin", version.ref = "rxbinding_version" }
 rxbinding-recycler-v7 = { module = "com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin", version.ref = "rxbinding_version" }
 
-j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:dfd3e43"
-tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:0e91111"
+j2k-subsample = "com.github.jays2kings:subsampling-scale-image-view:756849e"
+
+tachi-image-decoder = "com.github.tachiyomiorg:image-decoder:7481a4a"
 tachi-source-api = "org.tachiyomi:source-api:1.1"
 tachi-directional-view-pager = "com.github.tachiyomiorg:DirectionalViewPager:1.0.0"
 tachi-unifile = "com.github.tachiyomiorg:unifile:17bec43"

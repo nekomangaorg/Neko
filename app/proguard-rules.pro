@@ -9,14 +9,33 @@
 -keep,allowoptimization class rx.** { public protected *; }
 -keep,allowoptimization class org.jsoup.** { public protected *; }
 -keep,allowoptimization class com.google.gson.** { public protected *; }
--keep,allowoptimization class com.github.salomonbrys.kotson.** { public protected *; }
--keep,allowoptimization class com.squareup.duktape.** { public protected *; }
--keep,allowoptimization class app.cash.quickjs.** { public protected *; }
 -keep,allowoptimization class uy.kohesive.injekt.** { public protected *; }
+-keep,allowoptimization class eu.davidea.flexibleadapter.** { public protected *; }
 -keep class com.crashlytics.** { *; }
 -dontwarn com.crashlytics.**
+# Design library
+-dontwarn com.google.android.material.**
+-keep class com.google.android.material.** { *; }
+-keep interface com.google.android.material.** { *; }
+-keep public class com.google.android.material.R$* { *; }
 
-##---------------Begin: proguard configuration for RxJava 1.x  ----------
+-keep class com.hippo.image.** { *; }
+-keep interface com.hippo.image.** { *; }
+-dontwarn nucleus.view.NucleusActionBarActivity
+
+# Extensions may require methods unused in the core app
+-keep class org.jsoup.** { *; }
+-keep class kotlin.** { *; }
+-keep class okhttp3.** { *; }
+-keep class com.google.gson.** { *; }
+
+# OkHttp
+-dontwarn okhttp3.**
+-dontwarn okio.**
+-dontwarn javax.annotation.**
+
+
+# RxJava 1.1.0
 -dontwarn sun.misc.**
 
 -keepclassmembers class rx.internal.util.unsafe.*ArrayQueue*Field* {
