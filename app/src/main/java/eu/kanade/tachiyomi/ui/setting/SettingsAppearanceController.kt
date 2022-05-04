@@ -81,9 +81,9 @@ class SettingsAppearanceController : SettingsController() {
                 }
             }
         }
-
+/*
         preferenceCategory {
-            /*switchPreference {
+            switchPreference {
                 bindTo(preferences.useLargeToolbar())
                 titleRes = R.string.expanded_toolbar
                 summaryRes = R.string.show_larger_toolbar
@@ -107,9 +107,9 @@ class SettingsAppearanceController : SettingsController() {
                     }
                     true
                 }
-            }*/
+            }
         }
-
+    */
         preferenceCategory {
             titleRes = R.string.details_page
             switchPreference {
