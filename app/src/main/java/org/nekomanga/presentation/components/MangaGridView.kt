@@ -1,6 +1,5 @@
 package org.nekomanga.presentation.components
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.combinedClickable
@@ -39,7 +38,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.zedlabs.pastelplaceholder.Pastel
@@ -342,21 +341,19 @@ private fun GridCover(manga: Manga, shouldOutlineCover: Boolean) {
         )
         else -> Modifier
     }
-
-    Image(
-        painter = rememberAsyncImagePainter(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(manga)
-                .setParameter(MangaCoverFetcher.useCustomCover, false)
-                .placeholder(Pastel.getColorLight())
-                .build(),
-        ),
+    val color by remember { mutableStateOf(Pastel.getColorLight()) }
+    AsyncImage(
+        model = ImageRequest.Builder(LocalContext.current)
+            .data(manga)
+            .placeholder(color)
+            .setParameter(MangaCoverFetcher.useCustomCover, false)
+            .build(),
         contentDescription = null,
+        contentScale = ContentScale.Crop,
         modifier = Modifier
             .aspectRatio(3f / 4f)
             .clip(RoundedCornerShape(Shapes.coverRadius))
             .then(outlineModifier),
-        contentScale = ContentScale.Crop,
     )
 }
 

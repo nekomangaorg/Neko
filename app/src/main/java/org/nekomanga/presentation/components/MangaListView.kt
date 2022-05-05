@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.base
 
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -20,16 +19,20 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.paging.LoadState
 import androidx.paging.compose.LazyPagingItems
 import androidx.paging.compose.items
-import coil.compose.rememberAsyncImagePainter
+import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -201,22 +204,22 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
             )
             else -> Modifier
         }
-        Image(
-            painter = rememberAsyncImagePainter(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(manga)
-                    .setParameter(MangaCoverFetcher.useCustomCover, false)
-                    .placeholder(Pastel.getColorLight())
-                    .build(),
-            ),
+        val color by remember { mutableStateOf(Pastel.getColorLight()) }
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(manga)
+                .placeholder(color)
+                .setParameter(MangaCoverFetcher.useCustomCover, false)
+                .build(),
             contentDescription = null,
-            modifier = modifier
+            contentScale = ContentScale.Crop,
+            modifier = Modifier
                 .size(48.dp)
                 .padding(4.dp)
                 .clip(RoundedCornerShape(Shapes.coverRadius))
                 .then(outlineModifier),
-
-            )
+        )
+        
         if (manga.favorite) {
             val offset = (-4).dp
             Favorited(offset)
