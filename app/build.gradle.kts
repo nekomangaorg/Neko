@@ -141,7 +141,7 @@ dependencies {
     implementation("androidx.multidex:multidex:2.0.1")
 
     implementation("com.google.firebase:firebase-analytics-ktx:20.1.0")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.8")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.9")
 
     val lifecycleVersion = "2.4.1"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -258,8 +258,8 @@ dependencies {
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Design
-    implementation("androidx.compose.material3:material3:1.0.0-alpha06")
-    implementation("com.google.android.material:compose-theme-adapter-3:1.0.4")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha07")
+    implementation("com.google.android.material:compose-theme-adapter-3:1.0.5")
     implementation("androidx.compose.material:material:$composeVersion")
 
     // Material design icons
@@ -272,7 +272,7 @@ dependencies {
     implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
 
     //accompianist
-    val accompanistVersion = "0.23.0"
+    val accompanistVersion = "0.23.1"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
@@ -295,7 +295,7 @@ dependencies {
 // Tests
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.assertj:assertj-core:3.22.0")
-    testImplementation("org.mockito:mockito-core:4.3.1")
+    testImplementation("org.mockito:mockito-core:4.4.0")
 
     val roboElectricVersion = "3.3.2"
     testImplementation("org.robolectric:robolectric:$roboElectricVersion")
