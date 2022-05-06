@@ -116,13 +116,13 @@ class FullRestore(val context: Context, val job: Job?) {
             } else {
                 throw java.lang.Exception("Job was cancelled")
             }
-            var manga = backupManga.getMangaImpl()
+            val manga = backupManga.getMangaImpl()
             val chapters = backupManga.getChaptersImpl()
             val categories = backupManga.categories
             val history = backupManga.history
             val tracks = backupManga.getTrackingImpl()
 
-            var dbManga = backupManager.getMangaFromDatabase(manga)
+            val dbManga = backupManager.getMangaFromDatabase(manga)
             val dbMangaExists = dbManga != null
 
             if (dbMangaExists) {
