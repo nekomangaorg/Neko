@@ -59,7 +59,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -348,6 +347,7 @@ class MangaDetailsPresenter(
                 db.deleteChapters(mergedChapters).executeAsBlocking()
                 allChapterScanlators =
                     nonMergedChapters.flatMap { it -> it.scanlatorList() }.toSet()
+                if (allChapterScanlators.size == 1) filteredScanlators = emptySet()
                 if (filteredScanlators.isNotEmpty()) {
                     val newSet = filteredScanlators.toMutableSet()
                     newSet.remove(sourceManager.getMergeSource().name)

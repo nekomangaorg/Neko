@@ -1564,10 +1564,6 @@ class MangaDetailsController :
         return
     }
 
-    fun updatingScanlatorFilters() {
-        activity?.toast("New Scanlators added, adding them to scanlator filter, if enabled")
-    }
-
     private fun viewComments(chapter: ChapterItem) {
         val activity = activity ?: return
         val url = MdUtil.baseUrl + "/chapter/" + MdUtil.getChapterId(chapter.url) + "/comments"
