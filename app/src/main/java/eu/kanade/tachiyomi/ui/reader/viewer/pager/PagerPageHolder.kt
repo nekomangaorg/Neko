@@ -14,13 +14,10 @@ import android.os.Build
 import android.view.Gravity
 import android.view.ViewGroup
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
-import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
-import coil.load
-import coil.request.CachePolicy
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -39,7 +36,6 @@ import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.topCutoutInset
 import eu.kanade.tachiyomi.util.view.backgroundColor
 import eu.kanade.tachiyomi.util.view.isVisibleOnScreen
-import eu.kanade.tachiyomi.widget.GifViewTarget
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers.Default
@@ -845,17 +841,6 @@ class PagerPageHolder(
             if (extraPage?.fullPage == true || page.fullPage == true) {
                 extraPage = null
             }
-        }
-    }
-
-    /**
-     * Extension method to set a [stream] into this ImageView.
-     */
-    private fun ImageView.setImage(stream: InputStream) {
-        this.load(stream.readBytes()) {
-            memoryCachePolicy(CachePolicy.DISABLED)
-            diskCachePolicy(CachePolicy.DISABLED)
-            target(GifViewTarget(this@setImage, progressBar, decodeErrorLayout))
         }
     }
 
