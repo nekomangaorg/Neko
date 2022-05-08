@@ -524,8 +524,6 @@
     <string name="enhanced_tracking_info">Services that provide enhanced features for specific sources. Manga are automatically tracked when added to your library.</string>
     <string name="update_tracking_after_reading">Update tracking after reading</string>
     <string name="update_tracking_marked_read">Update tracking when marked as read</string>
-    <string name="track_when_adding_to_library">Track when adding to library</string>
-    <string name="only_applies_silent_trackers">Only applies to silent trackers, such as Komga</string>
     <string name="reading">Reading</string>
     <string name="currently_reading">Currently Reading</string>
     <string name="dropped">Dropped</string>
