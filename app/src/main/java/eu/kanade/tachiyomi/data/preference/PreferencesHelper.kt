@@ -295,8 +295,7 @@ class PreferencesHelper(val context: Context) {
         flowPrefs.getStringSet(Keys.libraryUpdateDeviceRestriction, emptySet())
 
     fun libraryUpdateCategories() = flowPrefs.getStringSet(Keys.libraryUpdateCategories, emptySet())
-    fun libraryUpdateCategoriesExclude() =
-        flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
+    fun libraryUpdateCategoriesExclude() = flowPrefs.getStringSet(Keys.libraryUpdateCategoriesExclude, emptySet())
 
     fun libraryUpdatePrioritization() = flowPrefs.getInt(Keys.libraryUpdatePrioritization, 0)
 
@@ -349,8 +348,7 @@ class PreferencesHelper(val context: Context) {
     fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
-    fun excludeCategoriesInDownloadNew() =
-        flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
+    fun excludeCategoriesInDownloadNew() = flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
 
     fun lang() = prefs.getString(Keys.lang, "")
 

@@ -75,10 +75,7 @@ inline fun PreferenceGroup.listPreference(
 
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
-    block: (
-        @DSL
-        IntListMatPreference
-    ).() -> Unit,
+    block: (@DSL IntListMatPreference).() -> Unit,
 ):
     IntListMatPreference {
     return initThenAdd(IntListMatPreference(activity, context), block)
@@ -86,22 +83,14 @@ inline fun PreferenceGroup.intListPreference(
 
 inline fun PreferenceGroup.multiSelectListPreferenceMat(
     activity: Activity?,
-    block: (
-        @DSL
-        MultiListMatPreference
-    ).()
-    -> Unit,
+    block: (@DSL MultiListMatPreference).() -> Unit,
 ): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(activity, context), block)
 }
 
 inline fun PreferenceGroup.triStateListPreference(
     activity: Activity?,
-    block: (
-        @DSL
-        TriStateListPreference
-    ).()
-    -> Unit,
+    block: (@DSL TriStateListPreference).() -> Unit,
 ): TriStateListPreference {
     return initThenAdd(TriStateListPreference(activity, context), block)
 }
@@ -191,6 +180,27 @@ fun <T> ListMatPreference.bindTo(preference: FlowPreference<T>) {
     key = preference.key
     val defValue = preference.defaultValue
     defaultValue = if (defValue is Set<*>) defValue else defValue.toString()
+}
+
+@Deprecated(
+    "Do not bind tri-states prefs with a single preference",
+    ReplaceWith("bindTo(preference, excludePreference = )"),
+    DeprecationLevel.ERROR,
+)
+fun <T> TriStateListPreference.bindTo(preference: FlowPreference<T>) { key = preference.key }
+
+fun TriStateListPreference.bindTo(
+    includePreference: FlowPreference<Set<String>>,
+    excludePreference: FlowPreference<Set<String>>,
+) {
+    key = includePreference.key
+    excludeKey = excludePreference.key
+    defaultValue = includePreference.defaultValue to excludePreference.defaultValue
+}
+
+fun <T> IntListMatPreference.bindTo(preference: FlowPreference<T>) {
+    key = preference.key
+    defaultValue = preference.defaultValue
 }
 
 fun SwitchPreferenceCompat.requireAuthentication(
