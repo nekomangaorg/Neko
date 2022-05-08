@@ -201,8 +201,6 @@ object PreferenceKeys {
 
     const val lastUnlock = "last_unlock"
 
-    const val secureScreen = "secure_screen"
-
     const val hideNotificationContent = "hide_notification_content"
 
     const val removeArticles = "remove_articles"
