@@ -314,7 +314,8 @@ class PagerViewerAdapter(private val viewer: PagerViewer) : ViewPagerAdapter() {
                     val lastPage = subJoinedItems.lastOrNull()?.first as? ReaderPage
                     if (lastPage == null || (
                         if (it is ChapterTransition.Next) {
-                            it.from.chapter.id == lastPage.chapter.chapter.id } else true
+                            it.from.chapter.id == lastPage.chapter.chapter.id
+                        } else true
                         )
                     ) {
                         subJoinedItems.add(Pair(it, null))
