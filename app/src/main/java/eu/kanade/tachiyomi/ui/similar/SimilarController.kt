@@ -18,7 +18,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.zIndex
 import com.google.accompanist.swiperefresh.SwipeRefresh
 import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
 import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
@@ -96,15 +95,17 @@ class SimilarController(bundle: Bundle? = null) :
                 onRefresh = refreshing,
                 modifier = Modifier
                     .fillMaxSize(),
+                clipIndicatorToPadding = false,
                 indicator = { state, trigger ->
                     SwipeRefreshIndicator(
                         state = state,
-                        modifier = Modifier
-                            .zIndex(1f),
+                        refreshingOffset = paddingValues.calculateTopPadding(),
                         refreshTriggerDistance = trigger,
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
-                    )
+
+                        )
+
                 },
                 content = {
                     SimilarContent(isRefreshing,
