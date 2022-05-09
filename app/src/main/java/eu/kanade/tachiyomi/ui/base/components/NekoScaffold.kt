@@ -53,6 +53,7 @@ fun NekoScaffold(
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.smallTopAppBarColors(
+                        containerColor = getTopAppBarColor(),
                         scrolledContainerColor = getTopAppBarColor()),
                     modifier = Modifier
                         .statusBarsPadding(),
