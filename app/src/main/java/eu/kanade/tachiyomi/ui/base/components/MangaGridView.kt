@@ -129,6 +129,7 @@ fun PagingMangaGrid(
                 Modifier
                     .zIndex(1f)
                     .padding(8.dp)
+                    .padding(top = contentPadding.calculateTopPadding())
                     .align(Alignment.TopCenter))
         }
 
@@ -155,6 +156,7 @@ fun PagingMangaGrid(
                     Loading(isLoading,
                         Modifier
                             .padding(8.dp)
+                            .padding(top = contentPadding.calculateTopPadding())
                             .wrapContentSize())
                 }
             }
