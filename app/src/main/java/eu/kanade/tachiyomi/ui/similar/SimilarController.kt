@@ -146,7 +146,7 @@ class SimilarController(bundle: Bundle? = null) :
                 )
 
                 val groupedMangaRedux =
-                    groupedManga.entries.map { stringResource(id = it.key) to it.value }.toMap()
+                    groupedManga.entries.associate { stringResource(id = it.key) to it.value }
 
                 if (isList) {
                     MangaListWithHeader(groupedManga = groupedMangaRedux,
