@@ -131,7 +131,7 @@ dependencies {
     implementation("com.google.android.material:material:1.5.0")
     implementation("androidx.webkit:webkit:1.4.0")
     implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("androidx.preference:preference:1.1.1")
+    implementation("androidx.preference:preference:1.2.0")
     implementation("androidx.annotation:annotation:1.3.0")
     implementation("androidx.browser:browser:1.4.0")
     implementation("androidx.biometric:biometric:1.1.0")
@@ -140,8 +140,8 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-analytics-ktx:20.1.0")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.9")
+    implementation("com.google.firebase:firebase-analytics-ktx:20.1.2")
+    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.10")
 
     val lifecycleVersion = "2.4.1"
     kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
@@ -258,8 +258,8 @@ dependencies {
     // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
     implementation("androidx.compose.foundation:foundation:$composeVersion")
     // Material Design
-    implementation("androidx.compose.material3:material3:1.0.0-alpha07")
-    implementation("com.google.android.material:compose-theme-adapter-3:1.0.5")
+    implementation("androidx.compose.material3:material3:1.0.0-alpha10")
+    implementation("com.google.android.material:compose-theme-adapter-3:1.0.7")
     implementation("androidx.compose.material:material:$composeVersion")
 
     // Material design icons
@@ -274,12 +274,9 @@ dependencies {
     //accompianist
     val accompanistVersion = "0.23.1"
     implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-insets:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
     implementation("com.google.accompanist:accompanist-drawablepainter:$accompanistVersion")
-
-    //implementation("com.google.accompanist:accompanist-insets-ui:$accompanistVersion")
-    //implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
+    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
 
 // Conductor
     implementation("com.bluelinelabs:conductor:3.1.4")
