@@ -140,7 +140,7 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout:2.1.3")
     implementation("androidx.multidex:multidex:2.0.1")
 
-    implementation("com.google.firebase:firebase-analytics-ktx:20.1.0")
+    implementation("com.google.firebase:firebase-analytics-ktx:21.0.0")
     implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.9")
 
     val lifecycleVersion = "2.4.1"
