@@ -65,7 +65,7 @@ inline fun PreferenceGroup.dropDownPreference(block: (@DSL DropDownPreference).(
 inline fun PreferenceGroup.listPreference(
     activity: Activity?,
     block: (@DSL ListMatPreference).()
-    -> Unit
+    -> Unit,
 ):
     ListMatPreference {
     return initThenAdd(ListMatPreference(activity, context), block)
@@ -74,9 +74,9 @@ inline fun PreferenceGroup.listPreference(
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
     block: (
-        @DSL
-        IntListMatPreference
-    ).() -> Unit
+    @DSL
+    IntListMatPreference
+    ).() -> Unit,
 ):
     IntListMatPreference {
     return initThenAdd(IntListMatPreference(activity, context), block)
@@ -85,10 +85,10 @@ inline fun PreferenceGroup.intListPreference(
 inline fun PreferenceGroup.multiSelectListPreferenceMat(
     activity: Activity?,
     block: (
-        @DSL
-        MultiListMatPreference
+    @DSL
+    MultiListMatPreference
     ).()
-    -> Unit
+    -> Unit,
 ): MultiListMatPreference {
     return initThenAdd(MultiListMatPreference(activity, context), block)
 }
@@ -96,10 +96,10 @@ inline fun PreferenceGroup.multiSelectListPreferenceMat(
 inline fun PreferenceGroup.triStateListPreference(
     activity: Activity?,
     block: (
-        @DSL
-        TriStateListPreference
+    @DSL
+    TriStateListPreference
     ).()
-    -> Unit
+    -> Unit,
 ): TriStateListPreference {
     return initThenAdd(TriStateListPreference(activity, context), block)
 }
@@ -168,7 +168,7 @@ inline fun Preference.onChange(crossinline block: (Any?) -> Boolean) {
 fun SwitchPreferenceCompat.requireAuthentication(
     activity: FragmentActivity?,
     title: String,
-    subtitle: String? = null
+    subtitle: String? = null,
 ) {
     onPreferenceChangeListener = Preference.OnPreferenceChangeListener { _, newValue ->
         newValue as Boolean
@@ -222,7 +222,7 @@ var Preference.summaryRes: Int
 var Preference.iconTint: Int
     get() = 0 // set only
     set(value) {
-        DrawableCompat.setTint(icon, value)
+        DrawableCompat.setTint(icon!!, value)
     }
 
 var Preference.iconDrawable: Drawable
