@@ -18,8 +18,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -27,7 +25,6 @@ import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
 
 @Composable
 fun EmptyView(
@@ -51,10 +48,7 @@ fun EmptyView(
             message?.let {
                 Text(text = stringResource(id = message),
                     color = iconColor,
-                    style = TextStyle(
-                        fontFamily = Typefaces.montserrat,
-                        fontSize = MaterialTheme.typography.bodyMedium.fontSize)
-                )
+                    style = MaterialTheme.typography.bodyLarge)
             }
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
                 actions.forEach { action ->
@@ -62,10 +56,7 @@ fun EmptyView(
                     TextButton(onClick = action.onClick) {
                         Text(text = stringResource(id = action.resId),
                             color = MaterialTheme.colorScheme.secondary,
-                            style = TextStyle(
-                                fontFamily = Typefaces.montserrat,
-                                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-                                fontWeight = FontWeight.Medium)
+                            style = MaterialTheme.typography.titleLarge
                         )
                     }
                 }
