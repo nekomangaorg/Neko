@@ -3,11 +3,12 @@ package eu.kanade.tachiyomi.ui.base.components
 import TooltipBox
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.ViewList
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -26,8 +27,10 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.base.components.theme.NekoTheme
 import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
 
 @Composable
@@ -83,13 +86,26 @@ fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
     when (isList.not()) {
         true -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "list"),
-            icon = Icons.Filled.ViewList,
+            icon = Icons.Filled.List,
             buttonClicked = buttonClicked)
 
         false -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
             icon = Icons.Filled.ViewModule,
             buttonClicked = buttonClicked)
+    }
+}
+
+@Preview
+@Composable
+private fun ListGridActionButton() {
+    Row {
+        NekoTheme {
+            ListGridActionButton(isList = false) {}
+        }
+        NekoTheme {
+            ListGridActionButton(isList = true) {}
+        }
     }
 }
 
