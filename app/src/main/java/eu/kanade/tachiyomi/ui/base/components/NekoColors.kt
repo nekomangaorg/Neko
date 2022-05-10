@@ -6,7 +6,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 
-class NekoColors() {
+class NekoColors {
     companion object {
         val outline = Color(0xFF79747E)
     }

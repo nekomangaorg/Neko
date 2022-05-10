@@ -4,8 +4,8 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.runtime.Composable
-import com.google.android.material.composethemeadapter3.Mdc3Theme
 import eu.kanade.tachiyomi.databinding.EmptyComposeControllerBinding
+import eu.kanade.tachiyomi.ui.base.components.theme.NekoTheme
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 
 abstract class BaseComposeController<PS : BaseCoroutinePresenter>(bundle: Bundle? = null) :
@@ -16,7 +16,7 @@ abstract class BaseComposeController<PS : BaseCoroutinePresenter>(bundle: Bundle
         super.onViewCreated(view)
 
         binding.root.setContent {
-            Mdc3Theme {
+            NekoTheme {
                 ScreenContent()
             }
         }

@@ -1,22 +1,26 @@
 package eu.kanade.tachiyomi.ui.base.components.theme
 
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
-import eu.kanade.tachiyomi.util.system.Themes
+import androidx.compose.ui.platform.LocalContext
+import com.google.android.material.composethemeadapter3.createMdc3Theme
+import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces.appTypography
 
 @Composable
-fun AppTheme(
-    theme: Themes = Themes.DEFAULT,
-    darkTheme: Boolean = isSystemInDarkTheme(),
+fun NekoTheme(
     content: @Composable () -> Unit,
 ) {
-    //this will need to be done per theme
-    val colorScheme = if (darkTheme) darkColorScheme() else lightColorScheme()
+
+    val context = LocalContext.current
+
+    val (colorScheme) = createMdc3Theme(
+        context = context,
+        setTextColors = true,
+    )
+
     MaterialTheme(
-        colorScheme = colorScheme,
+        colorScheme = colorScheme!!,
+        typography = appTypography,
         content = content
     )
 }
