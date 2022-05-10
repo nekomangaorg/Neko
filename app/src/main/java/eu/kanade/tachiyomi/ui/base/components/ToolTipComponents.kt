@@ -1,6 +1,5 @@
 @file:Suppress("INVISIBLE_REFERENCE", "INVISIBLE_MEMBER")
 
-import androidx.annotation.StringRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -22,30 +21,33 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 
 /**
  * This is a box around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
  */
 @Composable
-fun TooltipBox(@StringRes toolTipLabel: Int, icon: ImageVector, buttonClicked: () -> Unit) {
+fun TooltipBox(toolTipLabel: String, icon: ImageVector, buttonClicked: () -> Unit) {
     val showTooltip = remember { mutableStateOf(false) }
+    val haptic = LocalHapticFeedback.current
     CombinedClickableIconButton(
         modifier = Modifier.iconButtonCombinedClickable(
             toolTipLabel = toolTipLabel,
             onClick = buttonClicked,
             onLongClick = {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showTooltip.value = true
             })
     ) {
         Icon(imageVector = icon,
-            contentDescription = stringResource(id = toolTipLabel))
+            contentDescription = toolTipLabel)
     }
 
     Tooltip(showTooltip,
-        modifier = Modifier.background(MaterialTheme.colorScheme.onSurface)) {
-        Text(stringResource(id = toolTipLabel),
+        modifier = Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = .75f))) {
+        Text(text = toolTipLabel,
             color = MaterialTheme.colorScheme.surface)
     }
 }
@@ -83,7 +85,7 @@ fun CombinedClickableIconButton(
  */
 @Composable
 fun Modifier.iconButtonCombinedClickable(
-    @StringRes toolTipLabel: Int,
+    toolTipLabel: String,
     onLongClick: (() -> Unit)? = null,
     onDoubleClick: (() -> Unit)? = null,
     onClick: () -> Unit,
@@ -94,7 +96,7 @@ fun Modifier.iconButtonCombinedClickable(
             bounded = false,
             radius = IconButtonTokens.StateLayerSize / 2
         ),
-        onClickLabel = stringResource(id = toolTipLabel),
+        onClickLabel = toolTipLabel,
         role = Role.Button,
         onClick = onClick,
         onLongClick = onLongClick,
