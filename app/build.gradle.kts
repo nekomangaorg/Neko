@@ -16,7 +16,6 @@ object Configs {
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("kapt")
     id("kotlin-parcelize")
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.mikepenz.aboutlibraries.plugin")
@@ -144,7 +143,6 @@ dependencies {
     implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.10")
 
     val lifecycleVersion = "2.4.1"
-    kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-process:$lifecycleVersion")
     implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
 
