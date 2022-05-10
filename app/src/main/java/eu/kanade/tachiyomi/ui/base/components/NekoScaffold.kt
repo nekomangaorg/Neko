@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.base.components
 
+import TooltipBox
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -45,12 +46,12 @@ fun NekoScaffold(
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
     }
     val scrollBehavior = remember { TopAppBarDefaults.enterAlwaysScrollBehavior() }
-
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+
                 CenterAlignedTopAppBar(
                     colors = TopAppBarDefaults.smallTopAppBarColors(
                         containerColor = getTopAppBarColor(),
@@ -65,11 +66,9 @@ fun NekoScaffold(
                                 fontWeight = FontWeight.Normal))
                     },
                     navigationIcon = {
-                        IconButton(onClick = { onBack() }) {
-                            Icon(imageVector = Icons.Filled.ArrowBack,
-                                contentDescription = stringResource(id = R.string.back))
-                        }
-
+                        TooltipBox(toolTipLabel = R.string.back,
+                            icon = Icons.Filled.ArrowBack,
+                            buttonClicked = onBack)
                     },
                     actions = actions,
                     scrollBehavior = scrollBehavior
