@@ -18,12 +18,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.Card
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuPositionProvider
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.material.contentColorFor
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuPositionProvider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
@@ -149,11 +150,13 @@ private fun TooltipContent(
     ) { if (it) 1f else 0f }
 
     Card(
-        backgroundColor = backgroundColor.copy(alpha = 0.75f),
-        contentColor = MaterialTheme.colors.contentColorFor(backgroundColor)
-            .takeOrElse { backgroundColor.onColor() },
+        colors = CardDefaults.cardColors(
+            containerColor = backgroundColor.copy(alpha = 0.75f),
+            contentColor = MaterialTheme.colorScheme.contentColorFor(backgroundColor)
+                .takeOrElse { backgroundColor.onColor() }
+        ),
         modifier = Modifier.alpha(alpha),
-        elevation = TooltipElevation,
+        elevation = CardDefaults.cardElevation(defaultElevation = TooltipElevation),
     ) {
         val p = TooltipPadding
         Column(
