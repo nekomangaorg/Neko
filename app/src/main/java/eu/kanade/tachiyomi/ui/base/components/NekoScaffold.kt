@@ -11,8 +11,6 @@ import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -66,7 +64,7 @@ fun NekoScaffold(
                                 fontWeight = FontWeight.Normal))
                     },
                     navigationIcon = {
-                        TooltipBox(toolTipLabel = R.string.back,
+                        TooltipBox(toolTipLabel = stringResource(id = R.string.back),
                             icon = Icons.Filled.ArrowBack,
                             buttonClicked = onBack)
                     },
@@ -82,16 +80,16 @@ fun NekoScaffold(
 
 @Composable
 fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
-    IconButton(onClick = { buttonClicked() }) {
-        Icon(
-            imageVector = if (isList.not()) {
-                Icons.Filled.ViewList
-            } else {
-                Icons.Filled.ViewModule
-            },
-            tint = MaterialTheme.colorScheme.onSurface,
-            contentDescription = stringResource(id = R.string.display_as)
-        )
+    when (isList.not()) {
+        true -> TooltipBox(
+            toolTipLabel = stringResource(id = R.string.display_as_, "list"),
+            icon = Icons.Filled.ViewList,
+            buttonClicked = buttonClicked)
+
+        false -> TooltipBox(
+            toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
+            icon = Icons.Filled.ViewModule,
+            buttonClicked = buttonClicked)
     }
 }
 
