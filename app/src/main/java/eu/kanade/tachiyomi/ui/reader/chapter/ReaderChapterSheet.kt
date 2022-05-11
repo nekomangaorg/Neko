@@ -98,7 +98,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 }
 
                 override fun onStateChanged(p0: View, state: Int) {
-                    val canShowNav = presenter.getCurrentChapter()?.pages?.size ?: 1 > 1
+                    val canShowNav = (presenter.getCurrentChapter()?.pages?.size ?: 1) > 1
                     if (state == BottomSheetBehavior.STATE_COLLAPSED) {
                         sheetBehavior?.isHideable = false
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
@@ -144,6 +144,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                 if (item.chapter.id != presenter.getCurrentChapter()?.chapter?.id) {
                     activity.binding.readerNav.leftChapter.isInvisible = true
                     activity.binding.readerNav.rightChapter.isInvisible = true
+                    activity.isScrollingThroughPagesOrChapters = true
 
                     presenter.loadChapter(item.chapter)
                     loadingPos = position

@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.setting
 import android.os.Build
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
@@ -308,7 +309,13 @@ class SettingsReaderController : SettingsController() {
                 )
                 defaultValue = ViewerNavigation.TappingInvertMode.NONE.name
             }
-
+            listPreference(activity) {
+                bindTo(preferences.webtoonReaderHideThreshold())
+                titleRes = R.string.pref_hide_threshold
+                val enumValues = PreferenceValues.ReaderHideThreshold.values()
+                entriesRes = enumValues.map { it.titleResId }.toTypedArray()
+                entryValues = enumValues.map { it.name }
+            }
             switchPreference {
                 key = Keys.cropBordersWebtoon
                 titleRes = R.string.crop_borders

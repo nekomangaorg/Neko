@@ -715,6 +715,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             if (isLoading) {
                 return@setOnClickListener
             }
+            isScrollingThroughPagesOrChapters = true
             val result = if (viewer is R2LPagerViewer) {
                 presenter.loadNextChapter()
             } else {
@@ -738,6 +739,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             if (isLoading) {
                 return@setOnClickListener
             }
+            isScrollingThroughPagesOrChapters = true
             val result = if (viewer !is R2LPagerViewer) {
                 presenter.loadNextChapter()
             } else {
@@ -773,9 +775,11 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                     override fun onStartTrackingTouch(slider: Slider) {
                         readerNavGestureDetector.lockVertical = false
                         readerNavGestureDetector.hasScrollHorizontal = true
+                    isScrollingThroughPagesOrChapters = true
                     }
 
                     override fun onStopTrackingTouch(slider: Slider) {
+                    isScrollingThroughPagesOrChapters = false
                     }
                 },
             )
@@ -1257,11 +1261,14 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
      * Moves the viewer to the given page [index]. It does nothing if the viewer is null or the
      * page is not found.
      */
-    fun moveToPageIndex(index: Int, animated: Boolean = true) {
+    fun moveToPageIndex(index: Int, animated: Boolean = true, chapterChange: Boolean = false) {
         val viewer = viewer ?: return
         val currentChapter = presenter.getCurrentChapter() ?: return
         val page = currentChapter.pages?.getOrNull(index) ?: return
         viewer.moveToPage(page, animated)
+        if (chapterChange) {
+            isScrollingThroughPagesOrChapters = false
+        }
     }
 
     fun refreshChapters() {

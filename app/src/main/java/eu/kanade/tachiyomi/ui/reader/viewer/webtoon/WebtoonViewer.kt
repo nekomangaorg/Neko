@@ -22,6 +22,8 @@ import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
 import rx.subscriptions.CompositeSubscription
+import timber.log.Timber
+import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import kotlin.math.max
 import kotlin.math.min
@@ -87,6 +89,10 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
             object : RecyclerView.OnScrollListener() {
                 override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                     onScrolled()
+
+                    if (dy > config.menuThreshold || dy < -config.menuThreshold) {
+                        activity.hideMenu()
+                    }
 
                     if (dy < 0) {
                         val firstIndex = layoutManager.findFirstVisibleItemPosition()

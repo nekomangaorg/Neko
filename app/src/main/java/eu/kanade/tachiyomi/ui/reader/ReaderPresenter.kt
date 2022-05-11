@@ -394,7 +394,7 @@ class ReaderPresenter(
             .subscribeFirst(
                 { view, _ ->
                     scope.launchUI {
-                        view.moveToPageIndex(lastPage, false)
+                        view.moveToPageIndex(lastPage, false, chapterChange = true)
                     }
                     view.refreshChapters()
                 },

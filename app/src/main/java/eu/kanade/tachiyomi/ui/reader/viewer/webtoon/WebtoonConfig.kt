@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.reader.viewer.webtoon
 
+import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.reader.settings.PageLayout
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerConfig
@@ -42,6 +43,8 @@ class WebtoonConfig(
 
     var invertDoublePages = false
 
+    var menuThreshold = PreferenceValues.ReaderHideThreshold.LOW.threshold
+
     init {
         preferences.navigationModeWebtoon()
             .register({ navigationMode = it }, { updateNavigation(it) })
@@ -78,7 +81,7 @@ class WebtoonConfig(
                 { splitPages = it == PageLayout.SPLIT_PAGES.webtoonValue },
                 { imagePropertyChangedListener?.invoke() },
             )
-
+        preferences.webtoonReaderHideThreshold().register({ menuThreshold = it.threshold })
         preferences.webtoonInvertDoublePages()
             .register({ invertDoublePages = it }, { imagePropertyChangedListener?.invoke() })
 
