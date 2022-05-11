@@ -106,7 +106,7 @@ retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serializati
 #test libs
 junit = "junit:junit:4.13.2"
 assertj = "org.assertj:assertj-core:3.22.0"
-mockito = "org.mockito:mockito-core:4.4.0"
+mockito = "org.mockito:mockito-core:4.5.1"
 roboelectric = { module = "org.robolectric:robolectric", version.ref = "roboelectric_version" }
 roboelectric-shadows-multidex = { module = "org.robolectric:shadows-multidex", version.ref = "roboelectric_version" }
 roboelectric-shadows-play-services = { module = "org.robolectric:shadows-play-services", version.ref = "roboelectric_version" }
