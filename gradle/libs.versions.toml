@@ -94,7 +94,7 @@ versioncompare = "io.github.g00fy2:versioncompare:1.5.0"
 aboutLibraries-gradle = { module = "com.mikepenz.aboutlibraries.plugin:aboutlibraries-plugin", version.ref = "aboutlib_version" }
 aboutLibraries-compose = { module = "com.mikepenz:aboutlibraries-compose", version.ref = "aboutlib_version" }
 
-leakcanary = "com.squareup.leakcanary:leakcanary-android:2.8.1"
+leakcanary = "com.squareup.leakcanary:leakcanary-android:2.9.1"
 pastelplaceholders = "com.github.zedlabs:pastelPlaceholders:1.0.4"
 stringsimilarity = "info.debatty:java-string-similarity:2.0.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
