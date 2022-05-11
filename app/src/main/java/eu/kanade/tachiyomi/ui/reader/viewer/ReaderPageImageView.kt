@@ -57,7 +57,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
     var onScaleChanged: ((newScale: Float) -> Unit)? = null
     var onViewClicked: (() -> Unit)? = null
 
-    open fun onNeedsLandscapeZoom() {}
+    open fun onNeedsLandscapeZoom() { }
 
     @CallSuper
     open fun onImageLoaded() {
