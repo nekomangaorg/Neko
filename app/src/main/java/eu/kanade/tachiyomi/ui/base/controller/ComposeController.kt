@@ -5,8 +5,8 @@ import android.view.LayoutInflater
 import android.view.View
 import androidx.compose.runtime.Composable
 import eu.kanade.tachiyomi.databinding.EmptyComposeControllerBinding
-import eu.kanade.tachiyomi.ui.base.components.theme.NekoTheme
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import org.nekomanga.presentation.theme.NekoTheme
 
 abstract class BaseComposeController<PS : BaseCoroutinePresenter>(bundle: Bundle? = null) :
     BaseCoroutineController<EmptyComposeControllerBinding, PS>(bundle) {
@@ -57,7 +57,7 @@ abstract class BasicComposeController : BaseController<EmptyComposeControllerBin
         showToolbar()
         super.onDestroyView(view)
     }
-    
+
     @Composable
     abstract fun ScreenContent()
 }

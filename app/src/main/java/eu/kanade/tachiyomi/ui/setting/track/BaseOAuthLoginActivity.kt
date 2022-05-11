@@ -6,9 +6,9 @@ import android.os.Bundle
 import androidx.activity.compose.setContent
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.base.activity.BaseThemedActivity
-import eu.kanade.tachiyomi.ui.base.components.LoadingScreen
-import eu.kanade.tachiyomi.ui.base.components.theme.NekoTheme
 import eu.kanade.tachiyomi.ui.main.MainActivity
+import org.nekomanga.presentation.components.LoadingScreen
+import org.nekomanga.presentation.theme.NekoTheme
 import uy.kohesive.injekt.injectLazy
 
 abstract class BaseOAuthLoginActivity : BaseThemedActivity() {

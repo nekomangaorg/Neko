@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components
+package org.nekomanga.presentation.components
 
 import TooltipBox
 import androidx.annotation.StringRes
@@ -30,8 +30,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.base.components.theme.NekoTheme
-import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
+import org.nekomanga.presentation.theme.NekoTheme
+import org.nekomanga.presentation.theme.Typefaces
 
 @Composable
 fun NekoScaffold(

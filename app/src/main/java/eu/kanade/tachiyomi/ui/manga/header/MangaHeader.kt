@@ -40,8 +40,8 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
-import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.theme.Typefaces
 import java.text.NumberFormat
 import java.util.Locale
 

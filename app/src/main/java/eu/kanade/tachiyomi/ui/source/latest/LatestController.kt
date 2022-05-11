@@ -15,13 +15,13 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.PagingListManga
-import eu.kanade.tachiyomi.ui.base.components.ListGridActionButton
-import eu.kanade.tachiyomi.ui.base.components.NekoScaffold
-import eu.kanade.tachiyomi.ui.base.components.PagingMangaGrid
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.PagingMangaGrid
 import uy.kohesive.injekt.injectLazy
 
 class LatestController(bundle: Bundle? = null) :

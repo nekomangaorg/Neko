@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

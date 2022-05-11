@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryColors
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.ui.base.components.NekoScaffold
 import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
+import org.nekomanga.presentation.components.NekoScaffold
 
 class LicensesController : BasicComposeController() {
     @Composable

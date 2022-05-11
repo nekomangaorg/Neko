@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces
+import org.nekomanga.presentation.theme.Typefaces
 
 @Composable
 internal fun MangaTitle(

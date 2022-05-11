@@ -1,10 +1,10 @@
-package eu.kanade.tachiyomi.ui.base.components.theme
+package org.nekomanga.presentation.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import com.google.android.material.composethemeadapter3.createMdc3Theme
-import eu.kanade.tachiyomi.ui.base.components.theme.Typefaces.appTypography
+import org.nekomanga.presentation.theme.Typefaces.appTypography
 
 @Composable
 fun NekoTheme(

@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -45,7 +45,8 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
-import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
+import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun MangaGridWithHeader(
@@ -113,7 +114,7 @@ fun PagingMangaGrid(
             }
             mangaListPagingItems.loadState.append is LoadState.Error && mangaListPagingItems.itemCount == 0 -> {
                 isLoading = false
-                EmptyView(
+                EmptyScreen(
                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                     iconSize = 176.dp,
                     message = R.string.no_results_found,

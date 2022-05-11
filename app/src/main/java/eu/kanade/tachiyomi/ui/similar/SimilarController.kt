@@ -28,11 +28,6 @@ import eu.kanade.tachiyomi.data.models.DisplayManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.MangaListWithHeader
-import eu.kanade.tachiyomi.ui.base.components.Action
-import eu.kanade.tachiyomi.ui.base.components.EmptyView
-import eu.kanade.tachiyomi.ui.base.components.ListGridActionButton
-import eu.kanade.tachiyomi.ui.base.components.MangaGridWithHeader
-import eu.kanade.tachiyomi.ui.base.components.NekoScaffold
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.similar.SimilarPresenter
@@ -40,6 +35,11 @@ import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.view.numberOfColumnsForCompose
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
+import org.nekomanga.presentation.components.ListGridActionButton
+import org.nekomanga.presentation.components.MangaGridWithHeader
+import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.screens.Action
+import org.nekomanga.presentation.screens.EmptyScreen
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -132,7 +132,7 @@ class SimilarController(bundle: Bundle? = null) :
             emptyMap())
         if (isRefreshing.not()) {
             if (groupedManga.isEmpty()) {
-                EmptyView(
+                EmptyScreen(
                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                     iconSize = 176.dp,
                     message = R.string.no_results_found,

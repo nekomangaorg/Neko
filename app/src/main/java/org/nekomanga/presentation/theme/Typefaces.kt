@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components.theme
+package org.nekomanga.presentation.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.staticCompositionLocalOf

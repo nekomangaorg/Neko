@@ -1,5 +1,5 @@
 [versions]
-accompanist_version = "0.23.1"
+accompanist_version = "0.24.7-alpha"
 compose_version = "1.1.1"
 
 [libraries]
@@ -8,6 +8,7 @@ accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiper
 accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist_version" }
 accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist_version" }
 accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
+accompainist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 
 paging = "androidx.paging:paging-compose:1.0.0-alpha14"
 material3-core = "androidx.compose.material3:material3:1.0.0-alpha10"
@@ -25,5 +26,5 @@ material-icons-extended = { module = "androidx.compose.material:material-icons-e
 gap = "jp.wasabeef:gap:1.1.0"
 
 [bundles]
-accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller"]
+accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompainist-webview"]
 compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended"]

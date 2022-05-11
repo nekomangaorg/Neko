@@ -33,14 +33,14 @@ import coil.transform.RoundedCornersTransformation
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.models.DisplayManga
-import eu.kanade.tachiyomi.ui.base.components.CoverRippleTheme
-import eu.kanade.tachiyomi.ui.base.components.DisplayText
-import eu.kanade.tachiyomi.ui.base.components.Favorited
-import eu.kanade.tachiyomi.ui.base.components.HeaderCard
-import eu.kanade.tachiyomi.ui.base.components.Loading
-import eu.kanade.tachiyomi.ui.base.components.MangaTitle
-import eu.kanade.tachiyomi.ui.base.components.NekoColors
-import eu.kanade.tachiyomi.ui.base.components.theme.Shapes
+import org.nekomanga.presentation.components.CoverRippleTheme
+import org.nekomanga.presentation.components.DisplayText
+import org.nekomanga.presentation.components.Favorited
+import org.nekomanga.presentation.components.HeaderCard
+import org.nekomanga.presentation.components.Loading
+import org.nekomanga.presentation.components.MangaTitle
+import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun MangaRow(

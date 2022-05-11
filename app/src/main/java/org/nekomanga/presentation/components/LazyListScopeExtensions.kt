@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,7 +20,7 @@ fun <T> LazyListScope.gridItems(
     itemModifier: Modifier = Modifier,
     itemContent: @Composable BoxScope.(T) -> Unit,
 ) {
-    val rows = if (items.count() == 0) 0 else 1 + (items.count() - 1) / columns
+    val rows = if (items.isEmpty()) 0 else 1 + (items.count() - 1) / columns
     items(rows) { rowIndex ->
         Row(horizontalArrangement = horizontalArrangement, modifier = modifier) {
             for (columnIndex in 0 until columns) {

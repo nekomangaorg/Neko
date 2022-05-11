@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base.components
+package org.nekomanga.presentation.screens
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
@@ -25,9 +25,10 @@ import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
+import org.nekomanga.presentation.components.CoverRippleTheme
 
 @Composable
-fun EmptyView(
+fun EmptyScreen(
     iconicImage: IIcon,
     iconSize: Dp = 24.dp,
     @StringRes message: Int? = null,
@@ -68,7 +69,7 @@ fun EmptyView(
 @Preview
 @Composable
 private fun EmptyViewPreview() {
-    EmptyView(
+    EmptyScreen(
         iconicImage = CommunityMaterial.Icon.cmd_compass_off,
         iconSize = 72.dp,
         message = R.string.no_results_found,
