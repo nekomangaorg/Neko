@@ -1,6 +1,3 @@
-import Build_gradle.Configs.getBuildTime
-import Build_gradle.Configs.getCommitCount
-import Build_gradle.Configs.getGitSha
 import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -14,10 +11,18 @@ object Configs {
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     const val versionCode = 141
     const val versionName = "2.8.0.2"
+}
 
-    fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
-    fun getCommitCount() = runCommand("git rev-list --count HEAD")
-    fun getGitSha() = runCommand("git rev-parse --short HEAD")
+fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
+fun getCommitCount() = runCommand("git rev-list --count HEAD")
+fun getGitSha() = runCommand("git rev-parse --short HEAD")
+fun runCommand(command: String): String {
+    val byteOut = ByteArrayOutputStream()
+    project.exec {
+        commandLine = command.split(" ")
+        standardOutput = byteOut
+    }
+    return String(byteOut.toByteArray()).trim()
 }
 
 plugins {
@@ -34,15 +39,6 @@ if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
     apply(mapOf("plugin" to "com.google.gms.google-services"))
 }
 
-
-fun runCommand(command: String): String {
-    val byteOut = ByteArrayOutputStream()
-    project.exec {
-        commandLine = command.split(" ")
-        standardOutput = byteOut
-    }
-    return String(byteOut.toByteArray()).trim()
-}
 
 android {
     compileSdk = Configs.compileSdkVersion
