@@ -79,10 +79,6 @@
             android:configChanges="uiMode|orientation|screenSize" />
         <activity android:name=".ui.security.BiometricActivity" />
         <activity
-            android:name=".widget.CustomLayoutPickerActivity"
-            android:label="@string/app_name"
-            android:theme="@style/FilePickerTheme" />
-        <activity
             android:name=".ui.setting.track.MyAnimeListLoginActivity"
             android:label="MyAnimeList"
             android:exported="true">

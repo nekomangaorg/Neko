@@ -233,6 +233,7 @@
         <item name="thumbTint">@color/switch_thumb_tint</item>
         <item name="trackTint">@null</item>
     </style>
+
     <style name="Widget.Tachiyomi.CompoundButton.CheckBox" parent="Base.Widget.Material3.CompoundButton.CheckBox">
         <item name="buttonTint">@null</item>
     </style>
@@ -265,7 +266,7 @@
         <item name="tabBarIconColor">?tabBarIconColor</item>
         <item name="tabRippleColor">?colorControlHighlight</item>
     </style>
-1
+    1
 
     <style name="Widget.Tachiyomi.Button.OutlinedButton.Icon" parent="Widget.Material3.Button.OutlinedButton.Icon">
         <item name="android:paddingStart">12dp</item>
@@ -339,22 +340,5 @@
         <item name="android:textSize">13sp</item>
         <item name="fontFamily">@font/montserrat_medium</item>
     </style>
-
-    <!--===-->
-    <!--OLD-->
-    <!--===-->
-
-    <style name="FilePickerTheme" parent="NNF_BaseTheme.Light">
-        <item name="colorPrimary">@color/primaryTachiyomi</item>
-        <item name="colorAccent">@color/secondaryTachiyomi</item>
-        <item name="colorButtonNormal">@color/primaryTachiyomi</item>
-        <item name="android:textSize">14sp</item>
-
-        <item name="alertDialogTheme">@style/FilePickerAlertDialogTheme</item>
-
-        <item name="nnf_toolbarTheme">@style/ThemeOverlay.AppCompat.Dark.ActionBar</item>
-    </style>
-
-    <style name="FilePickerAlertDialogTheme" parent="Theme.AppCompat.Light.Dialog.Alert"/>
 
 </resources>

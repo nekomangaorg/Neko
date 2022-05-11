@@ -26,7 +26,6 @@ import eu.kanade.tachiyomi.data.preference.asImmediateFlow
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.MiuiUtil
 import eu.kanade.tachiyomi.util.system.disableItems
-import eu.kanade.tachiyomi.util.system.getFilePicker
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.requestFilePermissionsSafe
@@ -116,16 +115,11 @@ class SettingsBackupController : SettingsController() {
                 titleRes = R.string.backup_location
 
                 onClick {
-                    val currentDir = preferences.backupsDirectory().get()
                     try {
                         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
                         startActivityForResult(intent, CODE_BACKUP_DIR)
                     } catch (e: ActivityNotFoundException) {
-                        // Fall back to custom picker on error
-                        startActivityForResult(
-                            preferences.context.getFilePicker(currentDir),
-                            CODE_BACKUP_DIR
-                        )
+                        activity?.toast(R.string.file_picker_error)
                     }
                 }
 

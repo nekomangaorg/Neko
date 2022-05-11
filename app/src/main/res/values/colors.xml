@@ -11,6 +11,8 @@
     <color name="secondaryVariantTachiyomi">@color/neko_primary</color>
     <color name="actionModeShadow">@color/md_black_1000_38</color>
     <color name="gray_button">#404040</color>
+    <color name="material_red_500">#F44336</color>
+    <color name="material_green_800">#2E7D32</color>
 
     <color name="gray">#404040</color>
 

@@ -1,3 +1,6 @@
+import Build_gradle.Configs.getBuildTime
+import Build_gradle.Configs.getCommitCount
+import Build_gradle.Configs.getGitSha
 import java.io.ByteArrayOutputStream
 import java.time.LocalDateTime
 import java.time.ZoneOffset
@@ -11,21 +14,26 @@ object Configs {
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     const val versionCode = 141
     const val versionName = "2.8.0.2"
+
+    fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
+    fun getCommitCount() = runCommand("git rev-list --count HEAD")
+    fun getGitSha() = runCommand("git rev-parse --short HEAD")
 }
 
 plugins {
     id("com.android.application")
     kotlin("android")
+    kotlin("plugin.serialization")
     id("kotlin-parcelize")
-    id("org.jetbrains.kotlin.plugin.serialization")
     id("com.mikepenz.aboutlibraries.plugin")
     id("com.google.firebase.crashlytics")
     id("com.google.gms.google-services") apply false
 }
 
-fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
-fun getCommitCount() = runCommand("git rev-list --count HEAD")
-fun getGitSha() = runCommand("git rev-parse --short HEAD")
+if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
+    apply(mapOf("plugin" to "com.google.gms.google-services"))
+}
+
 
 fun runCommand(command: String): String {
     val byteOut = ByteArrayOutputStream()
@@ -82,7 +90,7 @@ android {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.1.0-rc02"
+        kotlinCompilerExtensionVersion = compose.versions.compose.version.get()
     }
 
     flavorDimensions.add("default")
@@ -113,214 +121,95 @@ android {
 }
 
 dependencies {
+
+    implementation(kotlinx.bundles.kotlin)
+
     // Modified dependencies
-    implementation("com.github.jays2kings:subsampling-scale-image-view:dfd3e43") {
+    implementation(libs.j2k.subsample) {
         exclude(module = "image-decoder")
     }
 
-    implementation("com.github.tachiyomiorg:image-decoder:0e91111")
-    //implementation("com.github.tachiyomiorg:image-decoder:7481a4a")
-
-    // Source models and interfaces from Tachiyomi 1.x
-    implementation("tachiyomi.sourceapi:source-api:1.1")
-
-    // Android X libraries
-    implementation("androidx.appcompat:appcompat:1.4.1")
-    implementation("androidx.cardview:cardview:1.0.0")
-    implementation("com.google.android.material:material:1.5.0")
-    implementation("androidx.webkit:webkit:1.4.0")
-    implementation("androidx.recyclerview:recyclerview:1.2.1")
-    implementation("androidx.preference:preference:1.2.0")
-    implementation("androidx.annotation:annotation:1.3.0")
-    implementation("androidx.browser:browser:1.4.0")
-    implementation("androidx.biometric:biometric:1.1.0")
-    implementation("androidx.palette:palette:1.0.0")
-    implementation("androidx.core:core-ktx:1.7.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.1.3")
-    implementation("androidx.multidex:multidex:2.0.1")
-
-    implementation("com.google.firebase:firebase-analytics-ktx:20.1.2")
-    implementation("com.google.firebase:firebase-crashlytics-ktx:18.2.10")
-
-    val lifecycleVersion = "2.4.1"
-    implementation("androidx.lifecycle:lifecycle-process:$lifecycleVersion")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:$lifecycleVersion")
-
-    // ReactiveX
-    implementation("io.reactivex:rxandroid:1.2.1")
-    implementation("io.reactivex:rxjava:1.3.8")
-    implementation("com.jakewharton.rxrelay:rxrelay:1.2.0")
-    implementation("com.github.pwittchen:reactivenetwork:0.13.0")
-
-    // Coroutines
-    implementation("com.github.tfcporciuncula:flow-preferences:1.3.4")
-
-    // Network client
-    val okhttpVersion = "4.9.3"
-    implementation("com.squareup.okhttp3:okhttp:$okhttpVersion")
-    implementation("com.squareup.okhttp3:logging-interceptor:$okhttpVersion")
-    implementation("com.squareup.okhttp3:okhttp-dnsoverhttps:$okhttpVersion")
-    implementation("com.squareup.okio:okio:2.10.0")
+    implementation(libs.bundles.tachiyomi)
+    implementation(androidx.bundles.androidx)
+    implementation(libs.bundles.google)
+    implementation(libs.bundles.rx)
+    implementation(libs.flowprefs)
+    implementation(libs.bundles.ok)
 
     // TLS 1.3 support for Android < 10
-    implementation("org.conscrypt:conscrypt-android:2.5.2")
+    implementation(libs.conscrypt)
 
-    // Chucker
-    val chuckerVersion = "3.5.2"
-    debugImplementation("com.github.ChuckerTeam.Chucker:library:$chuckerVersion")
-    releaseImplementation("com.github.ChuckerTeam.Chucker:library-no-op:$chuckerVersion")
+    debugImplementation(libs.chucker.debug)
+    releaseImplementation(libs.chucker.release)
 
-    // REST
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
-    implementation("com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0")
+    implementation(libs.bundles.retrofit)
 
     // JSON
-    implementation("com.google.code.gson:gson:2.9.0")
-    implementation("com.github.salomonbrys.kotson:kotson:2.5.0")
-
-    // Serialization
-    val kotlinSerialization = "1.3.2"
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:${kotlinSerialization}")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-protobuf:${kotlinSerialization}")
+    implementation(libs.kotson)
 
     // Disk
-    implementation("com.jakewharton:disklrucache:2.0.2")
-    implementation("com.github.tachiyomiorg:unifile:17bec43")
+    implementation(libs.disklrue)
 
     // HTML parser
-    implementation("org.jsoup:jsoup:1.14.3")
+    implementation(libs.jsoup)
 
     // Icons
-    implementation("com.mikepenz:iconics-core:5.3.3")
-    implementation("com.mikepenz:iconics-views:5.3.3")
-    implementation("com.mikepenz:iconics-compose:5.3.3")
+    implementation(libs.bundles.iconics)
+
+    //requrired outside bundle cause toml doesnt work with aar
     implementation("com.mikepenz:community-material-typeface:6.4.95.0-kotlin@aar")
     implementation("com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin@aar")
     implementation("com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin@aar")
-
-    // Job scheduling
-    implementation("androidx.work:work-runtime-ktx:2.7.1")
-
-    implementation("com.google.android.gms:play-services-gcm:17.0.0")
 
     // Database
     implementation("androidx.sqlite:sqlite:2.2.0")
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
-    implementation("io.requery:sqlite-android:3.31.0")
+    implementation("com.github.requery:sqlite-android:3.36.0")
 
     // Model View Presenter
-    val nucleusVersion = "3.0.0"
-    implementation("info.android15.nucleus:nucleus:$nucleusVersion")
-    implementation("info.android15.nucleus:nucleus-support-v7:$nucleusVersion")
+    implementation(libs.bundles.nucleus)
 
     // Dependency injection
     implementation("com.github.inorichi.injekt:injekt-core:65b0440")
 
     // Image library
-    val coilVersion = "1.4.0"
-    implementation("io.coil-kt:coil:$coilVersion")
-    implementation("io.coil-kt:coil-gif:$coilVersion")
-    implementation("io.coil-kt:coil-svg:$coilVersion")
-    implementation("io.coil-kt:coil-compose:$coilVersion")
+    implementation(libs.bundles.coil)
 
     // Logging
     implementation("com.elvishew:xlog:1.11.0")
 
     // UI
-    implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
-    implementation("br.com.simplepass:loading-button-android:2.2.0")
-    val fastAdapterVersion = "5.6.0"
-    implementation("com.mikepenz:fastadapter:$fastAdapterVersion")
-    implementation("com.mikepenz:fastadapter-extensions-binding:$fastAdapterVersion")
-    implementation("eu.davidea:flexible-adapter:5.1.0")
-    implementation("eu.davidea:flexible-adapter-ui:1.0.0")
-    implementation("com.nononsenseapps:filepicker:2.5.2")
+    //implementation("com.dmitrymalkovich.android:material-design-dimens:1.4")
+    implementation("com.github.leandroBorgesFerreira:LoadingButtonAndroid:2.2.0")
+    implementation(libs.bundles.fastadapter)
+
+    implementation(libs.bundles.flexibleadapter)
+
     implementation("com.nightlynexus.viewstatepageradapter:viewstatepageradapter:1.1.0")
     implementation("com.github.sephiroth74:NumberSlidingPicker:1.0.3")
     implementation("com.github.chrisbanes:PhotoView:2.3.0")
-    implementation("com.github.tachiyomiorg:DirectionalViewPager:1.0.0")
-    implementation("com.github.florent37:viewtooltip:1.2.2")
+    implementation("com.github.CarlosEsco:ViewTooltip:f79a8955ef")
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade:1.3.0")
-    implementation("com.google.android.flexbox:flexbox:3.0.0")
 
     //Compose
-    val composeVersion = "1.1.0-rc01"
-    implementation("androidx.compose.ui:ui:$composeVersion")
-    implementation("androidx.compose.runtime:runtime-livedata:$composeVersion")
-    implementation("androidx.paging:paging-compose:1.0.0-alpha14")
-    // Tooling support (Previews, etc.)
-    implementation("androidx.compose.ui:ui-tooling:$composeVersion")
-    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
-    implementation("androidx.compose.foundation:foundation:$composeVersion")
-    // Material Design
-    implementation("androidx.compose.material3:material3:1.0.0-alpha10")
-    implementation("com.google.android.material:compose-theme-adapter-3:1.0.7")
-    implementation("androidx.compose.material:material:$composeVersion")
-
-    // Material design icons
-    implementation("androidx.compose.material:material-icons-core:$composeVersion")
-    implementation("androidx.compose.material:material-icons-extended:$composeVersion")
-
-    implementation("jp.wasabeef:gap:1.1.0")
+    implementation(compose.bundles.compose)
+    implementation(compose.gap)
+    implementation(compose.bundles.accompanist)
 
 
-    implementation("com.github.zedlabs:pastelPlaceholders:1.0.4")
+    implementation(libs.pastelplaceholders)
+    implementation(libs.bundles.conductor)
+    implementation(libs.stringsimilarity)
+    implementation(libs.versioncompare)
+    implementation(libs.tokenbucket)
+    implementation(libs.bundles.kahelpers)
+    implementation(libs.sandwich)
+    implementation(libs.aboutlibs)
+    debugImplementation(libs.leakcanary)
 
-    //accompianist
-    val accompanistVersion = "0.23.1"
-    implementation("com.google.accompanist:accompanist-swiperefresh:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-flowlayout:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-drawablepainter:$accompanistVersion")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:$accompanistVersion")
-
-// Conductor
-    implementation("com.bluelinelabs:conductor:3.1.4")
-    implementation("com.github.tachiyomiorg:conductor-support-preference:3.0.0")
-
-// RxBindings
-    val rxBindingVersion = "1.0.1"
-    implementation("com.jakewharton.rxbinding:rxbinding-kotlin:$rxBindingVersion")
-    implementation("com.jakewharton.rxbinding:rxbinding-appcompat-v7-kotlin:$rxBindingVersion")
-    implementation("com.jakewharton.rxbinding:rxbinding-support-v4-kotlin:$rxBindingVersion")
-    implementation("com.jakewharton.rxbinding:rxbinding-recyclerview-v7-kotlin:$rxBindingVersion")
-
-// Tests
-    testImplementation("junit:junit:4.13.2")
-    testImplementation("org.assertj:assertj-core:3.22.0")
-    testImplementation("org.mockito:mockito-core:4.4.0")
-
-    val roboElectricVersion = "3.3.2"
-    testImplementation("org.robolectric:robolectric:$roboElectricVersion")
-    testImplementation("org.robolectric:shadows-multidex:$roboElectricVersion")
-    testImplementation("org.robolectric:shadows-play-services:$roboElectricVersion")
-
-    implementation(kotlin("stdlib", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
-    implementation(kotlin("reflect", org.jetbrains.kotlin.config.KotlinCompilerVersion.VERSION))
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.0")
-
-// Text distance
-    implementation("info.debatty:java-string-similarity:2.0.0")
-
-//  version comparison
-    implementation("com.g00fy2:versioncompare:1.3.4")
-
-// token bucket
-    implementation("org.isomorphism:token-bucket:1.7")
-// needed to compile with token bucket
-    implementation("com.google.guava:listenablefuture:9999.0-empty-to-avoid-conflict-with-guava")
-
-//helpers
-    val kahelpersVersion = "3.0.5"
-    implementation("com.github.FunkyMuse.KAHelpers:kotlinextensions:$kahelpersVersion")
-    implementation("com.github.FunkyMuse.KAHelpers:activity:$kahelpersVersion")
-    implementation("com.github.FunkyMuse.KAHelpers:string:$kahelpersVersion")
-    implementation("com.github.skydoves:sandwich:1.2.3")
-
-    implementation("com.mikepenz:aboutlibraries:8.9.4")
-    debugImplementation("com.squareup.leakcanary:leakcanary-android:2.8.1")
+    testImplementation(libs.bundles.tests)
 
 }
 
@@ -348,6 +237,3 @@ tasks {
     }
 }
 
-if (gradle.startParameter.taskRequests.toString().contains("Standard")) {
-    apply(mapOf("plugin" to "com.google.gms.google-services"))
-}

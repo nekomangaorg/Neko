@@ -20,5 +20,17 @@
     <dimen name="theme_bottom_item_preview">12dp</dimen>
     <dimen name="theme_accent_width_preview">16dp</dimen>
 
+    <!-- stuff from material dimens lib -->
+    <dimen name="material_component_cards_space_between_cards">8dp</dimen>
+    <dimen name="material_component_cards_top_and_bottom_padding">16dp</dimen>
+    <dimen name="material_layout_avatar">40dp</dimen>
+    <dimen name="material_layout_keylines_screen_edge_margin">16dp</dimen>
+    <dimen name="material_component_lists_icon_left_padding">16dp</dimen>
+    <dimen name="material_component_dialogs_padding_around_content_area">24dp</dimen>
+    <dimen name="material_component_text_fields_floating_label_padding_between_label_and_input_text">
+        8dp
+    </dimen>
+    <dimen name="material_component_lists_single_line_with_avatar_height">56dp</dimen>
+    <dimen name="material_component_lists_padding_above_list">8dp</dimen>
 
 </resources>

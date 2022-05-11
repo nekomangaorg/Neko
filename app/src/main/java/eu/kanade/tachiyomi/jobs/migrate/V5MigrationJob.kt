@@ -99,7 +99,7 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
                     errors.size,
                     errors.size))
                 addAction(
-                    R.drawable.nnf_ic_file_folder,
+                    R.drawable.ic_folder_24dp,
                     context.getString(R.string.view_all_errors),
                     NotificationReceiver.openErrorLogPendingActivity(context, uri!!)
                 )
