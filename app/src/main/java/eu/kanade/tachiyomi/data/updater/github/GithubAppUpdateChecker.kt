@@ -1,9 +1,9 @@
 package eu.kanade.tachiyomi.data.updater.github
 
-import com.g00fy2.versioncompare.Version
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
+import io.github.g00fy2.versioncompare.Version
 
 class GithubAppUpdateChecker : AppUpdateChecker() {
 

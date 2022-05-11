@@ -1,0 +1,28 @@
+[versions]
+accompanist_version = "0.23.1"
+compose_version = "1.1.1"
+
+[libraries]
+
+accompanist-swiperefresh = { module = "com.google.accompanist:accompanist-swiperefresh", version.ref = "accompanist_version" }
+accompanist-flowlayout = { module = "com.google.accompanist:accompanist-flowlayout", version.ref = "accompanist_version" }
+accompanist-drawablepainter = { module = "com.google.accompanist:accompanist-drawablepainter", version.ref = "accompanist_version" }
+accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-systemuicontroller", version.ref = "accompanist_version" }
+
+paging = "androidx.paging:paging-compose:1.0.0-alpha14"
+material3-core = "androidx.compose.material3:material3:1.0.0-alpha10"
+material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.8"
+
+ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
+runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose_version" }
+ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
+foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose_version" }
+material = { module = "androidx.compose.material:material", version.ref = "compose_version" }
+material-icons-core = { module = "androidx.compose.material:material-icons-core", version.ref = "compose_version" }
+material-icons-extended = { module = "androidx.compose.material:material-icons-extended", version.ref = "compose_version" }
+
+gap = "jp.wasabeef:gap:1.1.0"
+
+[bundles]
+accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller"]
+compose = ["paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended"]

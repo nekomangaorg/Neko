@@ -83,7 +83,6 @@ fun CombinedClickableIconButton(
  * This button wraps combinedClickable with the remember ripple from a normal IconButton, and is to be used with the
  * CombinedClickableIconButton
  */
-@Composable
 fun Modifier.iconButtonCombinedClickable(
     toolTipLabel: String,
     onLongClick: (() -> Unit)? = null,

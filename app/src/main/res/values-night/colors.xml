@@ -17,7 +17,7 @@
     <color name="textColorPrimaryInverse">@color/md_black_1000_87</color>
     <color name="strong_divider">@color/md_white_1000_38</color>
     <color name="divider">@color/md_white_1000_12</color>
-    <color name="download">@color/material_green_700</color>
+    <color name="download">#388E3C</color>
     <color name="holo_red">#cc4444</color>
     <color name="splashIcon">@color/md_white_1000</color>
 

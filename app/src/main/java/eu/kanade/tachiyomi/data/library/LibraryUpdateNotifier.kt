@@ -32,7 +32,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import okhttp3.internal.toImmutableMap
 import uy.kohesive.injekt.injectLazy
-import java.util.ArrayList
 
 class LibraryUpdateNotifier(private val context: Context) {
 
@@ -117,7 +116,7 @@ class LibraryUpdateNotifier(private val context: Context) {
                         )
                     )
                     addAction(
-                        R.drawable.nnf_ic_file_folder,
+                        R.drawable.ic_folder_24dp,
                         context.getString(R.string.view_all_errors),
                         NotificationReceiver.openErrorLogPendingActivity(context, uri)
                     )
