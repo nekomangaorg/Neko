@@ -97,7 +97,7 @@ open class WebViewActivity : BaseWebViewActivity() {
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         val backItem = binding.toolbar.menu.findItem(R.id.action_web_back)
         val forwardItem = binding.toolbar.menu.findItem(R.id.action_web_forward)
         backItem?.isEnabled = binding.webview.canGoBack()

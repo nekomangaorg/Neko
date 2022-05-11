@@ -308,8 +308,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         return true
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val splitItem = menu?.findItem(R.id.action_shift_double_page)
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val splitItem = menu.findItem(R.id.action_shift_double_page)
         splitItem?.isVisible =
             ((viewer as? PagerViewer)?.config?.doublePages ?: false) && !canShowSplitAtBottom()
         binding.chaptersSheet.shiftPageButton.isVisible =
@@ -550,7 +550,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         binding.appBar.setBackgroundColor(primaryColor)
         window.statusBarColor = Color.TRANSPARENT
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        binding.toolbar.setNavigationIcon(this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back))
+        binding.toolbar.navigationIcon =
+            this.iconicsDrawableMedium(MaterialDesignDx.Icon.gmf_arrow_back)
         binding.toolbar.setNavigationOnClickListener {
             popToMain()
         }

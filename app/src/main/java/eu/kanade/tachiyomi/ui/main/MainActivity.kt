@@ -728,8 +728,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         router.setRoot(controller.withFadeInTransaction().tag(id.toString()))
     }
 
-    override fun onPrepareOptionsMenu(menu: Menu?): Boolean {
-        val searchItem = menu?.findItem(R.id.action_search)
+    override fun onPrepareOptionsMenu(menu: Menu): Boolean {
+        val searchItem = menu.findItem(R.id.action_search)
         if (currentToolbar == binding.cardToolbar) {
             searchItem?.isVisible = false
         }
@@ -764,9 +764,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         router.pushController(AboutController().withFadeTransaction())
     }
 
-    override fun dispatchTouchEvent(ev: MotionEvent?): Boolean {
+    override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         gestureDetector?.onTouchEvent(ev)
-        if (ev?.action == MotionEvent.ACTION_DOWN) {
+        if (ev.action == MotionEvent.ACTION_DOWN) {
             if (snackBar != null && snackBar!!.isShown) {
                 val sRect = Rect()
                 snackBar!!.view.getGlobalVisibleRect(sRect)

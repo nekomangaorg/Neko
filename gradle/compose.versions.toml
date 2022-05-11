@@ -13,6 +13,7 @@ paging = "androidx.paging:paging-compose:1.0.0-alpha14"
 material3-core = "androidx.compose.material3:material3:1.0.0-alpha10"
 material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.8"
 
+activity = "androidx.activity:activity-compose:1.6.0-alpha03"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
 runtime-livedata = { module = "androidx.compose.runtime:runtime-livedata", version.ref = "compose_version" }
 ui-tooling = { module = "androidx.compose.ui:ui-tooling", version.ref = "compose_version" }
@@ -25,4 +26,4 @@ gap = "jp.wasabeef:gap:1.1.0"
 
 [bundles]
 accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller"]
-compose = ["paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended"]
+compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended"]

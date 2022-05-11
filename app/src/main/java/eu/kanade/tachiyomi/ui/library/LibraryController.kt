@@ -110,7 +110,6 @@ import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import java.util.ArrayList
 import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.max
@@ -742,7 +741,7 @@ class LibraryController(
         }
         hopperGravity = gravityPref
 
-        val gestureDetector = GestureDetectorCompat(activity, LibraryGestureDetector(this))
+        val gestureDetector = GestureDetectorCompat(activity!!, LibraryGestureDetector(this))
         with(binding.roundedCategoryHopper) {
             listOf(categoryHopperLayout, upCategory, downCategory, categoryButton).forEach {
                 it.setOnTouchListener { _, event ->

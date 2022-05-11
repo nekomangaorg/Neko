@@ -3,12 +3,11 @@ package eu.kanade.tachiyomi.ui.setting.track
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.Gravity
-import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ProgressBar
+import androidx.activity.compose.setContent
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.ui.base.activity.BaseThemedActivity
+import eu.kanade.tachiyomi.ui.base.components.LoadingScreen
+import eu.kanade.tachiyomi.ui.base.components.theme.NekoTheme
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import uy.kohesive.injekt.injectLazy
 
@@ -21,15 +20,12 @@ abstract class BaseOAuthLoginActivity : BaseThemedActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        val view = ProgressBar(this)
-        setContentView(
-            view,
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                ViewGroup.LayoutParams.WRAP_CONTENT,
-                Gravity.CENTER
-            )
-        )
+        setContent {
+            NekoTheme {
+                LoadingScreen()
+            }
+        }
+
 
         handleResult(intent.data)
     }
