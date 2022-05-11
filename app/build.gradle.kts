@@ -202,7 +202,7 @@ dependencies {
     implementation(libs.tokenbucket)
     implementation(libs.bundles.kahelpers)
     implementation(libs.sandwich)
-    implementation(libs.aboutlibs)
+    implementation(libs.aboutLibraries.compose)
     debugImplementation(libs.leakcanary)
 
     testImplementation(libs.bundles.tests)
