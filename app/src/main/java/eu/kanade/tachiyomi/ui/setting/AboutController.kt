@@ -7,7 +7,6 @@ import android.os.Bundle
 import androidx.core.net.toUri
 import androidx.preference.PreferenceScreen
 import com.elvishew.xlog.XLog
-import com.mikepenz.aboutlibraries.LibsBuilder
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -21,6 +20,7 @@ import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
 import eu.kanade.tachiyomi.util.view.openInBrowser
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -141,8 +141,7 @@ class AboutController : SettingsController() {
                 titleRes = R.string.open_source_licenses
 
                 onClick {
-                    LibsBuilder().withFields(R.string::class.java.fields)
-                        .start(activity!!)
+                    router.pushController(LicensesController().withFadeTransaction())
                 }
             }
         }

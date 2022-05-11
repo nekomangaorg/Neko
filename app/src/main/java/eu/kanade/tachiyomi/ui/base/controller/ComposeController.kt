@@ -33,3 +33,31 @@ abstract class BaseComposeController<PS : BaseCoroutinePresenter>(bundle: Bundle
     @Composable
     abstract fun ScreenContent()
 }
+
+/**
+ * Basic Compose controller without a presenter.
+ */
+abstract class BasicComposeController : BaseController<EmptyComposeControllerBinding>() {
+
+    override fun createBinding(inflater: LayoutInflater): EmptyComposeControllerBinding =
+        EmptyComposeControllerBinding.inflate(inflater)
+
+    override fun onViewCreated(view: View) {
+        hideToolbar()
+        super.onViewCreated(view)
+
+        binding.root.setContent {
+            NekoTheme {
+                ScreenContent()
+            }
+        }
+    }
+
+    override fun onDestroyView(view: View) {
+        showToolbar()
+        super.onDestroyView(view)
+    }
+    
+    @Composable
+    abstract fun ScreenContent()
+}
