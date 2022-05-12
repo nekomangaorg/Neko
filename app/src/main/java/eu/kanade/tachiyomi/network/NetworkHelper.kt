@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.network
 
 import android.content.Context
 import coil.util.CoilUtils
+import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
@@ -76,8 +77,14 @@ class NetworkHelper(val context: Context) {
             .cookieJar(cookieManager)
             .apply {
                 if (BuildConfig.DEBUG) {
-                    addInterceptor(ChuckerInterceptor.Builder(context).alwaysReadResponseBody(true)
-                        .build())
+                    addInterceptor(
+                        ChuckerInterceptor.Builder(context)
+                            .collector(ChuckerCollector(context))
+                            .maxContentLength(250000L)
+                            .redactHeaders(emptySet())
+                            .alwaysReadResponseBody(false)
+                            .build()
+                    )
                 }
                 when (preferences.dohProvider()) {
                     PREF_DOH_CLOUDFLARE -> dohCloudflare()
