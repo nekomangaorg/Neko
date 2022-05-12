@@ -73,6 +73,7 @@ class NetworkHelper(val context: Context) {
         return OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
+            .callTimeout(15, TimeUnit.SECONDS)
             .cache(Cache(cacheDir, cacheSize))
             .cookieJar(cookieManager)
             .apply {
