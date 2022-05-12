@@ -11,6 +11,7 @@ import androidx.core.net.toUri
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.data.backup.full.FullBackupManager
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 
 /**
@@ -71,11 +72,7 @@ class BackupCreateService : Service() {
 
         startForeground(Notifications.ID_BACKUP_PROGRESS, notifier.showBackupProgress().build())
 
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "${javaClass.name}:WakeLock"
-        )
-        wakeLock.acquire()
+        wakeLock = acquireWakeLock()
     }
 
     override fun stopService(name: Intent?): Boolean {
@@ -108,7 +105,7 @@ class BackupCreateService : Service() {
 
             val backupFileUri =
                 FullBackupManager(this).createBackup(uri!!, backupFlags, false).toUri()
-            
+
             val unifile = UniFile.fromUri(this, backupFileUri)
             notifier.showBackupComplete(unifile)
         } catch (e: Exception) {

@@ -10,12 +10,12 @@ import androidx.core.content.ContextCompat
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.backup.full.FullRestore
 import eu.kanade.tachiyomi.data.notification.Notifications
+import eu.kanade.tachiyomi.util.system.acquireWakeLock
 import eu.kanade.tachiyomi.util.system.isServiceRunning
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
-import java.util.concurrent.TimeUnit
 
 /**
  * Restores backup.
@@ -43,11 +43,7 @@ class BackupRestoreService : Service() {
             Notifications.ID_RESTORE_PROGRESS,
             restoreHelper.progressNotification.build()
         )
-        wakeLock = (getSystemService(Context.POWER_SERVICE) as PowerManager).newWakeLock(
-            PowerManager.PARTIAL_WAKE_LOCK,
-            "BackupRestoreService:WakeLock"
-        )
-        wakeLock.acquire(TimeUnit.HOURS.toMillis(3))
+        wakeLock = acquireWakeLock()
     }
 
     /**

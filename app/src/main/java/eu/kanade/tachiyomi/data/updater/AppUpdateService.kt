@@ -57,7 +57,7 @@ class AppUpdateService : Service() {
         startForeground(Notifications.ID_UPDATER,
             notifier.onDownloadStarted(getString(R.string.app_name)).build())
 
-        wakeLock = acquireWakeLock(javaClass.name)
+        wakeLock = acquireWakeLock()
     }
 
     /**
@@ -268,12 +268,19 @@ class AppUpdateService : Service() {
          * @param url the url to the new update.
          * @return [PendingIntent]
          */
-        internal fun downloadApkPendingService(context: Context, url: String, notifyOnInstall: Boolean = false): PendingIntent {
+        internal fun downloadApkPendingService(
+            context: Context,
+            url: String,
+            notifyOnInstall: Boolean = false,
+        ): PendingIntent {
             val intent = Intent(context, AppUpdateService::class.java).apply {
                 putExtra(EXTRA_DOWNLOAD_URL, url)
                 putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
             }
-            return PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+            return PendingIntent.getService(context,
+                0,
+                intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         }
     }
 }

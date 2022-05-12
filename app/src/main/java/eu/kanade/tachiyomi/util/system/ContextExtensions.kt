@@ -214,9 +214,14 @@ fun Context.isLandscape(): Boolean {
 /**
  * Convenience method to acquire a partial wake lock.
  */
-fun Context.acquireWakeLock(tag: String): PowerManager.WakeLock {
-    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "$tag:WakeLock")
-    wakeLock.acquire()
+fun Context.acquireWakeLock(tag: String? = null, timeout: Long? = null): PowerManager.WakeLock {
+    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
+        "${tag ?: javaClass.name}:WakeLock")
+    if (timeout != null) {
+        wakeLock.acquire(timeout)
+    } else {
+        wakeLock.acquire()
+    }
     return wakeLock
 }
 
