@@ -80,9 +80,11 @@ fun NekoScaffold(
                             .statusBarsPadding(),
                         title = {
                             Column {
-                                AutoSizeText(
+                                Text(
                                     text = title,
                                     style = MaterialTheme.typography.titleMedium,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                                 if (subtitle.isNotEmpty()) {
                                     Text(
