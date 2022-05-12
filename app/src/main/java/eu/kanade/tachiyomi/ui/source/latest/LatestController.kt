@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.only
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.res.stringResource
 import androidx.paging.compose.collectAsLazyPagingItems
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -43,7 +44,8 @@ class LatestController(bundle: Bundle? = null) :
         }
 
         NekoScaffold(
-            title = R.string.latest, onBack = { activity?.onBackPressed() },
+            title = stringResource(id = R.string.latest),
+            onNavigationIconClicked = { activity?.onBackPressed() },
             actions = {
                 ListGridActionButton(isList = isList,
                     buttonClicked = { preferences.browseAsList().set(isList.not()) })

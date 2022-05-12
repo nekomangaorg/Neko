@@ -938,6 +938,7 @@
     <string name="pinned">Pinned</string>
     <string name="preview">Preview</string>
     <string name="previous">Previous</string>
+    <string name="refresh">Refresh</string>
     <string name="remove">Remove</string>
     <string name="remove_from_">Remove from %1$s</string>
     <string name="reorder">Reorder</string>
@@ -1059,7 +1060,7 @@
     <!-- Similar -->
     <string name="similar_type">Similar</string>
     <string name="related_type">Related</string>
-    <string name="similar">Similar manga</string>
+    <string name="similar">Similar Manga</string>
     <string name="similar_credit_title">Similar Manga Credits</string>
     <string name="similar_credit_message">
         For more information and to view the source code:\n%s

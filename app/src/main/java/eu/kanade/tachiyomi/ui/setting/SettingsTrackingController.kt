@@ -33,11 +33,10 @@ class SettingsTrackingController :
             titleRes = R.string.services
 
             trackPreference(trackManager.myAnimeList) {
-                activity?.openInBrowser(MyAnimeListApi.authUrl(),
-                    trackManager.myAnimeList.getLogoColor())
+                activity?.openInBrowser(MyAnimeListApi.authUrl())
             }
             trackPreference(trackManager.aniList) {
-                activity?.openInBrowser(AnilistApi.authUrl(), trackManager.aniList.getLogoColor())
+                activity?.openInBrowser(AnilistApi.authUrl())
             }
             trackPreference(trackManager.kitsu) {
                 val dialog = TrackLoginDialog(trackManager.kitsu, R.string.email)

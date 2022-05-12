@@ -2,6 +2,7 @@ package eu.kanade.tachiyomi.ui.setting
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.res.stringResource
 import com.mikepenz.aboutlibraries.ui.compose.LibrariesContainer
 import com.mikepenz.aboutlibraries.ui.compose.LibraryDefaults.libraryColors
 import eu.kanade.tachiyomi.R
@@ -11,8 +12,9 @@ import org.nekomanga.presentation.components.NekoScaffold
 class LicensesController : BasicComposeController() {
     @Composable
     override fun ScreenContent() {
-        NekoScaffold(title = R.string.open_source_licenses,
-            onBack = { activity?.onBackPressed() }) { contentPadding ->
+        NekoScaffold(
+            title = stringResource(id = R.string.open_source_licenses),
+            onNavigationIconClicked = { activity?.onBackPressed() }) { contentPadding ->
             LibrariesContainer(
                 contentPadding = contentPadding,
                 colors = libraryColors(

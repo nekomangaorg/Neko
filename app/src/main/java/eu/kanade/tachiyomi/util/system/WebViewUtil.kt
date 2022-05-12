@@ -11,7 +11,7 @@ import com.elvishew.xlog.XLog
 object WebViewUtil {
     const val REQUESTED_WITH = "com.android.browser"
 
-    const val MINIMUM_WEBVIEW_VERSION = 88
+    const val MINIMUM_WEBVIEW_VERSION = 98
 
     fun supportsWebView(context: Context): Boolean {
         try {

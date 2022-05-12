@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.components
+package org.nekomanga.presentation.screens
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize

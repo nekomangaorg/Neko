@@ -1079,12 +1079,12 @@ class MangaDetailsController :
         externalBottomSheet?.dismiss()
         if (isNotOnline()) return
         val activity = activity ?: return
+
         val intent = WebViewActivity.newIntent(
             activity.applicationContext,
             presenter.source.id,
             url,
-            presenter.manga
-                .title
+            presenter.manga.title
         )
         startActivity(intent)
     }

@@ -1,19 +1,17 @@
 package org.nekomanga.presentation.components
 
 import TooltipBox
-import androidx.annotation.StringRes
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SmallTopAppBar
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -23,20 +21,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.luminance
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.text.style.TextOverflow
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import eu.kanade.tachiyomi.R
-import org.nekomanga.presentation.theme.NekoTheme
-import org.nekomanga.presentation.theme.Typefaces
 
 @Composable
 fun NekoScaffold(
-    @StringRes title: Int,
-    onBack: () -> Unit,
+    title: String,
+    onNavigationIconClicked: () -> Unit,
+    navigationIcon: ImageVector = Icons.Filled.ArrowBack,
+    navigationIconLabel: String = stringResource(id = R.string.back),
+    subtitle: String = "",
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
 ) {
@@ -52,60 +50,63 @@ fun NekoScaffold(
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
-
-                CenterAlignedTopAppBar(
-                    colors = TopAppBarDefaults.smallTopAppBarColors(
-                        containerColor = getTopAppBarColor(),
-                        scrolledContainerColor = getTopAppBarColor()),
-                    modifier = Modifier
-                        .statusBarsPadding(),
-                    title = {
-                        Text(text = stringResource(id = title),
-                            style = TextStyle(
-                                fontFamily = Typefaces.montserrat,
-                                fontSize = MaterialTheme.typography.titleLarge.fontSize,
-                                fontWeight = FontWeight.Normal))
-                    },
-                    navigationIcon = {
-                        TooltipBox(toolTipLabel = stringResource(id = R.string.back),
-                            icon = Icons.Filled.ArrowBack,
-                            buttonClicked = onBack)
-                    },
-                    actions = actions,
-                    scrollBehavior = scrollBehavior
-                )
+                if (subtitle.isEmpty()) {
+                    CenterAlignedTopAppBar(
+                        colors = TopAppBarDefaults.smallTopAppBarColors(
+                            containerColor = getTopAppBarColor(),
+                            scrolledContainerColor = getTopAppBarColor()),
+                        modifier = Modifier
+                            .statusBarsPadding(),
+                        title = {
+                            Text(text = title,
+                                style = MaterialTheme.typography.titleLarge,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis)
+                        },
+                        navigationIcon = {
+                            TooltipBox(toolTipLabel = navigationIconLabel,
+                                icon = navigationIcon,
+                                buttonClicked = onNavigationIconClicked)
+                        },
+                        actions = actions,
+                        scrollBehavior = scrollBehavior
+                    )
+                } else {
+                    SmallTopAppBar(
+                        colors = TopAppBarDefaults.smallTopAppBarColors(
+                            containerColor = getTopAppBarColor(),
+                            scrolledContainerColor = getTopAppBarColor()),
+                        modifier = Modifier
+                            .statusBarsPadding(),
+                        title = {
+                            Column {
+                                AutoSizeText(
+                                    text = title,
+                                    style = MaterialTheme.typography.titleMedium,
+                                )
+                                if (subtitle.isNotEmpty()) {
+                                    Text(
+                                        text = subtitle,
+                                        style = MaterialTheme.typography.bodySmall,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        },
+                        navigationIcon = {
+                            TooltipBox(toolTipLabel = navigationIconLabel,
+                                icon = navigationIcon,
+                                buttonClicked = onNavigationIconClicked)
+                        },
+                        actions = actions,
+                        scrollBehavior = scrollBehavior
+                    )
+                }
             }
         })
     { paddingValues ->
         content(paddingValues)
-    }
-}
-
-@Composable
-fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
-    when (isList.not()) {
-        true -> TooltipBox(
-            toolTipLabel = stringResource(id = R.string.display_as_, "list"),
-            icon = Icons.Filled.List,
-            buttonClicked = buttonClicked)
-
-        false -> TooltipBox(
-            toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
-            icon = Icons.Filled.ViewModule,
-            buttonClicked = buttonClicked)
-    }
-}
-
-@Preview
-@Composable
-private fun ListGridActionButton() {
-    Row {
-        NekoTheme {
-            ListGridActionButton(isList = false) {}
-        }
-        NekoTheme {
-            ListGridActionButton(isList = true) {}
-        }
     }
 }
 

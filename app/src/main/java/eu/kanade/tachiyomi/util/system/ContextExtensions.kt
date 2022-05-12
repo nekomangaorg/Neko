@@ -9,7 +9,6 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.content.res.Configuration
 import android.content.res.Resources
 import android.graphics.drawable.Drawable
@@ -28,9 +27,6 @@ import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.browser.customtabs.CustomTabColorSchemeParams
-import androidx.browser.customtabs.CustomTabsIntent
-import androidx.browser.customtabs.CustomTabsService.ACTION_CUSTOM_TABS_CONNECTION
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import androidx.core.content.getSystemService
@@ -322,28 +318,6 @@ fun Context.isServiceRunning(serviceClass: Class<*>): Boolean {
         .any { className == it.service.className }
 }
 
-fun Context.openInBrowser(url: String, @ColorInt toolbarColor: Int? = null) {
-    this.openInBrowser(url.toUri(), toolbarColor)
-}
-
-fun Context.openInBrowser(uri: Uri, @ColorInt toolbarColor: Int? = null) {
-    try {
-        val intent = CustomTabsIntent.Builder()
-            .setDefaultColorSchemeParams(
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(toolbarColor ?: getResourceColor(R.attr.colorPrimaryVariant))
-                    .build()
-            )
-            .build()
-        // Force allowing browser selection  so that verified links don't re-open in Neko
-        // Force default browser so that verified links don't re-open in Neko
-        defaultBrowserPackageName()?.let { intent.intent.setPackage(it) }
-        intent.launchUrl(this, uri)
-    } catch (e: Exception) {
-        toast(e.message)
-    }
-}
-
 fun Context.defaultBrowserPackageName(): String? {
     val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse("http://"))
     return packageManager.resolveActivity(browserIntent, PackageManager.MATCH_DEFAULT_ONLY)
@@ -351,52 +325,22 @@ fun Context.defaultBrowserPackageName(): String? {
         ?.takeUnless { it in DeviceUtil.invalidDefaultBrowsers }
 }
 
-/**
- * Opens a URL in a custom tab.
- */
-fun Context.openInBrowser(url: String, forceBrowser: Boolean): Boolean {
-    try {
-        val parsedUrl = url.toUri()
-        val intent = CustomTabsIntent.Builder()
-            .setDefaultColorSchemeParams(
-                CustomTabColorSchemeParams.Builder()
-                    .setToolbarColor(getResourceColor(R.attr.colorPrimaryVariant))
-                    .build()
-            )
-            .build()
-        if (forceBrowser) {
-            val packages = getCustomTabsPackages().maxByOrNull { it.preferredOrder }
-            val processName = packages?.activityInfo?.processName ?: return false
-            intent.intent.`package` = processName
-        }
-        intent.launchUrl(this, parsedUrl)
-        return true
-    } catch (e: Exception) {
-        toast(e.message)
-        return false
-    }
+fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {
+    this.openInBrowser(url.toUri(), forceDefaultBrowser)
 }
 
-/**
- * Returns a list of packages that support Custom Tabs.
- */
-fun Context.getCustomTabsPackages(): ArrayList<ResolveInfo> {
-    val pm = packageManager
-    // Get default VIEW intent handler.
-    val activityIntent = Intent(Intent.ACTION_VIEW, "http://www.example.com".toUri())
-    // Get all apps that can handle VIEW intents.
-    val resolvedActivityList = pm.queryIntentActivities(activityIntent, 0)
-    val packagesSupportingCustomTabs = ArrayList<ResolveInfo>()
-    for (info in resolvedActivityList) {
-        val serviceIntent = Intent()
-        serviceIntent.action = ACTION_CUSTOM_TABS_CONNECTION
-        serviceIntent.setPackage(info.activityInfo.packageName)
-        // Check if this package also resolves the Custom Tabs service.
-        if (pm.resolveService(serviceIntent, 0) != null) {
-            packagesSupportingCustomTabs.add(info)
+fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {
+    try {
+        val intent = Intent(Intent.ACTION_VIEW, uri).apply {
+            // Force default browser so that verified extensions don't re-open Neko
+            if (forceDefaultBrowser) {
+                defaultBrowserPackageName()?.let { setPackage(it) }
+            }
         }
+        startActivity(intent)
+    } catch (e: Exception) {
+        toast(e.message)
     }
-    return packagesSupportingCustomTabs
 }
 
 fun Context.isInNightMode(): Boolean {

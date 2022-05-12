@@ -84,7 +84,8 @@ class SimilarController(bundle: Bundle? = null) :
         }
 
         NekoScaffold(
-            title = R.string.similar, onBack = { activity?.onBackPressed() },
+            title = stringResource(id = R.string.similar),
+            onNavigationIconClicked = { activity?.onBackPressed() },
             actions = {
                 ListGridActionButton(isList = isList,
                     buttonClicked = { preferences.browseAsList().set(isList.not()) })

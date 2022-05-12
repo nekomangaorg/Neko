@@ -1577,10 +1577,8 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             val id = pathSegments[1]
             val secondary = pathSegments.getOrNull(2)
             if (secondary == "comments") {
-                if (openInBrowser(intent.data!!.toString(), true)) {
-                    finishAfterTransition()
-                    return true
-                }
+                openInBrowser(intent.data!!.toString(), true)
+                return true
             } else if (!id.isNullOrBlank()) {
                 intentPageNumber = secondary?.toIntOrNull()?.minus(1)
                 setMenuVisibility(visible = false, animate = true)

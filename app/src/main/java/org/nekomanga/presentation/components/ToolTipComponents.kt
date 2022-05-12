@@ -29,10 +29,16 @@ import androidx.compose.ui.semantics.Role
  * This is a box around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
  */
 @Composable
-fun TooltipBox(toolTipLabel: String, icon: ImageVector, buttonClicked: () -> Unit) {
+fun TooltipBox(
+    toolTipLabel: String,
+    icon: ImageVector,
+    isEnabled: Boolean = true,
+    buttonClicked: () -> Unit,
+) {
     val showTooltip = remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
     CombinedClickableIconButton(
+        enabled = isEnabled,
         modifier = Modifier.iconButtonCombinedClickable(
             toolTipLabel = toolTipLabel,
             onClick = buttonClicked,
