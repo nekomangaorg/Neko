@@ -66,8 +66,9 @@ jobs:
           
 
       - name: Prep build artifacts for release
+        env:
+          APK_FOLDER: app/build/outputs/apk/standard/release
         run: |
-          env APK_FOLDER=app/build/outputs/apk/standard/release
       
           mv ${{ APK_FOLDER }}/Neko-standard-universal-release-unsigned-signed.apk neko-universal.apk
           sha=`sha256sum neko-universal.apk | awk '{ print $1 }'`
