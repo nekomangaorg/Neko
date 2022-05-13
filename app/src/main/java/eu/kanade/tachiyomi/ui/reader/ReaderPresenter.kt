@@ -111,6 +111,8 @@ class ReaderPresenter(
      * Relay used when loading prev/next chapter needed to lock the UI (with a dialog).
      */
     private val isLoadingAdjacentChapterRelay = BehaviorRelay.create<Boolean>()
+    private var finished = false
+
 
     /**
      * Chapter list for the active manga. It's retrieved lazily and should be accessed for the first
@@ -171,6 +173,8 @@ class ReaderPresenter(
      * trigger deletion of the downloaded chapters.
      */
     fun onBackPressed() {
+        if (finished) return
+        finished = true
         deletePendingChapters()
         val currentChapters = viewerChaptersRelay.value
         if (currentChapters != null) {

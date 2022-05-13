@@ -27,6 +27,8 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.addCallback
 import android.widget.Toast
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
@@ -206,6 +208,13 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
 
     var didTransistionFromChapter = false
     var visibleChapterRange = longArrayOf()
+    private var backPressedCallback: OnBackPressedCallback? = null
+    private val backCallback = {
+        if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
+            binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
+        }
+        reEnableBackPressedCallBack()
+    }
 
     var isScrollingThroughPagesOrChapters = false
 
@@ -278,6 +287,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             ColorStateList.valueOf(contextCompatColor(R.color.surface_alpha)),
         )
 
+        backPressedCallback = onBackPressedDispatcher.addCallback { backCallback() }
         if (presenter.needsInit()) {
             fromUrl = handleIntentAction(intent)
             if (!fromUrl) {
@@ -311,6 +321,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             .asImmediateFlowIn(lifecycleScope) {
                 SecureActivityDelegate.setSecure(this)
             }
+        reEnableBackPressedCallBack()
     }
 
     /**
@@ -507,7 +518,6 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     private fun popToMain() {
-        presenter.onBackPressed()
         if (fromUrl) {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK
@@ -515,25 +525,27 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             startActivity(intent)
             finishAfterTransition()
         } else {
-            finish()
+            backPressedCallback?.isEnabled = false
+            onBackPressedDispatcher.onBackPressed()
         }
     }
 
-    /**
-     * Called when the user clicks the back key or the button on the binding.toolbar. The call is
-     * delegated to the presenter.
-     */
-    override fun onBackPressed() {
-        if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
-            binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.collapse()
-            return
-        }
-        presenter.onBackPressed()
+    fun reEnableBackPressedCallBack() {
+        backPressedCallback?.isEnabled = binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()
+    }
+
+    override fun finishAfterTransition() {
         if (didTransistionFromChapter && visibleChapterRange.isNotEmpty() && MainActivity.chapterIdToExitTo !in visibleChapterRange) {
             finish()
         } else {
-            super.onBackPressed()
+            presenter.onBackPressed()
+            super.finishAfterTransition()
         }
+    }
+
+    override fun finish() {
+        presenter.onBackPressed()
+        super.finish()
     }
 
     /**

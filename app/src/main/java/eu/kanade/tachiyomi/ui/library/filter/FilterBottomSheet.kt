@@ -19,6 +19,7 @@ import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.databinding.FilterBottomSheetBinding
 import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryGroup
+import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.launchUI
 import eu.kanade.tachiyomi.util.system.rootWindowInsetsCompat
@@ -131,6 +132,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
                 override fun onStateChanged(p0: View, state: Int) {
                     this@FilterBottomSheet.controller?.updateFilterSheetY()
+                    (this@FilterBottomSheet.controller?.activity as? MainActivity)?.reEnableBackPressedCallBack()
                     stateChanged(state)
                 }
             },

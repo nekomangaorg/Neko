@@ -131,6 +131,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     }
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
+                    activity.reEnableBackPressedCallBack()
                 }
             },
         )

@@ -1,10 +1,10 @@
 [versions]
 agp_version = "7.2.0"
-lifecycle_version = "2.4.1"
+lifecycle_version = "2.5.0-rc01"
 
 [libraries]
 
-appcompat = "androidx.appcompat:appcompat:1.4.1"
+appcompat = "androidx.appcompat:appcompat:1.6.0-alpha03"
 cardview = "androidx.cardview:cardview:1.0.0"
 webkit = "androidx.webkit:webkit:1.4.0"
 recyclerview = "androidx.recyclerview:recyclerview:1.2.1"
@@ -21,9 +21,11 @@ work = "androidx.work:work-runtime-ktx:2.7.1"
 #kapt("androidx.lifecycle:lifecycle-compiler:$lifecycleVersion")
 lifecycle-process = { module = "androidx.lifecycle:lifecycle-process", version.ref = "lifecycle_version" }
 lifecycle-runtime-ktx = { module = "androidx.lifecycle:lifecycle-runtime-ktx", version.ref = "lifecycle_version" }
+lifecycle-viewmodel-ktx = { module = "androidx.lifecycle:lifecycle-viewmodel-ktx", version.ref = "lifecycle_version" }
+
 
 [bundles]
-androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preference", "annotation", "browser", "biometric", "palette", "core-kts", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "work"]
+androidx = ["appcompat", "cardview", "webkit", "recyclerview", "preference", "annotation", "browser", "biometric", "palette", "core-kts", "constraintlayout", "multidex", "lifecycle-process", "lifecycle-runtime-ktx", "lifecycle-viewmodel-ktx", "work"]
 
 
 [plugins]

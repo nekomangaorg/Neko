@@ -56,7 +56,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         setSupportActionBar(binding.toolbar)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener {
-            super.onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
         val tintColor = getResourceColor(R.attr.actionBarTintColor)
         binding.toolbar.navigationIcon?.setTint(tintColor)
@@ -232,10 +232,5 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             else Color.BLACK
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
-    }
-
-    override fun onBackPressed() {
-        if (binding.webview.canGoBack()) binding.webview.goBack()
-        else super.onBackPressed()
     }
 }

@@ -101,9 +101,7 @@ abstract class BaseController<VB : ViewBinding>(bundle: Bundle? = null) :
         return null
     }
 
-    open fun canStillGoBack(): Boolean {
-        return false
-    }
+    open fun canStillGoBack(): Boolean { return false }
 
     open val mainRecycler: RecyclerView?
         get() = null

@@ -2,7 +2,6 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.animation.AnimatorSet
 import android.animation.ValueAnimator
-import android.app.Dialog
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -17,6 +16,8 @@ import android.os.PowerManager
 import android.view.LayoutInflater
 import android.view.View
 import android.view.animation.DecelerateInterpolator
+import androidx.activity.ComponentDialog
+import androidx.activity.addCallback
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.animation.addListener
 import androidx.core.view.WindowInsetsCompat.Type.systemBars
@@ -37,7 +38,7 @@ import eu.kanade.tachiyomi.util.view.animateBlur
 import uy.kohesive.injekt.injectLazy
 
 class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable, private val thumbView: View) :
-    Dialog(controller.activity!!, R.style.FullCoverDialogTheme) {
+    ComponentDialog(controller.activity!!, R.style.FullCoverDialogTheme) {
 
     val activity = controller.activity
     val binding = FullCoverDialogBinding.inflate(LayoutInflater.from(context), null, false)
@@ -78,11 +79,17 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
             context.registerReceiver(powerSaverChangeReceiver, filter)
         }
 
+        onBackPressedDispatcher.addCallback {
+            if (binding.mangaCoverFull.isClickable) {
+                animateBack()
+            }
+        }
+
         binding.touchOutside.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
         binding.mangaCoverFull.setOnClickListener {
-            onBackPressed()
+            onBackPressedDispatcher.onBackPressed()
         }
 
         binding.btnSave.setOnClickListener {
@@ -280,11 +287,5 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
             interpolator = DecelerateInterpolator()
             duration = shortAnimationDuration
         }.start()
-    }
-
-    override fun onBackPressed() {
-        if (binding.mangaCoverFull.isClickable) {
-            animateBack()
-        }
     }
 }
