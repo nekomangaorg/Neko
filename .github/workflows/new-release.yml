@@ -67,7 +67,7 @@ jobs:
       - uses: jungwinter/split@v1
         id: signed_files
         with:
-          msg: ${{ steps.sign_app.signedReleaseFiles }}
+          msg: ${{ env.SIGNED_RELEASE_FILES }}
           separator: ':'
 
       - name: Prep build artifacts for release
