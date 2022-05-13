@@ -65,7 +65,7 @@ jobs:
 
       - name: Prep build artifacts for release
         run: |
- mv app/build/outputs/apk/standard/release/app-standard-universal-release-unsigned-signed.apk neko.apk
+          mv app/build/outputs/apk/standard/release/app-standard-universal-release-unsigned-signed.apk neko.apk
           sha=`sha256sum neko-${{ env.VERSION_TAG }}.apk | awk '{ print $1 }'`
           echo "APK_UNIVERSAL_SHA=$sha" >> $GITHUB_ENV
           cp app/build/outputs/apk/standard/release/app-standard-arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
@@ -80,15 +80,15 @@ jobs:
           echo "" >> CurrentChangeLog.MD
           echo "#### MD5: $md5" >> CurrentChangeLog.MD
 
- - name: Example Release
-    uses: "marvinpinto/action-automatic-releases@latest"
-    with:
-      repo_token: "${{ secrets.GITHUB_TOKEN }}"
-      automatic_release_tag: "latest"
-      prerelease: true
-      title: "Development Build"
-      files: |
-        ${{ steps.sign_app.signedReleaseFile0 }}
-        ${{ steps.sign_app.signedReleaseFile1 }}
-        ${{ steps.sign_app.signedReleaseFile2 }}
-        ${{ steps.sign_app.signedReleaseFile3 }}
+      - name: Example Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+            repo_token: "${{ secrets.GITHUB_TOKEN }}"
+            automatic_release_tag: "latest"
+            prerelease: true
+            title: "Development Build"
+            files: |
+              ${{ steps.sign_app.signedReleaseFile0 }}
+              ${{ steps.sign_app.signedReleaseFile1 }}
+              ${{ steps.sign_app.signedReleaseFile2 }}
+              ${{ steps.sign_app.signedReleaseFile3 }}
