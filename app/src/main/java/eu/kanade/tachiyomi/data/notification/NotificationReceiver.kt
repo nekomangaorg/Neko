@@ -241,26 +241,32 @@ class NotificationReceiver : BroadcastReceiver() {
     /**
      * Method called when user wants to mark as read
      *
-     * @param context context of application
-     * @param notificationId id of notification
      */
     private fun markAsRead(chapterUrls: Array<String>, mangaId: Long) {
         val db: DatabaseHelper = Injekt.get()
-        chapterUrls.forEach {
-            val chapter = db.getChapter(it, mangaId).executeAsBlocking() ?: return
+        val preferences: PreferencesHelper = Injekt.get()
+        val sourceManager: SourceManager = Injekt.get()
+
+        val dbChapters = chapterUrls.map { chapterUrl ->
+            val chapter = db.getChapter(chapterUrl, mangaId).executeAsBlocking() ?: return
             chapter.read = true
             db.updateChapterProgress(chapter).executeAsBlocking()
-            val preferences: PreferencesHelper = Injekt.get()
-            if (preferences.removeAfterMarkedAsRead()) {
-                val manga = db.getManga(mangaId).executeAsBlocking() ?: return
-                val sourceManager: SourceManager = Injekt.get()
-                val source = sourceManager.get(manga.source) ?: return
-                downloadManager.deleteChapters(listOf(chapter), manga, source)
-            }
-            if (preferences.readingSync() && chapter.isMergedChapter().not()) {
+            chapter
+        }
+        if (preferences.removeAfterMarkedAsRead()) {
+            val manga = db.getManga(mangaId).executeAsBlocking() ?: return
+            val source = sourceManager.get(manga.source) ?: return
+            downloadManager.deleteChapters(dbChapters, manga, source)
+        }
+
+
+        if (preferences.readingSync()) {
+            val nonMergedChapterIds =
+                dbChapters.filter { it.isMergedChapter().not() }.map { it.mangadex_chapter_id }
+            if (nonMergedChapterIds.isNotEmpty()) {
                 val statusHandler: StatusHandler = Injekt.get()
                 launchIO {
-                    statusHandler.markChapterRead(chapter.mangadex_chapter_id)
+                    statusHandler.marksChaptersStatus(mangaId.toString(), nonMergedChapterIds)
                 }
             }
         }

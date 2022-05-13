@@ -607,17 +607,21 @@ class MangaDetailsPresenter(
                     it.last_page_read = lastRead ?: 0
                     it.pages_left = pagesLeft ?: 0
                 }
-                if (preferences.readingSync() && it.chapter.isMergedChapter()
-                        .not() && skipReadingSync.not()
-                ) {
+            }
+
+            if (preferences.readingSync() && skipReadingSync.not()) {
+                val nonMergedChapterIds = selectedChapters
+                    .filter { it.isMergedChapter().not() }
+                    .map { it.mangadex_chapter_id }
+                if (nonMergedChapterIds.isNotEmpty()) {
                     launchIO {
-                        when (read) {
-                            true -> statusHandler.markChapterRead(it.chapter.mangadex_chapter_id)
-                            false -> statusHandler.markChapterUnRead(it.chapter.mangadex_chapter_id)
-                        }
+                        statusHandler.marksChaptersStatus(MdUtil.getMangaId(manga.url),
+                            nonMergedChapterIds,
+                            read)
                     }
                 }
             }
+
             db.updateChaptersProgress(selectedChapters).executeAsBlocking()
 
             val numberOfNonBookmarkedChapters =

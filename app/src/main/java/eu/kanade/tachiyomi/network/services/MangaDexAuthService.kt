@@ -6,6 +6,7 @@ import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.LoginResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.LogoutDto
 import eu.kanade.tachiyomi.source.online.models.dto.MangaListDto
+import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingDto
 import eu.kanade.tachiyomi.source.online.models.dto.RatingResponseDto
 import eu.kanade.tachiyomi.source.online.models.dto.ReadChapterDto
@@ -70,6 +71,12 @@ interface MangaDexAuthService {
         @Query("status") status: String,
         @Header("Cache-Control") cacheControl: String = "no-cache",
     ): ApiResponse<ReadingStatusMapDto>
+
+    @POST("${MdApi.manga}/{id}/read")
+    suspend fun markStatusForMultipleChapters(
+        @Path("id") mangaId: String,
+        @Body markStatusDto: MarkStatusDto,
+    ): ApiResponse<ResultDto>
 
     @POST("${MdApi.chapter}/{id}/read")
     suspend fun markChapterRead(@Path("id") chapterId: String): ApiResponse<ResultDto>

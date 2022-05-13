@@ -23,6 +23,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.FollowStatus
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_DEFAULT
 import eu.kanade.tachiyomi.ui.library.LibraryGroup.BY_TAG
@@ -1081,7 +1082,7 @@ class LibraryPresenter(
 
     fun markReadStatus(
         mangaList: List<Manga>,
-        markRead: Boolean
+        markRead: Boolean,
     ): HashMap<Manga, List<Chapter>> {
         val mapMangaChapters = HashMap<Manga, List<Chapter>>()
         presenterScope.launchIO {
@@ -1114,19 +1115,19 @@ class LibraryPresenter(
 
     fun confirmMarkReadStatus(
         mangaList: HashMap<Manga, List<Chapter>>,
-        markRead: Boolean
+        markRead: Boolean,
     ) {
         if (preferences.readingSync()) {
             mangaList.forEach { entry ->
-                entry.value.filter { it.isMergedChapter().not() }.forEach { chapter ->
+                val nonMergedChapterIds =
+                    entry.value.filter { it.isMergedChapter().not() }.map { it.mangadex_chapter_id }
+                if (nonMergedChapterIds.isNotEmpty()) {
                     presenterScope.launch {
-                        when (markRead) {
-                            true -> statusHandler.markChapterRead(chapter.mangadex_chapter_id)
-                            false -> statusHandler.markChapterUnRead(chapter.mangadex_chapter_id)
-                        }
+                        statusHandler.marksChaptersStatus(MdUtil.getMangaId(entry.key.url),
+                            nonMergedChapterIds,
+                            markRead)
                     }
                 }
-
             }
         }
 

@@ -11,6 +11,7 @@ import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
+import eu.kanade.tachiyomi.source.online.models.dto.MarkStatusDto
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.Dispatchers
@@ -69,6 +70,27 @@ class StatusHandler {
 
          }
      }.flowOn(Dispatchers.IO)*/
+
+    /**
+     * Mark a list of chapters as read or unread for a manga on MangaDex.  Defaults to marking read
+     */
+    suspend fun marksChaptersStatus(
+        mangaId: String,
+        chapterIds: List<String>,
+        read: Boolean = true,
+    ) {
+        withIOContext {
+            val dto = when (read) {
+                true -> MarkStatusDto(chapterIdsRead = chapterIds)
+                false -> MarkStatusDto(chapterIdsUnread = chapterIds)
+            }
+            authService.markStatusForMultipleChapters(mangaId, dto).onError {
+                this.log("trying to mark chapters read=${read}")
+            }.onException {
+                this.log("trying to mark chapters read=${read}\"")
+            }
+        }
+    }
 
     suspend fun markChapterRead(chapterId: String) {
         withIOContext {
