@@ -88,17 +88,29 @@ jobs:
           cp app/build/outputs/apk/standard/release/Neko-standard-x86-release-unsigned-signed.apk neko-x86.apk
           sha=`sha256sum neko-x86.apk | awk '{ print $1 }'`
           echo "| x86  | $sha" >> CurrentChangeLog.MD
-          
-      - name: Example Release
-        uses: "marvinpinto/action-automatic-releases@latest"
+      
+      
+      - name: Create Release
+        uses: ncipollo/release-action@v1.10.0
         with:
-            repo_token: "${{ secrets.GITHUB_TOKEN }}"
-            automatic_release_tag: "latest"
-            prerelease: true
-            title: "Development Build"
-            files: |
-              CurrentChangeLog.MD
-              neko-universal.apk
-              neko-arm64-v8a.apk
-              neko-armeabi-v7a.apk
-              neko-x86.apk
+          allowUpdates: true
+          bodyFile: "CurrentChangeLog.MD"
+          token: ${{ secrets.GITHUB_TOKEN }}
+          draft: true
+          replacesArtifacts: true
+          tag: "latest"
+          artifacts: "*.apk"
+          
+     # - name: Example Release
+     #   uses: "marvinpinto/action-automatic-releases@latest"
+     #   with:
+     #       repo_token: "${{ secrets.GITHUB_TOKEN }}"
+     #       automatic_release_tag: "latest"
+     #       prerelease: true
+      #      title: "Development Build"
+      #      files: |
+      #        CurrentChangeLog.MD
+      #        neko-universal.apk
+      #        neko-arm64-v8a.apk
+      #        neko-armeabi-v7a.apk
+      #        neko-x86.apk
