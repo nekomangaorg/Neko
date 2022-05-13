@@ -65,16 +65,20 @@ jobs:
 
       - name: Prep build artifacts for release
         run: |
-          mv app/build/outputs/apk/standard/release/app-standard-universal-release-unsigned-signed.apk neko.apk
+          echo  ${{ steps.sign_app.signedReleaseFile0 }}
+          mv ${{ steps.sign_app.signedReleaseFile0 }} neko.apk
           sha=`sha256sum neko-${{ env.VERSION_TAG }}.apk | awk '{ print $1 }'`
           echo "APK_UNIVERSAL_SHA=$sha" >> $GITHUB_ENV
-          cp app/build/outputs/apk/standard/release/app-standard-arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
+          echo  ${{ steps.sign_app.signedReleaseFile1 }}
+          cp ${{ steps.sign_app.signedReleaseFile1 }} neko-arm64-v8a.apk
           sha=`sha256sum neko-arm64-v8a-${{ env.VERSION_TAG }}.apk | awk '{ print $1 }'`
           echo "APK_ARM64_V8A_SHA=$sha" >> $GITHUB_ENV
-          cp app/build/outputs/apk/standard/release/app-standard-armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
+          echo  ${{ steps.sign_app.signedReleaseFile2 }}
+          cp  ${{ steps.sign_app.signedReleaseFile2 }} neko-armeabi-v7a.apk
           sha=`sha256sum neko-armeabi-v7a-${{ env.VERSION_TAG }}.apk | awk '{ print $1 }'`
           echo "APK_ARMEABI_V7A_SHA=$sha" >> $GITHUB_ENV
-          cp app/build/outputs/apk/standard/release/app-standard-x86-release-unsigned-signed.apk tachiyomij2k-x86.apk
+          echo  ${{ steps.sign_app.signedReleaseFile3 }}
+          cp  ${{ steps.sign_app.signedReleaseFile3 }} neko-x86.apk
           sha=`sha256sum neko-x86-${{ env.VERSION_TAG }}.apk | awk '{ print $1 }'`
           echo "APK_X86_SHA=$sha" >> $GITHUB_ENV
           echo "" >> CurrentChangeLog.MD
