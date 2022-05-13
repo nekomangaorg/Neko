@@ -55,6 +55,7 @@ jobs:
           configuration-cache-enabled: true
 
       - name: Sign APK
+        id: sign_app
         uses: r0adkll/sign-android-release@v1.0.4
         with:
           releaseDirectory: app/build/outputs/apk/standard/release
