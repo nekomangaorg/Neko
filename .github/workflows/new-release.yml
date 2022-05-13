@@ -64,14 +64,10 @@ jobs:
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
           
-      - uses: jungwinter/split@v2
-        id: signed_files
-        with:
-          msg: ${{ env.SIGNED_RELEASE_FILES }}
-          separator: ':'
 
       - name: Prep build artifacts for release
         run: |
+          ls app/build/outputs/apk/standard/release
           echo  ${{ steps.signed_files._0 }}
           mv ${{ steps.signed_files._0 }} neko.apk
           sha=`sha256sum neko.apk | awk '{ print $1 }'`
