@@ -2,8 +2,8 @@ name: Release app
 on:
   push:
     branches:
-    - master
-    
+      - master
+
 jobs:
   check_wrapper:
     name: Validate Gradle Wrapper
@@ -63,7 +63,7 @@ jobs:
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
-          
+
 
       - name: Prep build artifacts for release
         run: |
@@ -71,25 +71,25 @@ jobs:
           echo "" >> CurrentChangeLog.MD
           echo "| Variant | SHA-256 |" >> CurrentChangeLog.MD
           echo "| ------- | ------- |" >> CurrentChangeLog.MD
-          
+
           mv app/build/outputs/apk/standard/release/Neko-standard-universal-release-unsigned-signed.apk neko-universal.apk
           sha=`sha256sum neko-universal.apk | awk '{ print $1 }'`
           echo "| Universal | $sha" >> CurrentChangeLog.MD
-      
-      
+
+
           cp app/build/outputs/apk/standard/release/Neko-standard-arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
           sha=`sha256sum neko-arm64-v8a.apk | awk '{ print $1 }'`
           echo "| arm64-v8a | $sha" >> CurrentChangeLog.MD
-          
+
           cp app/build/outputs/apk/standard/release/Neko-standard-armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
           sha=`sha256sum neko-armeabi-v7a.apk | awk '{ print $1 }'`
           echo "| armeabi-v7a | $sha" >> CurrentChangeLog.MD
-          
+
           cp app/build/outputs/apk/standard/release/Neko-standard-x86-release-unsigned-signed.apk neko-x86.apk
           sha=`sha256sum neko-x86.apk | awk '{ print $1 }'`
           echo "| x86  | $sha" >> CurrentChangeLog.MD
-      
-      
+
+
       - name: Create Release
         uses: ncipollo/release-action@v1.10.0
         with:
@@ -100,13 +100,13 @@ jobs:
           replacesArtifacts: true
           tag: "latest"
           artifacts: "*.apk"
-          
-     # - name: Example Release
-     #   uses: "marvinpinto/action-automatic-releases@latest"
-     #   with:
-     #       repo_token: "${{ secrets.GITHUB_TOKEN }}"
-     #       automatic_release_tag: "latest"
-     #       prerelease: true
+
+      # - name: Example Release
+      #   uses: "marvinpinto/action-automatic-releases@latest"
+      #   with:
+      #       repo_token: "${{ secrets.GITHUB_TOKEN }}"
+      #       automatic_release_tag: "latest"
+      #       prerelease: true
       #      title: "Development Build"
       #      files: |
       #        CurrentChangeLog.MD
