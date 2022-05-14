@@ -135,7 +135,6 @@ class AboutController : SettingsController() {
                     val intent = Intent(Intent.ACTION_VIEW, url.toUri())
                     startActivity(intent)
                 }
-                isIconSpaceReserved = true
             }
 
             preference {
