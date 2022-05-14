@@ -9,7 +9,7 @@ ka_helpers_version = "3.0.5"
 okhttp_version = "4.9.3"
 retrofit_version = "2.9.0"
 rxbinding_version = "1.0.1"
-roboelectric_version = "3.3.2"
+roboelectric_version = "3.8"
 
 
 [libraries]
