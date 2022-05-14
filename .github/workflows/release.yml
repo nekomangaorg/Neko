@@ -70,7 +70,7 @@ jobs:
           echo "#### MD5: $md5" >> CurrentChangeLog.MD
 
       - name: Create Release
-        uses: ncipollo/release-action@v1.8.6
+        uses: ncipollo/release-action@v1.10.0
         with:
           allowUpdates: true
           bodyFile: "CurrentChangeLog.MD"
