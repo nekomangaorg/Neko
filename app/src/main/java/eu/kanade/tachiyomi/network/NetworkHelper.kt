@@ -7,7 +7,6 @@ import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
-import com.skydoves.sandwich.coroutines.CoroutinesResponseCallAdapterFactory
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
@@ -73,7 +72,7 @@ class NetworkHelper(val context: Context) {
         return OkHttpClient.Builder()
             .connectTimeout(15, TimeUnit.SECONDS)
             .readTimeout(15, TimeUnit.SECONDS)
-            .callTimeout(15, TimeUnit.SECONDS)
+            .callTimeout(1, TimeUnit.MINUTES)
             .cache(Cache(cacheDir, cacheSize))
             .cookieJar(cookieManager)
             .apply {
