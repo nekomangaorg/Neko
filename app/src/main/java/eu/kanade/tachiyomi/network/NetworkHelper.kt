@@ -7,6 +7,7 @@ import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
 import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
+import com.skydoves.sandwich.adapters.ApiResponseCallAdapterFactory
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.interceptor.CloudflareInterceptor
@@ -51,6 +52,11 @@ class NetworkHelper(val context: Context) {
     private val rateLimitInterceptor = Interceptor {
         bucket.consume()
         it.proceed(it.request())
+    }
+
+    private val json = Json {
+        ignoreUnknownKeys = true
+        isLenient = true
     }
 
     private fun authInterceptor() = Interceptor { chain ->
@@ -128,7 +134,7 @@ class NetworkHelper(val context: Context) {
             .authenticator(TokenAuthenticator(mangaDexLoginHelper)).build()
     }
 
-    fun buildCloudFlareClient(): OkHttpClient {
+    private fun buildCloudFlareClient(): OkHttpClient {
         return nonRateLimitedClient.newBuilder()
             .addInterceptor(UserAgentInterceptor())
             .addInterceptor(CloudflareInterceptor(context))
@@ -146,7 +152,7 @@ class NetworkHelper(val context: Context) {
             .build()
     }
 
-    val authClient = buildRateLimitedAuthenticatedClient()
+    private val authClient = buildRateLimitedAuthenticatedClient()
 
     val headers = Headers.Builder().apply {
         add("User-Agent", "Neko " + System.getProperty("http.agent"))
@@ -155,13 +161,10 @@ class NetworkHelper(val context: Context) {
     }.build()
 
     private val jsonRetrofitClient = Retrofit.Builder().addConverterFactory(
-        Json {
-            ignoreUnknownKeys = true
-            isLenient = true
-        }.asConverterFactory("application/json".toMediaType())
+        json.asConverterFactory("application/json".toMediaType())
     )
         .baseUrl(MdConstants.baseUrl)
-        .addCallAdapterFactory(CoroutinesResponseCallAdapterFactory.create())
+        .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
         .client(client)
 
     val service: MangaDexService =
@@ -169,11 +172,11 @@ class NetworkHelper(val context: Context) {
             .client(client.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
             .create(MangaDexService::class.java)
 
-    val authService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
+    val authService: MangaDexAuthService = jsonRetrofitClient.baseUrl(MdApi.baseUrl)
         .client(authClient.newBuilder().addNetworkInterceptor(HeadersInterceptor()).build()).build()
         .create(MangaDexAuthService::class.java)
 
-    val similarService =
+    val similarService: SimilarService =
         jsonRetrofitClient.client(client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
             .readTimeout(2, TimeUnit.SECONDS).build())
             .build()
