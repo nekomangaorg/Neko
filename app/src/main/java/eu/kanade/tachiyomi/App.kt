@@ -120,7 +120,6 @@ open class App : Application(), DefaultLifecycleObserver {
         super.onLowMemory()
         LibraryPresenter.onLowMemory()
         RecentsPresenter.onLowMemory()
-        SourcePresenter.onLowMemory()
     }
 
     protected open fun setupNotificationChannels() {
