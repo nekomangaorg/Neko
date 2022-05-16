@@ -3,7 +3,7 @@ package org.nekomanga.presentation.components
 import TooltipBox
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.List
+import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material3.DropdownMenu
@@ -25,7 +25,7 @@ fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
     when (isList.not()) {
         true -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "list"),
-            icon = Icons.Filled.List,
+            icon = Icons.Filled.ListAlt,
             buttonClicked = buttonClicked)
 
         false -> TooltipBox(
