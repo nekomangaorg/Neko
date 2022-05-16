@@ -324,7 +324,6 @@ class RecentsController(bundle: Bundle? = null) :
                     }
 
                     if (presenter.downloadManager.hasQueue()) {
-                        binding.downloadBottomSheet.downloadFab.alpha = 1f
                         if (state == BottomSheetBehavior.STATE_EXPANDED) {
                             binding.downloadBottomSheet.downloadFab.show()
                         } else {
