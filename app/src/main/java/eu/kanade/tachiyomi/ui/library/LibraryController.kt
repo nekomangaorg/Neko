@@ -461,6 +461,7 @@ class LibraryController(
 
     private fun showFilterTip() {
         if (preferences.shownFilterTutorial().get() || !hasExpanded) return
+        if (filterTooltip != null) return
         val activityBinding = activityBinding ?: return
         val activity = activity ?: return
         val icon =
