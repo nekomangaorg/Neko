@@ -15,8 +15,8 @@ import java.util.concurrent.ConcurrentHashMap
 object MangaCoverMetadata {
     private var coverRatioMap = ConcurrentHashMap<Long, Float>()
     private var coverColorMap = ConcurrentHashMap<Long, Pair<Int, Int>>()
-    val preferences by injectLazy<PreferencesHelper>()
-    val coverCache by injectLazy<CoverCache>()
+    private val preferences by injectLazy<PreferencesHelper>()
+    private val coverCache by injectLazy<CoverCache>()
 
     fun load() {
         val ratios = preferences.coverRatios().get()
