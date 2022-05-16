@@ -22,11 +22,9 @@ class LibraryUpdateJob(private val context: Context, workerParams: WorkerParamet
 
     override fun doWork(): Result {
         val preferences = Injekt.get<PreferencesHelper>()
-        if (requiresWifiConnection(preferences) && !context.isConnectedToWifi()) {
+        return if (requiresWifiConnection(preferences) && !context.isConnectedToWifi()) {
             Result.failure()
-        }
-
-        return if (LibraryUpdateService.start(context)) {
+        } else if (LibraryUpdateService.start(context)) {
             Result.success()
         } else {
             Result.failure()
