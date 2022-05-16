@@ -1,11 +1,7 @@
 package eu.kanade.tachiyomi.data.updater
 
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-import android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_VISIBLE
 import android.content.Context
 import android.os.Build
-import androidx.core.app.NotificationCompat
 import androidx.work.Constraints
 import androidx.work.CoroutineWorker
 import androidx.work.ExistingWorkPolicy
@@ -13,9 +9,8 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
-import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.util.system.notificationManager
+import eu.kanade.tachiyomi.util.system.isConnectedToWifi
 import kotlinx.coroutines.coroutineScope
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -31,7 +26,11 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
             ) {
                 return@coroutineScope Result.failure()
             }
-            val result = AppUpdateChecker().checkForUpdate(context, doExtrasAfterNewUpdate = false)
+            val preferences = Injekt.get<PreferencesHelper>()
+            if (preferences.appShouldAutoUpdate() == ONLY_ON_UNMETERED && !context.isConnectedToWifi()) {
+                return@coroutineScope Result.failure()
+            }
+            val result = AppUpdateChecker().checkForUpdate(context, true, doExtrasAfterNewUpdate = false)
             if (result is AppUpdateResult.NewUpdate && !AppUpdateService.isRunning()) {
                 AppUpdateNotifier(context).cancel()
                 AppUpdateNotifier.releasePageUrl = result.release.releaseLink
@@ -43,17 +42,6 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
         }
     }
 
-    fun foregrounded(): Boolean {
-        val appProcessInfo = ActivityManager.RunningAppProcessInfo()
-        ActivityManager.getMyMemoryState(appProcessInfo)
-        return appProcessInfo.importance == IMPORTANCE_FOREGROUND || appProcessInfo.importance == IMPORTANCE_VISIBLE
-    }
-
-    fun NotificationCompat.Builder.update(block: NotificationCompat.Builder.() -> Unit) {
-        block()
-        context.notificationManager.notify(Notifications.ID_UPDATER, build())
-    }
-
     companion object {
         private const val TAG = "AutoUpdateRunner"
         const val ALWAYS = 0
@@ -61,16 +49,8 @@ class AutoAppUpdaterJob(private val context: Context, workerParams: WorkerParame
         const val NEVER = 2
 
         fun setupTask(context: Context) {
-            val preferences = Injekt.get<PreferencesHelper>()
-            val restrictions = preferences.appShouldAutoUpdate()
-            val wifiRestriction = if (restrictions == ONLY_ON_UNMETERED) {
-                NetworkType.UNMETERED
-            } else {
-                NetworkType.CONNECTED
-            }
-
             val constraints = Constraints.Builder()
-                .setRequiredNetworkType(wifiRestriction)
+                .setRequiredNetworkType(NetworkType.CONNECTED)
                 .setRequiresDeviceIdle(true)
                 .build()
 
