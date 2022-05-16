@@ -4,6 +4,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_COLLAPSED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_EXPANDED
 import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_HIDDEN
+import com.google.android.material.bottomsheet.BottomSheetBehavior.STATE_SETTLING
 
 fun BottomSheetBehavior<*>.hide() {
     state = STATE_HIDDEN
@@ -18,5 +19,6 @@ fun BottomSheetBehavior<*>.expand() {
 }
 
 fun BottomSheetBehavior<*>?.isExpanded() = this?.state == STATE_EXPANDED
+fun BottomSheetBehavior<*>?.isSettling() = this?.state == STATE_SETTLING
 fun BottomSheetBehavior<*>?.isCollapsed() = this?.state == STATE_COLLAPSED
 fun BottomSheetBehavior<*>?.isHidden() = this?.state == STATE_HIDDEN
