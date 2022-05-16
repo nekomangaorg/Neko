@@ -118,7 +118,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
                     ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(
-                        systemBars())?.bottom
+                        systemBars())?.bottom ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {

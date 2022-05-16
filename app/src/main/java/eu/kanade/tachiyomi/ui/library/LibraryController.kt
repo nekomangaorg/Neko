@@ -766,7 +766,7 @@ class LibraryController(
 
     fun updateHopperY(windowInsets: WindowInsetsCompat? = null) {
         val view = view ?: return
-        val insets = windowInsets ?: view.rootWindowInsetsCompat
+        val insets = windowInsets ?: view.rootWindowInsetsCompat ?: return
         val listOfYs = mutableListOf(
             binding.filterBottomSheet.filterBottomSheet.y,
             activityBinding?.bottomNav?.y ?: binding.filterBottomSheet.filterBottomSheet.y
