@@ -9,7 +9,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.content.ContextCompat
 import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.RecyclerView
-import com.tfcporciuncula.flow.Preference
+import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.FlexibleAdapter
 import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 import eu.davidea.flexibleadapter.items.IFlexible
@@ -37,7 +37,10 @@ class BrowseSourceItem(
         }
     }
 
-    override fun createViewHolder(view: View, adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>): BrowseSourceHolder {
+    override fun createViewHolder(
+        view: View,
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
+    ): BrowseSourceHolder {
         val parent = adapter.recyclerView
         return if (parent is AutofitRecyclerView && !catalogueAsList.get()) {
             val listType = catalogueListType.get()
@@ -83,7 +86,7 @@ class BrowseSourceItem(
             }
             BrowseSourceGridHolder(view, adapter, listType == 1, outlineOnCovers.get(), isFollows)
         } else {
-            BrowseSourceListHolder(view, adapter, outlineOnCovers.get(),isFollows)
+            BrowseSourceListHolder(view, adapter, outlineOnCovers.get(), isFollows)
         }
     }
 
@@ -91,7 +94,7 @@ class BrowseSourceItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: BrowseSourceHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.onSetValues(manga)
     }

@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.ui.recents
 
 import androidx.recyclerview.widget.ItemTouchHelper
-import com.tfcporciuncula.flow.Preference
+import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter

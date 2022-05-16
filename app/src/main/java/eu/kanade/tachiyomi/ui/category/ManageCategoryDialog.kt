@@ -6,8 +6,8 @@ import android.content.DialogInterface
 import android.os.Bundle
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
+import com.fredporciuncula.flow.preferences.Preference
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
-import com.tfcporciuncula.flow.Preference
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -113,10 +113,10 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         if (preferences.libraryUpdateInterval().get() > 0 &&
             updatePref(
-                    preferences.libraryUpdateCategories(),
-                    preferences.libraryUpdateCategoriesExclude(),
-                    binding.includeGlobal
-                ) == false
+                preferences.libraryUpdateCategories(),
+                preferences.libraryUpdateCategoriesExclude(),
+                binding.includeGlobal
+            ) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
             LibraryUpdateJob.setupTask(preferences.context, 0)
@@ -176,7 +176,7 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
     private fun updatePref(
         categories: Preference<Set<String>>,
         excludeCategories: Preference<Set<String>>,
-        box: TriStateCheckBox
+        box: TriStateCheckBox,
     ): Boolean? {
         val categoryId = category?.id ?: return null
         if (!box.isVisible) return null
@@ -205,11 +205,12 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         box: TriStateCheckBox,
         categories: Preference<Set<String>>,
         excludeCategories: Preference<Set<String>>,
-        shouldShow: Boolean
+        shouldShow: Boolean,
     ) {
         val updateCategories = categories.get()
         val excludeUpdateCategories = excludeCategories.get()
-        box.isVisible = (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
+        box.isVisible =
+            (updateCategories.isNotEmpty() || excludeUpdateCategories.isNotEmpty()) && shouldShow
         if (shouldShow) box.state = when {
             updateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.CHECKED
             excludeUpdateCategories.any { category?.id == it.toIntOrNull() } -> TriStateCheckBox.State.IGNORE

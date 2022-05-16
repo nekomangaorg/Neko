@@ -5,7 +5,7 @@ import android.widget.CompoundButton
 import android.widget.RadioButton
 import android.widget.RadioGroup
 import android.widget.Spinner
-import com.tfcporciuncula.flow.Preference
+import com.fredporciuncula.flow.preferences.Preference
 import eu.kanade.tachiyomi.widget.IgnoreFirstSpinnerListener
 
 inline fun <reified T> SharedPreferences.getItem(key: String, default: T): T {
@@ -50,7 +50,7 @@ fun RadioGroup.bindToPreference(pref: Preference<Int>, block: (() -> Unit)? = nu
  */
 fun Spinner.bindToPreference(
     pref: Preference<Int>,
-    offset: Int = 0
+    offset: Int = 0,
 ) {
     onItemSelectedListener = IgnoreFirstSpinnerListener { position ->
         pref.set(position + offset)
