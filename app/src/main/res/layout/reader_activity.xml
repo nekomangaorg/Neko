@@ -44,29 +44,27 @@
         android:visibility="gone" />
 
     <FrameLayout
-        android:id="@+id/reader_menu"
+        android:id="@+id/app_bar"
+        tools:background="?attr/colorSurface"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:visibility="gone">
-
-        <FrameLayout
-            android:id="@+id/app_bar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        android:visibility="gone"
+        tools:visibility="visible"
+        android:layout_height="wrap_content">
 
             <com.google.android.material.appbar.MaterialToolbar
-                android:id="@+id/toolbar"
-                android:layout_width="match_parent"
-                android:layout_height="?attr/actionBarSize"
-                app:titleTextColor="?actionBarTintColor"
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            app:navigationContentDescription="@string/close"
+            android:layout_height="?attr/actionBarSize"
+            tools:title="Chapter 3"
+            tools:subtitle="Chapter name"
+            app:titleTextColor="?actionBarTintColor"
                 app:titleCentered="true"
                 app:titleTextAppearance="@style/Neko.Toolbar.TitleText"
                 app:subtitleCentered="true"
                 app:subtitleTextAppearance="@style/Neko.Toolbar.SubTitleText"
-                app:subtitleTextColor="@color/action_bar_tint_alpha"
-                android:background="@drawable/reader_toolbar_ripple" />
-
-        </FrameLayout>
+            app:subtitleTextColor="@color/action_bar_tint_alpha"
+            android:background="@drawable/reader_toolbar_ripple" />
     </FrameLayout>
 
     <View

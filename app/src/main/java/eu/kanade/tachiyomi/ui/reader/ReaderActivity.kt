@@ -1011,7 +1011,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         if (visible) {
             snackbar?.dismiss()
             wic.show(systemBars())
-            binding.readerMenu.isVisible = true
+            binding.appBar.isVisible = true
 
             if (binding.chaptersSheet.chaptersBottomSheet.sheetBehavior.isExpanded()) {
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.isHideable = false
@@ -1035,15 +1035,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                 wic.systemBarsBehavior = WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE
             }
 
-            if (animate && binding.readerMenu.isVisible) {
+            if (animate && binding.appBar.isVisible) {
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.exit_to_top)
-                toolbarAnimation.doOnEnd { binding.readerMenu.isVisible = false }
+                toolbarAnimation.doOnEnd { binding.appBar.isVisible = false }
                 binding.appBar.startAnimation(toolbarAnimation)
                 BottomSheetBehavior.from(binding.chaptersSheet.chaptersBottomSheet).isHideable =
                     true
                 binding.chaptersSheet.chaptersBottomSheet.sheetBehavior?.hide()
             } else if (!animate) {
-                binding.readerMenu.isVisible = false
+                binding.appBar.isVisible = false
             }
         }
         menuStickyVisible = false
@@ -1595,7 +1595,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
     }
 
     private fun onVisibilityChange(visible: Boolean) {
-        if (visible && !menuStickyVisible && !menuVisible && !binding.readerMenu.isVisible) {
+        if (visible && !menuStickyVisible && !menuVisible && !binding.appBar.isVisible) {
             menuStickyVisible = visible
             if (visible) {
                 coroutine = launchUI {
@@ -1618,7 +1618,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
                             },
                         )
                 }
-                binding.readerMenu.isVisible = true
+                binding.appBar.isVisible = true
                 val toolbarAnimation = AnimationUtils.loadAnimation(this, R.anim.enter_from_top)
                 toolbarAnimation.doOnStart {
                     window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS)
