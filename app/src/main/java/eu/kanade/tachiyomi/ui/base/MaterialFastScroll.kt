@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.base.controller.BaseController
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.dpToPxEnd
+import eu.kanade.tachiyomi.util.system.isLTR
 import kotlin.math.abs
 
 class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: AttributeSet? = null) :
@@ -25,12 +26,15 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
         setViewsToUse(
             R.layout.material_fastscroll,
             R.id.fast_scroller_bubble,
-            R.id.fast_scroller_handle
+            R.id.fast_scroller_handle,
         )
         autoHideEnabled = true
         ignoreTouchesOutsideHandle = false
         updateScrollListener()
     }
+
+    val isFastScrolling: Boolean
+        get() = handle.isSelected
 
     // Overriding to force a distance moved before scrolling
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -47,9 +51,13 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
 
         when (event.action) {
             MotionEvent.ACTION_DOWN -> {
-                if ( event.x > handle.width + handle.paddingStart) {
-                    return false
-                }
+                if (
+                    if (context.resources.isLTR) {
+                        event.x < handle.x - handle.paddingStart
+                    } else {
+                        event.x > handle.width + handle.paddingStart
+                    }
+                ) return false
                 val y = event.y
                 startY = event.y
                 if (canScroll) {
@@ -113,12 +121,12 @@ class MaterialFastScroll @JvmOverloads constructor(context: Context, attrs: Attr
             if (layoutManager is StaggeredGridLayoutManager) {
                 (layoutManager as StaggeredGridLayoutManager).scrollToPositionWithOffset(
                     targetPos,
-                    scrollOffset
+                    scrollOffset,
                 )
             } else {
                 (layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                     targetPos,
-                    scrollOffset
+                    scrollOffset,
                 )
             }
             updateBubbleText(targetPos)
