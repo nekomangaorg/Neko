@@ -32,7 +32,7 @@ import kotlinx.coroutines.flow.onEach
 import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
-import java.util.Locale
+import java.util.*
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
 
 fun <T> Preference<T>.asImmediateFlow(block: (value: T) -> Unit): Flow<T> {
@@ -343,12 +343,12 @@ class PreferencesHelper(val context: Context) {
 
     fun pinnedCatalogues() = flowPrefs.getStringSet("pinned_catalogues", mutableSetOf())
 
-    fun downloadNew() = flowPrefs.getBoolean(Keys.downloadNew, false)
+    fun saveChaptersAsCBZ() = flowPrefs.getBoolean("save_chapter_as_cbz", true)
 
-    fun saveChaptersAsCBZ() = flowPrefs.getBoolean(Keys.saveChaptersAsCBZ, false)
+    fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
-    fun downloadNewCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
-    fun downloadNewCategoriesExclude() =
+    fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())
+    fun excludeCategoriesInDownloadNew() =
         flowPrefs.getStringSet(Keys.downloadNewCategoriesExclude, emptySet())
 
     fun lang() = prefs.getString(Keys.lang, "")
@@ -514,8 +514,10 @@ class PreferencesHelper(val context: Context) {
         prefs.getBoolean(Keys.addToLibraryAsPlannedToRead, false)
 
     fun contentRatingSelections(): MutableSet<String> =
-        prefs.getStringSet(Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive))!!
+        prefs.getStringSet(
+            Keys.contentRating,
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+        )!!
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")
 

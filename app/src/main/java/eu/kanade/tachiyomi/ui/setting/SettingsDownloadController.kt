@@ -95,7 +95,7 @@ class SettingsDownloadController : SettingsController() {
                 entryValues = categories.map { it.id.toString() }
                 allSelectionRes = R.string.all
 
-                preferences.downloadNew().asImmediateFlowIn(viewScope) { isVisible = it }
+                preferences.downloadNewChapters().asImmediateFlowIn(viewScope) { isVisible = it }
             }
             preferenceCategory {
                 titleRes = R.string.automatic_removal

@@ -395,12 +395,16 @@ class RecentsPresenter(
     }
 
     override fun onUpdateManga(manga: Manga?) {
-        if (manga == null && !LibraryUpdateService.isRunning()) {
-            presenterScope.launchUI { controller?.setRefreshing(false) }
-        } else if (manga == null) {
-            presenterScope.launchUI { controller?.setRefreshing(true) }
-        } else {
-            getRecents()
+        when {
+            manga == null -> {
+                presenterScope.launchUI { controller?.setRefreshing(false) }
+            }
+            manga.source == LibraryUpdateService.STARTING_UPDATE_SOURCE -> {
+                presenterScope.launchUI { controller?.setRefreshing(true) }
+            }
+            else -> {
+                getRecents()
+            }
         }
     }
 

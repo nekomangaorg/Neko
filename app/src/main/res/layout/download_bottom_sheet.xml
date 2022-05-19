@@ -70,6 +70,18 @@
             app:navigationIconTint="?actionBarTintColor"
             app:titleTextColor="?actionBarTintColor">
 
+            <com.google.android.material.textview.MaterialTextView
+                android:id="@+id/toolbar_title"
+                style="?textAppearanceTitleLarge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:drawableTint="?actionBarTintColor"
+                android:ellipsize="end"
+                android:maxLines="1"
+                android:textColor="?actionBarTintColor"
+                android:textSize="20sp"
+                tools:text="Title Text" />
         </eu.kanade.tachiyomi.ui.base.CenteredToolbar>
     </androidx.constraintlayout.widget.ConstraintLayout>
 

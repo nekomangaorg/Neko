@@ -477,7 +477,7 @@ class MangaDetailsPresenter(
             if (!error) {
                 val newChapters = syncChaptersWithSource(db, finChapters, manga)
                 if (newChapters.first.isNotEmpty()) {
-                    val downloadNew = preferences.downloadNew().get()
+                    val downloadNew = preferences.downloadNewChapters().get()
                     if (downloadNew && controller?.fromCatalogue == false && mangaWasInitalized) {
                         if (!hasMergeChaptersInitially && manga.isMerged()) {
                             hasMergeChaptersInitially = true

@@ -1041,14 +1041,14 @@ class MangaDetailsController :
 
     private fun updateMenuVisibility(menu: Menu?) {
         menu ?: return
-        menu.findItem(R.id.action_download).isVisible = !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_read).isVisible =
+        menu.findItem(R.id.action_download)?.isVisible = !presenter.isLockedFromSearch
+        menu.findItem(R.id.action_mark_all_as_read)?.isVisible =
             presenter.getNextUnreadChapter() != null && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_mark_all_as_unread).isVisible =
+        menu.findItem(R.id.action_mark_all_as_unread)?.isVisible =
             presenter.anyRead() && !presenter.isLockedFromSearch
-        menu.findItem(R.id.action_remove_downloads).isVisible =
+        menu.findItem(R.id.action_remove_downloads)?.isVisible =
             presenter.hasDownloads() && !presenter.isLockedFromSearch
-        menu.findItem(R.id.remove_non_bookmarked).isVisible =
+        menu.findItem(R.id.remove_non_bookmarked)?.isVisible =
             presenter.hasBookmark() && !presenter.isLockedFromSearch
     }
 

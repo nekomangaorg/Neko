@@ -25,7 +25,6 @@ import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.source.SourceManager
-import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.MangaDexLoginHelper
@@ -103,10 +102,10 @@ class LibraryUpdateService(
 
     // List containing categories that get included in downloads.
     private val categoriesToDownload =
-        preferences.downloadNewCategories().get().map(String::toInt)
+        preferences.downloadNewChaptersInCategories().get().map(String::toInt)
 
     // Boolean to determine if user wants to automatically download new chapters.
-    private val downloadNew: Boolean = preferences.downloadNew().get()
+    private val downloadNew: Boolean = preferences.downloadNewChapters().get()
 
     // Boolean to determine if DownloadManager has downloads
     private var hasDownloads = false
@@ -193,9 +192,6 @@ class LibraryUpdateService(
                 libraryManga.distinctBy { it.id }
             }
         }
-        if (target == Target.CHAPTERS && preferences.updateOnlyNonCompleted()) {
-            listToUpdate = listToUpdate.filter { it.status != SManga.COMPLETED }
-        }
 
         val categoriesToExclude =
             preferences.libraryUpdateCategoriesExclude().get().map(String::toInt)
@@ -238,7 +234,7 @@ class LibraryUpdateService(
         if (wakeLock.isHeld) {
             wakeLock.release()
         }
-        listener?.onUpdateManga(LibraryManga())
+        listener?.onUpdateManga()
         super.onDestroy()
     }
 
@@ -289,7 +285,7 @@ class LibraryUpdateService(
             stopSelf(startId)
         }
         if (target == Target.CHAPTERS) {
-            listener?.onUpdateManga(LibraryManga())
+            listener?.onUpdateManga(Manga.create(STARTING_UPDATE_SOURCE))
         }
 
         job = GlobalScope.launch(handler) {
@@ -487,6 +483,9 @@ class LibraryUpdateService(
                         downloadManager.deleteChapters(removedChapters, manga, source)
                     }
                 }
+                if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
+                    manga,
+                )
                 if (preferences.readingSync() && source.isLogged()) {
                     val dbChapters = db.getChapters(manga).executeAsBlocking()
                     statusHandler.getReadChapterIds(MdUtil.getMangaId(manga.url))
@@ -637,6 +636,7 @@ class LibraryUpdateService(
          * Key for category to update.
          */
         const val KEY_CATEGORY = "category"
+        const val STARTING_UPDATE_SOURCE = -5L
 
         fun categoryInQueue(id: Int?) = instance?.categoryIds?.contains(id) ?: false
         private var instance: LibraryUpdateService? = null

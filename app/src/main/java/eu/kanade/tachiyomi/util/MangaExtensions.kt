@@ -20,10 +20,10 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
     if (!favorite) return false
 
     // Boolean to determine if user wants to automatically download new chapters.
-    val downloadNew = prefs.downloadNew().get()
+    val downloadNew = prefs.downloadNewChapters().get()
     if (!downloadNew) return false
 
-    val categoriesToDownload = prefs.downloadNewCategories().get().map(String::toInt)
+    val categoriesToDownload = prefs.downloadNewChaptersInCategories().get().map(String::toInt)
     if (categoriesToDownload.isEmpty()) return true
 
     // Get all categories, else default category (0)
@@ -32,10 +32,10 @@ fun Manga.shouldDownloadNewChapters(db: DatabaseHelper, prefs: PreferencesHelper
             .mapNotNull { it.id }
             .takeUnless { it.isEmpty() } ?: listOf(0)
 
-    val categoriesToExclude = prefs.downloadNewCategoriesExclude().get().map(String::toInt)
-    if (categoriesForManga.intersect(categoriesToExclude).isNotEmpty()) return false
+    val categoriesToExclude = prefs.excludeCategoriesInDownloadNew().get().map(String::toInt)
+    if (categoriesForManga.intersect(categoriesToExclude.toSet()).isNotEmpty()) return false
 
-    return categoriesForManga.intersect(categoriesToDownload).isNotEmpty()
+    return categoriesForManga.intersect(categoriesToDownload.toSet()).isNotEmpty()
 }
 
 fun Manga.moveCategories(
@@ -209,11 +209,11 @@ fun SManga.getSlug(): String {
     val wordList = title.split('-')
     val slug = mutableListOf<String>()
 
-    for(i in wordList) {
-        if((slug.joinToString("-","","-") + i).count() < 100) {
+    for (i in wordList) {
+        if ((slug.joinToString("-", "", "-") + i).count() < 100) {
             slug.add(i)
         } else {
-            break;
+            break
         }
     }
 
