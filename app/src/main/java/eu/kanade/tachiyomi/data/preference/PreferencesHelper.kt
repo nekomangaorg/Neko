@@ -347,6 +347,8 @@ class PreferencesHelper(val context: Context) {
 
     fun saveChaptersAsCBZ() = flowPrefs.getBoolean("save_chapter_as_cbz", true)
 
+    fun splitTallImages() = flowPrefs.getBoolean("split_tall_images", false)
+
     fun downloadNewChapters() = flowPrefs.getBoolean(Keys.downloadNew, false)
 
     fun downloadNewChaptersInCategories() = flowPrefs.getStringSet(Keys.downloadNewCategories, emptySet())

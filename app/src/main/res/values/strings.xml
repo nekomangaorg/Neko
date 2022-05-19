@@ -844,6 +844,8 @@
     <string name="visit_recents_for_download_queue">Visit the recents tab to access the download
         queue. You can also double tap or press and hold for quicker access</string>
     <string name="couldnt_download_low_space">Couldn\'t download chapters due to low disk space</string>
+    <string name="download_notifier_split_page_not_found">Page %d not found while splitting</string>
+    <string name="download_notifier_split_failed">Couldn\'t split downloaded image</string>
 
     <!-- Download Notification -->
     <string name="group_downloader">Downloads</string>
@@ -874,7 +876,9 @@
     <string name="always_keep">Always keep</string>
     <string name="always_delete">Always delete</string>
     <string name="automatic_removal">Automatic removal</string>
-    <string name="save_chapters_as_cbz">Save chapters as CBZ</string>
+    <string name="save_chapters_as_cbz">Save as CBZ archive</string>
+    <string name="split_tall_images">Auto split tall images</string>
+    <string name="split_tall_images_summary">Improves reader performance by splitting tall downloaded images.</string>
 
     <!-- Time -->
     <string name="manual">Manual</string>

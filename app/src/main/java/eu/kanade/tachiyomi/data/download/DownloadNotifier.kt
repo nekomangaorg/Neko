@@ -214,11 +214,14 @@ internal class DownloadNotifier(private val context: Context) {
     fun onError(
         error: String? = null,
         chapter: String? = null,
+        mangaTitle: String? = null,
         customIntent: Intent? = null,
     ) {
         // Create notification
         with(errorNotificationBuilder) {
-            setContentTitle(chapter ?: context.getString(R.string.download_error))
+            setContentTitle(
+                mangaTitle?.plus(": $chapter") ?: context.getString(R.string.download_error),
+            )
             setContentText(error ?: context.getString(R.string.could_not_download_unexpected_error))
             setStyle(
                 NotificationCompat.BigTextStyle().bigText(

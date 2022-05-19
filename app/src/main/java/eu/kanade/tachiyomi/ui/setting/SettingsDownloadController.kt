@@ -52,6 +52,12 @@ class SettingsDownloadController : SettingsController() {
             titleRes = R.string.save_chapters_as_cbz
             defaultValue = false
         }
+        switchPreference {
+            bindTo(preferences.splitTallImages())
+            titleRes = R.string.split_tall_images
+            summaryRes = R.string.split_tall_images_summary
+        }
+
         preferenceCategory {
             titleRes = R.string.remove_after_read
 

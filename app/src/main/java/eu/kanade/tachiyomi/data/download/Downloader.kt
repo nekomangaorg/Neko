@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.runAsObservable
+import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -322,6 +323,7 @@ class Downloader(
             notifier.onError(
                 context.getString(R.string.external_storage_download_notice),
                 download.chapter.name,
+                download.manga.title,
                 intent,
             )
             return@defer Observable.just(download)
@@ -370,7 +372,7 @@ class Downloader(
             .onErrorReturn { error ->
                 XLog.e(error)
                 download.status = Download.State.ERROR
-                notifier.onError(error.message, download.chapter.name)
+                notifier.onError(error.message, download.chapter.name, download.manga.title)
                 download
             }
     }
@@ -400,7 +402,7 @@ class Downloader(
         tmpFile?.delete()
 
         // Try to find the image file.
-        val imageFile = tmpDir.listFiles()!!.find { it.name!!.startsWith("$filename.") }
+        val imageFile = tmpDir.listFiles()!!.find { it.name!!.startsWith("$filename.") || it.name!!.contains("${filename}__001") }
 
         // If the image is already downloaded, do nothing. Otherwise download from network
         val pageObservable = when {
@@ -415,8 +417,12 @@ class Downloader(
         }
 
         return pageObservable
-            // When the image is ready, set image path, progress (just in case) and status
+            // When the page is ready, set page path, progress (just in case) and status
             .doOnNext { file ->
+                val success = splitTallImageIfNeeded(page, tmpDir)
+                if (success.not()) {
+                    notifier.onError(context.getString(R.string.download_notifier_split_failed), download.chapter.name, download.manga.title)
+                }
                 page.uri = file.uri
                 page.progress = 100
                 download.downloadedImages++
@@ -427,34 +433,9 @@ class Downloader(
             .onErrorReturn {
                 page.progress = 0
                 page.status = Page.ERROR
+                notifier.onError(it.message, download.chapter.name, download.manga.title)
                 page
             }
-    }
-
-    /**
-     * Return the observable which copies the image from cache.
-     *
-     * @param cacheFile the file from cache.
-     * @param tmpDir the temporary directory of the download.
-     * @param filename the filename of the image.
-     */
-    private fun moveImageFromCache(
-        cacheFile: File,
-        tmpDir: UniFile,
-        filename: String,
-    ): Observable<UniFile> {
-        return Observable.just(cacheFile).map {
-            val tmpFile = tmpDir.createFile("$filename.tmp")
-            cacheFile.inputStream().use { input ->
-                tmpFile.openOutputStream().use { output ->
-                    input.copyTo(output)
-                }
-            }
-            val extension = ImageUtil.findImageType(cacheFile.inputStream()) ?: return@map tmpFile
-            tmpFile.renameTo("$filename.${extension.extension}")
-            cacheFile.delete()
-            tmpFile
-        }
     }
 
     /**
@@ -493,6 +474,32 @@ class Downloader(
     }
 
     /**
+     * Return the observable which copies the image from cache.
+     *
+     * @param cacheFile the file from cache.
+     * @param tmpDir the temporary directory of the download.
+     * @param filename the filename of the image.
+     */
+    private fun moveImageFromCache(
+        cacheFile: File,
+        tmpDir: UniFile,
+        filename: String,
+    ): Observable<UniFile> {
+        return Observable.just(cacheFile).map {
+            val tmpFile = tmpDir.createFile("$filename.tmp")
+            cacheFile.inputStream().use { input ->
+                tmpFile.openOutputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+            val extension = ImageUtil.findImageType(cacheFile.inputStream()) ?: return@map tmpFile
+            tmpFile.renameTo("$filename.${extension.extension}")
+            cacheFile.delete()
+            tmpFile
+        }
+    }
+
+    /**
      * Returns the extension of the downloaded image from the network response, or if it's null,
      * analyze the file. If everything fails, assume it's a jpg.
      *
@@ -510,6 +517,21 @@ class Downloader(
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(mime) ?: "jpg"
     }
 
+    private fun splitTallImageIfNeeded(page: Page, tmpDir: UniFile): Boolean {
+        if (!preferences.splitTallImages().get()) return true
+
+        val filename = String.format("%03d", page.number)
+        val imageFile = tmpDir.listFiles()?.find { it.name!!.startsWith(filename) }
+            ?: throw Error(context.getString(R.string.download_notifier_split_page_not_found, page.number))
+        val imageFilePath = imageFile.filePath
+            ?: throw Error(context.getString(R.string.download_notifier_split_page_not_found, page.number))
+
+        // check if the original page was previously split before then skip.
+        if (imageFile.name!!.contains("__")) return true
+
+        return ImageUtil.splitTallImage(imageFile, imageFilePath)
+    }
+
     /**
      * Checks if the download was successful.
      *
@@ -525,44 +547,57 @@ class Downloader(
         dirname: String,
     ) {
         // Ensure that the chapter folder has all the images.
-        val downloadedImages = tmpDir.listFiles().orEmpty().filterNot { it.name!!.endsWith(".tmp") }
+        val downloadedImages = tmpDir.listFiles().orEmpty().filterNot { it.name!!.endsWith(".tmp") || (it.name!!.contains("__") && !it.name!!.contains("__001.jpg")) }
 
         download.status = if (downloadedImages.size == download.pages!!.size) {
-            Download.State.DOWNLOADED
-        } else {
-            Download.State.ERROR
-        }
-
-        // Only rename the directory if it's downloaded.
-        if (download.status == Download.State.DOWNLOADED) {
+            // Only rename the directory if it's downloaded.
             if (preferences.saveChaptersAsCBZ().get()) {
-                val zip = mangaDir.createFile("$dirname.cbz.tmp")
-                val zipOut = ZipOutputStream(BufferedOutputStream(zip.openOutputStream()))
-                zipOut.setMethod(ZipEntry.STORED)
-
-                tmpDir.listFiles()?.forEach { img ->
-                    val input = img.openInputStream()
-                    val data = input.readBytes()
-                    val entry = ZipEntry(img.name)
-                    val crc = CRC32()
-                    val size = img.length()
-                    crc.update(data)
-                    entry.crc = crc.value
-                    entry.compressedSize = size
-                    entry.size = size
-                    zipOut.putNextEntry(entry)
-                    zipOut.write(data)
-                    input.close()
-                }
-                zipOut.close()
-                zip.renameTo("$dirname.cbz")
-                tmpDir.delete()
+                archiveChapter(mangaDir, dirname, tmpDir)
             } else {
                 tmpDir.renameTo(dirname)
             }
             cache.addChapter(dirname, download.manga)
+
             DiskUtil.createNoMediaFile(tmpDir, context)
+
+            Download.State.DOWNLOADED
+        } else {
+            Download.State.ERROR
         }
+    }
+
+    /**
+     * Archive the chapter pages as a CBZ.
+     */
+    private fun archiveChapter(
+        mangaDir: UniFile,
+        dirname: String,
+        tmpDir: UniFile,
+    ) {
+        val zip = mangaDir.createFile("$dirname.cbz.tmp")
+        ZipOutputStream(BufferedOutputStream(zip.openOutputStream())).use { zipOut ->
+            zipOut.setMethod(ZipEntry.STORED)
+
+            tmpDir.listFiles()?.forEach { img ->
+                img.openInputStream().use { input ->
+                    val data = input.readBytes()
+                    val size = img.length()
+                    val entry = ZipEntry(img.name).apply {
+                        val crc = CRC32().apply {
+                            update(data)
+                        }
+                        setCrc(crc.value)
+
+                        compressedSize = size
+                        setSize(size)
+                    }
+                    zipOut.putNextEntry(entry)
+                    zipOut.write(data)
+                }
+            }
+        }
+        zip.renameTo("$dirname.cbz")
+        tmpDir.delete()
     }
 
     /**
@@ -589,7 +624,7 @@ class Downloader(
     companion object {
         const val TMP_DIR_SUFFIX = "_tmp"
 
-        // Arbitrary minimum required space to start a download: 50 MB
-        const val MIN_DISK_SPACE = 50 * 1024 * 1024
+        // Arbitrary minimum required space to start a download: 200 MB
+        const val MIN_DISK_SPACE = 200 * 1024 * 1024
     }
 }
