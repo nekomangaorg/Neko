@@ -50,7 +50,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         throw Exception("Not Used")
     }
 
-    override suspend fun update(track: Track, setToReadStatus: Boolean): Track {
+    override suspend fun update(track: Track, setToRead: Boolean): Track {
         return withContext(Dispatchers.IO) {
             try {
                 val manga = db.getManga(track.tracking_url.substringAfter(".org"), mdex.id)
@@ -69,23 +69,27 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 // mangadex wont update chapters if manga is not follows this prevents unneeded network call
 
                 if (followStatus != FollowStatus.UNFOLLOWED) {
-                    if (track.total_chapters != 0 && track.last_chapter_read == track.total_chapters) {
+                    if (track.total_chapters != 0 && track.last_chapter_read.toInt() == track.total_chapters) {
                         track.status = FollowStatus.COMPLETED.int
-                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url),
-                            FollowStatus.COMPLETED)
+                        mdex.updateFollowStatus(
+                            MdUtil.getMangaId(track.tracking_url),
+                            FollowStatus.COMPLETED
+                        )
                     }
                     if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
                         val newFollowStatus = FollowStatus.READING
                         track.status = FollowStatus.READING.int
-                        mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url),
-                            newFollowStatus)
+                        mdex.updateFollowStatus(
+                            MdUtil.getMangaId(track.tracking_url),
+                            newFollowStatus
+                        )
                         manga.follow_status = newFollowStatus
                         db.insertManga(manga).executeAsBlocking()
                     }
                     mdex.updateReadingProgress(track)
-                } else if (track.last_chapter_read != 0) {
+                } else if (track.last_chapter_read.toInt() != 0) {
                     // When followStatus has been changed to unfollowed 0 out read chapters since dex does
-                    track.last_chapter_read = 0
+                    track.last_chapter_read = 0f
                 }
             } catch (e: Exception) {
                 XLog.e("error updating MDList", e)
@@ -99,6 +103,8 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         getStatusList()[index] == FollowStatus.COMPLETED.int
 
     override fun completedStatus() = FollowStatus.COMPLETED.int
+    override fun readingStatus() = FollowStatus.READING.int
+    override fun planningStatus() = FollowStatus.PLAN_TO_READ.int
 
     override suspend fun bind(track: Track): Track {
         if (MdUtil.getMangaId(track.tracking_url).isDigitsOnly()) {
