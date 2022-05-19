@@ -12,7 +12,7 @@ accompainist-webview = { module = "com.google.accompanist:accompanist-webview", 
 
 paging = "androidx.paging:paging-compose:1.0.0-alpha14"
 material3-core = "androidx.compose.material3:material3:1.0.0-alpha11"
-material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.9"
+material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.10"
 
 activity = "androidx.activity:activity-compose:1.6.0-alpha03"
 ui = { module = "androidx.compose.ui:ui", version.ref = "compose_version" }
