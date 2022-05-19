@@ -119,6 +119,22 @@ import me.saket.cascade.overrideAllPopupMenus
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
+import kotlin.collections.List
+import kotlin.collections.MutableList
+import kotlin.collections.MutableMap
+import kotlin.collections.distinct
+import kotlin.collections.filterNotNull
+import kotlin.collections.firstOrNull
+import kotlin.collections.forEach
+import kotlin.collections.forEachIndexed
+import kotlin.collections.indexOfLast
+import kotlin.collections.lastIndex
+import kotlin.collections.lastOrNull
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.orEmpty
+import kotlin.collections.plus
+import kotlin.collections.set
 import kotlin.math.abs
 import kotlin.math.min
 import kotlin.math.roundToLong
@@ -978,6 +994,14 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             if (it.itemId != R.id.action_search && !newMenuIds.contains(it.itemId)) {
                 toolbar.menu.removeItem(it.itemId)
             }
+        }
+
+        val indexOfMore = toolbar.menu.children.toList().indexOfLast { it.itemId == R.id.action_more }
+        val lastIndex = toolbar.menu.children.toList().lastIndex
+        if (indexOfMore != -1 && indexOfMore != lastIndex) {
+            val actionMoreItem = toolbar.menu.findItem(R.id.action_more)
+            toolbar.menu.removeItem(R.id.action_more)
+            addOrUpdateMenuItem(actionMoreItem, toolbar.menu, true, currentItemsId, toolbar.menu.children.toList().lastIndex)
         }
 
         // Done because sometimes ActionMenuItemViews have a width/height of 0 and never update

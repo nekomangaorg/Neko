@@ -240,28 +240,23 @@ open class BrowseSourceController(bundle: Bundle) :
         inflater.inflate(R.menu.browse_source, menu)
 
         // Initialize search menu
-        val searchItem = menu.findItem(R.id.action_search)
-        val searchView = searchItem.actionView as SearchView
+        val searchItem = activityBinding?.searchToolbar?.searchItem
+        val searchView = activityBinding?.searchToolbar?.searchView
 
         val query = presenter.query
         if (query.isNotBlank()) {
-            searchItem.expandActionView()
-            searchView.setQuery(query, true)
-            searchView.clearFocus()
+            searchItem?.expandActionView()
+            searchView?.setQuery(query, true)
+            searchView?.clearFocus()
+        } else if (activityBinding?.searchToolbar?.isSearchExpanded == true) {
+            searchItem?.collapseActionView()
+            searchView?.setQuery("", true)
         }
 
         setOnQueryTextChangeListener(searchView, onlyOnSubmit = true, hideKbOnSubmit = true) {
             searchWithQuery(it ?: "")
             true
         }
-
-        searchItem.fixExpand(
-            onExpand = { invalidateMenuOnExpand() },
-            onCollapse = {
-                searchWithQuery("")
-                true
-            }
-        )
 
         // Show next display mode
         updateDisplayMenuItem(menu)

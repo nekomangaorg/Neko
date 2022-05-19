@@ -21,19 +21,6 @@
         android:title="@string/hide_library_manga"
         app:showAsAction="ifRoom" />
 
-<!--    <item
-        android:id="@+id/action_open_in_web_view"
-        android:icon="@drawable/ic_open_in_webview_24dp"
-        android:title="@string/open_in_webview"
-        app:showAsAction="never" />
-
-    <item
-        android:id="@+id/action_open_merged_source_in_web_view"
-        android:icon="@drawable/ic_open_in_webview_24dp"
-        android:title="@string/open_merged_in_webview"
-        app:showAsAction="never" />-->
-
-
     <item
         android:id="@+id/action_more"
         android:icon="@drawable/ic_more_vert_24dp"
