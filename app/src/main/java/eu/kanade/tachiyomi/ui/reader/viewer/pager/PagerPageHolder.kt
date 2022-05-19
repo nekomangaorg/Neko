@@ -700,6 +700,19 @@ class PagerPageHolder(
     }
 
     private fun mergeOrSplitPages(imageStream: InputStream, imageStream2: InputStream?): InputStream {
+        if (ImageUtil.isAnimatedAndSupported(imageStream)) {
+            imageStream.reset()
+            if (page.longPage == null) {
+                page.longPage = true
+                if (viewer.config.splitPages || imageStream2 != null) {
+                    splitDoublePages()
+                }
+            }
+            scope?.launchUI {
+                progressBar.completeAndFadeOut()
+            }
+            return imageStream
+        }
         if (page.longPage == true && viewer.config.splitPages) {
             val imageBytes = imageStream.readBytes()
             val imageBitmap = try {
