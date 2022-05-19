@@ -119,21 +119,6 @@ import me.saket.cascade.overrideAllPopupMenus
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
-import kotlin.collections.List
-import kotlin.collections.MutableList
-import kotlin.collections.MutableMap
-import kotlin.collections.distinct
-import kotlin.collections.filterNotNull
-import kotlin.collections.firstOrNull
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
-import kotlin.collections.indexOfLast
-import kotlin.collections.lastIndex
-import kotlin.collections.lastOrNull
-import kotlin.collections.listOf
-import kotlin.collections.map
-import kotlin.collections.orEmpty
-import kotlin.collections.plus
 import kotlin.collections.set
 import kotlin.math.abs
 import kotlin.math.min
@@ -170,8 +155,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
     private val actionButtonSize: Pair<Int, Int> by lazy {
         val attrs = intArrayOf(android.R.attr.minWidth, android.R.attr.minHeight)
-        val ta =
-            obtainStyledAttributes(androidx.appcompat.R.style.Widget_AppCompat_ActionButton, attrs)
+        val ta = obtainStyledAttributes(androidx.appcompat.R.style.Widget_AppCompat_ActionButton, attrs)
         val dimenW = ta.getDimensionPixelSize(0, 0.dpToPx)
         val dimenH = ta.getDimensionPixelSize(1, 0.dpToPx)
         ta.recycle()
@@ -196,11 +180,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     }
 
     val toolbarHeight: Int
-        get() = max(
-            binding.toolbar.height,
-            binding.cardFrame.height,
-            binding.appBar.attrToolbarHeight
-        )
+        get() = max(binding.toolbar.height, binding.cardFrame.height, binding.appBar.attrToolbarHeight)
 
     var backPressedCallback: OnBackPressedCallback? = null
     private val backCallback = {
@@ -208,19 +188,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         reEnableBackPressedCallBack()
     }
 
-    fun bigToolbarHeight(
-        includeSearchToolbar: Boolean,
-        includeTabs: Boolean,
-        includeLargeToolbar: Boolean,
-    ): Int {
+    fun bigToolbarHeight(includeSearchToolbar: Boolean, includeTabs: Boolean, includeLargeToolbar: Boolean): Int {
         return if (!includeLargeToolbar || !binding.appBar.useLargeToolbar) {
             toolbarHeight + if (includeTabs) 48.dpToPx else 0
         } else {
-            binding.appBar.getEstimatedLayout(
-                includeSearchToolbar,
-                includeTabs,
-                includeLargeToolbar
-            )
+            binding.appBar.getEstimatedLayout(includeSearchToolbar, includeTabs, includeLargeToolbar)
         }
     }
 
@@ -462,8 +434,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         nav.isVisible = !hideBottomNav
         updateControllersWithSideNavChanges()
-        binding.bottomView?.visibility =
-            if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
+        binding.bottomView?.visibility = if (hideBottomNav) View.GONE else binding.bottomView?.visibility ?: View.GONE
         nav.alpha = if (hideBottomNav) 0f else 1f
         router.addChangeListener(
             object : ControllerChangeHandler.ControllerChangeListener {
@@ -539,10 +510,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     else -> Gravity.TOP
                 }
             }
-        setFloatingToolbar(
-            canShowFloatingToolbar(router.backstack.lastOrNull()?.controller),
-            changeBG = false
-        )
+        setFloatingToolbar(canShowFloatingToolbar(router.backstack.lastOrNull()?.controller), changeBG = false)
     }
 
     fun reEnableBackPressedCallBack() {
@@ -555,8 +523,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
     override fun onTitleChanged(title: CharSequence?, color: Int) {
         super.onTitleChanged(title, color)
         binding.searchToolbar.title = searchTitle
-        val onExpandedController =
-            if (this::router.isInitialized) router.backstack.lastOrNull()?.controller !is SmallToolbarInterface else false
+        val onExpandedController = if (this::router.isInitialized) router.backstack.lastOrNull()?.controller !is SmallToolbarInterface else false
         binding.appBar.setTitle(title, onExpandedController)
     }
 
@@ -573,30 +540,22 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             binding.searchToolbar.title = title
         }
 
-    open fun setFloatingToolbar(
-        show: Boolean,
-        solidBG: Boolean = false,
-        changeBG: Boolean = true,
-        showSearchAnyway: Boolean = false,
-    ) {
-        val controller =
-            if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
+    open fun setFloatingToolbar(show: Boolean, solidBG: Boolean = false, changeBG: Boolean = true, showSearchAnyway: Boolean = false) {
+        val controller = if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
         val useLargeTB = binding.appBar.useLargeToolbar
         val onSearchController = canShowFloatingToolbar(controller)
         val onSmallerController = controller is SmallToolbarInterface || !useLargeTB
-        currentToolbar =
-            if (show && ((showSearchAnyway && onSearchController) || onSmallerController)) {
-                binding.searchToolbar
-            } else {
-                binding.toolbar
-            }
+        currentToolbar = if (show && ((showSearchAnyway && onSearchController) || onSmallerController)) {
+            binding.searchToolbar
+        } else {
+            binding.toolbar
+        }
         binding.toolbar.isVisible = !(onSmallerController && onSearchController)
         setSearchTBLongClick()
         val showSearchBar = (show || showSearchAnyway) && onSearchController
         val isAppBarVisible = binding.appBar.isVisible
-        val needsAnim =
-            if (showSearchBar) !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
-            else binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
+        val needsAnim = if (showSearchBar) !binding.cardFrame.isVisible || binding.cardFrame.alpha < 1f
+        else binding.cardFrame.isVisible || binding.cardFrame.alpha > 0f
         if (this::router.isInitialized && needsAnim && binding.appBar.useLargeToolbar && !onSmallerController &&
             (showSearchAnyway || isAppBarVisible)
         ) {
@@ -635,8 +594,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         if (!useLargeTB) {
             binding.searchToolbar.navigationIcon = if (onRoot) searchDrawable else backDrawable
         } else if (showSearchAnyway) {
-            binding.searchToolbar.navigationIcon =
-                if (!show || onRoot) searchDrawable else backDrawable
+            binding.searchToolbar.navigationIcon = if (!show || onRoot) searchDrawable else backDrawable
         }
         binding.searchToolbar.title = searchTitle
     }
@@ -746,13 +704,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     recentsItem,
                     getString(R.string.manage_whats_downloading),
                     getString(R.string.visit_recents_for_download_queue),
-                ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary))
-                    .outerCircleAlpha(0.95f)
+                ).outerCircleColorInt(getResourceColor(R.attr.colorSecondary)).outerCircleAlpha(0.95f)
                     .titleTextSize(
                         20,
                     )
-                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary))
-                    .descriptionTextSize(16)
+                    .titleTextColorInt(getResourceColor(R.attr.colorOnSecondary)).descriptionTextSize(16)
                     .descriptionTextColorInt(getResourceColor(R.attr.colorOnSecondary))
                     .icon(contextCompatDrawable(R.drawable.ic_recent_read_32dp))
                     .targetCircleColor(android.R.color.white)
@@ -1019,20 +975,13 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             actionMenuView.requestLayout()
         }
 
-        val controller =
-            if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
+        val controller = if (this::router.isInitialized) router.backstack.lastOrNull()?.controller else null
         if (canShowFloatingToolbar(controller)) {
             binding.toolbar.menu.removeItem(R.id.action_search)
         }
     }
 
-    private fun addOrUpdateMenuItem(
-        oldMenuItem: MenuItem,
-        menu: Menu,
-        isVisible: Boolean,
-        currentItemsId: List<Int>,
-        index: Int,
-    ) {
+    private fun addOrUpdateMenuItem(oldMenuItem: MenuItem, menu: Menu, isVisible: Boolean, currentItemsId: List<Int>, index: Int) {
         if (currentItemsId.contains(oldMenuItem.itemId)) {
             val newItem = menu.findItem(oldMenuItem.itemId) ?: return
             if (newItem.icon != oldMenuItem.icon) {
@@ -1077,26 +1026,15 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             var isCheckable = false
             oldSubMenu.children.toList().forEachIndexed { index, oldSubMenuItem ->
                 val isSubVisible = oldSubMenuItem.isVisible
-                addOrUpdateMenuItem(
-                    oldSubMenuItem,
-                    menuItem.subMenu,
-                    isSubVisible,
-                    currentItemsId,
-                    index
-                )
+                addOrUpdateMenuItem(oldSubMenuItem, menuItem.subMenu, isSubVisible, currentItemsId, index)
                 if (!isExclusiveCheckable) {
-                    isExclusiveCheckable =
-                        (oldSubMenuItem as? MenuItemImpl)?.isExclusiveCheckable ?: false
+                    isExclusiveCheckable = (oldSubMenuItem as? MenuItemImpl)?.isExclusiveCheckable ?: false
                 }
                 if (!isCheckable) {
                     isCheckable = oldSubMenuItem.isCheckable
                 }
             }
-            menuItem.subMenu.setGroupCheckable(
-                oldSubMenu.children.first().groupId,
-                isCheckable,
-                isExclusiveCheckable
-            )
+            menuItem.subMenu.setGroupCheckable(oldSubMenu.children.first().groupId, isCheckable, isExclusiveCheckable)
             menuItem.subMenu.children.toList().forEach {
                 if (!newMenuIds.contains(it.itemId)) {
                     menuItem.subMenu.removeItem(it.itemId)
@@ -1176,8 +1114,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val onRoot = router.backstackSize == 1
         val navIcon = if (onRoot) searchDrawable else backDrawable
         binding.toolbar.navigationIcon = if (onRoot) null else backDrawable
-        binding.searchToolbar.navigationIcon =
-            if (binding.appBar.useLargeToolbar) searchDrawable else navIcon
+        binding.searchToolbar.navigationIcon = if (binding.appBar.useLargeToolbar) searchDrawable else navIcon
         binding.searchToolbar.subtitle = null
 
         nav.visibility = if (!hideBottomNav) View.VISIBLE else nav.visibility

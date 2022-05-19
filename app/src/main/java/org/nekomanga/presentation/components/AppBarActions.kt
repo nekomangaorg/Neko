@@ -3,8 +3,8 @@ package org.nekomanga.presentation.components
 import TooltipBox
 import androidx.compose.foundation.layout.Row
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ListAlt
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material.icons.filled.ViewModule
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -25,13 +25,15 @@ fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
     when (isList.not()) {
         true -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "list"),
-            icon = Icons.Filled.ListAlt,
-            buttonClicked = buttonClicked)
+            icon = Icons.Filled.ViewList,
+            buttonClicked = buttonClicked
+        )
 
         false -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
             icon = Icons.Filled.ViewModule,
-            buttonClicked = buttonClicked)
+            buttonClicked = buttonClicked
+        )
     }
 }
 
@@ -55,10 +57,12 @@ fun AppBarActions(
     var showMenu by remember { mutableStateOf(false) }
 
     actions.filterIsInstance<AppBar.Action>().map {
-        TooltipBox(toolTipLabel = it.title,
+        TooltipBox(
+            toolTipLabel = it.title,
             icon = it.icon,
             isEnabled = it.isEnabled,
-            buttonClicked = it.onClick)
+            buttonClicked = it.onClick
+        )
     }
 
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
