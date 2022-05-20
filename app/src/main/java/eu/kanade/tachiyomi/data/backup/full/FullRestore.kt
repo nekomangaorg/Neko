@@ -91,7 +91,7 @@ class FullRestore(val context: Context, val job: Job?) {
             totalAmount,
             cancelled,
             errors,
-            trackingErrors
+            trackingErrors,
         )
     }
 
@@ -110,7 +110,7 @@ class FullRestore(val context: Context, val job: Job?) {
                 restoreHelper.showProgressNotification(
                     restoreProgress,
                     totalAmount,
-                    backupManga.title
+                    backupManga.title,
                 )
                 restoreProgress += 1
             } else {

@@ -17,7 +17,8 @@ class LicensesController : BasicComposeController() {
     override fun ScreenContent() {
         NekoScaffold(
             title = stringResource(id = R.string.open_source_licenses),
-            onNavigationIconClicked = { activity?.onBackPressed() }) { contentPadding ->
+            onNavigationIconClicked = { activity?.onBackPressed() },
+        ) { contentPadding ->
             LibrariesContainer(
                 contentPadding = contentPadding,
                 colors = libraryColors(
@@ -26,10 +27,8 @@ class LicensesController : BasicComposeController() {
                     badgeBackgroundColor = MaterialTheme.colorScheme.primary,
                     badgeContentColor = MaterialTheme.colorScheme.onPrimary,
                 ),
-                padding = libraryPadding(badgeContentPadding = PaddingValues(4.dp))
+                padding = libraryPadding(badgeContentPadding = PaddingValues(4.dp)),
             )
         }
     }
 }
- 
- 

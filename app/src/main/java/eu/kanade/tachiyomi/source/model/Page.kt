@@ -66,7 +66,7 @@ open class Page(
 
 fun Page.toPageUrl(): PageUrl {
     return PageUrl(
-        url = this.imageUrl ?: this.url
+        url = this.imageUrl ?: this.url,
     )
 }
 

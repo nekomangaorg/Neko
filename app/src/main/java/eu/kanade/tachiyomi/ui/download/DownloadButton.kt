@@ -25,60 +25,60 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
             activeColor = ColorUtils.blendARGB(
                 colorSecondary,
                 context.getResourceColor(R.attr.background),
-                0.05f
+                0.05f,
             )
             downloadedColor = ColorUtils.blendARGB(
                 colorSecondary,
                 context.getResourceColor(R.attr.colorOnBackground),
-                0.3f
+                0.3f,
             )
         }
     private var activeColor = ColorUtils.blendARGB(
         colorSecondary,
         context.getResourceColor(R.attr.background),
-        0.05f
+        0.05f,
     )
     private val progressBGColor = ContextCompat.getColor(
         context,
-        R.color.divider
+        R.color.divider,
     )
     private val disabledColor = ContextCompat.getColor(
         context,
-        R.color.material_on_surface_disabled
+        R.color.material_on_surface_disabled,
     )
     private var downloadedColor = ColorUtils.blendARGB(
         colorSecondary,
         context.getResourceColor(R.attr.colorOnBackground),
-        0.3f
+        0.3f,
     )
     private val downloadedTextColor = context.getResourceColor(R.attr.background)
     private val errorColor = ContextCompat.getColor(
         context,
-        R.color.material_red_500
+        R.color.material_red_500,
     )
     private val filledCircle = ContextCompat.getDrawable(
         context,
-        R.drawable.filled_circle
+        R.drawable.filled_circle,
     )?.mutate()
     private val borderCircle = ContextCompat.getDrawable(
         context,
-        R.drawable.border_circle
+        R.drawable.border_circle,
     )?.mutate()
     private val downloadDrawable = ContextCompat.getDrawable(
         context,
-        R.drawable.ic_arrow_downward_24dp
+        R.drawable.ic_arrow_downward_24dp,
     )?.mutate()
     private val checkDrawable = ContextCompat.getDrawable(
         context,
-        R.drawable.ic_check_24dp
+        R.drawable.ic_check_24dp,
     )?.mutate()
     private val filledAnim = AnimatedVectorDrawableCompat.create(
         context,
-        R.drawable.anim_outline_to_filled
+        R.drawable.anim_outline_to_filled,
     )
     private val checkAnim = AnimatedVectorDrawableCompat.create(
         context,
-        R.drawable.anim_dl_to_check_to_dl
+        R.drawable.anim_dl_to_check_to_dl,
     )
     private var isAnimating = false
     private var iconAnimation: ObjectAnimator? = null
@@ -99,7 +99,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
         binding.downloadIcon.setImageDrawable(
             if (state == Download.State.CHECKED) {
                 checkDrawable
-            } else downloadDrawable
+            } else downloadDrawable,
         )
         when (state) {
             Download.State.CHECKED -> {
@@ -162,7 +162,7 @@ class DownloadButton @JvmOverloads constructor(context: Context, attrs: Attribut
                         EndAnimatorListener {
                             binding.downloadIcon.drawable.setTint(downloadedTextColor)
                             checkAnim?.start()
-                        }
+                        },
                     )
                     alphaAnimation.duration = 150
                     alphaAnimation.start()

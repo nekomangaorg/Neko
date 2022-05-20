@@ -36,12 +36,14 @@ class CoilSetup(context: Context) {
             }.okHttpClient {
                 OkHttpClient.Builder().apply {
                     if (BuildConfig.DEBUG) {
-                        addInterceptor(ChuckerInterceptor.Builder(context)
-                            .collector(ChuckerCollector(context))
-                            .maxContentLength(250000L)
-                            .redactHeaders(emptySet())
-                            .alwaysReadResponseBody(false)
-                            .build())
+                        addInterceptor(
+                            ChuckerInterceptor.Builder(context)
+                                .collector(ChuckerCollector(context))
+                                .maxContentLength(250000L)
+                                .redactHeaders(emptySet())
+                                .alwaysReadResponseBody(false)
+                                .build(),
+                        )
                     }
                 }.build()
             }

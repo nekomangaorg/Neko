@@ -35,7 +35,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     val decimalFormat = DecimalFormat(
         "#.###",
         DecimalFormatSymbols()
-            .apply { decimalSeparator = '.' }
+            .apply { decimalSeparator = '.' },
     )
 
     init {

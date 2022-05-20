@@ -23,9 +23,9 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
         Bundle().apply {
             putLong(
                 "key",
-                source.id
+                source.id,
             )
-        }
+        },
     )
 
     override fun onCreateDialog(savedViewState: Bundle?): Dialog {
@@ -65,7 +65,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                     val result = source.login(
                         binding.username.text.toString(),
                         binding.password.text.toString(),
-                        binding.twoFactorEdit.text.toString()
+                        binding.twoFactorEdit.text.toString(),
                     )
                     if (result) {
                         dialog?.dismiss()
@@ -73,12 +73,14 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                             preferences.setSourceCredentials(
                                 source,
                                 binding.username.text.toString(),
-                                binding.password.text.toString()
+                                binding.password.text.toString(),
                             )
                         }
                         context.toast(R.string.successfully_logged_in)
-                        (targetController as? Listener)?.siteLoginDialogClosed(source,
-                            binding.username.text.toString())
+                        (targetController as? Listener)?.siteLoginDialogClosed(
+                            source,
+                            binding.username.text.toString(),
+                        )
                     } else {
                         errorResult()
                     }

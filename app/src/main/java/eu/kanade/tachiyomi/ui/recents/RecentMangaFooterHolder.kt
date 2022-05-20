@@ -7,7 +7,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterHolder
 
 class RecentMangaFooterHolder(
     view: View,
-    val adapter: RecentMangaAdapter
+    val adapter: RecentMangaAdapter,
 ) : BaseChapterHolder(view, adapter) {
     private val binding = RecentsFooterItemBinding.bind(view)
 

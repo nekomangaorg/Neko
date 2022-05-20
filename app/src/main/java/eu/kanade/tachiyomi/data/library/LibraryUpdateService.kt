@@ -162,7 +162,7 @@ class LibraryUpdateService(
         val selectedScheme = preferences.libraryUpdatePrioritization().get()
         val mangaList =
             getMangaToUpdate(categoryId, Target.CHAPTERS).sortedWith(
-                rankingScheme[selectedScheme]
+                rankingScheme[selectedScheme],
             )
         categoryIds.add(categoryId)
         addManga(mangaList)
@@ -219,7 +219,7 @@ class LibraryUpdateService(
         wakeLock = acquireWakeLock(timeout = TimeUnit.MINUTES.toMillis(30))
         startForeground(
             Notifications.ID_LIBRARY_PROGRESS,
-            notifier.progressNotificationBuilder.build()
+            notifier.progressNotificationBuilder.build(),
         )
     }
 
@@ -337,7 +337,7 @@ class LibraryUpdateService(
             val errorFile = writeErrorFile(failedUpdates)
             notifier.showUpdateErrorNotification(
                 failedUpdates.map { it.key.title },
-                errorFile.getUriCompat(this)
+                errorFile.getUriCompat(this),
             )
         }
 
@@ -356,7 +356,6 @@ class LibraryUpdateService(
         }
 
         while (currentCount < mangaToUpdateMap[source]!!.size) {
-
             val manga = mangaToUpdateMap[source]!![currentCount]
             val shouldDownload = manga.shouldDownloadNewChapters(db, preferences)
             logTimeTaken("library manga ${manga.title}") {
@@ -386,8 +385,6 @@ class LibraryUpdateService(
             if (job?.isCancelled == true) {
                 return@runCatching false
             }
-
-
 
             notifier.showProgressNotification(manga, progress, mangaToUpdate.size)
 
@@ -425,7 +422,7 @@ class LibraryUpdateService(
             withIOContext {
                 // dont refresh covers while using cached source
                 if (manga.thumbnail_url != null && preferences.refreshCoversToo()
-                        .get()
+                    .get()
                 ) {
                     coverCache.deleteFromCache(thumbnailUrl)
                     // load new covers in background
@@ -451,7 +448,6 @@ class LibraryUpdateService(
                     syncChaptersWithSource(db, fetchedChapters, manga, errorFromMerged)
 
                 if (newChapters.first.isNotEmpty()) {
-
                     if (shouldDownload) {
                         var chaptersToDl = newChapters.first.sortedBy { it.chapter_number }
 
@@ -496,14 +492,12 @@ class LibraryUpdateService(
                                         it
                                     }.toList()
 
-
                             db.updateChaptersProgress(markRead).executeAsBlocking()
                         }
                 }
 
-
                 if (newChapters.first.size + newChapters.second.size > 0) listener?.onUpdateManga(
-                    manga
+                    manga,
                 )
             }
 
@@ -676,7 +670,7 @@ class LibraryUpdateService(
                         putExtra(KEY_CATEGORY, id)
                         if (mangaToUse != null) putExtra(
                             KEY_MANGAS,
-                            mangaToUse.mapNotNull { it.id }.toLongArray()
+                            mangaToUse.mapNotNull { it.id }.toLongArray(),
                         )
                     }
                 }

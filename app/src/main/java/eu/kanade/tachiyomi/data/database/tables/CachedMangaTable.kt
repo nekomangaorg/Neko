@@ -17,5 +17,6 @@ object CachedMangaTable {
     val createVirtualTableQuery: String
         get() =
             """CREATE VIRTUAL TABLE $TABLE_FTS
-               USING fts5($COL_MANGA_TITLE, $COL_MANGA_UUID UNINDEXED, $COL_MANGA_RATING UNINDEXED)"""
+               USING fts5($COL_MANGA_TITLE, $COL_MANGA_UUID UNINDEXED, $COL_MANGA_RATING UNINDEXED)
+            """
 }

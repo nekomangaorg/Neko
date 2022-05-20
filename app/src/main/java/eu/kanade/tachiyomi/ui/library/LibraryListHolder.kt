@@ -23,7 +23,7 @@ import eu.kanade.tachiyomi.util.view.setCards
 
 class LibraryListHolder(
     private val view: View,
-    adapter: LibraryCategoryAdapter
+    adapter: LibraryCategoryAdapter,
 ) : LibraryHolder(view, adapter) {
 
     private val binding = MangaListItemBinding.bind(view)
@@ -49,7 +49,7 @@ class LibraryListHolder(
             } else {
                 binding.title.text = itemView.context.getString(
                     if (adapter.hasActiveFilters) R.string.no_matches_for_filters_short
-                    else R.string.category_is_empty
+                    else R.string.category_is_empty,
                 )
             }
             binding.title.textAlignment = View.TEXT_ALIGNMENT_CENTER
@@ -76,7 +76,7 @@ class LibraryListHolder(
             } else {
                 listOfNotNull(
                     item.manga.author?.trim()?.takeIf { it.isNotBlank() },
-                    item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
+                    item.manga.artist?.trim()?.takeIf { it.isNotBlank() },
                 ).joinToString(", ")
             }
 

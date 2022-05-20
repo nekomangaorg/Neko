@@ -113,7 +113,7 @@ class MergeSearchBottomSheet(controller: MangaDetailsController) :
             mergeSearchItemAdapter.set(
                 results.map {
                     MergeSearchItem(it)
-                }
+                },
             )
         }
     }
@@ -122,7 +122,7 @@ class MergeSearchBottomSheet(controller: MangaDetailsController) :
         binding.mergeRecycler.visibility = View.INVISIBLE
         binding.searchEmptyView.showMedium(
             CommunityMaterial.Icon.cmd_compass_off,
-            binding.root.context.getString(R.string.no_results_found)
+            binding.root.context.getString(R.string.no_results_found),
         )
     }
 

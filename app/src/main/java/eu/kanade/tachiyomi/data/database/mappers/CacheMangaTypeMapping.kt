@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.data.database.tables.CachedMangaTable.TABLE_FTS
 class CacheMangaTypeMapping : SQLiteTypeMapping<CachedManga>(
     CacheMangaPutResolver(),
     CacheMangaGetResolver(),
-    CacheMangaDeleteResolver()
+    CacheMangaDeleteResolver(),
 )
 
 class CacheMangaPutResolver : DefaultPutResolver<CachedManga>() {
@@ -45,7 +45,7 @@ class CacheMangaGetResolver : DefaultGetResolver<CachedManga>() {
     override fun mapFromCursor(cursor: Cursor): CachedManga = CachedManga(
         title = cursor.getString(cursor.getColumnIndex(COL_MANGA_TITLE)),
         uuid = cursor.getString(cursor.getColumnIndex(COL_MANGA_UUID)),
-        rating = cursor.getString(cursor.getColumnIndex(COL_MANGA_RATING))
+        rating = cursor.getString(cursor.getColumnIndex(COL_MANGA_RATING)),
     )
 }
 

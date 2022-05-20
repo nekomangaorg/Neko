@@ -95,7 +95,7 @@ class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
     fun setIconColor(@ColorInt color: Int) = binding?.itemTextView?.let {
         TextViewCompat.setCompoundDrawableTintList(
             it,
-            ColorStateList.valueOf(color)
+            ColorStateList.valueOf(color),
         )
     }
 
@@ -104,7 +104,7 @@ class MenuSheetItemView constructor(context: Context, attrs: AttributeSet?) :
             res,
             0,
             0,
-            0
+            0,
         )
     }
 

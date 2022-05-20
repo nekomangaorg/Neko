@@ -61,7 +61,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             if (hasLightNav) {
                 fullPrimary
             } else Color.BLACK,
-            200
+            200,
         )
         sheetBehavior = BottomSheetBehavior.from(this)
         binding.chaptersButton.setOnClickListener {
@@ -103,7 +103,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                         sheetBehavior?.isHideable = false
                         (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                             adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
-                            binding.chapterRecycler.height / 2 - 30.dpToPx
+                            binding.chapterRecycler.height / 2 - 30.dpToPx,
                         )
                         if (canShowNav) {
                             activity.binding.readerNav.root.isVisible = true
@@ -132,7 +132,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     binding.chapterRecycler.isClickable = state == BottomSheetBehavior.STATE_EXPANDED
                     binding.chapterRecycler.isFocusable = state == BottomSheetBehavior.STATE_EXPANDED
                 }
-            }
+            },
         )
 
         adapter = FastAdapter.with(itemAdapter)
@@ -168,19 +168,19 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     v: View,
                     position: Int,
                     fastAdapter: FastAdapter<ReaderChapterItem>,
-                    item: ReaderChapterItem
+                    item: ReaderChapterItem,
                 ) {
                     if (!activity.isLoading && sheetBehavior.isExpanded()) {
                         presenter.toggleBookmark(item.chapter)
                         refreshList()
                     }
                 }
-            }
+            },
         )
 
         backgroundTintList = ColorStateList.valueOf(
             if (!sheetBehavior.isExpanded()) primary
-            else fullPrimary
+            else fullPrimary,
         )
 
         binding.chapterRecycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
@@ -194,7 +194,8 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
                     sheetBehavior?.isDraggable = !recyclerView.canScrollVertically(-1)
                 }
             }
-        })
+        },
+        )
 
         binding.chapterRecycler.layoutManager = LinearLayoutManager(context)
         refreshList()
@@ -216,7 +217,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
 
             (binding.chapterRecycler.layoutManager as LinearLayoutManager).scrollToPositionWithOffset(
                 adapter?.getPosition(presenter.getCurrentChapter()?.chapter?.id ?: 0L) ?: 0,
-                binding.chapterRecycler.height / 2 - 30.dpToPx
+                binding.chapterRecycler.height / 2 - 30.dpToPx,
             )
         }
     }
@@ -227,7 +228,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
             lerpColorCalc(Color.alpha(colorStart), Color.alpha(colorEnd), perc),
             lerpColorCalc(Color.red(colorStart), Color.red(colorEnd), perc),
             lerpColorCalc(Color.green(colorStart), Color.green(colorEnd), perc),
-            lerpColorCalc(Color.blue(colorStart), Color.blue(colorEnd), perc)
+            lerpColorCalc(Color.blue(colorStart), Color.blue(colorEnd), perc),
         )
     }
 
@@ -235,7 +236,7 @@ class ReaderChapterSheet @JvmOverloads constructor(context: Context, attrs: Attr
         return (
             min(colorStart, colorEnd) * (100 - percent) + max(
                 colorStart,
-                colorEnd
+                colorEnd,
             ) * percent
             ) / 100
     }

@@ -27,7 +27,7 @@ enum class LibrarySort(
         R.drawable.ic_swap_vert_24dp,
         7,
         R.string.category,
-        R.drawable.ic_label_outline_24dp
+        R.drawable.ic_label_outline_24dp,
     )
     ;
 
@@ -47,7 +47,7 @@ enum class LibrarySort(
         return MaterialMenuSheet.MenuSheetItem(
             mainValue,
             iconRes(isDynamic),
-            stringRes(isDynamic)
+            stringRes(isDynamic),
         )
     }
 

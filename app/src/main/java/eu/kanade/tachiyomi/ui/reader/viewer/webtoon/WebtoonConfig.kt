@@ -21,7 +21,7 @@ import uy.kohesive.injekt.api.get
  */
 class WebtoonConfig(
     scope: CoroutineScope,
-    preferences: PreferencesHelper = Injekt.get()
+    preferences: PreferencesHelper = Injekt.get(),
 ) : ViewerConfig(preferences, scope) {
 
     var webtoonCropBorders = false
@@ -51,7 +51,7 @@ class WebtoonConfig(
                 { tappingInverted = it },
                 {
                     navigator.invertMode = it
-                }
+                },
             )
 
         preferences.webtoonNavInverted().asFlow()
@@ -76,7 +76,7 @@ class WebtoonConfig(
         preferences.webtoonPageLayout()
             .register(
                 { splitPages = it == PageLayout.SPLIT_PAGES.webtoonValue },
-                { imagePropertyChangedListener?.invoke() }
+                { imagePropertyChangedListener?.invoke() },
             )
 
         preferences.webtoonInvertDoublePages()

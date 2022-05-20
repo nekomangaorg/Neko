@@ -76,8 +76,8 @@ inline fun PreferenceGroup.listPreference(
 inline fun PreferenceGroup.intListPreference(
     activity: Activity?,
     block: (
-    @DSL
-    IntListMatPreference
+        @DSL
+        IntListMatPreference
     ).() -> Unit,
 ):
     IntListMatPreference {
@@ -87,8 +87,8 @@ inline fun PreferenceGroup.intListPreference(
 inline fun PreferenceGroup.multiSelectListPreferenceMat(
     activity: Activity?,
     block: (
-    @DSL
-    MultiListMatPreference
+        @DSL
+        MultiListMatPreference
     ).()
     -> Unit,
 ): MultiListMatPreference {
@@ -98,8 +98,8 @@ inline fun PreferenceGroup.multiSelectListPreferenceMat(
 inline fun PreferenceGroup.triStateListPreference(
     activity: Activity?,
     block: (
-    @DSL
-    TriStateListPreference
+        @DSL
+        TriStateListPreference
     ).()
     -> Unit,
 ): TriStateListPreference {
@@ -111,7 +111,7 @@ inline fun PreferenceScreen.preferenceCategory(block: (@DSL PreferenceCategory).
         PreferenceCategory(context).apply {
             isIconSpaceReserved = false
         },
-        block
+        block,
     )
 }
 
@@ -127,7 +127,7 @@ fun PreferenceGroup.infoPreference(@StringRes infoRes: Int): Preference {
             iconTint = context.getResourceColor(android.R.attr.textColorSecondary)
             summaryRes = infoRes
             isSelectable = false
-        }
+        },
     )
 }
 
@@ -214,7 +214,7 @@ fun SwitchPreferenceCompat.requireAuthentication(
                         super.onAuthenticationError(errorCode, errString)
                         activity.toast(errString.toString())
                     }
-                }
+                },
             )
             false
         } else {

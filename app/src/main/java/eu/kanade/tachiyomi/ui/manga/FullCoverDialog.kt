@@ -47,7 +47,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
     private val fullRatio = 0f
     val shortAnimationDuration = (
         activity?.resources?.getInteger(
-            android.R.integer.config_shortAnimTime
+            android.R.integer.config_shortAnimTime,
         ) ?: 0
         ).toLong()
 
@@ -59,7 +59,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) return
             if (canBlur) {
                 activity?.window?.decorView?.setRenderEffect(
-                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP)
+                    RenderEffect.createBlurEffect(20f, 20f, Shader.TileMode.CLAMP),
                 )
             } else {
                 activity?.window?.decorView?.setRenderEffect(null)
@@ -275,7 +275,7 @@ class FullCoverDialog(val controller: MangaDetailsController, drawable: Drawable
                     expandedImageView.post {
                         dismiss()
                     }
-                }
+                },
             )
             interpolator = DecelerateInterpolator()
             duration = shortAnimationDuration

@@ -203,7 +203,7 @@ class DownloadBottomSheet @JvmOverloads constructor(
         if (presenter.downloadQueue.isEmpty()) {
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_download_off,
-                R.string.nothing_is_downloading
+                R.string.nothing_is_downloading,
             )
         } else {
             binding.emptyView.hide()

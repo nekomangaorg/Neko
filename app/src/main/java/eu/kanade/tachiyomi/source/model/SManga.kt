@@ -119,7 +119,6 @@ interface SManga : Serializable {
             last_chapter_number = other.last_chapter_number
         }
 
-
         missing_chapters = other.missing_chapters
 
         status = other.status
@@ -153,7 +152,7 @@ fun SManga.toMangaInfo(): MangaInfo {
         description = this.description ?: "",
         genres = this.genre?.split(", ") ?: emptyList(),
         status = this.status,
-        cover = this.thumbnail_url ?: ""
+        cover = this.thumbnail_url ?: "",
     )
 }
 

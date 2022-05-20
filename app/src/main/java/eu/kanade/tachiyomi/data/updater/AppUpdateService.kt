@@ -54,8 +54,10 @@ class AppUpdateService : Service() {
         super.onCreate()
         notifier = AppUpdateNotifier(this)
 
-        startForeground(Notifications.ID_UPDATER,
-            notifier.onDownloadStarted(getString(R.string.app_name)).build())
+        startForeground(
+            Notifications.ID_UPDATER,
+            notifier.onDownloadStarted(getString(R.string.app_name)).build(),
+        )
 
         wakeLock = acquireWakeLock()
     }
@@ -174,7 +176,7 @@ class AppUpdateService : Service() {
             val data = file.inputStream()
 
             val params = PackageInstaller.SessionParams(
-                PackageInstaller.SessionParams.MODE_FULL_INSTALL
+                PackageInstaller.SessionParams.MODE_FULL_INSTALL,
             )
             params.setRequireUserAction(PackageInstaller.SessionParams.USER_ACTION_NOT_REQUIRED)
             val sessionId = packageInstaller.createSession(params)
@@ -194,10 +196,12 @@ class AppUpdateService : Service() {
                 .putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
                 .putExtra(EXTRA_FILE_URI, file.getUriCompat(this).toString())
 
-            val pendingIntent = PendingIntent.getBroadcast(this,
+            val pendingIntent = PendingIntent.getBroadcast(
+                this,
                 -10053,
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE,
+            )
             val statusReceiver = pendingIntent.intentSender
             session.commit(statusReceiver)
             data.close()
@@ -277,10 +281,12 @@ class AppUpdateService : Service() {
                 putExtra(EXTRA_DOWNLOAD_URL, url)
                 putExtra(EXTRA_NOTIFY_ON_INSTALL, notifyOnInstall)
             }
-            return PendingIntent.getService(context,
+            return PendingIntent.getService(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
     }
 }

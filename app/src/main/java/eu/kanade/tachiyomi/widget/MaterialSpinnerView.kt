@@ -44,7 +44,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private val blendedAccent = ColorUtils.blendARGB(
         context.getResourceColor(R.attr.colorSecondary),
         context.getResourceColor(R.attr.colorOnBackground),
-        0.5f
+        0.5f,
     )
 
     var onItemSelectedListener: ((Int) -> Unit)? = null
@@ -62,7 +62,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private val binding = MaterialSpinnerViewBinding.inflate(
         LayoutInflater.from(context),
         this,
-        false
+        false,
     )
 
     init {

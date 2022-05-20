@@ -49,7 +49,8 @@ object TrackTable {
             UNIQUE ($COL_MANGA_ID, $COL_SYNC_ID) ON CONFLICT REPLACE,
             FOREIGN KEY($COL_MANGA_ID) REFERENCES ${MangaTable.TABLE} (${MangaTable.COL_ID})
             ON DELETE CASCADE
-            )"""
+            )
+            """
 
     val addTrackingUrl: String
         get() = "ALTER TABLE $TABLE ADD COLUMN $COL_TRACKING_URL TEXT DEFAULT ''"

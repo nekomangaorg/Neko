@@ -84,8 +84,8 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             icon.create(
                 context,
                 48f,
-                android.R.attr.textColorHint
-            )
+                android.R.attr.textColorHint,
+            ),
         )
         iconicsAfter(message, actions)
     }
@@ -95,8 +95,8 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
             icon.create(
                 context,
                 128f,
-                android.R.attr.textColorHint
-            )
+                android.R.attr.textColorHint,
+            ),
         )
         iconicsAfter(message, actions)
     }
@@ -111,7 +111,7 @@ class EmptyView @JvmOverloads constructor(context: Context, attrs: AttributeSet?
                     inflate(
                         context,
                         R.layout.material_text_button,
-                        null
+                        null,
                     ) as MaterialButton
                     ).apply {
                     setText(it.resId)

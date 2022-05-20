@@ -10,7 +10,6 @@ import org.nekomanga.presentation.theme.Typefaces.appTypography
 fun NekoTheme(
     content: @Composable () -> Unit,
 ) {
-
     val context = LocalContext.current
 
     val (colorScheme) = createMdc3Theme(
@@ -21,6 +20,6 @@ fun NekoTheme(
     MaterialTheme(
         colorScheme = colorScheme!!,
         typography = appTypography,
-        content = content
+        content = content,
     )
 }

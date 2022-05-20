@@ -54,28 +54,34 @@ fun NekoScaffold(
                     CenterAlignedTopAppBar(
                         colors = TopAppBarDefaults.smallTopAppBarColors(
                             containerColor = getTopAppBarColor(),
-                            scrolledContainerColor = getTopAppBarColor()),
+                            scrolledContainerColor = getTopAppBarColor(),
+                        ),
                         modifier = Modifier
                             .statusBarsPadding(),
                         title = {
-                            Text(text = title,
+                            Text(
+                                text = title,
                                 style = MaterialTheme.typography.titleLarge,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis)
+                                overflow = TextOverflow.Ellipsis,
+                            )
                         },
                         navigationIcon = {
-                            TooltipBox(toolTipLabel = navigationIconLabel,
+                            TooltipBox(
+                                toolTipLabel = navigationIconLabel,
                                 icon = navigationIcon,
-                                buttonClicked = onNavigationIconClicked)
+                                buttonClicked = onNavigationIconClicked,
+                            )
                         },
                         actions = actions,
-                        scrollBehavior = scrollBehavior
+                        scrollBehavior = scrollBehavior,
                     )
                 } else {
                     SmallTopAppBar(
                         colors = TopAppBarDefaults.smallTopAppBarColors(
                             containerColor = getTopAppBarColor(),
-                            scrolledContainerColor = getTopAppBarColor()),
+                            scrolledContainerColor = getTopAppBarColor(),
+                        ),
                         modifier = Modifier
                             .statusBarsPadding(),
                         title = {
@@ -84,30 +90,32 @@ fun NekoScaffold(
                                     text = title,
                                     style = MaterialTheme.typography.titleMedium,
                                     maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
+                                    overflow = TextOverflow.Ellipsis,
                                 )
                                 if (subtitle.isNotEmpty()) {
                                     Text(
                                         text = subtitle,
                                         style = MaterialTheme.typography.bodySmall,
                                         maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
+                                        overflow = TextOverflow.Ellipsis,
                                     )
                                 }
                             }
                         },
                         navigationIcon = {
-                            TooltipBox(toolTipLabel = navigationIconLabel,
+                            TooltipBox(
+                                toolTipLabel = navigationIconLabel,
                                 icon = navigationIcon,
-                                buttonClicked = onNavigationIconClicked)
+                                buttonClicked = onNavigationIconClicked,
+                            )
                         },
                         actions = actions,
-                        scrollBehavior = scrollBehavior
+                        scrollBehavior = scrollBehavior,
                     )
                 }
             }
-        })
-    { paddingValues ->
+        },
+    ) { paddingValues ->
         content(paddingValues)
     }
 }

@@ -19,22 +19,22 @@ import eu.kanade.tachiyomi.widget.TabbedBottomSheetDialog
 
 class TabbedReaderSettingsSheet(
     val readerActivity: ReaderActivity,
-    showColorFilterSettings: Boolean = false
+    showColorFilterSettings: Boolean = false,
 ) : TabbedBottomSheetDialog(readerActivity) {
     private val generalView: ReaderGeneralView = View.inflate(
         readerActivity,
         R.layout.reader_general_layout,
-        null
+        null,
     ) as ReaderGeneralView
     private val pagedView: ReaderPagedView = View.inflate(
         readerActivity,
         R.layout.reader_paged_layout,
-        null
+        null,
     ) as ReaderPagedView
     private val filterView: ReaderFilterView = View.inflate(
         readerActivity,
         R.layout.reader_color_filter,
-        null
+        null,
     ) as ReaderFilterView
 
     var showWebtoonView: Boolean = run {
@@ -57,13 +57,13 @@ class TabbedReaderSettingsSheet(
     override fun getTabViews(): List<View> = listOf(
         generalView,
         pagedView,
-        filterView
+        filterView,
     )
 
     override fun getTabTitles(): List<Int> = listOf(
         R.string.general,
         if (showWebtoonView) R.string.webtoon else R.string.paged,
-        R.string.filter
+        R.string.filter,
     )
 
     init {
@@ -89,8 +89,8 @@ class TabbedReaderSettingsSheet(
         binding.menu.setImageDrawable(
             ContextCompat.getDrawable(
                 context,
-                R.drawable.ic_outline_settings_24dp
-            )
+                R.drawable.ic_outline_settings_24dp,
+            ),
         )
         binding.menu.setOnClickListener {
             val intent = SearchActivity.openReaderSettings(readerActivity)
@@ -132,7 +132,8 @@ class TabbedReaderSettingsSheet(
 
             override fun onTabReselected(tab: TabLayout.Tab?) {
             }
-        })
+        },
+        )
 
         if (showColorFilterSettings) {
             binding.tabs.getTabAt(filterTabIndex)?.select()

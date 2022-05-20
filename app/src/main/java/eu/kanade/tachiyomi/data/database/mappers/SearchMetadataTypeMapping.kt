@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.data.database.tables.SearchMetadataTable.TABLE
 class SearchMetadataTypeMapping : SQLiteTypeMapping<SearchMetadata>(
     SearchMetadataPutResolver(),
     SearchMetadataGetResolver(),
-    SearchMetadataDeleteResolver()
+    SearchMetadataDeleteResolver(),
 )
 
 class SearchMetadataPutResolver : DefaultPutResolver<SearchMetadata>() {
@@ -51,7 +51,7 @@ class SearchMetadataGetResolver : DefaultGetResolver<SearchMetadata>() {
         uploader = cursor.getString(cursor.getColumnIndex(COL_UPLOADER)),
         extra = cursor.getString(cursor.getColumnIndex(COL_EXTRA)),
         indexedExtra = cursor.getString(cursor.getColumnIndex(COL_INDEXED_EXTRA)),
-        extraVersion = cursor.getInt(cursor.getColumnIndex(COL_EXTRA_VERSION))
+        extraVersion = cursor.getInt(cursor.getColumnIndex(COL_EXTRA_VERSION)),
     )
 }
 

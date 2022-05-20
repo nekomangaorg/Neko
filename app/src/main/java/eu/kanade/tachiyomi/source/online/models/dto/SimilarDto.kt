@@ -114,4 +114,3 @@ data class MalMangaRecommendationDto(
     val title: String,
     val recommendation_count: Int,
 )
-

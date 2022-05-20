@@ -21,7 +21,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         e1: MotionEvent?,
         e2: MotionEvent?,
         distanceX: Float,
-        distanceY: Float
+        distanceY: Float,
     ): Boolean {
         val distance = ((e1?.rawX ?: 0f) - (e2?.rawX ?: 0f)) / 50
         val poa = 1.7f
@@ -38,7 +38,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
         e1: MotionEvent,
         e2: MotionEvent,
         velocityX: Float,
-        velocityY: Float
+        velocityY: Float,
     ): Boolean {
         var result = false
         val diffY = e2.y - e1.y
@@ -66,7 +66,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             if (diffX <= 0) {
                 animator.translationX(
                     if (hopperGravity == Gravity.TOP or Gravity.LEFT) 0f
-                    else (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat()
+                    else (-(controller.view!!.width - controller.binding.categoryHopperFrame.width) / 2).toFloat(),
                 ).withEndAction {
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =
@@ -85,7 +85,7 @@ class LibraryGestureDetector(private val controller: LibraryController) : Gestur
             } else {
                 animator.translationX(
                     if (hopperGravity == Gravity.TOP or Gravity.RIGHT) 0f
-                    else ((controller.view!!.width - hopperFrame.width) / 2).toFloat()
+                    else ((controller.view!!.width - hopperFrame.width) / 2).toFloat(),
                 ).withEndAction {
                     hopperFrame.updateLayoutParams<CoordinatorLayout.LayoutParams> {
                         gravity =

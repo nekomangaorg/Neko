@@ -31,8 +31,9 @@ plugins {
     kotlin("plugin.serialization")
     id("kotlin-parcelize")
     id("com.mikepenz.aboutlibraries.plugin")
-    id("com.google.firebase.crashlytics")
     id("com.google.gms.google-services") apply false
+    id("com.google.firebase.crashlytics")
+
 }
 
 if (gradle.startParameter.taskRequests.toString().contains("Standard")) {

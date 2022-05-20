@@ -24,11 +24,11 @@ class CustomDialogTitle constructor(context: Context, attrs: AttributeSet? = nul
                         null,
                         R.styleable.TextAppearance,
                         android.R.attr.textAppearanceMedium,
-                        android.R.style.TextAppearance_Medium
+                        android.R.style.TextAppearance_Medium,
                     )
                     a.getDimensionPixelSize(
                         R.styleable.TextAppearance_android_textSize,
-                        0
+                        0,
                     ).takeIf { it != 0 }?.let { textSize ->
                         // textSize is already expressed in pixels
                         setTextSize(TypedValue.COMPLEX_UNIT_PX, textSize.toFloat())

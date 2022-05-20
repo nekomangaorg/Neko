@@ -39,9 +39,9 @@ class SiteLoginPreference @JvmOverloads constructor(
                 false -> CommunityMaterial.Icon.cmd_account_circle.createWithColorRes(
                     context,
                     24f,
-                    R.color.material_on_surface_disabled
+                    R.color.material_on_surface_disabled,
                 )
-            }
+            },
         )
         val summary = (holder.findViewById(android.R.id.summary) as? TextView)
         summary?.isVisible = true

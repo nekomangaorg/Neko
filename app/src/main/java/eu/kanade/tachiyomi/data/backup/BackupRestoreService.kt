@@ -41,7 +41,7 @@ class BackupRestoreService : Service() {
         super.onCreate()
         startForeground(
             Notifications.ID_RESTORE_PROGRESS,
-            restoreHelper.progressNotification.build()
+            restoreHelper.progressNotification.build(),
         )
         wakeLock = acquireWakeLock()
     }
@@ -85,7 +85,7 @@ class BackupRestoreService : Service() {
         job = GlobalScope.launch(handler) {
             FullRestore(
                 this@BackupRestoreService,
-                job
+                job,
             ).restoreBackup(uri)
         }
         job?.invokeOnCompletion { stopSelf(startId) }

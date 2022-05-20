@@ -1,6 +1,5 @@
 package eu.kanade.tachiyomi.ui.base.activity
 
-import android.content.Context
 import android.content.res.Resources
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

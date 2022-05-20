@@ -20,7 +20,7 @@ import eu.kanade.tachiyomi.data.database.tables.HistoryTable.TABLE
 class HistoryTypeMapping : SQLiteTypeMapping<History>(
     HistoryPutResolver(),
     HistoryGetResolver(),
-    HistoryDeleteResolver()
+    HistoryDeleteResolver(),
 )
 
 open class HistoryPutResolver : DefaultPutResolver<History>() {

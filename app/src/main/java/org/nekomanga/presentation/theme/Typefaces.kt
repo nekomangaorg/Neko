@@ -17,8 +17,7 @@ object Typefaces {
         Font(R.font.montserrat_medium, FontWeight.Medium),
         Font(R.font.montserrat_semi_bold, FontWeight.SemiBold),
         Font(R.font.montserrat_regular, FontWeight.Normal),
-
-        )
+    )
 
     val appTypography = Typography(
         displayLarge = defaultTypography.displayLarge.copy(fontFamily = montserrat),

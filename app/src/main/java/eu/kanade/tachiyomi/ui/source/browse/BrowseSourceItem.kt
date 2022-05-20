@@ -49,14 +49,14 @@ class BrowseSourceItem(
                     binding.card.setCardForegroundColor(
                         ContextCompat.getColorStateList(
                             context,
-                            R.color.library_comfortable_grid_foreground
-                        )
+                            R.color.library_comfortable_grid_foreground,
+                        ),
                     )
                 }
                 binding.setBGAndFG(listType)
                 binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.WRAP_CONTENT
+                    ViewGroup.LayoutParams.WRAP_CONTENT,
                 )
                 binding.coverThumbnail.maxHeight = Int.MAX_VALUE
                 binding.coverThumbnail.minimumHeight = 0

@@ -39,8 +39,10 @@ class ApiMangaParser {
             val manga = mangaDto.toBasicManga()
 
             val simpleChapters = withIOContext {
-                val aggregateDto = network.service.aggregateChapters(mangaDto.id,
-                    MdUtil.getLangsToShow(preferencesHelper))
+                val aggregateDto = network.service.aggregateChapters(
+                    mangaDto.id,
+                    MdUtil.getLangsToShow(preferencesHelper),
+                )
                     .onError {
                         this.log("trying to aggregate for ${mangaDto.id}")
                     }.onException {
@@ -61,21 +63,20 @@ class ApiMangaParser {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.getOrNull()
                 statResult?.statistics?.get(mangaDto.id)?.let { stats ->
-                    val rating = stats.rating?.average ?: 0.0
+                    val rating = stats.rating.average ?: 0.0
                     if (rating > 0) {
                         manga.rating = rating.toString()
                     }
 
                     manga.users = stats.follows?.toString()
-
                 }
-
             }
 
-
             manga.description =
-                MdUtil.cleanDescription(mangaAttributesDto.description.asMdMap<String>()["en"]
-                    ?: "")
+                MdUtil.cleanDescription(
+                    mangaAttributesDto.description.asMdMap<String>()["en"]
+                        ?: "",
+                )
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
@@ -268,7 +269,6 @@ class ApiMangaParser {
         /* if (scanlatorName.isEmpty()) {
              scanlatorName.add("No Group")
          }*/
-
 
         chapter.scanlator = MdUtil.cleanString(ChapterUtil.getScanlatorString(scanlatorName))
 

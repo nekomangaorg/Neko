@@ -38,7 +38,6 @@ fun WebViewScreen(
     onOpenInBrowser: (String) -> Unit,
     onClose: () -> Unit,
 ) {
-
     val context = LocalContext.current
     val state = rememberWebViewState(url = url)
     val navigator = rememberWebViewNavigator()
@@ -50,51 +49,53 @@ fun WebViewScreen(
         navigationIconLabel = stringResource(id = R.string.close),
         subtitle = url,
         actions = {
-
-            AppBarActions(actions = listOf(
-                if (navigator.canGoBack) {
-                    AppBar.Action(
-                        title = stringResource(id = R.string.back),
-                        icon = Icons.Filled.ArrowBack,
-                        onClick = {
-                            navigator.navigateBack()
-                        },
-                    )
-                } else {
-                    AppBar.Empty
-                }
-            ) + listOf(
-                if (navigator.canGoForward) {
-                    AppBar.Action(
-                        title = stringResource(R.string.forward),
-                        icon = Icons.Default.ArrowForward,
-                        onClick = {
-                            navigator.navigateForward()
-                        },
-                    )
-                } else {
-                    AppBar.Empty
-                }
-            ) + listOf(
-                AppBar.OverflowAction(
-                    title = stringResource(R.string.refresh),
-                    onClick = { navigator.reload() },
+            AppBarActions(
+                actions = listOf(
+                    if (navigator.canGoBack) {
+                        AppBar.Action(
+                            title = stringResource(id = R.string.back),
+                            icon = Icons.Filled.ArrowBack,
+                            onClick = {
+                                navigator.navigateBack()
+                            },
+                        )
+                    } else {
+                        AppBar.Empty
+                    },
+                ) + listOf(
+                    if (navigator.canGoForward) {
+                        AppBar.Action(
+                            title = stringResource(R.string.forward),
+                            icon = Icons.Default.ArrowForward,
+                            onClick = {
+                                navigator.navigateForward()
+                            },
+                        )
+                    } else {
+                        AppBar.Empty
+                    },
+                ) + listOf(
+                    AppBar.OverflowAction(
+                        title = stringResource(R.string.refresh),
+                        onClick = { navigator.reload() },
+                    ),
+                    AppBar.OverflowAction(
+                        title = stringResource(R.string.share),
+                        onClick = { onShare(state.content.getCurrentUrl()!!) },
+                    ),
+                    AppBar.OverflowAction(
+                        title = stringResource(R.string.open_in_browser),
+                        onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
+                    ),
                 ),
-                AppBar.OverflowAction(
-                    title = stringResource(R.string.share),
-                    onClick = { onShare(state.content.getCurrentUrl()!!) },
-                ),
-                AppBar.OverflowAction(
-                    title = stringResource(R.string.open_in_browser),
-                    onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
-                )
-            ))
-        }
+            )
+        },
     ) { paddingValues ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(paddingValues)) {
-
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(paddingValues),
+        ) {
             val loadingState = state.loadingState
             if (loadingState is LoadingState.Loading) {
                 LinearProgressIndicator(
@@ -137,5 +138,3 @@ fun WebViewScreen(
         }
     }
 }
-
-

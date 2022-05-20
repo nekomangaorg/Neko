@@ -19,8 +19,10 @@ class RestoreHelper(val context: Context) {
      * Pending intent of action that cancels the library update
      */
     val cancelIntent by lazy {
-        NotificationReceiver.cancelRestorePendingBroadcast(context,
-            Notifications.ID_RESTORE_PROGRESS)
+        NotificationReceiver.cancelRestorePendingBroadcast(
+            context,
+            Notifications.ID_RESTORE_PROGRESS,
+        )
     }
 
     /**
@@ -34,9 +36,11 @@ class RestoreHelper(val context: Context) {
             .setOnlyAlertOnce(true)
             .setAutoCancel(false)
             .setColor(ContextCompat.getColor(context, R.color.new_neko_accent))
-            .addAction(R.drawable.ic_close_24dp,
+            .addAction(
+                R.drawable.ic_close_24dp,
                 context.getString(android.R.string.cancel),
-                cancelIntent)
+                cancelIntent,
+            )
     }
 
     /**Get the PendingIntent for the error log
@@ -64,11 +68,11 @@ class RestoreHelper(val context: Context) {
                     context.getString(
                         R.string.restoring_progress,
                         current,
-                        total
-                    )
+                        total,
+                    ),
                 )
                 .setProgress(total, current, false)
-                .build()
+                .build(),
         )
     }
 
@@ -83,8 +87,10 @@ class RestoreHelper(val context: Context) {
                 .setSmallIcon(R.drawable.ic_error_24dp)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(ContextCompat.getColor(context, R.color.md_red_500))
-        context.notificationManager.notify(Notifications.ID_BACKUP_RESTORE_ERROR,
-            resultNotification.build())
+        context.notificationManager.notify(
+            Notifications.ID_BACKUP_RESTORE_ERROR,
+            resultNotification.build(),
+        )
     }
 
     /**
@@ -108,8 +114,8 @@ class RestoreHelper(val context: Context) {
                 context.resources.getQuantityString(
                     R.plurals.restore_categories,
                     categoriesAmount,
-                    categoriesAmount
-                )
+                    categoriesAmount,
+                ),
             )
         }
 
@@ -118,15 +124,15 @@ class RestoreHelper(val context: Context) {
                 R.string.restore_completed_successful,
                 restoreProgress
                     .toString(),
-                restoreAmount.toString()
-            )
+                restoreAmount.toString(),
+            ),
         )
 
         content.add(
             context.getString(
                 R.string.restore_completed_errors,
-                errors.size.toString()
-            )
+                errors.size.toString(),
+            ),
         )
 
         if (skippedAmount > 0) {
@@ -134,8 +140,8 @@ class RestoreHelper(val context: Context) {
                 context.getString(
                     R.string.restore_skipped,
                     skippedAmount.toString(),
-                    totalAmount.toString()
-                )
+                    totalAmount.toString(),
+                ),
             )
         }
 
@@ -163,13 +169,15 @@ class RestoreHelper(val context: Context) {
                 R.drawable.ic_close_24dp,
                 context.getString(
                     R.string
-                        .view_log
+                        .view_log,
                 ),
-                getErrorLogIntent(path, file)
+                getErrorLogIntent(path, file),
             )
         }
-        context.notificationManager.notify(Notifications.ID_RESTORE_COMPLETE,
-            resultNotification.build())
+        context.notificationManager.notify(
+            Notifications.ID_RESTORE_COMPLETE,
+            resultNotification.build(),
+        )
     }
 
     /**

@@ -62,11 +62,11 @@ class MdUtil {
             "English :",
             "[English]:",
             "English Translaton:",
-            "[B][ENG][/B]"
+            "[B][ENG][/B]",
         )
 
         val bbCodeToRemove = listOf(
-            "list", "*", "hr", "u", "b", "i", "s", "center", "spoiler="
+            "list", "*", "hr", "u", "b", "i", "s", "center", "spoiler=",
         )
         val descriptionLanguages = listOf(
             "=FRANCAIS=",

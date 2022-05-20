@@ -49,27 +49,36 @@ fun MangaRow(
     modifier: Modifier = Modifier,
 ) {
     Row(modifier = modifier.padding(4.dp)) {
-        MangaCover(displayManga.manga,
+        MangaCover(
+            displayManga.manga,
             shouldOutlineCover,
-            Modifier.align(alignment = Alignment.CenterVertically))
+            Modifier.align(alignment = Alignment.CenterVertically),
+        )
         if (displayManga.displayText.isBlank()) {
             MangaTitle(
                 title = displayManga.manga.title,
                 modifier = Modifier.align(
-                    alignment = Alignment.CenterVertically),
-                fontSize = MaterialTheme.typography.bodyLarge.fontSize)
+                    alignment = Alignment.CenterVertically,
+                ),
+                fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+            )
         } else {
-            Column(Modifier
-                .padding(4.dp)
-                .align(
-                    alignment = Alignment.CenterVertically)) {
+            Column(
+                Modifier
+                    .padding(4.dp)
+                    .align(
+                        alignment = Alignment.CenterVertically,
+                    ),
+            ) {
                 MangaTitle(
                     title = displayManga.manga.title,
                     maxLines = 1,
-                    fontSize = MaterialTheme.typography.bodyLarge.fontSize)
+                    fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                )
                 DisplayText(
                     displayText = displayManga.displayText,
-                    modifier = Modifier.padding(bottom = 4.dp))
+                    modifier = Modifier.padding(bottom = 4.dp),
+                )
             }
         }
     }
@@ -88,14 +97,16 @@ fun PagingListManga(
     ) {
         items(mangaListPagingItems) { displayManga ->
             displayManga?.let {
-                MangaRow(displayManga = displayManga,
+                MangaRow(
+                    displayManga = displayManga,
                     shouldOutlineCover = shouldOutlineCover,
                     modifier = Modifier
                         .fillMaxWidth()
                         .wrapContentHeight()
                         .clickable {
                             onClick(displayManga.manga)
-                        })
+                        },
+                )
             }
         }
         mangaListPagingItems.apply {
@@ -103,8 +114,10 @@ fun PagingListManga(
                 loadState.refresh is LoadState.Loading || loadState.append is LoadState.Loading -> {
                     item {
                         Box(modifier = Modifier.fillMaxWidth()) {
-                            Loading(isLoading = true,
-                                modifier = Modifier.align(Alignment.Center))
+                            Loading(
+                                isLoading = true,
+                                modifier = Modifier.align(Alignment.Center),
+                            )
                         }
                     }
                 }
@@ -125,14 +138,16 @@ fun MangaList(
         contentPadding = contentPadding,
     ) {
         itemsIndexed(mangaList) { index, displayManga ->
-            MangaRow(displayManga = displayManga,
+            MangaRow(
+                displayManga = displayManga,
                 shouldOutlineCover = shouldOutlineCover,
                 modifier = Modifier
                     .fillMaxWidth()
                     .wrapContentHeight()
                     .clickable {
                         onClick(displayManga.manga)
-                    })
+                    },
+            )
         }
     }
 }
@@ -149,14 +164,16 @@ fun MangaListWithHeader(
     LazyColumn(
         modifier = modifier
             .wrapContentWidth(align = Alignment.CenterHorizontally),
-        contentPadding = contentPadding) {
+        contentPadding = contentPadding,
+    ) {
         groupedManga.forEach { (text, mangaList) ->
             stickyHeader {
                 HeaderCard(text)
             }
             itemsIndexed(mangaList) { index, displayManga ->
                 CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
-                    MangaRow(displayManga = displayManga,
+                    MangaRow(
+                        displayManga = displayManga,
                         shouldOutlineCover,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -164,10 +181,10 @@ fun MangaListWithHeader(
                             .combinedClickable(
                                 onClick = { onClick(displayManga.manga) },
                                 onLongClick = { onLongClick(displayManga.manga) },
-                            ))
+                            ),
+                    )
                 }
             }
-
         }
     }
 }
@@ -175,25 +192,27 @@ fun MangaListWithHeader(
 @Composable
 private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modifier = Modifier) {
     Box {
-
         val outlineModifier = when (shouldOutlineCover) {
-            true -> Modifier.border(.75.dp, NekoColors.outline,
-                RoundedCornerShape(Shapes.coverRadius))
+            true -> Modifier.border(
+                .75.dp, NekoColors.outline,
+                RoundedCornerShape(Shapes.coverRadius),
+            )
             else -> Modifier
         }
-        Image(painter = rememberImagePainter(
-            data = manga,
-            builder = {
-                placeholder(Pastel.getColorLight())
-                transformations(RoundedCornersTransformation(0f))
-
-            }),
+        Image(
+            painter = rememberImagePainter(
+                data = manga,
+                builder = {
+                    placeholder(Pastel.getColorLight())
+                    transformations(RoundedCornersTransformation(0f))
+                },
+            ),
             contentDescription = null,
             modifier = modifier
                 .size(48.dp)
                 .padding(4.dp)
                 .clip(RoundedCornerShape(Shapes.coverRadius))
-                .then(outlineModifier)
+                .then(outlineModifier),
 
         )
         if (manga.favorite) {
@@ -206,35 +225,62 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
 @Preview
 @Composable
 fun MangaListPreview() {
-    MangaList(listOf(DisplayManga(Manga.create(0L).apply {
-        url = ""
-        title = "test 1"
-        relationship = "doujinshi"
-    }), DisplayManga(Manga.create(0L).apply {
-        url = ""
-        title =
-            "This is a very very very very very very very very long text that ellipses because its too long"
-    })), true, onClick = { })
+    MangaList(
+        listOf(
+            DisplayManga(
+                Manga.create(0L).apply {
+                    url = ""
+                    title = "test 1"
+                    relationship = "doujinshi"
+                },
+            ),
+            DisplayManga(
+                Manga.create(0L).apply {
+                    url = ""
+                    title =
+                        "This is a very very very very very very very very long text that ellipses because its too long"
+                },
+            ),
+        ),
+        true, onClick = { },
+    )
 }
 
 @Preview
 @Composable
 fun MangaHeaderPreview() {
-    MangaListWithHeader(mapOf("abc" to listOf(DisplayManga(Manga.create(0L).apply {
-        url = ""
-        title = "test 1"
-    }), DisplayManga(Manga.create(0L).apply {
-        url = ""
-        title =
-            "This is a very very very very very very very very long text that ellipses because its too long"
-    }, "doujinshi")
-    )), true)
+    MangaListWithHeader(
+        mapOf(
+            "abc" to listOf(
+                DisplayManga(
+                    Manga.create(0L).apply {
+                        url = ""
+                        title = "test 1"
+                    },
+                ),
+                DisplayManga(
+                    Manga.create(0L).apply {
+                        url = ""
+                        title =
+                            "This is a very very very very very very very very long text that ellipses because its too long"
+                    },
+                    "doujinshi",
+                ),
+            ),
+        ),
+        true,
+    )
 }
 
 @Preview
 @Composable
 private fun MangaCoverPreview() {
-    MangaCover(manga = Manga.create("test",
-        "Title",
-        1L).apply { favorite = true }, true)
+    MangaCover(
+        manga = Manga.create(
+            "test",
+            "Title",
+            1L,
+        ).apply { favorite = true },
+        true,
+    )
 }

@@ -22,7 +22,7 @@ class ChapterSort(
             filterForReader -> chapterFilter.filterChaptersForReader(
                 rawChapters,
                 manga,
-                currentChapter
+                currentChapter,
             )
             andFiltered -> chapterFilter.filterChapters(rawChapters, manga)
             else -> rawChapters

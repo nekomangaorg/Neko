@@ -24,7 +24,8 @@ object SearchMetadataTable {
             $COL_EXTRA_VERSION INT NOT NULL,
             FOREIGN KEY($COL_MANGA_ID) REFERENCES ${MangaTable.TABLE} (${MangaTable.COL_ID})
             ON DELETE CASCADE
-            )"""
+            )
+            """
 
     val createUploaderIndexQuery: String
         get() = "CREATE INDEX ${TABLE}_${COL_UPLOADER}_index ON $TABLE($COL_UPLOADER)"

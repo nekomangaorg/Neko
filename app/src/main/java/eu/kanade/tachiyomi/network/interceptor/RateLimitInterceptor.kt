@@ -27,7 +27,7 @@ fun OkHttpClient.Builder.rateLimit(
 private class RateLimitInterceptor(
     permits: Long,
     period: Long = 1,
-    unit: TimeUnit = TimeUnit.SECONDS
+    unit: TimeUnit = TimeUnit.SECONDS,
 ) : Interceptor {
 
     private val bucket = TokenBuckets.builder().withCapacity(permits)

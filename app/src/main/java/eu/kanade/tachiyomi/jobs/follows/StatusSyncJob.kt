@@ -23,7 +23,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.injectLazy
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * WorkManager job that syncs FollowsList to and from Neko
@@ -44,7 +44,7 @@ class StatusSyncJob(
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.cancelFollowSyncPendingIntent(context)
+                NotificationReceiver.cancelFollowSyncPendingIntent(context),
             )
         }
 
@@ -60,35 +60,34 @@ class StatusSyncJob(
             return@coroutineScope Result.failure()
         }
         try {
-
             when (val ids = inputData.getString(SYNC_TO_MANGADEX)) {
                 null, "0" -> {
                     followsSyncService.toMangaDex(
                         ::updateNotificationProgress,
                         ::completeNotificationToDex,
-                        null
+                        null,
                     )
                 }
 
                 "1" -> {
                     val total = followsSyncService.fromMangaDex(
                         ::updateNotificationProgress,
-                        ::completeNotificationFromDex
+                        ::completeNotificationFromDex,
                     )
                     withUIContext {
                         applicationContext.toast(
                             applicationContext.getString(
                                 R.string.sync_follows_to_library_toast,
-                                total
+                                total,
                             ),
-                            Toast.LENGTH_LONG
+                            Toast.LENGTH_LONG,
                         )
                     }
                 }
                 else -> {
                     followsSyncService.toMangaDex(
                         ::updateNotificationProgress,
-                        ::completeNotificationToDex, ids
+                        ::completeNotificationToDex, ids,
                     )
                 }
             }
@@ -99,7 +98,7 @@ class StatusSyncJob(
             return@coroutineScope Result.failure()
         } finally {
             launchIO {
-                delay(Duration.seconds(3).inWholeMilliseconds)
+                delay(3.seconds.inWholeMilliseconds)
                 context.notificationManager.cancel(Notifications.Id.Status.Complete)
             }
         }
@@ -112,7 +111,7 @@ class StatusSyncJob(
             .build()
         applicationContext.notificationManager.notify(
             Notifications.Id.Status.Progress,
-            notification
+            notification,
         )
     }
 
@@ -122,9 +121,9 @@ class StatusSyncJob(
             applicationContext.toast(
                 applicationContext.getString(
                     R.string.push_favorites_to_mangadex_toast,
-                    total
+                    total,
                 ),
-                Toast.LENGTH_LONG
+                Toast.LENGTH_LONG,
             )
         }
     }
@@ -139,20 +138,19 @@ class StatusSyncJob(
             .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Complete,
-            notification
+            notification,
         )
     }
 
     private fun errorNotification() {
         val notification = progressNotification
             .setContentTitle(context.getString(R.string.not_logged_into_mangadex_cannot_sync))
-
             .setOngoing(true)
             .setAutoCancel(true)
             .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Complete,
-            notification
+            notification,
         )
     }
 
@@ -170,9 +168,9 @@ class StatusSyncJob(
                     addTag(TAG)
                     setInputData(
                         Data.Builder().putString(SYNC_TO_MANGADEX, syncToMangadex)
-                            .build()
+                            .build(),
                     )
-                }.build()
+                }.build(),
             )
         }
     }

@@ -45,7 +45,7 @@ class TabsAnimator(val tabs: TabLayout) {
                         }
                     }
                 }
-            }
+            },
         )
     }
 

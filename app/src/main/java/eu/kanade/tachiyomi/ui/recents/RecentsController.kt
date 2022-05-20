@@ -167,7 +167,7 @@ class RecentsController(bundle: Bundle? = null) :
         )
         adapter.isSwipeEnabled = true
         adapter.itemTouchHelperCallback.setSwipeFlags(
-            ItemTouchHelper.LEFT
+            ItemTouchHelper.LEFT,
         )
         binding.swipeRefresh.setStyle()
         scrollViewWith(

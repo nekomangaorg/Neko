@@ -61,7 +61,8 @@ abstract class TabbedBottomSheetDialog(private val activity: Activity) :
                 view?.isNestedScrollingEnabled = true
                 view?.requestLayout()
             }
-        })
+        },
+        )
     }
 
     abstract fun getTabViews(): List<View>
@@ -99,7 +100,7 @@ class MeasuredViewPager @JvmOverloads constructor(context: Context, attrs: Attri
         var height = 0
         val childWidthSpec = MeasureSpec.makeMeasureSpec(
             max(0, MeasureSpec.getSize(widthMeasureSpec) - paddingLeft - paddingRight),
-            MeasureSpec.getMode(widthMeasureSpec)
+            MeasureSpec.getMode(widthMeasureSpec),
         )
         for (i in 0 until childCount) {
             val child = getChildAt(i)

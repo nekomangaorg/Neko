@@ -15,7 +15,7 @@ interface SimilarQueries : DbProvider {
                 .table(SimilarTable.TABLE)
                 .where("${SimilarTable.COL_MANGA_ID} = ?")
                 .whereArgs(manga_id)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -25,7 +25,7 @@ interface SimilarQueries : DbProvider {
         .byQuery(
             DeleteQuery.builder()
                 .table(SimilarTable.TABLE)
-                .build()
+                .build(),
         )
         .prepare()
 }

@@ -22,7 +22,6 @@ import eu.kanade.tachiyomi.ui.reader.viewer.BaseViewer
 import eu.kanade.tachiyomi.ui.reader.viewer.ViewerNavigation
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.cancel
-import timber.log.Timber
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -336,7 +335,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         XLog.d("setChaptersInternal")
         val forceTransition = config.alwaysShowChapterTransition || adapter.joinedItems.getOrNull(
             pager
-                .currentItem
+                .currentItem,
         )?.first is ChapterTransition
         adapter.setChapters(chapters, forceTransition)
 
@@ -377,7 +376,7 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
                     adapter.joinedItems.firstOrNull { it.first == page || it.second == page }
                 activity.onPageSelected(
                     joinedItem?.first as? ReaderPage ?: page,
-                    joinedItem?.second is ReaderPage
+                    joinedItem?.second is ReaderPage,
                 )
             }
             XLog.d("finished moveToPage method")

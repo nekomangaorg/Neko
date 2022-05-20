@@ -38,7 +38,7 @@ fun Long.toUtcCalendar(): Calendar? {
             rawCalendar.get(Calendar.DAY_OF_MONTH),
             rawCalendar.get(Calendar.HOUR_OF_DAY),
             rawCalendar.get(Calendar.MINUTE),
-            rawCalendar.get(Calendar.SECOND)
+            rawCalendar.get(Calendar.SECOND),
         )
     }
 }
@@ -63,7 +63,7 @@ fun Long.toLocalCalendar(): Calendar? {
             rawCalendar.get(Calendar.DAY_OF_MONTH),
             rawCalendar.get(Calendar.HOUR_OF_DAY),
             rawCalendar.get(Calendar.MINUTE),
-            rawCalendar.get(Calendar.SECOND)
+            rawCalendar.get(Calendar.SECOND),
         )
     }
 }

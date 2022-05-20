@@ -34,7 +34,6 @@ class StatusHandler {
                     emptyMap()
                 }
                 else -> response.getOrThrow().statuses
-
             }
         }
     }
@@ -85,7 +84,7 @@ class StatusHandler {
                 false -> MarkStatusDto(chapterIdsUnread = chapterIds)
             }
             authService.markStatusForMultipleChapters(mangaId, dto).onError {
-                this.log("trying to mark chapters read=${read}")
+                this.log("trying to mark chapters read=$read")
             }.onException {
                 this.log("trying to mark chapters read=${read}\"")
             }

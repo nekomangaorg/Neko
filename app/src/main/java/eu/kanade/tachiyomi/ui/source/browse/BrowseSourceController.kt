@@ -81,13 +81,13 @@ open class BrowseSourceController(bundle: Bundle) :
             if (searchQuery != null) {
                 putString(SEARCH_QUERY_KEY, searchQuery)
             }
-        }
+        },
     )
 
     constructor(applyInset: Boolean = true) : this(
         Bundle().apply {
             putBoolean(APPLY_INSET, applyInset)
-        }
+        },
     )
 
     /**
@@ -129,7 +129,7 @@ open class BrowseSourceController(bundle: Bundle) :
     override fun createPresenter(): BrowseSourcePresenter {
         return BrowseSourcePresenter(
             args.getString(SEARCH_QUERY_KEY) ?: "",
-            args.getBoolean(DEEP_LINK)
+            args.getBoolean(DEEP_LINK),
         )
     }
 
@@ -177,7 +177,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 layoutManager = LinearLayoutManager(context)
                 layoutParams = RecyclerView.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
+                    ViewGroup.LayoutParams.MATCH_PARENT,
                 )
                 addItemDecoration(DividerItemDecoration(context, DividerItemDecoration.VERTICAL))
             }
@@ -213,7 +213,7 @@ open class BrowseSourceController(bundle: Bundle) :
             },
             onBottomNavUpdate = {
                 updateFab()
-            }
+            },
         )
         binding.fab.applyBottomAnimatedInsets(16.dpToPx)
 
@@ -226,7 +226,7 @@ open class BrowseSourceController(bundle: Bundle) :
                         binding.fab.shrink()
                     }
                 }
-            }
+            },
         )
 
         binding.catalogueView.addView(recycler, 1)
@@ -461,7 +461,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 activity,
                 source.id,
                 source.baseUrl,
-                presenter.source.name
+                presenter.source.name,
             )
         } else {
             val source = presenter.sourceManager.getMergeSource() as? HttpSource ?: return
@@ -470,7 +470,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 activity,
                 source.id,
                 source.baseUrl,
-                source.name
+                source.name,
             )
         }
 
@@ -558,13 +558,13 @@ open class BrowseSourceController(bundle: Bundle) :
             actions += EmptyView.Action(R.string.retry, retryAction)
             actions += EmptyView.Action(
                 R.string.open_in_webview,
-                View.OnClickListener { openInWebView() }
+                View.OnClickListener { openInWebView() },
             )
 
             binding.emptyView.show(
                 CommunityMaterial.Icon.cmd_compass_off,
                 message,
-                actions
+                actions,
             )
         } else {
             snack = binding.sourceLayout.snack(message, Snackbar.LENGTH_INDEFINITE) {
@@ -733,7 +733,7 @@ open class BrowseSourceController(bundle: Bundle) :
                 snack = view.snack(R.string.added_to_library)
             },
             onMangaMoved = { adapter?.notifyItemChanged(position) },
-            onMangaDeleted = { presenter.confirmDeletion(manga) }
+            onMangaDeleted = { presenter.confirmDeletion(manga) },
         )
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             (activity as? MainActivity)?.setUndoSnackBar(snack)
@@ -745,14 +745,16 @@ open class BrowseSourceController(bundle: Bundle) :
         val insets = windowInsets ?: view.rootWindowInsets
         binding.fab.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             bottomMargin = max(
-                (activityBinding!!.bottomNav?.height
-                    ?: 0) - (activityBinding!!.bottomNav?.translationY ?: 0f).toInt(),
+                (
+                    activityBinding!!.bottomNav?.height
+                        ?: 0
+                    ) - (activityBinding!!.bottomNav?.translationY ?: 0f).toInt(),
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                     insets?.getInsets(WindowInsets.Type.systemBars() or WindowInsets.Type.ime())?.bottom
                         ?: 0
                 } else {
                     insets?.systemWindowInsetBottom ?: 0
-                }
+                },
             ) + 16.dpToPx
         }
         binding.fab.isVisible =

@@ -146,14 +146,14 @@ private fun TooltipContent(
                 // Expanded to dismissed.
                 tween(durationMillis = OutTransitionDuration)
             }
-        }
+        },
     ) { if (it) 1f else 0f }
 
     Card(
         colors = CardDefaults.cardColors(
             containerColor = backgroundColor.copy(alpha = 0.75f),
             contentColor = MaterialTheme.colorScheme.contentColorFor(backgroundColor)
-                .takeOrElse { backgroundColor.onColor() }
+                .takeOrElse { backgroundColor.onColor() },
         ),
         modifier = Modifier.alpha(alpha),
         elevation = CardDefaults.cardElevation(defaultElevation = TooltipElevation),

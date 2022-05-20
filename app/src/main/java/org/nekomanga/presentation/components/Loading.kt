@@ -16,9 +16,10 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun Loading(isLoading: Boolean, modifier: Modifier = Modifier) {
     if (isLoading) {
-        Box(modifier = modifier
-            .size(40.dp)
-            .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape)
+        Box(
+            modifier = modifier
+                .size(40.dp)
+                .background(color = MaterialTheme.colorScheme.secondary, shape = CircleShape),
         ) {
             CircularProgressIndicator(
                 modifier = Modifier
@@ -26,7 +27,7 @@ fun Loading(isLoading: Boolean, modifier: Modifier = Modifier) {
                     .padding(2.dp)
                     .align(Alignment.Center),
                 color = MaterialTheme.colorScheme.onSecondary,
-                strokeWidth = 2.dp
+                strokeWidth = 2.dp,
             )
         }
     }

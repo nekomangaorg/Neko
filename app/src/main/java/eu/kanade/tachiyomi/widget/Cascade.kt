@@ -23,7 +23,7 @@ fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
         RippleDrawable(
             ColorStateList.valueOf(context.getResourceColor(R.attr.colorAccent)),
             null,
-            ColorDrawable(Color.BLACK)
+            ColorDrawable(Color.BLACK),
         )
     }
 
@@ -31,7 +31,7 @@ fun cascadeMenuStyler(context: Context): CascadePopupMenu.Styler {
         background = {
             RoundedRectDrawable(
                 context.getResourceColor(R.attr.colorPrimaryVariant),
-                radius = 8f.dpToPx
+                radius = 8f.dpToPx,
             )
         },
         menuTitle = {

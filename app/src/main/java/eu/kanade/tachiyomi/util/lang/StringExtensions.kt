@@ -103,9 +103,9 @@ fun String.compareToCaseInsensitiveNaturalOrder(other: String): Int {
 
 fun String.capitalized(): String {
     return this.replaceFirstChar {
-        if (it.isLowerCase())
+        if (it.isLowerCase()) {
             it.titlecase(Locale.US)
-        else it.toString()
+        } else it.toString()
     }
 }
 
@@ -123,7 +123,7 @@ fun String.highlightText(highlight: String, @ColorInt color: Int): Spanned {
             BackgroundColorSpan(color),
             it,
             it + highlight.length,
-            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+            Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
         )
     }
     return wordToSpan
@@ -152,7 +152,7 @@ fun String.withSubtitle(context: Context, subtitle: String): Spanned {
         ForegroundColorSpan(context.getResourceColor(android.R.attr.textColorSecondary)),
         this.length + 1,
         spannable.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     return spannable
 }
@@ -164,25 +164,25 @@ fun String.addBetaTag(context: Context): Spanned {
         SuperscriptSpan(),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     betaSpan.setSpan(
         RelativeSizeSpan(0.75f),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     betaSpan.setSpan(
         StyleSpan(Typeface.BOLD),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     betaSpan.setSpan(
         ForegroundColorSpan(context.getResourceColor(R.attr.colorSecondary)),
         length,
         length + betaText.length,
-        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE
+        Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
     )
     return betaSpan
 }

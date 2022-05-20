@@ -10,7 +10,7 @@ import java.util.concurrent.CopyOnWriteArrayList
 
 class DownloadQueue(
     private val store: DownloadStore,
-    private val queue: MutableList<Download> = CopyOnWriteArrayList<Download>()
+    private val queue: MutableList<Download> = CopyOnWriteArrayList<Download>(),
 ) :
     List<Download> by queue {
 

@@ -24,7 +24,7 @@ object MangaCoverMetadata {
                 } else {
                     null
                 }
-            }.toMap()
+            }.toMap(),
         )
         val colors = preferences.coverColors().get()
         coverColorMap = ConcurrentHashMap(
@@ -38,7 +38,7 @@ object MangaCoverMetadata {
                 } else {
                     null
                 }
-            }.toMap()
+            }.toMap(),
         )
     }
 

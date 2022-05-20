@@ -69,8 +69,8 @@ class V5MigrationService(
                 val responseDto = networkHelper.service.legacyMapping(
                     LegacyIdDto(
                         type = "manga",
-                        listOf(oldMangaId.toInt())
-                    )
+                        listOf(oldMangaId.toInt()),
+                    ),
                 )
 
                 when (responseDto) {
@@ -118,8 +118,12 @@ class V5MigrationService(
 
                 chapterChunks.asSequence().forEach { legacyIds ->
                     val responseDto =
-                        networkHelper.service.legacyMapping(LegacyIdDto("chapter",
-                            legacyIds))
+                        networkHelper.service.legacyMapping(
+                            LegacyIdDto(
+                                "chapter",
+                                legacyIds,
+                            ),
+                        )
 
                     when (responseDto) {
                         is ApiResponse.Success -> {
@@ -141,7 +145,7 @@ class V5MigrationService(
                                     "unable to find new chapter V5 id deleting chapter"
                                 chapterErrors.add(
                                     "\t- unable to find new chapter id for " +
-                                        "vol ${failedChapter.vol} - ${failedChapter.chapter_number} - ${failedChapter.name}"
+                                        "vol ${failedChapter.vol} - ${failedChapter.chapter_number} - ${failedChapter.name}",
                                 )
                                 db.deleteChapter(failedChapter).executeAsBlocking()
                             }
@@ -171,8 +175,11 @@ class V5MigrationService(
     ) {
         if (failedUpdatesMangaList.isNotEmpty() || failedUpdatesChapters.isNotEmpty()) {
             val errorFile = writeErrorFile(context, failedUpdatesErrors)
-            errorNotification(failedUpdatesMangaList.map { it.key.title } +
-                failedUpdatesChapters.map { it.key.chapter_title }, errorFile.getUriCompat(context))
+            errorNotification(
+                failedUpdatesMangaList.map { it.key.title } +
+                    failedUpdatesChapters.map { it.key.chapter_title },
+                errorFile.getUriCompat(context),
+            )
         }
         completeNotificaton(actualMigrated)
     }

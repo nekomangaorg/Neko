@@ -33,7 +33,7 @@ class MaterialMenuSheet(
     selectedId: Int? = null,
     maxHeight: Int? = null,
     showDivider: Boolean = false,
-    onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean
+    onMenuItemClicked: (MaterialMenuSheet, Int) -> Boolean,
 ) : E2EBottomSheetDialog<BottomMenuSheetBinding>(activity) {
 
     override fun createBinding(inflater: LayoutInflater) = BottomMenuSheetBinding.inflate(inflater)
@@ -50,7 +50,7 @@ class MaterialMenuSheet(
                 matchConstraintMaxHeight =
                     min(
                         (maxHeight ?: fullHeight) + (insets?.bottom ?: 0),
-                        fullHeight - (insets?.top ?: 0) - binding.titleLayout.height - 26.dpToPx
+                        fullHeight - (insets?.top ?: 0) - binding.titleLayout.height - 26.dpToPx,
                     )
             }
         }
@@ -86,7 +86,7 @@ class MaterialMenuSheet(
                 binding.root.post {
                     binding.menuSheetRecycler.scrollBy(
                         0,
-                        pos * 48.dpToPx - binding.menuSheetRecycler.height / 2
+                        pos * 48.dpToPx - binding.menuSheetRecycler.height / 2,
                     )
                 }
             }
@@ -104,7 +104,7 @@ class MaterialMenuSheet(
 
             elevationAnimator = ValueAnimator.ofArgb(
                 if (elevate) nonElevateColor else elevateColor,
-                if (elevate) elevateColor else nonElevateColor
+                if (elevate) elevateColor else nonElevateColor,
             )
 
             elevationAnimator?.addUpdateListener {
@@ -121,7 +121,8 @@ class MaterialMenuSheet(
                         elevate(notAtTop)
                     }
                 }
-            })
+            },
+            )
         }
     }
 
@@ -145,6 +146,6 @@ class MaterialMenuSheet(
         @DrawableRes val drawable: Int = 0,
         @StringRes val textRes: Int = 0,
         val text: String? = null,
-        var endDrawableRes: Int = 0
+        var endDrawableRes: Int = 0,
     )
 }

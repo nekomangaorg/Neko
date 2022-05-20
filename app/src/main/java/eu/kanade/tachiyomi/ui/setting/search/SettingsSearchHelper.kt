@@ -41,7 +41,7 @@ object SettingsSearchHelper {
         SettingsMainController::class,
         SettingsReaderController::class,
         SettingsSiteController::class,
-        SettingsTrackingController::class
+        SettingsTrackingController::class,
     )
 
     /**
@@ -119,8 +119,8 @@ object SettingsSearchHelper {
                         title = title,
                         summary = summary,
                         breadcrumb = breadcrumbs,
-                        searchController = ctrl
-                    )
+                        searchController = ctrl,
+                    ),
                 )
             }
         }

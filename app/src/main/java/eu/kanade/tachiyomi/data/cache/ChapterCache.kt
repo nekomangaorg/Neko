@@ -98,7 +98,7 @@ class ChapterCache(private val context: Context) {
             PARAMETER_APP_VERSION,
             PARAMETER_VALUE_COUNT,
             // 4 pages = 115MB, 6 = ~150MB, 10 = ~200MB, 20 = ~300MB
-            (PARAMETER_CACHE_SIZE * cacheSize.toFloat().pow(0.6f)).roundToLong()
+            (PARAMETER_CACHE_SIZE * cacheSize.toFloat().pow(0.6f)).roundToLong(),
         )
     }
 

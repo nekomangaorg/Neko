@@ -44,12 +44,12 @@ open class SimpleNavigationView @JvmOverloads constructor(
             attrs,
             R.styleable.NavigationView,
             defStyleAttr,
-            R.style.Widget_Design_NavigationView
+            R.style.Widget_Design_NavigationView,
         )
 
         ViewCompat.setBackground(
             this,
-            a.getDrawable(R.styleable.NavigationView_android_background)
+            a.getDrawable(R.styleable.NavigationView_android_background),
         )
 
         if (a.hasValue(R.styleable.NavigationView_elevation)) {
@@ -57,15 +57,15 @@ open class SimpleNavigationView @JvmOverloads constructor(
                 this,
                 a.getDimensionPixelSize(
                     R.styleable.NavigationView_elevation,
-                    0
-                ).toFloat()
+                    0,
+                ).toFloat(),
             )
         }
 
         @Suppress("DEPRECATION")
         ViewCompat.setFitsSystemWindows(
             this,
-            a.getBoolean(R.styleable.NavigationView_android_fitsSystemWindows, false)
+            a.getBoolean(R.styleable.NavigationView_android_fitsSystemWindows, false),
         )
 
         maxWidth = a.getDimensionPixelSize(R.styleable.NavigationView_android_maxWidth, 0)
@@ -84,7 +84,7 @@ open class SimpleNavigationView @JvmOverloads constructor(
         val width = when (MeasureSpec.getMode(widthSpec)) {
             MeasureSpec.AT_MOST -> MeasureSpec.makeMeasureSpec(
                 min(MeasureSpec.getSize(widthSpec), maxWidth),
-                MeasureSpec.EXACTLY
+                MeasureSpec.EXACTLY,
             )
             MeasureSpec.UNSPECIFIED -> MeasureSpec.makeMeasureSpec(maxWidth, MeasureSpec.EXACTLY)
             else -> widthSpec

@@ -19,7 +19,7 @@ import kotlin.math.abs
 open class WebtoonRecyclerView @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyle: Int = 0
+    defStyle: Int = 0,
 ) : androidx.recyclerview.widget.RecyclerView(context, attrs, defStyle) {
 
     private var isZooming = false
@@ -103,7 +103,7 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         fromX: Float,
         toX: Float,
         fromY: Float,
-        toY: Float
+        toY: Float,
     ) {
         isZooming = true
         val animatorSet = AnimatorSet()
@@ -136,7 +136,7 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
 
                 override fun onAnimationRepeat(animation: Animator) {
                 }
-            }
+            },
         )
     }
 
@@ -186,7 +186,7 @@ open class WebtoonRecyclerView @JvmOverloads constructor(
         currentScale *= scaleFactor
         currentScale = currentScale.coerceIn(
             minRate,
-            MAX_SCALE_RATE
+            MAX_SCALE_RATE,
         )
 
         setScaleRate(currentScale)

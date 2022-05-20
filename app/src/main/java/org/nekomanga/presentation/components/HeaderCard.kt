@@ -17,12 +17,14 @@ import org.nekomanga.presentation.theme.Typefaces
 
 @Composable
 fun HeaderCard(text: String) {
-    Card(shape = RoundedCornerShape(Shapes.coverRadius),
+    Card(
+        shape = RoundedCornerShape(Shapes.coverRadius),
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp),
         elevation = 8.dp,
-        backgroundColor = MaterialTheme.colorScheme.secondary) {
+        backgroundColor = MaterialTheme.colorScheme.secondary,
+    ) {
         Text(
             text = text,
             fontSize = MaterialTheme.typography.titleMedium.fontSize,
@@ -30,7 +32,7 @@ fun HeaderCard(text: String) {
             fontWeight = FontWeight.Normal,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSecondary,
-            modifier = Modifier.padding(all = 12.dp)
+            modifier = Modifier.padding(all = 12.dp),
         )
     }
 }

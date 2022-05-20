@@ -75,7 +75,7 @@ class DownloadPageLoader(
                             page.mangaDexChapterId,
                             {
                                 context.contentResolver.openInputStream(page.uri ?: Uri.EMPTY)!!
-                            }
+                            },
                         ).apply {
                             status = Page.READY
                         }

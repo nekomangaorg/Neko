@@ -83,7 +83,7 @@ class SettingsSiteController :
                 "safe",
                 "suggestive",
                 "erotica",
-                "pornographic"
+                "pornographic",
             )
 
             defValue = setOf("safe", "suggestive")
@@ -123,7 +123,6 @@ class SettingsSiteController :
             defaultValue = 0
         }
 
-
         switchPreference {
             key = PreferenceKeys.readingSync
             titleRes = R.string.reading_sync
@@ -141,7 +140,7 @@ class SettingsSiteController :
                     .setMultiChoiceItems(
                         context.resources.getStringArray(R.array.follows_options).drop(1)
                             .toTypedArray(),
-                        booleanArrayOf(true, false, false, false, false, true)
+                        booleanArrayOf(true, false, false, false, false, true),
                     ) { dialog, position, bool ->
                         val listView = (dialog as AlertDialog).listView
                         listView.setItemChecked(position, bool)
@@ -184,7 +183,7 @@ class SettingsSiteController :
                         db.getLibraryMangaList().executeAsBlocking().forEach {
                             followsHandler.updateFollowStatus(
                                 MdUtil.getMangaId(it.url),
-                                FollowStatus.UNFOLLOWED
+                                FollowStatus.UNFOLLOWED,
                             )
                             db.getMDList(it).executeOnIO()?.let { _ ->
                                 db.deleteTrackForManga(it, trackManager.mdList)
@@ -258,9 +257,8 @@ class SettingsSiteController :
                 .setTitle(R.string.show_languages)
                 .setMultiChoiceItems(
                     allLangs,
-                    enabledLangs
+                    enabledLangs,
                 ) { dialog, position, _ ->
-
                 }
                 .setNegativeButton(android.R.string.cancel, null)
                 .setPositiveButton(android.R.string.ok) { dialog, t ->
@@ -273,7 +271,6 @@ class SettingsSiteController :
                     }
                     preferences!!.langsToShow().set(selected.joinToString(","))
                 }
-
                 .create()
         }
     }

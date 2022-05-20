@@ -41,7 +41,7 @@ import java.util.concurrent.TimeUnit
  */
 class WebtoonPageHolder(
     private val frame: ReaderPageImageView,
-    viewer: WebtoonViewer
+    viewer: WebtoonViewer,
 ) : WebtoonBaseHolder(frame, viewer) {
 
     /**
@@ -283,8 +283,8 @@ class WebtoonPageHolder(
                         minimumScaleType = SubsamplingScaleImageView.SCALE_TYPE_FIT_WIDTH,
                         cropBorders =
                         if (viewer.hasMargins) viewer.config.verticalCropBorders
-                        else viewer.config.webtoonCropBorders
-                    )
+                        else viewer.config.webtoonCropBorders,
+                    ),
                 )
             }
             // Keep the Rx stream alive to close the input stream only when unsubscribed

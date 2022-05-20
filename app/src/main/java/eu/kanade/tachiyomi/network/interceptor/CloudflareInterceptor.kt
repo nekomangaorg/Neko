@@ -41,9 +41,9 @@ class CloudflareInterceptor(private val context: Context) : Interceptor {
     private val initWebView by lazy {
         // Checked added due to crash https://bugs.chromium.org/p/chromium/issues/detail?id=1279562
         if (!(
-                Build.VERSION.SDK_INT == Build.VERSION_CODES.S &&
-                    Build.MANUFACTURER.lowercase(Locale.ENGLISH) == "samsung"
-                )
+            Build.VERSION.SDK_INT == Build.VERSION_CODES.S &&
+                Build.MANUFACTURER.lowercase(Locale.ENGLISH) == "samsung"
+            )
         ) {
             WebSettings.getDefaultUserAgent(context)
         }

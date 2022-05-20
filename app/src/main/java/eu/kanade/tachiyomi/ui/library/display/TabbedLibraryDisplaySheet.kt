@@ -44,12 +44,12 @@ open class TabbedLibraryDisplaySheet(val controller: Controller) :
     override fun getTabViews(): List<View> = listOf(
         displayView,
         badgesView,
-        categoryView
+        categoryView,
     )
 
     override fun getTabTitles(): List<Int> = listOf(
         R.string.display,
         R.string.badges,
-        R.string.categories
+        R.string.categories,
     )
 }

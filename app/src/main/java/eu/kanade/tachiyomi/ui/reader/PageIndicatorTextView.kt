@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.widget.OutlineSpan
  */
 class PageIndicatorTextView(
     context: Context,
-    attrs: AttributeSet? = null
+    attrs: AttributeSet? = null,
 ) : AppCompatTextView(context, attrs) {
 
     init {
@@ -48,7 +48,7 @@ class PageIndicatorTextView(
         // A span object with text outlining properties
         val spanOutline = OutlineSpan(
             strokeColor = strokeColor,
-            strokeWidth = 4f
+            strokeWidth = 4f,
         )
     }
 }

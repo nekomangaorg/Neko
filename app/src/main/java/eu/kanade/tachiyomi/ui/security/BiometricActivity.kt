@@ -37,7 +37,7 @@ class BiometricActivity : BaseThemedActivity() {
                     preferences.lastUnlock().set(Date().time)
                     finish()
                 }
-            }
+            },
         )
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()

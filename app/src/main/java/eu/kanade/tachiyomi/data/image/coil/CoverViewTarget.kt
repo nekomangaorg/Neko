@@ -15,7 +15,7 @@ class CoverViewTarget(
     view: ImageView,
     val progress: View? = null,
     val errorUrl: String? = null,
-    val scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP
+    val scaleType: ImageView.ScaleType = ImageView.ScaleType.CENTER_CROP,
 ) : ImageViewTarget(view) {
 
     override fun onError(error: Drawable?) {

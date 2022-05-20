@@ -102,7 +102,7 @@ class SettingsBackupController : SettingsController() {
                     R.string.every_12_hours,
                     R.string.daily,
                     R.string.every_2_days,
-                    R.string.weekly
+                    R.string.weekly,
                 )
                 entryValues = listOf(0, 6, 12, 24, 48, 168)
 
@@ -270,12 +270,12 @@ class SettingsBackupController : SettingsController() {
 
                 if (results.missingSources.isNotEmpty()) {
                     message += "\n\n${activity.getString(R.string.restore_missing_sources)}\n${
-                        results.missingSources.joinToString("\n") { "- $it" }
+                    results.missingSources.joinToString("\n") { "- $it" }
                     }"
                 }
                 if (results.missingTrackers.isNotEmpty()) {
                     message += "\n\n${activity.getString(R.string.restore_missing_trackers)}\n${
-                        results.missingTrackers.joinToString("\n") { "- $it" }
+                    results.missingTrackers.joinToString("\n") { "- $it" }
                     }"
                 }
 

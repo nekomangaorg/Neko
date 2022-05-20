@@ -17,7 +17,7 @@ class OneWayFadeChangeHandler : FadeChangeHandler {
     constructor(duration: Long) : super(duration)
     constructor(duration: Long, removesFromViewOnPush: Boolean) : super(
         duration,
-        removesFromViewOnPush
+        removesFromViewOnPush,
     )
 
     var fadeOut = true
@@ -26,7 +26,7 @@ class OneWayFadeChangeHandler : FadeChangeHandler {
         from: View?,
         to: View?,
         isPush: Boolean,
-        toAddedToContainer: Boolean
+        toAddedToContainer: Boolean,
     ): Animator {
         val animator = AnimatorSet()
         if (to != null) {

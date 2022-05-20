@@ -58,7 +58,8 @@ abstract class E2EBottomSheetDialog<VB : ViewBinding>(activity: Activity) :
                         sheetBehavior.isDraggable = !recyclerView.canScrollVertically(-1)
                     }
                 }
-            })
+            },
+            )
         }
     }
 

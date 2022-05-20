@@ -63,7 +63,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
     private val binding = TriStateCheckBoxBinding.inflate(
         LayoutInflater.from(context),
         this,
-        false
+        false,
     )
 
     private val disabledAlpha = run {
@@ -80,7 +80,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
     private val ignoreColor get() = if (useIndeterminateForIgnore) indeterColor else inverseColor
 
     private val disabledColor = ColorStateList.valueOf(
-        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorControlNormal), (disabledAlpha * 255).roundToInt())
+        ColorUtils.setAlphaComponent(context.getResourceColor(R.attr.colorControlNormal), (disabledAlpha * 255).roundToInt()),
     )
 
     init {
@@ -127,7 +127,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                 State.UNCHECKED -> State.CHECKED
                 else -> State.UNCHECKED
             },
-            true
+            true,
         )
     }
 
@@ -176,7 +176,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                                 R.drawable.anim_check_box_x_to_blank_24dp
                             }
                             else -> R.drawable.anim_check_box_checked_to_blank_24dp
-                        }
+                        },
                     )
                     backgroundTintList = uncheckedColor
                 }
@@ -190,7 +190,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                             useIndeterminateForIgnore -> R.drawable.anim_check_box_checked_to_indeterminate_24dp
                             oldState == State.CHECKED -> R.drawable.anim_check_box_checked_to_x_24dp
                             else -> R.drawable.anim_checkbox_blank_to_x_24dp
-                        }
+                        },
                     )
                     backgroundTintList = ignoreColor
                 }
@@ -220,7 +220,7 @@ class TriStateCheckBox constructor(context: Context, attrs: AttributeSet?) :
                             R.drawable.ic_check_box_indeterminate_24dp
                         } else {
                             R.drawable.ic_check_box_x_24dp
-                        }
+                        },
                     )
                     ignoreColor
                 }

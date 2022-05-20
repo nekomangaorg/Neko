@@ -3,12 +3,8 @@ package eu.kanade.tachiyomi.ui.webview
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.view.View
 import androidx.activity.compose.setContent
-import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
-import androidx.core.view.isVisible
-import com.crazylegend.activity.hideToolbar
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
@@ -41,12 +37,11 @@ open class WebViewActivity : BaseThemedActivity() {
                     headers = headers,
                     onShare = this::shareWebpage,
                     onOpenInBrowser = this::openInBrowser,
-                    onClose = { finish() }
+                    onClose = { finish() },
                 )
             }
         }
     }
-
 
     private fun shareWebpage(url: String) {
         try {

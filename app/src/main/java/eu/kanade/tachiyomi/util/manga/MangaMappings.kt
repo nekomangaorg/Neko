@@ -30,7 +30,7 @@ class MangaMappings(context: Context) {
 
     @Throws(IOException::class)
     private fun copyDatabase(context: Context, dbFile: File, dbPath: String) {
-        val `is`: InputStream = context.getAssets().open(dbPath)
+        val `is`: InputStream = context.assets.open(dbPath)
         val os: OutputStream = FileOutputStream(dbFile)
         val buffer = ByteArray(1024)
         while (`is`.read(buffer) > 0) {
@@ -68,6 +68,4 @@ class MangaMappings(context: Context) {
         cursor.close()
         return null
     }
-
 }
-

@@ -11,8 +11,8 @@ import androidx.core.view.isGone
 import androidx.core.view.isVisible
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.WebtoonLayoutManager
-import eu.kanade.tachiyomi.data.download.DownloadManager
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderPage
@@ -96,7 +96,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
                         }
                     }
                 }
-            }
+            },
         )
         recycler.tapListener = f@{ event ->
             val pos = PointF(event.rawX / recycler.width, event.rawY / recycler.height)
@@ -330,7 +330,7 @@ class WebtoonViewer(val activity: ReaderActivity, val hasMargins: Boolean = fals
         val position = layoutManager.findLastEndVisibleItemPosition()
         adapter.notifyItemRangeChanged(
             max(0, position - 3),
-            min(position + 3, adapter.itemCount - 1)
+            min(position + 3, adapter.itemCount - 1),
         )
     }
 }

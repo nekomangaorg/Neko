@@ -102,7 +102,7 @@ open class ReaderPageImageView @JvmOverloads constructor(
     fun recycle() = pageView?.let {
         when (it) {
             is SubsamplingScaleImageView -> it.recycle()
-            //is AppCompatImageView -> it.dispose()
+            // is AppCompatImageView -> it.dispose()
         }
         it.isVisible = false
     }

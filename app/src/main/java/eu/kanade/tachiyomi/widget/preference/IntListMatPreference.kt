@@ -10,7 +10,7 @@ class IntListMatPreference @JvmOverloads constructor(
     context: Context,
     attrs:
         AttributeSet? =
-            null
+            null,
 ) :
     MatPreference(activity, context, attrs) {
     var entryValues: List<Int> = emptyList()

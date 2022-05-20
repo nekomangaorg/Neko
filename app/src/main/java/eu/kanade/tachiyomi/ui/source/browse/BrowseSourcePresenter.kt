@@ -160,7 +160,7 @@ open class BrowseSourcePresenter(
                         browseAsList,
                         sourceListType,
                         outlineCovers,
-                        isFollows
+                        isFollows,
                     )
                 }
                     .filter { manga -> isDeepLink || isLibraryVisible || !manga.manga.favorite }
@@ -178,7 +178,7 @@ open class BrowseSourcePresenter(
                 },
                 { _, error ->
                     XLog.e(error)
-                }
+                },
             )
 
         // Request first page.

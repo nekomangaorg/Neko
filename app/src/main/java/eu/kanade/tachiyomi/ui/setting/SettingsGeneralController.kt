@@ -34,7 +34,7 @@ class SettingsGeneralController : SettingsController() {
                 R.string.last_used_library_recents,
                 R.string.library,
                 R.string.recents,
-                R.string.browse
+                R.string.browse,
             )
             entryValues = (0 downTo -3).toList()
             defaultValue = 0

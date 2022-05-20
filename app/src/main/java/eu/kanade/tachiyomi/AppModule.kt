@@ -61,7 +61,7 @@ class AppModule(val app: Application) : InjektModule {
         addSingletonFactory { DownloadManager(app) }
 
         addSingletonFactory { TrackManager(app) }
-        
+
         addSingletonFactory { ChapterFilter() }
 
         addSingletonFactory { Json { ignoreUnknownKeys = true } }

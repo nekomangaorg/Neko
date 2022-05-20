@@ -19,12 +19,12 @@ class ByteArrayFetcher : Fetcher<ByteArray> {
         pool: BitmapPool,
         data: ByteArray,
         size: Size,
-        options: Options
+        options: Options,
     ): FetchResult {
         return SourceResult(
             source = ByteArrayInputStream(data).source().buffer(),
             mimeType = "image/gif",
-            dataSource = DataSource.MEMORY
+            dataSource = DataSource.MEMORY,
         )
     }
 }

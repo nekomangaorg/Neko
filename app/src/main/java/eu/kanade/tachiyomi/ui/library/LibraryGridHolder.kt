@@ -37,7 +37,7 @@ class LibraryGridHolder(
     private val view: View,
     adapter: LibraryCategoryAdapter,
     compact: Boolean,
-    val fixedSize: Boolean
+    val fixedSize: Boolean,
 ) : LibraryHolder(view, adapter) {
 
     private val binding = MangaGridItemBinding.bind(view)
@@ -73,14 +73,14 @@ class LibraryGridHolder(
         val mangaColor = item.manga.dominantCoverColors
         binding.coverConstraint.backgroundColor = mangaColor?.first ?: itemView.context.getResourceColor(R.attr.background)
         binding.behindTitle.setTextColor(
-            mangaColor?.second ?: itemView.context.getResourceColor(R.attr.colorOnBackground)
+            mangaColor?.second ?: itemView.context.getResourceColor(R.attr.colorOnBackground),
         )
         val authorArtist = if (item.manga.author == item.manga.artist || item.manga.artist.isNullOrBlank()) {
             item.manga.author?.trim() ?: ""
         } else {
             listOfNotNull(
                 item.manga.author?.trim()?.takeIf { it.isNotBlank() },
-                item.manga.artist?.trim()?.takeIf { it.isNotBlank() }
+                item.manga.artist?.trim()?.takeIf { it.isNotBlank() },
             ).joinToString(", ")
         }
         binding.subtitle.text = authorArtist.highlightText(item.filter, color)
@@ -134,7 +134,7 @@ class LibraryGridHolder(
                     if (!fixedSize && !hasRatio && MangaCoverMetadata.getRatio(manga) != null) {
                         setFreeformCoverRatio(manga)
                     }
-                }
+                },
             )
         }
     }

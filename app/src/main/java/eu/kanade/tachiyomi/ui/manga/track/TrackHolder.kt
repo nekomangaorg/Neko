@@ -60,16 +60,16 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
             with(binding.trackChapters) {
                 text = when {
                     track.total_chapters > 0 && track.last_chapter_read.toInt() == track.total_chapters -> context.getString(
-                        R.string.all_chapters_read
+                        R.string.all_chapters_read,
                     )
                     track.total_chapters > 0 -> context.getString(
                         R.string.chapter_x_of_y,
                         track.last_chapter_read.toInt(),
-                        track.total_chapters
+                        track.total_chapters,
                     )
                     track.last_chapter_read > 0 -> context.getString(
                         R.string.chapter_,
-                        track.last_chapter_read.toInt().toString()
+                        track.last_chapter_read.toInt().toString(),
                     )
                     else -> context.getString(R.string.not_started)
                 }
@@ -101,7 +101,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
                         0,
                         0,
                         starIcon(track),
-                        0
+                        0,
                     )
                     setTextColor(enabledTextColor(track.score != 0f))
                     TextViewCompat.setCompoundDrawableTintList(this, ColorStateList.valueOf(enabledTextColor(track.score != 0f)))
@@ -140,7 +140,7 @@ class TrackHolder(view: View, adapter: TrackAdapter) : BaseViewHolder(view) {
                 android.R.attr.textColorPrimary
             } else {
                 android.R.attr.textColorHint
-            }
+            },
         )
     }
 

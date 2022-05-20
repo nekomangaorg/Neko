@@ -39,7 +39,7 @@ class GroupItem(val filter: Filter.Group<*>) : AbstractExpandableHeaderItem<Grou
                 R.drawable.anim_expand_more_to_less
             } else {
                 R.drawable.anim_expand_less_to_more
-            }
+            },
         )
 
         holder.itemView.setOnClickListener(holder)

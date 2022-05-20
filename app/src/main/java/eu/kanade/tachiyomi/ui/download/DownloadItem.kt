@@ -34,7 +34,7 @@ class DownloadItem(
     override fun createViewHolder(
         view: View,
         adapter: FlexibleAdapter<IFlexible<RecyclerView
-                .ViewHolder>>
+                .ViewHolder,>,>,
     ): DownloadHolder {
         return DownloadHolder(view, adapter as DownloadAdapter)
     }
@@ -51,7 +51,7 @@ class DownloadItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: DownloadHolder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         holder.bind(download)
     }

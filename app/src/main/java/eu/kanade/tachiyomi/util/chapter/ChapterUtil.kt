@@ -43,18 +43,18 @@ class ChapterUtil {
                 val drawable = VectorDrawableCompat.create(
                     textView.resources,
                     R.drawable.ic_bookmark_24dp,
-                    context.theme
+                    context.theme,
                 )
                 drawable?.setBounds(0, 0, textView.textSize.toInt(), textView.textSize.toInt())
                 textView.setCompoundDrawablesRelative(
                     drawable,
                     null,
                     null,
-                    null
+                    null,
                 )
                 TextViewCompat.setCompoundDrawableTintList(
                     textView,
-                    ColorStateList.valueOf(bookmarkedColor(context))
+                    ColorStateList.valueOf(bookmarkedColor(context)),
                 )
                 textView.compoundDrawablePadding = 3.dpToPx
                 textView.translationX = (-2f).dpToPxEnd

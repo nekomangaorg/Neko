@@ -44,7 +44,7 @@ object ImageUtil {
                 Format.Gif -> ImageType.GIF
                 Format.Heif -> ImageType.HEIF
                 Format.Jpeg -> ImageType.JPEG
-                //Format.Jxl -> ImageType.JXL
+                // Format.Jxl -> ImageType.JXL
                 Format.Png -> ImageType.PNG
                 Format.Webp -> ImageType.WEBP
                 else -> null
@@ -126,28 +126,28 @@ object ImageUtil {
 
         if (!isWhite(image.getPixel(left, top)) && pixelIsClose(
                 image.getPixel(left, top),
-                image.getPixel(midX, top)
+                image.getPixel(midX, top),
             ) &&
             !isWhite(image.getPixel(midX, top)) && pixelIsClose(
-                image.getPixel(midX, top),
-                image.getPixel(right, top)
-            ) &&
+                    image.getPixel(midX, top),
+                    image.getPixel(right, top),
+                ) &&
             !isWhite(image.getPixel(right, top)) && pixelIsClose(
-                image.getPixel(right, top),
-                image.getPixel(right, bot)
-            ) &&
+                    image.getPixel(right, top),
+                    image.getPixel(right, bot),
+                ) &&
             !isWhite(image.getPixel(right, bot)) && pixelIsClose(
-                image.getPixel(right, bot),
-                image.getPixel(midX, bot)
-            ) &&
+                    image.getPixel(right, bot),
+                    image.getPixel(midX, bot),
+                ) &&
             !isWhite(image.getPixel(midX, bot)) && pixelIsClose(
-                image.getPixel(midX, bot),
-                image.getPixel(left, bot)
-            ) &&
+                    image.getPixel(midX, bot),
+                    image.getPixel(left, bot),
+                ) &&
             !isWhite(image.getPixel(left, bot)) && pixelIsClose(
-                image.getPixel(left, bot),
-                image.getPixel(left, top)
-            )
+                    image.getPixel(left, bot),
+                    image.getPixel(left, top),
+                )
         ) {
             return ColorDrawable(image.getPixel(left, top))
         }
@@ -266,59 +266,59 @@ object ImageUtil {
         if (darkBG) {
             return if (!isLandscape && isWhite(image.getPixel(left, bot)) && isWhite(
                     image.getPixel(
-                        right,
-                        bot
-                    )
+                            right,
+                            bot,
+                        ),
                 )
             ) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
+                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
             )
             else if (!isLandscape && isWhite(image.getPixel(left, top)) && isWhite(
                     image.getPixel(
-                        right,
-                        top
-                    )
+                            right,
+                            top,
+                        ),
                 )
             ) GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
+                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
             )
             else ColorDrawable(blackPixel)
         }
         if (!isLandscape && (
-                topIsBlackStreak || (
-                    topLeftIsDark && topRightIsDark &&
-                        isDark(
+            topIsBlackStreak || (
+                topLeftIsDark && topRightIsDark &&
+                    isDark(
                             image.getPixel(
-                                left - offsetX,
-                                top
-                            )
+                                    left - offsetX,
+                                    top,
+                                ),
                         ) && isDark(image.getPixel(right + offsetX, top)) &&
-                        (topMidIsDark || overallBlackPixels > 9)
-                    )
+                    (topMidIsDark || overallBlackPixels > 9)
                 )
+            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor)
+                intArrayOf(blackPixel, blackPixel, backgroundColor, backgroundColor),
             )
         } else if (!isLandscape && (
-                bottomIsBlackStreak || (
-                    botLeftIsDark && botRightIsDark &&
-                        isDark(
+            bottomIsBlackStreak || (
+                botLeftIsDark && botRightIsDark &&
+                    isDark(
                             image.getPixel(
-                                left - offsetX,
-                                bot
-                            )
+                                    left - offsetX,
+                                    bot,
+                                ),
                         ) && isDark(image.getPixel(right + offsetX, bot)) &&
-                        (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
-                    )
+                    (isDark(image.getPixel(midX, bot)) || overallBlackPixels > 9)
                 )
+            )
         ) {
             return GradientDrawable(
                 GradientDrawable.Orientation.TOP_BOTTOM,
-                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel)
+                intArrayOf(backgroundColor, backgroundColor, blackPixel, blackPixel),
             )
         }
         return ColorDrawable(backgroundColor)
@@ -344,7 +344,7 @@ object ImageUtil {
     fun splitBitmap(
         imageBitmap: Bitmap,
         secondHalf: Boolean,
-        progressCallback: ((Int) -> Unit)? = null
+        progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
@@ -363,7 +363,7 @@ object ImageUtil {
         imageBitmap: Bitmap,
         rightSideOnTop: Boolean,
         hasMargins: Boolean,
-        progressCallback: ((Int) -> Unit)? = null
+        progressCallback: ((Int) -> Unit)? = null,
     ): ByteArrayInputStream {
         val height = imageBitmap.height
         val width = imageBitmap.width
@@ -376,13 +376,13 @@ object ImageUtil {
             0,
             0,
             result.width,
-            result.height / 2
+            result.height / 2,
         )
         val lowerPart = Rect(
             0,
             result.height / 2 + gap,
             result.width,
-            result.height
+            result.height,
         )
         canvas.drawBitmap(
             imageBitmap,
@@ -390,10 +390,10 @@ object ImageUtil {
                 if (!rightSideOnTop) 0 else width / 2,
                 0,
                 if (!rightSideOnTop) width / 2 else width,
-                height
+                height,
             ),
             upperPart,
-            null
+            null,
         )
         canvas.drawBitmap(
             imageBitmap,
@@ -401,10 +401,10 @@ object ImageUtil {
                 if (rightSideOnTop) 0 else width / 2,
                 0,
                 if (rightSideOnTop) width / 2 else width,
-                height
+                height,
             ),
             lowerPart,
-            null
+            null,
         )
         progressCallback?.invoke(99)
         val output = ByteArrayOutputStream()
@@ -433,7 +433,7 @@ object ImageUtil {
             if (isLTR) 0 else width2,
             (maxHeight - imageBitmap.height) / 2,
             (if (isLTR) 0 else width2) + imageBitmap.width,
-            imageBitmap.height + (maxHeight - imageBitmap.height) / 2
+            imageBitmap.height + (maxHeight - imageBitmap.height) / 2,
         )
         canvas.drawBitmap(imageBitmap, imageBitmap.rect, upperPart, null)
         progressCallback?.invoke(98)
@@ -441,7 +441,7 @@ object ImageUtil {
             if (!isLTR) 0 else width,
             (maxHeight - imageBitmap2.height) / 2,
             (if (!isLTR) 0 else width) + imageBitmap2.width,
-            imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2
+            imageBitmap2.height + (maxHeight - imageBitmap2.height) / 2,
         )
         canvas.drawBitmap(imageBitmap2, imageBitmap2.rect, bottomPart, null)
         progressCallback?.invoke(99)
@@ -493,7 +493,7 @@ object ImageUtil {
     fun getPercentOfColor(
         @ColorInt color: Int,
         @ColorInt colorFrom: Int,
-        @ColorInt colorTo: Int
+        @ColorInt colorTo: Int,
     ): Float {
         val reds = arrayOf(Color.red(color), Color.red(colorFrom), Color.red(colorTo))
         val blues = arrayOf(Color.blue(color), Color.blue(colorFrom), Color.blue(colorTo))
@@ -507,7 +507,7 @@ object ImageUtil {
             rPercent.takeIf { reds[2] != reds[1] },
             bPercent.takeIf { blues[2] != blues[1] },
             gPercent.takeIf { greens[2] != greens[1] },
-            aPercent.takeIf { alphas[2] != alphas[1] }
+            aPercent.takeIf { alphas[2] != alphas[1] },
         ).filterNotNull().average().toFloat().takeIf { it in 0f..1f } ?: 0f
     }
 }

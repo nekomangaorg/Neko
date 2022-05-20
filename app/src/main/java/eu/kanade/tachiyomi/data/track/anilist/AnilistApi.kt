@@ -99,11 +99,11 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
     }
 
     suspend fun search(
-        search: String, manga: Manga,
+        search: String,
+        manga: Manga,
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         return withIOContext {
-
             val payload = buildJsonObject {
                 put("query", if (manga.anilist_id != null && !wasPreviouslyTracked) findQuery() else searchQuery())
                 putJsonObject("variables") {
@@ -272,7 +272,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                 |   status 
                 |} 
             |}
-            |""".trimMargin()
+            |
+            """.trimMargin()
 
         fun deleteFromLibraryQuery() =
             """
@@ -281,7 +282,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |deleted
 
                 |}
-            |}""".trimMargin()
+            |}
+            """.trimMargin()
 
         fun updateInLibraryQuery() =
             """
@@ -302,7 +304,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
+            |
+            """.trimMargin()
 
         fun searchQuery() =
             """
@@ -328,7 +331,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
+            |
+            """.trimMargin()
 
         fun findQuery() =
             """
@@ -354,7 +358,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
+            |
+            """.trimMargin()
 
         fun findLibraryMangaQuery() =
             """
@@ -396,7 +401,8 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
+            |
+            """.trimMargin()
 
         fun currentUserQuery() =
             """
@@ -408,6 +414,7 @@ class AnilistApi(val client: OkHttpClient, interceptor: AnilistInterceptor) {
                     |}
                 |}
             |}
-            |""".trimMargin()
+            |
+            """.trimMargin()
     }
 }

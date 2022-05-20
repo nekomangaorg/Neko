@@ -30,7 +30,7 @@ open class TextItem(val filter: Filter.Text) : AbstractFlexibleItem<TextItem.Hol
                 override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
                     filter.state = s.toString()
                 }
-            }
+            },
         )
     }
 

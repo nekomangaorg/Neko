@@ -52,8 +52,10 @@ class SettingsTrackingController :
                 key = "update_anilist_scoring"
                 isPersistent = false
                 isIconSpaceReserved = true
-                title = context.getString(R.string.update_tracking_scoring_type,
-                    context.getString(R.string.anilist))
+                title = context.getString(
+                    R.string.update_tracking_scoring_type,
+                    context.getString(R.string.anilist),
+                )
 
                 preferences.getStringPref(Keys.trackUsername(trackManager.aniList.id))
                     .asImmediateFlowIn(viewScope) {
@@ -69,8 +71,8 @@ class SettingsTrackingController :
                             view?.snack(
                                 context.getString(
                                     R.string.could_not_update_scoring_,
-                                    error?.localizedMessage.orEmpty()
-                                )
+                                    error?.localizedMessage.orEmpty(),
+                                ),
                             )
                         }
                     }

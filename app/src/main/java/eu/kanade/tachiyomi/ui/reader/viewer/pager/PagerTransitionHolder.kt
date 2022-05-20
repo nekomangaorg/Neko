@@ -12,9 +12,9 @@ import androidx.appcompat.widget.AppCompatTextView
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.reader.model.ChapterTransition
 import eu.kanade.tachiyomi.ui.reader.model.ReaderChapter
+import eu.kanade.tachiyomi.ui.reader.viewer.ReaderTransitionView
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.widget.ViewPagerAdapter
-import eu.kanade.tachiyomi.ui.reader.viewer.ReaderTransitionView
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 

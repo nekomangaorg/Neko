@@ -48,7 +48,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             val typeface = if (item.isCurrent) ResourcesCompat.getFont(
                 itemView.context,
-                R.font.montserrat_black
+                R.font.montserrat_black,
             ) else null
 
             binding.chapterTitle.text = if (manga.hideChapterTitle(item.preferences)) {
@@ -70,7 +70,7 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             if (item.chapter.language.isNullOrBlank() || item.chapter.language.equals(
                     "english",
-                    true
+                    true,
                 )
             ) {
                 binding.chapterLanguage.isVisible = false
@@ -86,15 +86,15 @@ class ReaderChapterItem(val chapter: Chapter, val manga: Manga, val isCurrent: B
 
             binding.bookmarkImage.setImageResource(
                 if (item.bookmark) R.drawable.ic_bookmark_24dp
-                else R.drawable.ic_bookmark_border_24dp
+                else R.drawable.ic_bookmark_border_24dp,
             )
 
             val drawableColor = ChapterUtil.bookmarkColor(itemView.context, item)
 
             DrawableCompat.setTint(binding.bookmarkImage.drawable, drawableColor)
-            binding.chapterTitle.setTypeface(typeface)
-            binding.chapterSubtitle.setTypeface(typeface)
-            binding.chapterLanguage.setTypeface(typeface)
+            binding.chapterTitle.typeface = typeface
+            binding.chapterSubtitle.typeface = typeface
+            binding.chapterLanguage.typeface = typeface
             binding.chapterSubtitle.text = statuses.joinToString(" • ")
         }
 

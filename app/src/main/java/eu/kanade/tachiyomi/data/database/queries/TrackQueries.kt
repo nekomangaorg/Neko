@@ -20,7 +20,7 @@ interface TrackQueries : DbProvider {
                 .table(TrackTable.TABLE)
                 .where("${TrackTable.COL_MANGA_ID} = ?")
                 .whereArgs(mangaId)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -31,7 +31,7 @@ interface TrackQueries : DbProvider {
                 .table(TrackTable.TABLE)
                 .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
                 .whereArgs(manga.id, TrackManager.MDLIST)
-                .build()
+                .build(),
         )
         .prepare()
 
@@ -45,7 +45,7 @@ interface TrackQueries : DbProvider {
                 .table(TrackTable.TABLE)
                 .where("${TrackTable.COL_MANGA_ID} = ? AND ${TrackTable.COL_SYNC_ID} = ?")
                 .whereArgs(manga.id, sync.id)
-                .build()
+                .build(),
         )
         .prepare()
 }

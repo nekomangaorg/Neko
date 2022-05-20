@@ -11,7 +11,7 @@ import eu.kanade.tachiyomi.data.database.models.Category
 
 class LibraryHeaderItem(
     private val categoryF: (Int) -> Category,
-    val catId: Int
+    val catId: Int,
 ) :
     AbstractHeaderItem<LibraryHeaderHolder>() {
 
@@ -21,7 +21,7 @@ class LibraryHeaderItem(
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): LibraryHeaderHolder {
         return LibraryHeaderHolder(view, adapter as LibraryCategoryAdapter)
     }
@@ -30,7 +30,7 @@ class LibraryHeaderItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: LibraryHeaderHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(this)
         val layoutParams = holder.itemView.layoutParams as? StaggeredGridLayoutManager.LayoutParams

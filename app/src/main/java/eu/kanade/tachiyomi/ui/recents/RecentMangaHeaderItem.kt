@@ -19,7 +19,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
         return Holder(view, adapter as RecentMangaAdapter)
     }
@@ -28,7 +28,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         holder.bind(recentsType)
     }
@@ -56,7 +56,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
     class Holder(val view: View, adapter: RecentMangaAdapter) : BaseFlexibleViewHolder(
         view,
         adapter,
-        true
+        true,
     ) {
 
         private val binding = RecentsHeaderItemBinding.bind(view)
@@ -68,7 +68,7 @@ class RecentMangaHeaderItem(val recentsType: Int) :
                     NEW_CHAPTERS -> R.string.new_chapters
                     NEWLY_ADDED -> R.string.newly_added
                     else -> R.string.continue_reading
-                }
+                },
             )
         }
 

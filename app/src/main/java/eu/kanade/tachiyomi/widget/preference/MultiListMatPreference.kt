@@ -14,7 +14,7 @@ class MultiListMatPreference @JvmOverloads constructor(
     activity: Activity?,
     context: Context,
     attrs: AttributeSet? =
-        null
+        null,
 ) :
     ListMatPreference(activity, context, attrs) {
 

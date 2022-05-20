@@ -16,7 +16,7 @@ class FollowsController(bundle: Bundle) : BrowseSourceController(bundle) {
         Bundle().apply {
             putBoolean(APPLY_INSET, false)
             putBoolean(FOLLOWS, true)
-        }
+        },
     )
 
     override fun createPresenter(): BrowseSourcePresenter {

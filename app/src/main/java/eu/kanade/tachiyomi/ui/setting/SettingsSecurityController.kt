@@ -20,7 +20,7 @@ class SettingsSecurityController : SettingsController() {
 
                 requireAuthentication(
                     activity as? FragmentActivity,
-                    context.getString(R.string.lock_with_biometrics)
+                    context.getString(R.string.lock_with_biometrics),
                 )
             }
             intListPreference(activity) {
@@ -34,7 +34,7 @@ class SettingsSecurityController : SettingsController() {
                         else -> resources?.getQuantityString(
                             R.plurals.after_minutes,
                             it,
-                            it
+                            it,
                         )
                     }
                 }

@@ -40,7 +40,7 @@ class MangaPlusHandler {
     private fun pageListRequest(chapterId: String): Request {
         return GET(
             "$baseUrl/manga_viewer?chapter_id=$chapterId&split=yes&img_quality=super_high",
-            headers
+            headers,
         )
     }
 

@@ -20,7 +20,7 @@ class FilterHandler {
             SortFilter(sortableList.map { it.first }.toTypedArray()),
             TagList(getTags()),
             TagInclusionMode(),
-            TagExclusionMode()
+            TagExclusionMode(),
         ).toMutableList()
 
         if (preferencesHelper.showContentRatingFilter()) {
@@ -55,7 +55,7 @@ class FilterHandler {
         Demographic("Shounen"),
         Demographic("Shoujo"),
         Demographic("Seinen"),
-        Demographic("Josei")
+        Demographic("Josei"),
     )
 
     private class Status(name: String) : Filter.CheckBox(name)
@@ -102,7 +102,7 @@ class FilterHandler {
         Pair("Manga info updated", "updatedAt"),
         Pair("Title", "title"),
 
-        )
+    )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(1, false))
 

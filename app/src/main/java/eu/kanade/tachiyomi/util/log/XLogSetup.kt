@@ -14,7 +14,7 @@ import com.elvishew.xlog.printer.file.naming.DateFileNameGenerator
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
 import java.io.File
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.days
 import kotlin.time.ExperimentalTime
 
 @OptIn(ExperimentalTime::class)
@@ -47,21 +47,23 @@ class XLogSetup(context: Context) {
         val logFolder = File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
                 defaultFolder,
-            "logs"
+            "logs",
         )
         printers += FilePrinter
             .Builder(
-                logFolder.absolutePath
+                logFolder.absolutePath,
             )
-            .fileNameGenerator(object : DateFileNameGenerator() {
-                override fun generateFileName(logLevel: Int, timestamp: Long): String {
-                    return super.generateFileName(
-                        logLevel,
-                        timestamp
-                    ) + "-${BuildConfig.BUILD_TYPE}.txt"
-                }
-            })
-            .cleanStrategy(FileLastModifiedCleanStrategy(Duration.days(1).inWholeMilliseconds))
+            .fileNameGenerator(
+                object : DateFileNameGenerator() {
+                    override fun generateFileName(logLevel: Int, timestamp: Long): String {
+                        return super.generateFileName(
+                            logLevel,
+                            timestamp,
+                        ) + "-${BuildConfig.BUILD_TYPE}.txt"
+                    }
+                },
+            )
+            .cleanStrategy(FileLastModifiedCleanStrategy(1.days.inWholeMilliseconds))
             .backupStrategy(NeverBackupStrategy())
             .build()
 
@@ -72,7 +74,7 @@ class XLogSetup(context: Context) {
 
         XLog.init(
             logConfig,
-            *printers.toTypedArray()
+            *printers.toTypedArray(),
         )
     }
 }

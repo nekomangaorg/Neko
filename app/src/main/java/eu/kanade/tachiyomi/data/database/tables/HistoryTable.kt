@@ -39,7 +39,8 @@ object HistoryTable {
             $COL_TIME_READ LONG,
             FOREIGN KEY($COL_CHAPTER_ID) REFERENCES ${ChapterTable.TABLE} (${ChapterTable.COL_ID})
             ON DELETE CASCADE
-            )"""
+            )
+            """
 
     /**
      * query to index history chapter id

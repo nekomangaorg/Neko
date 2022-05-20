@@ -54,7 +54,7 @@ fun Manga.moveCategories(
         this,
         categories.toMutableList(),
         ids,
-        false
+        false,
     ) {
         onMangaMoved()
     }.show()
@@ -84,7 +84,7 @@ fun List<Manga>.moveCategories(
                 else -> TriStateCheckBox.State.UNCHECKED
             }
         }.toTypedArray(),
-        false
+        false,
     ) {
         onMangaMoved()
     }.show()
@@ -127,8 +127,8 @@ fun Manga.addOrRemoveToFavorites(
                     view.snack(
                         activity.getString(
                             R.string.added_to_,
-                            activity.getString(R.string.default_value)
-                        )
+                            activity.getString(R.string.default_value),
+                        ),
                     ) {
                         setAction(R.string.change) {
                             moveCategories(db, activity, onMangaMoved)
@@ -147,7 +147,7 @@ fun Manga.addOrRemoveToFavorites(
                     this,
                     categories.toMutableList(),
                     ids,
-                    true
+                    true,
                 ) {
                     onMangaAdded()
                 }.show()
@@ -161,7 +161,7 @@ fun Manga.addOrRemoveToFavorites(
         onMangaMoved()
         return view.snack(
             view.context.getString(R.string.removed_from_library),
-            Snackbar.LENGTH_INDEFINITE
+            Snackbar.LENGTH_INDEFINITE,
         ) {
             setAction(R.string.undo) {
                 favorite = true
@@ -177,7 +177,7 @@ fun Manga.addOrRemoveToFavorites(
                             onMangaDeleted()
                         }
                     }
-                }
+                },
             )
         }
     }

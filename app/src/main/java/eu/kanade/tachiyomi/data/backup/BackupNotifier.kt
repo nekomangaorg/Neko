@@ -81,8 +81,8 @@ internal class BackupNotifier(private val context: Context) {
                 NotificationReceiver.shareBackupPendingBroadcast(
                     context,
                     unifile.uri,
-                    Notifications.ID_BACKUP_COMPLETE
-                )
+                    Notifications.ID_BACKUP_COMPLETE,
+                ),
             )
 
             show(Notifications.ID_BACKUP_COMPLETE)
@@ -112,8 +112,8 @@ internal class BackupNotifier(private val context: Context) {
                 context.getString(R.string.stop),
                 NotificationReceiver.cancelRestorePendingBroadcast(
                     context,
-                    Notifications.ID_RESTORE_PROGRESS
-                )
+                    Notifications.ID_RESTORE_PROGRESS,
+                ),
             )
         }
 
@@ -140,8 +140,8 @@ internal class BackupNotifier(private val context: Context) {
             R.string.restore_duration,
             TimeUnit.MILLISECONDS.toMinutes(time),
             TimeUnit.MILLISECONDS.toSeconds(time) - TimeUnit.MINUTES.toSeconds(
-                TimeUnit.MILLISECONDS.toMinutes(time)
-            )
+                TimeUnit.MILLISECONDS.toMinutes(time),
+            ),
         )
 
         with(completeNotificationBuilder) {
@@ -151,8 +151,8 @@ internal class BackupNotifier(private val context: Context) {
                     R.plurals.restore_completed_message,
                     errorCount,
                     timeString,
-                    errorCount
-                )
+                    errorCount,
+                ),
             )
 
             // Clear old actions if they exist
@@ -165,7 +165,7 @@ internal class BackupNotifier(private val context: Context) {
                 addAction(
                     R.drawable.ic_eye_24dp,
                     context.getString(R.string.open_log),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri)
+                    NotificationReceiver.openErrorLogPendingActivity(context, uri),
                 )
             }
 

@@ -157,9 +157,11 @@ fun Context.isTablet() = resources.configuration.smallestScreenWidthDp >= 600
  * @see Settings.Global.ANIMATOR_DURATION_SCALE
  */
 val Context.animatorDurationScale: Float
-    get() = Settings.Global.getFloat(this.contentResolver,
+    get() = Settings.Global.getFloat(
+        this.contentResolver,
         Settings.Global.ANIMATOR_DURATION_SCALE,
-        1f)
+        1f,
+    )
 
 /**
  * Helper method to create a notification builder.
@@ -218,8 +220,10 @@ fun Context.isLandscape(): Boolean {
  * Convenience method to acquire a partial wake lock.
  */
 fun Context.acquireWakeLock(tag: String? = null, timeout: Long? = null): PowerManager.WakeLock {
-    val wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
-        "${tag ?: javaClass.name}:WakeLock")
+    val wakeLock = powerManager.newWakeLock(
+        PowerManager.PARTIAL_WAKE_LOCK,
+        "${tag ?: javaClass.name}:WakeLock",
+    )
     if (timeout != null) {
         wakeLock.acquire(timeout)
     } else {
@@ -256,7 +260,7 @@ val Context.powerManager: PowerManager
  */
 fun Context.sendLocalBroadcast(intent: Intent) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).sendBroadcast(
-        intent
+        intent,
     )
 }
 
@@ -268,7 +272,7 @@ fun Context.sendLocalBroadcast(intent: Intent) {
 fun Context.sendLocalBroadcastSync(intent: Intent) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
         .sendBroadcastSync(
-            intent
+            intent,
         )
 }
 
@@ -280,7 +284,7 @@ fun Context.sendLocalBroadcastSync(intent: Intent) {
 fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFilter) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this).registerReceiver(
         receiver,
-        filter
+        filter,
     )
 }
 
@@ -292,7 +296,7 @@ fun Context.registerLocalReceiver(receiver: BroadcastReceiver, filter: IntentFil
 fun Context.unregisterLocalReceiver(receiver: BroadcastReceiver) {
     androidx.localbroadcastmanager.content.LocalBroadcastManager.getInstance(this)
         .unregisterReceiver(
-            receiver
+            receiver,
         )
 }
 

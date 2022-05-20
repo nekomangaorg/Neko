@@ -71,7 +71,7 @@ class MangaDexLoginHelper {
         if (result) {
             preferences.setTokens(
                 refreshTokenDto!!.token.refresh,
-                refreshTokenDto!!.token.session
+                refreshTokenDto.token.session,
             )
         } else {
             log.e("error refreshing token")
@@ -100,11 +100,10 @@ class MangaDexLoginHelper {
 
             preferences.setTokens(
                 loginResponseDto.token.refresh,
-                loginResponseDto.token.session
+                loginResponseDto.token.session,
             )
             preferences.setSourceCredentials(MangaDex(), username, password)
             return@withContext true
-
         }
     }
 

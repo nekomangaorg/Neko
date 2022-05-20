@@ -118,7 +118,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
                     ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(
-                        systemBars())?.bottom ?: 0
+                        systemBars(),
+                    )?.bottom ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -132,7 +133,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     this@FilterBottomSheet.controller?.updateFilterSheetY()
                     stateChanged(state)
                 }
-            }
+            },
         )
 
         sheetBehavior?.hide()
@@ -160,7 +161,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     BottomSheetBehavior.STATE_HIDDEN -> -1f
                     BottomSheetBehavior.STATE_EXPANDED -> 1f
                     else -> 0f
-                }
+                },
             )
 
             if (binding.secondLayout.width + (binding.groupBy.width * 2) + 20.dpToPx < width) {
@@ -192,8 +193,10 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun stateChanged(state: Int) {
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight
-                ?: 0 + 10.dpToPx + bottomBarHeight)
+            libraryRecyler?.updatePaddingRelative(
+                bottom = sheetBehavior?.peekHeight
+                    ?: 0 + 10.dpToPx + bottomBarHeight,
+            )
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -233,7 +236,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 R.string.expand_all_categories
             } else {
                 R.string.collapse_all_categories
-            }
+            },
         )
         if (animated) {
             binding.expandCategories.icon = AnimatedVectorDrawableCompat.create(
@@ -242,7 +245,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     R.drawable.anim_expand_less_to_more
                 } else {
                     R.drawable.anim_expand_more_to_less
-                }
+                },
             )
             (binding.expandCategories.icon as? AnimatedVectorDrawableCompat)?.start()
         } else {
@@ -251,7 +254,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                     R.drawable.ic_expand_more_24dp
                 } else {
                     R.drawable.ic_expand_less_24dp
-                }
+                },
             )
         }
     }
@@ -318,7 +321,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         R.string.manga,
                         types.first(),
                         types.getOrNull(1),
-                        types.getOrNull(2)
+                        types.getOrNull(2),
                     )
                     this@FilterBottomSheet.mangaType = mangaType
                     reorderFilters()
@@ -333,7 +336,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         Manga.TYPE_MANHWA -> context.getString(R.string.manhwa)
                         Manga.TYPE_COMIC -> context.getString(R.string.comic)
                         else -> ""
-                    }
+                    },
                 )
                 missingChapters.setState(preferences.filterMissingChapters())
                 merged.setState(preferences.filterMerged())
@@ -352,7 +355,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             this@FilterBottomSheet,
                             serviceNames.first(),
                             serviceNames.getOrNull(1),
-                            serviceNames.getOrNull(2)
+                            serviceNames.getOrNull(2),
                         )
                         if (tracked?.isActivated == true) {
                             binding.filterLayout.addView(trackers)
@@ -398,7 +401,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
             mangaType,
             tracked,
             missingChapters,
-            merged
+            merged,
         )
             .forEach {
                 if (!filterItems.contains(it)) {
@@ -438,7 +441,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                         when (index) {
                             in 0..1 -> index + 3
                             else -> 0
-                        }
+                        },
                     )
                     null
                 }
@@ -501,7 +504,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         transition.duration = 150
         androidx.transition.TransitionManager.beginDelayedTransition(
             binding.filterLayout,
-            transition
+            transition,
         )
         reorderFilters()
         filterItems.forEach {
@@ -563,7 +566,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                 SeriesType,
                 MissingChapters,
                 Merged,
-                Tracked
+                Tracked,
             ).joinToString("") { it.value.toString() }
 
             fun filterOf(char: Char) = values().find { it.value == char }

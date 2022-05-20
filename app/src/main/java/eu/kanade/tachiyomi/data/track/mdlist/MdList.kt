@@ -73,7 +73,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                         track.status = FollowStatus.COMPLETED.int
                         mdex.updateFollowStatus(
                             MdUtil.getMangaId(track.tracking_url),
-                            FollowStatus.COMPLETED
+                            FollowStatus.COMPLETED,
                         )
                     }
                     if (followStatus == FollowStatus.PLAN_TO_READ && track.last_chapter_read > 0) {
@@ -81,7 +81,7 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                         track.status = FollowStatus.READING.int
                         mdex.updateFollowStatus(
                             MdUtil.getMangaId(track.tracking_url),
-                            newFollowStatus
+                            newFollowStatus,
                         )
                         manga.follow_status = newFollowStatus
                         db.insertManga(manga).executeAsBlocking()

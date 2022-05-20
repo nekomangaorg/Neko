@@ -138,7 +138,7 @@ class DownloadPendingDeleter(context: Context) {
         val url: String,
         val name: String,
         val scanlator: String? = null,
-        val mangadexChapterId: String
+        val mangadexChapterId: String,
     )
 
     /**

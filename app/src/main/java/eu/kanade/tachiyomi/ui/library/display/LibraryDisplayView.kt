@@ -56,7 +56,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                     else null
                 }.filterNotNull(),
                 this,
-                true
+                true,
             )
             recycler.layoutManager = LinearLayoutManager(context)
             recycler.adapter = adapter
@@ -82,7 +82,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                     R.string.landscape
                 } else {
                     R.string.portrait
-                }
+                },
             )
             val alt = (
                 if (view.measuredHeight >= 720.dpToPx) {
@@ -99,7 +99,7 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                     R.string.portrait
                 } else {
                     R.string.landscape
-                }
+                },
             )
             "$mainOrientation: $mainText • $altOrientation: $altText"
         }
@@ -116,7 +116,8 @@ class LibraryDisplayView @JvmOverloads constructor(context: Context, attrs: Attr
                 preferences.gridSize().set((slider.value / 2f) - .5f)
                 setGridText(slider.value)
             }
-        })
+        },
+        )
     }
 
     override fun onFinishInflate() {

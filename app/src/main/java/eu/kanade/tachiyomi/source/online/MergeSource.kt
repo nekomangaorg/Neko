@@ -96,7 +96,6 @@ class MergeSource : ReducedHttpSource() {
                 response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
                     .substringAfter("vm.Chapters = ").substringBefore(";")
 
-
             return@withContext json.parseToJsonElement(vmChapters).jsonArray.map { json ->
                 val indexChapter = json.getString("Chapter")
                 SChapter.create().apply {
@@ -162,7 +161,7 @@ class MergeSource : ReducedHttpSource() {
         val script = document.select("script:containsData(MainFunction)").first()!!.data()
         val curChapter = json.parseToJsonElement(
             script.substringAfter("vm.CurChapter = ")
-                .substringBefore(";")
+                .substringBefore(";"),
         ).jsonObject
 
         val pageTotal = curChapter.getString("Page").toInt()

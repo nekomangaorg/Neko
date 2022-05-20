@@ -38,9 +38,9 @@ class SearchActivity : MainActivity() {
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                    rootSearchController is RootSearchInterface ||
-                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                    ) && rootSearchController !is SmallToolbarInterface
+                rootSearchController is RootSearchInterface ||
+                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                ) && rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
             } else popToRoot()
@@ -138,9 +138,13 @@ class SearchActivity : MainActivity() {
                         } else {
                             Pair("${MdUtil.PREFIX_ID_SEARCH}$id", true)
                         }
-                        router.replaceTopController(BrowseSourceController(query,
-                            mangaDeepLink,
-                            mangaDeepLink).withFadeTransaction())
+                        router.replaceTopController(
+                            BrowseSourceController(
+                                query,
+                                mangaDeepLink,
+                                mangaDeepLink,
+                            ).withFadeTransaction(),
+                        )
                     }
                 }
             }

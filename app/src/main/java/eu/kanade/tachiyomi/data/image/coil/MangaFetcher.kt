@@ -92,7 +92,7 @@ class MangaFetcher : Fetcher<Manga> {
             } else {
                 false
             },
-            shouldFetchRemotely
+            shouldFetchRemotely,
         )
 
         if (options.diskCachePolicy.writeEnabled) {
@@ -159,7 +159,7 @@ class MangaFetcher : Fetcher<Manga> {
     }
 
     private suspend fun awaitGetCall(manga: Manga, onlyCache: Boolean = false, forceNetwork: Boolean): Pair<Response,
-        ResponseBody> {
+        ResponseBody,> {
         val call = getCall(manga, onlyCache, forceNetwork)
         val response = call.await()
         return response to checkNotNull(response.body) { "Null response source" }
@@ -221,7 +221,7 @@ class MangaFetcher : Fetcher<Manga> {
         return SourceResult(
             source = file.source().buffer(),
             mimeType = "image/*",
-            dataSource = DataSource.DISK
+            dataSource = DataSource.DISK,
         )
     }
 

@@ -32,12 +32,12 @@ class TabbedRecentsOptionsSheet(val controller: RecentsController, @IntRange(fro
     override fun getTabViews(): List<View> = listOf(
         generalView,
         historyView,
-        updatesView
+        updatesView,
     )
 
     override fun getTabTitles(): List<Int> = listOf(
         R.string.general,
         R.string.history,
-        R.string.updates
+        R.string.updates,
     )
 }

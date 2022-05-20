@@ -122,7 +122,8 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
         return (layoutManager as? LinearLayoutManager)?.scrollToPositionWithOffset(position, offset)
             ?: (layoutManager as StaggeredGridLayoutManagerAccurateOffset).scrollToPositionWithOffset(
                 position,
-                offset)
+                offset,
+            )
     }
 
     fun findFirstVisibleItemPosition(): Int {
@@ -166,10 +167,10 @@ class AutofitRecyclerView @JvmOverloads constructor(context: Context, attrs: Att
 
     private fun setSpan(force: Boolean = false) {
         if ((
-                spanCount == 0 || force ||
-                    // Add 100dp check to make sure we dont update span for sidenav changes
-                    (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
-                ) &&
+            spanCount == 0 || force ||
+                // Add 100dp check to make sure we dont update span for sidenav changes
+                (width != lastMeasuredWidth && abs(width - lastMeasuredWidth) > 100.dpToPx)
+            ) &&
             columnWidth > 0
         ) {
             val dpWidth = (width.pxToDp / 100f).roundToInt()

@@ -38,7 +38,8 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.cancelV5MigrationUpdatePendingBroadcast(context))
+                NotificationReceiver.cancelV5MigrationUpdatePendingBroadcast(context),
+            )
         }
 
     override suspend fun doWork(): Result = coroutineScope {
@@ -52,7 +53,8 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
                 context,
                 ::updateNotificationProgress,
                 ::completeNotification,
-                ::errorNotification)
+                ::errorNotification,
+            )
             return@coroutineScope Result.success()
         } catch (e: Exception) {
             XLog.e("error with v5 migration follows", e)
@@ -67,7 +69,7 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
             .build()
         applicationContext.notificationManager.notify(
             Notifications.Id.V5.Progress,
-            notification
+            notification,
         )
     }
 
@@ -78,13 +80,17 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
                 setLargeIcon(notificationBitmap)
                 setAutoCancel(true)
                 setContentTitle(context.getString(R.string.v5_migration_complete))
-                setContentText(context.getString(R.string.number_of_migrated,
-                    numberProcessed))
+                setContentText(
+                    context.getString(
+                        R.string.number_of_migrated,
+                        numberProcessed,
+                    ),
+                )
             }
                 .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.V5.Complete,
-            notification
+            notification,
         )
     }
 
@@ -95,26 +101,30 @@ class V5MigrationJob(private val context: Context, workerParams: WorkerParameter
                 setSmallIcon(R.drawable.ic_neko_notification)
                 setLargeIcon(notificationBitmap)
                 setAutoCancel(true)
-                setContentTitle(context.resources.getQuantityString(R.plurals.notification_update_failed,
-                    errors.size,
-                    errors.size))
+                setContentTitle(
+                    context.resources.getQuantityString(
+                        R.plurals.notification_update_failed,
+                        errors.size,
+                        errors.size,
+                    ),
+                )
                 addAction(
                     R.drawable.ic_folder_24dp,
                     context.getString(R.string.view_all_errors),
-                    NotificationReceiver.openErrorLogPendingActivity(context, uri!!)
+                    NotificationReceiver.openErrorLogPendingActivity(context, uri!!),
                 )
                 setStyle(
                     NotificationCompat.BigTextStyle().bigText(
                         errors.joinToString("\n") {
                             it.chop(TITLE_MAX_LEN)
-                        }
-                    )
+                        },
+                    ),
                 )
             }
                 .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Status.Error,
-            notification
+            notification,
         )
     }
 

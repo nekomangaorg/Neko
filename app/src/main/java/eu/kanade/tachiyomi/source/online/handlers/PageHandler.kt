@@ -83,7 +83,7 @@ class PageHandler {
                 val atHomeResponse =
                     network.service.getAtHomeServer(
                         chapter.mangadex_chapter_id,
-                        preferences.usePort443Only()
+                        preferences.usePort443Only(),
                     )
 
                 when (atHomeResponse) {
@@ -98,11 +98,10 @@ class PageHandler {
 
                 val atHomeDto = atHomeResponse.getOrThrow()
 
-
                 return@withContext pageListParse(
                     chapter.mangadex_chapter_id,
                     atHomeDto,
-                    preferences.dataSaver()
+                    preferences.dataSaver(),
                 )
             } catch (e: Exception) {
                 XLog.e("error processing page list ", e)

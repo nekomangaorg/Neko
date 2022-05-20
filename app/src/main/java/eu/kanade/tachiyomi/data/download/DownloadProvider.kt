@@ -124,7 +124,7 @@ class DownloadProvider(private val context: Context) {
                     }
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter chapterNameHashSet.contains(fileName) || chapterNameHashSet.contains(
-                        afterScanlatorCheck
+                        afterScanlatorCheck,
                     )
                 }
             }
@@ -167,7 +167,7 @@ class DownloadProvider(private val context: Context) {
 
                     val afterScanlatorCheck = fileName.substringAfter("_")
                     return@filter !chapterNameHashSet.contains(fileName) && !chapterNameHashSet.contains(
-                        afterScanlatorCheck
+                        afterScanlatorCheck,
                     )
                 }
             }
@@ -232,7 +232,7 @@ class DownloadProvider(private val context: Context) {
     fun getJ2kChapterName(chapter: Chapter): String {
         return DiskUtil.buildValidFilename(
             if (chapter.scanlator != null) "${chapter.scanlator}_${chapter.name}"
-            else chapter.name
+            else chapter.name,
         )
     }
 
@@ -249,7 +249,7 @@ class DownloadProvider(private val context: Context) {
             // legacy manga id
             getChapterDirName(chapter, false),
             // Legacy chapter directory name used in v0.8.4 and before
-            DiskUtil.buildValidFilename(chapter.name)
+            DiskUtil.buildValidFilename(chapter.name),
         ).filter { it.isNotEmpty() }
     }
 }

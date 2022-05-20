@@ -22,7 +22,7 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
         e1: MotionEvent?,
         e2: MotionEvent?,
         distanceX: Float,
-        distanceY: Float
+        distanceY: Float,
     ): Boolean {
         val newDistanceX = (e1?.rawX ?: 0f) - (e2?.rawX ?: 0f)
         val newDistanceY = (e1?.rawY ?: 0f) - (e2?.rawY ?: 0f)
@@ -39,7 +39,7 @@ class ReaderNavGestureDetector(private val activity: ReaderActivity) : GestureDe
         e1: MotionEvent,
         e2: MotionEvent,
         velocityX: Float,
-        velocityY: Float
+        velocityY: Float,
     ): Boolean {
         var result = false
         val diffY = e2.y - e1.y

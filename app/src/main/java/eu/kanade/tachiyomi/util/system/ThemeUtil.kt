@@ -21,7 +21,7 @@ object ThemeUtil {
                 0, 1 -> AppCompatDelegate.MODE_NIGHT_NO
                 2, 3, 4, 9 -> AppCompatDelegate.MODE_NIGHT_YES
                 else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
-            }
+            },
         )
         preferences.lightTheme().set(Themes.DEFAULT)
         preferences.darkTheme().set(Themes.DEFAULT)
@@ -40,7 +40,7 @@ object ThemeUtil {
                     "SPRING" -> Themes.SPRING_AND_DUSK
                     "STRAWBERRY_DAIQUIRI" -> Themes.STRAWBERRIES
                     else -> Themes.DEFAULT
-                }.name
+                }.name,
             )
             putString(
                 PreferenceKeys.darkTheme,
@@ -48,7 +48,7 @@ object ThemeUtil {
                     "DUSK" -> Themes.SPRING_AND_DUSK
                     "CHOCOLATE_STRAWBERRIES" -> Themes.STRAWBERRIES
                     else -> Themes.DEFAULT
-                }.name
+                }.name,
             )
         }
     }
@@ -107,8 +107,10 @@ fun Context.getPrefTheme(preferences: PreferencesHelper): Themes {
     // Using a try catch in case I start to remove themes
     return try {
         (
-            if ((applicationContext.isInNightMode() || preferences.nightMode()
-                    .get() == AppCompatDelegate.MODE_NIGHT_YES) &&
+            if ((
+                applicationContext.isInNightMode() || preferences.nightMode()
+                    .get() == AppCompatDelegate.MODE_NIGHT_YES
+                ) &&
                 preferences.nightMode().get() != AppCompatDelegate.MODE_NIGHT_NO
             ) preferences.darkTheme() else preferences.lightTheme()
             ).get()

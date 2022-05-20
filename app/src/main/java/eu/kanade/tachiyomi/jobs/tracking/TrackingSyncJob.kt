@@ -18,7 +18,7 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import uy.kohesive.injekt.injectLazy
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 /**
  * WorkManager job that syncs tracking from trackers to Neko
@@ -38,7 +38,7 @@ class TrackingSyncJob(
             addAction(
                 R.drawable.ic_close_24dp,
                 context.getString(R.string.cancel),
-                NotificationReceiver.cancelTrackingSyncPendingIntent(context)
+                NotificationReceiver.cancelTrackingSyncPendingIntent(context),
             )
         }
 
@@ -52,7 +52,7 @@ class TrackingSyncJob(
         try {
             trackingSyncService.process(
                 ::updateNotificationProgress,
-                ::completeNotification
+                ::completeNotification,
             )
 
             return@coroutineScope Result.success()
@@ -61,7 +61,7 @@ class TrackingSyncJob(
             return@coroutineScope Result.failure()
         } finally {
             launchIO {
-                delay(Duration.seconds(3).inWholeMilliseconds)
+                delay(3.seconds.inWholeMilliseconds)
                 context.notificationManager.cancel(Notifications.Id.Tracking.Complete)
             }
         }
@@ -74,7 +74,7 @@ class TrackingSyncJob(
             .build()
         applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Progress,
-            notification
+            notification,
         )
     }
 
@@ -84,7 +84,7 @@ class TrackingSyncJob(
             .build()
         context.applicationContext.notificationManager.notify(
             Notifications.Id.Tracking.Complete,
-            notification
+            notification,
         )
     }
 
@@ -93,10 +93,8 @@ class TrackingSyncJob(
         val TAG = "tracking_sync_job"
 
         fun doWorkNow(context: Context) {
-
             val request = OneTimeWorkRequestBuilder<TrackingSyncJob>()
                 .addTag(TAG)
-
                 .build()
 
             WorkManager.getInstance(context)

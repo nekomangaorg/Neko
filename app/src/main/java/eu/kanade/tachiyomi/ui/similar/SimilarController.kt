@@ -51,7 +51,7 @@ class SimilarController(bundle: Bundle? = null) :
     constructor(manga: Manga) : this(
         Bundle().apply {
             putString(BrowseSourceController.MANGA_ID, MdUtil.getMangaId(manga.url))
-        }
+        },
     )
 
     override var presenter =
@@ -79,16 +79,22 @@ class SimilarController(bundle: Bundle? = null) :
             .collectAsState(preferences.browseAsList().get())
 
         val mangaClicked: (Manga) -> Unit = { manga ->
-            router.pushController(MangaDetailsController(manga,
-                true).withFadeTransaction())
+            router.pushController(
+                MangaDetailsController(
+                    manga,
+                    true,
+                ).withFadeTransaction(),
+            )
         }
 
         NekoScaffold(
             title = stringResource(id = R.string.similar),
             onNavigationIconClicked = { activity?.onBackPressed() },
             actions = {
-                ListGridActionButton(isList = isList,
-                    buttonClicked = { preferences.browseAsList().set(isList.not()) })
+                ListGridActionButton(
+                    isList = isList,
+                    buttonClicked = { preferences.browseAsList().set(isList.not()) },
+                )
             },
         ) { paddingValues ->
             SwipeRefresh(
@@ -105,17 +111,18 @@ class SimilarController(bundle: Bundle? = null) :
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                        )
-
+                    )
                 },
                 content = {
-                    SimilarContent(isRefreshing,
+                    SimilarContent(
+                        isRefreshing,
                         isList,
                         preferences.libraryLayout().get() == 2,
                         paddingValues = paddingValues,
                         refreshing,
-                        mangaClicked)
-                }
+                        mangaClicked,
+                    )
+                },
             )
         }
     }
@@ -130,37 +137,40 @@ class SimilarController(bundle: Bundle? = null) :
         mangaClicked: (Manga) -> Unit,
     ) {
         val groupedManga: Map<Int, List<DisplayManga>> by presenter.mangaMap.observeAsState(
-            emptyMap())
+            emptyMap(),
+        )
         if (isRefreshing.not()) {
             if (groupedManga.isEmpty()) {
                 EmptyScreen(
                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                     iconSize = 176.dp,
                     message = R.string.no_results_found,
-                    actions = listOf(Action(R.string.retry, refreshing))
+                    actions = listOf(Action(R.string.retry, refreshing)),
                 )
             } else {
-
                 val contentPadding = PaddingValues(
                     bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
                         .asPaddingValues().calculateBottomPadding(),
-                    top = paddingValues.calculateTopPadding()
+                    top = paddingValues.calculateTopPadding(),
                 )
 
                 val groupedMangaRedux =
                     groupedManga.entries.associate { stringResource(id = it.key) to it.value }
 
                 if (isList) {
-                    MangaListWithHeader(groupedManga = groupedMangaRedux,
+                    MangaListWithHeader(
+                        groupedManga = groupedMangaRedux,
                         shouldOutlineCover = preferences.outlineOnCovers()
                             .get(),
                         contentPadding = contentPadding,
-                        onClick = mangaClicked)
+                        onClick = mangaClicked,
+                    )
                 } else {
                     val columns =
                         binding.root.measuredWidth.numberOfColumnsForCompose(
                             preferences.gridSize()
-                                .get())
+                                .get(),
+                        )
 
                     MangaGridWithHeader(
                         groupedManga = groupedMangaRedux,
@@ -169,11 +179,10 @@ class SimilarController(bundle: Bundle? = null) :
                         columns = columns,
                         isComfortable = isComfortable,
                         contentPadding = contentPadding,
-                        onClick = mangaClicked
+                        onClick = mangaClicked,
                     )
                 }
             }
         }
     }
 }
-

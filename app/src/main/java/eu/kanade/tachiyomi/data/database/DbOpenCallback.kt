@@ -124,7 +124,7 @@ class DbOpenCallback : SupportSQLiteOpenHelper.Callback(DATABASE_VERSION) {
             db.execSQL(SimilarTable.createTableQuery)
         }
 
-        if(oldVersion < 30){
+        if (oldVersion < 30) {
             db.execSQL(TrackTable.renameTableToTemp)
             db.execSQL(TrackTable.createTableQuery)
             db.execSQL(TrackTable.insertFromTempTable)

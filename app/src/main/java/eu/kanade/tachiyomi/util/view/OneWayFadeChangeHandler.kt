@@ -17,7 +17,7 @@ class OneWayFadeChangeHandler : AnimatorChangeHandler {
     constructor(duration: Long) : super(duration)
     constructor(duration: Long, removesFromViewOnPush: Boolean) : super(
         duration,
-        removesFromViewOnPush
+        removesFromViewOnPush,
     )
 
     override fun getAnimator(container: ViewGroup, from: View?, to: View?, isPush: Boolean, toAddedToContainer: Boolean): Animator {

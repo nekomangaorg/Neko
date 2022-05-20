@@ -26,7 +26,7 @@ class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem
      */
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
         return Holder(view, adapter)
     }
@@ -43,7 +43,7 @@ class DownloadSwipeTutorialItem : AbstractFlexibleItem<DownloadSwipeTutorialItem
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
     }
 

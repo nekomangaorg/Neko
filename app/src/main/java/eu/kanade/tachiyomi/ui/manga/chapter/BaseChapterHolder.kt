@@ -28,7 +28,7 @@ open class BaseChapterHolder(
                 val popup = CascadePopupMenu(
                     downloadButton.context,
                     downloadButton,
-                    styler = cascadeMenuStyler(downloadButton.context)
+                    styler = cascadeMenuStyler(downloadButton.context),
                 )
 
                 // Inflate our menu resource into the PopupMenu's Menu
@@ -40,17 +40,17 @@ open class BaseChapterHolder(
                 // Hide download and show delete if the chapter is downloaded
                 if (chapter.status != Download.State.DOWNLOADED) popup.menu.findItem(R.id.action_delete).title =
                     downloadButton.context.getString(
-                        R.string.cancel
+                        R.string.cancel,
                     )
 
                 // Set a listener so we are notified if a menu item is clicked
                 popup.setOnMenuItemClickListener { item ->
                     when (item.itemId) {
                         R.id.action_delete -> adapter.baseDelegate.downloadChapter(
-                            flexibleAdapterPosition
+                            flexibleAdapterPosition,
                         )
                         R.id.action_start -> adapter.baseDelegate.startDownloadNow(
-                            flexibleAdapterPosition
+                            flexibleAdapterPosition,
                         )
                     }
                     true

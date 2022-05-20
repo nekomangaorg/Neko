@@ -55,22 +55,25 @@ class LatestChapterHandler {
     }
 
     private suspend fun latestChapterParse(chapterListDto: ChapterListDto): MangaListPage {
-
         val mangaIds = chapterListDto.data.asSequence().map { it.relationships }.flatten()
             .filter { it.type == MdConstants.Types.manga }.map { it.id }.distinct()
             .filter { uniqueManga.contains(it).not() }.toList()
 
         uniqueManga.addAll(mangaIds)
 
-        val allContentRating = listOf(MdConstants.ContentRating.safe,
+        val allContentRating = listOf(
+            MdConstants.ContentRating.safe,
             MdConstants.ContentRating.suggestive,
             MdConstants.ContentRating.erotica,
-            MdConstants.ContentRating.pornographic)
+            MdConstants.ContentRating.pornographic,
+        )
 
         val queryParameters =
-            mutableMapOf("ids[]" to mangaIds,
+            mutableMapOf(
+                "ids[]" to mangaIds,
                 "limit" to mangaIds.size,
-                "contentRating[]" to allContentRating)
+                "contentRating[]" to allContentRating,
+            )
 
         val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters)).onError {
             val type = "trying to search manga from latest chapters"

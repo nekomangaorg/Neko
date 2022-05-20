@@ -22,7 +22,7 @@ class LoginPreference @JvmOverloads constructor(context: Context, attrs: Attribu
         (holder.findViewById(R.id.image_view) as? ImageView)?.let { imageView ->
             imageView.setImageResource(
                 if (getPersistedString("").isNullOrEmpty()) android.R.color.transparent
-                else R.drawable.ic_done_24dp
+                else R.drawable.ic_done_24dp,
             )
             imageView.imageTintList =
                 ColorStateList.valueOf(Color.parseColor("#FF4CAF50"))

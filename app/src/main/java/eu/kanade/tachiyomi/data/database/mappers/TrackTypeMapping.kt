@@ -29,7 +29,7 @@ import eu.kanade.tachiyomi.data.database.tables.TrackTable.TABLE
 class TrackTypeMapping : SQLiteTypeMapping<Track>(
     TrackPutResolver(),
     TrackGetResolver(),
-    TrackDeleteResolver()
+    TrackDeleteResolver(),
 )
 
 class TrackPutResolver : DefaultPutResolver<Track>() {

@@ -99,8 +99,8 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
                 ContextCompat.getColor(
                     itemView.context,
                     R
-                        .color.gray_button
-                )
+                        .color.gray_button,
+                ),
             )
             binding.reorder.setImageDrawable(regularDrawable)
         }
@@ -127,7 +127,7 @@ class CategoryHolder(view: View, val adapter: CategoryAdapter) : BaseFlexibleVie
         inputMethodManager.showSoftInput(
             binding.editText,
             WindowManager.LayoutParams
-                .SOFT_INPUT_ADJUST_PAN
+                .SOFT_INPUT_ADJUST_PAN,
         )
     }
 

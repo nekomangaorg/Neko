@@ -48,7 +48,7 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             cropBordersWebtoon.bindToPreference(if (hasMargins) preferences.cropBorders() else preferences.cropBordersWebtoon())
             webtoonSidePadding.bindToIntPreference(
                 preferences.webtoonSidePadding(),
-                R.array.webtoon_side_padding_values
+                R.array.webtoon_side_padding_values,
             )
             webtoonEnableZoomOut.bindToPreference(preferences.webtoonEnableZoomOut())
             webtoonNav.bindToPreference(preferences.navigationModeWebtoon())
@@ -87,12 +87,13 @@ class ReaderPagedView @JvmOverloads constructor(context: Context, attrs: Attribu
             binding.webtoonNav,
             binding.webtoonInvert,
             binding.webtoonPageLayout,
-            binding.webtoonInvertDoublePages
+            binding.webtoonInvertDoublePages,
         ).forEach { it.isVisible = !show }
         val isFullFit = when (preferences.imageScaleType().get()) {
             SubsamplingScaleImageView.SCALE_TYPE_FIT_HEIGHT,
             SubsamplingScaleImageView.SCALE_TYPE_SMART_FIT,
-            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP -> true
+            SubsamplingScaleImageView.SCALE_TYPE_CENTER_CROP,
+            -> true
             else -> false
         }
         val ogView = (context as? Activity)?.window?.decorView

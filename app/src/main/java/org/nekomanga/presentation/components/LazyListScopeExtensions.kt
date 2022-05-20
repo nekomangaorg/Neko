@@ -30,7 +30,7 @@ fun <T> LazyListScope.gridItems(
                         modifier = Modifier
                             .weight(1f, fill = true)
                             .then(itemModifier),
-                        propagateMinConstraints = true
+                        propagateMinConstraints = true,
                     ) {
                         itemContent.invoke(this, items[itemIndex])
                     }
@@ -50,4 +50,3 @@ fun <T : Any> LazyGridScope.items(
         itemContent(lazyPagingItems[index])
     }
 }
-

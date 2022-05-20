@@ -26,7 +26,7 @@ import okhttp3.Response
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import kotlin.collections.set
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class ImageHandler {
     val network: NetworkHelper by injectLazy()
@@ -46,8 +46,12 @@ class ImageHandler {
         return withIOContext {
             return@withIOContext when {
                 page.imageUrl!!.contains("mangaplus", true) -> {
-                    mangaPlusHandler.client.newCall(GET(page.imageUrl!!,
-                        mangaPlusHandler.headers))
+                    mangaPlusHandler.client.newCall(
+                        GET(
+                            page.imageUrl!!,
+                            mangaPlusHandler.headers,
+                        ),
+                    )
                         .await()
                 }
                 page.imageUrl!!.contains("comikey", true) -> {
@@ -64,8 +68,12 @@ class ImageHandler {
                 }
                 page.imageUrl!!.contains("/bfs/comic/", true)
                 -> {
-                    bilibiliHandler.client.newCall(GET(page.imageUrl!!,
-                        bilibiliHandler.headers))
+                    bilibiliHandler.client.newCall(
+                        GET(
+                            page.imageUrl!!,
+                            bilibiliHandler.headers,
+                        ),
+                    )
                         .await()
                 }
 
@@ -97,7 +105,7 @@ class ImageHandler {
         val atHomeImageReportDto = AtHomeImageReportDto(
             url,
             false,
-            duration = Duration.seconds(30).inWholeMilliseconds
+            duration = 30.seconds.inWholeMilliseconds,
         )
         sendReport(atHomeImageReportDto)
     }
@@ -111,7 +119,7 @@ class ImageHandler {
             response.isSuccessful,
             byteSize,
             cache,
-            duration
+            duration,
         )
         log.d(atHomeImageReportDto)
         sendReport(atHomeImageReportDto)
@@ -142,8 +150,10 @@ class ImageHandler {
                 false -> {
                     log.d("Time has expired get new at home url isLogged $isLogged")
                     updateTokenTracker(page.mangaDexChapterId, currentTime)
-                    val atHomeResponse = network.service.getAtHomeServer(page.mangaDexChapterId,
-                        preferences.usePort443Only())
+                    val atHomeResponse = network.service.getAtHomeServer(
+                        page.mangaDexChapterId,
+                        preferences.usePort443Only(),
+                    )
                     atHomeResponse.onError {
                         atHomeResponse.log(" getting image")
                         atHomeResponse.throws("getting image")

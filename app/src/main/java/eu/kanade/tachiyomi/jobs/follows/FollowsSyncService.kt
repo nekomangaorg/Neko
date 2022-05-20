@@ -61,7 +61,7 @@ class FollowsSyncService {
                     dbManga = Manga.create(
                         networkManga.url,
                         networkManga.title,
-                        sourceManager.getMangadex().id
+                        sourceManager.getMangadex().id,
                     )
                     dbManga.date_added = Date().time
                 }
@@ -123,7 +123,7 @@ class FollowsSyncService {
                     withIOContext {
                         followsHandler.updateFollowStatus(
                             MdUtil.getMangaId(manga.url),
-                            FollowStatus.READING
+                            FollowStatus.READING,
                         )
 
                         trackItem.track.status = FollowStatus.READING.int

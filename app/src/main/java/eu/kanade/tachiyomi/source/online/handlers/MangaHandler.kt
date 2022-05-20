@@ -30,7 +30,6 @@ class MangaHandler {
 
         return withContext(Dispatchers.IO) {
             logTimeTaken("Chapter and Manga Details for  ${manga.title}") {
-
                 val chapterList = async {
                     fetchChapterList(manga)
                 }
@@ -42,7 +41,7 @@ class MangaHandler {
 
                 Pair(
                     manga,
-                    chapterList.await()
+                    chapterList.await(),
                 )
             }
         }

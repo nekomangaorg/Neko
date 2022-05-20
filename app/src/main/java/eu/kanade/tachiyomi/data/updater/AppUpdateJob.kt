@@ -39,7 +39,6 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
         private const val TAG = "UpdateChecker"
 
         fun doWorkNow(context: Context) {
-
             val request = OneTimeWorkRequestBuilder<AppUpdateJob>()
                 .build()
 
@@ -56,7 +55,7 @@ class AppUpdateJob(private val context: Context, workerParams: WorkerParameters)
                 2,
                 TimeUnit.DAYS,
                 3,
-                TimeUnit.HOURS
+                TimeUnit.HOURS,
             )
                 .addTag(TAG)
                 .setConstraints(constraints)

@@ -131,7 +131,6 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                     track.finished_reading_date = finishedDate
                 }
             }
-
         }
         return track
     }
@@ -152,7 +151,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         if (manga.kitsu_id.isNullOrBlank()
-                .not() && !wasPreviouslyTracked && manga.kitsu_id!!.isDigitsOnly()
+            .not() && !wasPreviouslyTracked && manga.kitsu_id!!.isDigitsOnly()
         ) {
             client.newCall(eu.kanade.tachiyomi.network.GET(apiMangaUrl(manga.kitsu_id!!)))
                 .await().parseAs<JsonObject>().let {
@@ -319,7 +318,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                 .add("refresh_token", token)
                 .add("client_id", clientId)
                 .add("client_secret", clientSecret)
-                .build()
+                .build(),
         )
     }
 }

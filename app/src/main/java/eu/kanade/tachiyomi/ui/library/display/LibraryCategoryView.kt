@@ -35,7 +35,7 @@ class LibraryCategoryView @JvmOverloads constructor(context: Context, attrs: Att
             val hideHopper = min(
                 2,
                 preferences.hideHopper().get().toInt() * 2 + preferences.autohideHopper().get()
-                    .toInt()
+                    .toInt(),
             )
             hideHopperSpinner.setSelection(hideHopper)
             hideHopperSpinner.onItemSelectedListener = {

@@ -62,15 +62,15 @@ class MangaShortcutManager(
 
                     ShortcutInfo.Builder(
                         context,
-                        "Manga-${item.id?.toString() ?: item.title}"
+                        "Manga-${item.id?.toString() ?: item.title}",
                     )
                         .setShortLabel(
                             item.title.takeUnless { it.isBlank() }
-                                ?: context.getString(R.string.manga)
+                                ?: context.getString(R.string.manga),
                         )
                         .setLongLabel(
                             item.title.takeUnless { it.isBlank() }
-                                ?: context.getString(R.string.manga)
+                                ?: context.getString(R.string.manga),
                         )
                         .setIcon(
                             if (bitmap != null) if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -78,11 +78,11 @@ class MangaShortcutManager(
                             } else {
                                 Icon.createWithBitmap(bitmap)
                             }
-                            else Icon.createWithResource(context, R.drawable.ic_book_24dp)
+                            else Icon.createWithResource(context, R.drawable.ic_book_24dp),
                         )
                         .setIntent(
                             SearchActivity.openMangaIntent(context, item.id, true)
-                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP),
                         )
                         .build()
                 }

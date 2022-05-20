@@ -200,7 +200,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         if (last != null && last > 100) {
                             recyclerView.context.getString(
                                 R.string.fetched_,
-                                last.timeSpanFromNow(preferences.context)
+                                last.timeSpanFromNow(preferences.context),
                             )
                         } else {
                             "N/A"
@@ -213,7 +213,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         if (last != null && last > 100) {
                             recyclerView.context.getString(
                                 R.string.read_,
-                                last.timeSpanFromNow(preferences.context)
+                                last.timeSpanFromNow(preferences.context),
                             )
                         } else {
                             "N/A"
@@ -229,7 +229,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         if (total > 0) recyclerView.resources.getQuantityString(
                             R.plurals.chapters_plural,
                             total,
-                            total
+                            total,
                         )
                         else {
                             "N/A"
@@ -240,7 +240,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         if (lastUpdate > 0) {
                             recyclerView.context.getString(
                                 R.string.updated_,
-                                lastUpdate.timeSpanFromNow(preferences.context)
+                                lastUpdate.timeSpanFromNow(preferences.context),
                             )
                         } else {
                             "N/A"
@@ -251,7 +251,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                         if (added > 0) {
                             recyclerView.context.getString(
                                 R.string.added_,
-                                added.timeSpanFromNow(preferences.context)
+                                added.timeSpanFromNow(preferences.context),
                             )
                         } else {
                             "N/A"

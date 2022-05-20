@@ -1,7 +1,7 @@
 buildscript {
     dependencies {
-        classpath(libs.firebase.gradle)
         classpath(libs.google.services.gradle)
+        classpath(libs.firebase.gradle)
         classpath(kotlinx.serialization.gradle)
         classpath(libs.aboutLibraries.gradle)
     }

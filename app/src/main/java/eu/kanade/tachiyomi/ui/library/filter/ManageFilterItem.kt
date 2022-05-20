@@ -30,7 +30,7 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
      */
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): Holder {
         return Holder(view, adapter)
     }
@@ -47,7 +47,7 @@ class ManageFilterItem(val char: Char) : AbstractFlexibleItem<ManageFilterItem.H
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any>
+        payloads: MutableList<Any>,
     ) {
         holder.bind(char)
     }

@@ -57,7 +57,7 @@ class BrowseSourceGridHolder(
         when (isFollows) {
             true -> binding.unreadDownloadBadge.root.setStatus(
                 manga.follow_status!!,
-                manga.favorite
+                manga.favorite,
             )
             false -> binding.unreadDownloadBadge.root.setInLibrary(manga.favorite)
         }

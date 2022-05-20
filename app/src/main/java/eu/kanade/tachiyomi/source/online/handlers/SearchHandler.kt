@@ -82,7 +82,6 @@ class SearchHandler {
     }
 
     private fun searchMangaParse(mangaListDto: MangaListDto): MangaListPage {
-
         val hasMoreResults = mangaListDto.limit + mangaListDto.offset < mangaListDto.total
 
         val thumbQuality = preferencesHelper.thumbnailQuality()

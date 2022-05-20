@@ -38,6 +38,6 @@ class MangaFlagsPutResolver(private val colName: String, private val fieldGetter
 
     fun mapToContentValues(manga: Manga) =
         contentValuesOf(
-            colName to fieldGetter.get(manga)
+            colName to fieldGetter.get(manga),
         )
 }

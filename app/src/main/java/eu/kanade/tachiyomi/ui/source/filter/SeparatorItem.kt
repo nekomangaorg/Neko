@@ -25,7 +25,7 @@ class SeparatorItem(val filter: Filter.Separator) : AbstractHeaderItem<Separator
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: Holder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
     }
 

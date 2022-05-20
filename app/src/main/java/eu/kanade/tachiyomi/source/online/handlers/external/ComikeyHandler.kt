@@ -25,7 +25,7 @@ class ComikeyHandler {
     val headers = Headers.Builder()
         .add("User-Agent", USER_AGENT)
         .build()
-    
+
     val client: OkHttpClient by lazy { Injekt.get<NetworkHelper>().client }
 
     private val urlForbidden =

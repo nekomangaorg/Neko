@@ -284,7 +284,7 @@ class LibraryController(
                     hopperOffset = hopperOffset.coerceIn(0f, maxHopperOffset)
                 }
                 if (!preferences.hideBottomNavOnScroll()
-                        .get() || activityBinding?.bottomNav == null
+                    .get() || activityBinding?.bottomNav == null
                 ) {
                     updateFilterSheetY()
                 }
@@ -378,7 +378,7 @@ class LibraryController(
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
             val closerToEdge =
                 if (preferences.hideBottomNavOnScroll()
-                        .get() && activityBinding?.bottomNav != null
+                    .get() && activityBinding?.bottomNav != null
                 ) {
                     closerToBottom && !atTop
                 } else {
@@ -582,8 +582,10 @@ class LibraryController(
                 afterInsets = { insets ->
                     val systemInsets = insets.ignoredSystemInsets
                     binding.categoryRecycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = systemInsets.top + (activityBinding?.searchToolbar?.height
-                            ?: 0) + 12.dpToPx
+                        topMargin = systemInsets.top + (
+                            activityBinding?.searchToolbar?.height
+                                ?: 0
+                            ) + 12.dpToPx
                     }
                     updateSmallerViewsTopMargins()
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -796,7 +798,7 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                    binding.libraryGridRecycler.recycler.translationY
+                binding.libraryGridRecycler.recycler.translationY
         } else {
             binding.jumperCategoryText.translationY =
                 binding.libraryGridRecycler.recycler.translationY
@@ -836,8 +838,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                    newOffset > -1
-                } else {
+                newOffset > -1
+            } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -1081,7 +1083,8 @@ class LibraryController(
                     }
                 }
                 binding.libraryGridRecycler.recycler.viewTreeObserver.addOnGlobalLayoutListener(
-                    staggeredObserver)
+                    staggeredObserver,
+                )
                 viewScope.launchUI {
                     delay(500)
                     removeStaggeredObserver()
@@ -1437,10 +1440,10 @@ class LibraryController(
         when {
             lastClickPosition == -1 -> setSelection(position)
             lastClickPosition > position -> for (i in position until lastClickPosition) setSelection(
-                i
+                i,
             )
             lastClickPosition < position -> for (i in lastClickPosition + 1..position) setSelection(
-                i
+                i,
             )
             else -> setSelection(position)
         }
@@ -1490,8 +1493,8 @@ class LibraryController(
         val fromItem = adapter.getItem(fromPosition)
         val toItem = adapter.getItem(toPosition)
         if (binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager && (
-                (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
-                )
+            (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
+            )
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,
@@ -1734,8 +1737,10 @@ class LibraryController(
 
         val searchItem = activityBinding?.searchToolbar?.searchItem
         val searchView = activityBinding?.searchToolbar?.searchView
-        activityBinding?.searchToolbar?.setQueryHint(resources?.getString(R.string.library_search_hint),
-            query.isEmpty())
+        activityBinding?.searchToolbar?.setQueryHint(
+            resources?.getString(R.string.library_search_hint),
+            query.isEmpty(),
+        )
 
         if (query.isNotEmpty()) {
             if (activityBinding?.searchToolbar?.isSearchExpanded != true) {

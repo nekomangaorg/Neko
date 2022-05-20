@@ -19,7 +19,7 @@ import eu.kanade.tachiyomi.data.database.tables.SimilarTable.TABLE
 class SimilarTypeMapping : SQLiteTypeMapping<MangaSimilar>(
     SimilarPutResolver(),
     SimilarGetResolver(),
-    SimilarDeleteResolver()
+    SimilarDeleteResolver(),
 )
 
 class SimilarPutResolver : DefaultPutResolver<MangaSimilar>() {

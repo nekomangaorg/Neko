@@ -21,7 +21,7 @@ class MangaDetailsDivider(context: Context, val padding: Int = 12.dpToPx) : andr
     override fun onDraw(
         c: Canvas,
         parent: androidx.recyclerview.widget.RecyclerView,
-        state: androidx.recyclerview.widget.RecyclerView.State
+        state: androidx.recyclerview.widget.RecyclerView.State,
     ) {
         val childCount = parent.childCount
         for (i in 0 until childCount - 1) {
@@ -43,7 +43,7 @@ class MangaDetailsDivider(context: Context, val padding: Int = 12.dpToPx) : andr
         outRect: Rect,
         view: View,
         parent: androidx.recyclerview.widget.RecyclerView,
-        state: androidx.recyclerview.widget.RecyclerView.State
+        state: androidx.recyclerview.widget.RecyclerView.State,
     ) {
         outRect.set(0, 0, 0, divider.intrinsicHeight)
     }

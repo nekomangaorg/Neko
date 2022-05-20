@@ -28,14 +28,14 @@ object AuthenticatorUtil {
         title: String,
         subtitle: String? = null,
         confirmationRequired: Boolean = true,
-        callback: AuthenticationCallback
+        callback: AuthenticationCallback,
     ) {
         isAuthenticating = true
         val executor: Executor = ContextCompat.getMainExecutor(this)
         val biometricPrompt = BiometricPrompt(
             this,
             executor,
-            callback
+            callback,
         )
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()

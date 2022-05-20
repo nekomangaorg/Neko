@@ -109,7 +109,8 @@ object MangaTable {
             $COL_MERGE_MANGA_IMAGE_URL TEXT,
             $COL_MANGA_LAST_CHAPTER INTEGER,
             $COL_FOLLOW_STATUS INTEGER
-            )"""
+            )
+            """
 
     val createUrlIndexQuery: String
         get() = "CREATE INDEX ${TABLE}_${COL_URL}_index ON $TABLE($COL_URL)"

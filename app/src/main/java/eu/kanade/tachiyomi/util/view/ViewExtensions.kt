@@ -383,7 +383,7 @@ inline fun View.popupMenu(
         val blendedAccent = ColorUtils.blendARGB(
             context.getResourceColor(R.attr.colorSecondary),
             context.getResourceColor(R.attr.colorOnBackground),
-            0.5f
+            0.5f,
         )
         (popup.menu as? MenuBuilder)?.setOptionalIconsVisible(true)
         val emptyIcon = ContextCompat.getDrawable(context, R.drawable.ic_blank_24dp)
@@ -588,9 +588,11 @@ fun View?.isVisibleOnScreen(): Boolean {
     }
     val actualPosition = Rect()
     this.getGlobalVisibleRect(actualPosition)
-    val screen = Rect(0,
+    val screen = Rect(
+        0,
         0,
         Resources.getSystem().displayMetrics.widthPixels,
-        Resources.getSystem().displayMetrics.heightPixels)
+        Resources.getSystem().displayMetrics.heightPixels,
+    )
     return actualPosition.intersect(screen)
 }

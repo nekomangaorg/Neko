@@ -107,17 +107,20 @@ class SimilarHandler {
             this.thumbnail_url = this@toDisplaySManga.thumbnail
             this.title = this@toDisplaySManga.title
         },
-        displayText = this@toDisplaySManga.relation)
+        displayText = this@toDisplaySManga.relation,
+    )
 
     private fun MangaDataDto.toRelatedMangaDto(
         thumbQuality: Int,
         otherText: String,
     ): RelatedMangaDto {
         val manga = this.toBasicManga(thumbQuality)
-        return RelatedMangaDto(manga.url,
+        return RelatedMangaDto(
+            manga.url,
             manga.title,
             manga.thumbnail_url!!,
-            otherText)
+            otherText,
+        )
     }
 
     /**
@@ -128,7 +131,6 @@ class SimilarHandler {
         forceRefresh: Boolean,
     ): List<DisplaySManga> {
         if (forceRefresh) {
-
             val response = network.similarService.getSimilarManga(dexId)
                 .onFailure {
                     XLog.e("trying to get similar manga, $this")
@@ -141,7 +143,7 @@ class SimilarHandler {
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.similarManga?.map { it.toDisplaySManga() }?.sortedByDescending {
-            it.displayText?.split("%")?.get(0)?.toDouble()
+            it.displayText.split("%").get(0).toDouble()
         } ?: emptyList()
     }
 
@@ -158,11 +160,13 @@ class SimilarHandler {
 
         val thumbQuality = preferencesHelper.thumbnailQuality()
         val similarMangaList = mangaListDto.data.mapIndexed { index, it ->
-            it.toRelatedMangaDto(thumbQuality,
-                String.format("%.2f", 100.0 * scores[index]) + "% match")
+            it.toRelatedMangaDto(
+                thumbQuality,
+                String.format("%.2f", 100.0 * scores[index]) + "% match",
+            )
         }
 
-        //insert the new info into the db
+        // insert the new info into the db
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
         val dbDto = getDbDto(mangaDb)
         dbDto.similarApi = similarDto
@@ -183,7 +187,7 @@ class SimilarHandler {
         if (forceRefresh) {
             // Main network request
             val graphql =
-                """{ Media(id: ${anilistId}, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
+                """{ Media(id: $anilistId, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
             val response = network.similarService.getAniListGraphql(graphql).onError {
                 val type = "trying to get Anilist recommendations"
                 this.log(type)
@@ -203,7 +207,7 @@ class SimilarHandler {
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.aniListManga?.map { it.toDisplaySManga() }?.sortedByDescending {
-            it.displayText?.split(" ")?.get(0)?.toDouble()
+            it.displayText.split(" ").get(0).toDouble()
         } ?: emptyList()
     }
 
@@ -216,8 +220,9 @@ class SimilarHandler {
 
         // Get our page of mangaList
         val idPairs = similarDto.data.Media.recommendations.edges.map {
-            if (it.node.mediaRecommendation.format != "MANGA")
+            if (it.node.mediaRecommendation.format != "MANGA") {
                 return@map null
+            }
             val id = mappings.getMangadexID(it.node.mediaRecommendation.id.toString(), "al")
             val text = it.node.rating.toString() + " user votes"
             id to text
@@ -231,7 +236,7 @@ class SimilarHandler {
             it.toRelatedMangaDto(thumbQuality, idPairs[it.id] ?: "")
         }
 
-        //update db
+        // update db
         val mangaDb = db.getSimilar(dexId).executeAsBlocking()
         val dbDto = getDbDto(mangaDb)
 
@@ -271,7 +276,7 @@ class SimilarHandler {
         val dbDto = getDbDto(mangaDb)
         // Get data from db
         return dbDto.myAnimeListManga?.map { it.toDisplaySManga() }?.sortedByDescending {
-            it.displayText?.split(" ")?.get(0)?.toDouble()
+            it.displayText.split(" ").get(0).toDouble()
         } ?: emptyList()
     }
 
@@ -311,7 +316,8 @@ class SimilarHandler {
      * this will get the manga objects with cover_art for all the specified ids
      */
     private suspend fun similarGetMangadexMangaList(
-        mangaIds: List<String>, strictMatch: Boolean = true,
+        mangaIds: List<String>,
+        strictMatch: Boolean = true,
     ): MangaListDto {
         val queryMap = mutableMapOf(
             "limit" to mangaIds.size,

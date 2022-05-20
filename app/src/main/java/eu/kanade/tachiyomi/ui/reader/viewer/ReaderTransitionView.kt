@@ -102,7 +102,7 @@ class ReaderTransitionView @JvmOverloads constructor(context: Context, attrs: At
 
     private fun SpannableStringBuilder.addDLImageSpan(isDownloaded: Boolean) {
         val icon = context.contextCompatDrawable(
-            if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp
+            if (isDownloaded) R.drawable.ic_file_download_24dp else R.drawable.ic_cloud_24dp,
         )
             ?.mutate()
             ?.apply {

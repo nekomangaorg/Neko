@@ -69,7 +69,6 @@ import java.io.File
 import java.io.FileOutputStream
 import java.io.OutputStream
 import java.util.Date
-import java.util.Locale
 
 class MangaDetailsPresenter(
     val manga: Manga,
@@ -80,7 +79,8 @@ class MangaDetailsPresenter(
     chapterFilter: ChapterFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
-) : BaseCoroutinePresenter<MangaDetailsController>(), DownloadQueue.DownloadListener,
+) : BaseCoroutinePresenter<MangaDetailsController>(),
+    DownloadQueue.DownloadListener,
     LibraryServiceListener {
 
     private val mangaShortcutManager: MangaShortcutManager by injectLazy()
@@ -459,12 +459,12 @@ class MangaDetailsPresenter(
                                 .memoryCachePolicy(CachePolicy.DISABLED)
                                 .parameters(
                                     Parameters.Builder().set(MangaFetcher.onlyFetchRemotely, true)
-                                        .build()
+                                        .build(),
                                 )
                                 .build()
 
                         if (Coil.imageLoader(preferences.context)
-                                .execute(request) is SuccessResult
+                            .execute(request) is SuccessResult
                         ) {
                             preferences.context.imageLoader.memoryCache.remove(MemoryCache.Key(manga.key()))
                             withContext(Dispatchers.Main) {
@@ -486,7 +486,7 @@ class MangaDetailsPresenter(
                             if (manga.shouldDownloadNewChapters(db, preferences)) {
                                 downloadChapters(
                                     newChapters.first.sortedBy { it.chapter_number }
-                                        .map { it.toModel() }
+                                        .map { it.toModel() },
                                 )
                             }
                         }
@@ -501,7 +501,7 @@ class MangaDetailsPresenter(
                     if (removedChapters.isNotEmpty()) {
                         withContext(Dispatchers.Main) {
                             controller?.showChaptersRemovedPopup(
-                                removedChapters
+                                removedChapters,
                             )
                         }
                     }
@@ -623,7 +623,7 @@ class MangaDetailsPresenter(
                         statusHandler.marksChaptersStatus(
                             MdUtil.getMangaId(manga.url),
                             nonMergedChapterIds,
-                            read
+                            read,
                         )
                     }
                 }
@@ -654,7 +654,7 @@ class MangaDetailsPresenter(
     fun setSortOrder(sort: Int, descend: Boolean) {
         manga.setChapterOrder(
             sort,
-            if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC
+            if (descend) Manga.CHAPTER_SORT_DESC else Manga.CHAPTER_SORT_ASC,
         )
         if (mangaSortMatchesDefault()) {
             manga.setSortToGlobal()
@@ -749,21 +749,21 @@ class MangaDetailsPresenter(
                 TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_UNREAD
                 TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_READ
                 else -> Manga.SHOW_ALL
-            }
+            },
         )
         preferences.filterChapterByDownloaded().set(
             when (downloaded) {
                 TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_DOWNLOADED
                 TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_NOT_DOWNLOADED
                 else -> Manga.SHOW_ALL
-            }
+            },
         )
         preferences.filterChapterByBookmarked().set(
             when (bookmarked) {
                 TriStateCheckBox.State.CHECKED -> Manga.CHAPTER_SHOW_BOOKMARKED
                 TriStateCheckBox.State.IGNORE -> Manga.CHAPTER_SHOW_NOT_BOOKMARKED
                 else -> Manga.SHOW_ALL
-            }
+            },
         )
         preferences.hideChapterTitlesByDefault().set(manga.hideChapterTitles)
         manga.setFilterToGlobal()
@@ -794,7 +794,7 @@ class MangaDetailsPresenter(
         val manga = manga
         manga.filtered_scanlators =
             if (filteredScanlators.size == allChapterScanlators.size || filteredScanlators.isEmpty()) null else ChapterUtil.getScanlatorString(
-                filteredScanlators
+                filteredScanlators,
             )
         db.updateMangaFilteredScanlators(manga).executeAsBlocking()
         asyncUpdateMangaAndChapters()
@@ -920,7 +920,7 @@ class MangaDetailsPresenter(
             val directory = File(
                 Environment.getExternalStorageDirectory().absolutePath +
                     File.separator + Environment.DIRECTORY_PICTURES +
-                    File.separator + preferences.context.getString(R.string.app_name)
+                    File.separator + preferences.context.getString(R.string.app_name),
             )
             saveCover(directory)
             true
@@ -932,7 +932,7 @@ class MangaDetailsPresenter(
     private fun saveCover(directory: File): File {
         val cover =
             coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
-                manga
+                manga,
             )
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
@@ -961,7 +961,6 @@ class MangaDetailsPresenter(
         presenterScope.launch {
             trackList = loggedServices.map { service ->
                 TrackItem(tracks.find { it.sync_id == service.id }, service)
-
             }
         }
     }
@@ -1058,9 +1057,9 @@ class MangaDetailsPresenter(
                         controller?.onMergeSearchError(
                             Exception(
                                 preferences.context.getString(
-                                    R.string.no_results_found
-                                )
-                            )
+                                    R.string.no_results_found,
+                                ),
+                            ),
                         )
                     }
                 }

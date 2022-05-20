@@ -36,23 +36,27 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
 
         preference {
             iconDrawable =
-                OutlinedGoogleMaterial.Icon.gmo_palette.create(context,
-                    colorAttr = R.attr.colorOnSurface)
+                OutlinedGoogleMaterial.Icon.gmo_palette.create(
+                    context,
+                    colorAttr = R.attr.colorOnSurface,
+                )
             titleRes = R.string.appearance
             onClick { navigateTo(SettingsAppearanceController()) }
         }
 
         preference {
             iconDrawable =
-                OutlinedGoogleMaterial.Icon.gmo_collections_bookmark.create(context,
-                    colorAttr = R.attr.colorOnSurface)
+                OutlinedGoogleMaterial.Icon.gmo_collections_bookmark.create(
+                    context,
+                    colorAttr = R.attr.colorOnSurface,
+                )
             titleRes = R.string.library
             onClick { navigateTo(SettingsLibraryController()) }
         }
         preference {
             iconDrawable = CommunityMaterial.Icon2.cmd_google_chrome.create(
                 context,
-                colorAttr = R.attr.colorOnSurface
+                colorAttr = R.attr.colorOnSurface,
             )
             titleRes = R.string.site_specific_settings
             onClick { navigateTo(SettingsSiteController()) }
@@ -61,7 +65,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             iconDrawable =
                 OutlinedGoogleMaterial.Icon.gmo_chrome_reader_mode.create(
                     context,
-                    colorAttr = R.attr.colorOnSurface
+                    colorAttr = R.attr.colorOnSurface,
                 )
             titleRes = R.string.reader
             onClick { navigateTo(SettingsReaderController()) }
@@ -69,7 +73,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         preference {
             iconDrawable = OutlinedGoogleMaterial.Icon.gmo_download.create(
                 context,
-                colorAttr = R.attr.colorOnSurface
+                colorAttr = R.attr.colorOnSurface,
             )
             titleRes = R.string.downloads
             onClick { navigateTo(SettingsDownloadController()) }
@@ -83,7 +87,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         preference {
             iconDrawable = MaterialDesignDx.Icon.gmf_settings_backup_restore.create(
                 context,
-                colorAttr = R.attr.colorOnSurface
+                colorAttr = R.attr.colorOnSurface,
             )
             titleRes = R.string.backup_and_restore
             onClick { navigateTo(SettingsBackupController()) }
@@ -91,7 +95,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
         preference {
             iconDrawable = MaterialDesignDx.Icon.gmf_security.create(
                 context,
-                colorAttr = R.attr.colorOnSurface
+                colorAttr = R.attr.colorOnSurface,
             )
             titleRes = R.string.security
             onClick { navigateTo(SettingsSecurityController()) }
@@ -106,7 +110,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
             iconDrawable =
                 MaterialDesignDx.Icon.gmf_volunteer_activism.create(
                     context,
-                    colorAttr = R.attr.colorOnSurface
+                    colorAttr = R.attr.colorOnSurface,
                 )
             titleRes = R.string.dex_loot
             onClick {
@@ -133,7 +137,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
                     SettingsSearchController.lastSearch = "" // reset saved search query
                     router.pushController(
-                        RouterTransaction.with(SettingsSearchController())
+                        RouterTransaction.with(SettingsSearchController()),
                     )
                     return true
                 }
@@ -141,7 +145,7 @@ class SettingsMainController : SettingsController(), FloatingSearchInterface {
                 override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
                     return true
                 }
-            }
+            },
         )
     }
 

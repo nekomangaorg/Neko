@@ -29,7 +29,7 @@ import uy.kohesive.injekt.injectLazy
 class LibraryItem(
     val manga: LibraryManga,
     header: LibraryHeaderItem,
-    private val preferences: PreferencesHelper = Injekt.get()
+    private val preferences: PreferencesHelper = Injekt.get(),
 ) :
     AbstractSectionableItem<LibraryHolder, LibraryHeaderItem>(header), IFilterable<String> {
 
@@ -72,14 +72,14 @@ class LibraryItem(
                         binding.card.setCardForegroundColor(
                             ContextCompat.getColorStateList(
                                 context,
-                                R.color.library_comfortable_grid_foreground
-                            )
+                                R.color.library_comfortable_grid_foreground,
+                            ),
                         )
                     }
                     if (isFixedSize) {
                         binding.constraintLayout.layoutParams = FrameLayout.LayoutParams(
                             ViewGroup.LayoutParams.MATCH_PARENT,
-                            ViewGroup.LayoutParams.WRAP_CONTENT
+                            ViewGroup.LayoutParams.WRAP_CONTENT,
                         )
                         binding.coverThumbnail.maxHeight = Int.MAX_VALUE
                         binding.coverThumbnail.minimumHeight = 0
@@ -102,7 +102,7 @@ class LibraryItem(
                     view,
                     adapter as LibraryCategoryAdapter,
                     libraryLayout == LAYOUT_COMPACT_GRID,
-                    isFixedSize
+                    isFixedSize,
                 )
                 if (!isFixedSize) {
                     gridHolder.setFreeformCoverRatio(manga, parent)
@@ -118,7 +118,7 @@ class LibraryItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: LibraryHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         if (holder is LibraryGridHolder && !holder.fixedSize) {
             holder.setFreeformCoverRatio(manga, adapter.recyclerView as? AutofitRecyclerView)

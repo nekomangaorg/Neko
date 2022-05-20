@@ -26,13 +26,13 @@ fun ListGridActionButton(isList: Boolean, buttonClicked: () -> Unit) {
         true -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "list"),
             icon = Icons.Filled.ViewList,
-            buttonClicked = buttonClicked
+            buttonClicked = buttonClicked,
         )
 
         false -> TooltipBox(
             toolTipLabel = stringResource(id = R.string.display_as_, "grid"),
             icon = Icons.Filled.ViewModule,
-            buttonClicked = buttonClicked
+            buttonClicked = buttonClicked,
         )
     }
 }
@@ -61,19 +61,21 @@ fun AppBarActions(
             toolTipLabel = it.title,
             icon = it.icon,
             isEnabled = it.isEnabled,
-            buttonClicked = it.onClick
+            buttonClicked = it.onClick,
         )
     }
 
     val overflowActions = actions.filterIsInstance<AppBar.OverflowAction>()
     if (overflowActions.isNotEmpty()) {
-        TooltipBox(toolTipLabel = stringResource(R.string.more),
+        TooltipBox(
+            toolTipLabel = stringResource(R.string.more),
             icon = Icons.Filled.MoreVert,
-            buttonClicked = { showMenu = !showMenu })
+            buttonClicked = { showMenu = !showMenu },
+        )
 
         DropdownMenu(
             expanded = showMenu,
-            onDismissRequest = { showMenu = false }
+            onDismissRequest = { showMenu = false },
         ) {
             overflowActions.map {
                 DropdownMenuItem(

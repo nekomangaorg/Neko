@@ -21,7 +21,7 @@ import eu.kanade.tachiyomi.data.database.tables.CategoryTable.TABLE
 class CategoryTypeMapping : SQLiteTypeMapping<Category>(
     CategoryPutResolver(),
     CategoryGetResolver(),
-    CategoryDeleteResolver()
+    CategoryDeleteResolver(),
 )
 
 class CategoryPutResolver : DefaultPutResolver<Category>() {

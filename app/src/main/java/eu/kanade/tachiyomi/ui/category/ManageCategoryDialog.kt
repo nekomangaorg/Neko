@@ -114,10 +114,10 @@ class ManageCategoryDialog(bundle: Bundle? = null) :
         }
         if (preferences.libraryUpdateInterval().get() > 0 &&
             updatePref(
-                preferences.libraryUpdateCategories(),
-                preferences.libraryUpdateCategoriesExclude(),
-                binding.includeGlobal,
-            ) == false
+                    preferences.libraryUpdateCategories(),
+                    preferences.libraryUpdateCategoriesExclude(),
+                    binding.includeGlobal,
+                ) == false
         ) {
             preferences.libraryUpdateInterval().set(0)
             LibraryUpdateJob.setupTask(preferences.context, 0)

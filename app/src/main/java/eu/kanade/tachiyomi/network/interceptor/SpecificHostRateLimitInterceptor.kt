@@ -31,7 +31,7 @@ class SpecificHostRateLimitInterceptor(
     private val httpUrl: HttpUrl,
     private val permits: Int,
     private val period: Long = 1,
-    private val unit: TimeUnit = TimeUnit.SECONDS
+    private val unit: TimeUnit = TimeUnit.SECONDS,
 ) : Interceptor {
 
     private val requestQueue = ArrayList<Long>(permits)

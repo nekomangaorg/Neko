@@ -231,7 +231,7 @@ class Downloader(
                     DownloadService.stop(context)
                     XLog.e(error)
                     notifier.onError(error.message)
-                }
+                },
             )
     }
 
@@ -307,7 +307,7 @@ class Downloader(
             download.status = Download.State.ERROR
             notifier.onError(
                 context.getString(R.string.couldnt_download_low_space),
-                download.chapter.name
+                download.chapter.name,
             )
             return@defer Observable.just(download)
         }
@@ -316,13 +316,13 @@ class Downloader(
         ) {
             val intent = Intent(
                 Settings.ACTION_MANAGE_APP_ALL_FILES_ACCESS_PERMISSION,
-                "package:${context.packageName}".toUri()
+                "package:${context.packageName}".toUri(),
             )
 
             notifier.onError(
                 context.getString(R.string.external_storage_download_notice),
                 download.chapter.name,
-                intent
+                intent,
             )
             return@defer Observable.just(download)
         }
@@ -407,9 +407,9 @@ class Downloader(
             imageFile != null -> Observable.just(imageFile)
             chapterCache.isImageInCache(page.imageUrl!!) -> moveImageFromCache(
                 chapterCache.getImageFile(
-                    page.imageUrl!!
+                    page.imageUrl!!,
                 ),
-                tmpDir, filename
+                tmpDir, filename,
             )
             else -> downloadImage(page, download.source, tmpDir, filename)
         }
@@ -502,7 +502,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-        // Else guess from the uri.
+            // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime

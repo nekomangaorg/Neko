@@ -57,7 +57,7 @@ class NotificationReceiver : BroadcastReceiver() {
             // Dismiss notification
             ACTION_DISMISS_NOTIFICATION -> dismissNotification(
                 context,
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
             )
             // Resume the download service
             ACTION_RESUME_DOWNLOADS -> DownloadService.start(context)
@@ -72,7 +72,7 @@ class NotificationReceiver : BroadcastReceiver() {
             ACTION_DELETE_IMAGE -> deleteImage(
                 context,
                 intent.getStringExtra(EXTRA_FILE_LOCATION)!!,
-                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
             )
             // Cancel library update and dismiss notification
             ACTION_CANCEL_LIBRARY_UPDATE -> cancelLibraryUpdate(context)
@@ -86,14 +86,14 @@ class NotificationReceiver : BroadcastReceiver() {
                 shareBackup(
                     context,
                     intent.getParcelableExtra(EXTRA_URI)!!,
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
             // Open reader activity
             ACTION_OPEN_CHAPTER -> {
                 openChapter(
                     context,
                     intent.getLongExtra(EXTRA_MANGA_ID, -1),
-                    intent.getLongExtra(EXTRA_CHAPTER_ID, -1)
+                    intent.getLongExtra(EXTRA_CHAPTER_ID, -1),
                 )
             }
             ACTION_MARK_AS_READ -> {
@@ -101,7 +101,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 if (notificationId > -1) dismissNotification(
                     context,
                     notificationId,
-                    intent.getIntExtra(EXTRA_GROUP_ID, 0)
+                    intent.getIntExtra(EXTRA_GROUP_ID, 0),
                 )
                 val urls = intent.getStringArrayExtra(EXTRA_CHAPTER_URL) ?: return
                 val mangaId = intent.getLongExtra(EXTRA_MANGA_ID, -1)
@@ -114,7 +114,7 @@ class NotificationReceiver : BroadcastReceiver() {
                     context,
                     intent.getParcelableExtra(EXTRA_URI)!!,
                     "text/plain",
-                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1)
+                    intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
                 )
         }
     }
@@ -260,7 +260,6 @@ class NotificationReceiver : BroadcastReceiver() {
             downloadManager.deleteChapters(dbChapters, manga, source)
         }
 
-
         if (preferences.readingSync()) {
             val nonMergedChapterIds =
                 dbChapters.filter { it.isMergedChapter().not() }.map { it.mangadex_chapter_id }
@@ -365,10 +364,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_RESUME_DOWNLOADS
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -381,10 +382,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_PAUSE_DOWNLOADS
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -397,10 +400,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CLEAR_DOWNLOADS
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -418,10 +423,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 action = ACTION_DISMISS_NOTIFICATION
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -478,7 +485,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 0,
                 shareIntent,
-                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_CANCEL_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -500,10 +507,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_FILE_LOCATION, path)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -517,14 +526,14 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-            Chapter,
+                Chapter,
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
                 context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -544,7 +553,7 @@ class NotificationReceiver : BroadcastReceiver() {
             val newIntent =
                 Intent(
                     context,
-                    MainActivity::class.java
+                    MainActivity::class.java,
                 ).setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                     .putExtra(AboutController.NewUpdateDialogController.BODY_KEY, notes)
@@ -553,7 +562,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 downloadLink.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -575,7 +584,7 @@ class NotificationReceiver : BroadcastReceiver() {
                 context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
             )
         }
 
@@ -617,7 +626,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapters:
-            Array<Chapter>,
+                Array<Chapter>,
             groupId: Int,
         ):
             PendingIntent {
@@ -628,10 +637,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_NOTIFICATION_ID, manga.id.hashCode())
                 putExtra(EXTRA_GROUP_ID, groupId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 manga.id.hashCode(),
                 newIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -644,10 +655,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_LIBRARY_UPDATE
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -660,10 +673,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_TRACKING_SYNC
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -676,10 +691,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_FOLLOW_SYNC
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -692,10 +709,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_V5_MIGRATION
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -716,10 +735,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_URI, uri)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -732,10 +753,12 @@ class NotificationReceiver : BroadcastReceiver() {
             val intent = Intent(context, NotificationReceiver::class.java).apply {
                 action = ACTION_CANCEL_UPDATE_DOWNLOAD
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -757,10 +780,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_URI, uri)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -781,10 +806,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 putExtra(EXTRA_URI, uri)
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
 
         /**
@@ -802,10 +829,12 @@ class NotificationReceiver : BroadcastReceiver() {
                 action = ACTION_CANCEL_RESTORE
                 putExtra(EXTRA_NOTIFICATION_ID, notificationId)
             }
-            return PendingIntent.getBroadcast(context,
+            return PendingIntent.getBroadcast(
+                context,
                 0,
                 intent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+            )
         }
     }
 }

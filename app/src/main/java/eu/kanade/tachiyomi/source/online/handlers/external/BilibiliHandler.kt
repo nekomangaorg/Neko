@@ -75,7 +75,7 @@ class BilibiliHandler {
         return POST(
             "$baseUrl/$BASE_API_ENDPOINT/GetImageIndex?device=pc&platform=web",
             headers = newHeaders,
-            body = requestBody
+            body = requestBody,
         )
     }
 
@@ -101,9 +101,12 @@ class BilibiliHandler {
 
     private fun imageUrlRequest(baseUrls: List<String>): Request {
         val jsonPayload = buildJsonObject {
-            put("urls", buildJsonArray {
-                baseUrls.forEach { add(it) }
-            }.toString())
+            put(
+                "urls",
+                buildJsonArray {
+                    baseUrls.forEach { add(it) }
+                }.toString(),
+            )
         }
         val requestBody = jsonPayload.toString().toRequestBody(JSON_MEDIA_TYPE)
 
@@ -115,7 +118,7 @@ class BilibiliHandler {
         return POST(
             "$baseUrl/$BASE_API_ENDPOINT/ImageToken?device=pc&platform=web",
             headers = newHeaders,
-            body = requestBody
+            body = requestBody,
         )
     }
 

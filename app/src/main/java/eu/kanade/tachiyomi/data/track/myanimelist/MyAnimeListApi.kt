@@ -95,8 +95,10 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return withIOContext {
             val url = "$baseApiUrl/manga".toUri().buildUpon()
                 .appendPath(id.toString())
-                .appendQueryParameter("fields",
-                    "id,title,synopsis,num_chapters,main_picture,status,media_type,start_date")
+                .appendQueryParameter(
+                    "fields",
+                    "id,title,synopsis,num_chapters,main_picture,status,media_type,start_date",
+                )
                 .build()
             authClient.newCall(GET(url.toString()))
                 .await()
@@ -160,8 +162,10 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         return withIOContext {
             val uri = "$baseApiUrl/manga".toUri().buildUpon()
                 .appendPath(track.media_id.toString())
-                .appendQueryParameter("fields",
-                    "num_chapters,my_list_status{start_date,finish_date}")
+                .appendQueryParameter(
+                    "fields",
+                    "num_chapters,my_list_status{start_date,finish_date}",
+                )
                 .build()
             authClient.newCall(GET(uri.toString()))
                 .await()
@@ -184,7 +188,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .filter {
                     it.jsonObject["node"]!!.jsonObject["title"]!!.jsonPrimitive.content.contains(
                         query,
-                        ignoreCase = true
+                        ignoreCase = true,
                     )
                 }
                 .map {

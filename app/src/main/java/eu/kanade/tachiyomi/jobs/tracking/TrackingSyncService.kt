@@ -11,7 +11,7 @@ import kotlinx.coroutines.delay
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import kotlin.coroutines.cancellation.CancellationException
-import kotlin.time.Duration
+import kotlin.time.Duration.Companion.seconds
 
 class TrackingSyncService {
 
@@ -24,7 +24,6 @@ class TrackingSyncService {
         updateNotification: (title: String, progress: Int, total: Int) -> Unit,
         completeNotification: () -> Unit,
     ) {
-
         var count = 0
         val librayMangaList = db.getLibraryMangaList().executeAsBlocking()
         val loggedServices = trackManager.services.filter { it.isLogged() }
@@ -47,7 +46,7 @@ class TrackingSyncService {
                         }
                     }
                 }
-                delay(Duration.Companion.seconds(1))
+                delay(1.seconds)
             }
         }
         completeNotification()

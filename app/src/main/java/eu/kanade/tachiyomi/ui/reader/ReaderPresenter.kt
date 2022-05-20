@@ -216,7 +216,7 @@ class ReaderPresenter(
 
                     // Ignore onNext event
                 },
-                ReaderActivity::setInitialChapterError
+                ReaderActivity::setInitialChapterError,
             )
     }
 
@@ -225,13 +225,15 @@ class ReaderPresenter(
         chapterItems = withContext(Dispatchers.IO) {
             val chapterSort = ChapterSort(manga, chapterFilter, preferences)
             val dbChapters = db.getChapters(manga).executeAsBlocking()
-            chapterSort.getChaptersSorted(dbChapters,
+            chapterSort.getChaptersSorted(
+                dbChapters,
                 filterForReader = true,
-                currentChapter = getCurrentChapter()?.chapter).map {
+                currentChapter = getCurrentChapter()?.chapter,
+            ).map {
                 ReaderChapterItem(
                     it,
                     manga,
-                    it.id == getCurrentChapter()?.chapter?.id ?: chapterId
+                    it.id == getCurrentChapter()?.chapter?.id ?: chapterId,
                 )
             }
         }
@@ -254,7 +256,7 @@ class ReaderPresenter(
         NotificationReceiver.dismissNotification(
             preferences.context,
             manga.id!!.hashCode(),
-            Notifications.ID_NEW_CHAPTERS
+            Notifications.ID_NEW_CHAPTERS,
         )
 
         loader = ChapterLoader(downloadManager, manga, sourceManager)
@@ -274,7 +276,7 @@ class ReaderPresenter(
                 { _, _ ->
                     // Ignore onNext event
                 },
-                ReaderActivity::setInitialChapterError
+                ReaderActivity::setInitialChapterError,
             )
     }
 
@@ -297,9 +299,9 @@ class ReaderPresenter(
                     ViewerChapters(
                         chapter,
                         chapterList.getOrNull(chapterPos - 1),
-                        chapterList.getOrNull(chapterPos + 1)
+                        chapterList.getOrNull(chapterPos + 1),
                     )
-                }
+                },
             )
             .observeOn(AndroidSchedulers.mainThread())
             .doOnNext { newChapters ->
@@ -396,7 +398,7 @@ class ReaderPresenter(
                 },
                 { _, _ ->
                     // Ignore onError event, viewers handle that state
-                }
+                },
             )
     }
 
@@ -640,7 +642,7 @@ class ReaderPresenter(
                     view.setManga(manga)
                     view.setChapters(currChapters)
                 }
-            })
+            },)
     }
 
     /**
@@ -670,7 +672,7 @@ class ReaderPresenter(
                 if (currChapters != null) {
                     view.setOrientation(getMangaOrientationType())
                 }
-            })
+            },)
     }
 
     /**
@@ -769,7 +771,7 @@ class ReaderPresenter(
 
         // Build destination file.
         val filename = DiskUtil.buildValidFilename(
-            "${manga.title} - ${chapter.name}".take(225)
+            "${manga.title} - ${chapter.name}".take(225),
         ) + " - ${page1.number}-${page2.number}.jpg"
 
         val destFile = File(directory, filename)
@@ -815,7 +817,7 @@ class ReaderPresenter(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeFirst(
                 { view, file -> view.onSaveImageResult(SaveImageResult.Success(file)) },
-                { view, error -> view.onSaveImageResult(SaveImageResult.Error(error)) }
+                { view, error -> view.onSaveImageResult(SaveImageResult.Error(error)) },
             )
     }
 
@@ -875,7 +877,7 @@ class ReaderPresenter(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeFirst(
                 { view, file -> view.onShareImageResult(file, page) },
-                { _, _ -> /* Empty */ }
+                { _, _ -> /* Empty */ },
             )
     }
 
@@ -924,7 +926,7 @@ class ReaderPresenter(
             .observeOn(AndroidSchedulers.mainThread())
             .subscribeFirst(
                 { view, result -> view.onSetAsCoverResult(result) },
-                { view, _ -> view.onSetAsCoverResult(SetAsCoverResult.Error) }
+                { view, _ -> view.onSetAsCoverResult(SetAsCoverResult.Error) },
             )
     }
 

@@ -37,27 +37,34 @@ fun EmptyScreen(
     val iconColor = MaterialTheme.colorScheme.onSurface.copy(alpha = .45f)
     BoxWithConstraints(modifier = Modifier.fillMaxSize()) {
         val top = maxHeight / 2
-        Column(modifier = Modifier
-            .fillMaxSize()
-            .paddingFromBaseline(top = top),
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .paddingFromBaseline(top = top),
             Arrangement.Top,
-            Alignment.CenterHorizontally) {
-            Image(asset = iconicImage,
+            Alignment.CenterHorizontally,
+        ) {
+            Image(
+                asset = iconicImage,
                 modifier = Modifier
                     .size(iconSize),
-                colorFilter = ColorFilter.tint(iconColor))
+                colorFilter = ColorFilter.tint(iconColor),
+            )
             message?.let {
-                Text(text = stringResource(id = message),
+                Text(
+                    text = stringResource(id = message),
                     color = iconColor,
-                    style = MaterialTheme.typography.bodyLarge)
+                    style = MaterialTheme.typography.bodyLarge,
+                )
             }
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
                 actions.forEach { action ->
                     Spacer(modifier = Modifier.size(16.dp))
                     TextButton(onClick = action.onClick) {
-                        Text(text = stringResource(id = action.resId),
+                        Text(
+                            text = stringResource(id = action.resId),
                             color = MaterialTheme.colorScheme.secondary,
-                            style = MaterialTheme.typography.titleLarge
+                            style = MaterialTheme.typography.titleLarge,
                         )
                     }
                 }
@@ -73,7 +80,8 @@ private fun EmptyViewPreview() {
         iconicImage = CommunityMaterial.Icon.cmd_compass_off,
         iconSize = 72.dp,
         message = R.string.no_results_found,
-        actions = listOf(Action(R.string.retry)))
+        actions = listOf(Action(R.string.retry)),
+    )
 }
 
 data class Action(

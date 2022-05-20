@@ -27,7 +27,7 @@ class LibraryHeaderGestureDetector(
         e1: MotionEvent?,
         e2: MotionEvent?,
         distanceX: Float,
-        distanceY: Float
+        distanceY: Float,
     ): Boolean {
         if (binding == null || header == null) return false
         val distance = ((e1?.rawX ?: 0f) - (e2?.rawX ?: 0f))
@@ -61,7 +61,7 @@ class LibraryHeaderGestureDetector(
         e1: MotionEvent,
         e2: MotionEvent,
         velocityX: Float,
-        velocityY: Float
+        velocityY: Float,
     ): Boolean {
         var result = false
         val diffY = e2.y - e1.y

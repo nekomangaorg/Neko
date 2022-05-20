@@ -10,7 +10,6 @@ import eu.kanade.tachiyomi.ui.source.browse.Pager
 class FollowsPager(val source: MangaDex) : Pager() {
 
     override suspend fun requestNextPage() {
-
         val mangaListPage = source.fetchFollowList()
 
         if (mangaListPage.manga.isNotEmpty()) {

@@ -27,7 +27,7 @@ import kotlin.math.min
 class ReaderProgressBar @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+    defStyleAttr: Int = 0,
 ) : View(context, attrs, defStyleAttr) {
 
     /**
@@ -76,7 +76,7 @@ class ReaderProgressBar @JvmOverloads constructor(
             Animation.RELATIVE_TO_SELF,
             0.5f,
             Animation.RELATIVE_TO_SELF,
-            0.5f
+            0.5f,
         ).apply {
             interpolator = LinearInterpolator()
             repeatCount = Animation.INFINITE
@@ -184,7 +184,7 @@ class ReaderProgressBar @JvmOverloads constructor(
                         override fun onAnimationCancel(animation: Animator?) {
                             alpha = 1f
                         }
-                    }
+                    },
                 )
                 start()
             }

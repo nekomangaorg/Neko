@@ -25,7 +25,7 @@ class AppUpdateChecker {
     ): AppUpdateResult {
         // Limit checks to once a day at most
         if (!isUserPrompt && Date().time < preferences.lastAppCheck()
-                .get() + TimeUnit.DAYS.toMillis(1)
+            .get() + TimeUnit.DAYS.toMillis(1)
         ) {
             return AppUpdateResult.NoNewUpdate
         }
@@ -54,7 +54,7 @@ class AppUpdateChecker {
                 AppUpdateNotifier(context).promptUpdate(
                     result.release.info,
                     result.release.downloadLink,
-                    result.release.releaseLink
+                    result.release.releaseLink,
                 )
             }
 

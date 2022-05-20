@@ -11,7 +11,7 @@ open class ListMatPreference @JvmOverloads constructor(
     activity: Activity?,
     context: Context,
     attrs: AttributeSet? =
-        null
+        null,
 ) :
     MatPreference(activity, context, attrs) {
 
@@ -47,7 +47,7 @@ open class ListMatPreference @JvmOverloads constructor(
             if (sharedPref != null) {
                 val settings = context.getSharedPreferences(sharedPref, Context.MODE_PRIVATE)
                 settings.getString(key, "")
-            } else prefs.getStringPref(key, defValue).get()
+            } else prefs.getStringPref(key, defValue).get(),
         )
         setSingleChoiceItems(entries.toTypedArray(), default) { dialog, pos ->
             val value = entryValues[pos]
@@ -62,7 +62,7 @@ open class ListMatPreference @JvmOverloads constructor(
                     entries[pos]
                 else otherPref?.summary = otherPref?.summary?.toString()?.replace(
                     oldDef,
-                    entries[pos]
+                    entries[pos],
                 ) ?: entries[pos]
             } else {
                 prefs.getStringPref(key, defValue).set(value)

@@ -23,7 +23,7 @@ fun Context.materialAlertDialog() = MaterialAlertDialogBuilder(withOriginalWidth
 fun MaterialAlertDialogBuilder.addCheckBoxPrompt(
     @StringRes stringRes: Int,
     isChecked: Boolean = false,
-    listener: MaterialAlertDialogBuilderOnCheckClickListener? = null
+    listener: MaterialAlertDialogBuilderOnCheckClickListener? = null,
 ): MaterialAlertDialogBuilder {
     return addCheckBoxPrompt(context.getString(stringRes), isChecked, listener)
 }
@@ -31,11 +31,11 @@ fun MaterialAlertDialogBuilder.addCheckBoxPrompt(
 fun MaterialAlertDialogBuilder.addCheckBoxPrompt(
     text: CharSequence,
     isChecked: Boolean = false,
-    listener: MaterialAlertDialogBuilderOnCheckClickListener? = null
+    listener: MaterialAlertDialogBuilderOnCheckClickListener? = null,
 ): MaterialAlertDialogBuilder {
     return setMultiChoiceItems(
         arrayOf(text),
-        booleanArrayOf(isChecked)
+        booleanArrayOf(isChecked),
     ) { dialog, _, checked ->
         listener?.onClick(dialog, checked)
     }
@@ -56,7 +56,7 @@ fun AlertDialog.disableItems(items: Array<String>) {
             }
 
             override fun onChildViewRemoved(view: View?, view1: View?) {}
-        }
+        },
     )
 }
 
@@ -65,7 +65,7 @@ fun MaterialAlertDialogBuilder.setCustomTitleAndMessage(title: Int, message: Str
         (CustomDialogTitleMessageBinding.inflate(LayoutInflater.from(context))).apply {
             alertTitle.text = context.getString(title)
             this.message.text = message
-        }.root
+        }.root,
     )
 }
 
@@ -89,7 +89,7 @@ internal fun MaterialAlertDialogBuilder.setTriStateItems(
         disabledItems = disabledIndices,
         initialSelection = initialSelection,
         skipChecked = skipChecked,
-        listener = selection
+        listener = selection,
     )
     val updateScrollIndicators = {
         binding.scrollIndicatorUp.isVisible = binding.list.canScrollVertically(-1)
@@ -112,7 +112,7 @@ internal fun MaterialAlertDialogBuilder.setTriStateItems(
 internal fun MaterialAlertDialogBuilder.setNegativeStateItems(
     items: List<CharSequence>,
     initialSelection: BooleanArray = BooleanArray(items.size),
-    listener: DialogInterface.OnMultiChoiceClickListener
+    listener: DialogInterface.OnMultiChoiceClickListener,
 ): MaterialAlertDialogBuilder {
     return setTriStateItems(
         items = items,
@@ -124,7 +124,7 @@ internal fun MaterialAlertDialogBuilder.setNegativeStateItems(
             }
         }
             .toIntArray(),
-        skipChecked = true
+        skipChecked = true,
     ) { _, _, _, index, state ->
         listener.onClick(null, index, state == TriStateCheckBox.State.IGNORE.ordinal)
     }

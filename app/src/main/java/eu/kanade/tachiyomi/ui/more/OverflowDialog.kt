@@ -32,8 +32,8 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
             ColorUtils.blendARGB(
                 activity.getResourceColor(R.attr.background),
                 activity.getResourceColor(R.attr.colorSecondary),
-                0.075f
-            )
+                0.075f,
+            ),
         )
         binding.touchOutside.setOnClickListener {
             cancel()
@@ -43,13 +43,13 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
             val titleText = context.getString(
                 if (preferences.incognitoMode().get()) R.string.turn_off_
                 else R.string.turn_on_,
-                incogText
+                incogText,
             )
             val subtitleText = context.getString(R.string.pauses_reading_history)
             text = titleText.withSubtitle(context, subtitleText)
             setIcon(
                 if (preferences.incognitoMode().get()) R.drawable.ic_incognito_24dp
-                else R.drawable.ic_glasses_24dp
+                else R.drawable.ic_glasses_24dp,
             )
             setOnClickListener {
                 preferences.incognitoMode().toggle()
@@ -57,13 +57,13 @@ class OverflowDialog(activity: MainActivity) : Dialog(activity, R.style.Overflow
                 val newTitle = context.getString(
                     if (incog) R.string.turn_off_
                     else R.string.turn_on_,
-                    incogText
+                    incogText,
                 )
                 text = newTitle.withSubtitle(context, subtitleText)
                 val drawable = AnimatedVectorDrawableCompat.create(
                     context,
                     if (incog) R.drawable.anim_read_to_incog
-                    else R.drawable.anim_incog_to_read
+                    else R.drawable.anim_incog_to_read,
                 )
                 setIcon(drawable)
                 (getIcon() as? AnimatedVectorDrawableCompat)?.start()

@@ -110,7 +110,7 @@ interface Manga : SManga {
                 TYPE_MANHUA -> R.string.manhua
                 TYPE_COMIC -> R.string.comic
                 else -> R.string.manga
-            }
+            },
         ).lowercase(Locale.getDefault())
     }
 
@@ -178,7 +178,7 @@ interface Manga : SManga {
         val list = mutableListOf<ExternalLink>()
         list.add(Dex(MdUtil.getMangaId(url)))
         list.add(DexApi(MdUtil.getMangaId(url)))
-        
+
         kitsu_id?.let {
             list.add(Kitsu(it))
         }
@@ -207,7 +207,6 @@ interface Manga : SManga {
                     split[0] == "cdj" -> list.add(CdJapan(split[1]))
                     split[0] == "ebj" -> list.add(EBookJapan(split[1]))
                     split[0] == "amz" -> list.add(Amazon(split[1]))
-
                 }
             }
         }
@@ -324,6 +323,6 @@ fun Manga.toMangaInfo(): MangaInfo {
         genres = this.getGenres() ?: emptyList(),
         key = this.url,
         status = this.status,
-        title = this.title
+        title = this.title,
     )
 }

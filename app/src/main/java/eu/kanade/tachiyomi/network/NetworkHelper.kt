@@ -88,7 +88,7 @@ class NetworkHelper(val context: Context) {
                             .maxContentLength(250000L)
                             .redactHeaders(emptySet())
                             .alwaysReadResponseBody(false)
-                            .build()
+                            .build(),
                     )
                 }
                 when (preferences.dohProvider()) {
@@ -117,7 +117,7 @@ class NetworkHelper(val context: Context) {
                     addInterceptor(
                         HttpLoggingInterceptor(logger).apply {
                             level = HttpLoggingInterceptor.Level.BODY
-                        }
+                        },
                     )
                 }
             }.build()
@@ -160,7 +160,7 @@ class NetworkHelper(val context: Context) {
     }.build()
 
     private val jsonRetrofitClient = Retrofit.Builder().addConverterFactory(
-        json.asConverterFactory("application/json".toMediaType())
+        json.asConverterFactory("application/json".toMediaType()),
     )
         .baseUrl(MdConstants.baseUrl)
         .addCallAdapterFactory(ApiResponseCallAdapterFactory.create())
@@ -178,7 +178,7 @@ class NetworkHelper(val context: Context) {
     val similarService: SimilarService =
         jsonRetrofitClient.client(
             client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
-                .readTimeout(2, TimeUnit.SECONDS).build()
+                .readTimeout(2, TimeUnit.SECONDS).build(),
         )
             .build()
             .create(SimilarService::class.java)

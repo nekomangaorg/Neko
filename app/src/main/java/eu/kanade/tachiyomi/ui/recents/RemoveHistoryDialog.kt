@@ -37,15 +37,15 @@ class RemoveHistoryDialog<T>(bundle: Bundle? = null) : DialogController(bundle)
                 R.string.reset_chapter_question,
                 if (chapter?.name != null) activity.getString(
                     R.string.this_will_remove_the_read_date_for_x_question,
-                    chapter?.name ?: ""
+                    chapter?.name ?: "",
                 )
-                else activity.getString(R.string.this_will_remove_the_read_date_question)
+                else activity.getString(R.string.this_will_remove_the_read_date_question),
             )
             .addCheckBoxPrompt(
                 activity.getString(
                     R.string.reset_all_chapters_for_this_,
-                    manga!!.seriesType(activity)
-                )
+                    manga!!.seriesType(activity),
+                ),
             )
             .setNegativeButton(android.R.string.cancel, null)
             .setPositiveButton(R.string.reset) { dialog, _ ->

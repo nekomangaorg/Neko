@@ -75,7 +75,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
             // with horizontal insets
             v.updatePadding(
                 left = insets.getInsets(systemBars()).left,
-                right = insets.getInsets(systemBars()).right
+                right = insets.getInsets(systemBars()).right,
             )
             WindowInsetsCompat.Builder(insets).setInsets(
                 systemBars(),
@@ -83,8 +83,8 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                     0,
                     insets.getInsets(systemBars()).top,
                     0,
-                    insets.getInsets(systemBars()).bottom
-                )
+                    insets.getInsets(systemBars()).bottom,
+                ),
             ).build()
         }
         binding.swipeRefresh.setStyle()
@@ -94,7 +94,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
 
         window.statusBarColor = ColorUtils.setAlphaComponent(
             getResourceColor(R.attr.colorSurface),
-            255
+            255,
         )
 
         ViewCompat.setOnApplyWindowInsetsListener(content) { v, insets ->
@@ -111,7 +111,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 insets.getInsets(systemBars()).left,
                 insets.getInsets(systemBars()).top,
                 insets.getInsets(systemBars()).right,
-                0
+                0,
             )
             if (!isInNightMode()) {
                 WindowInsetsControllerCompat(window, content).isAppearanceLightNavigationBars = true
@@ -155,12 +155,12 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
         if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK_STRATEGY)) {
             setForceDarkStrategy(
                 binding.webview.settings,
-                DARK_STRATEGY_WEB_THEME_DARKENING_ONLY
+                DARK_STRATEGY_WEB_THEME_DARKENING_ONLY,
             )
             if (WebViewFeature.isFeatureSupported(WebViewFeature.FORCE_DARK)) {
                 setForceDark(
                     binding.webview.settings,
-                    if (isInNightMode()) FORCE_DARK_ON else FORCE_DARK_OFF
+                    if (isInNightMode()) FORCE_DARK_ON else FORCE_DARK_OFF,
                 )
             }
         }
@@ -199,7 +199,7 @@ open class BaseWebViewActivity : BaseActivity<WebviewActivityBinding>() {
                 R.attr.colorSurface,
                 R.attr.actionBarTintColor,
                 R.attr.colorPrimaryVariant,
-            )
+            ),
         )
         setWebDarkMode()
         val colorSurface = attrs.getColor(0, 0)

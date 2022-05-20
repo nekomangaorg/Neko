@@ -144,7 +144,7 @@ class SettingsAdvancedController : SettingsController() {
                 titleRes = R.string.clean_up_cached_covers
                 summary = context.getString(
                     R.string.delete_old_covers_in_library_used_,
-                    coverCache.getChapterCacheSize()
+                    coverCache.getChapterCacheSize(),
                 )
 
                 onClick {
@@ -159,7 +159,7 @@ class SettingsAdvancedController : SettingsController() {
                 titleRes = R.string.clear_cached_covers_non_library
                 summary = context.getString(
                     R.string.delete_all_covers__not_in_library_used_,
-                    coverCache.getOnlineCoverCacheSize()
+                    coverCache.getOnlineCoverCacheSize(),
                 )
 
                 onClick {
@@ -256,8 +256,8 @@ class SettingsAdvancedController : SettingsController() {
                 context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${
-                    it.name.lowercase(Locale.ENGLISH)
-                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                it.name.lowercase(Locale.ENGLISH)
+                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
                 } (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
@@ -267,7 +267,7 @@ class SettingsAdvancedController : SettingsController() {
                 val logFolder = File(
                     Environment.getExternalStorageDirectory().absolutePath + File.separator +
                         context.getString(R.string.app_name),
-                    "logs"
+                    "logs",
                 )
                 logFolder.deleteRecursively()
             }
@@ -280,7 +280,7 @@ class SettingsAdvancedController : SettingsController() {
                 .setTitle(R.string.clean_up_downloaded_chapters)
                 .setMultiChoiceItems(
                     R.array.clean_up_downloads,
-                    booleanArrayOf(true, true, true)
+                    booleanArrayOf(true, true, true),
                 ) { dialog, position, _ ->
                     if (position == 0) {
                         val listView = (dialog as AlertDialog).listView
@@ -293,7 +293,7 @@ class SettingsAdvancedController : SettingsController() {
                     val deleteNonFavorite = listView.isItemChecked(2)
                     (targetController as? SettingsAdvancedController)?.cleanupDownloads(
                         deleteRead,
-                        deleteNonFavorite
+                        deleteNonFavorite,
                     )
                 }
                 .setNegativeButton(android.R.string.cancel, null)
@@ -332,7 +332,7 @@ class SettingsAdvancedController : SettingsController() {
                     manga,
                     source,
                     removeRead,
-                    removeNonFavorite
+                    removeNonFavorite,
                 )
             }
             launchUI {
@@ -342,7 +342,7 @@ class SettingsAdvancedController : SettingsController() {
                     else resources!!.getQuantityString(
                         R.plurals.cleanup_done,
                         foldersCleared,
-                        foldersCleared
+                        foldersCleared,
                     )
                 activity.toast(cleanupString, Toast.LENGTH_LONG)
             }
@@ -374,12 +374,12 @@ class SettingsAdvancedController : SettingsController() {
                         resources?.getQuantityString(
                             R.plurals.cache_cleared,
                             deletedFiles,
-                            deletedFiles
-                        )
+                            deletedFiles,
+                        ),
                     )
                     findPreference(CLEAR_CACHE_KEY)?.summary =
                         resources?.getString(R.string.used_, chapterCache.readableSize)
-                }
+                },
             )
     }
 

@@ -32,7 +32,7 @@ class SortTextView constructor(context: Context, attrs: AttributeSet?) :
     private val binding = SortTextViewBinding.inflate(
         LayoutInflater.from(context),
         this,
-        false
+        false,
     )
     private var mOnSortChangeListener: OnSortChangeListener? = null
 

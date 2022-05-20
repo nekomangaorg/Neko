@@ -27,13 +27,15 @@ internal fun MangaTitle(
 ) {
     Text(
         text = title,
-        style = TextStyle(fontFamily = Typefaces.montserrat,
+        style = TextStyle(
+            fontFamily = Typefaces.montserrat,
             fontSize = fontSize,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = fontWeight),
+            fontWeight = fontWeight,
+        ),
         maxLines = maxLines,
         overflow = TextOverflow.Ellipsis,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -46,13 +48,15 @@ internal fun DisplayText(
 ) {
     Text(
         text = displayText,
-        style = TextStyle(fontFamily = Typefaces.montserrat,
+        style = TextStyle(
+            fontFamily = Typefaces.montserrat,
             fontSize = fontSize,
             fontWeight = fontWeight,
-            color = MaterialTheme.colorScheme.onSurface.copy(.6f)),
+            color = MaterialTheme.colorScheme.onSurface.copy(.6f),
+        ),
         maxLines = 1,
         overflow = TextOverflow.Ellipsis,
-        modifier = modifier
+        modifier = modifier,
     )
 }
 
@@ -63,6 +67,6 @@ internal fun Favorited(offset: Dp) {
         colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
         modifier = Modifier
             .size(24.dp)
-            .offset(x = offset, y = offset)
+            .offset(x = offset, y = offset),
     )
 }

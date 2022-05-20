@@ -45,16 +45,23 @@ fun TooltipBox(
             onLongClick = {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 showTooltip.value = true
-            })
+            },
+        ),
     ) {
-        Icon(imageVector = icon,
-            contentDescription = toolTipLabel)
+        Icon(
+            imageVector = icon,
+            contentDescription = toolTipLabel,
+        )
     }
 
-    Tooltip(showTooltip,
-        modifier = Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = .75f))) {
-        Text(text = toolTipLabel,
-            color = MaterialTheme.colorScheme.surface)
+    Tooltip(
+        showTooltip,
+        modifier = Modifier.background(MaterialTheme.colorScheme.onSurface.copy(alpha = .75f)),
+    ) {
+        Text(
+            text = toolTipLabel,
+            color = MaterialTheme.colorScheme.surface,
+        )
     }
 }
 
@@ -72,7 +79,7 @@ fun CombinedClickableIconButton(
         modifier
             .minimumTouchTargetSize()
             .size(IconButtonTokens.StateLayerSize),
-        contentAlignment = Alignment.Center
+        contentAlignment = Alignment.Center,
     ) {
         val contentColor =
             if (enabled) {
@@ -99,13 +106,12 @@ fun Modifier.iconButtonCombinedClickable(
         interactionSource = remember { MutableInteractionSource() },
         indication = rememberRipple(
             bounded = false,
-            radius = IconButtonTokens.StateLayerSize / 2
+            radius = IconButtonTokens.StateLayerSize / 2,
         ),
         onClickLabel = toolTipLabel,
         role = Role.Button,
         onClick = onClick,
         onLongClick = onLongClick,
-        onDoubleClick = onDoubleClick
+        onDoubleClick = onDoubleClick,
     )
 }
-

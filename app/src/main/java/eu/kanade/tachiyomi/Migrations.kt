@@ -89,7 +89,6 @@ object Migrations {
                 }
             }
 
-
             if (oldVersion < 120) {
                 // Migrate Rotation and Viewer values to default values for viewer_flags
                 val newOrientation = when (prefs.getInt("pref_rotation_type_key", 1)) {

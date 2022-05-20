@@ -26,7 +26,6 @@ abstract class BaseOAuthLoginActivity : BaseThemedActivity() {
             }
         }
 
-
         handleResult(intent.data)
     }
 

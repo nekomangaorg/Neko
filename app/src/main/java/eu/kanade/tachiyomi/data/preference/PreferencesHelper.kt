@@ -80,16 +80,16 @@ class PreferencesHelper(val context: Context) {
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
                 defaultFolder,
-            "downloads"
-        )
+            "downloads",
+        ),
     )
 
     private val defaultBackupDir = Uri.fromFile(
         File(
             Environment.getExternalStorageDirectory().absolutePath + File.separator +
                 defaultFolder,
-            "backup"
-        )
+            "backup",
+        ),
     )
 
     fun getInt(key: String, default: Int) = flowPrefs.getInt(key, default)
@@ -196,7 +196,7 @@ class PreferencesHelper(val context: Context) {
 
     fun readerBottomButtons() = flowPrefs.getStringSet(
         Keys.readerBottomButtons,
-        ReaderBottomButton.BUTTONS_DEFAULTS
+        ReaderBottomButton.BUTTONS_DEFAULTS,
     )
 
     fun showNavigationOverlayNewUser() =
@@ -518,7 +518,7 @@ class PreferencesHelper(val context: Context) {
     fun contentRatingSelections(): MutableSet<String> =
         prefs.getStringSet(
             Keys.contentRating,
-            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive)
+            setOf(MdConstants.ContentRating.safe, MdConstants.ContentRating.suggestive),
         )!!
 
     fun sessionToken() = prefs.getString(Keys.sessionToken, "")

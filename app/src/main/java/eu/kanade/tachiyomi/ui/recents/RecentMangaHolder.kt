@@ -117,7 +117,7 @@ class RecentMangaHolder(
         }
         if (binding.frontView.translationX == 0f) {
             binding.read.setImageResource(
-                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp
+                if (item.read) R.drawable.ic_eye_off_24dp else R.drawable.ic_eye_24dp,
             )
         }
         val notValidNum = item.mch.chapter.chapter_number <= 0
@@ -125,33 +125,33 @@ class RecentMangaHolder(
         binding.body.text = when {
             item.mch.chapter.id == null -> binding.body.context.getString(
                 R.string.added_,
-                item.mch.manga.date_added.timeSpanFromNow(itemView.context)
+                item.mch.manga.date_added.timeSpanFromNow(itemView.context),
             )
             isSmallUpdates -> ""
             item.mch.history.id == null -> binding.body.context.getString(
                 R.string.updated_,
-                item.chapter.date_upload.timeSpanFromNow(itemView.context)
+                item.chapter.date_upload.timeSpanFromNow(itemView.context),
             )
             item.chapter.id != item.mch.chapter.id ->
                 binding.body.context.getString(
                     R.string.read_,
-                    item.mch.history.last_read.timeSpanFromNow
+                    item.mch.history.last_read.timeSpanFromNow,
                 ) + "\n" + binding.body.context.getString(
                     if (notValidNum) R.string.last_read_ else R.string.last_read_chapter_,
-                    if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number)
+                    if (notValidNum) item.mch.chapter.name else adapter.decimalFormat.format(item.mch.chapter.chapter_number),
                 )
             item.chapter.pages_left > 0 && !item.chapter.read ->
                 binding.body.context.getString(
                     R.string.read_,
-                    item.mch.history.last_read.timeSpanFromNow(itemView.context)
+                    item.mch.history.last_read.timeSpanFromNow(itemView.context),
                 ) + "\n" + itemView.resources.getQuantityString(
                     R.plurals.pages_left,
                     item.chapter.pages_left,
-                    item.chapter.pages_left
+                    item.chapter.pages_left,
                 )
             else -> binding.body.context.getString(
                 R.string.read_,
-                item.mch.history.last_read.timeSpanFromNow(itemView.context)
+                item.mch.history.last_read.timeSpanFromNow(itemView.context),
             )
         }
         if ((itemView.context as? Activity)?.isDestroyed != true) {
@@ -160,7 +160,7 @@ class RecentMangaHolder(
         notifyStatus(
             if (adapter.isSelected(flexibleAdapterPosition)) Download.State.CHECKED else item.status,
             item.progress,
-            item.chapter.read
+            item.chapter.read,
         )
 
         resetFrontView()

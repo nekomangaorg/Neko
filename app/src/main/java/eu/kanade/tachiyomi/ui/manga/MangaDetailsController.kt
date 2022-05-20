@@ -118,7 +118,7 @@ import me.saket.cascade.CascadePopupMenu
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.io.File
-import java.util.*
+import java.util.Locale
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -140,7 +140,7 @@ class MangaDetailsController :
             putLong(MANGA_EXTRA, manga.id ?: 0)
             putBoolean(FROM_CATALOGUE_EXTRA, fromCatalogue)
             putBoolean(UPDATE_EXTRA, update)
-        }
+        },
     ) {
         this.manga = manga
         this.shouldLockIfNeeded = shouldLockIfNeeded
@@ -148,7 +148,7 @@ class MangaDetailsController :
     }
 
     constructor(mangaId: Long) : this(
-        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()!!
+        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()!!,
     )
 
     constructor(bundle: Bundle) : this(bundle.getLong(MANGA_EXTRA)) {
@@ -157,7 +157,7 @@ class MangaDetailsController :
         if (notificationId > -1) NotificationReceiver.dismissNotification(
             context,
             notificationId,
-            bundle.getInt("groupId", 0)
+            bundle.getInt("groupId", 0),
         )
     }
 
@@ -237,7 +237,7 @@ class MangaDetailsController :
                         it,
                         context.getColor(if (context.isInNightMode()) R.color.md_white_1000 else R.color.md_black_1000),
                         (if (context.isInNightMode().not()) luminance else -(luminance - 1))
-                            .toFloat() * if (context.isInNightMode()) 0.33f else 0.5f
+                            .toFloat() * if (context.isInNightMode()) 0.33f else 0.5f,
                     )
                 } else {
                     it
@@ -263,17 +263,17 @@ class MangaDetailsController :
                     )
                 }
                 )?.let {
-                    // this makes the color more consistent regardless of theme
-                    val dominant = it
-                    val domLum = ColorUtils.calculateLuminance(dominant)
-                    val lumWrongForTheme =
-                        (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
-                    ColorUtils.blendARGB(
-                        it,
-                        colorBack,
-                        if (lumWrongForTheme) 0.9f else 0.7f,
-                    )
-                }
+                // this makes the color more consistent regardless of theme
+                val dominant = it
+                val domLum = ColorUtils.calculateLuminance(dominant)
+                val lumWrongForTheme =
+                    (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
+                ColorUtils.blendARGB(
+                    it,
+                    colorBack,
+                    if (lumWrongForTheme) 0.9f else 0.7f,
+                )
+            }
     }
 
     private fun setRefreshStyle() {
@@ -815,7 +815,7 @@ class MangaDetailsController :
         val popup = CascadePopupMenu(
             binding.root.context,
             itemView,
-            styler = cascadeMenuStyler(binding.root.context)
+            styler = cascadeMenuStyler(binding.root.context),
         )
         val isDexChapter = item.chapter.isMergedChapter().not()
 
@@ -833,13 +833,13 @@ class MangaDetailsController :
                     menuClick {
                         activity?.toast(R.string.comments_unavailable_dex)
                         // viewComments(item)  })
-                    }
+                    },
                 )
             }
             add(R.string.open_in_webview).setOnMenuItemClickListener(
                 menuClick {
                     openInWebView(item.chapter.fullUrl())
-                }
+                },
             )
             addSubMenu(R.string.mark_previous_as).also { sub ->
                 sub.add(R.string.read)
@@ -852,17 +852,17 @@ class MangaDetailsController :
                     menuClick {
                         startReadRange(
                             position,
-                            RangeMode.Read
+                            RangeMode.Read,
                         )
-                    }
+                    },
                 )
                 sub.add(R.string.unread).setOnMenuItemClickListener(
                     menuClick {
                         startReadRange(
                             position,
-                            RangeMode.Unread
+                            RangeMode.Unread,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -1075,7 +1075,7 @@ class MangaDetailsController :
                     .show()
             }
             R.id.download_next, R.id.download_next_5, R.id.download_next_10, R.id.download_custom, R.id.download_unread, R.id.download_all -> downloadChapters(
-                item.itemId
+                item.itemId,
             )
             else -> return super.onOptionsItemSelected(item)
         }
@@ -1140,7 +1140,7 @@ class MangaDetailsController :
 
     override fun openSimilar() {
         router.pushController(
-            SimilarController(manga!!).withFadeTransaction()
+            SimilarController(manga!!).withFadeTransaction(),
         )
     }
 
@@ -1174,7 +1174,7 @@ class MangaDetailsController :
             activity.applicationContext,
             presenter.source.id,
             url,
-            presenter.manga.title
+            presenter.manga.title,
         )
         startActivity(intent)
     }
@@ -1294,9 +1294,9 @@ class MangaDetailsController :
             presenter.manga.seriesType(view.context).lowercase(Locale.ROOT),
         )
         if (!presenter.manga.favorite && (
-                snack == null ||
-                    snack?.getText() != text
-                )
+            snack == null ||
+                snack?.getText() != text
+            )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {
@@ -1485,10 +1485,9 @@ class MangaDetailsController :
                 updateHeader()
                 presenter.afterFavorited()
                 showAddedSnack()
-
             },
             onMangaMoved = { updateHeader() },
-            onMangaDeleted = { presenter.confirmDeletion() }
+            onMangaDeleted = { presenter.confirmDeletion() },
         )
         if (snack?.duration == Snackbar.LENGTH_INDEFINITE) {
             val favButton = getHeader()?.binding?.favoriteButton

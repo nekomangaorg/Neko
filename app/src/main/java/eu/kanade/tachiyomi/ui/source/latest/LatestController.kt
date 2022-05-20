@@ -34,42 +34,51 @@ class LatestController(bundle: Bundle? = null) :
 
     @Composable
     override fun ScreenContent() {
-
         val isList by preferences.browseAsList().asFlow()
             .collectAsState(preferences.browseAsList().get())
 
         val mangaClicked: (Manga) -> Unit = { manga ->
-            router.pushController(MangaDetailsController(manga,
-                true).withFadeTransaction())
+            router.pushController(
+                MangaDetailsController(
+                    manga,
+                    true,
+                ).withFadeTransaction(),
+            )
         }
 
         NekoScaffold(
             title = stringResource(id = R.string.latest),
             onNavigationIconClicked = { activity?.onBackPressed() },
             actions = {
-                ListGridActionButton(isList = isList,
-                    buttonClicked = { preferences.browseAsList().set(isList.not()) })
+                ListGridActionButton(
+                    isList = isList,
+                    buttonClicked = { preferences.browseAsList().set(isList.not()) },
+                )
             },
         ) { incomingContentPadding ->
             val contentPadding =
-                PaddingValues(bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                    .asPaddingValues().calculateBottomPadding(),
-                    top = incomingContentPadding.calculateTopPadding())
+                PaddingValues(
+                    bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                        .asPaddingValues().calculateBottomPadding(),
+                    top = incomingContentPadding.calculateTopPadding(),
+                )
 
             val mangaListPagingItems = presenter.mangaList.collectAsLazyPagingItems()
 
             if (isList) {
-                PagingListManga(mangaListPagingItems = mangaListPagingItems,
+                PagingListManga(
+                    mangaListPagingItems = mangaListPagingItems,
                     shouldOutlineCover = preferences.outlineOnCovers()
                         .get(),
                     contentPadding = contentPadding,
-                    onClick = mangaClicked)
+                    onClick = mangaClicked,
+                )
             } else {
-
                 val columns =
                     binding.root.measuredWidth.numberOfColumnsForCompose(
                         preferences.gridSize()
-                            .get())
+                            .get(),
+                    )
 
                 PagingMangaGrid(
                     mangaListPagingItems = mangaListPagingItems,
@@ -78,7 +87,7 @@ class LatestController(bundle: Bundle? = null) :
                     columns = columns,
                     isComfortable = preferences.libraryLayout().get() == 2,
                     contentPadding = contentPadding,
-                    onClick = mangaClicked
+                    onClick = mangaClicked,
                 )
             }
         }

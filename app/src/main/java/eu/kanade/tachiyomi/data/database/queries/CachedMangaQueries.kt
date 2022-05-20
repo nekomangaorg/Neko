@@ -16,13 +16,13 @@ interface CachedMangaQueries : DbProvider {
             .query(
                 "INSERT INTO ${CachedMangaTable.TABLE_FTS} " +
                     "(${CachedMangaTable.COL_MANGA_TITLE}, ${CachedMangaTable.COL_MANGA_UUID}," +
-                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);"
+                    " ${CachedMangaTable.COL_MANGA_RATING}) VALUES (?, ?, ?);",
             )
 
         cachedManga.forEach {
             db.lowLevel().executeSQL(
                 query.args(it.title, it.uuid, it.rating)
-                    .build()
+                    .build(),
             )
         }
     }
@@ -31,7 +31,7 @@ interface CachedMangaQueries : DbProvider {
         .byQuery(
             DeleteQuery.builder()
                 .table(CachedMangaTable.TABLE_FTS)
-                .build()
+                .build(),
         )
         .prepare()
 }

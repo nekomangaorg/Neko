@@ -79,7 +79,7 @@ class SettingsLibraryController : SettingsController() {
                     context.resources.getQuantityString(
                         R.plurals.category_plural,
                         catCount,
-                        catCount
+                        catCount,
                     )
                 onClick { router.pushController(CategoryController().withFadeTransaction()) }
             }
@@ -117,7 +117,7 @@ class SettingsLibraryController : SettingsController() {
                     R.string.every_12_hours,
                     R.string.daily,
                     R.string.every_2_days,
-                    R.string.weekly
+                    R.string.weekly,
                 )
                 entryValues = listOf(0, 6, 12, 24, 48, 168)
                 defaultValue = 24
@@ -166,7 +166,7 @@ class SettingsLibraryController : SettingsController() {
                 entriesRes = arrayOf(
                     R.string.alphabetically,
                     R.string.last_updated,
-                    R.string.next_updated
+                    R.string.next_updated,
                 )
                 entryRange = 0..2
                 defaultValue = 0
@@ -190,7 +190,7 @@ class SettingsLibraryController : SettingsController() {
 
                 entriesRes = arrayOf(
                     R.string.first_category,
-                    R.string.categories_in_global_update
+                    R.string.categories_in_global_update,
                 )
                 entryRange = 0..1
                 defaultValue = -1

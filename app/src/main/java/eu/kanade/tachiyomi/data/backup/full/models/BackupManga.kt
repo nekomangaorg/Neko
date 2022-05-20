@@ -44,8 +44,10 @@ data class BackupManga(
 ) {
     fun getMangaImpl(): MangaImpl {
         return MangaImpl().apply {
-            url = this@BackupManga.url.replace("/manga/",
-                "/title/") //tachiyomi extension uses /manga/
+            url = this@BackupManga.url.replace(
+                "/manga/",
+                "/title/",
+            ) // tachiyomi extension uses /manga/
             title = this@BackupManga.title
             artist = this@BackupManga.artist
             author = this@BackupManga.author

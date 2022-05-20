@@ -17,7 +17,7 @@ import uy.kohesive.injekt.injectLazy
 
 class LibraryMangaImageTarget(
     override val view: ImageView,
-    val manga: Manga
+    val manga: Manga,
 ) : ImageViewTarget(view) {
 
     private val coverCache: CoverCache by injectLazy()
@@ -46,7 +46,7 @@ class LibraryMangaImageTarget(
 inline fun ImageView.loadManga(
     manga: Manga,
     imageLoader: ImageLoader = context.imageLoader,
-    builder: ImageRequest.Builder.() -> Unit = {}
+    builder: ImageRequest.Builder.() -> Unit = {},
 ): Disposable {
     val request = ImageRequest.Builder(context)
         .data(manga)

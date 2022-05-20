@@ -18,7 +18,7 @@ class LatestPagingSource(private val latestSourceRepo: LatestRepository) :
             LoadResult.Page(
                 data = repoResult.second,
                 prevKey = if (nextPage == 1) null else nextPage - 1,
-                nextKey = if (repoResult.first) nextPage + 1 else null
+                nextKey = if (repoResult.first) nextPage + 1 else null,
             )
         } catch (e: Exception) {
             LoadResult.Error(e)

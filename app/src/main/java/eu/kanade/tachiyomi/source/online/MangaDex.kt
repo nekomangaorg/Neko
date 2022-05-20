@@ -68,7 +68,6 @@ open class MangaDex : HttpSource() {
                     this.log("trying to get random manga")
                     emit(null)
                 }
-
         }.flowOn(Dispatchers.IO)
     }
 
@@ -129,7 +128,7 @@ open class MangaDex : HttpSource() {
 
     override fun isLogged(): Boolean {
         return preferences.sourceUsername(this).isNullOrBlank().not() && preferences.sourcePassword(
-            this
+            this,
         ).isNullOrBlank().not() && preferences.sessionToken().isNullOrBlank().not() &&
             preferences.refreshToken().isNullOrBlank().not()
     }

@@ -39,8 +39,10 @@ class SimilarRepository {
             val related = async {
                 kotlin.runCatching {
                     logTimeTaken(" Related Rec:") {
-                        createGroup(R.string.related_type,
-                            similarHandler.fetchRelated(dexId, actualRefresh))
+                        createGroup(
+                            R.string.related_type,
+                            similarHandler.fetchRelated(dexId, actualRefresh),
+                        )
                     }
                 }.onFailure { XLog.e("Failed to get related", it) }
                     .getOrNull()
@@ -49,8 +51,10 @@ class SimilarRepository {
             val similar = async {
                 runCatching {
                     logTimeTaken("Similar Recs:") {
-                        createGroup(R.string.similar_type,
-                            similarHandler.fetchSimilar(dexId, actualRefresh))
+                        createGroup(
+                            R.string.similar_type,
+                            similarHandler.fetchSimilar(dexId, actualRefresh),
+                        )
                     }
                 }.onFailure { XLog.e("Failed to get similar", it) }
                     .getOrNull()
@@ -59,9 +63,13 @@ class SimilarRepository {
             val anilist = async {
                 runCatching {
                     logTimeTaken("Anilist Recs:") {
-                        createGroup(R.string.anilist,
-                            similarHandler.fetchAnilist(dexId,
-                                actualRefresh))
+                        createGroup(
+                            R.string.anilist,
+                            similarHandler.fetchAnilist(
+                                dexId,
+                                actualRefresh,
+                            ),
+                        )
                     }
                 }.onFailure { XLog.e("Failed to get anilist recs", it) }
                     .getOrNull()
@@ -70,16 +78,19 @@ class SimilarRepository {
             val mal = async {
                 runCatching {
                     logTimeTaken("Mal Recs:") {
-                        createGroup(R.string.myanimelist,
-                            similarHandler.fetchSimilarExternalMalManga(dexId,
-                                actualRefresh))
+                        createGroup(
+                            R.string.myanimelist,
+                            similarHandler.fetchSimilarExternalMalManga(
+                                dexId,
+                                actualRefresh,
+                            ),
+                        )
                     }
                 }.onFailure { XLog.e("Failed to get mal recs", it) }
                     .getOrNull()
             }
 
             listOfNotNull(related.await(), similar.await(), anilist.await(), mal.await())
-
         }
     }
 
@@ -87,10 +98,15 @@ class SimilarRepository {
         return if (manga.isEmpty()) {
             null
         } else {
-            SimilarMangaGroup(id, manga.map {
-                DisplayManga(it.sManga.toLocalManga(db, mangaDex.id),
-                    it.displayText?.replace("_", " ")?.capitalizeWords())
-            })
+            SimilarMangaGroup(
+                id,
+                manga.map {
+                    DisplayManga(
+                        it.sManga.toLocalManga(db, mangaDex.id),
+                        it.displayText.replace("_", " ").capitalizeWords(),
+                    )
+                },
+            )
         }
     }
 }

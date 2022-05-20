@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterItem
 class RecentMangaItem(
     val mch: MangaChapterHistory = MangaChapterHistory.createBlank(),
     chapter: Chapter = ChapterImpl(),
-    header: AbstractHeaderItem<*>?
+    header: AbstractHeaderItem<*>?,
 ) :
     BaseChapterItem<BaseChapterHolder, AbstractHeaderItem<*>>(chapter, header) {
 
@@ -26,7 +26,7 @@ class RecentMangaItem(
 
     override fun createViewHolder(
         view: View,
-        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>
+        adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
     ): BaseChapterHolder {
         return if (mch.manga.id == null) RecentMangaFooterHolder(view, adapter as RecentMangaAdapter)
         else RecentMangaHolder(view, adapter as RecentMangaAdapter)
@@ -55,7 +55,7 @@ class RecentMangaItem(
         adapter: FlexibleAdapter<IFlexible<RecyclerView.ViewHolder>>,
         holder: BaseChapterHolder,
         position: Int,
-        payloads: MutableList<Any?>?
+        payloads: MutableList<Any?>?,
     ) {
         if (mch.manga.id == null) (holder as? RecentMangaFooterHolder)?.bind((header as? RecentMangaHeaderItem)?.recentsType ?: 0)
         else if (chapter.id != null) (holder as? RecentMangaHolder)?.bind(this)

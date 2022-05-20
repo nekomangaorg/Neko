@@ -52,37 +52,45 @@ fun InformationHeader(
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 
-    ) {
-    val style = TextStyle(fontFamily = Typefaces.montserrat,
+) {
+    val style = TextStyle(
+        fontFamily = Typefaces.montserrat,
         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f))
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f),
+    )
 
     val noRippleInteraction = remember { MutableInteractionSource() }
     val haptic = LocalHapticFeedback.current
 
-
-    Column(modifier = Modifier
-        .fillMaxWidth()
-        .fillMaxHeight()
-        .padding(horizontal = 8.dp)) {
-
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight()
+            .padding(horizontal = 8.dp),
+    ) {
         if (manga.title.isNotNullOrEmpty()) {
-            Text(text = manga.title,
+            Text(
+                text = manga.title,
                 modifier = Modifier
                     .animateContentSize()
                     .indication(indication = null, interactionSource = noRippleInteraction)
-                    .combinedClickable(interactionSource = noRippleInteraction,
+                    .combinedClickable(
+                        interactionSource = noRippleInteraction,
                         indication = null,
                         onLongClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             titleLongClick(manga.title)
                         },
-                        onClick = {}),
+                        onClick = {},
+                    ),
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
                 overflow = TextOverflow.Ellipsis,
-                style = style.copy(fontSize = 18.sp,
+                style = style.copy(
+                    fontSize = 18.sp,
                     fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f)))
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f),
+                ),
+            )
         }
 
         if (manga.author.isNotNullOrEmpty() || manga.artist.isNotNullOrEmpty()) {
@@ -95,19 +103,23 @@ fun InformationHeader(
                 }
 
             Gap(4.dp)
-            Text(text = creator,
+            Text(
+                text = creator,
                 modifier = Modifier
                     .animateContentSize()
-                    .combinedClickable(interactionSource = noRippleInteraction,
+                    .combinedClickable(
+                        interactionSource = noRippleInteraction,
                         indication = null,
                         onLongClick = {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             creatorLongClicked(creator)
                         },
-                        onClick = {}),
+                        onClick = {},
+                    ),
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 2,
                 overflow = TextOverflow.Ellipsis,
-                style = style)
+                style = style,
+            )
         }
         if (manga.status != 0) {
             Gap(4.dp)
@@ -121,15 +133,18 @@ fun InformationHeader(
                 else -> R.string.unknown
             }
 
-            Text(text = stringResource(id = status),
-                style = style)
+            Text(
+                text = stringResource(id = status),
+                style = style,
+            )
         }
-        if (manga.rating != null || manga.users != null || manga.lang_flag != null)
+        if (manga.rating != null || manga.users != null || manga.lang_flag != null) {
             Gap(8.dp)
+        }
         FlowRow(
             modifier = Modifier.fillMaxWidth(),
-            mainAxisAlignment = FlowMainAxisAlignment.Start) {
-
+            mainAxisAlignment = FlowMainAxisAlignment.Start,
+        ) {
             if (manga.lang_flag != null) {
                 val flag = when (manga.lang_flag?.lowercase(Locale.US)) {
                     "zh-hk" -> R.drawable.ic_flag_china
@@ -140,22 +155,27 @@ fun InformationHeader(
                 }
                 if (flag != null) {
                     val drawable = AppCompatResources.getDrawable(LocalContext.current, flag)
-                    androidx.compose.foundation.Image(painter = rememberDrawablePainter(drawable = drawable),
+                    androidx.compose.foundation.Image(
+                        painter = rememberDrawablePainter(drawable = drawable),
                         modifier = Modifier
                             .padding(end = 4.dp)
                             .clip(RoundedCornerShape(4.dp)),
-                        contentDescription = "flag")
+                        contentDescription = "flag",
+                    )
                 }
             }
 
             if (manga.rating != null) {
-
                 Row {
-                    Image(asset = MaterialDesignDx.Icon.gmf_bar_chart,
-                        colorFilter = ColorFilter.tint(style.color.copy(.65f)))
-                    Text(text = manga.rating!!,
+                    Image(
+                        asset = MaterialDesignDx.Icon.gmf_bar_chart,
+                        colorFilter = ColorFilter.tint(style.color.copy(.65f)),
+                    )
+                    Text(
+                        text = manga.rating!!,
                         style = style,
-                        modifier = Modifier.padding(end = 4.dp))
+                        modifier = Modifier.padding(end = 4.dp),
+                    )
                 }
             }
             if (manga.users != null) {
@@ -166,17 +186,20 @@ fun InformationHeader(
                     0
                 }.toString()
                 Row {
-                    Image(asset = MaterialDesignDx.Icon.gmf_person,
-                        colorFilter = ColorFilter.tint(style.color.copy(.65f)))
+                    Image(
+                        asset = MaterialDesignDx.Icon.gmf_person,
+                        colorFilter = ColorFilter.tint(style.color.copy(.65f)),
+                    )
                     Text(text = users, style = style)
                 }
             }
         }
         if (manga.missing_chapters != null) {
-            Text(text = stringResource(R.string.missing_chapters, manga.missing_chapters!!),
-                style = style)
+            Text(
+                text = stringResource(R.string.missing_chapters, manga.missing_chapters!!),
+                style = style,
+            )
         }
-
     }
 }
 

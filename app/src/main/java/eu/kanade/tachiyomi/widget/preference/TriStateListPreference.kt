@@ -14,7 +14,7 @@ class TriStateListPreference @JvmOverloads constructor(
     activity: Activity?,
     context: Context,
     attrs: AttributeSet? =
-        null
+        null,
 ) :
     ListMatPreference(activity, context, attrs) {
 
@@ -83,7 +83,7 @@ class TriStateListPreference @JvmOverloads constructor(
         }.orEmpty()
         val allValue = intArrayOf(
             if (set.isEmpty()) TriStateCheckBox.State.CHECKED.ordinal
-            else TriStateCheckBox.State.UNCHECKED.ordinal
+            else TriStateCheckBox.State.UNCHECKED.ordinal,
         )
         val preselected =
             if (allSelectionRes != null && !showAllLast) { allValue } else { intArrayOf() } + entryValues
@@ -107,7 +107,7 @@ class TriStateListPreference @JvmOverloads constructor(
         setTriStateItems(
             items = items,
             disabledIndices = if (allSelectionRes != null) intArrayOf(allPos) else null,
-            initialSelection = preselected
+            initialSelection = preselected,
         ) { adapter, sels, _, _, _ ->
             val selections = sels.filterIndexed { index, _ -> allSelectionRes == null || index != allPos }
             includedItems = selections

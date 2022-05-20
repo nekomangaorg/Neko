@@ -7,7 +7,7 @@ enum class PageLayout(
     val value: Int,
     val webtoonValue: Int,
     @StringRes val stringRes: Int,
-    @StringRes private val _fullStringRes: Int? = null
+    @StringRes private val _fullStringRes: Int? = null,
 ) {
     SINGLE_PAGE(0, 0, R.string.single_page),
     DOUBLE_PAGES(1, 2, R.string.double_pages),

@@ -20,7 +20,7 @@ import uy.kohesive.injekt.api.get
 class CategoryPresenter(
     private val controller: CategoryController,
     private val db: DatabaseHelper = Injekt.get(),
-    preferences: PreferencesHelper = Injekt.get()
+    preferences: PreferencesHelper = Injekt.get(),
 ) {
 
     private val context = preferences.context

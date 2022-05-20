@@ -20,7 +20,8 @@ object SimilarTable {
             $COL_MANGA_ID TEXT NOT NULL,
             $COL_MANGA_DATA TEXT NOT NULL,
             UNIQUE ($COL_ID) ON CONFLICT REPLACE
-            )"""
+            )
+            """
 
     val createMangaIdIndexQuery: String
         get() = "CREATE INDEX ${SimilarTable.TABLE}_${SimilarTable.COL_MANGA_ID}_index ON ${SimilarTable.TABLE}(${SimilarTable.COL_MANGA_ID})"

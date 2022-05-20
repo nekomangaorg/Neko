@@ -67,7 +67,7 @@ class AboutController : SettingsController() {
                         "https://github.com/CarlosEsco/Neko/commits/master"
                     } else {
                         RELEASE_URL
-                    }.toUri()
+                    }.toUri(),
                 )
                 startActivity(intent)
             }
@@ -163,7 +163,7 @@ class AboutController : SettingsController() {
             Bundle().apply {
                 putString(BODY_KEY, body)
                 putString(URL_KEY, url)
-            }
+            },
         )
 
         override fun onCreateDialog(savedViewState: Bundle?): Dialog {

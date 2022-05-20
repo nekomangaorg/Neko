@@ -12,7 +12,7 @@ import eu.davidea.flexibleadapter.items.AbstractFlexibleItem
 class DownloadAdapter(controller: DownloadItemListener) : FlexibleAdapter<AbstractFlexibleItem<*>>(
     null,
     controller,
-    true
+    true,
 ) {
 
     /**
