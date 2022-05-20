@@ -1,12 +1,5 @@
 package eu.kanade.tachiyomi.source.online
 
-import com.github.salomonbrys.kotson.fromJson
-import com.github.salomonbrys.kotson.get
-import com.github.salomonbrys.kotson.nullString
-import com.github.salomonbrys.kotson.string
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonArray
-import com.google.gson.JsonElement
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.newCallWithProgress
@@ -18,7 +11,15 @@ import info.debatty.java.stringsimilarity.JaroWinkler
 import info.debatty.java.stringsimilarity.Levenshtein
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.json.Json
+import kotlinx.serialization.json.JsonArray
+import kotlinx.serialization.json.JsonElement
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
 import okhttp3.Response
+import uy.kohesive.injekt.injectLazy
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -26,38 +27,45 @@ class MergeSource : ReducedHttpSource() {
     override val name = "Merged Chapter"
     override val baseUrl = "https://manga4life.com"
 
-    var directory: JsonArray? = null
+    lateinit var directory: List<JsonElement>
 
-    val gson = GsonBuilder().setLenient().create()
+    private val textDistance = Levenshtein()
+    private val textDistance2 = JaroWinkler()
+
+    val json: Json by injectLazy()
 
     private val dateFormat = SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
 
     suspend fun searchManga(query: String): List<SManga> {
         return withContext(Dispatchers.IO) {
-            if (directory == null) {
+            if (this@MergeSource::directory.isInitialized.not()) {
                 val response = client.newCall(GET("$baseUrl/search/", headers)).await()
-                directory = gson.fromJson(directoryFromResponse(response))
+                directory = directoryFromResponse(response)
             }
-            val textDistance = Levenshtein()
-            val textDistance2 = JaroWinkler()
 
-            val exactMatch = directory!!.firstOrNull { it["s"].string == query }
-            if (exactMatch != null) {
-                parseMangaList(listOf(exactMatch))
+            val exactMatch = directory.filter { jsonElement ->
+                jsonElement.getString("s") == query || jsonElement.getArray("al").any { altName -> altName.jsonPrimitive.content == query }
+            }
+            if (exactMatch.isNotEmpty()) {
+                parseMangaList(exactMatch)
             } else {
                 // take results that potentially start the same
-                val results = directory!!.filter {
-                    val title = it["s"].string
+                val results = directory.filter { jsonElement ->
+
+                    val title = jsonElement.getString("s")
                     val query2 = query.take(7)
-                    (
-                        title.startsWith(query2, true) ||
-                            title.contains(query2, true)
-                        )
-                }.sortedBy { textDistance.distance(query, it["s"].string) }
+
+                    val titleMatches = jsonElement.getArray("al").map { altTitleJson ->
+                        val altTitle = altTitleJson.jsonPrimitive.content
+                        altTitle.startsWith(query2, true) || altTitle.contains(query2, true)
+                    } + listOf((title.startsWith(query2, true)), title.contains(query2, true))
+
+                    titleMatches.isNotEmpty()
+                }.sortedBy { textDistance.distance(query, it.getString("s")) }
 
                 // take similar results
                 val results2 =
-                    directory!!.map { Pair(textDistance2.distance(it["s"].string, query), it) }
+                    directory.map { Pair(textDistance2.distance(it.getString("s"), query), it) }
                         .filter { it.first < 0.3 }.sortedBy { it.first }.map { it.second }
 
                 val combinedResults = results.union(results2)
@@ -74,9 +82,9 @@ class MergeSource : ReducedHttpSource() {
     private fun parseMangaList(json: List<JsonElement>): List<SManga> {
         return json.map { jsonElement ->
             SManga.create().apply {
-                title = jsonElement["s"].string
-                url = "/manga/${jsonElement["i"].string}"
-                thumbnail_url = "https://cover.nep.li/cover/${jsonElement["i"].string}.jpg"
+                title = jsonElement.getString("s")
+                url = "/manga/${jsonElement.getString("i")}"
+                thumbnail_url = "https://cover.nep.li/cover/${jsonElement.getString("i")}.jpg"
             }
         }
     }
@@ -88,15 +96,15 @@ class MergeSource : ReducedHttpSource() {
                 response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
                     .substringAfter("vm.Chapters = ").substringBefore(";")
 
-            return@withContext gson.fromJson<JsonArray>(vmChapters).map { json ->
-                val indexChapter = json["Chapter"].string
-                SChapter.create().apply {
-                    val type = json["Type"].string
 
-                    name = json["ChapterName"].nullString.let {
-                        if (it.isNullOrEmpty()) "$type ${
-                            chapterImage(indexChapter)
-                        }" else it
+            return@withContext json.parseToJsonElement(vmChapters).jsonArray.map { json ->
+                val indexChapter = json.getString("Chapter")
+                SChapter.create().apply {
+                    val type = json.getString("Type")
+
+                    name = when (json.getString("ChapterName").isEmpty()) {
+                        true -> "$type ${chapterImage(indexChapter, true)}"
+                        false -> json.getString("ChapterName")
                     }
 
                     val season = name.substringAfter("Volume ", "")
@@ -111,7 +119,7 @@ class MergeSource : ReducedHttpSource() {
                         vol = seasonAnotherWay
                     }
 
-                    if (json["Type"].string != "Volume") {
+                    if (type != "Volume") {
                         val splitName = name.substringAfter(" - Chapter").split(" ")
                         for (split in splitName) {
                             val splitFloat = split.toFloatOrNull()
@@ -125,11 +133,14 @@ class MergeSource : ReducedHttpSource() {
                     url = "/read-online/" + response.request.url.toString()
                         .substringAfter("/manga/") + chapterURLEncode(indexChapter)
                     mangadex_chapter_id = url.substringAfter("/read-online/")
-                    date_upload = try {
-                        json["Date"].nullString?.let { dateFormat.parse("$it +0600")?.time } ?: 0
-                    } catch (_: Exception) {
-                        0L
-                    }
+                    date_upload = runCatching {
+                        val jsonDate = json.getString("Date")
+                        when (jsonDate.isEmpty()) {
+                            true -> 0L
+                            false -> dateFormat.parse("$jsonDate +0600")?.time!!
+                        }
+                    }.getOrElse { 0L }
+
                     scanlator = this@MergeSource.name
                 }
             }.asReversed()
@@ -146,23 +157,23 @@ class MergeSource : ReducedHttpSource() {
         return pageListParse(response)
     }
 
-    fun pageListParse(response: Response): List<Page> {
+    private fun pageListParse(response: Response): List<Page> {
         val document = response.asJsoup()
         val script = document.select("script:containsData(MainFunction)").first()!!.data()
-        val curChapter = gson.fromJson<JsonElement>(
+        val curChapter = json.parseToJsonElement(
             script.substringAfter("vm.CurChapter = ")
                 .substringBefore(";")
-        )
+        ).jsonObject
 
-        val pageTotal = curChapter["Page"].string.toInt()
+        val pageTotal = curChapter.getString("Page").toInt()
 
         val host = "https://" + script.substringAfter("vm.CurPathName = \"").substringBefore("\"")
         val titleURI = script.substringAfter("vm.IndexName = \"").substringBefore("\"")
-        val seasonURI = curChapter["Directory"].string
+        val seasonURI = curChapter.getString("Directory")
             .let { if (it.isEmpty()) "" else "$it/" }
         val path = "$host/manga/$titleURI/$seasonURI"
 
-        val chNum = chapterImage(curChapter["Chapter"].string)
+        val chNum = chapterImage(curChapter.getString("Chapter"))
 
         return IntRange(1, pageTotal).mapIndexed { i, _ ->
             val imageNum = (i + 1).toString().let { "000$it" }.let { it.substring(it.length - 3) }
@@ -171,17 +182,25 @@ class MergeSource : ReducedHttpSource() {
     }
 
     // don't use ";" for substringBefore() !
-    private fun directoryFromResponse(response: Response): String {
-        return response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
+    private fun directoryFromResponse(response: Response): JsonArray {
+        val jsonValue = response.asJsoup().select("script:containsData(MainFunction)").first()!!.data()
             .substringAfter("vm.Directory = ").substringBefore("vm.GetIntValue").trim()
             .replace(";", " ")
+
+        return json.parseToJsonElement(jsonValue).jsonArray
     }
 
-    private fun chapterImage(e: String): String {
-        val a = e.substring(1, e.length - 1)
+    private val chapterImageRegex = Regex("""^0+""")
+
+    private fun chapterImage(e: String, cleanString: Boolean = false): String {
+        // cleanString will result in an empty string if chapter number is 0, hence the else if below
+        val a = e.substring(1, e.length - 1).let { if (cleanString) it.replace(chapterImageRegex, "") else it }
+        // If b is not zero, indicates chapter has decimal numbering
         val b = e.substring(e.length - 1).toInt()
-        return if (b == 0) {
+        return if (b == 0 && a.isNotEmpty()) {
             a
+        } else if (b == 0 && a.isEmpty()) {
+            "0"
         } else {
             "$a.$b"
         }
@@ -210,6 +229,17 @@ class MergeSource : ReducedHttpSource() {
 
     override suspend fun fetchImage(page: Page): Response {
         return client.newCallWithProgress(GET(page.imageUrl!!, headers), page).await()
+    }
+
+    // Convenience functions to shorten later code
+    /** Returns value corresponding to given key as a string, or ""*/
+    private fun JsonElement.getString(key: String): String {
+        return this.jsonObject[key]!!.jsonPrimitive.contentOrNull ?: ""
+    }
+
+    /** Returns value corresponding to given key as a JsonArray */
+    private fun JsonElement.getArray(key: String): JsonArray {
+        return this.jsonObject[key]!!.jsonArray
     }
 
     companion object {

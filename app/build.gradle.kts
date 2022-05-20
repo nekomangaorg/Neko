@@ -150,10 +150,7 @@ dependencies {
     releaseImplementation(libs.chucker.release)
 
     implementation(libs.bundles.retrofit)
-
-    // JSON
-    implementation(libs.kotson)
-
+    
     // Disk
     implementation(libs.disklrue)
 

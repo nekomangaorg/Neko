@@ -5,7 +5,6 @@ import coil.util.CoilUtils
 import com.chuckerteam.chucker.api.ChuckerCollector
 import com.chuckerteam.chucker.api.ChuckerInterceptor
 import com.elvishew.xlog.XLog
-import com.google.gson.Gson
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.skydoves.sandwich.adapters.ApiResponseCallAdapterFactory
 import eu.kanade.tachiyomi.BuildConfig
@@ -106,7 +105,7 @@ class NetworkHelper(val context: Context) {
                                     XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
                                         .d("Not logging request because it contained username and password")
                                 } else {
-                                    Gson().fromJson(message, Any::class.java)
+                                    json.parseToJsonElement(message)
                                     XLog.tag("||NEKO-NETWORK-JSON").disableStackTrace()
                                         .json(message)
                                 }
@@ -177,8 +176,10 @@ class NetworkHelper(val context: Context) {
         .create(MangaDexAuthService::class.java)
 
     val similarService: SimilarService =
-        jsonRetrofitClient.client(client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
-            .readTimeout(2, TimeUnit.SECONDS).build())
+        jsonRetrofitClient.client(
+            client.newBuilder().connectTimeout(2, TimeUnit.SECONDS)
+                .readTimeout(2, TimeUnit.SECONDS).build()
+        )
             .build()
             .create(SimilarService::class.java)
 

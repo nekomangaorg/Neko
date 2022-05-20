@@ -16,7 +16,6 @@ roboelectric_version = "4.8.1"
 google-services-gradle = "com.google.gms:google-services:4.3.10"
 firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.8.1"
 
-gson = "com.google.code.gson:gson:2.9.0"
 material = "com.google.android.material:material:1.6.0"
 firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.0.0"
 firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.2.10"
@@ -66,8 +65,6 @@ ka-helpers-kotlin-ext = { module = "com.github.FunkyMuse.KAHelpers:kotlinextensi
 ka-helpers-activity = { module = "com.github.FunkyMuse.KAHelpers:activity", version.ref = "ka_helpers_version" }
 ka-helpers-string = { module = "com.github.FunkyMuse.KAHelpers:string", version.ref = "ka_helpers_version" }
 
-kotson = "com.github.salomonbrys.kotson:kotson:2.5.0"
-
 chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chucker_version" }
 chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chucker_version" }
 
@@ -100,7 +97,6 @@ stringsimilarity = "info.debatty:java-string-similarity:2.0.0"
 tokenbucket = "org.isomorphism:token-bucket:1.7"
 
 retrofit-core = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit_version" }
-retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit_version" }
 retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
 
 #test libs
@@ -119,12 +115,12 @@ coil = ["coil", "coil-gif", "coil-svg", "coil-compose"]
 conductor = ["conductor", "conductor-supportpref"]
 fastadapter = ["fast-adapter", "fast-adapter-binding"]
 flexibleadapter = ["flexible-adapter-core", "flexible-adapter-ui"]
-google = ["gson", "material", "firebase-analytics", "firebase-crashlytics", "guava-fix", "play-services", "flex-box"]
+google = ["material", "firebase-analytics", "firebase-crashlytics", "guava-fix", "play-services", "flex-box"]
 iconics = ["iconics-core", "iconics-views", "iconics-compose"]
 kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 nucleus = ["nucleus", "nucleus-support"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]
 tests = ["junit", "assertj", "mockito", "roboelectric", "roboelectric-shadows-multidex", "roboelectric-shadows-play-services"]
-retrofit = ["retrofit-core", "retrofit-gson", "retrofit-serialization"]
+retrofit = ["retrofit-core", "retrofit-serialization"]
 rx = ["rx-android", "rx-java", "rx-relay", "reactivenetwork", "rxbinding-kotlin", "rxbinding-appcompat-v7", "rxbinding-appcompat-v4", "rxbinding-recycler-v7"]

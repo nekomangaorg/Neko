@@ -19,10 +19,10 @@ import java.util.concurrent.TimeUnit
  * @param unit {TimeUnit} The unit of time for the period. Defaults to seconds.
  */
 fun OkHttpClient.Builder.rateLimit(
-    permits: Long,
-    period: Long = 1,
+    permits: Int,
+    period: Int = 1,
     unit: TimeUnit = TimeUnit.SECONDS,
-) = addInterceptor(RateLimitInterceptor(permits, period, unit))
+) = addInterceptor(RateLimitInterceptor(permits.toLong(), period.toLong(), unit))
 
 private class RateLimitInterceptor(
     permits: Long,

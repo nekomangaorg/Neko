@@ -23,7 +23,6 @@ import okhttp3.FormBody
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.Field
@@ -40,10 +39,12 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
 
     private val authClient = client.newBuilder().addInterceptor(interceptor).build()
 
-    val jsonBuilder = Json {
+    private val json = Json {
         ignoreUnknownKeys = true
         isLenient = true
-    }.asConverterFactory("application/json".toMediaType())
+    }
+
+    private val jsonBuilder = json.asConverterFactory("application/json".toMediaType())
 
     private val rest = Retrofit.Builder()
         .baseUrl(baseUrl)
@@ -72,7 +73,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                 put("type", "libraryEntries")
                 putJsonObject("attributes") {
                     put("status", track.toKitsuStatus())
-                        put("progress", track.last_chapter_read.toInt())
+                    put("progress", track.last_chapter_read.toInt())
                 }
                 putJsonObject("relationships") {
                     putJsonObject("user") {
@@ -105,7 +106,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
                 put("id", track.media_id)
                 putJsonObject("attributes") {
                     put("status", track.toKitsuStatus())
-                        put("progress", track.last_chapter_read.toInt())
+                    put("progress", track.last_chapter_read.toInt())
                     put("ratingTwenty", track.toKitsuScore())
                     put("startedAt", KitsuDateHelper.convert(track.started_reading_date))
                     put("finishedAt", KitsuDateHelper.convert(track.finished_reading_date))
@@ -209,7 +210,7 @@ class KitsuApi(private val client: OkHttpClient, interceptor: KitsuInterceptor) 
         return Retrofit.Builder()
             .baseUrl(loginUrl)
             .client(client)
-            .addConverterFactory(GsonConverterFactory.create())
+            .addConverterFactory(jsonBuilder)
             .build()
             .create(LoginRest::class.java)
             .requestAccessToken(username, password)

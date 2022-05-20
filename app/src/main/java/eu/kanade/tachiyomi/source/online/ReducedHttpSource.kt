@@ -2,32 +2,23 @@ package eu.kanade.tachiyomi.source.online
 
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.await
+import eu.kanade.tachiyomi.network.interceptor.rateLimit
 import eu.kanade.tachiyomi.network.newCallWithProgress
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.model.SChapter
 import eu.kanade.tachiyomi.source.model.SManga
 import okhttp3.Headers
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
-import org.isomorphism.util.TokenBuckets
 import java.util.concurrent.TimeUnit
 
 abstract class ReducedHttpSource : HttpSource() {
-
-    private val bucket = TokenBuckets.builder().withCapacity(1)
-        .withFixedIntervalRefillStrategy(1, 2, TimeUnit.SECONDS).build()
-
-    private val rateLimitInterceptor = Interceptor {
-        bucket.consume()
-        it.proceed(it.request())
-    }
 
     override val client: OkHttpClient = network.cloudFlareClient.newBuilder()
         .connectTimeout(1, TimeUnit.MINUTES)
         .readTimeout(1, TimeUnit.MINUTES)
         .writeTimeout(1, TimeUnit.MINUTES)
-        .addNetworkInterceptor(rateLimitInterceptor)
+        .rateLimit(2)
         .build()
 
     override val headers = Headers.Builder()
