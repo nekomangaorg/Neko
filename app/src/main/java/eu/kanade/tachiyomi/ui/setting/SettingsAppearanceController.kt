@@ -4,8 +4,6 @@ import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatDelegate
-import androidx.core.view.doOnNextLayout
-import androidx.core.view.isVisible
 import androidx.preference.PreferenceScreen
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.asImmediateFlow
@@ -15,8 +13,6 @@ import eu.kanade.tachiyomi.util.system.appDelegateNightMode
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.getPrefTheme
 import eu.kanade.tachiyomi.util.system.isInNightMode
-import eu.kanade.tachiyomi.util.view.activityBinding
-import eu.kanade.tachiyomi.util.view.moveRecyclerViewUp
 import kotlinx.coroutines.flow.launchIn
 import kotlin.math.max
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys as Keys
@@ -87,7 +83,7 @@ class SettingsAppearanceController : SettingsController() {
         }
 
         preferenceCategory {
-            switchPreference {
+            /*switchPreference {
                 bindTo(preferences.useLargeToolbar())
                 titleRes = R.string.expanded_toolbar
                 summaryRes = R.string.show_larger_toolbar
@@ -111,7 +107,7 @@ class SettingsAppearanceController : SettingsController() {
                     }
                     true
                 }
-            }
+            }*/
         }
 
         preferenceCategory {
