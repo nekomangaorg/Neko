@@ -115,7 +115,7 @@ object Migrations {
                 scope.launchIO {
                     LibraryPresenter.updateRatiosAndColors()
                 }
-                val oldReaderTap = prefs.getBoolean("reader_tap", false)
+                val oldReaderTap = prefs.getBoolean("reader_tap", true)
                 if (!oldReaderTap) {
                     preferences.navigationModePager().set(5)
                     preferences.navigationModeWebtoon().set(5)
