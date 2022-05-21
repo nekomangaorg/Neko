@@ -167,7 +167,7 @@ fun MangaGridItemBinding.setFreeformCoverRatio(manga: Manga?, parent: AutofitRec
     val itemWidth = parent?.itemWidth ?: root.width
     if (ratio != null) {
         coverThumbnail.adjustViewBounds = false
-        coverThumbnail.maxHeight = Int.MAX_VALUE
+        coverThumbnail.maxHeight = (itemWidth / 3f * 10f).toInt()
         coverThumbnail.minimumHeight = 56.dpToPx
         constraintLayout.minHeight = 56.dpToPx
     } else {
@@ -181,6 +181,8 @@ fun MangaGridItemBinding.setFreeformCoverRatio(manga: Manga?, parent: AutofitRec
     coverThumbnail.updateLayoutParams<ConstraintLayout.LayoutParams> {
         if (ratio != null) {
             height = ConstraintLayout.LayoutParams.MATCH_CONSTRAINT
+            matchConstraintMaxHeight = coverThumbnail.maxHeight
+            matchConstraintMinHeight = coverThumbnail.minimumHeight
             dimensionRatio = "W,1:$ratio"
         } else {
             height = ViewGroup.LayoutParams.WRAP_CONTENT
