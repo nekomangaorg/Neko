@@ -402,10 +402,12 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         binding.appBar.y = 0f
                         binding.appBar.updateAppBarAfterY(controller?.mainRecyclerView)
                     }
-                    (controller as? BaseController<*>)?.onActionViewExpand(item)
-                    (controller as? SettingsController)?.onActionViewExpand(item)
                     binding.searchToolbar.menu.forEach { it.isVisible = false }
-                    lifecycleScope.launchUI { reEnableBackPressedCallBack() }
+                    lifecycleScope.launchUI {
+                        (controller as? BaseController<*>)?.onActionViewExpand(item)
+                        (controller as? SettingsController)?.onActionViewExpand(item)
+                        reEnableBackPressedCallBack()
+                    }
                     return true
                 }
 
@@ -414,9 +416,11 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                     binding.appBar.compactSearchMode = false
                     controller?.mainRecyclerView?.requestApplyInsets()
                     setupSearchTBMenu(binding.toolbar.menu, true)
-                    (controller as? BaseController<*>)?.onActionViewCollapse(item)
-                    (controller as? SettingsController)?.onActionViewCollapse(item)
-                    lifecycleScope.launchUI { reEnableBackPressedCallBack() }
+                    lifecycleScope.launchUI {
+                        (controller as? BaseController<*>)?.onActionViewCollapse(item)
+                        (controller as? SettingsController)?.onActionViewCollapse(item)
+                        reEnableBackPressedCallBack()
+                    }
                     return true
                 }
             },
