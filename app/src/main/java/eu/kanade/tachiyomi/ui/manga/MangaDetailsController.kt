@@ -60,6 +60,7 @@ import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.HttpSource
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.BaseCoroutineController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -128,6 +129,7 @@ class MangaDetailsController :
     FlexibleAdapter.OnItemLongClickListener,
     ActionMode.Callback,
     MangaDetailsAdapter.MangaDetailsInterface,
+    SmallToolbarInterface,
     FlexibleAdapter.OnItemMoveListener {
 
     constructor(
