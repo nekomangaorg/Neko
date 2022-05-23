@@ -4,7 +4,7 @@ lifecycle_version = "2.5.0-rc01"
 
 [libraries]
 
-appcompat = "androidx.appcompat:appcompat:1.6.0-alpha03"
+appcompat = "androidx.appcompat:appcompat:1.6.0-alpha04"
 cardview = "androidx.cardview:cardview:1.0.0"
 webkit = "androidx.webkit:webkit:1.4.0"
 recyclerview = "androidx.recyclerview:recyclerview:1.2.1"
