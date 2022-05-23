@@ -75,9 +75,8 @@ class LatestController(bundle: Bundle? = null) :
                 )
             } else {
                 val columns =
-                    binding.root.measuredWidth.numberOfColumnsForCompose(
-                        preferences.gridSize()
-                            .get(),
+                    binding.root.rootView.measuredWidth.numberOfColumnsForCompose(
+                        preferences.gridSize().get(),
                     )
 
                 PagingMangaGrid(

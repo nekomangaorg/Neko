@@ -111,7 +111,7 @@ class SimilarController(bundle: Bundle? = null) :
                         backgroundColor = MaterialTheme.colorScheme.secondary,
                         contentColor = MaterialTheme.colorScheme.onSecondary,
 
-                    )
+                        )
                 },
                 content = {
                     SimilarContent(
@@ -167,7 +167,7 @@ class SimilarController(bundle: Bundle? = null) :
                     )
                 } else {
                     val columns =
-                        binding.root.measuredWidth.numberOfColumnsForCompose(
+                        binding.root.rootView.measuredWidth.numberOfColumnsForCompose(
                             preferences.gridSize()
                                 .get(),
                         )
