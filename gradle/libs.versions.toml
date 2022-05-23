@@ -83,7 +83,7 @@ flexible-adapter-ui = "com.github.arkon.FlexibleAdapter:flexible-adapter-ui:c801
 okhttp = { module = "com.squareup.okhttp3:okhttp", version.ref = "okhttp_version" }
 okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-interceptor", version.ref = "okhttp_version" }
 okhttp-dnsoverhttps = { module = "com.squareup.okhttp3:okhttp-dnsoverhttps", version.ref = "okhttp_version" }
-okio = "com.squareup.okio:okio:2.10.0"
+okio = "com.squareup.okio:okio:3.1.0"
 
 flowprefs = "com.fredporciuncula:flow-preferences:1.7.0"
 sandwich = "com.github.skydoves:sandwich:1.2.4"
