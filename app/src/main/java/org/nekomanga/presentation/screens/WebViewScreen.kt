@@ -36,6 +36,8 @@ fun WebViewScreen(
     headers: Map<String, String> = emptyMap(),
     onShare: (String) -> Unit,
     onOpenInBrowser: (String) -> Unit,
+    canOpenInApp: (String) -> Boolean,
+    onOpenInApp: (String) -> Unit,
     onClose: () -> Unit,
 ) {
     val context = LocalContext.current
@@ -87,6 +89,15 @@ fun WebViewScreen(
                         title = stringResource(R.string.open_in_browser),
                         onClick = { onOpenInBrowser(state.content.getCurrentUrl()!!) },
                     ),
+                ) + listOf(
+                    if (navigator.canGoBack && canOpenInApp(state.content.getCurrentUrl()!!)) {
+                        AppBar.OverflowAction(
+                            title = stringResource(id = R.string.open_in_app),
+                            onClick = { onOpenInApp(state.content.getCurrentUrl()!!) },
+                        )
+                    } else {
+                        AppBar.Empty
+                    },
                 ),
             )
         },

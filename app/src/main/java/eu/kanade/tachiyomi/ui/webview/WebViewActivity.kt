@@ -37,6 +37,8 @@ open class WebViewActivity : BaseThemedActivity() {
                     headers = headers,
                     onShare = this::shareWebpage,
                     onOpenInBrowser = this::openInBrowser,
+                    canOpenInApp = this::canOpenInApp,
+                    onOpenInApp = this::openInApp,
                     onClose = { finish() },
                 )
             }
@@ -57,6 +59,14 @@ open class WebViewActivity : BaseThemedActivity() {
 
     private fun openInBrowser(url: String) {
         openInBrowser(url, forceDefaultBrowser = true)
+    }
+
+    private fun openInApp(url: String) {
+        openInBrowser(url, forceDefaultBrowser = false)
+    }
+
+    private fun canOpenInApp(url: String): Boolean {
+        return url.contains("mangadex.org/manga/", true) || url.contains("mangadex.org/title/", true) || url.contains("mangadex.org/group", true)
     }
 
     companion object {
