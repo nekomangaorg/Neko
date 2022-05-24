@@ -1236,15 +1236,15 @@ class MangaDetailsController :
 
     private fun downloadChapters(choice: Int) {
         val chaptersToDownload = when (choice) {
-            R.id.download_next -> presenter.getUnreadChaptersSorted().take(1)
-            R.id.download_next_5 -> presenter.getUnreadChaptersSorted().take(5)
-            R.id.download_next_10 -> presenter.getUnreadChaptersSorted().take(10)
+            R.id.download_next -> presenter.getUnreadChapterSortedFiltered().take(1)
+            R.id.download_next_5 -> presenter.getUnreadChapterSortedFiltered().take(5)
+            R.id.download_next_10 -> presenter.getUnreadChapterSortedFiltered().take(10)
             R.id.download_custom -> {
                 createActionModeIfNeeded()
                 rangeMode = RangeMode.Download
                 return
             }
-            R.id.download_unread -> presenter.allChapters.filter { !it.read }
+            R.id.download_unread -> presenter.getUnreadChapterSortedFiltered()
             R.id.download_all -> presenter.allChapters
             else -> emptyList()
         }

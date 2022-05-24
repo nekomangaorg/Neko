@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.data.database.models.Chapter.Companion.copy
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.scanlatorList
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.preference.minusAssign
@@ -36,6 +37,7 @@ import eu.kanade.tachiyomi.ui.library.filter.FilterBottomSheet.Companion.STATE_I
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.chapter.ChapterSort
+import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.getSlug
 import eu.kanade.tachiyomi.util.lang.capitalizeWords
 import eu.kanade.tachiyomi.util.lang.chopByWords
@@ -1080,9 +1082,12 @@ class LibraryPresenter(
     fun downloadUnread(mangaList: List<Manga>) {
         presenterScope.launch {
             withContext(Dispatchers.IO) {
-                mangaList.forEach {
-                    val chapters = db.getChapters(it).executeAsBlocking().filter { !it.read }
-                    downloadManager.downloadChapters(it, chapters)
+                mangaList.forEach { manga ->
+                    val scanlatorsToIgnore = ChapterUtil.getScanlators(manga.filtered_scanlators)
+                    val chapters = db.getChapters(manga).executeAsBlocking().filter { chapter ->
+                        chapter.read.not() && chapter.scanlatorList().any { scanlator -> scanlator in scanlatorsToIgnore }.not()
+                    }
+                    downloadManager.downloadChapters(manga, chapters)
                 }
             }
             if (preferences.downloadBadge().get()) {

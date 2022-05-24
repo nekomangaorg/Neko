@@ -283,6 +283,13 @@ class MangaDetailsPresenter(
             .distinctBy { it.name }
             .sortedWith(chapterSort.sortComparator(true))
 
+    fun getUnreadChapterSortedFiltered(): List<ChapterItem> {
+        val scanlatorsToIgnore = ChapterUtil.getScanlators(manga.filtered_scanlators)
+        return getUnreadChaptersSorted().filter { chapterItem ->
+            chapterItem.scanlatorList().any { scanlator -> scanlator in scanlatorsToIgnore }.not()
+        }
+    }
+
     fun startDownloadingNow(chapter: Chapter) {
         downloadManager.startDownloadNow(chapter)
     }
