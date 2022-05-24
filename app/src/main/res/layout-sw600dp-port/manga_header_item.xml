@@ -1,0 +1,421 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/manga_header_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content">
+
+    <View
+        android:id="@+id/true_backdrop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/bottom_line"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_min="200dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:background="@color/material_red_500" />
+
+    <ImageView
+        android:id="@+id/backdrop"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:alpha="0.1"
+        android:scaleType="centerCrop"
+        app:layout_constraintBottom_toBottomOf="@+id/true_backdrop"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/true_backdrop"
+        tools:src="@mipmap/ic_launcher" />
+
+    <View
+        android:id="@+id/backdrop_gradient"
+        android:layout_width="match_parent"
+        android:layout_height="300dp"
+        android:background="@drawable/gradient_shape"
+        android:backgroundTint="?attr/background"
+        app:layout_constraintBottom_toBottomOf="@+id/true_backdrop" />
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="?attr/background"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/backdrop_gradient" />
+
+    <View
+        android:id="@+id/top_view"
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        app:layout_constraintBottom_toTopOf="@id/cover_card"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cover_card"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:strokeWidth="0dp"
+        app:cardElevation="2dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:maxHeight="200dp"
+        app:layout_constraintWidth_max="200dp"
+        app:layout_constraintWidth_min="50dp"
+        app:layout_constraintWidth_percent="0.25"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/top_view"
+        app:layout_constraintVertical_bias="1.0">
+
+        <ImageView
+            android:id="@+id/manga_cover"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:adjustViewBounds="true"
+            android:clickable="true"
+            android:contentDescription="@string/cover_of_image"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:maxHeight="500dp"
+            tools:background="@color/material_grey_50"
+            tools:src="@mipmap/ic_launcher" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cover_card"
+        app:layout_constraintTop_toTopOf="@id/cover_card" />
+
+    <TextView
+        android:id="@+id/r18_badge"
+        style="?textAppearanceLabelLarge"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:background="@color/material_red_500"
+        android:padding="2dp"
+        android:text="H"
+        android:textColor="@color/md_white_1000"
+        android:textSize="14sp"
+        android:translationZ="2dp"
+        android:layout_marginStart="4dp"
+        android:visibility="gone"
+        app:layout_constraintBottom_toTopOf="@+id/cover_card"
+        app:layout_constraintStart_toStartOf="@+id/cover_card"
+        app:layout_constraintTop_toTopOf="@id/cover_card"
+        tools:visibility="visible" />
+
+    <androidx.constraintlayout.widget.Barrier
+        android:id="@+id/bottom_line"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="6dp"
+        android:orientation="horizontal"
+        app:barrierDirection="bottom"
+        app:constraint_referenced_ids="compose,cover_card" />
+
+    <HorizontalScrollView
+        android:id="@+id/sub_button_scroll"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:clipToPadding="false"
+        android:requiresFadingEdge="horizontal"
+        android:scrollbars="none"
+        app:layout_constraintBottom_toTopOf="@id/manga_summary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/bottom_line">
+
+        <LinearLayout
+            android:id="@+id/button_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:orientation="horizontal"
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp">
+
+            <ImageView
+                android:id="@+id/favorite_button"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:background="@drawable/round_ripple"
+                android:padding="5dp"
+                android:tooltipText="@string/add_to_library"
+                tools:background="@color/md_black_1000"
+                tools:src="@drawable/ic_open_in_webview_24dp" />
+
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/track_button"
+                style="@style/Neko.Iconics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:padding="5dp"
+                android:tooltipText="@string/tracking"
+                app:iiv_icon="gmf_art_track"
+                app:iiv_size="28dp"
+                tools:background="@color/md_black_1000" />
+
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/similar_button"
+                style="@style/Neko.Iconics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:padding="5dp"
+                android:tooltipText="@string/similar"
+                app:iiv_icon="cmd_source_merge"
+                tools:background="@color/md_black_1000"
+                tools:visibility="visible" />
+
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/merge_button"
+                style="@style/Neko.Iconics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="@string/share"
+                android:padding="5dp"
+                android:tooltipText="@string/merge_other"
+                app:iiv_icon="gmf_merge_type"
+                tools:background="@color/md_black_1000"
+                tools:visibility="visible" />
+
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/webview_button"
+                style="@style/Neko.Iconics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="@string/open_external"
+                android:padding="5dp"
+                android:tooltipText="@string/open_external"
+                app:iiv_icon="cmd_web"
+                tools:background="@color/md_black_1000" />
+
+            <com.mikepenz.iconics.view.IconicsImageView
+                android:id="@+id/share_button"
+                style="@style/Neko.Iconics"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginStart="6dp"
+                android:layout_marginEnd="6dp"
+                android:contentDescription="@string/share"
+                android:padding="5dp"
+                android:tooltipText="@string/share"
+                app:iiv_icon="gmf_share"
+                tools:background="@color/md_black_1000" />
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <TextView
+        android:id="@+id/manga_summary"
+        style="?textAppearanceBodySecondary"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="16dp"
+        android:clickable="true"
+        android:focusable="true"
+        android:maxLines="3"
+        android:textSize="16sp"
+        app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sub_button_scroll"
+        tools:maxLines="10"
+        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
+
+    <View
+        android:id="@+id/more_bg_gradient"
+        android:layout_width="60dp"
+        android:layout_height="16sp"
+        android:background="@drawable/full_gradient"
+        android:backgroundTint="?attr/background"
+        app:layout_constraintBottom_toBottomOf="@id/manga_summary"
+        app:layout_constraintEnd_toEndOf="@id/more_end_guide" />
+
+    <View
+        android:id="@+id/more_end_guide"
+        android:layout_width="24dp"
+        android:layout_height="0dp"
+        app:layout_constraintStart_toStartOf="@+id/more_button"
+        app:layout_constraintTop_toTopOf="@id/more_button"
+        app:layout_constraintBottom_toBottomOf="@id/more_button" />
+
+    <View
+        android:id="@+id/more_bg_solid"
+        android:layout_width="0dp"
+        android:layout_height="16sp"
+        android:background="?attr/background"
+        app:layout_constraintBottom_toBottomOf="@id/manga_summary"
+        app:layout_constraintEnd_toEndOf="@id/more_button"
+        app:layout_constraintStart_toStartOf="@id/more_button" />
+
+    <View
+        android:id="@+id/more_guide"
+        android:layout_width="1dp"
+        android:layout_height="15sp"
+        app:layout_constraintEnd_toEndOf="@id/manga_summary"
+        app:layout_constraintTop_toBottomOf="@id/manga_summary" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/more_button"
+        style="@style/Theme.Widget.Button.TextButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="12dp"
+        android:text="@string/more"
+        android:textAlignment="viewEnd"
+        android:drawableEnd="@drawable/ic_expand_more_24dp"
+        android:minWidth="0dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
+        app:drawableTint="?colorSecondary"
+        app:layout_constraintBottom_toBottomOf="@id/more_guide"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:rippleColor="@null" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/more_button_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="more_button,more_bg_gradient,more_bg_solid" />
+
+    <androidx.constraintlayout.widget.Group
+        android:id="@+id/sub_item_group"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:constraint_referenced_ids="manga_summary,sub_button_scroll" />
+
+    <com.google.android.material.chip.ChipGroup
+        android:id="@+id/manga_genres_tags"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:chipSpacingVertical="-12dp"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="16dp"
+        android:visibility="gone"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/less_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/manga_summary"
+        tools:layout_height="100dp" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/less_button"
+        style="@style/Theme.Widget.Button.TextButton"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginEnd="12dp"
+        android:drawableEnd="@drawable/ic_expand_less_24dp"
+        android:paddingStart="0dp"
+        android:paddingEnd="0dp"
+        android:text="@string/less"
+        android:textAlignment="textEnd"
+        android:visibility="gone"
+        app:drawableTint="?colorSecondary"
+        app:layout_constraintBottom_toTopOf="@id/start_reading_button"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/manga_genres_tags"
+        app:rippleColor="@null"
+        tools:visibility="visible" />
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/start_reading_button"
+        style="@style/Theme.Widget.Button.Primary"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginEnd="16dp"
+        android:text="@string/start_reading"
+        app:layout_constraintBottom_toTopOf="@id/chapter_layout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/less_button"
+        tools:text="Continue Reading Chapter 17.1" />
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/chapter_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:background="@drawable/list_item_selector"
+        android:tooltipText="@string/sort_and_filter"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/start_reading_button">
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/chapters_title"
+            style="?textAppearanceTitleSmall"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_marginBottom="12dp"
+            android:maxLines="1"
+            android:text="@string/chapters"
+            android:textSize="17sp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/filters_text"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/filter_button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="12dp"
+            android:background="@null"
+            android:padding="5dp"
+            android:src="@drawable/ic_filter_list_24dp"
+            app:tint="?attr/colorSecondary"
+            app:layout_constraintBottom_toBottomOf="@id/chapters_title"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/chapters_title" />
+
+        <com.google.android.material.textview.MaterialTextView
+            android:id="@+id/filters_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="6dp"
+            android:maxLines="2"
+            android:padding="5dp"
+            android:textAlignment="textEnd"
+            android:textColor="@color/material_on_background_disabled"
+            app:layout_constraintBottom_toBottomOf="@id/filter_button"
+            app:layout_constraintEnd_toStartOf="@id/filter_button"
+            app:layout_constraintStart_toEndOf="@+id/chapters_title"
+            app:layout_constraintTop_toTopOf="@id/filter_button"
+            tools:text="Read, Unread, Bookmarked, Downloaded, All" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

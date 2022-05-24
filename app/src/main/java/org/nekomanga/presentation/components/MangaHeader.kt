@@ -52,7 +52,7 @@ fun InformationHeader(
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 
-) {
+    ) {
     val style = TextStyle(
         fontFamily = Typefaces.montserrat,
         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
@@ -72,7 +72,6 @@ fun InformationHeader(
             Text(
                 text = manga.title,
                 modifier = Modifier
-                    .animateContentSize()
                     .indication(indication = null, interactionSource = noRippleInteraction)
                     .combinedClickable(
                         interactionSource = noRippleInteraction,

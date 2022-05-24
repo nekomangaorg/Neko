@@ -29,7 +29,6 @@ import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
 import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
-import com.google.android.material.composethemeadapter3.Mdc3Theme
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
@@ -49,6 +48,7 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
+import org.nekomanga.presentation.theme.NekoTheme
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -73,7 +73,7 @@ class MangaHeaderHolder(
     private var showMoreButton = true
     var hadSelection = false
     private var canCollapse = true
-    val expandedState = IsExpandedState(startExpanded)
+    val expandedState = IsExpandedState(startExpanded || isTablet)
 
     init {
 
@@ -298,8 +298,9 @@ class MangaHeaderHolder(
 
         // composeStuff
         binding.compose.setContent {
-            Mdc3Theme {
+            NekoTheme {
                 val isExpanded = remember { expandedState }
+
                 InformationHeader(
                     manga = manga,
                     titleLongClick = { title ->
