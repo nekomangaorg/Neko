@@ -10,6 +10,7 @@ import coil.memory.MemoryCache
 import coil.request.CachePolicy
 import coil.request.ImageRequest
 import coil.request.SuccessResult
+import com.crazylegend.string.isNotNullOrEmpty
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
@@ -175,12 +176,16 @@ class MangaDetailsPresenter(
         allChapterScanlators =
             chapters.flatMap { ChapterUtil.getScanlators(it.chapter.scanlator) }.toSet()
 
-        // Find downloaded chapters
-        setDownloadedChapters(chapters)
+        if (allChapterScanlators.size == 1 && manga.filtered_scanlators.isNotNullOrEmpty()) {
+            setScanlatorFilter(emptySet())
+        } else {
+            // Find downloaded chapters
+            setDownloadedChapters(chapters)
 
-        // Store the last emission
-        allChapters = chapters
-        this.chapters = applyChapterFilters(chapters)
+            // Store the last emission
+            allChapters = chapters
+            this.chapters = applyChapterFilters(chapters)
+        }
     }
 
     /**
@@ -787,7 +792,9 @@ class MangaDetailsPresenter(
     fun setScanlatorFilter(filteredScanlators: Set<String>) {
         val manga = manga
         manga.filtered_scanlators =
-            if (filteredScanlators.size == allChapterScanlators.size || filteredScanlators.isEmpty()) null else ChapterUtil.getScanlatorString(
+            if (filteredScanlators.size == allChapterScanlators.size || filteredScanlators.isEmpty() || allChapterScanlators.size == 1) {
+                null
+            } else ChapterUtil.getScanlatorString(
                 filteredScanlators,
             )
         db.updateMangaFilteredScanlators(manga).executeAsBlocking()
