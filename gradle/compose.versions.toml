@@ -11,7 +11,7 @@ accompanist-systemuicontroller = { module = "com.google.accompanist:accompanist-
 accompainist-webview = { module = "com.google.accompanist:accompanist-webview", version.ref = "accompanist_version" }
 
 paging = "androidx.paging:paging-compose:1.0.0-alpha14"
-material3-core = "androidx.compose.material3:material3:1.0.0-alpha11"
+material3-core = "androidx.compose.material3:material3:1.0.0-alpha12"
 material3-adapter = "com.google.android.material:compose-theme-adapter-3:1.0.10"
 
 activity = "androidx.activity:activity-compose:1.6.0-alpha03"
