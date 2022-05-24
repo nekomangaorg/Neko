@@ -64,6 +64,20 @@ android {
         ndk {
             abiFilters += supportedAbis
         }
+        packagingOptions {
+            jniLibs.excludes.addAll(
+                listOf(
+                    "**/libjxl.so",
+                    "**/libjxl_dec.so",
+                    "**/libjxl_threads.so",
+                ),
+            )
+        }
+        externalNativeBuild {
+            cmake {
+                this.arguments("-DHAVE_LIBJXL=FALSE")
+            }
+        }
     }
 
     splits {
