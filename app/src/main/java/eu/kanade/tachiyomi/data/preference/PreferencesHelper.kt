@@ -463,7 +463,7 @@ class PreferencesHelper(val context: Context) {
 
     fun themeMangaDetails() = prefs.getBoolean(Keys.themeMangaDetails, true)
 
-    fun useLargeToolbar() = flowPrefs.getBoolean("use_large_toolbar", true)
+    fun useLargeToolbar() = flowPrefs.getBoolean("use_large_toolbar", false)
 
     fun dohProvider() = prefs.getInt(Keys.dohProvider, -1)
 
