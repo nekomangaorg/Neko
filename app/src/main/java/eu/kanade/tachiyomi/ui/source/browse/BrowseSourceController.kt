@@ -124,6 +124,10 @@ open class BrowseSourceController(bundle: Bundle) :
         return searchTitle(presenter.source.name)
     }
 
+    override fun getSearchTitle(): String? {
+        return searchTitle(presenter.source.name)
+    }
+
     override fun createPresenter(): BrowseSourcePresenter {
         return BrowseSourcePresenter(
             args.getString(SEARCH_QUERY_KEY) ?: "",
@@ -241,6 +245,8 @@ open class BrowseSourceController(bundle: Bundle) :
         val searchItem = activityBinding?.searchToolbar?.searchItem
         val searchView = activityBinding?.searchToolbar?.searchView
 
+        activityBinding?.searchToolbar?.setQueryHint("")
+        
         val query = presenter.query
         if (query.isNotBlank()) {
             searchItem?.expandActionView()
