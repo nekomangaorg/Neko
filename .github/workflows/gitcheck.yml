@@ -15,19 +15,14 @@ jobs:
 
       - name: Get previous release
         id: last_release
-        uses: InsonusK/get-latest-release@v1.0.1
+        uses: pozetroninc/github-action-get-latest-release@master
         with:
-          myToken: ${{ github.token }}
-          exclude_types: "draft|prerelease"
-          view_top: 1
+          repository: ${{ github.repository }}
+          excludes: prerelease, draft
       - name: "Print result"
         run: |
-          echo "id: ${{ steps.last_release.outputs.id }}"
-          echo "name: ${{ steps.last_release.outputs.name }}"
-          echo "tag_name: ${{ steps.last_release.outputs.tag_name }}"
-          echo "created_at: ${{ steps.last_release.outputs.created_atd }}"
-          echo "draft: ${{ steps.last_release.outputs.draft }}"
-          echo "prerelease: ${{ steps.last_release.outputs.prerelease }}"
+          echo "id: ${{ steps.last_release.outputs.release }}"
+          echo "name: ${{ steps.last_release.outputs.id }}"
       - name: Prepare build
         run: |
           set -e
