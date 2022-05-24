@@ -64,11 +64,20 @@ jobs:
           alias: ${{ secrets.KEY_ALIAS }}
           keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
           keyPassword: ${{ secrets.KEY_PASSWORD }}
+      
+      - name: Get previous release
+        id: last_release
+        uses: InsonusK/get-latest-release@v1.0.1
+        with:
+          myToken: ${{ secrets.GITHUB_TOKEN  }}
+          exclude_types: "draft|prerelease"
+          view_top: 1
           
       - name: "Build Changelog"
         id: build_changelog
         uses: mikepenz/release-changelog-builder-action@v3.0.0
         with:
+          fromTag: ${{ steps.last_release.outputs.tag_name }}
           toTag: HEAD
           commitMode: true
         env:
