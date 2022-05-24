@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.external
 import android.graphics.Color
 import androidx.annotation.DrawableRes
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 
 class AnimePlanet(id: String) : ExternalLink(id) {
@@ -58,7 +59,8 @@ class DexApi(id: String) : ExternalLink(id) {
     override val name = "API"
     override fun getLogo() = R.drawable.ic_tracker_mangadex_logo
     override fun getLogoColor() = Color.rgb(43, 48, 53)
-    override fun getUrl() = "${MdUtil.apiUrl}/manga/$id"
+    override fun getUrl() =
+        "${MdUtil.apiUrl}/manga/$id/feed?limit=500&contentRating[]=${MdConstants.ContentRating.safe}&contentRating[]=${MdConstants.ContentRating.suggestive}&contentRating[]=${MdConstants.ContentRating.erotica}&contentRating[]=${MdConstants.ContentRating.pornographic}&includes[]=${MdConstants.Types.scanlator}&order[volume]=desc&order[chapter]=desc"
 }
 
 class Raw(id: String) : ExternalLink(id) {
