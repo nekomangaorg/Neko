@@ -1,4 +1,4 @@
-name: Release app
+name: git check
 on:
   push:
     branches:
