@@ -30,10 +30,10 @@ data class GithubRelease(
                 "arm64-v8a" -> "-arm64-v8a"
                 "armeabi-v7a" -> "-armeabi-v7a"
                 "x86", "x86_64" -> "-x86"
-                else -> ""
+                else -> "-universal"
             }
 
-            return assets.find { it.downloadLink.contains("neko$apkVariant-") }?.downloadLink
+            return assets.find { it.downloadLink.contains("neko$apkVariant") }?.downloadLink
                 ?: assets[0].downloadLink
         }
 
