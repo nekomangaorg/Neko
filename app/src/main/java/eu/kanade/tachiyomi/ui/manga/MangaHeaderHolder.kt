@@ -307,7 +307,7 @@ class MangaHeaderHolder(
                         adapter.delegate.copyToClipboard(title, R.string.title)
                     },
                     creatorLongClicked = { creator ->
-                        adapter.delegate.copyToClipboard(creator, R.string.author)
+                        adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
                     isExpanded = isExpanded.isExpanded,
                 )
