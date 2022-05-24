@@ -54,7 +54,7 @@ jobs:
 
       - name: Prep build artifacts for release
         run: |
-        set -e
+          set -e
         #  mv app/build/outputs/apk/standard/release/Neko-standard-universal-release-unsigned-signed.apk neko-universal.apk
         #  sha=`sha256sum neko-universal.apk | awk '{ print $1 }'`
         #  echo "APK_UNIVERSAL_SHA=$sha" >> $GITHUB_ENV
