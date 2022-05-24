@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.util.chapter.ChapterSort
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
+import eu.kanade.tachiyomi.util.getMissingChapterCount
 import eu.kanade.tachiyomi.util.manga.MangaShortcutManager
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -505,7 +506,7 @@ class MangaDetailsPresenter(
             launchIO {
                 launch {
                     val allChaps = db.getChapters(manga).executeOnIO()
-                    val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
+                    val missingChapters = allChaps.getMissingChapterCount(manga.status)
                     if (missingChapters != manga.missing_chapters) {
                         manga.missing_chapters = missingChapters
                         db.insertManga(manga).executeOnIO()

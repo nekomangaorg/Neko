@@ -33,6 +33,7 @@ import eu.kanade.tachiyomi.source.online.utils.FollowStatus
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.chapter.ChapterUtil
 import eu.kanade.tachiyomi.util.chapter.syncChaptersWithSource
+import eu.kanade.tachiyomi.util.getMissingChapterCount
 import eu.kanade.tachiyomi.util.shouldDownloadNewChapters
 import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.acquireWakeLock
@@ -541,7 +542,7 @@ class LibraryUpdateService(
 
     private suspend fun updateMissingChapterCount(manga: LibraryManga): LibraryManga {
         val allChaps = db.getChapters(manga).executeAsBlocking()
-        val missingChapters = MdUtil.getMissingChapterCount(allChaps, manga.status)
+        val missingChapters = allChaps.getMissingChapterCount(manga.status)
         if (missingChapters != manga.missing_chapters) {
             manga.missing_chapters = missingChapters
             db.insertManga(manga).executeOnIO()

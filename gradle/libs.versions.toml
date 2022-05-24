@@ -102,11 +102,8 @@ retrofit-serialization = "com.jakewharton.retrofit:retrofit2-kotlinx-serializati
 
 #test libs
 junit = "junit:junit:4.13.2"
-assertj = "org.assertj:assertj-core:3.22.0"
-mockito = "org.mockito:mockito-core:4.5.1"
-roboelectric = { module = "org.robolectric:robolectric", version.ref = "roboelectric_version" }
-roboelectric-shadows-multidex = { module = "org.robolectric:shadows-multidex", version.ref = "roboelectric_version" }
-roboelectric-shadows-play-services = { module = "org.robolectric:shadows-play-services", version.ref = "roboelectric_version" }
+mockk = "io.mockk:mockk:1.12.4"
+kotest-assertions = "io.kotest:kotest-assertions-core-jvm:5.3.0"
 
 [plugins]
 kotlinter = { id = "org.jmailen.kotlinter", version = "3.9.0" }
@@ -122,6 +119,6 @@ kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string"
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 nucleus = ["nucleus", "nucleus-support"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]
-tests = ["junit", "assertj", "mockito", "roboelectric", "roboelectric-shadows-multidex", "roboelectric-shadows-play-services"]
+tests = ["junit", "mockk", "kotest-assertions"]
 retrofit = ["retrofit-core", "retrofit-serialization"]
 rx = ["rx-android", "rx-java", "rx-relay", "reactivenetwork", "rxbinding-kotlin", "rxbinding-appcompat-v7", "rxbinding-appcompat-v4", "rxbinding-recycler-v7"]

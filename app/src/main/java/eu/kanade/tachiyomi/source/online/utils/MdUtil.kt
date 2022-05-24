@@ -1,14 +1,11 @@
 package eu.kanade.tachiyomi.source.online.utils
 
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
-import eu.kanade.tachiyomi.source.model.SChapter
-import eu.kanade.tachiyomi.source.model.SManga
 import kotlinx.serialization.json.Json
 import org.jsoup.parser.Parser
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
-import kotlin.math.floor
 
 class MdUtil {
 
@@ -207,32 +204,7 @@ class MdUtil {
             }
             return cleanString(newDescription)
         }
-
-        fun getMissingChapterCount(chapters: List<SChapter>, mangaStatus: Int): String? {
-            if (mangaStatus == SManga.COMPLETED) return null
-
-            val remove0ChaptersFromCount = chapters.distinctBy {
-                if (it.chapter_txt.isNotEmpty()) {
-                    it.vol + it.chapter_txt
-                } else {
-                    it.name
-                }
-            }.sortedByDescending { it.chapter_number }
-
-            remove0ChaptersFromCount.firstOrNull()?.let {
-                val chpNumber = floor(it.chapter_number).toInt()
-                val allChapters = (1..chpNumber).toMutableSet()
-
-                remove0ChaptersFromCount.forEach {
-                    allChapters.remove(floor(it.chapter_number).toInt())
-                }
-
-                if (allChapters.size <= 0) return null
-                return allChapters.size.toString()
-            }
-            return null
-        }
-
+        
         val dateFormatter = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss+SSS", Locale.US)
             .apply { timeZone = TimeZone.getTimeZone("UTC") }
 
