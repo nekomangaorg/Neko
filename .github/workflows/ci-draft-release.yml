@@ -5,27 +5,11 @@ on:
       - master
 
 jobs:
-  check_wrapper:
-    name: Validate Gradle Wrapper
-    runs-on: ubuntu-latest
-    steps:
-      - name: Clone repo
-        uses: actions/checkout@v3
-
-      - name: Validate Gradle Wrapper
-        uses: gradle/wrapper-validation-action@v1.0.4
-
   build:
     name: Build app
-    needs: check_wrapper
     runs-on: ubuntu-latest
 
     steps:
-      - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.9.1
-        with:
-          access_token: ${{ github.token }}
-
       - name: Clone repo
         uses: actions/checkout@v3
         with:
@@ -41,31 +25,6 @@ jobs:
         run: |
           mkdir -p ~/.gradle
           cp .github/runner-files/ci-gradle.properties ~/.gradle/gradle.properties
-
-      - name: Write google-services.json
-        uses: DamianReeves/write-file-action@v1.0
-        with:
-          path: app/google-services.json
-          contents: ${{ secrets.GOOGLE_SERVICE_JSON }}
-          write-mode: overwrite # optional, default is preserve
-
-      - name: Build app
-        uses: eskatos/gradle-command-action@v2
-        with:
-          arguments: assembleStandardRelease
-          wrapper-cache-enabled: true
-          dependencies-cache-enabled: true
-          configuration-cache-enabled: true
-
-      - name: Sign APK
-        id: sign_app
-        uses: r0adkll/sign-android-release@v1
-        with:
-          releaseDirectory: app/build/outputs/apk/standard/release
-          signingKeyBase64: ${{ secrets.SIGNING_KEY }}
-          alias: ${{ secrets.KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
-          keyPassword: ${{ secrets.KEY_PASSWORD }}
 
       - name: Get previous release
         id: last_release
@@ -84,8 +43,9 @@ jobs:
           prev_release_sha=$(git rev-list -n 1 ${{ steps.last_release.outputs.release }})
           echo "PREV_RELEASE_SHA=$prev_release_sha"
           echo "PREV_RELEASE_SHA=$prev_release_sha" >> $GITHUB_ENV
-          echo "COMMIT_LOGS<<{delimiter}
           echo "Url to compare: https://api.github.com/repos/carlosesco/neko/compare/$prev_release_sha...$current_sha"
+
+          echo "COMMIT_LOGS<<{delimiter}
           $(curl -H "Accept: application/vnd.github.v3+json" \
             "https://api.github.com/repos/carlosesco/neko/compare/$prev_release_sha...$current_sha" \
             | jq '[.commits[]|{message:(.commit.message | split("\n")), username:.author.login}]' \
@@ -94,32 +54,29 @@ jobs:
 
       - name: Prep build artifacts for release
         run: |
-          echo "" >> CurrentChangeLog.MD
-          echo ${{ env.COMMIT_LOGS }} >> CurrentChangeLog.MD
-          echo "" >> CurrentChangeLog.MD
-          echo "" >> CurrentChangeLog.MD
-          echo "| Variant | SHA-256 |" >> CurrentChangeLog.MD
-          echo "| ------- | ------- |" >> CurrentChangeLog.MD
+        set -e
+        #  mv app/build/outputs/apk/standard/release/Neko-standard-universal-release-unsigned-signed.apk neko-universal.apk
+        #  sha=`sha256sum neko-universal.apk | awk '{ print $1 }'`
+        #  echo "APK_UNIVERSAL_SHA=$sha" >> $GITHUB_ENV
+        #  echo "| Universal | $sha" >> CurrentChangeLog.MD
 
-          mv app/build/outputs/apk/standard/release/Neko-standard-universal-release-unsigned-signed.apk neko-universal.apk
-          sha=`sha256sum neko-universal.apk | awk '{ print $1 }'`
-          echo "| Universal | $sha" >> CurrentChangeLog.MD
+        #  cp app/build/outputs/apk/standard/release/Neko-standard-arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
+        #  sha=`sha256sum neko-arm64-v8a.apk | awk '{ print $1 }'`
+        #  echo "APK_ARM64_V8A_SHA=$sha" >> $GITHUB_ENV
 
+        #  cp app/build/outputs/apk/standard/release/Neko-standard-armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
+        #  sha=`sha256sum neko-armeabi-v7a.apk | awk '{ print $1 }'`
+        #  echo "APK_ARMEABI_V7A_SHA=$sha" >> $GITHUB_ENV
 
-          cp app/build/outputs/apk/standard/release/Neko-standard-arm64-v8a-release-unsigned-signed.apk neko-arm64-v8a.apk
-          sha=`sha256sum neko-arm64-v8a.apk | awk '{ print $1 }'`
-          echo "| arm64-v8a | $sha" >> CurrentChangeLog.MD
-
-          cp app/build/outputs/apk/standard/release/Neko-standard-armeabi-v7a-release-unsigned-signed.apk neko-armeabi-v7a.apk
-          sha=`sha256sum neko-armeabi-v7a.apk | awk '{ print $1 }'`
-          echo "| armeabi-v7a | $sha" >> CurrentChangeLog.MD
-
-          cp app/build/outputs/apk/standard/release/Neko-standard-x86-release-unsigned-signed.apk neko-x86.apk
-          sha=`sha256sum neko-x86.apk | awk '{ print $1 }'`
-          echo "| x86  | $sha" >> CurrentChangeLog.MD
+        #  cp app/build/outputs/apk/standard/release/Neko-standard-x86-release-unsigned-signed.apk neko-x86.apk
+        #  sha=`sha256sum neko-x86.apk | awk '{ print $1 }'`
+        #  echo "APK_X86_SHA=$sha" >> $GITHUB_ENV
 
       - name: Delete any draft releases
-        uses: hugo19941994/delete-draft-releases@v1.0.0
+        uses: dev-drprasad/delete-tag-and-release@v0.2.0
+        with:
+          delete_release: true
+          tag_name: latest
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -127,7 +84,15 @@ jobs:
         uses: ncipollo/release-action@v1.10.0
         with:
           allowUpdates: true
-          bodyFile: "CurrentChangeLog.MD"
+          body: |
+            ${{ env.COMMIT_LOGS }}
+
+            | Variant | SHA-256 |
+            | ------- | ------- |
+            | Universal | ${{ env.APK_UNIVERSAL_SHA }}
+            | arm64-v8a | ${{ env.APK_ARM64_V8A_SHA }}
+            | armeabi-v7a | ${{ env.APK_ARMEABI_V7A_SHA }}
+            | x86 | ${{ env.APK_X86_SHA }} |
           token: ${{ secrets.GITHUB_TOKEN }}
           draft: true
           replacesArtifacts: true
