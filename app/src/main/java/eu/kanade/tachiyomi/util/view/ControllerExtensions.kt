@@ -751,6 +751,9 @@ val Controller.fullAppBarHeight: Int?
 val Controller.isControllerVisible: Boolean
     get() = router.backstack.lastOrNull()?.controller == this
 
+val Controller.previousController: Controller?
+    get() = router.backstack.getOrNull(router.backstackSize - 2)?.controller
+
 @MainThread
 fun Router.canStillGoBack(): Boolean {
     if (backstack.size > 1) return true

@@ -9,6 +9,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.network.parseAs
 import eu.kanade.tachiyomi.util.system.withIOContext
+import io.github.g00fy2.versioncompare.Version
 import uy.kohesive.injekt.injectLazy
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -25,7 +26,7 @@ class AppUpdateChecker {
     ): AppUpdateResult {
         // Limit checks to once a day at most
         if (!isUserPrompt && Date().time < preferences.lastAppCheck()
-            .get() + TimeUnit.DAYS.toMillis(1)
+                .get() + TimeUnit.DAYS.toMillis(1)
         ) {
             return AppUpdateResult.NoNewUpdate
         }
@@ -39,7 +40,7 @@ class AppUpdateChecker {
                     preferences.lastAppCheck().set(Date().time)
 
                     // Check if latest version is different from current version
-                    if (isNewVersion(it.version)) {
+                    if (Version(it.version).isHigherThan(BuildConfig.VERSION_NAME)) {
                         AppUpdateResult.NewUpdate(it)
                     } else {
                         AppUpdateResult.NoNewUpdate
@@ -60,12 +61,6 @@ class AppUpdateChecker {
 
             result
         }
-    }
-
-    private fun isNewVersion(versionTag: String): Boolean {
-        // Removes prefixes like "r" or "v"
-        val newVersion = versionTag.replace("[^\\d.]".toRegex(), "")
-        return newVersion != BuildConfig.VERSION_NAME
     }
 }
 
