@@ -94,7 +94,7 @@ fun InformationHeader(
 
         if (manga.author.isNotNullOrEmpty() || manga.artist.isNotNullOrEmpty()) {
             val creator =
-                if (manga.author == manga.artist || manga.artist.isNotNullOrEmpty()) {
+                if (manga.author == manga.artist) {
                     manga.author ?: "".trim()
                 } else {
                     listOfNotNull(manga.author?.trim(), manga.artist?.trim())
