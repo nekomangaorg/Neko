@@ -27,9 +27,9 @@ import android.view.ViewGroup
 import android.view.Window
 import android.view.WindowManager
 import android.view.animation.AnimationUtils
+import android.widget.Toast
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.addCallback
-import android.widget.Toast
 import androidx.core.app.ActivityOptionsCompat
 import androidx.core.content.ContextCompat
 import androidx.core.graphics.ColorUtils
@@ -465,7 +465,7 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         with(binding.chaptersSheet) {
             readingMode.isVisible =
                 presenter?.manga?.isLongStrip() != true &&
-                ReaderBottomButton.ReadingMode.isIn(enabledButtons)
+                    ReaderBottomButton.ReadingMode.isIn(enabledButtons)
             rotationSheetButton.isVisible =
                 ReaderBottomButton.Rotation.isIn(enabledButtons)
             doublePage.isVisible = viewer is PagerViewer &&
@@ -782,16 +782,17 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         val readerNavGestureDetector = ReaderNavGestureDetector(this)
         val gestureDetector = GestureDetectorCompat(this, readerNavGestureDetector)
         with(binding.readerNav) {
-            binding.readerNav.pageSeekbar.addOnSliderTouchListener(object :
+            binding.readerNav.pageSeekbar.addOnSliderTouchListener(
+                object :
                     Slider.OnSliderTouchListener {
                     override fun onStartTrackingTouch(slider: Slider) {
                         readerNavGestureDetector.lockVertical = false
                         readerNavGestureDetector.hasScrollHorizontal = true
-                    isScrollingThroughPagesOrChapters = true
+                        isScrollingThroughPagesOrChapters = true
                     }
 
                     override fun onStopTrackingTouch(slider: Slider) {
-                    isScrollingThroughPagesOrChapters = false
+                        isScrollingThroughPagesOrChapters = false
                     }
                 },
             )
@@ -899,15 +900,15 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
             }
             binding.chaptersSheet.root.sheetBehavior?.peekHeight =
                 peek + if (fullscreen) {
-                insets.getBottomGestureInsets()
-            } else {
-                val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
-                max(
-                    0,
-                    (rootInsets.getBottomGestureInsets()) -
-                        rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
-                )
-            }
+                    insets.getBottomGestureInsets()
+                } else {
+                    val rootInsets = binding.root.rootWindowInsetsCompat ?: insets
+                    max(
+                        0,
+                        (rootInsets.getBottomGestureInsets()) -
+                            rootInsets.getInsetsIgnoringVisibility(systemBars()).bottom,
+                    )
+                }
             binding.chaptersSheet.chapterRecycler.updatePaddingRelative(bottom = systemInsets.bottom)
             binding.viewerContainer.requestLayout()
         }
@@ -1493,10 +1494,10 @@ class ReaderActivity : BaseRxActivity<ReaderPresenter>() {
         }
 
         val text = "${manga.title}: ${
-        getString(
-            R.string.chapter_,
-            decimalFormat.format(chapter.chapter_number),
-        )
+            getString(
+                R.string.chapter_,
+                decimalFormat.format(chapter.chapter_number),
+            )
         }, $pageNumber, <${MdUtil.baseUrl + manga.url}>"
 
         val stream = file.getUriCompat(this)

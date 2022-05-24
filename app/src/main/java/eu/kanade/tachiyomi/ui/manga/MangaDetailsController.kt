@@ -263,17 +263,17 @@ class MangaDetailsController :
                     )
                 }
                 )?.let {
-                // this makes the color more consistent regardless of theme
-                val dominant = it
-                val domLum = ColorUtils.calculateLuminance(dominant)
-                val lumWrongForTheme =
-                    (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
-                ColorUtils.blendARGB(
-                    it,
-                    colorBack,
-                    if (lumWrongForTheme) 0.9f else 0.7f,
-                )
-            }
+                    // this makes the color more consistent regardless of theme
+                    val dominant = it
+                    val domLum = ColorUtils.calculateLuminance(dominant)
+                    val lumWrongForTheme =
+                        (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
+                    ColorUtils.blendARGB(
+                        it,
+                        colorBack,
+                        if (lumWrongForTheme) 0.9f else 0.7f,
+                    )
+                }
     }
 
     private fun setRefreshStyle() {
@@ -1294,9 +1294,9 @@ class MangaDetailsController :
             presenter.manga.seriesType(view.context).lowercase(Locale.ROOT),
         )
         if (!presenter.manga.favorite && (
-            snack == null ||
-                snack?.getText() != text
-            )
+                snack == null ||
+                    snack?.getText() != text
+                )
         ) {
             snack = view.snack(text, Snackbar.LENGTH_INDEFINITE) {
                 setAction(R.string.add) {

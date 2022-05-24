@@ -102,7 +102,7 @@ class FilterHandler {
         Pair("Manga info updated", "updatedAt"),
         Pair("Title", "title"),
 
-    )
+        )
 
     class SortFilter(sortables: Array<String>) : Filter.Sort("Sort", sortables, Selection(1, false))
 
