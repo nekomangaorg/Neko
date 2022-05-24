@@ -33,7 +33,8 @@ jobs:
           current_sha=$(git rev-parse --short HEAD)
           echo "CURRENT_SHA=$current_sha"
           echo "CURRENT_SHA=$current_sha" >> $GITHUB_ENV
-          commit_count_diff=$(git rev-list --count ${{ steps.last_release.outputs.release }}..)
+          count_command="${{ steps.last_release.outputs.release }}"
+          commit_count_diff=$(git rev-list --count $count_command..)
           echo "COMMIT_COUNT_DIFF:$commit_count_diff"
           prev_release_sha=$(git rev-parse --short HEAD~$commit_count_diff)
           echo "PREV_RELEASE_SHA=$prev_release_sha"
