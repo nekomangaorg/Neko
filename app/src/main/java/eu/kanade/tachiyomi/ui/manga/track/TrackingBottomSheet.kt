@@ -203,6 +203,9 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
 
     override fun onTitleClick(position: Int) {
         val item = adapter?.getItem(position) ?: return
+        if (item.service.isMdList()) {
+            return
+        }
         if (controller.isNotOnline()) {
             dismiss()
             return
