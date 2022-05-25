@@ -3,8 +3,6 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates.Companion.READING_LIST
-import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates.Companion.WISH_LIST
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Context
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.ListItem
 import eu.kanade.tachiyomi.data.track.mangaupdates.dto.Rating
@@ -61,14 +59,13 @@ class MangaUpdatesApi(
         return listItem to rating
     }
 
-    suspend fun addSeriesToList(track: Track, setToRead: Boolean = false) {
-        val status = if (setToRead) READING_LIST else WISH_LIST
+    suspend fun addSeriesToList(track: Track) {
         val body = buildJsonArray {
             addJsonObject {
                 putJsonObject("series") {
                     put("id", track.media_id)
                 }
-                put("list_id", status)
+                put("list_id", track.status)
             }
         }
         authClient.newCall(
@@ -78,22 +75,29 @@ class MangaUpdatesApi(
             ),
         )
             .await()
-            .let {
-                if (it.code == 200) {
-                    track.status = status
-                    track.last_chapter_read = 1f
-                }
-            }
     }
 
-    suspend fun updateSeriesListItem(track: Track, setToRead: Boolean) {
-        val status = if (setToRead) READING_LIST else track.status
+    suspend fun removeSeriesFromList(track: Track): Boolean {
+        val body = buildJsonArray {
+            add(track.media_id)
+        }
+        authClient.newCall(
+            POST(
+                url = "$baseUrl/v1/lists/series/delete",
+                body = body.toString().toRequestBody(contentType),
+            ),
+        )
+            .await()
+            .let { return it.code == 200 }
+    }
+
+    suspend fun updateSeriesListItem(track: Track) {
         val body = buildJsonArray {
             addJsonObject {
                 putJsonObject("series") {
                     put("id", track.media_id)
                 }
-                put("list_id", status)
+                put("list_id", track.status)
                 putJsonObject("status") {
                     put("chapter", track.last_chapter_read.toInt())
                 }
@@ -106,11 +110,6 @@ class MangaUpdatesApi(
             ),
         )
             .await()
-            .let {
-                if (it.code == 200 && track.status != status) {
-                    track.status = status
-                }
-            }
 
         updateSeriesRating(track)
     }
@@ -192,24 +191,5 @@ class MangaUpdatesApi(
                     null
                 }
             }
-    }
-
-    suspend fun remove(track: Track): Boolean {
-        return try {
-            val body = buildJsonArray {
-                add(track.media_id)
-            }
-            authClient.newCall(
-                POST(
-                    url = "$baseUrl/v1/lists/series/delete",
-                    body = body.toString().toRequestBody(contentType),
-                ),
-            )
-                .await()
-            true
-        } catch (e: Exception) {
-            XLog.w(e)
-            false
-        }
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -74,6 +75,9 @@ fun CombinedClickableIconButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
+    IconButton(onClick = { /*TODO*/ }) {
+
+    }
     Box(
         modifier =
         modifier

@@ -557,7 +557,7 @@
     <string name="anilist" translatable="false">AniList</string>
     <string name="myanimelist" translatable="false">MyAnimeList</string>
     <string name="kitsu" translatable="false">Kitsu</string>
-    <string name="mangaupdates" translatable="false">MangaUpdates</string>
+    <string name="manga_updates" translatable="false">MangaUpdates</string>
     <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
     <string name="scoring_type_updated">Scoring type updated</string>
     <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>

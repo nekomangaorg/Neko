@@ -23,12 +23,7 @@ import uy.kohesive.injekt.api.get
  * @param remoteTrack the remote Track object.
  * @param service the tracker service.
  */
-fun syncChaptersWithTrackServiceTwoWay(
-    db: DatabaseHelper,
-    chapters: List<Chapter>,
-    remoteTrack: Track,
-    service: TrackService,
-) {
+fun syncChaptersWithTrackServiceTwoWay(db: DatabaseHelper, chapters: List<Chapter>, remoteTrack: Track, service: TrackService) {
     val sortedChapters = chapters.sortedBy { it.chapter_number }
     sortedChapters
         .filter { chapter -> chapter.chapter_number <= remoteTrack.last_chapter_read && !chapter.read }
@@ -71,7 +66,7 @@ fun updateTrackChapterMarkedAsRead(
     val newChapterRead = newLastChapter?.chapter_number ?: 0f
 
     // To avoid unnecessary calls if multiple marked as read for same manga
-    if (trackingJobs[mangaId]?.second ?: 0f < newChapterRead) {
+    if ((trackingJobs[mangaId]?.second ?: 0f) < newChapterRead) {
         trackingJobs[mangaId]?.first?.cancel()
 
         // We want these to execute even if the presenter is destroyed
@@ -105,7 +100,7 @@ suspend fun updateTrackChapterRead(
                 DelayedTrackingUpdateJob.setupTask(preferences.context)
             } else if (preferences.context.isOnline()) {
                 try {
-                    track.last_chapter_read = newChapterRead.toFloat()
+                    track.last_chapter_read = newChapterRead
                     service.update(track, true)
                     db.insertTrack(track).executeAsBlocking()
                 } catch (e: Exception) {

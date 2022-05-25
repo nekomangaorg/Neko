@@ -246,7 +246,7 @@ open class BrowseSourceController(bundle: Bundle) :
         val searchView = activityBinding?.searchToolbar?.searchView
 
         activityBinding?.searchToolbar?.setQueryHint("")
-        
+
         val query = presenter.query
         if (query.isNotBlank()) {
             searchItem?.expandActionView()

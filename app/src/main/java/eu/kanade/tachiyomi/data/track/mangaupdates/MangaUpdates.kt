@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.data.track.mangaupdates
 import android.content.Context
 import android.graphics.Color
 import androidx.annotation.StringRes
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -20,7 +19,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     private val api by lazy { MangaUpdatesApi(interceptor, client) }
 
     @StringRes
-    override fun nameRes(): Int = R.string.mangaupdates
+    override fun nameRes(): Int = R.string.manga_updates
 
     override fun getLogo(): Int = R.drawable.ic_tracker_manga_updates_logo
 
@@ -42,13 +41,13 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
             else -> ""
         }
 
-    override fun getGlobalStatus(status: Int): String = with(context) {
+    override fun getGlobalStatus(status: Int) = with(context) {
         when (status) {
             READING_LIST -> getString(R.string.reading)
-            WISH_LIST -> getString(R.string.plan_to_read)
             COMPLETE_LIST -> getString(R.string.completed)
             ON_HOLD_LIST -> getString(R.string.on_hold)
             UNFINISHED_LIST -> getString(R.string.dropped)
+            WISH_LIST -> getString(R.string.plan_to_read)
             else -> ""
         }
     }
@@ -62,12 +61,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
     override fun getScoreList(): List<String> = (0..10).map(Int::toString)
 
     override fun displayScore(track: Track): String = track.score.toInt().toString()
-
-    override suspend fun update(track: Track, setToRead: Boolean): Track {
-        api.updateSeriesListItem(track, setToRead)
-        return track
-    }
-
+    
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE
         track.status = DEFAULT_STATUS
@@ -76,22 +70,32 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         return track
     }
 
+    override suspend fun update(track: Track, setToRead: Boolean): Track {
+        updateTrackStatus(track, setToRead, setToComplete = true, mustReadToComplete = true)
+        api.updateSeriesListItem(track)
+        return track
+    }
+
     override suspend fun bind(track: Track): Track {
         return try {
             val (series, rating) = api.getSeriesListItem(track)
             series.copyTo(track)
-            rating?.copyTo(track) ?: track
+            update(rating?.copyTo(track) ?: track)
         } catch (e: Exception) {
-            api.addSeriesToList(track)
-            track
+            add(track)
         }
     }
 
-    override fun canRemoveFromService(): Boolean = true
-
-    override suspend fun removeFromService(track: Track): Boolean {
-        return api.remove(track)
-    }
+//    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
+//        return try {
+//            val (series, rating) = api.getSeriesListItem(track)
+//            series.copyTo(track)
+//            rating?.copyTo(track) ?: track
+//        } catch (e: Exception) {
+//            api.addSeriesToList(track, hasReadChapters)
+//            track
+//        }
+//    }
 
     override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         return api.search(query, manga, wasPreviouslyTracked)
@@ -106,16 +110,17 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         return rating?.copyTo(track) ?: track
     }
 
+    override fun canRemoveFromService(): Boolean = true
+
+    override suspend fun removeFromService(track: Track): Boolean {
+        return api.removeSeriesFromList(track)
+    }
+
     override suspend fun login(username: String, password: String): Boolean {
-        return try {
-            val authenticated = api.authenticate(username, password)!!
-            interceptor.newAuth(authenticated.sessionToken)
-            saveCredentials(authenticated.uid.toString(), authenticated.sessionToken)
-            true
-        } catch (e: Exception) {
-            XLog.e(e)
-            false
-        }
+        val authenticated = api.authenticate(username, password) ?: throw Throwable("Unable to login")
+        saveCredentials(authenticated.uid.toString(), authenticated.sessionToken)
+        interceptor.newAuth(authenticated.sessionToken)
+        return true
     }
 
     fun restoreSession(): String? {
