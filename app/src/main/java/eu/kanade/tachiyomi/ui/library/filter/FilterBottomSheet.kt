@@ -358,6 +358,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
                             serviceNames.first(),
                             serviceNames.getOrNull(1),
                             serviceNames.getOrNull(2),
+                            serviceNames.getOrNull(3),
+                            serviceNames.getOrNull(4),
                         )
                         if (tracked?.isActivated == true) {
                             binding.filterLayout.addView(trackers)

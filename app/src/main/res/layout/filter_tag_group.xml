@@ -86,4 +86,27 @@
         tools:text="Item 4"
         android:paddingStart="20dp"
         android:paddingEnd="20dp"/>
+
+
+    <View
+        android:id="@+id/separator4"
+        android:layout_width="1dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center"
+        android:background="@color/strong_divider"/>
+    <TextView
+        android:id="@+id/fifthButton"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        style="?textAppearanceBodyMedium"
+        android:textSize="15sp"
+        android:textColor="?attr/colorOnBackground"
+        android:background="@drawable/oval_ripple"
+        android:clickable="true"
+        android:focusable="true"
+        android:textStyle="normal"
+        tools:text="Item 4"
+        android:paddingStart="20dp"
+        android:paddingEnd="20dp"/>
 </eu.kanade.tachiyomi.ui.library.filter.FilterTagGroup>
