@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track
 import android.content.Context
 import eu.kanade.tachiyomi.data.track.anilist.Anilist
 import eu.kanade.tachiyomi.data.track.kitsu.Kitsu
+import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeList
 
@@ -13,6 +14,7 @@ class TrackManager(context: Context) {
         const val MYANIMELIST = 1
         const val ANILIST = 2
         const val KITSU = 3
+        const val MANGA_UPDATES = 7
     }
 
     val mdList = MdList(context, MDLIST)
@@ -23,7 +25,9 @@ class TrackManager(context: Context) {
 
     val kitsu = Kitsu(context, KITSU)
 
-    val services = listOf(mdList, myAnimeList, aniList, kitsu)
+    val mangaUpdates = MangaUpdates(context, MANGA_UPDATES)
+
+    val services = listOf(mdList, myAnimeList, aniList, kitsu, mangaUpdates)
 
     fun getService(id: Int) = services.find { it.id == id }
 

@@ -41,7 +41,7 @@ class Amazon(id: String) : ExternalLink(id) {
     override fun getUrl() = id
 }
 
-class MangaUpdates(id: String) : ExternalLink(id) {
+class MangaUpdatesLink(id: String) : ExternalLink(id) {
     override val name = "MangaUpdates"
     override fun getLogo() = R.drawable.ic_tracker_manga_updates_logo
     override fun getLogoColor() = Color.rgb(137, 164, 195)

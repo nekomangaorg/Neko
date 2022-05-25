@@ -15,7 +15,7 @@ import eu.kanade.tachiyomi.data.external.Engtl
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.external.Kitsu
 import eu.kanade.tachiyomi.data.external.Mal
-import eu.kanade.tachiyomi.data.external.MangaUpdates
+import eu.kanade.tachiyomi.data.external.MangaUpdatesLink
 import eu.kanade.tachiyomi.data.external.Raw
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.SManga
@@ -190,7 +190,7 @@ interface Manga : SManga {
             list.add(AnimePlanet(it))
         }
         manga_updates_id?.let {
-            list.add(MangaUpdates(it))
+            list.add(MangaUpdatesLink(it))
         }
 
         my_anime_list_id?.let {

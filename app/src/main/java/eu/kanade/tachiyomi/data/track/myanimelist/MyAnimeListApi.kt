@@ -23,6 +23,7 @@ import kotlinx.serialization.json.int
 import kotlinx.serialization.json.jsonArray
 import kotlinx.serialization.json.jsonObject
 import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.long
 import okhttp3.FormBody
 import okhttp3.OkHttpClient
 import okhttp3.Request
@@ -68,7 +69,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
     ): List<TrackSearch> {
         return withIOContext {
             if (manga.my_anime_list_id !== null && !wasPreviouslyTracked) {
-                listOf(getMangaDetails(manga.my_anime_list_id!!.toInt()))
+                listOf(getMangaDetails(manga.my_anime_list_id!!.toLong()))
             } else {
                 val url = "$baseApiUrl/manga".toUri().buildUpon()
                     .appendQueryParameter("q", query)
@@ -81,7 +82,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                         it["data"]!!.jsonArray
                             .map { data -> data.jsonObject["node"]!!.jsonObject }
                             .map { node ->
-                                val id = node["id"]!!.jsonPrimitive.int
+                                val id = node["id"]!!.jsonPrimitive.long
                                 async { getMangaDetails(id) }
                             }
                             .awaitAll()
@@ -91,7 +92,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
         }
     }
 
-    suspend fun getMangaDetails(id: Int): TrackSearch {
+    suspend fun getMangaDetails(id: Long): TrackSearch {
         return withIOContext {
             val url = "$baseApiUrl/manga".toUri().buildUpon()
                 .appendPath(id.toString())
@@ -106,7 +107,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                 .let {
                     val obj = it.jsonObject
                     TrackSearch.create(TrackManager.MYANIMELIST).apply {
-                        media_id = obj["id"]!!.jsonPrimitive.int
+                        media_id = obj["id"]!!.jsonPrimitive.long
                         title = obj["title"]!!.jsonPrimitive.content
                         summary = obj["synopsis"]?.jsonPrimitive?.content ?: ""
                         total_chapters = obj["num_chapters"]!!.jsonPrimitive.int
@@ -192,7 +193,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
                     )
                 }
                 .map {
-                    val id = it.jsonObject["node"]!!.jsonObject["id"]!!.jsonPrimitive.int
+                    val id = it.jsonObject["node"]!!.jsonObject["id"]!!.jsonPrimitive.long
                     async { getMangaDetails(id) }
                 }
                 .awaitAll()
@@ -295,7 +296,7 @@ class MyAnimeListApi(private val client: OkHttpClient, interceptor: MyAnimeListI
             .appendQueryParameter("response_type", "code")
             .build()
 
-        fun mangaUrl(id: Int): Uri = "$baseApiUrl/manga".toUri().buildUpon()
+        fun mangaUrl(id: Long): Uri = "$baseApiUrl/manga".toUri().buildUpon()
             .appendPath(id.toString())
             .appendPath("my_list_status")
             .build()

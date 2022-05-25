@@ -8,6 +8,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.launch
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -47,7 +48,9 @@ class TrackLoginDialog(@StringRes usernameLabelRes: Int? = null, bundle: Bundle?
             val pass = binding.password.text.toString()
             scope.launch {
                 try {
-                    val result = service.login(user, pass)
+                    val result = withIOContext {
+                        service.login(user, pass)
+                    }
                     if (result) {
                         dialog?.dismiss()
                         context.toast(R.string.successfully_logged_in)

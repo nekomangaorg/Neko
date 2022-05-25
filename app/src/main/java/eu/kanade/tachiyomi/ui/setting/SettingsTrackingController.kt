@@ -83,6 +83,12 @@ class SettingsTrackingController :
                 dialog.targetController = this@SettingsTrackingController
                 dialog.showDialog(router)
             }
+
+            trackPreference(trackManager.mangaUpdates) {
+                val dialog = TrackLoginDialog(trackManager.mangaUpdates, R.string.username)
+                dialog.targetController = this@SettingsTrackingController
+                dialog.showDialog(router)
+            }
         }
     }
 

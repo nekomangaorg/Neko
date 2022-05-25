@@ -105,7 +105,7 @@ class MyAnimeList(private val context: Context, id: Int) : TrackService(id) {
         wasPreviouslyTracked: Boolean,
     ): List<TrackSearch> {
         if (query.startsWith(SEARCH_ID_PREFIX)) {
-            query.substringAfter(SEARCH_ID_PREFIX).toIntOrNull()?.let { id ->
+            query.substringAfter(SEARCH_ID_PREFIX).toLongOrNull()?.let { id ->
                 return listOf(api.getMangaDetails(id))
             }
         }

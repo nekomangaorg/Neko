@@ -36,7 +36,7 @@ object TrackTable {
             $COL_ID INTEGER NOT NULL PRIMARY KEY,
             $COL_MANGA_ID INTEGER NOT NULL,
             $COL_SYNC_ID INTEGER NOT NULL,
-            $COL_MEDIA_ID INTEGER NOT NULL,
+            $COL_MEDIA_ID LONG NOT NULL,
             $COL_LIBRARY_ID INTEGER,
             $COL_TITLE TEXT NOT NULL,
             $COL_LAST_CHAPTER_READ REAL NOT NULL,
