@@ -14,17 +14,11 @@ abstract class BaseComposeController<PS : BaseCoroutinePresenter<*>>(bundle: Bun
     override fun onViewCreated(view: View) {
         hideToolbar()
         super.onViewCreated(view)
-
         binding.root.setContent {
             NekoTheme {
                 ScreenContent()
             }
         }
-    }
-
-    override fun onDestroyView(view: View) {
-        showToolbar()
-        super.onDestroyView(view)
     }
 
     override fun createBinding(inflater: LayoutInflater) =
@@ -41,11 +35,10 @@ abstract class BasicComposeController : BaseController<EmptyComposeControllerBin
 
     override fun createBinding(inflater: LayoutInflater): EmptyComposeControllerBinding =
         EmptyComposeControllerBinding.inflate(inflater)
-
+    
     override fun onViewCreated(view: View) {
         hideToolbar()
         super.onViewCreated(view)
-
         binding.root.setContent {
             NekoTheme {
                 ScreenContent()
