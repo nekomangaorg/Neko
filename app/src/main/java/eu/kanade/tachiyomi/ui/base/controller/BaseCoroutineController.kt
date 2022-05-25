@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.viewbinding.ViewBinding
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 
@@ -9,9 +11,13 @@ abstract class BaseCoroutineController<VB : ViewBinding, PS : BaseCoroutinePrese
     BaseController<VB>(bundle) {
 
     abstract val presenter: PS
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
+        showToolbar()
+        return super.onCreateView(inflater, container, savedViewState)
+    }
+
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
-        showToolbar()
         presenter.takeView(this)
         presenter.onCreate()
     }

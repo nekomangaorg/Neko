@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.ui.base.controller
 
 import android.os.Bundle
+import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewGroup
 import androidx.annotation.CallSuper
 import androidx.viewbinding.ViewBinding
 import rx.Observable
@@ -29,10 +31,14 @@ abstract class RxController<VB : ViewBinding>(bundle: Bundle? = null) : BaseCont
         super.onDetach(view)
         untilDetachSubscriptions.unsubscribe()
     }
+    
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup, savedViewState: Bundle?): View {
+        showToolbar()
+        return super.onCreateView(inflater, container, savedViewState)
+    }
 
     @CallSuper
     override fun onViewCreated(view: View) {
-        showToolbar()
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }

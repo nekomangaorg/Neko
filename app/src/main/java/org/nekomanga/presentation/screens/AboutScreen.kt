@@ -91,7 +91,7 @@ fun AboutScreen(
                 LogoHeader()
             }
             item {
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(24.dp))
             }
             item {
                 PreferenceRow(
