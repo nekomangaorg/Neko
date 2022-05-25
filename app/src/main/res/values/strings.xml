@@ -802,6 +802,7 @@
     <string name="website">Website</string>
     <string name="dex_loot">Buy loot from MangaDex</string>
     <string name="open_source_licenses">Open source licenses</string>
+    <string name="privacy_policy">Privacy policy</string>
 
     <!-- Login/Logout dialog -->
     <string name="log_in_to_">Log in to %1$s</string>

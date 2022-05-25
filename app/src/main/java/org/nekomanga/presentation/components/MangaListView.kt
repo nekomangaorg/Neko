@@ -219,7 +219,7 @@ private fun MangaCover(manga: Manga, shouldOutlineCover: Boolean, modifier: Modi
                 .clip(RoundedCornerShape(Shapes.coverRadius))
                 .then(outlineModifier),
         )
-        
+
         if (manga.favorite) {
             val offset = (-4).dp
             Favorited(offset)

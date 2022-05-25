@@ -1,6 +1,6 @@
 package org.nekomanga.presentation.components
 
-import TooltipBox
+import ToolTipIconButton
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -35,6 +35,7 @@ fun NekoScaffold(
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
     subtitle: String = "",
+    snackBarHost: @Composable () -> Unit = {},
     actions: @Composable RowScope.() -> Unit = {},
     content: @Composable (PaddingValues) -> Unit = {},
 ) {
@@ -47,6 +48,7 @@ fun NekoScaffold(
     val scrollBehavior = remember { TopAppBarDefaults.enterAlwaysScrollBehavior() }
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        snackbarHost = snackBarHost,
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
@@ -67,7 +69,7 @@ fun NekoScaffold(
                             )
                         },
                         navigationIcon = {
-                            TooltipBox(
+                            ToolTipIconButton(
                                 toolTipLabel = navigationIconLabel,
                                 icon = navigationIcon,
                                 buttonClicked = onNavigationIconClicked,
@@ -103,7 +105,7 @@ fun NekoScaffold(
                             }
                         },
                         navigationIcon = {
-                            TooltipBox(
+                            ToolTipIconButton(
                                 toolTipLabel = navigationIconLabel,
                                 icon = navigationIcon,
                                 buttonClicked = onNavigationIconClicked,
@@ -124,3 +126,4 @@ fun NekoScaffold(
 fun getTopAppBarColor(): Color {
     return MaterialTheme.colorScheme.surface.copy(alpha = .7f)
 }
+

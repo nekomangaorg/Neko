@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import androidx.preference.PreferenceScreen
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -256,8 +257,8 @@ class SettingsAdvancedController : SettingsController() {
                 context.getString(R.string.log_level_summary) + "\nCurrent Level: " + XLogLevel.values()[prefs.logLevel()]
             entries = XLogLevel.values().map {
                 "${
-                it.name.lowercase(Locale.ENGLISH)
-                    .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
+                    it.name.lowercase(Locale.ENGLISH)
+                        .replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ENGLISH) else it.toString() }
                 } (${it.description})"
             }
             entryValues = XLogLevel.values().indices.toList()
@@ -270,6 +271,15 @@ class SettingsAdvancedController : SettingsController() {
                     "logs",
                 )
                 logFolder.deleteRecursively()
+            }
+        }
+
+        preference {
+            key = "send_firebase_event"
+            title = "send a test firebase event"
+
+            onClick {
+                FirebaseAnalytics.getInstance(context).logEvent("test_event", Bundle().apply { this.putString("test", "test") })
             }
         }
     }

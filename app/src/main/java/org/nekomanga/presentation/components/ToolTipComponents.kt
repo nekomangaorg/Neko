@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -21,26 +20,33 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.semantics.Role
 
 /**
- * This is a box around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
+ * This is a Tooltip Icon button, a wrapper around a CombinedClickableIcon Button, in which the long click of the button with show the tooltip
  */
 @Composable
-fun TooltipBox(
+fun ToolTipIconButton(
     toolTipLabel: String,
-    icon: ImageVector,
+    modifier: Modifier = Modifier,
+    icon: ImageVector? = null,
+    painter: Painter? = null,
     isEnabled: Boolean = true,
+    tint: Color = LocalContentColor.current,
     buttonClicked: () -> Unit,
 ) {
+    require(icon != null || painter != null)
+
     val showTooltip = remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
     CombinedClickableIconButton(
         enabled = isEnabled,
-        modifier = Modifier.iconButtonCombinedClickable(
+        modifier = modifier.iconButtonCombinedClickable(
             toolTipLabel = toolTipLabel,
             onClick = buttonClicked,
             onLongClick = {
@@ -49,10 +55,21 @@ fun TooltipBox(
             },
         ),
     ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = toolTipLabel,
-        )
+
+        if (icon != null) {
+            Icon(
+                imageVector = icon,
+                tint = tint,
+                contentDescription = toolTipLabel,
+            )
+        } else {
+            Icon(
+                painter = painter!!,
+                tint = tint,
+                contentDescription = toolTipLabel,
+            )
+        }
+
     }
 
     Tooltip(
@@ -75,9 +92,6 @@ fun CombinedClickableIconButton(
     enabled: Boolean = true,
     content: @Composable () -> Unit,
 ) {
-    IconButton(onClick = { /*TODO*/ }) {
-
-    }
     Box(
         modifier =
         modifier

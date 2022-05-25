@@ -32,6 +32,7 @@ abstract class RxController<VB : ViewBinding>(bundle: Bundle? = null) : BaseCont
 
     @CallSuper
     override fun onViewCreated(view: View) {
+        showToolbar()
         if (untilDestroySubscriptions.isUnsubscribed) {
             untilDestroySubscriptions = CompositeSubscription()
         }

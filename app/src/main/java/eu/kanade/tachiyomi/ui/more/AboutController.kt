@@ -3,122 +3,78 @@ package eu.kanade.tachiyomi.ui.more
 import android.app.Dialog
 import android.content.ClipData
 import android.content.ClipboardManager
-import android.content.Intent
+import android.content.Context
 import android.os.Build
 import android.os.Bundle
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.getSystemService
-import androidx.core.net.toUri
-import androidx.preference.PreferenceScreen
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateNotifier
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
 import eu.kanade.tachiyomi.data.updater.AppUpdateService
-import eu.kanade.tachiyomi.data.updater.RELEASE_URL
+import eu.kanade.tachiyomi.ui.base.controller.BasicComposeController
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.ui.setting.LicensesController
-import eu.kanade.tachiyomi.ui.setting.SettingsController
-import eu.kanade.tachiyomi.ui.setting.add
-import eu.kanade.tachiyomi.ui.setting.onClick
-import eu.kanade.tachiyomi.ui.setting.preference
-import eu.kanade.tachiyomi.ui.setting.preferenceCategory
-import eu.kanade.tachiyomi.ui.setting.titleRes
 import eu.kanade.tachiyomi.util.CrashLogUtil
 import eu.kanade.tachiyomi.util.lang.toTimestampString
 import eu.kanade.tachiyomi.util.system.isOnline
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 import eu.kanade.tachiyomi.util.system.toast
-import eu.kanade.tachiyomi.util.view.snack
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.nekomanga.presentation.screens.AboutScreen
+import uy.kohesive.injekt.injectLazy
 import java.text.DateFormat
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
 
-class AboutController : SettingsController() {
+class AboutController : BasicComposeController() {
 
-    /**
-     * Checks for new releases
-     */
+    private val preferences: PreferencesHelper by injectLazy()
     private val updateChecker by lazy { AppUpdateChecker() }
 
     private val dateFormat: DateFormat by lazy {
         preferences.dateFormat()
     }
 
-    private val isUpdaterEnabled = BuildConfig.INCLUDE_UPDATER
+    @Composable
+    override fun ScreenContent() {
+        val context = LocalContext.current
+        AboutScreen(
+            getFormattedBuildTime = this::getFormattedBuildTime,
+            checkVersion = this::checkVersion,
+            onVersionClicked = { this.copyVersionInfo(context) },
+            onClickLicenses = { router.pushController(LicensesController().withFadeTransaction()) },
+            onBackPressed = { activity?.onBackPressed() },
+        )
+    }
 
-    override fun setupPreferenceScreen(screen: PreferenceScreen) = screen.apply {
-        titleRes = R.string.about
+    private fun copyVersionInfo(context: Context) {
+        val deviceInfo = CrashLogUtil(context).getDebugInfo()
+        val clipboard = context.getSystemService<ClipboardManager>()!!
+        val appInfo = context.getString(R.string.app_info)
+        clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))
+    }
 
-        preference {
-            key = "pref_whats_new"
-            titleRes = R.string.whats_new_this_release
-            onClick {
-                val intent = Intent(
-                    Intent.ACTION_VIEW,
-                    if (BuildConfig.DEBUG) {
-                        "https://github.com/CarlosEsco/Neko/commits/master"
-                    } else {
-                        RELEASE_URL
-                    }.toUri(),
-                )
-                startActivity(intent)
-            }
-        }
-        if (isUpdaterEnabled) {
-            preference {
-                key = "pref_check_for_updates"
-                titleRes = R.string.check_for_updates
-                onClick {
-                    if (activity!!.isOnline()) {
-                        checkVersion()
-                    } else {
-                        activity!!.toast(R.string.no_network_connection)
-                    }
-                }
-            }
-        }
-        preference {
-            key = "pref_version"
-            titleRes = R.string.version
-            summary = if (BuildConfig.DEBUG) "r" + BuildConfig.COMMIT_COUNT
-            else BuildConfig.VERSION_NAME
+    private fun getFormattedBuildTime(): String {
+        try {
+            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
+            inputDf.timeZone = TimeZone.getTimeZone("UTC")
+            val buildTime = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
 
-            onClick {
-                activity?.let {
-                    val deviceInfo = CrashLogUtil(it).getDebugInfo()
-                    val clipboard = it.getSystemService<ClipboardManager>()!!
-                    val appInfo = it.getString(R.string.app_info)
-                    clipboard.setPrimaryClip(ClipData.newPlainText(appInfo, deviceInfo))
-                    if (Build.VERSION.SDK_INT + Build.VERSION.PREVIEW_SDK_INT < 33) {
-                        view?.snack(context.getString(R.string._copied_to_clipboard, appInfo))
-                    }
-                }
-            }
+            return buildTime.toTimestampString(dateFormat)
+        } catch (e: ParseException) {
+            return BuildConfig.BUILD_TIME
         }
-        preference {
-            key = "pref_build_time"
-            titleRes = R.string.build_time
-            summary = getFormattedBuildTime()
-        }
-
-        preferenceCategory {
-            preference {
-                titleRes = R.string.open_source_licenses
-
-                onClick {
-                    router.pushController(LicensesController().withFadeTransaction())
-                }
-            }
-        }
-        add(AboutLinksPreference(context))
     }
 
     /**
@@ -126,10 +82,15 @@ class AboutController : SettingsController() {
      */
     private fun checkVersion() {
         val activity = activity ?: return
+        if (activity.isOnline().not()) {
+            activity.toast(R.string.no_network_connection)
+            return
+        }
 
         activity.toast(R.string.searching_for_updates)
         viewScope.launch {
             val result = try {
+
                 updateChecker.checkForUpdate(activity, true)
             } catch (error: Exception) {
                 withContext(Dispatchers.Main) {
@@ -188,16 +149,6 @@ class AboutController : SettingsController() {
             const val URL_KEY = "NewUpdateDialogController.key"
         }
     }
-
-    private fun getFormattedBuildTime(): String {
-        try {
-            val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
-            inputDf.timeZone = TimeZone.getTimeZone("UTC")
-            val buildTime = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
-
-            return buildTime.toTimestampString(dateFormat)
-        } catch (e: ParseException) {
-            return BuildConfig.BUILD_TIME
-        }
-    }
 }
+
+

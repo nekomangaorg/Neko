@@ -71,3 +71,4 @@ val RELEASE_TAG: String by lazy {
 const val GITHUB_REPO: String = "CarlosEsco/Neko"
 
 val RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/tag/$RELEASE_TAG"
+
