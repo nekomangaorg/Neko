@@ -53,11 +53,6 @@ abstract class BasicComposeController : BaseController<EmptyComposeControllerBin
         }
     }
 
-    override fun onDestroyView(view: View) {
-        showToolbar()
-        super.onDestroyView(view)
-    }
-
     @Composable
     abstract fun ScreenContent()
 }

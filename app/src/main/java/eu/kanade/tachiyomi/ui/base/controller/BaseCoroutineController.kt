@@ -11,6 +11,7 @@ abstract class BaseCoroutineController<VB : ViewBinding, PS : BaseCoroutinePrese
     abstract val presenter: PS
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
+        showToolbar()
         presenter.takeView(this)
         presenter.onCreate()
     }
