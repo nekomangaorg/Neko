@@ -47,8 +47,8 @@ object ChapterRecognition {
         // Get chapter title with lower case
         var name = chapter.name.lowercase(Locale.getDefault())
 
-        // Remove comma's from chapter.
-        name = name.replace(',', '.')
+        // Remove comma's or hyphens.
+        name = name.replace(',', '.').replace('-', '.')
 
         val start = name.indexOf("[")
         val end = name.indexOf("]")
