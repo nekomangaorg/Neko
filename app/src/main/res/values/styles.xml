@@ -139,7 +139,13 @@
     <!-- set the rounded drawable as background to your bottom sheet -->
 
     <style name="BottomSheetDialogTheme" parent="@style/ThemeOverlay.Material3.BottomSheetDialog">
+        <item name="bottomSheetStyle">@style/BottomSheet.Modal</item>
+    </style>
+
+    <style name="BottomSheet.Modal" parent="Widget.Material3.BottomSheet.Modal">
         <item name="paddingBottomSystemWindowInsets">false</item>
+        <item name="paddingLeftSystemWindowInsets">false</item>
+        <item name="paddingRightSystemWindowInsets">false</item>
     </style>
 
     <style name="OverflowDialogTheme" parent="BottomSheetDialogTheme">
