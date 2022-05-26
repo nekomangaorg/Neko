@@ -81,6 +81,7 @@ import eu.kanade.tachiyomi.ui.library.LibraryController
 import eu.kanade.tachiyomi.ui.library.LibraryPresenter
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.more.AboutController
+import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.more.OverflowDialog
 import eu.kanade.tachiyomi.ui.recents.RecentsController
 import eu.kanade.tachiyomi.ui.recents.RecentsPresenter
@@ -337,9 +338,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             val currentController = router.backstack.lastOrNull()?.controller
             if (!continueSwitchingTabs && currentController is BottomNavBarInterface) {
                 if (!currentController.canChangeTabs {
-                    continueSwitchingTabs = true
-                    this@MainActivity.nav.selectedItemId = id
-                }
+                        continueSwitchingTabs = true
+                        this@MainActivity.nav.selectedItemId = id
+                    }
                 ) return@setOnItemSelectedListener false
             }
             continueSwitchingTabs = false
@@ -381,9 +382,9 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         binding.searchToolbar.setNavigationOnClickListener {
             val rootSearchController = router.backstack.lastOrNull()?.controller
             if ((
-                rootSearchController is RootSearchInterface ||
-                    (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
-                ) &&
+                    rootSearchController is RootSearchInterface ||
+                        (currentToolbar != binding.searchToolbar && binding.appBar.useLargeToolbar)
+                    ) &&
                 rootSearchController !is SmallToolbarInterface
             ) {
                 binding.searchToolbar.menu.findItem(R.id.action_search)?.expandActionView()
@@ -526,7 +527,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
         val returnToStart = preferences.backReturnsToStart().get() && this !is SearchActivity
         backPressedCallback?.isEnabled =
             (binding.searchToolbar.hasExpandedActionView() && binding.cardFrame.isVisible) ||
-            router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
+                router.canStillGoBack() || (returnToStart && startingTab() != nav.selectedItemId)
     }
 
     override fun onTitleChanged(title: CharSequence?, color: Int) {
@@ -756,7 +757,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
                         // Create confirmation window
                         withContext(Dispatchers.Main) {
                             AppUpdateNotifier.releasePageUrl = result.release.releaseLink
-                            AboutController.NewUpdateDialogController(body, url).showDialog(router)
+                            NewUpdateDialogController(body, url).showDialog(router)
                         }
                     }
                 } catch (error: Exception) {
@@ -807,8 +808,8 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
             SHORTCUT_UPDATE_NOTES -> {
                 val extras = intent.extras ?: return false
                 if (router.backstack.isEmpty()) nav.selectedItemId = R.id.nav_library
-                if (router.backstack.lastOrNull()?.controller !is AboutController.NewUpdateDialogController) {
-                    AboutController.NewUpdateDialogController(extras).showDialog(router)
+                if (router.backstack.lastOrNull()?.controller !is NewUpdateDialogController) {
+                    NewUpdateDialogController(extras).showDialog(router)
                 }
             }
             SHORTCUT_SOURCE -> {
@@ -963,7 +964,7 @@ open class MainActivity : BaseActivity<MainActivityBinding>(), DownloadServiceLi
 
         val indexOfMore = toolbar.menu.children.toList().indexOfLast { it.itemId == R.id.action_more }
         val lastIndex = toolbar.menu.children.toList().lastIndex
-        if (indexOfMore != -1 && indexOfMore != lastIndex) {
+        if (indexOfMore != -1 && indexOfMore < lastIndex) {
             val actionMoreItem = toolbar.menu.findItem(R.id.action_more)
             toolbar.menu.removeItem(R.id.action_more)
             addOrUpdateMenuItem(actionMoreItem, toolbar.menu, true, currentItemsId, toolbar.menu.children.toList().lastIndex)

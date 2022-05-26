@@ -1,4 +1,4 @@
-package org.nekomanga.presentation.components
+package org.nekomanga.presentation.components.snackbar
 
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.offset
@@ -81,3 +81,6 @@ fun SwipeableSnackbarHost(
             ),
     )
 }
+
+
+

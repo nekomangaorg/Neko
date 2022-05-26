@@ -27,7 +27,7 @@ import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
-import eu.kanade.tachiyomi.ui.more.AboutController
+import eu.kanade.tachiyomi.ui.more.NewUpdateDialogController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.util.chapter.updateTrackChapterMarkedAsRead
 import eu.kanade.tachiyomi.util.storage.DiskUtil
@@ -526,7 +526,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapter:
-                Chapter,
+            Chapter,
         ): PendingIntent {
             val newIntent = ReaderActivity.newIntent(context, manga, chapter)
             return PendingIntent.getActivity(
@@ -556,8 +556,8 @@ class NotificationReceiver : BroadcastReceiver() {
                     MainActivity::class.java,
                 ).setAction(MainActivity.SHORTCUT_UPDATE_NOTES)
                     .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
-                    .putExtra(AboutController.NewUpdateDialogController.BODY_KEY, notes)
-                    .putExtra(AboutController.NewUpdateDialogController.URL_KEY, downloadLink)
+                    .putExtra(NewUpdateDialogController.BODY_KEY, notes)
+                    .putExtra(NewUpdateDialogController.URL_KEY, downloadLink)
             return PendingIntent.getActivity(
                 context,
                 downloadLink.hashCode(),
@@ -626,7 +626,7 @@ class NotificationReceiver : BroadcastReceiver() {
             context: Context,
             manga: Manga,
             chapters:
-                Array<Chapter>,
+            Array<Chapter>,
             groupId: Int,
         ):
             PendingIntent {

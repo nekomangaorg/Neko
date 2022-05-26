@@ -118,7 +118,9 @@ fun NekoScaffold(
             }
         },
     ) { paddingValues ->
-        content(paddingValues)
+        CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+            content(paddingValues)
+        }
     }
 }
 
