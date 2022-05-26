@@ -8,9 +8,7 @@ import eu.kanade.tachiyomi.data.updater.AppUpdateService
 import eu.kanade.tachiyomi.ui.base.controller.DialogController
 import eu.kanade.tachiyomi.util.system.materialAlertDialog
 
-/**
- * This is only used from the main screen when it auto checks. Manual checks use compose version
- */
+@Deprecated(message = "This is only used from the main screen when it auto checks. Manual checks use compose version remove when everything is composed")
 class NewUpdateDialogController(bundle: Bundle? = null) : DialogController(bundle) {
 
     constructor(body: String, url: String) : this(
