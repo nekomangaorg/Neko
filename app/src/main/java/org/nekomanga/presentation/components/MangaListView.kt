@@ -1,4 +1,4 @@
-package eu.kanade.tachiyomi.ui.base
+package org.nekomanga.presentation.components
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -38,13 +38,6 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 import eu.kanade.tachiyomi.data.models.DisplayManga
-import org.nekomanga.presentation.components.CoverRippleTheme
-import org.nekomanga.presentation.components.DisplayText
-import org.nekomanga.presentation.components.Favorited
-import org.nekomanga.presentation.components.HeaderCard
-import org.nekomanga.presentation.components.Loading
-import org.nekomanga.presentation.components.MangaTitle
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable

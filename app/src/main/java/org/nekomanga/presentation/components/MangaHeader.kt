@@ -1,7 +1,6 @@
-package eu.kanade.tachiyomi.ui.manga.header
+package org.nekomanga.presentation.components
 
 import androidx.appcompat.content.res.AppCompatResources
-import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -105,7 +104,6 @@ fun InformationHeader(
             Text(
                 text = creator,
                 modifier = Modifier
-                    .animateContentSize()
                     .combinedClickable(
                         interactionSource = noRippleInteraction,
                         indication = null,
