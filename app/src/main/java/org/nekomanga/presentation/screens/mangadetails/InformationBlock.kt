@@ -1,8 +1,8 @@
-package org.nekomanga.presentation.components
+package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.appcompat.content.res.AppCompatResources
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.indication
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -33,34 +33,37 @@ import com.elvishew.xlog.XLog
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.google.android.material.composethemeadapter3.Mdc3Theme
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.theme.Typefaces
+import org.nekomanga.presentation.components.NoRippleText
+import org.nekomanga.presentation.theme.NekoTheme
 import java.text.NumberFormat
 import java.util.Locale
 import kotlin.math.roundToInt
 
 @Composable
-fun InformationHeader(
+fun InformationBlock(
     manga: Manga,
     isExpanded: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 
     ) {
-    val style = TextStyle(
-        fontFamily = Typefaces.montserrat,
-        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f),
-    )
+
+    val lightAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f)
+    val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f)
 
     val noRippleInteraction = remember { MutableInteractionSource() }
     val haptic = LocalHapticFeedback.current
+
+    val style = TextStyle(
+        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f),
+    )
 
     Column(
         modifier = Modifier
@@ -69,26 +72,12 @@ fun InformationHeader(
             .padding(horizontal = 8.dp),
     ) {
         if (manga.title.isNotNullOrEmpty()) {
-            Text(
-                text = manga.title,
-                modifier = Modifier
-                    .indication(indication = null, interactionSource = noRippleInteraction)
-                    .combinedClickable(
-                        interactionSource = noRippleInteraction,
-                        indication = null,
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            titleLongClick(manga.title)
-                        },
-                        onClick = {},
-                    ),
+            NoRippleText(
+                title = manga.title,
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
-                overflow = TextOverflow.Ellipsis,
-                style = style.copy(
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Medium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f),
-                ),
+                onLongClick = titleLongClick,
+                style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-1).sp, fontWeight = FontWeight.Medium),
+                color = lightAlpha,
             )
         }
 
@@ -153,7 +142,7 @@ fun InformationHeader(
                 }
                 if (flag != null) {
                     val drawable = AppCompatResources.getDrawable(LocalContext.current, flag)
-                    androidx.compose.foundation.Image(
+                    Image(
                         painter = rememberDrawablePainter(drawable = drawable),
                         modifier = Modifier
                             .padding(end = 4.dp)
@@ -203,15 +192,15 @@ fun InformationHeader(
 
 @Preview
 @Composable
-private fun InformationHeader() {
+private fun InformationBlock() {
     val manga = Manga.create(1L).apply {
         title = "One Piece"
         author = "Eiichiro Oda"
         status = SManga.ONGOING
     }
-    Mdc3Theme {
+    NekoTheme {
         Surface {
-            InformationHeader(manga = manga)
+            InformationBlock(manga = manga)
         }
     }
 }
