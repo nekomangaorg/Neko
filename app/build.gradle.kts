@@ -187,7 +187,7 @@ dependencies {
     implementation("com.github.requery:sqlite-android:3.36.0")
 
     //markdown
-    implementation("com.mikepenz:multiplatform-markdown-renderer-android:0.5.0")
+    implementation(libs.markdown)
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)
