@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,13 +17,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -76,36 +73,28 @@ fun InformationBlock(
                 title = manga.title,
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
                 onLongClick = titleLongClick,
-                style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-1).sp, fontWeight = FontWeight.Medium),
+                style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
                 color = lightAlpha,
             )
         }
 
         if (manga.author.isNotNullOrEmpty() || manga.artist.isNotNullOrEmpty()) {
             val creator =
-                if (manga.author == manga.artist) {
-                    manga.author ?: "".trim()
-                } else {
-                    listOfNotNull(manga.author?.trim(), manga.artist?.trim())
-                        .joinToString(", ")
+                when (manga.author == manga.artist) {
+                    true -> manga.author ?: "".trim()
+                    false -> {
+                        listOfNotNull(manga.author?.trim(), manga.artist?.trim())
+                            .joinToString(", ")
+                    }
                 }
 
             Gap(4.dp)
-            Text(
-                text = creator,
-                modifier = Modifier
-                    .combinedClickable(
-                        interactionSource = noRippleInteraction,
-                        indication = null,
-                        onLongClick = {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            creatorLongClicked(creator)
-                        },
-                        onClick = {},
-                    ),
+            NoRippleText(
+                title = creator,
+                onLongClick = creatorLongClicked,
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 2,
-                overflow = TextOverflow.Ellipsis,
-                style = style,
+                style = MaterialTheme.typography.bodyLarge.copy(letterSpacing = (-.5).sp),
+                color = mediumAlpha,
             )
         }
         if (manga.status != 0) {
