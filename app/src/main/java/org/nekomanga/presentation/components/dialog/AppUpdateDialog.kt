@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.data.updater.GithubRelease
  */
 @Composable
 fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConfirm: (String) -> Unit) {
-    val body = release.info
+    val body = release.info.substringBeforeLast("| Variant | SHA-256")
     val url = release.downloadLink
     AlertDialog(
         title = {
@@ -58,7 +58,6 @@ fun AppUpdateDialog(release: GithubRelease, onDismissRequest: () -> Unit, onConf
 
 @Composable
 private fun markdownColors(): MarkdownColors {
-    val textColor = MaterialTheme.colorScheme.onSurface
     return MarkdownDefaults.markdownColors(
         textColor = MaterialTheme.colorScheme.onSurface,
         backgroundColor = MaterialTheme.colorScheme.surface,
