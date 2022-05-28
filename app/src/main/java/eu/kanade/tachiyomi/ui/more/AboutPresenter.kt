@@ -11,7 +11,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import java.text.DateFormat
-import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.Locale
 import java.util.TimeZone
@@ -20,15 +19,11 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
     private val updateChecker by lazy { AppUpdateChecker() }
 
     fun getFormattedBuildTime(dateFormat: DateFormat): String {
-        try {
+        return runCatching {
             val inputDf = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS", Locale.getDefault())
             inputDf.timeZone = TimeZone.getTimeZone("UTC")
-            val buildTime = inputDf.parse(BuildConfig.BUILD_TIME) ?: return BuildConfig.BUILD_TIME
-
-            return buildTime.toTimestampString(dateFormat)
-        } catch (e: ParseException) {
-            return BuildConfig.BUILD_TIME
-        }
+            inputDf.parse(BuildConfig.BUILD_TIME)!!.toTimestampString(dateFormat)
+        }.getOrDefault(BuildConfig.BUILD_TIME)
     }
 
     /**
