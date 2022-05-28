@@ -1,7 +1,6 @@
 package eu.kanade.tachiyomi.ui.more
 
 import android.content.Context
-import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.data.updater.AppUpdateChecker
 import eu.kanade.tachiyomi.data.updater.AppUpdateResult
@@ -30,11 +29,12 @@ class AboutPresenter : BaseCoroutinePresenter<AboutPresenter>() {
      * Checks version and shows a user prompt if an update is available.
      */
     fun checkForUpdate(context: Context) = flow {
-        try {
-            emit(updateChecker.checkForUpdate(context, true))
-        } catch (error: Exception) {
-            XLog.e(error)
-            emit(AppUpdateResult.CantCheckForUpdate(error.message ?: "Error"))
-        }
+        emit(
+            runCatching {
+                updateChecker.checkForUpdate(context, true)
+            }.getOrElse { error ->
+                AppUpdateResult.CantCheckForUpdate(error.message ?: "Error")
+            },
+        )
     }.flowOn(Dispatchers.IO)
 }
