@@ -11,7 +11,7 @@
 
  <p align="center">
     <a href="https://github.com/CarlosEsco/Neko/releases/latest"><img src="https://img.shields.io/github/release/CarlosEsco/Neko.svg?maxAge=3600&style=for-the-badge&label=download"/></a>
-    <a href="https://github.com/carlosesco/neko/actions?query=workflow%3A%22Android+CI%22"><img src="https://img.shields.io/github/workflow/status/carlosesco/neko/Android%20CI?style=for-the-badge" /></a>
+    <a href="https://github.com/CarlosEsco/Neko/actions/workflows/ci-draft-release.yml?query=workflow%3A%22Release+app%22"><img src="https://img.shields.io/github/workflow/status/carlosesco/neko/Android%20CI?style=for-the-badge" /></a>
     <img src="https://img.shields.io/github/stars/CarlosEsco/Neko.svg?style=for-the-badge" />
     <a href="https://discord.gg/tachiyomi"><img src="https://img.shields.io/discord/349436576037732353.svg?style=for-the-badge"/></a>
 
