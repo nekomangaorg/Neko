@@ -11,6 +11,7 @@ import coil.fetch.SourceResult
 import coil.network.HttpException
 import coil.request.Options
 import coil.request.Parameters
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.await
@@ -30,9 +31,6 @@ import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
-import okio.source
-import timber.log.Timber
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 import java.io.File
 import java.net.HttpURLConnection
@@ -189,7 +187,7 @@ class MangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            Timber.e(e, "Failed to write snapshot data to cover cache ${cacheFile.name}")
+            XLog.e("Failed to write snapshot data to cover cache ${cacheFile.name}", e)
             null
         }
     }
@@ -202,7 +200,7 @@ class MangaCoverFetcher(
             }
             cacheFile.takeIf { it.exists() }
         } catch (e: Exception) {
-            Timber.e(e, "Failed to write response data to cover cache ${cacheFile.name}")
+            XLog.e("Failed to write response data to cover cache ${cacheFile.name}", e)
             null
         }
     }

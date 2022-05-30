@@ -13,11 +13,12 @@ import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.os.Build
 import androidx.annotation.ColorInt
+import com.elvishew.xlog.XLog
 import com.hippo.unifile.UniFile
 import eu.kanade.tachiyomi.R
 import tachiyomi.decoder.Format
 import tachiyomi.decoder.ImageDecoder
-import timber.log.Timber
+
 import java.io.BufferedInputStream
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
@@ -500,7 +501,7 @@ object ImageUtil {
         // -1 so it doesn't try to split when imageHeight = displayMaxHeightInPx
         val partCount = (imageHeight - 1) / splitHeight + 1
 
-        Timber.d("Splitting ${imageHeight}px height image into $partCount part with estimated ${splitHeight}px per height")
+        XLog.d("Splitting ${imageHeight}px height image into $partCount part with estimated ${splitHeight}px per height")
 
         val bitmapRegionDecoder = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             BitmapRegionDecoder.newInstance(imageFile.openInputStream())
@@ -510,7 +511,7 @@ object ImageUtil {
         }
 
         if (bitmapRegionDecoder == null) {
-            Timber.d("Failed to create new instance of BitmapRegionDecoder")
+            XLog.d("Failed to create new instance of BitmapRegionDecoder")
             return false
         }
 
@@ -521,7 +522,7 @@ object ImageUtil {
                 val topOffset = splitIndex * splitHeight
                 val outputImageHeight = min(splitHeight, imageHeight - topOffset)
                 val bottomOffset = topOffset + outputImageHeight
-                Timber.d("Split #$splitIndex with topOffset=$topOffset height=$outputImageHeight bottomOffset=$bottomOffset")
+                XLog.d("Split #$splitIndex with topOffset=$topOffset height=$outputImageHeight bottomOffset=$bottomOffset")
 
                 val region = Rect(0, topOffset, imageWidth, bottomOffset)
 
@@ -537,7 +538,7 @@ object ImageUtil {
             (0 until partCount)
                 .map { imageFilePath.substringBeforeLast(".") + "__${"%03d".format(it + 1)}.jpg" }
                 .forEach { File(it).delete() }
-            Timber.e(e)
+            XLog.e(e)
             return false
         } finally {
             bitmapRegionDecoder.recycle()

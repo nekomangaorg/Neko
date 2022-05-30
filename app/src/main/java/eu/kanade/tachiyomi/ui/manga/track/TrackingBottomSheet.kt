@@ -25,6 +25,7 @@ import androidx.core.view.updateLayoutParams
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.transition.TransitionManager
+import com.elvishew.xlog.XLog
 import com.google.android.material.datepicker.MaterialDatePicker
 import com.mikepenz.fastadapter.FastAdapter
 import com.mikepenz.fastadapter.adapters.ItemAdapter
@@ -53,7 +54,7 @@ import eu.kanade.tachiyomi.util.view.RecyclerWindowInsetsListener
 import eu.kanade.tachiyomi.util.view.checkHeightThen
 import eu.kanade.tachiyomi.util.view.expand
 import eu.kanade.tachiyomi.widget.E2EBottomSheetDialog
-import timber.log.Timber
+
 import java.text.DateFormat
 import java.util.Calendar
 
@@ -297,7 +298,7 @@ class TrackingBottomSheet(private val controller: MangaDetailsController) :
     }
 
     fun onSearchResultsError(error: Throwable) {
-        Timber.e(error)
+        XLog.e(error)
         startTransition()
         setMiddleTrackView(binding.searchEmptyView.id)
         binding.searchProgress.isVisible = false

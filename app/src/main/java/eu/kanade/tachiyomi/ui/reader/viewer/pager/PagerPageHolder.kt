@@ -19,6 +19,7 @@ import android.widget.TextView
 import androidx.core.net.toUri
 import androidx.core.view.isVisible
 import com.davemorrissey.labs.subscaleview.SubsamplingScaleImageView
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -47,7 +48,7 @@ import rx.Observable
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import timber.log.Timber
+
 import uy.kohesive.injekt.injectLazy
 import java.io.InputStream
 import java.util.concurrent.TimeUnit
@@ -506,7 +507,7 @@ class PagerPageHolder(
                                 try {
                                     pageView?.background = setBG(bytesArray)
                                 } catch (e: Exception) {
-                                    Timber.e(e.localizedMessage)
+                                    XLog.e(e.localizedMessage)
                                     pageView?.background = ColorDrawable(Color.WHITE)
                                 } finally {
                                     page.bg = pageView?.background
@@ -719,7 +720,7 @@ class PagerPageHolder(
                 BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
             } catch (e: Exception) {
                 imageStream.close()
-                Timber.e("Cannot split page ${e.message}")
+                XLog.e("Cannot split page ${e.message}")
                 return imageBytes.inputStream()
             }
             val isLTR = (viewer !is R2LPagerViewer).xor(viewer.config.invertDoublePages)
@@ -742,7 +743,7 @@ class PagerPageHolder(
                     imageStream.close()
                     page.longPage = true
                     splitDoublePages()
-                    Timber.e("Cannot split page ${e.message}")
+                    XLog.e("Cannot split page ${e.message}")
                     return imageBytes.inputStream()
                 }
                 val height = imageBitmap.height
@@ -787,7 +788,7 @@ class PagerPageHolder(
             imageStream.close()
             page.fullPage = true
             splitDoublePages()
-            Timber.e("Cannot combine pages ${e.message}")
+            XLog.e("Cannot combine pages ${e.message}")
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(96) }
@@ -811,7 +812,7 @@ class PagerPageHolder(
             extraPage?.fullPage = true
             page.isolatedPage = true
             splitDoublePages()
-            Timber.e("Cannot combine pages ${e.message}")
+            XLog.e("Cannot combine pages ${e.message}")
             return imageBytes.inputStream()
         }
         scope?.launchUI { progressBar.setProgress(97) }

@@ -41,7 +41,7 @@ import kotlinx.coroutines.flow.onEach
 import rx.Subscription
 import rx.android.schedulers.AndroidSchedulers
 import rx.schedulers.Schedulers
-import timber.log.Timber
+
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 
@@ -255,7 +255,7 @@ open class BrowseSourcePresenter(
                         view?.onMangaInitialized(it)
                     }
                 }
-                .catch { e -> Timber.e(e) }
+                .catch { e -> XLog.e(e) }
                 .collect()
         }
     }
@@ -273,7 +273,7 @@ open class BrowseSourcePresenter(
             manga.initialized = true
             db.insertManga(manga).executeAsBlocking()
         } catch (e: Exception) {
-            Timber.e(e)
+            XLog.e(e)
         }
         return manga
     }

@@ -1,7 +1,7 @@
 package eu.kanade.tachiyomi.util.system
 
 import android.annotation.SuppressLint
-import timber.log.Timber
+import com.elvishew.xlog.XLog
 
 object MiuiUtil {
 
@@ -31,7 +31,7 @@ object MiuiUtil {
                 .getDeclaredMethod("get", String::class.java)
                 .invoke(null, key) as String
         } catch (e: Exception) {
-            Timber.w(e, "Unable to use SystemProperties.get")
+            XLog.w("Unable to use SystemProperties.get", e)
             null
         }
     }
