@@ -3,24 +3,43 @@ package eu.kanade.tachiyomi.ui.webview
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.compose.setContent
+import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.lifecycleScope
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.ui.base.activity.BaseThemedActivity
+import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
+import eu.kanade.tachiyomi.util.system.WebViewUtil
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.system.toast
 import org.nekomanga.presentation.screens.WebViewScreen
 import org.nekomanga.presentation.theme.NekoTheme
 import uy.kohesive.injekt.injectLazy
 
-open class WebViewActivity : BaseThemedActivity() {
+open class WebViewActivity : AppCompatActivity() {
 
     private val sourceManager by injectLazy<SourceManager>()
+    private val preferences: PreferencesHelper by injectLazy()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (!WebViewUtil.supportsWebView(this)) {
+            toast(R.string.webview_is_required, Toast.LENGTH_LONG)
+            finish()
+            return
+        }
+
+        preferences.incognitoMode()
+            .asImmediateFlowIn(lifecycleScope) {
+                SecureActivityDelegate.setSecure(this)
+            }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         title = intent.extras?.getString(TITLE_KEY) ?: ""
