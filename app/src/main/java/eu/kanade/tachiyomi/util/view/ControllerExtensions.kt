@@ -78,7 +78,7 @@ fun Controller.setOnQueryTextChangeListener(
         object : SearchView.OnQueryTextListener {
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (!onlyOnSubmit && router.backstack.lastOrNull()
-                    ?.controller == this@setOnQueryTextChangeListener
+                        ?.controller == this@setOnQueryTextChangeListener
                 ) {
                     return f(newText)
                 }
@@ -197,7 +197,7 @@ fun Controller.liftAppbarWith(recycler: RecyclerView, padView: Boolean = false) 
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 super.onScrolled(recyclerView, dx, dy)
                 if (router?.backstack?.lastOrNull()
-                    ?.controller == this@liftAppbarWith && activity != null
+                        ?.controller == this@liftAppbarWith && activity != null
                 ) {
                     val notAtTop = recycler.canScrollVertically(-1)
                     if (notAtTop != isToolbarColored) colorToolbar(notAtTop)
@@ -352,11 +352,11 @@ fun Controller.scrollViewWith(
                     }
                 } else {
                     if (!customPadding && lastY == 0f && (
-                        (
-                            this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
-                                ?.controller is MangaDetailsController
-                            ) || includeTabView
-                        )
+                            (
+                                this@scrollViewWith !is FloatingSearchInterface && router.backstack.lastOrNull()
+                                    ?.controller is MangaDetailsController
+                                ) || includeTabView
+                            )
                     ) {
                         val parent = recycler.parent as? ViewGroup ?: return
                         val v = View(activity)
@@ -396,7 +396,7 @@ fun Controller.scrollViewWith(
     colorToolbar(!atTopOfRecyclerView())
 
     recycler.post {
-        if (isControllerVisible) {
+        if (isControllerVisible && activityBinding != null) {
             activityBinding!!.appBar.updateAppBarAfterY(recycler)
             colorToolbar(!atTopOfRecyclerView())
         }
@@ -449,12 +449,12 @@ fun Controller.scrollViewWith(
                         }
 
                         if (!isToolbarColor && (
-                            dy == 0 ||
-                                (
-                                    activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
-                                        dy == 0 && activityBinding!!.appBar.y == 0f
-                                    )
-                            )
+                                dy == 0 ||
+                                    (
+                                        activityBinding!!.appBar.y <= -activityBinding!!.appBar.height.toFloat() ||
+                                            dy == 0 && activityBinding!!.appBar.y == 0f
+                                        )
+                                )
                         ) {
                             colorToolbar(true)
                         }
@@ -493,12 +493,12 @@ fun Controller.scrollViewWith(
                                 preferences.hideBottomNavOnScroll().get()
                             ) closerToBottom else closerToTop
                         lastY = activityBinding!!.appBar.snapAppBarY(this@scrollViewWith, recycler) {
-                                val activityBinding = activityBinding ?: return@snapAppBarY
-                                swipeCircle?.translationY = max(
-                                    activityBinding.appBar.y,
-                                    -activityBinding.appBar.height + activityBinding.appBar.paddingTop.toFloat(),
-                                )
-                            }
+                            val activityBinding = activityBinding ?: return@snapAppBarY
+                            swipeCircle?.translationY = max(
+                                activityBinding.appBar.y,
+                                -activityBinding.appBar.height + activityBinding.appBar.paddingTop.toFloat(),
+                            )
+                        }
                         if (activityBinding!!.bottomNav?.isVisible == true &&
                             isInView && preferences.hideBottomNavOnScroll().get()
                         ) {
