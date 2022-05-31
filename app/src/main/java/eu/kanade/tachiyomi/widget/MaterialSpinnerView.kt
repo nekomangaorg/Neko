@@ -257,6 +257,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
                 menuItem.title?.tintText(blendedAccent)
         }
         this.popup = popup
+        updateOriginalPositionMenu()
         return popup
     }
 
