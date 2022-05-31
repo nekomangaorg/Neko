@@ -2,6 +2,8 @@ package eu.kanade.tachiyomi.util.lang
 
 import android.content.Context
 import android.graphics.Typeface
+import android.os.Build
+import android.text.Html
 import android.text.Spannable
 import android.text.SpannableString
 import android.text.SpannableStringBuilder
@@ -201,3 +203,14 @@ fun String.isUUID() =
                 this[idx].let { char -> char in '0'..'9' || char in 'a'..'f' || char in 'A'..'F' }
             }
         }
+
+/**
+ * HTML-decode the string
+ */
+fun String.htmlDecode(): String {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        Html.fromHtml(this, Html.FROM_HTML_MODE_LEGACY).toString()
+    } else {
+        Html.fromHtml(this).toString()
+    }
+}
