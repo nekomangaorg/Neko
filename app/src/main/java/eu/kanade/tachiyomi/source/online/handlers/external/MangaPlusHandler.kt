@@ -1,12 +1,13 @@
 package eu.kanade.tachiyomi.source.online.handlers.external
 
-import MangaPlusSerializer
+import MangaPlusResponse
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
-import kotlinx.serialization.protobuf.ProtoBuf
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.Headers
 import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
@@ -16,6 +17,7 @@ import okhttp3.Response
 import okhttp3.ResponseBody.Companion.toResponseBody
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
 import java.util.UUID
 
 class MangaPlusHandler {
@@ -25,6 +27,8 @@ class MangaPlusHandler {
         .add("Referer", WEB_URL)
         .add("User-Agent", USER_AGENT)
         .add("SESSION-TOKEN", UUID.randomUUID().toString()).build()
+
+    private val json: Json by injectLazy()
 
     val client: OkHttpClient by lazy {
         Injekt.get<NetworkHelper>().nonRateLimitedClient.newBuilder()
@@ -39,20 +43,22 @@ class MangaPlusHandler {
 
     private fun pageListRequest(chapterId: String): Request {
         return GET(
-            "$baseUrl/manga_viewer?chapter_id=$chapterId&split=yes&img_quality=super_high",
+            "$baseUrl/manga_viewer?chapter_id=$chapterId&split=yes&img_quality=super_high&format=json",
             headers,
         )
     }
 
+    private fun Response.asMangaPlusResponse(): MangaPlusResponse = use {
+        json.decodeFromString(body!!.string())
+    }
+
     private fun pageListParse(response: Response): List<Page> {
-        val result = ProtoBuf.decodeFromByteArray(MangaPlusSerializer, response.body!!.bytes())
+        val result = response.asMangaPlusResponse()
 
-        if (result.success == null) {
-            throw Exception("error getting images")
-        }
-
+        checkNotNull(result.success) { result.error!!.englishPopup.body }
+        
         return result.success.mangaViewer!!.pages
-            .mapNotNull { it.page }
+            .mapNotNull { it.mangaPage }
             .mapIndexed { i, page ->
                 val encryptionKey =
                     if (page.encryptionKey == null) "" else "&encryptionKey=${page.encryptionKey}"
