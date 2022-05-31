@@ -99,6 +99,7 @@ class RecentsPresenter(
             preferences.groupChaptersHistory(),
             preferences.showReadInAllRecents(),
             preferences.groupChaptersUpdates(),
+            preferences.sortFetchedTime(),
         ).forEach {
             it.asFlow()
                 .drop(1)
@@ -297,7 +298,9 @@ class RecentsPresenter(
                     val dateItem = DateItem(it.key, true)
                     it.value
                         .map { item -> RecentMangaItem(item.first, item.second, dateItem) }
-                        .sortedByDescending { item -> item.chapter.date_upload }
+                        .sortedByDescending { item ->
+                            if (preferences.sortFetchedTime().get()) item.date_fetch else item.date_upload
+                        }
                 }
             } else pairs.map { RecentMangaItem(it.first, it.second, null) }
         }
