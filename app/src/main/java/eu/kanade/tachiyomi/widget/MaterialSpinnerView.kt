@@ -30,6 +30,8 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
     private var entries = emptyList<String>()
     var selectedPosition = 0
         private set
+    var originalPosition: Int? = null
+    var originalIcon: Drawable? = null
     private var pref: Preference<Int>? = null
     private var prefOffset = 0
     private var popup: PopupMenu? = null
@@ -46,6 +48,14 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         context.getResourceColor(R.attr.colorOnBackground),
         0.5f,
     )
+
+    private val slightAccent by lazy {
+        ColorUtils.blendARGB(
+            context.getResourceColor(R.attr.colorSecondary),
+            context.getResourceColor(R.attr.colorOnBackground),
+            0.9f,
+        )
+    }
 
     var onItemSelectedListener: ((Int) -> Unit)? = null
         set(value) {
@@ -72,10 +82,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         val str = a.getString(R.styleable.MaterialSpinnerView_title) ?: ""
         title = str
 
-        val entries = (
-            a.getTextArray(R.styleable.MaterialSpinnerView_android_entries)
-                ?: emptyArray()
-            ).map { it.toString() }
+        val entries = (a.getTextArray(R.styleable.MaterialSpinnerView_android_entries) ?: emptyArray()).map { it.toString() }
         this.entries = entries
 
         val maxLines = a.getInt(R.styleable.MaterialSpinnerView_android_maxLines, Int.MAX_VALUE)
@@ -118,6 +125,7 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
                 it.title = it.title?.tintText(blendedAccent)
             }
         }
+        updateOriginalPositionMenu()
         binding.detailView.text = entries.getOrNull(selection).orEmpty()
     }
 
@@ -259,6 +267,25 @@ class MaterialSpinnerView constructor(context: Context, attrs: AttributeSet?) :
         this.popup = popup
         updateOriginalPositionMenu()
         return popup
+    }
+
+    private fun updateOriginalPositionMenu() {
+        popup ?: return
+        val originalPosition = originalPosition ?: return
+        if (originalPosition != selectedPosition &&
+            originalPosition >= 0 && originalPosition < (popup?.menu?.size() ?: 0)
+        ) {
+            popup?.menu?.getItem(originalPosition)?.let { menuItem ->
+                menuItem.icon = tintedOG()
+                menuItem
+            }
+        }
+    }
+
+    private fun tintedOG(): Drawable? {
+        return originalIcon ?: ContextCompat.getDrawable(context, R.drawable.ic_browse_outline_24dp)?.mutate()?.apply {
+            setTint(slightAccent)
+        }
     }
 
     private fun tintedCheck(): Drawable? {
