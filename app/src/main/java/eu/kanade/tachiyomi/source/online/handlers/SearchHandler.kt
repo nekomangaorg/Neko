@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.ProxyRetrofitQueryMap
@@ -32,11 +31,7 @@ class SearchHandler {
             if (query.startsWith(MdUtil.PREFIX_ID_SEARCH)) {
                 val realQuery = query.removePrefix(MdUtil.PREFIX_ID_SEARCH)
                 val response = service.viewManga(realQuery)
-                    .onError {
-                        val type = "trying to view manga $realQuery"
-                        this.log(type)
-                        this.throws(type)
-                    }.onException {
+                    .onFailure {
                         val type = "trying to view manga $realQuery"
                         this.log(type)
                         this.throws(type)
@@ -66,11 +61,7 @@ class SearchHandler {
                 queryParameters.putAll(additionalQueries)
 
                 val response = service.search(ProxyRetrofitQueryMap(queryParameters))
-                    .onError {
-                        val type = "trying to search"
-                        this.log(type)
-                        this.throws(type)
-                    }.onException {
+                    .onFailure {
                         val type = "trying to search"
                         this.log(type)
                         this.throws(type)

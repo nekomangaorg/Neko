@@ -2,8 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -133,9 +132,7 @@ class ImageHandler {
                 log.d("image is at CDN don't report to md@home node")
                 return@launchIO
             }
-            network.service.atHomeImageReport(atHomeImageReportDto).onError {
-                this.log("trying to post to dex@home")
-            }.onException {
+            network.service.atHomeImageReport(atHomeImageReportDto).onFailure {
                 this.log("trying to post to dex@home")
             }
         }
@@ -154,12 +151,9 @@ class ImageHandler {
                         page.mangaDexChapterId,
                         preferences.usePort443Only(),
                     )
-                    atHomeResponse.onError {
-                        atHomeResponse.log(" getting image")
-                        atHomeResponse.throws("getting image")
-                    }.onException {
-                        atHomeResponse.log(" getting image")
-                        atHomeResponse.throws("getting image")
+                    atHomeResponse.onFailure {
+                        this.log(" getting image")
+                        this.throws("getting image")
                     }.getOrThrow()
                         .baseUrl
                 }

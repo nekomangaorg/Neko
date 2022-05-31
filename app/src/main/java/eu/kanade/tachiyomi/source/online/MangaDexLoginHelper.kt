@@ -1,20 +1,23 @@
 package eu.kanade.tachiyomi.source.online
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.services.MangaDexAuthService
 import eu.kanade.tachiyomi.network.services.MangaDexService
+import eu.kanade.tachiyomi.source.online.models.dto.ErrorResponse
 import eu.kanade.tachiyomi.source.online.models.dto.LoginRequestDto
 import eu.kanade.tachiyomi.source.online.models.dto.RefreshTokenDto
 import eu.kanade.tachiyomi.util.log
 import eu.kanade.tachiyomi.util.throws
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import uy.kohesive.injekt.injectLazy
 import java.util.concurrent.TimeUnit
 
@@ -24,6 +27,7 @@ class MangaDexLoginHelper {
     val authService: MangaDexAuthService by lazy { networkHelper.authService }
     val service: MangaDexService by lazy { networkHelper.service }
     val preferences: PreferencesHelper by injectLazy()
+    private val json: Json by injectLazy()
 
     val log = XLog.tag("||LoginHelper")
 
@@ -37,12 +41,8 @@ class MangaDexLoginHelper {
         }
         log.i("token was not refreshed recently hit dex auth check")
         authService.checkToken()
-
         val checkTokenResponse = authService.checkToken()
-            .onError {
-                this.log("checking token")
-            }
-            .onException {
+            .onFailure {
                 this.log("checking token")
             }
 
@@ -61,9 +61,7 @@ class MangaDexLoginHelper {
         log.i("refreshing token")
 
         val refreshTokenResponse = service.refreshToken(RefreshTokenDto(refreshToken))
-            .onError {
-                this.log("trying to refresh token")
-            }.onException {
+            .onFailure {
                 this.log("trying to refresh token")
             }
         val refreshTokenDto = refreshTokenResponse.getOrNull()
@@ -86,16 +84,20 @@ class MangaDexLoginHelper {
         return withContext(Dispatchers.IO) {
             val loginRequest = LoginRequestDto(username, password)
 
-            val loginResponseDto = authService.login(loginRequest).onError {
+            val loginResponseDto = authService.login(loginRequest).onFailure {
                 preferences.setTokens("", "")
                 val type = "trying to login"
+                if (this is ApiResponse.Failure.Error && this.response.errorBody() != null) {
+                    val error = json.decodeFromString<ErrorResponse>(this.response.errorBody()!!.string())
+                    if (error.errors.isNotEmpty()) {
+                        this.log(error.errors.first().detail)
+                        throw Exception(error.errors.first().detail)
+                    }
+                }
+
                 this.log(type)
                 this.throws(type)
-            }.onException {
-                preferences.setTokens("", "")
-                val type = "trying to login"
-                this.log(type)
-                this.throws(type)
+
             }.getOrThrow()
 
             preferences.setTokens(

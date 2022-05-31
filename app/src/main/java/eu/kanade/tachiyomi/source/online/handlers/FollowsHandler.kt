@@ -4,11 +4,8 @@ import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.onFailure
-import com.skydoves.sandwich.suspendOnError
-import com.skydoves.sandwich.suspendOnException
+import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -69,10 +66,7 @@ class FollowsHandler {
 
                     followsParseMangaPage(results, readingStatusResponse)
                 }
-            }.suspendOnError {
-                this.log("getting follows")
-                throw Exception("Failure to get follows")
-            }.suspendOnException {
+            }.suspendOnFailure {
                 this.log("getting follows")
                 throw Exception("Failure to get follows")
             }
@@ -113,15 +107,11 @@ class FollowsHandler {
 
             withIOContext {
                 if (followStatus == FollowStatus.UNFOLLOWED) {
-                    authService.unfollowManga(mangaId).onError {
-                        this.log("trying to unfollow manga $mangaId")
-                    }.onException {
+                    authService.unfollowManga(mangaId).onFailure {
                         this.log("trying to unfollow manga $mangaId")
                     }
                 } else {
-                    authService.followManga(mangaId).onError {
-                        this.log("trying to follow manga $mangaId")
-                    }.onException {
+                    authService.followManga(mangaId).onFailure {
                         this.log("trying to follow manga $mangaId")
                     }
                 }

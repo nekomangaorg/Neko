@@ -1,8 +1,7 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.models.DisplaySManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -39,11 +38,7 @@ class LatestChapterHandler {
             val contentRatings = preferencesHelper.contentRatingSelections().toList()
 
             val response = logTimeTaken("fetching latest chapters from dex") {
-                service.latestChapters(limit, offset, langs, contentRatings).onError {
-                    val type = "getting latest chapters"
-                    this.log(type)
-                    this.throws(type)
-                }.onException {
+                service.latestChapters(limit, offset, langs, contentRatings).onFailure {
                     val type = "getting latest chapters"
                     this.log(type)
                     this.throws(type)
@@ -75,11 +70,7 @@ class LatestChapterHandler {
                 "contentRating[]" to allContentRating,
             )
 
-        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters)).onError {
-            val type = "trying to search manga from latest chapters"
-            this.log(type)
-            this.throws(type)
-        }.onException {
+        val mangaListDto = service.search(ProxyRetrofitQueryMap(queryParameters)).onFailure {
             val type = "trying to search manga from latest chapters"
             this.log(type)
             this.throws(type)

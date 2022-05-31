@@ -3,8 +3,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.Page
@@ -40,10 +39,7 @@ class PageHandler {
 
             try {
                 val chapterAttributesDto = network.service.viewChapter(chapter.mangadex_chapter_id)
-                    .onError {
-                        this.log("trying to fetch page list")
-                        throw Exception("error returned from chapterResponse")
-                    }.onException {
+                    .onFailure {
                         this.log("trying to fetch page list")
                         throw Exception("error returned from chapterResponse")
                     }.getOrThrow().data.attributes

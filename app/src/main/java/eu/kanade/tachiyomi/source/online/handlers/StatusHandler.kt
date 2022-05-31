@@ -3,10 +3,8 @@ package eu.kanade.tachiyomi.source.online.handlers
 import androidx.core.text.isDigitsOnly
 import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
-import com.skydoves.sandwich.suspendOnError
-import com.skydoves.sandwich.suspendOnException
+import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -83,19 +81,15 @@ class StatusHandler {
                 true -> MarkStatusDto(chapterIdsRead = chapterIds)
                 false -> MarkStatusDto(chapterIdsUnread = chapterIds)
             }
-            authService.markStatusForMultipleChapters(mangaId, dto).onError {
+            authService.markStatusForMultipleChapters(mangaId, dto).onFailure {
                 this.log("trying to mark chapters read=$read")
-            }.onException {
-                this.log("trying to mark chapters read=${read}\"")
             }
         }
     }
 
     suspend fun markChapterRead(chapterId: String) {
         withIOContext {
-            authService.markChapterRead(chapterId).onError {
-                this.log("trying to mark chapter read")
-            }.onException {
+            authService.markChapterRead(chapterId).onFailure {
                 this.log("trying to mark chapter read")
             }
         }
@@ -103,9 +97,7 @@ class StatusHandler {
 
     suspend fun markChapterUnRead(chapterId: String) {
         withIOContext {
-            authService.markChapterUnRead(chapterId).onError {
-                this.log("trying to mark chapter unread")
-            }.onException {
+            authService.markChapterUnRead(chapterId).onFailure {
                 this.log("trying to mark chapter unread")
             }
         }
@@ -116,10 +108,7 @@ class StatusHandler {
             emit(emptySet())
         } else {
             val response = authService.readChaptersForManga(mangaId)
-            response.suspendOnError {
-                this.log("trying to get chapterIds")
-                emit(emptySet())
-            }.suspendOnException {
+            response.suspendOnFailure {
                 this.log("trying to get chapterIds")
                 emit(emptySet())
             }.suspendOnSuccess {

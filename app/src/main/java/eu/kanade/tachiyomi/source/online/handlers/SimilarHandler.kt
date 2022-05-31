@@ -1,10 +1,10 @@
 package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
+import com.skydoves.sandwich.ApiResponse
 import com.skydoves.sandwich.getOrNull
 import com.skydoves.sandwich.getOrThrow
 import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
 import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.MangaSimilar
@@ -188,16 +188,12 @@ class SimilarHandler {
             // Main network request
             val graphql =
                 """{ Media(id: $anilistId, type: MANGA) { recommendations { edges { node { mediaRecommendation { id format } rating } } } } }"""
-            val response = network.similarService.getAniListGraphql(graphql).onError {
+            val response = network.similarService.getAniListGraphql(graphql).onFailure {
                 val type = "trying to get Anilist recommendations"
                 this.log(type)
-                if (this.statusCode.code == 404) {
+                if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
                     this.throws(type)
                 }
-            }.onException {
-                val type = "trying to get Anilist recommendations"
-                this.log(type)
-                this.throws(type)
             }.getOrNull()
 
             anilistRecommendationParse(dexId, response)
@@ -258,16 +254,12 @@ class SimilarHandler {
             ?: return emptyList()
 
         if (forceRefresh) {
-            val response = network.similarService.getSimilarMalManga(malId).onError {
+            val response = network.similarService.getSimilarMalManga(malId).onFailure {
                 val type = "trying to get MAL similar manga"
                 this.log(type)
-                if (this.statusCode.code == 404) {
+                if ((this is ApiResponse.Failure.Error && this.statusCode.code == 404) || this is ApiResponse.Failure.Exception) {
                     this.throws(type)
                 }
-            }.onException {
-                val type = "trying to get MAL similar manga"
-                this.log(type)
-                this.throws(type)
             }.getOrNull()
             similarMangaExternalMalParse(dexId, response)
         }
@@ -324,10 +316,6 @@ class SimilarHandler {
             "ids[]" to mangaIds,
         )
         val responseBody = network.service.search(ProxyRetrofitQueryMap(queryMap)).onError {
-            val type = "searching for manga in similar handler"
-            this.log(type)
-            this.throws(type)
-        }.onException {
             val type = "searching for manga in similar handler"
             this.log(type)
             this.throws(type)

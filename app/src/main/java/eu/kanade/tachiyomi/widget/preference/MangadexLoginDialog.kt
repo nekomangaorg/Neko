@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.widget.preference
 import android.app.Dialog
 import android.os.Bundle
 import android.view.View
+import android.widget.Toast
 import br.com.simplepass.loadingbutton.animatedDrawables.ProgressType
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.R
@@ -87,7 +88,7 @@ class MangadexLoginDialog(bundle: Bundle? = null) : LoginDialogPreference(bundle
                 } catch (error: Exception) {
                     XLog.e("error logging in ", error)
                     errorResult()
-                    error.message?.let { context.toast(it) }
+                    error.message?.let { context.toast(it, Toast.LENGTH_LONG) }
                 }
             }
         }

@@ -1,9 +1,7 @@
 package eu.kanade.tachiyomi.source.online
 
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
-import com.skydoves.sandwich.suspendOnError
-import com.skydoves.sandwich.suspendOnException
+import com.skydoves.sandwich.onFailure
+import com.skydoves.sandwich.suspendOnFailure
 import com.skydoves.sandwich.suspendOnSuccess
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
@@ -60,11 +58,7 @@ open class MangaDex : HttpSource() {
             network.service.randomManga()
                 .suspendOnSuccess {
                     emit(this.data.data.toBasicManga(preferences.thumbnailQuality()))
-                }.suspendOnError {
-                    this.log("trying to get random manga")
-                    emit(null)
-                }
-                .suspendOnException {
+                }.suspendOnFailure {
                     this.log("trying to get random manga")
                     emit(null)
                 }
@@ -151,9 +145,7 @@ open class MangaDex : HttpSource() {
 
     override suspend fun logout(): Logout {
         return withContext(Dispatchers.IO) {
-            network.authService.logout().onError {
-                this.log("trying to logout")
-            }.onException {
+            network.authService.logout().onFailure {
                 this.log("trying to logout")
             }
             return@withContext Logout(true)

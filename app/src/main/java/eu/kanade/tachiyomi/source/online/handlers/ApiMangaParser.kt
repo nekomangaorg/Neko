@@ -2,8 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.getOrNull
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.source.model.SChapter
@@ -43,9 +42,7 @@ class ApiMangaParser {
                     mangaDto.id,
                     MdUtil.getLangsToShow(preferencesHelper),
                 )
-                    .onError {
-                        this.log("trying to aggregate for ${mangaDto.id}")
-                    }.onException {
+                    .onFailure {
                         this.log("trying to aggregate for ${mangaDto.id}")
                     }.getOrNull()
 
@@ -57,9 +54,7 @@ class ApiMangaParser {
 
             withIOContext {
                 val statResult = network.service.mangaStatistics(mangaDto.id)
-                    .onError {
-                        this.log("trying to get rating for ${mangaDto.id}")
-                    }.onException {
+                    .onFailure {
                         this.log("trying to get rating for ${mangaDto.id}")
                     }.getOrNull()
                 statResult?.statistics?.get(mangaDto.id)?.let { stats ->

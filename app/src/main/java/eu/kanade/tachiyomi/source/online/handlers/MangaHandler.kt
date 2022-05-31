@@ -2,8 +2,7 @@ package eu.kanade.tachiyomi.source.online.handlers
 
 import com.elvishew.xlog.XLog
 import com.skydoves.sandwich.getOrThrow
-import com.skydoves.sandwich.onError
-import com.skydoves.sandwich.onException
+import com.skydoves.sandwich.onFailure
 import com.skydoves.sandwich.onSuccess
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.network.NetworkHelper
@@ -50,11 +49,7 @@ class MangaHandler {
     suspend fun getMangaIdFromChapterId(urlChapterId: String): String {
         return withContext(Dispatchers.IO) {
             network.service.viewChapter(urlChapterId)
-                .onError {
-                    val type = "trying to get manga id from chapter id"
-                    this.log(type)
-                    this.throws(type)
-                }.onException {
+                .onFailure {
                     val type = "trying to get manga id from chapter id"
                     this.log(type)
                     this.throws(type)
@@ -67,12 +62,7 @@ class MangaHandler {
         return withContext(Dispatchers.IO) {
             logTimeTaken("Manga Detail for  ${manga.title}") {
                 val response = network.service.viewManga(MdUtil.getMangaId(manga.url))
-                    .onError {
-                        val type =
-                            "trying to view manga ${manga.title} with id: ${MdUtil.getMangaId(manga.url)}"
-                        this.log(type)
-                        this.throws(type)
-                    }.onException {
+                    .onFailure {
                         val type =
                             "trying to view manga ${manga.title} with id: ${MdUtil.getMangaId(manga.url)}"
                         this.log(type)
@@ -91,11 +81,7 @@ class MangaHandler {
 
                 val chapterListDto = logTimeTaken("fetching chapters from Dex") {
                     network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, 0)
-                        .onError {
-                            val type = "trying to view chapters"
-                            this.log(type)
-                            this.throws(type)
-                        }.onException {
+                        .onFailure {
                             val type = "trying to view chapters"
                             this.log(type)
                             this.throws(type)
@@ -113,10 +99,7 @@ class MangaHandler {
                 while (hasMoreResults) {
                     offset += limit
                     network.service.viewChapters(MdUtil.getMangaId(manga.url), langs, offset)
-                        .onError {
-                            this.log("trying to get more results")
-                            hasMoreResults = false
-                        }.onException {
+                        .onFailure {
                             this.log("trying to get more results")
                             hasMoreResults = false
                         }.onSuccess {
