@@ -33,7 +33,7 @@ class AppUpdateChecker {
 
         return withIOContext {
             val result = networkService.client
-                .newCall(GET("https://api.github.com/repos/$GITHUB_REPO/releases/latest"))
+                .newCall(GET(LATEST_RELEASE_URL))
                 .await()
                 .parseAs<GithubRelease>()
                 .let {
@@ -64,11 +64,7 @@ class AppUpdateChecker {
     }
 }
 
-val RELEASE_TAG: String by lazy {
-    "v${BuildConfig.VERSION_NAME}"
-}
-
 const val GITHUB_REPO: String = "CarlosEsco/Neko"
-
-val RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/tag/$RELEASE_TAG"
+const val LATEST_RELEASE_URL = "https://api.github.com/repos/$GITHUB_REPO/releases/latest"
+const val RELEASE_URL = "https://github.com/$GITHUB_REPO/releases/tag/${BuildConfig.VERSION_NAME}"
 
