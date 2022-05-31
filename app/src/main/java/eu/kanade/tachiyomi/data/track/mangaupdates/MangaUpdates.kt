@@ -58,10 +58,14 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
 
     override fun completedStatus(): Int = COMPLETE_LIST
 
-    override fun getScoreList(): List<String> = (0..10).map(Int::toString)
+    private val _scoreList = (0..9).flatMap { i -> (0..9).map { j -> "$i.$j" } } + listOf("10.0")
 
-    override fun displayScore(track: Track): String = track.score.toInt().toString()
-    
+    override fun getScoreList(): List<String> = _scoreList
+
+    override fun indexToScore(index: Int): Float = _scoreList[index].toFloat()
+
+    override fun displayScore(track: Track): String = track.score.toString()
+
     override suspend fun add(track: Track): Track {
         track.score = DEFAULT_SCORE
         track.status = DEFAULT_STATUS

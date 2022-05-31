@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.data.track.mangaupdates.dto
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.mangaupdates.MangaUpdates.Companion.READING_LIST
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
+import eu.kanade.tachiyomi.util.lang.htmlDecode
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
@@ -38,12 +39,12 @@ fun ListItem.copyTo(track: Track): Track {
 
 @Serializable
 data class Rating(
-    val rating: Int? = null,
+    val rating: Float? = null,
 )
 
 fun Rating.copyTo(track: Track): Track {
     return track.apply {
-        this.score = rating?.toFloat() ?: 0f
+        this.score = rating ?: 0f
     }
 }
 
@@ -68,10 +69,10 @@ data class Record(
 fun Record.toTrackSearch(id: Int): TrackSearch {
     return TrackSearch.create(id).apply {
         media_id = this@toTrackSearch.seriesId ?: 0L
-        title = this@toTrackSearch.title ?: ""
+        title = this@toTrackSearch.title?.htmlDecode() ?: ""
         total_chapters = 0
         cover_url = this@toTrackSearch.image?.url?.original ?: ""
-        summary = this@toTrackSearch.description ?: ""
+        summary = this@toTrackSearch.description?.htmlDecode() ?: ""
         tracking_url = this@toTrackSearch.url ?: ""
         publishing_status = ""
         publishing_type = this@toTrackSearch.type.toString()

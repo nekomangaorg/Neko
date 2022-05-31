@@ -43,7 +43,7 @@ class MangaUpdatesApi(
             .addInterceptor(interceptor)
             .build()
     }
-
+    
     suspend fun getSeriesListItem(track: Track): Pair<ListItem, Rating?> {
         val listItem =
             authClient.newCall(
@@ -131,7 +131,7 @@ class MangaUpdatesApi(
     suspend fun updateSeriesRating(track: Track) {
         if (track.score != 0f) {
             val body = buildJsonObject {
-                put("rating", track.score.toInt())
+                put("rating", track.score)
             }
             authClient.newCall(
                 PUT(
