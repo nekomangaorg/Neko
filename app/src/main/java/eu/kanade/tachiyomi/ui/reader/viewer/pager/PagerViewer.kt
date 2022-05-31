@@ -137,7 +137,9 @@ abstract class PagerViewer(val activity: ReaderActivity) : BaseViewer {
         }
 
         config.imagePropertyChangedListener = {
+            activity.isScrollingThroughPagesOrChapters = true
             refreshAdapter()
+            activity.isScrollingThroughPagesOrChapters = false
         }
 
         config.reloadChapterListener = {
