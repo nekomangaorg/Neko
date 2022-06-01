@@ -34,6 +34,7 @@ import androidx.compose.ui.semantics.Role
 fun ToolTipIconButton(
     toolTipLabel: String,
     modifier: Modifier = Modifier,
+    iconModifier: Modifier = Modifier,
     icon: ImageVector? = null,
     painter: Painter? = null,
     isEnabled: Boolean = true,
@@ -55,16 +56,18 @@ fun ToolTipIconButton(
             },
         ),
     ) {
-
+        
         if (icon != null) {
             Icon(
                 imageVector = icon,
+                modifier = iconModifier,
                 tint = tint,
                 contentDescription = toolTipLabel,
             )
         } else {
             Icon(
                 painter = painter!!,
+                modifier = iconModifier,
                 tint = tint,
                 contentDescription = toolTipLabel,
             )
