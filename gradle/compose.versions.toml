@@ -1,6 +1,6 @@
 [versions]
 accompanist_version = "0.24.7-alpha"
-compose_version = "1.1.1"
+compose_version = "1.2.0-beta02"
 
 [libraries]
 

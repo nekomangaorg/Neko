@@ -16,7 +16,7 @@ import androidx.compose.ui.text.style.TextOverflow
 
 @Composable
 fun NoRippleText(
-    title: String,
+    text: String,
     maxLines: Int = Integer.MAX_VALUE,
     color: Color = LocalTextStyle.current.color,
     style: TextStyle = LocalTextStyle.current,
@@ -26,7 +26,7 @@ fun NoRippleText(
     val haptic = LocalHapticFeedback.current
     val noRippleInteraction = remember { MutableInteractionSource() }
     Text(
-        text = title,
+        text = text,
         modifier = Modifier
             .indication(indication = null, interactionSource = noRippleInteraction)
             .combinedClickable(
@@ -34,9 +34,9 @@ fun NoRippleText(
                 indication = null,
                 onLongClick = {
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                    onLongClick(title)
+                    onLongClick(text)
                 },
-                onClick = { onClick(title) },
+                onClick = { onClick(text) },
             ),
         maxLines = maxLines,
         color = color,

@@ -5,10 +5,7 @@ import android.annotation.SuppressLint
 import android.content.res.ColorStateList
 import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.RenderEffect
-import android.graphics.Shader
 import android.graphics.drawable.BitmapDrawable
-import android.os.Build
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
@@ -20,6 +17,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.ColorUtils
 import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.isDigitsOnly
+import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
 import androidx.core.view.updateLayoutParams
@@ -140,6 +138,7 @@ class MangaHeaderHolder(
             }
 
             applyBlur()
+            mangaCover.isGone = true
             mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
             when (startExpanded) {
@@ -155,7 +154,7 @@ class MangaHeaderHolder(
     }
 
     private fun applyBlur() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             binding?.backdrop?.alpha = 0.2f
             binding?.backdrop?.setRenderEffect(
                 RenderEffect.createBlurEffect(
@@ -164,7 +163,7 @@ class MangaHeaderHolder(
                     Shader.TileMode.MIRROR,
                 ),
             )
-        }
+        }*/
     }
 
     private fun expandDesc(animated: Boolean = false) {
@@ -417,7 +416,7 @@ class MangaHeaderHolder(
         }
 
         manga.genre?.let {
-            binding.r18Badge.isVisible = (it.contains("pornographic", true))
+            // binding.r18Badge.isVisible = (it.contains("pornographic", true))
         }
 
         binding.filtersText.text = presenter.currentFilters()

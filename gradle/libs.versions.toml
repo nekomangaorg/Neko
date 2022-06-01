@@ -65,6 +65,7 @@ tachi-unifile = "com.github.tachiyomiorg:unifile:17bec43"
 ka-helpers-kotlin-ext = { module = "com.github.FunkyMuse.KAHelpers:kotlinextensions", version.ref = "ka_helpers_version" }
 ka-helpers-activity = { module = "com.github.FunkyMuse.KAHelpers:activity", version.ref = "ka_helpers_version" }
 ka-helpers-string = { module = "com.github.FunkyMuse.KAHelpers:string", version.ref = "ka_helpers_version" }
+ka-helpers-common = { module = "com.github.FunkyMuse.KAHelpers:common", version.ref = "ka_helpers_version" }
 
 chucker-debug = { module = "com.github.ChuckerTeam.Chucker:library", version.ref = "chucker_version" }
 chucker-release = { module = "com.github.ChuckerTeam.Chucker:library-no-op", version.ref = "chucker_version" }
@@ -117,7 +118,7 @@ fastadapter = ["fast-adapter", "fast-adapter-binding"]
 flexibleadapter = ["flexible-adapter-core", "flexible-adapter-ui"]
 google = ["material", "firebase-analytics", "firebase-crashlytics", "guava-fix", "play-services", "flex-box"]
 iconics = ["iconics-core", "iconics-views", "iconics-compose"]
-kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string"]
+kahelpers = ["ka-helpers-kotlin-ext", "ka-helpers-activity", "ka-helpers-string", "ka-helpers-common"]
 ok = ["okhttp", "okhttp-logging-interceptor", "okhttp-dnsoverhttps", "okio"]
 nucleus = ["nucleus", "nucleus-support"]
 tachiyomi = ["tachi-image-decoder", "tachi-source-api", "tachi-directional-view-pager", "tachi-unifile"]

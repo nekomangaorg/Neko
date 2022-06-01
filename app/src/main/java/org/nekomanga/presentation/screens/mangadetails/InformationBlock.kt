@@ -2,36 +2,38 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.appcompat.content.res.AppCompatResources
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Bookmarks
+import androidx.compose.material.icons.filled.HotelClass
+import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.crazylegend.common.ifTrue
 import com.crazylegend.string.isNotNullOrEmpty
-import com.elvishew.xlog.XLog
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
-import com.mikepenz.iconics.compose.Image
-import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
@@ -54,9 +56,6 @@ fun InformationBlock(
     val lightAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f)
     val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f)
 
-    val noRippleInteraction = remember { MutableInteractionSource() }
-    val haptic = LocalHapticFeedback.current
-
     val style = TextStyle(
         fontSize = MaterialTheme.typography.bodyLarge.fontSize,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f),
@@ -70,7 +69,7 @@ fun InformationBlock(
     ) {
         if (manga.title.isNotNullOrEmpty()) {
             NoRippleText(
-                title = manga.title,
+                text = manga.title,
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
                 onLongClick = titleLongClick,
                 style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
@@ -90,10 +89,10 @@ fun InformationBlock(
 
             Gap(4.dp)
             NoRippleText(
-                title = creator,
+                text = creator,
                 onLongClick = creatorLongClicked,
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 2,
-                style = MaterialTheme.typography.bodyLarge.copy(letterSpacing = (-.5).sp),
+                style = MaterialTheme.typography.bodyLarge,
                 color = mediumAlpha,
             )
         }
@@ -109,16 +108,19 @@ fun InformationBlock(
                 else -> R.string.unknown
             }
 
-            Text(
+            NoRippleText(
                 text = stringResource(id = status),
-                style = style,
+                style = MaterialTheme.typography.bodyLarge,
+                color = mediumAlpha,
             )
         }
         if (manga.rating != null || manga.users != null || manga.lang_flag != null) {
             Gap(8.dp)
         }
         FlowRow(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .height(32.dp)
+                .fillMaxWidth(),
             mainAxisAlignment = FlowMainAxisAlignment.Start,
         ) {
             if (manga.lang_flag != null) {
@@ -134,42 +136,51 @@ fun InformationBlock(
                     Image(
                         painter = rememberDrawablePainter(drawable = drawable),
                         modifier = Modifier
-                            .padding(end = 4.dp)
                             .clip(RoundedCornerShape(4.dp)),
                         contentDescription = "flag",
+                        contentScale = ContentScale.FillHeight,
                     )
                 }
             }
-            if (manga.rating != null) {
-                val rating = ((manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
+
+            manga.rating?.let { rating ->
+                val formattedRating = ((manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
+
                 Row {
-                    Image(
-                        asset = MaterialDesignDx.Icon.gmf_bar_chart,
-                        colorFilter = ColorFilter.tint(style.color.copy(.65f)),
-                    )
-                    Text(
-                        text = rating,
-                        style = style,
-                        modifier = Modifier.padding(end = 4.dp),
+                    Gap(8.dp)
+                    Image(imageVector = Icons.Filled.HotelClass, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(4.dp)
+                    NoRippleText(
+                        text = formattedRating,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = mediumAlpha,
                     )
                 }
             }
-            if (manga.users != null) {
-                val users = kotlin.runCatching {
-                    NumberFormat.getNumberInstance(Locale.US).format(manga.users?.toInt() ?: 0)
-                }.getOrElse {
-                    XLog.e("number couldnt be formatted for ${manga.url}")
-                    0
-                }.toString()
+
+            manga.users?.let { unformattedNumberOfUsers ->
+                val numberOfUsers = runCatching {
+                    NumberFormat.getNumberInstance(Locale.US).format(unformattedNumberOfUsers.toInt())
+                }.getOrDefault(0).toString()
+
                 Row {
-                    Image(
-                        asset = MaterialDesignDx.Icon.gmf_person,
-                        colorFilter = ColorFilter.tint(style.color.copy(.65f)),
+                    Gap(8.dp)
+                    Image(imageVector = Icons.Filled.Bookmarks, contentDescription = null, colorFilter = ColorFilter.tint(mediumAlpha))
+                    Gap(4.dp)
+                    NoRippleText(
+                        text = numberOfUsers,
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = mediumAlpha,
                     )
-                    Text(text = users, style = style)
                 }
             }
+
+            manga.genre?.contains("pornographic", true)?.ifTrue {
+                Image(imageVector = Icons.Outlined._18UpRating, contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
+            }
+
         }
+
         if (manga.missing_chapters != null) {
             Text(
                 text = stringResource(R.string.missing_chapters, manga.missing_chapters!!),
