@@ -1,11 +1,11 @@
 package eu.kanade.tachiyomi.source.online.handlers.external
 
-import MangaPlusResponse
 import eu.kanade.tachiyomi.network.GET
 import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
+import eu.kanade.tachiyomi.source.online.models.dto.MangaPlusResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Headers
@@ -56,7 +56,7 @@ class MangaPlusHandler {
         val result = response.asMangaPlusResponse()
 
         checkNotNull(result.success) { result.error!!.englishPopup.body }
-        
+
         return result.success.mangaViewer!!.pages
             .mapNotNull { it.mangaPage }
             .mapIndexed { i, page ->

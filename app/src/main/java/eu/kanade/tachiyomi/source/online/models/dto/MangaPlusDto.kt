@@ -1,14 +1,16 @@
+package eu.kanade.tachiyomi.source.online.models.dto
+
 import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class MangaPlusResponse(
-    val success: SuccessResult? = null,
-    val error: ErrorResult? = null,
+    val success: MangaPLusSuccessResult? = null,
+    val error: MangaPlusErrorResult? = null,
 )
 
 @Serializable
-data class ErrorResult(
+data class MangaPlusErrorResult(
     val englishPopup: Popup,
     val popups: List<Popup> = emptyList(),
 ) {
@@ -25,7 +27,7 @@ data class Popup(
 )
 
 @Serializable
-data class SuccessResult(
+data class MangaPLusSuccessResult(
     val isFeaturedUpdated: Boolean? = false,
     val titleRankingView: TitleRankingView? = null,
     val titleDetailView: TitleDetailView? = null,
