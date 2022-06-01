@@ -20,7 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.painter.Painter
-import androidx.compose.ui.graphics.vector.rememberVectorPainter
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
@@ -29,6 +29,11 @@ import androidx.compose.ui.unit.dp
 import com.elvishew.xlog.XLog
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import compose.icons.SimpleIcons
+import compose.icons.simpleicons.Facebook
+import compose.icons.simpleicons.Github
+import compose.icons.simpleicons.Reddit
+import compose.icons.simpleicons.Twitter
 import eu.kanade.presentation.components.PreferenceRow
 import eu.kanade.tachiyomi.BuildConfig
 import eu.kanade.tachiyomi.R
@@ -180,13 +185,12 @@ fun AboutScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(Padding.horizontalPadding),
-                    mainAxisAlignment = FlowMainAxisAlignment.SpaceEvenly,
+                    mainAxisAlignment = FlowMainAxisAlignment.SpaceBetween,
                 ) {
                     val modifier = Modifier.size(24.dp)
                     LinkIcon(
                         label = stringResource(R.string.website),
-                        modifier = modifier,
-                        painter = rememberVectorPainter(Icons.Outlined.Public),
+                        icon = Icons.Outlined.Public,
                         url = "https://tachiyomi.org",
                     )
                     LinkIcon(
@@ -197,26 +201,22 @@ fun AboutScreen(
                     )
                     LinkIcon(
                         label = "Twitter",
-                        modifier = modifier,
-                        painter = painterResource(R.drawable.ic_twitter_24dp),
+                        icon = SimpleIcons.Twitter,
                         url = "https://twitter.com/tachiyomiorg",
                     )
                     LinkIcon(
                         label = "Facebook",
-                        modifier = modifier,
-                        painter = painterResource(R.drawable.ic_facebook_24dp),
+                        icon = SimpleIcons.Facebook,
                         url = "https://facebook.com/tachiyomiorg",
                     )
                     LinkIcon(
                         label = "Reddit",
-                        modifier = modifier,
-                        painter = painterResource(R.drawable.ic_reddit_24dp),
+                        icon = SimpleIcons.Reddit,
                         url = "https://www.reddit.com/r/Tachiyomi",
                     )
                     LinkIcon(
                         label = "GitHub",
-                        modifier = modifier,
-                        painter = painterResource(R.drawable.ic_github_24dp),
+                        icon = SimpleIcons.Github,
                         url = "https://github.com/CarlosEsco/neko",
                     )
                     LinkIcon(
@@ -254,11 +254,19 @@ private fun LogoHeader() {
 private fun LinkIcon(
     modifier: Modifier = Modifier,
     label: String,
-    painter: Painter,
+    painter: Painter? = null,
+    icon: ImageVector? = null,
     url: String,
 ) {
     val uriHandler = LocalUriHandler.current
 
-    ToolTipIconButton(label, modifier = modifier, painter = painter, tint = MaterialTheme.colorScheme.primary.copy(alpha = .7f), buttonClicked = { uriHandler.openUri(url) })
+    ToolTipIconButton(
+        label,
+        iconModifier = Modifier.size(24.dp),
+        icon = icon,
+        painter = painter,
+        tint = MaterialTheme.colorScheme.primary.copy(alpha = .7f),
+        buttonClicked = { uriHandler.openUri(url) },
+    )
 }
 
