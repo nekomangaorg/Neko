@@ -21,10 +21,9 @@ fun BackDrop(manga: Manga, shouldThemeBackdrop: Boolean = true, modifier: Modifi
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
-            modifier = modifier.alpha(.4f),
+            modifier = modifier
+                .alpha(.3f),
         )
-        if (shouldThemeBackdrop) {
-           
-        }
+
     }
 }
