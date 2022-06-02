@@ -5,7 +5,6 @@ import androidx.preference.PreferenceManager
 import eu.kanade.tachiyomi.data.backup.BackupCreatorJob
 import eu.kanade.tachiyomi.data.library.LibraryUpdateJob
 import eu.kanade.tachiyomi.data.preference.PreferenceKeys
-import eu.kanade.tachiyomi.data.preference.PreferenceValues
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.updater.AppUpdateJob
@@ -121,13 +120,7 @@ object Migrations {
                     preferences.navigationModeWebtoon().set(5)
                 }
             }
-            if (oldVersion < 90) {
-                val oldSecureScreen = prefs.getBoolean("secure_screen", false)
-                if (oldSecureScreen) {
-                    preferences.secureScreen().set(PreferenceValues.SecureScreenMode.ALWAYS)
-                }
-            }
-
+            
             return true
         }
         return false
