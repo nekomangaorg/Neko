@@ -45,7 +45,7 @@ import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
-import org.nekomanga.presentation.screens.mangadetails.InformationBlock
+import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.NekoTheme
 
 @SuppressLint("ClickableViewAccessibility")
@@ -300,7 +300,7 @@ class MangaHeaderHolder(
             NekoTheme {
                 val isExpanded = remember { expandedState }
 
-                InformationBlock(
+                MangaDetailsHeader(
                     manga = manga,
                     titleLongClick = { title ->
                         adapter.delegate.copyToClipboard(title, R.string.title)

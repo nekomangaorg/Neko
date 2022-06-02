@@ -48,14 +48,14 @@ fun InformationBlock(
     isExpanded: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
-
-    ) {
+    modifier: Modifier = Modifier,
+) {
 
     val lightAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f)
     val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f)
 
     Column(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .fillMaxHeight()
             .padding(horizontal = 8.dp),
