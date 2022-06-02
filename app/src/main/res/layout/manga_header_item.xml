@@ -22,7 +22,7 @@
         android:id="@+id/backdrop"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:alpha="0.1"
+        android:alpha="0.5"
         android:scaleType="centerCrop"
         app:layout_constraintBottom_toBottomOf="@+id/true_backdrop"
         app:layout_constraintEnd_toEndOf="parent"

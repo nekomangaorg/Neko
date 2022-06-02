@@ -6,8 +6,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bookmarks
@@ -15,16 +15,13 @@ import androidx.compose.material.icons.filled.HotelClass
 import androidx.compose.material.icons.outlined._18UpRating
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -32,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import com.crazylegend.common.ifTrue
 import com.crazylegend.string.isNotNullOrEmpty
 import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.R
@@ -55,11 +53,6 @@ fun InformationBlock(
 
     val lightAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f)
     val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f)
-
-    val style = TextStyle(
-        fontSize = MaterialTheme.typography.bodyLarge.fontSize,
-        color = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f),
-    )
 
     Column(
         modifier = Modifier
@@ -119,10 +112,11 @@ fun InformationBlock(
         }
         FlowRow(
             modifier = Modifier
-                .height(32.dp)
                 .fillMaxWidth(),
             mainAxisAlignment = FlowMainAxisAlignment.Start,
-        ) {
+            crossAxisAlignment = FlowCrossAxisAlignment.Center,
+
+            ) {
             if (manga.lang_flag != null) {
                 val flag = when (manga.lang_flag?.lowercase(Locale.US)) {
                     "zh-hk" -> R.drawable.ic_flag_china
@@ -138,8 +132,14 @@ fun InformationBlock(
                         modifier = Modifier
                             .clip(RoundedCornerShape(4.dp)),
                         contentDescription = "flag",
-                        contentScale = ContentScale.FillHeight,
                     )
+                }
+            }
+
+            manga.genre?.contains("pornographic", true)?.ifTrue {
+                Row {
+                    Gap(8.dp)
+                    Image(imageVector = Icons.Outlined._18UpRating, modifier = Modifier.size(32.dp), contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
                 }
             }
 
@@ -175,18 +175,16 @@ fun InformationBlock(
                 }
             }
 
-            manga.genre?.contains("pornographic", true)?.ifTrue {
-                Image(imageVector = Icons.Outlined._18UpRating, contentDescription = null, colorFilter = ColorFilter.tint(Color.Red))
-            }
-
         }
 
-        if (manga.missing_chapters != null) {
-            Text(
-                text = stringResource(R.string.missing_chapters, manga.missing_chapters!!),
-                style = style,
+        manga.missing_chapters?.let { numberOfMissingChapters ->
+            Gap(4.dp)
+            NoRippleText(
+                text = stringResource(id = R.string.missing_chapters, numberOfMissingChapters), style = MaterialTheme.typography.bodyLarge,
+                color = mediumAlpha,
             )
         }
+
     }
 }
 
