@@ -2,52 +2,52 @@ package eu.kanade.tachiyomi.ui.manga
 
 import android.animation.AnimatorInflater
 import android.annotation.SuppressLint
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.ColorStateList
-import android.graphics.Bitmap
 import android.graphics.Color
-import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
-import androidx.core.graphics.drawable.toDrawable
 import androidx.core.text.isDigitsOnly
-import androidx.core.view.isGone
 import androidx.core.view.isInvisible
 import androidx.core.view.isVisible
-import androidx.core.view.updateLayoutParams
 import androidx.core.widget.TextViewCompat
 import androidx.transition.TransitionSet
 import androidx.vectordrawable.graphics.drawable.AnimatedVectorDrawableCompat
-import coil.request.CachePolicy
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
-import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
-import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.data.image.coil.loadManga
 import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
-import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.system.create
+import eu.kanade.tachiyomi.util.moveCategories
 import eu.kanade.tachiyomi.util.system.getResourceColor
-import eu.kanade.tachiyomi.util.system.iconicsDrawable
-import eu.kanade.tachiyomi.util.system.iconicsDrawableLarge
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import eu.kanade.tachiyomi.util.system.isLTR
 import eu.kanade.tachiyomi.util.view.resetStrokeColor
+import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.NekoTheme
+import androidx.compose.material3.DropdownMenuItem as MenuItem
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -86,9 +86,7 @@ class MangaHeaderHolder(
             this ?: return@with
             chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
             startReadingButton.setOnClickListener { adapter.delegate.readNextChapter(it) }
-            topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
-                height = adapter.delegate.topCoverHeight()
-            }
+
             moreButton.setOnClickListener {
                 expandDesc(true)
             }
@@ -129,19 +127,7 @@ class MangaHeaderHolder(
                 collapseDesc(true)
             }
 
-            webviewButton.setOnClickListener { adapter.delegate.showExternalSheet() }
-            similarButton.setOnClickListener { adapter.delegate.openSimilar() }
-            mergeButton.setOnClickListener { adapter.delegate.openMerge() }
-
-            shareButton.setOnClickListener { adapter.delegate.prepareToShareManga() }
-            favoriteButton.setOnClickListener {
-                adapter.delegate.favoriteManga(false)
-            }
-
-            applyBlur()
-            mangaCover.isGone = true
-            mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
-            trackButton.setOnClickListener { adapter.delegate.showTrackingSheet() }
+            // mangaCover.setOnClickListener { adapter.delegate.zoomImageFromThumb(coverCard) }
             when (startExpanded) {
                 true -> expandDesc()
                 false -> collapseDesc()
@@ -152,19 +138,6 @@ class MangaHeaderHolder(
                 expandDesc()
             }
         }
-    }
-
-    private fun applyBlur() {
-        /*if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            binding?.backdrop?.alpha = 0.2f
-            binding?.backdrop?.setRenderEffect(
-                RenderEffect.createBlurEffect(
-                    20f,
-                    20f,
-                    Shader.TileMode.MIRROR,
-                ),
-            )
-        }*/
     }
 
     private fun expandDesc(animated: Boolean = false) {
@@ -300,6 +273,7 @@ class MangaHeaderHolder(
         binding.compose.setContent {
             NekoTheme {
                 val isExpanded = remember { expandedState }
+                var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
                 val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
 
@@ -314,15 +288,56 @@ class MangaHeaderHolder(
                     themeBasedOffCover = adapter.preferences.themeMangaDetails(),
                     trackServiceCount = trackServiceCount,
                     isExpanded = isExpanded.isExpanded,
-                    favoriteClick = {},
+                    favoriteClick = {
+                        if (manga.favorite.not()) {
+                            presenter.toggleFavorite()
+                        } else {
+                            favoriteExpanded = true
+                        }
+                    },
                     trackingClick = { adapter.delegate.showTrackingSheet() },
-                    artworkClick = {},
+                    artworkClick = { },
                     similarClick = { adapter.delegate.openSimilar() },
                     mergeClick = { adapter.delegate.openMerge() },
                     linksClick = { adapter.delegate.showExternalSheet() },
                     shareClick = { adapter.delegate.prepareToShareManga() },
 
                     )
+
+                CascadeDropdownMenu(
+                    expanded = favoriteExpanded,
+                    offset = DpOffset(8.dp, 0.dp),
+                    onDismissRequest = { favoriteExpanded = false },
+                ) {
+                    val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
+                    MenuItem(
+                        text = {
+                            Text(
+                                text = stringResource(R.string.remove_from_library),
+                                style = style,
+                            )
+                        },
+                        onClick = {
+                            presenter.toggleFavorite()
+                            favoriteExpanded = false
+                        },
+                    )
+                    if (presenter.getCategories().isNotEmpty()) {
+                        val context = LocalContext.current
+                        MenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(R.string.edit_categories),
+                                    style = style,
+                                )
+                            },
+                            onClick = {
+                                presenter.manga.moveCategories(presenter.db, context.getActivity()!!)
+                                favoriteExpanded = false
+                            },
+                        )
+                    }
+                }
             }
         }
 
@@ -349,49 +364,9 @@ class MangaHeaderHolder(
             else expand()
         }
 
-        with(binding.favoriteButton) {
-            val icon = when {
-                item.isLocked -> MaterialDesignDx.Icon.gmf_lock
-                item.manga.favorite -> CommunityMaterial.Icon2.cmd_heart
-                else -> CommunityMaterial.Icon2.cmd_heart_outline
-            }
-            setImageDrawable(icon.create(context, 24f))
-            adapter.delegate.setFavButtonPopup(this)
-        }
-        binding.trueBackdrop.setBackgroundColor(
-            adapter.delegate.coverColor()
-                ?: itemView.context.getResourceColor(R.attr.background),
-        )
+        //  item.isLocked -> MaterialDesignDx.Icon.gmf_lock
 
-        val tracked = presenter.isTracked() && !item.isLocked
-
-        with(binding.trackButton) {
-            setImageDrawable(
-                context.iconicsDrawable(
-                    MaterialDesignDx.Icon.gmf_art_track,
-                    size = 32,
-                ),
-            )
-        }
-
-        with(binding.similarButton) {
-            setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_account_tree))
-        }
-
-        with(binding.mergeButton) {
-            val iconics = when (manga.isMerged()) {
-                true -> context.iconicsDrawableLarge(CommunityMaterial.Icon.cmd_check_decagram)
-                false -> context.iconicsDrawableLarge(CommunityMaterial.Icon3.cmd_source_merge)
-            }
-            setImageDrawable(iconics)
-        }
-
-        with(binding.webviewButton) {
-            setImageDrawable(context.iconicsDrawableLarge(CommunityMaterial.Icon3.cmd_web))
-        }
-        with(binding.shareButton) {
-            setImageDrawable(context.iconicsDrawableLarge(MaterialDesignDx.Icon.gmf_share))
-        }
+        //val tracked = presenter.isTracked() && !item.isLocked
 
         with(binding.startReadingButton) {
             val nextChapter = presenter.getNextUnreadChapter()
@@ -424,9 +399,6 @@ class MangaHeaderHolder(
         binding.chaptersTitle.text =
             itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
 
-        binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = adapter.delegate.topCoverHeight()
-        }
 
         manga.genre?.let {
             // binding.r18Badge.isVisible = (it.contains("pornographic", true))
@@ -532,19 +504,6 @@ class MangaHeaderHolder(
         }
     }
 
-    fun setTopHeight(newHeight: Int) {
-        binding ?: return
-        if (newHeight == binding.topView.height) return
-        binding.topView.updateLayoutParams<ConstraintLayout.LayoutParams> {
-            height = newHeight
-        }
-    }
-
-    fun setBackDrop(color: Int) {
-        binding ?: return
-        binding.trueBackdrop.setBackgroundColor(color)
-    }
-
     fun updateColors(updateAll: Boolean = true) {
         val accentColor = adapter.delegate.accentColor() ?: return
         if (binding == null) {
@@ -555,10 +514,7 @@ class MangaHeaderHolder(
         }
         val manga = adapter.presenter.manga
         with(binding) {
-            trueBackdrop.setBackgroundColor(
-                adapter.delegate.coverColor()
-                    ?: trueBackdrop.context.getResourceColor(R.attr.background),
-            )
+
             TextViewCompat.setCompoundDrawableTintList(
                 moreButton,
                 ColorStateList.valueOf(accentColor),
@@ -569,13 +525,6 @@ class MangaHeaderHolder(
                 ColorStateList.valueOf(accentColor),
             )
             lessButton.setTextColor(accentColor)
-            shareButton.imageTintList = ColorStateList.valueOf(accentColor)
-            webviewButton.imageTintList = ColorStateList.valueOf(accentColor)
-            filterButton.imageTintList = ColorStateList.valueOf(accentColor)
-            mergeButton.imageTintList = ColorStateList.valueOf(accentColor)
-            trackButton.imageTintList = ColorStateList.valueOf(accentColor)
-            favoriteButton.imageTintList = ColorStateList.valueOf(accentColor)
-            similarButton.imageTintList = ColorStateList.valueOf(accentColor)
 
             val states = arrayOf(
                 intArrayOf(-android.R.attr.state_enabled),
@@ -627,41 +576,41 @@ class MangaHeaderHolder(
     fun updateCover(manga: Manga) {
         binding ?: return
         if (!manga.initialized) return
-        val drawable = adapter.controller.binding.mangaCoverFull.drawable
-        binding.mangaCover.loadManga(
-            manga,
-            builder = {
-                placeholder(drawable)
-                error(drawable)
-                if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
-                diskCachePolicy(CachePolicy.READ_ONLY)
-            },
-        )
-        binding.backdrop.loadManga(
-            manga,
-            builder = {
-                placeholder(drawable)
-                error(drawable)
-                if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
-                diskCachePolicy(CachePolicy.READ_ONLY)
-                target(
-                    onSuccess = {
-                        val bitmap = (it as? BitmapDrawable)?.bitmap
-                        if (bitmap == null) {
-                            binding.backdrop.setImageDrawable(it)
-                            return@target
-                        }
-                        val yOffset = (bitmap.height / 2 * 0.33).toInt()
+        /* val drawable = adapter.controller.binding.mangaCoverFull.drawable
+         binding.mangaCover.loadManga(
+             manga,
+             builder = {
+                 placeholder(drawable)
+                 error(drawable)
+                 if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
+                 diskCachePolicy(CachePolicy.READ_ONLY)
+             },
+         )
+         binding.backdrop.loadManga(
+             manga,
+             builder = {
+                 placeholder(drawable)
+                 error(drawable)
+                 if (manga.favorite) networkCachePolicy(CachePolicy.READ_ONLY)
+                 diskCachePolicy(CachePolicy.READ_ONLY)
+                 target(
+                     onSuccess = {
+                         val bitmap = (it as? BitmapDrawable)?.bitmap
+                         if (bitmap == null) {
+                             binding.backdrop.setImageDrawable(it)
+                             return@target
+                         }
+                         val yOffset = (bitmap.height / 2 * 0.33).toInt()
 
-                        binding.backdrop.setImageDrawable(
-                            Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height - yOffset)
-                                .toDrawable(itemView.resources),
-                        )
-                        applyBlur()
-                    },
-                )
-            },
-        )
+                         binding.backdrop.setImageDrawable(
+                             Bitmap.createBitmap(bitmap, 0, 0, bitmap.width, bitmap.height - yOffset)
+                                 .toDrawable(itemView.resources),
+                         )
+                         applyBlur()
+                     },
+                 )
+             },
+         )*/
     }
 
     fun expand() {
@@ -687,4 +636,16 @@ class MangaHeaderHolder(
 
 class IsExpandedState(initalState: Boolean) {
     var isExpanded by mutableStateOf(initalState)
+}
+
+@Deprecated("This can be removed once entire view is compose and the e2e sheet is written in compose\n")
+private fun Context.getActivity(): AppCompatActivity? {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is AppCompatActivity) {
+            return currentContext
+        }
+        currentContext = currentContext.baseContext
+    }
+    return null
 }

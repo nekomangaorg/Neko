@@ -456,7 +456,6 @@ class MangaDetailsController :
             // 4dp extra to line up chapter header and manga header
             binding.recycler.updatePaddingRelative(top = headerHeight + 4.dpToPx)
         }
-        getHeader()?.setTopHeight(headerHeight)
         binding.fastScroller.updateLayoutParams<ViewGroup.MarginLayoutParams> {
             topMargin = headerHeight
             bottomMargin = systemInsets.bottom
@@ -535,7 +534,7 @@ class MangaDetailsController :
                                 }
                             } else {
                                 setCoverColorValue()
-                                coverColor?.let { color -> getHeader()?.setBackDrop(color) }
+                                //coverColor?.let { color -> getHeader()?.setBackDrop(color) }
                             }
                         }
                     }
