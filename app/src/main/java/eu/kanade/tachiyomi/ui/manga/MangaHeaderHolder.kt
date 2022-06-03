@@ -314,8 +314,15 @@ class MangaHeaderHolder(
                     themeBasedOffCover = adapter.preferences.themeMangaDetails(),
                     trackServiceCount = trackServiceCount,
                     isExpanded = isExpanded.isExpanded,
+                    favoriteClick = {},
                     trackingClick = { adapter.delegate.showTrackingSheet() },
-                )
+                    artworkClick = {},
+                    similarClick = { adapter.delegate.openSimilar() },
+                    mergeClick = { adapter.delegate.openMerge() },
+                    linksClick = { adapter.delegate.showExternalSheet() },
+                    shareClick = { adapter.delegate.prepareToShareManga() },
+
+                    )
             }
         }
 
