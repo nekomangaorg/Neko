@@ -59,6 +59,9 @@ import eu.kanade.tachiyomi.widget.TriStateCheckBox
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
@@ -90,6 +93,10 @@ class MangaDetailsPresenter(
     val source = sourceManager.getMangadex()
 
     private var hasMergeChaptersInitially = manga.isMerged()
+
+    private val _trackServiceCount = MutableStateFlow(-1)
+
+    val trackServiceCountState = _trackServiceCount.asStateFlow()
 
     var isLockedFromSearch = false
     var hasRequested = false
@@ -962,6 +969,13 @@ class MangaDetailsPresenter(
     fun isTracked(): Boolean =
         loggedServices.any { service -> tracks.any { it.sync_id == service.id } }
 
+    fun numberTracked(): Int {
+        return when (hasTrackers()) {
+            true -> loggedServices.count { service -> tracks.any { it.sync_id == service.id } }
+            false -> -1
+        }
+    }
+
     fun hasTrackers(): Boolean = loggedServices.isNotEmpty()
 
     // Tracking
@@ -986,6 +1000,7 @@ class MangaDetailsPresenter(
         trackList = loggedServices.map { service ->
             TrackItem(tracks.find { it.sync_id == service.id }, service)
         }
+        _trackServiceCount.update { numberTracked() }
         withContext(Dispatchers.Main) { controller?.refreshTracking(trackList) }
     }
 

@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -300,15 +301,20 @@ class MangaHeaderHolder(
             NekoTheme {
                 val isExpanded = remember { expandedState }
 
+                val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
+
                 MangaDetailsHeader(
                     manga = manga,
                     titleLongClick = { title ->
                         adapter.delegate.copyToClipboard(title, R.string.title)
                     },
-                    creatorLongClicked = { creator ->
+                    creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
+                    themeBasedOffCover = adapter.preferences.themeMangaDetails(),
+                    trackServiceCount = trackServiceCount,
                     isExpanded = isExpanded.isExpanded,
+                    trackingClick = { adapter.delegate.showTrackingSheet() },
                 )
             }
         }
