@@ -1,8 +1,8 @@
 package org.nekomanga.presentation.screens.mangadetails
 
-import android.content.Context
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -46,7 +46,6 @@ import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.isMerged
-import eu.kanade.tachiyomi.util.system.isInNightMode
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.CoverRippleTheme
 import org.nekomanga.presentation.components.NekoColors
@@ -55,6 +54,7 @@ import org.nekomanga.presentation.components.NekoColors
 fun ButtonBlock(
     manga: Manga,
     trackServiceCount: Int,
+    themeBasedOffCover: Boolean = true,
     favoriteClick: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
@@ -65,7 +65,15 @@ fun ButtonBlock(
 ) {
 
     val surfaceColor = MaterialTheme.colorScheme.surface
-    val buttonColor = MaterialTheme.colorScheme.secondary
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val isDarkTheme = isSystemInDarkTheme()
+    val buttonColor = remember {
+        when (themeBasedOffCover && manga.vibrantCoverColor != null) {
+            true -> getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
+            false -> secondaryColor
+        }
+    }
+
     val checkedButtonBackgroundColor = remember { Color(getCheckedBackgroundColor(buttonColor, surfaceColor)) }
     val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = checkedButtonBackgroundColor)
     val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
@@ -195,11 +203,11 @@ private fun RowScope.ButtonText(text: String, color: Color) {
     }
 }
 
-private fun getThemedColor(buttonColor: Color, surfaceColor: Color, context: Context): Color {
+/*private fun getThemedColor(buttonColor: Color, surfaceColor: Color, isNightMode: Boolean): Color {
     val dominant = ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), 0.5f)
     val domLum = ColorUtils.calculateLuminance(dominant)
     val lumWrongForTheme =
-        (if (context.isInNightMode()) domLum > 0.8 else domLum <= 0.2)
+        (if (isNightMode) domLum > 0.8 else domLum <= 0.2)
     return Color(
         ColorUtils.blendARGB(
             dominant,
@@ -207,6 +215,27 @@ private fun getThemedColor(buttonColor: Color, surfaceColor: Color, context: Con
             if (lumWrongForTheme) 0.9f else 0.7f,
         ),
     )
+}*/
+
+private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
+
+    val color1 = buttonColor.toArgb()
+    val luminance = ColorUtils.calculateLuminance(color1).toFloat()
+
+    val color2 = when (isNightMode) {
+        true -> Color.White.toArgb()
+        false -> Color.Black.toArgb()
+    }
+
+    val ratio = when (isNightMode) {
+        true -> (-(luminance - 1)) * .33f
+        false -> luminance * .5f
+    }
+
+    return when ((isNightMode && luminance <= 0.6) || (isNightMode.not() && luminance > 0.4)) {
+        true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
+        false -> buttonColor
+    }
 }
 
 private fun getCheckedBackgroundColor(buttonColor: Color, surfaceColor: Color): Int {

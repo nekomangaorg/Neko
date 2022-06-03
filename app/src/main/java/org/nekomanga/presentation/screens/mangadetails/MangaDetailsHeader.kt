@@ -23,6 +23,7 @@ import jp.wasabeef.gap.Gap
 fun MangaDetailsHeader(
     manga: Manga,
     isExpanded: Boolean = true,
+    themeBasedOffCover: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
     trackServiceCount: Int,
@@ -38,6 +39,7 @@ fun MangaDetailsHeader(
         BoxWithConstraints {
             BackDrop(
                 manga = manga,
+                themeBasedOffCover = themeBasedOffCover,
                 modifier = Modifier
                     .fillMaxWidth()
                     .requiredHeightIn(250.dp, 400.dp),
@@ -67,6 +69,7 @@ fun MangaDetailsHeader(
                 ButtonBlock(
                     manga = manga,
                     trackServiceCount = trackServiceCount,
+                    themeBasedOffCover = themeBasedOffCover,
                     favoriteClick = favoriteClick,
                     trackingClick = trackingClick,
                     artworkClick = artworkClick,
