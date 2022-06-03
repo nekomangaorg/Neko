@@ -169,7 +169,7 @@ fun MangaListWithHeader(
                 HeaderCard(text)
             }
             itemsIndexed(mangaList) { index, displayManga ->
-                CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+                CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
                     MangaRow(
                         displayManga = displayManga,
                         shouldOutlineCover,

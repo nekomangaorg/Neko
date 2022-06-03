@@ -211,7 +211,7 @@ private fun MangaGridItem(
     onClick: () -> Unit = {},
     onLongClick: () -> Unit = {},
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+    CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
         Box {
             Box(
                 modifier = Modifier

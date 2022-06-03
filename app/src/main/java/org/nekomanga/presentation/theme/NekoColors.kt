@@ -12,7 +12,8 @@ class NekoColors {
     }
 }
 
-object CoverRippleTheme : RippleTheme {
+object PrimaryColorRippleTheme : RippleTheme {
+
     @Composable
     override fun defaultColor(): Color = MaterialTheme.colorScheme.primary
 
@@ -24,3 +25,18 @@ object CoverRippleTheme : RippleTheme {
         pressedAlpha = 0.9f,
     )
 }
+
+class DynamicRippleTheme(val color: Color) : RippleTheme {
+    @Composable
+    override fun defaultColor(): Color = color
+
+    @Composable
+    override fun rippleAlpha() = RippleAlpha(
+        draggedAlpha = 0.9f,
+        focusedAlpha = 0.9f,
+        hoveredAlpha = 0.9f,
+        pressedAlpha = 0.9f,
+    )
+}
+
+

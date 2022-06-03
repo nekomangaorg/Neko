@@ -47,8 +47,9 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.isMerged
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.components.CoverRippleTheme
+import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 
 @Composable
 fun ButtonBlock(
@@ -67,10 +68,13 @@ fun ButtonBlock(
     val surfaceColor = MaterialTheme.colorScheme.surface
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val isDarkTheme = isSystemInDarkTheme()
-    val buttonColor = remember {
+    val (buttonColor, rippleTheme) = remember {
         when (themeBasedOffCover && manga.vibrantCoverColor != null) {
-            true -> getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
-            false -> secondaryColor
+            true -> {
+                val color = getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
+                color to DynamicRippleTheme(color)
+            }
+            false -> secondaryColor to PrimaryColorRippleTheme
         }
     }
 
@@ -90,8 +94,8 @@ fun ButtonBlock(
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 8.dp),
     ) {
-
-        CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+        
+        CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
 
             val favConfig = when (manga.favorite) {
                 true -> ButtonConfig(icon = Icons.Filled.Favorite, buttonColors = checkedButtonColors, borderStroke = checkedBorderStroke, text = stringResource(R.string.in_library))
@@ -157,19 +161,19 @@ fun ButtonBlock(
             OutlinedButton(onClick = mergeClick, colors = mergeConfig.buttonColors, border = mergeConfig.borderStroke, contentPadding = iconicsPadding) {
                 IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = buttonColor, text = mergeConfig.text, iconicsSize = 28.dp)
             }
-        }
 
 
-        Gap(gapBetweenButtons)
+            Gap(gapBetweenButtons)
 
-        OutlinedButton(onClick = linksClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = buttonColor, text = stringResource(R.string.links))
-        }
+            OutlinedButton(onClick = linksClick, border = uncheckedBorderStroke, contentPadding = padding) {
+                ButtonContent(icon = Icons.Filled.OpenInBrowser, color = buttonColor, text = stringResource(R.string.links))
+            }
 
-        Gap(gapBetweenButtons)
+            Gap(gapBetweenButtons)
 
-        OutlinedButton(onClick = shareClick, border = uncheckedBorderStroke, contentPadding = padding) {
-            ButtonContent(icon = Icons.Filled.Share, color = buttonColor, text = stringResource(R.string.share))
+            OutlinedButton(onClick = shareClick, border = uncheckedBorderStroke, contentPadding = padding) {
+                ButtonContent(icon = Icons.Filled.Share, color = buttonColor, text = stringResource(R.string.share))
+            }
         }
     }
 }

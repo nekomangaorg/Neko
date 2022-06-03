@@ -51,7 +51,7 @@ fun NekoScaffold(
         snackbarHost = snackBarHost,
         topBar =
         {
-            CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+            CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
                 if (subtitle.isEmpty()) {
                     CenterAlignedTopAppBar(
                         colors = TopAppBarDefaults.smallTopAppBarColors(
@@ -118,7 +118,7 @@ fun NekoScaffold(
             }
         },
     ) { paddingValues ->
-        CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+        CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
             content(paddingValues)
         }
     }

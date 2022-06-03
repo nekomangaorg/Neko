@@ -25,7 +25,7 @@ import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
-import org.nekomanga.presentation.components.CoverRippleTheme
+import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 
 @Composable
 fun EmptyScreen(
@@ -57,7 +57,7 @@ fun EmptyScreen(
                     style = MaterialTheme.typography.bodyLarge,
                 )
             }
-            CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+            CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
                 actions.forEach { action ->
                     Spacer(modifier = Modifier.size(16.dp))
                     TextButton(onClick = action.onClick) {
