@@ -1076,6 +1076,12 @@
 
 
     <!-- Manga Details-->
+    <string name="_tracked">%1$s Tracked</string>
+    <string name="artwork">Artwork</string>
+    <string name="similar_work">Similar Work</string>
+    <string name="is_merged">Merged</string>
+    <string name="is_not_merged">Merge</string>
+    <string name="links">Links</string>
     <string name="open_external">Open external links</string>
     <string name="comments">Comments</string>
     <string name="comments_unavailable">"Comments not available for merged chapters"</string>

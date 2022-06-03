@@ -17,13 +17,22 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.data.database.models.Manga
+import jp.wasabeef.gap.Gap
 
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
     isExpanded: Boolean = true,
     titleLongClick: (String) -> Unit = {},
-    creatorLongClicked: (String) -> Unit = {},
+    creatorLongClick: (String) -> Unit = {},
+    trackServiceCount: Int,
+    favoriteClick: () -> Unit = {},
+    trackingClick: () -> Unit = {},
+    artworkClick: () -> Unit = {},
+    similarClick: () -> Unit = {},
+    mergeClick: () -> Unit = {},
+    linksClick: () -> Unit = {},
+    shareClick: () -> Unit = {},
 ) {
     Column {
         BoxWithConstraints {
@@ -31,7 +40,6 @@ fun MangaDetailsHeader(
                 manga = manga,
                 modifier = Modifier
                     .fillMaxWidth()
-
                     .requiredHeightIn(250.dp, 400.dp),
             )
             Spacer(
@@ -53,11 +61,19 @@ fun MangaDetailsHeader(
                         .padding(top = 70.dp),
                     isExpanded = isExpanded,
                     titleLongClick = titleLongClick,
-                    creatorLongClicked = creatorLongClicked,
+                    creatorLongClicked = creatorLongClick,
                 )
+                Gap(height = 24.dp)
                 ButtonBlock(
-                    manga,
-                    modifier = Modifier.padding(top = 8.dp),
+                    manga = manga,
+                    trackServiceCount = trackServiceCount,
+                    favoriteClick = favoriteClick,
+                    trackingClick = trackingClick,
+                    artworkClick = artworkClick,
+                    similarClick = similarClick,
+                    mergeClick = mergeClick,
+                    linksClick = linksClick,
+                    shareClick = shareClick,
                 )
             }
 

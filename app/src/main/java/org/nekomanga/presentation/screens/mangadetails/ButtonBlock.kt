@@ -1,109 +1,201 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import android.content.Context
-import androidx.annotation.StringRes
-import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.horizontalScroll
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CornerBasedShape
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountTree
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Gite
 import androidx.compose.material.icons.filled.OpenInBrowser
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.ripple.LocalRippleTheme
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
-import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
-import com.google.accompanist.flowlayout.FlowRow
-import com.google.accompanist.flowlayout.MainAxisAlignment
-import com.google.accompanist.flowlayout.SizeMode
+import com.mikepenz.iconics.compose.Image
+import com.mikepenz.iconics.typeface.IIcon
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
+import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.util.system.isInNightMode
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.components.CoverRippleTheme
+import org.nekomanga.presentation.components.NekoColors
 
 @Composable
-fun ButtonBlock(manga: Manga, modifier: Modifier = Modifier) {
-
-    val primaryColor = MaterialTheme.colorScheme.secondary
-    val surfaceColor = MaterialTheme.colorScheme.surface
-    val context = LocalContext.current
-    val buttonColor = MaterialTheme.colorScheme.secondary //remember { getColor(primaryColor, surfaceColor, context) }
-
-    FlowRow(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(8.dp),
-        mainAxisAlignment = MainAxisAlignment.SpaceBetween, crossAxisSpacing = 8.dp,
-        crossAxisAlignment = FlowCrossAxisAlignment.Center,
-        mainAxisSize = SizeMode.Expand,
-
-        ) {
-        val (favIcon, favDescription) = when (manga.favorite) {
-            true -> Icons.Filled.Favorite to R.string.remove_from_library
-            false -> Icons.Outlined.Favorite to R.string.add_to_library
-        }
-        OutlineButton(favIcon, favDescription, color = buttonColor, text = "In Library")
-
-        //Icons.Filled.AutoRenew for not tracked
-        OutlineButton(favIcon = Icons.Filled.Check, favDescription = R.string.tracking, color = buttonColor, text = "3 tracked")
-
-        OutlineButton(favIcon = Icons.Filled.AccountTree, favDescription = R.string.similar, color = buttonColor, text = "Similar")
-
-        OutlineButton(favIcon = Icons.Filled.Gite, favDescription = R.string.merged, color = buttonColor, text = "Merge")
-
-        OutlineButton(favIcon = Icons.Filled.OpenInBrowser, favDescription = R.string.open_external, color = buttonColor, text = "Links")
-
-        OutlineButton(favIcon = Icons.Filled.Share, favDescription = R.string.share, color = buttonColor, text = stringResource(id = R.string.share))
-
-    }
-}
-
-@Composable
-private fun OutlineButton(
-    favIcon: ImageVector,
-    @StringRes favDescription: Int,
-    color: Color = MaterialTheme.colorScheme.primary,
-    shape: CornerBasedShape = RoundedCornerShape(50),
-    text: String,
+fun ButtonBlock(
+    manga: Manga,
+    trackServiceCount: Int,
+    favoriteClick: () -> Unit = {},
+    trackingClick: () -> Unit = {},
+    artworkClick: () -> Unit = {},
+    similarClick: () -> Unit = {},
+    mergeClick: () -> Unit = {},
+    linksClick: () -> Unit = {},
+    shareClick: () -> Unit = {},
 ) {
+
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val buttonColor = MaterialTheme.colorScheme.secondary
+    val checkedButtonBackgroundColor = remember { Color(getCheckedBackgroundColor(buttonColor, surfaceColor)) }
+    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = checkedButtonBackgroundColor)
+    val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
+
+    val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
+    val uncheckedBorderStroke = BorderStroke(1.dp, NekoColors.outline.copy(alpha = .3f))
+    val gapBetweenButtons = 8.dp
+    val padding = PaddingValues(horizontal = 12.dp, vertical = 8.dp)
+    val iconicsPadding = PaddingValues(horizontal = 12.dp, vertical = 4.dp)
+
     Row(
         modifier = Modifier
-            .clip(shape)
-            .border(width = 2.dp, color = color.copy(alpha = .5f), shape)
-            .padding(12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.Center,
+            .fillMaxWidth()
+            .horizontalScroll(rememberScrollState())
+            .padding(horizontal = 8.dp),
     ) {
-        Icon(imageVector = favIcon, contentDescription = null, modifier = Modifier.size(24.dp), tint = color)
-        if (text.isNotEmpty()) {
-            Gap(width = 4.dp)
-            Text(text = text, style = MaterialTheme.typography.bodyLarge.copy(color = color.copy(alpha = .8f), fontWeight = FontWeight.Medium))
+
+        CompositionLocalProvider(LocalRippleTheme provides CoverRippleTheme) {
+
+            val favConfig = when (manga.favorite) {
+                true -> ButtonConfig(icon = Icons.Filled.Favorite, buttonColors = checkedButtonColors, borderStroke = checkedBorderStroke, text = stringResource(R.string.in_library))
+                false -> ButtonConfig(icon = Icons.Outlined.Favorite, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.add_to_library))
+            }
+
+            OutlinedButton(
+                colors = favConfig.buttonColors,
+                onClick = favoriteClick, border = favConfig.borderStroke, contentPadding = padding,
+            ) {
+                ButtonContent(favConfig.icon!!, color = buttonColor, text = favConfig.text)
+            }
+
+            Gap(gapBetweenButtons)
+
+            if (trackServiceCount >= 0) {
+                val trackerConfig = when {
+                    trackServiceCount > 0 -> ButtonConfig(
+                        icon = Icons.Filled.Check,
+                        buttonColors = checkedButtonColors,
+                        borderStroke = checkedBorderStroke,
+                        text = stringResource(R.string._tracked, trackServiceCount),
+                    )
+                    else -> ButtonConfig(icon = Icons.Filled.Sync, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.tracking))
+                }
+
+
+                OutlinedButton(onClick = trackingClick, colors = trackerConfig.buttonColors, border = trackerConfig.borderStroke, contentPadding = padding) {
+                    ButtonContent(trackerConfig.icon!!, color = buttonColor, text = trackerConfig.text)
+                }
+            }
+
+            Gap(gapBetweenButtons)
+
+
+            OutlinedButton(onClick = artworkClick, border = uncheckedBorderStroke, contentPadding = iconicsPadding) {
+                IconicsButtonContent(iIcon = MaterialDesignDx.Icon.gmf_art_track, color = buttonColor, text = stringResource(id = R.string.artwork), iconicsSize = 32.dp)
+            }
+
+            Gap(gapBetweenButtons)
+
+            OutlinedButton(onClick = similarClick, border = uncheckedBorderStroke, contentPadding = padding) {
+                ButtonContent(Icons.Filled.AccountTree, color = buttonColor, text = stringResource(R.string.similar_work))
+            }
+
+            Gap(gapBetweenButtons)
+
+            val mergeConfig = when (manga.isMerged()) {
+                true -> ButtonConfig(
+                    iIcon = CommunityMaterial.Icon.cmd_check_decagram,
+                    buttonColors = checkedButtonColors,
+                    borderStroke = checkedBorderStroke,
+                    text = stringResource(R.string.is_merged),
+                )
+                false -> ButtonConfig(
+                    iIcon = CommunityMaterial.Icon3.cmd_source_merge,
+                    buttonColors = uncheckedButtonColors,
+                    borderStroke = uncheckedBorderStroke,
+                    text = stringResource(R.string.is_not_merged),
+                )
+            }
+
+            OutlinedButton(onClick = mergeClick, colors = mergeConfig.buttonColors, border = mergeConfig.borderStroke, contentPadding = iconicsPadding) {
+                IconicsButtonContent(iIcon = mergeConfig.iIcon!!, color = buttonColor, text = mergeConfig.text, iconicsSize = 28.dp)
+            }
+        }
+
+
+        Gap(gapBetweenButtons)
+
+        OutlinedButton(onClick = linksClick, border = uncheckedBorderStroke, contentPadding = padding) {
+            ButtonContent(icon = Icons.Filled.OpenInBrowser, color = buttonColor, text = stringResource(R.string.links))
+        }
+
+        Gap(gapBetweenButtons)
+
+        OutlinedButton(onClick = shareClick, border = uncheckedBorderStroke, contentPadding = padding) {
+            ButtonContent(icon = Icons.Filled.Share, color = buttonColor, text = stringResource(R.string.share))
         }
     }
 }
 
-private fun getColor(buttonColor: Color, surfaceColor: Color, context: Context): Color {
+@Composable
+private fun RowScope.IconicsButtonContent(
+    iIcon: IIcon,
+    color: Color = MaterialTheme.colorScheme.primary,
+    text: String,
+    iconicsSize: Dp = 24.dp,
+) {
+    Image(asset = iIcon, contentDescription = null, modifier = Modifier.size(iconicsSize), colorFilter = ColorFilter.tint(color = color))
+    ButtonText(text = text, color = color)
+}
+
+@Composable
+private fun RowScope.ButtonContent(
+    icon: ImageVector,
+    text: String,
+    color: Color = MaterialTheme.colorScheme.primary,
+) {
+    Icon(imageVector = icon, contentDescription = null, modifier = Modifier.size(24.dp), tint = color)
+    ButtonText(text = text, color = color)
+}
+
+@Composable
+private fun RowScope.ButtonText(text: String, color: Color) {
+    if (text.isNotEmpty()) {
+        Gap(8.dp)
+        Text(text = text, style = MaterialTheme.typography.bodyLarge.copy(color = color.copy(alpha = .8f), letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium))
+    }
+}
+
+private fun getThemedColor(buttonColor: Color, surfaceColor: Color, context: Context): Color {
     val dominant = ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), 0.5f)
     val domLum = ColorUtils.calculateLuminance(dominant)
     val lumWrongForTheme =
@@ -116,3 +208,10 @@ private fun getColor(buttonColor: Color, surfaceColor: Color, context: Context):
         ),
     )
 }
+
+private fun getCheckedBackgroundColor(buttonColor: Color, surfaceColor: Color): Int {
+    return ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), .706f)
+}
+
+private data class ButtonConfig(val icon: ImageVector? = null, val iIcon: IIcon? = null, val buttonColors: ButtonColors, val borderStroke: BorderStroke, val text: String)
+
