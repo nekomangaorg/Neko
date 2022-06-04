@@ -90,16 +90,6 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
         }
     }
 
-//    override suspend fun bind(track: Track, hasReadChapters: Boolean): Track {
-//        return try {
-//            val (series, rating) = api.getSeriesListItem(track)
-//            series.copyTo(track)
-//            rating?.copyTo(track) ?: track
-//        } catch (e: Exception) {
-//            api.addSeriesToList(track, hasReadChapters)
-//            track
-//        }
-//    }
 
     override suspend fun search(query: String, manga: Manga, wasPreviouslyTracked: Boolean): List<TrackSearch> {
         return api.search(query, manga, wasPreviouslyTracked)
@@ -107,6 +97,7 @@ class MangaUpdates(private val context: Context, id: Int) : TrackService(id) {
                 it.toTrackSearch(id)
             }
     }
+
 
     override suspend fun refresh(track: Track): Track {
         val (series, rating) = api.getSeriesListItem(track)

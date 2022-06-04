@@ -125,8 +125,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
         adapter.libraryListener?.toggleCategoryVisibility(flexibleAdapterPosition)
         val tutorial = Injekt.get<PreferencesHelper>().shownLongPressCategoryTutorial()
         if (!tutorial.get()) {
-            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle)
-                .autoHide(true, 5000L)
+            ViewTooltip.on(itemView.context as? Activity, binding.categoryTitle).autoHide(true, 5000L)
                 .align(ViewTooltip.ALIGN.START).position(ViewTooltip.Position.TOP)
                 .text(R.string.long_press_category)
                 .color(itemView.context.getResourceColor(R.attr.colorSecondary))
@@ -162,15 +161,15 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
 
         binding.categoryTitle.text =
             if (category.isAlone && !category.isDynamic) {
-            ""
-        } else {
-            category.name
-        } +
-            if (adapter.showNumber) {
-                " (${adapter.itemsPerCategory[item.catId]})"
-            } else {
                 ""
-            }
+            } else {
+                category.name
+            } +
+                if (adapter.showNumber) {
+                    " (${adapter.itemsPerCategory[item.catId]})"
+                } else {
+                    ""
+                }
         binding.categoryTitle.setCompoundDrawablesRelative(null, null, null, null)
 
         val isAscending = category.isAscending()
@@ -252,8 +251,7 @@ class LibraryHeaderHolder(val view: View, val adapter: LibraryCategoryAdapter) :
                 sortingMode?.mainValue,
             ) { sheet, item ->
                 onCatSortClicked(category, item)
-                val nCategory =
-                    (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
+                val nCategory = (adapter.getItem(flexibleAdapterPosition) as? LibraryHeaderItem)?.category
                 val isAscending = nCategory?.isAscending() ?: false
                 val drawableRes = getSortRes(item, isAscending)
                 sheet.setDrawable(item, drawableRes)

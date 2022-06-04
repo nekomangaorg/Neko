@@ -72,7 +72,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
         itemsPerCategory = headerItems.associate { header ->
             (header as LibraryHeaderItem).catId to
                 controller.presenter.getItemCountInCategories(header.catId)
-        }.toMap()
+        }
     }
 
     /**
@@ -129,7 +129,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
         }
     }
 
-    fun performFilter() {
+    private fun performFilter() {
         val s = getFilter(String::class.java)
         if (s.isNullOrBlank()) {
             if (mangaList.firstOrNull()?.filter?.isNotBlank() == true) {
@@ -184,8 +184,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                 else when (getSort(position)) {
                     LibrarySort.DragAndDrop -> {
                         if (item.header.category.isDynamic) {
-                            val category = db.getCategoriesForManga(item.manga).executeAsBlocking()
-                                .firstOrNull()?.name
+                            val category = db.getCategoriesForManga(item.manga).executeAsBlocking().firstOrNull()?.name
                             category ?: recyclerView.context.getString(R.string.default_value)
                         } else {
                             val title = item.manga.title
@@ -249,10 +248,7 @@ class LibraryCategoryAdapter(val controller: LibraryController?) :
                     LibrarySort.DateAdded -> {
                         val added = item.manga.date_added
                         if (added > 0) {
-                            recyclerView.context.getString(
-                                R.string.added_,
-                                added.timeSpanFromNow(preferences.context),
-                            )
+                            recyclerView.context.getString(R.string.added_, added.timeSpanFromNow(preferences.context))
                         } else {
                             "N/A"
                         }

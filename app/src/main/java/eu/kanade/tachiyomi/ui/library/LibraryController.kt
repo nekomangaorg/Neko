@@ -166,7 +166,7 @@ class LibraryController(
     private var query = ""
 
     /**
-     * Currently selected mangaList.
+     * Currently selected mangaSet.
      */
     private val selectedMangaSet = mutableSetOf<Manga>()
 
@@ -284,9 +284,7 @@ class LibraryController(
                     hopperOffset += dy
                     hopperOffset = hopperOffset.coerceIn(0f, maxHopperOffset)
                 }
-                if (!preferences.hideBottomNavOnScroll()
-                    .get() || activityBinding?.bottomNav == null
-                ) {
+                if (!preferences.hideBottomNavOnScroll().get() || activityBinding?.bottomNav == null) {
                     updateFilterSheetY()
                 }
                 if (!binding.fastScroller.isFastScrolling) {
@@ -378,9 +376,7 @@ class LibraryController(
             val closerToBottom = (activityBinding?.bottomNav?.translationY ?: 0f) > halfWayBottom
             val atTop = !binding.libraryGridRecycler.recycler.canScrollVertically(-1)
             val closerToEdge =
-                if (preferences.hideBottomNavOnScroll()
-                    .get() && activityBinding?.bottomNav != null
-                ) {
+                if (preferences.hideBottomNavOnScroll().get() && activityBinding?.bottomNav != null) {
                     closerToBottom && !atTop
                 } else {
                     closerToHopperBottom
@@ -465,9 +461,7 @@ class LibraryController(
         if (filterTooltip != null) return
         val activityBinding = activityBinding ?: return
         val activity = activity ?: return
-        val icon =
-            (activityBinding.bottomNav ?: activityBinding.sideNav)?.getItemView(R.id.nav_library)
-                ?: return
+        val icon = (activityBinding.bottomNav ?: activityBinding.sideNav)?.getItemView(R.id.nav_library) ?: return
         filterTooltip =
             ViewTooltip.on(activity, icon).autoHide(false, 0L).align(ViewTooltip.ALIGN.START)
                 .position(ViewTooltip.Position.TOP)
@@ -481,8 +475,7 @@ class LibraryController(
     }
 
     private fun openRandomManga() {
-        val items =
-            adapter.currentItems.filter { (it is LibraryItem && !it.manga.isBlank() && !it.manga.isHidden() && (!it.manga.initialized || it.manga.unread > 0)) }
+        val items = adapter.currentItems.filter { (it is LibraryItem && !it.manga.isBlank() && !it.manga.isHidden() && (!it.manga.initialized || it.manga.unread > 0)) }
         if (items.isNotEmpty()) {
             val item = items.random() as LibraryItem
             openManga(item.manga)
@@ -533,15 +526,13 @@ class LibraryController(
         }
     }
 
-    override fun createBinding(inflater: LayoutInflater) =
-        LibraryControllerBinding.inflate(inflater)
+    override fun createBinding(inflater: LayoutInflater) = LibraryControllerBinding.inflate(inflater)
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onViewCreated(view: View) {
         super.onViewCreated(view)
         mAdapter = LibraryCategoryAdapter(this)
-        adapter.stateRestorationPolicy =
-            RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
+        adapter.stateRestorationPolicy = RecyclerView.Adapter.StateRestorationPolicy.PREVENT_WHEN_EMPTY
         setRecyclerLayout()
         binding.libraryGridRecycler.recycler.setHasFixedSize(true)
         binding.libraryGridRecycler.recycler.adapter = adapter
@@ -560,11 +551,9 @@ class LibraryController(
             scrollToHeader(it)
         }
         binding.categoryRecycler.setOnTouchListener { _, _ ->
-            val searchView =
-                activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView
-                    ?: return@setOnTouchListener false
-            val imm =
-                activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
+            val searchView = activityBinding?.searchToolbar?.menu?.findItem(R.id.action_search)?.actionView
+                ?: return@setOnTouchListener false
+            val imm = activity?.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
             imm!!.hideSoftInputFromWindow(searchView.windowToken, 0)
             false
         }
@@ -584,10 +573,7 @@ class LibraryController(
                 afterInsets = { insets ->
                     val systemInsets = insets.ignoredSystemInsets
                     binding.categoryRecycler.updateLayoutParams<ViewGroup.MarginLayoutParams> {
-                        topMargin = systemInsets.top + (
-                            activityBinding?.searchToolbar?.height
-                                ?: 0
-                            ) + 12.dpToPx
+                        topMargin = systemInsets.top + (activityBinding?.searchToolbar?.height ?: 0) + 12.dpToPx
                     }
                     updateSmallerViewsTopMargins()
                     binding.headerCard.updateLayoutParams<ViewGroup.MarginLayoutParams> {
@@ -755,8 +741,7 @@ class LibraryController(
         }
         hopperGravity = gravityPref
 
-        val gestureDetector =
-            GestureDetectorCompat(binding.root.context, LibraryGestureDetector(this))
+        val gestureDetector = GestureDetectorCompat(binding.root.context, LibraryGestureDetector(this))
         with(binding.roundedCategoryHopper) {
             listOf(categoryHopperLayout, upCategory, downCategory, categoryButton).forEach {
                 it.setOnTouchListener { _, event ->
@@ -800,10 +785,9 @@ class LibraryController(
         if (view.height - insetBottom < binding.categoryHopperFrame.y) {
             binding.jumperCategoryText.translationY =
                 -(binding.categoryHopperFrame.y - (view.height - insetBottom)) +
-                binding.libraryGridRecycler.recycler.translationY
+                    binding.libraryGridRecycler.recycler.translationY
         } else {
-            binding.jumperCategoryText.translationY =
-                binding.libraryGridRecycler.recycler.translationY
+            binding.jumperCategoryText.translationY = binding.libraryGridRecycler.recycler.translationY
         }
     }
 
@@ -840,8 +824,8 @@ class LibraryController(
                 presenter.categories.indexOfFirst { presenter.currentCategory == it.id } +
                     (if (next) 1 else -1)
             if (if (!next) {
-                newOffset > -1
-            } else {
+                    newOffset > -1
+                } else {
                     newOffset < presenter.categories.size
                 }
             ) {
@@ -930,18 +914,17 @@ class LibraryController(
                     end = 5.dpToPx,
                 )
             }
-            (manager as? GridLayoutManager)?.spanSizeLookup =
-                object : GridLayoutManager.SpanSizeLookup() {
-                    override fun getSpanSize(position: Int): Int {
-                        if (libraryLayout == LibraryItem.LAYOUT_LIST) return managerSpanCount
-                        val item = this@LibraryController.mAdapter?.getItem(position)
-                        return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
-                            managerSpanCount
-                        } else {
-                            1
-                        }
+            (manager as? GridLayoutManager)?.spanSizeLookup = object : GridLayoutManager.SpanSizeLookup() {
+                override fun getSpanSize(position: Int): Int {
+                    if (libraryLayout == LibraryItem.LAYOUT_LIST) return managerSpanCount
+                    val item = this@LibraryController.mAdapter?.getItem(position)
+                    return if (item is LibraryHeaderItem || item is SearchGlobalItem || (item is LibraryItem && item.manga.isBlank())) {
+                        managerSpanCount
+                    } else {
+                        1
                     }
                 }
+            }
         }
     }
 
@@ -1084,9 +1067,7 @@ class LibraryController(
                         }
                     }
                 }
-                binding.libraryGridRecycler.recycler.viewTreeObserver.addOnGlobalLayoutListener(
-                    staggeredObserver,
-                )
+                binding.libraryGridRecycler.recycler.viewTreeObserver.addOnGlobalLayoutListener(staggeredObserver)
                 viewScope.launchUI {
                     delay(500)
                     removeStaggeredObserver()
@@ -1232,8 +1213,7 @@ class LibraryController(
         val headerPosition = adapter.indexOf(pos)
         if (headerPosition > -1) {
             val activityBinding = activityBinding ?: return
-            val appbarOffset =
-                if (pos <= 0) 0 else -fullAppBarHeight!! + activityBinding.cardFrame.height
+            val appbarOffset = if (pos <= 0) 0 else -fullAppBarHeight!! + activityBinding.cardFrame.height
             val previousHeader = adapter.getItem(adapter.indexOf(pos - 1)) as? LibraryHeaderItem
             binding.libraryGridRecycler.recycler.scrollToPositionWithOffset(
                 headerPosition,
@@ -1495,8 +1475,8 @@ class LibraryController(
         val fromItem = adapter.getItem(fromPosition)
         val toItem = adapter.getItem(toPosition)
         if (binding.libraryGridRecycler.recycler.layoutManager !is StaggeredGridLayoutManager && (
-            (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
-            )
+                (fromItem is LibraryItem && toItem is LibraryItem) || fromItem == null
+                )
         ) {
             binding.libraryGridRecycler.recycler.scrollBy(
                 0,
@@ -1556,10 +1536,7 @@ class LibraryController(
         lastItemPosition = null
     }
 
-    private fun getSectionItems(
-        header: IHeader<*>,
-        skipItem: ISectionable<*, *>,
-    ): List<ISectionable<*, *>> {
+    private fun getSectionItems(header: IHeader<*>, skipItem: ISectionable<*, *>): List<ISectionable<*, *>> {
         val sectionItems: MutableList<ISectionable<*, *>> = ArrayList()
         var startPosition: Int = adapter.getGlobalPositionOf(header)
         var item = adapter.getItem(++startPosition) as? LibraryItem
@@ -1739,10 +1716,7 @@ class LibraryController(
 
         val searchItem = activityBinding?.searchToolbar?.searchItem
         val searchView = activityBinding?.searchToolbar?.searchView
-        activityBinding?.searchToolbar?.setQueryHint(
-            resources?.getString(R.string.library_search_hint),
-            query.isEmpty(),
-        )
+        activityBinding?.searchToolbar?.setQueryHint(resources?.getString(R.string.library_search_hint), query.isEmpty())
 
         if (query.isNotEmpty()) {
             if (activityBinding?.searchToolbar?.isSearchExpanded != true) {
