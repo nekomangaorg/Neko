@@ -1,9 +1,9 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -44,7 +44,7 @@ fun MangaDetailsHeader(
                     .fillMaxWidth()
                     .requiredHeightIn(250.dp, 400.dp),
             )
-            Spacer(
+            Box(
                 modifier = Modifier
                     .align(Alignment.BottomStart)
                     .fillMaxWidth()
@@ -79,8 +79,9 @@ fun MangaDetailsHeader(
                     shareClick = shareClick,
                 )
             }
-
         }
+        Gap(height = 16.dp)
+        DescriptionBlock(manga, isExpanded)
 
     }
 }

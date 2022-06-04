@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.NoRippleText
 import org.nekomanga.presentation.theme.NekoTheme
 import java.text.NumberFormat
@@ -51,8 +52,8 @@ fun InformationBlock(
     modifier: Modifier = Modifier,
 ) {
 
-    val lightAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .9f)
-    val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = .65f)
+    val highAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)
+    val mediumAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)
 
     Column(
         modifier = modifier
@@ -66,7 +67,7 @@ fun InformationBlock(
                 maxLines = if (isExpanded) Integer.MAX_VALUE else 4,
                 onLongClick = titleLongClick,
                 style = MaterialTheme.typography.headlineSmall.copy(letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium),
-                color = lightAlpha,
+                color = highAlpha,
             )
         }
 

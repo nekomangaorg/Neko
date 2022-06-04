@@ -9,6 +9,12 @@ import androidx.compose.ui.graphics.Color
 class NekoColors {
     companion object {
         val outline = Color(0xFF79747E)
+        const val highAlphaHighContrast = 1f
+        const val highAlphaLowContrast = .87f
+        const val mediumAlphaHighContrast = .74f
+        const val mediumAlphaLowContrast = .6f
+        const val disabledAlphaHighContrast = .38f
+        const val disabledAlphaLowContrast = .38f
     }
 }
 

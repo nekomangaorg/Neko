@@ -189,6 +189,7 @@ dependencies {
 
     //markdown
     implementation(libs.markdown)
+    implementation("com.github.jeziellago:compose-markdown:0.2.9")
 
     // Model View Presenter
     implementation(libs.bundles.nucleus)

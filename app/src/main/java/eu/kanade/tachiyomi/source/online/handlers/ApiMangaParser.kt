@@ -66,11 +66,7 @@ class ApiMangaParser {
                 }
             }
 
-            manga.description =
-                MdUtil.cleanDescription(
-                    mangaAttributesDto.description.asMdMap<String>()["en"]
-                        ?: "",
-                )
+            manga.description = mangaAttributesDto.description.asMdMap<String>()["en"]
 
             val authors = mangaDto.relationships.filter { relationshipDto ->
                 relationshipDto.type.equals(MdConstants.Types.author, true)
