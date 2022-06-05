@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
@@ -55,7 +54,7 @@ import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 fun ButtonBlock(
     manga: Manga,
     trackServiceCount: Int,
-    themeBasedOffCover: Boolean = true,
+    buttonColor: Color,
     favoriteClick: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
@@ -67,15 +66,10 @@ fun ButtonBlock(
 
     val surfaceColor = MaterialTheme.colorScheme.surface
     val secondaryColor = MaterialTheme.colorScheme.secondary
-    val isDarkTheme = isSystemInDarkTheme()
-    val (buttonColor, rippleTheme) = remember {
-        when (themeBasedOffCover && manga.vibrantCoverColor != null) {
-            true -> {
-                val color = getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
-                color to DynamicRippleTheme(color)
-            }
-            false -> secondaryColor to PrimaryColorRippleTheme
-        }
+    
+    val rippleTheme = when (buttonColor != secondaryColor) {
+        true -> DynamicRippleTheme(buttonColor)
+        false -> PrimaryColorRippleTheme
     }
 
     val checkedButtonBackgroundColor = remember { Color(getCheckedBackgroundColor(buttonColor, surfaceColor)) }
@@ -94,7 +88,7 @@ fun ButtonBlock(
             .horizontalScroll(rememberScrollState())
             .padding(horizontal = 8.dp),
     ) {
-        
+
         CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
 
             val favConfig = when (manga.favorite) {
@@ -221,26 +215,6 @@ private fun RowScope.ButtonText(text: String, color: Color) {
     )
 }*/
 
-private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
-
-    val color1 = buttonColor.toArgb()
-    val luminance = ColorUtils.calculateLuminance(color1).toFloat()
-
-    val color2 = when (isNightMode) {
-        true -> Color.White.toArgb()
-        false -> Color.Black.toArgb()
-    }
-
-    val ratio = when (isNightMode) {
-        true -> (-(luminance - 1)) * .33f
-        false -> luminance * .5f
-    }
-
-    return when ((isNightMode && luminance <= 0.6) || (isNightMode.not() && luminance > 0.4)) {
-        true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
-        false -> buttonColor
-    }
-}
 
 private fun getCheckedBackgroundColor(buttonColor: Color, surfaceColor: Color): Int {
     return ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), .706f)

@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -11,11 +12,18 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
+import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
 
@@ -35,6 +43,21 @@ fun MangaDetailsHeader(
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
 ) {
+    val isDarkTheme = isSystemInDarkTheme()
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val buttonColor = remember {
+        when (themeBasedOffCover && manga.vibrantCoverColor != null) {
+            true -> {
+                val color = getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
+                color
+            }
+            false -> secondaryColor
+        }
+    }
+
+    var descriptionExpanded by rememberSaveable { mutableStateOf(false) }
+
+
     Column {
         BoxWithConstraints {
             BackDrop(
@@ -69,7 +92,7 @@ fun MangaDetailsHeader(
                 ButtonBlock(
                     manga = manga,
                     trackServiceCount = trackServiceCount,
-                    themeBasedOffCover = themeBasedOffCover,
+                    buttonColor = buttonColor,
                     favoriteClick = favoriteClick,
                     trackingClick = trackingClick,
                     artworkClick = artworkClick,
@@ -81,7 +104,28 @@ fun MangaDetailsHeader(
             }
         }
         Gap(height = 16.dp)
-        DescriptionBlock(manga, isExpanded)
+        DescriptionBlock(manga = manga, buttonColor = buttonColor, isExpanded = descriptionExpanded, expandCollapseClick = { descriptionExpanded = descriptionExpanded.not() })
 
+    }
+}
+
+private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
+
+    val color1 = buttonColor.toArgb()
+    val luminance = ColorUtils.calculateLuminance(color1).toFloat()
+
+    val color2 = when (isNightMode) {
+        true -> Color.White.toArgb()
+        false -> Color.Black.toArgb()
+    }
+
+    val ratio = when (isNightMode) {
+        true -> (-(luminance - 1)) * .33f
+        false -> luminance * .5f
+    }
+
+    return when ((isNightMode && luminance <= 0.6) || (isNightMode.not() && luminance > 0.4)) {
+        true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
+        false -> buttonColor
     }
 }

@@ -1,15 +1,15 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Expand
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -18,8 +18,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.core.text.isDigitsOnly
 import com.mikepenz.markdown.Markdown
@@ -33,32 +36,62 @@ import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.components.NekoColors
 
 @Composable
-fun DescriptionBlock(manga: Manga, isExpanded: Boolean, expandCollapseClick: () -> Unit = {}) {
+fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expandCollapseClick: () -> Unit = {}) {
     val description = when (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
         true -> "THIS MANGA IS NOT MIGRATED TO V5"
         false -> manga.description ?: stringResource(R.string.no_description)
     }
 
-    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+    Column(modifier = Modifier
+        .padding(horizontal = 16.dp)
+        .clickable { expandCollapseClick() }) {
         if (isExpanded.not()) {
-            val text = description.trim()
+            val text = description.replace(
+                Regex(
+                    "[\\r\\n\\s*]{2,}",
+                    setOf(RegexOption.MULTILINE),
+                ),
+                "\n",
+            )
+
+            val lineHeight = with(LocalDensity.current) {
+                MaterialTheme.typography.bodyLarge.fontSize.toDp() + 5.dp
+            }
+
             Box {
-                Markdown(content = text, modifier = Modifier.height(90.dp), colors = markdownColors(), typography = markdownTypography())
+                Text(
+                    modifier = Modifier.align(Alignment.TopStart),
+                    text = text,
+                    maxLines = 3,
+                    style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.mediumAlphaLowContrast)),
+                )
                 Box(
                     modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxWidth()
-                        .height(60.dp)
+                        .height(lineHeight)
+                        .align(Alignment.BottomEnd)
+                        .width(150.dp)
                         .background(
-                            Brush.verticalGradient(
-                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface),
+                            Brush.horizontalGradient(
+                                colors = listOf(Color.Transparent, MaterialTheme.colorScheme.surface.copy(alpha = .8f), MaterialTheme.colorScheme.surface),
                             ),
                         ),
                 ) {
-                    Row(modifier = Modifier.align(Alignment.BottomCenter), horizontalArrangement = Arrangement.Center) {
-                        Text(text = "Expand", style = MaterialTheme.typography.bodyLarge.copy(fontWeight = FontWeight.Medium, color = MaterialTheme.colorScheme.onSurface))
+                    Row(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd),
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.surface)
+                                .padding(start = 8.dp),
+                            text = "More",
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                fontWeight = FontWeight.Medium,
+                                color = buttonColor,
+                            ),
+                        )
                         Gap(4.dp)
-                        Icon(imageVector = Icons.Filled.Expand, contentDescription = null, tint = MaterialTheme.colorScheme.onSurface)
+                        Icon(modifier = Modifier.align(Alignment.CenterVertically), imageVector = Icons.Filled.ExpandMore, contentDescription = null, tint = buttonColor)
                     }
                 }
             }
@@ -90,3 +123,9 @@ private fun markdownTypography() =
         body2 = MaterialTheme.typography.bodySmall,
     )
 
+private fun Int.textDp(density: Density): TextUnit = with(density) {
+    this@textDp.dp.toSp()
+}
+
+val Int.textDp: TextUnit
+    @Composable get() = this.textDp(density = LocalDensity.current)
