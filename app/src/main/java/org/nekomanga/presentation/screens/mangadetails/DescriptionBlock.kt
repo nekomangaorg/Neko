@@ -2,6 +2,7 @@ package org.nekomanga.presentation.screens.mangadetails
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
@@ -13,22 +14,21 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material3.ElevatedSuggestionChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import androidx.core.text.isDigitsOnly
@@ -42,10 +42,20 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import jp.wasabeef.gap.Gap
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
+import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 
 @Composable
-fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expandCollapseClick: () -> Unit = {}) {
+fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expandCollapseClick: () -> Unit = {}, genreClick: (String) -> Unit = {}, genreLongClick: (String) -> Unit = {}) {
+
+    val surfaceColor = MaterialTheme.colorScheme.surface
+    val secondaryColor = MaterialTheme.colorScheme.secondary
+    val isDarkTheme = isSystemInDarkTheme()
+
+    val tagColor = remember {
+        generateTagColor(surfaceColor, secondaryColor, buttonColor, isDarkTheme)
+    }
+
     val description = when (MdUtil.getMangaId(manga.url).isDigitsOnly()) {
         true -> "THIS MANGA IS NOT MIGRATED TO V5"
         false -> manga.description ?: stringResource(R.string.no_description)
@@ -101,7 +111,7 @@ fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expa
             )
             Gap(8.dp)
 
-            Genres(manga.getGenres(), buttonColor)
+            Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
 
             MoreLessButton(
                 buttonColor, false,
@@ -141,36 +151,23 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
 }
 
 @Composable
-fun Genres(genres: List<String>?, buttonColor: Color) {
+fun Genres(genres: List<String>?, tagColor: Color, genreClick: (String) -> Unit, genreLongClick: (String) -> Unit) {
     genres ?: return
-    val baseTagColor = MaterialTheme.colorScheme.surface.toArgb()
-    val buttonColorArray = FloatArray(3)
-    val bgArray = FloatArray(3)
 
-    ColorUtils.colorToHSL(baseTagColor, bgArray)
-    ColorUtils.colorToHSL(buttonColor.toArgb(), buttonColorArray)
+    val haptic = LocalHapticFeedback.current
 
-    val tagColor = ColorUtils.setAlphaComponent(
-        ColorUtils.HSLToColor(
-            floatArrayOf(
-                buttonColorArray[0],
-                bgArray[1],
-                (
-                    when {
-                        isSystemInDarkTheme() -> 0.225f
-                        else -> 0.85f
-                    }
-                    ),
-            ),
-        ),
-        199,
-    )
-
-    val chipColors = SuggestionChipDefaults.elevatedSuggestionChipColors(containerColor = Color(tagColor))
-
-    FlowRow(mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 8.dp, crossAxisSpacing = 8.dp) {
+    FlowRow(mainAxisAlignment = FlowMainAxisAlignment.Start, mainAxisSpacing = 12.dp, crossAxisSpacing = 12.dp) {
         genres.forEach { genre ->
-            ElevatedSuggestionChip(onClick = { /*TODO*/ }, label = { Text(text = genre) }, colors = chipColors)
+            Chip(
+                label = genre, containerColor = tagColor,
+                modifier = Modifier.combinedClickable(
+                    onClick = { genreClick(genre) },
+                    onLongClick = {
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        genreLongClick(genre)
+                    },
+                ),
+            )
         }
 
     }
@@ -197,9 +194,31 @@ private fun markdownTypography() =
         body2 = MaterialTheme.typography.bodySmall,
     )
 
-private fun Int.textDp(density: Density): TextUnit = with(density) {
-    this@textDp.dp.toSp()
-}
+private fun generateTagColor(surfaceColor: Color, secondaryColor: Color, buttonColor: Color, isDarkTheme: Boolean): Color {
+    val buttonColorArray = FloatArray(3)
+    val bgArray = FloatArray(3)
 
-val Int.textDp: TextUnit
-    @Composable get() = this.textDp(density = LocalDensity.current)
+    ColorUtils.colorToHSL(surfaceColor.toArgb(), bgArray)
+    ColorUtils.colorToHSL(buttonColor.toArgb(), buttonColorArray)
+
+    return Color(
+        ColorUtils.setAlphaComponent(
+            ColorUtils.HSLToColor(
+                floatArrayOf(
+                    when (buttonColor == secondaryColor) {
+                        true -> bgArray[0]
+                        false -> buttonColorArray[0]
+                    },
+                    bgArray[1],
+                    (
+                        when {
+                            isDarkTheme -> 0.225f
+                            else -> 0.85f
+                        }
+                        ),
+                ),
+            ),
+            199,
+        ),
+    )
+}

@@ -301,8 +301,9 @@ class MangaHeaderHolder(
                     mergeClick = { adapter.delegate.openMerge() },
                     linksClick = { adapter.delegate.showExternalSheet() },
                     shareClick = { adapter.delegate.prepareToShareManga() },
-
-                    )
+                    genreClick = { adapter.delegate.tagClicked(it) },
+                    genreLongClick = { adapter.delegate.tagLongClicked(it) },
+                )
 
                 CascadeDropdownMenu(
                     expanded = favoriteExpanded,

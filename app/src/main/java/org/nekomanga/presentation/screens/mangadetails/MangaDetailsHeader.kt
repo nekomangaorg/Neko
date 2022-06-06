@@ -42,6 +42,8 @@ fun MangaDetailsHeader(
     mergeClick: () -> Unit = {},
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
+    genreClick: (String) -> Unit = {},
+    genreLongClick: (String) -> Unit = {},
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val secondaryColor = MaterialTheme.colorScheme.secondary
@@ -104,7 +106,14 @@ fun MangaDetailsHeader(
             }
         }
         Gap(height = 16.dp)
-        DescriptionBlock(manga = manga, buttonColor = buttonColor, isExpanded = descriptionExpanded, expandCollapseClick = { descriptionExpanded = descriptionExpanded.not() })
+        DescriptionBlock(
+            manga = manga,
+            buttonColor = buttonColor,
+            isExpanded = descriptionExpanded,
+            expandCollapseClick = { descriptionExpanded = descriptionExpanded.not() },
+            genreClick = genreClick,
+            genreLongClick = genreLongClick,
+        )
 
     }
 }
