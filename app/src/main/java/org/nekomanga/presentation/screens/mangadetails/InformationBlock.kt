@@ -46,10 +46,10 @@ import kotlin.math.roundToInt
 @Composable
 fun InformationBlock(
     manga: Manga,
+    modifier: Modifier = Modifier,
     isExpanded: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
-    modifier: Modifier = Modifier,
 ) {
 
     val highAlpha = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.highAlphaLowContrast)

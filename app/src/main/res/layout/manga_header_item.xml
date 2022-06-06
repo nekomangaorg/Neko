@@ -16,130 +16,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <TextView
-        android:id="@+id/manga_summary"
-        style="?textAppearanceBodySecondary"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="4dp"
-        android:layout_marginEnd="16dp"
-        android:visibility="gone"
-        android:clickable="true"
-        android:focusable="true"
-        android:maxLines="3"
-        android:textSize="16sp"
-        app:layout_constraintBottom_toTopOf="@id/manga_genres_tags"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/compose"
-        tools:maxLines="10"
-        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum." />
-
-    <View
-        android:id="@+id/more_bg_gradient"
-        android:layout_width="60dp"
-        android:layout_height="16sp"
-        android:background="@drawable/full_gradient"
-        android:backgroundTint="?attr/background"
-        app:layout_constraintBottom_toBottomOf="@id/manga_summary"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="@id/more_end_guide" />
-
-    <View
-        android:id="@+id/more_end_guide"
-        android:layout_width="24dp"
-        android:layout_height="0dp"
-        app:layout_constraintStart_toStartOf="@+id/more_button"
-        app:layout_constraintTop_toTopOf="@id/more_button"
-        android:visibility="gone"
-        app:layout_constraintBottom_toBottomOf="@id/more_button" />
-
-    <View
-        android:id="@+id/more_bg_solid"
-        android:layout_width="0dp"
-        android:layout_height="16sp"
-        android:background="?attr/background"
-        app:layout_constraintBottom_toBottomOf="@id/manga_summary"
-        app:layout_constraintEnd_toEndOf="@id/more_button"
-        android:visibility="gone"
-        app:layout_constraintStart_toStartOf="@id/more_button" />
-
-    <View
-        android:id="@+id/more_guide"
-        android:layout_width="1dp"
-        android:layout_height="15sp"
-        app:layout_constraintEnd_toEndOf="@id/manga_summary"
-        android:visibility="gone"
-        app:layout_constraintTop_toBottomOf="@id/manga_summary" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/more_button"
-        style="@style/Neko.Button.TextButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="12dp"
-        android:drawableEnd="@drawable/ic_expand_more_24dp"
-        android:minWidth="0dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        android:text="@string/more"
-        android:visibility="gone"
-        android:textAlignment="viewEnd"
-        app:drawableTint="?colorSecondary"
-        app:layout_constraintBottom_toBottomOf="@id/more_guide"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:rippleColor="@null" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/more_button_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="more_button,more_bg_gradient,more_bg_solid" />
-
-    <androidx.constraintlayout.widget.Group
-        android:id="@+id/sub_item_group"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:constraint_referenced_ids="manga_summary" />
-
-    <com.google.android.material.chip.ChipGroup
-        android:id="@+id/manga_genres_tags"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="8dp"
-        app:chipSpacingVertical="-12dp"
-        android:layout_marginEnd="16dp"
-        android:visibility="gone"
-        app:layout_constrainedHeight="true"
-        app:layout_constraintBottom_toTopOf="@id/less_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/manga_summary"
-        tools:layout_height="100dp" />
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/less_button"
-        style="@style/Neko.Button.TextButton"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="16dp"
-        android:layout_marginEnd="12dp"
-        android:text="@string/less"
-        android:textAlignment="textEnd"
-        android:drawableEnd="@drawable/ic_expand_less_24dp"
-        android:paddingStart="0dp"
-        android:paddingEnd="0dp"
-        app:drawableTint="?colorSecondary"
-        android:visibility="gone"
-        app:layout_constraintBottom_toTopOf="@id/start_reading_button"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/manga_genres_tags"
-        app:rippleColor="@null"
-        tools:visibility="visible" />
-
     <com.google.android.material.button.MaterialButton
         android:id="@+id/start_reading_button"
         style="@style/Neko.Button.Rounded.Alternative"
@@ -154,7 +30,7 @@
         app:layout_constraintBottom_toTopOf="@id/chapter_layout"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/less_button"
+        app:layout_constraintTop_toBottomOf="@+id/compose"
         tools:text="Continue Reading Chapter 17.1" />
 
     <androidx.constraintlayout.widget.ConstraintLayout

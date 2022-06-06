@@ -1,5 +1,8 @@
 package org.nekomanga.presentation.screens.mangadetails
 
+import android.animation.TimeInterpolator
+import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.core.Easing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
@@ -11,6 +14,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
@@ -45,8 +49,17 @@ import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expandCollapseClick: () -> Unit = {}, genreClick: (String) -> Unit = {}, genreLongClick: (String) -> Unit = {}) {
+fun DescriptionBlock(
+    manga: Manga,
+    buttonColor: Color,
+    isExpanded: Boolean,
+    isTablet: Boolean,
+    expandCollapseClick: () -> Unit = {},
+    genreClick: (String) -> Unit = {},
+    genreLongClick: (String) -> Unit = {},
+) {
 
     val surfaceColor = MaterialTheme.colorScheme.surface
     val secondaryColor = MaterialTheme.colorScheme.secondary
@@ -66,7 +79,9 @@ fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expa
             .padding(horizontal = 16.dp)
             .focusable(enabled = false)
             .clickable { expandCollapseClick() },
+        // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
     ) {
+
         if (isExpanded.not()) {
             val text = description.replace(
                 Regex(
@@ -103,26 +118,35 @@ fun DescriptionBlock(manga: Manga, buttonColor: Color, isExpanded: Boolean, expa
             }
         } else {
             val text = description.trim()
-            Markdown(
-                content = text,
-                colors = markdownColors(),
-                typography = markdownTypography(),
-                flavour = CommonMarkFlavourDescriptor(),
-            )
-            Gap(8.dp)
+            SelectionContainer {
+                Markdown(
+                    content = text,
+                    colors = markdownColors(),
+                    typography = markdownTypography(),
+                    flavour = CommonMarkFlavourDescriptor(),
+                )
+            }
+
+            Gap(16.dp)
 
             Genres(manga.getGenres(), tagColor, genreClick, genreLongClick)
 
-            MoreLessButton(
-                buttonColor, false,
-                Modifier
-                    .clickable(onClick = expandCollapseClick)
-                    .align(Alignment.End),
-            )
+            if (isTablet.not()) {
+                Gap(16.dp)
+                MoreLessButton(
+                    buttonColor, false,
+                    Modifier
+                        .clickable(onClick = expandCollapseClick)
+                        .align(Alignment.End),
+                )
+            }
         }
     }
 }
 
+/**
+ * Composable for the expand more and expand less button
+ */
 @Composable
 private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifier = Modifier) {
 
@@ -130,7 +154,6 @@ private fun MoreLessButton(buttonColor: Color, isMore: Boolean, modifier: Modifi
         true -> R.string.more to Icons.Filled.ExpandMore
         false -> R.string.less to Icons.Filled.ExpandLess
     }
-
 
     Row(
         modifier = modifier,
@@ -194,6 +217,9 @@ private fun markdownTypography() =
         body2 = MaterialTheme.typography.bodySmall,
     )
 
+/**
+ * Generates the container color for the tag, changes depending on if if the button color is the secondary color or is based off the cover
+ */
 private fun generateTagColor(surfaceColor: Color, secondaryColor: Color, buttonColor: Color, isDarkTheme: Boolean): Color {
     val buttonColorArray = FloatArray(3)
     val bgArray = FloatArray(3)
@@ -221,4 +247,8 @@ private fun generateTagColor(surfaceColor: Color, secondaryColor: Color, buttonC
             199,
         ),
     )
+}
+
+fun TimeInterpolator.toEasing() = Easing { x ->
+    getInterpolation(x)
 }

@@ -3,7 +3,6 @@ package org.nekomanga.presentation.screens.mangadetails
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -12,16 +11,15 @@ import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -30,7 +28,6 @@ import jp.wasabeef.gap.Gap
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
-    isExpanded: Boolean = true,
     themeBasedOffCover: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
@@ -47,6 +44,7 @@ fun MangaDetailsHeader(
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val secondaryColor = MaterialTheme.colorScheme.secondary
+
     val buttonColor = remember {
         when (themeBasedOffCover && manga.vibrantCoverColor != null) {
             true -> {
@@ -56,12 +54,17 @@ fun MangaDetailsHeader(
             false -> secondaryColor
         }
     }
-
-    var descriptionExpanded by rememberSaveable { mutableStateOf(false) }
-
+    val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
+    
+    val isExpanded = rememberSaveable {
+        when (isTablet) {
+            false -> mutableStateOf(manga.favorite.not())
+            true -> mutableStateOf(true)
+        }
+    }
 
     Column {
-        BoxWithConstraints {
+        Box {
             BackDrop(
                 manga = manga,
                 themeBasedOffCover = themeBasedOffCover,
@@ -86,7 +89,7 @@ fun MangaDetailsHeader(
                     modifier = Modifier
                         .statusBarsPadding()
                         .padding(top = 70.dp),
-                    isExpanded = isExpanded,
+                    isExpanded = isExpanded.value,
                     titleLongClick = titleLongClick,
                     creatorLongClicked = creatorLongClick,
                 )
@@ -109,12 +112,17 @@ fun MangaDetailsHeader(
         DescriptionBlock(
             manga = manga,
             buttonColor = buttonColor,
-            isExpanded = descriptionExpanded,
-            expandCollapseClick = { descriptionExpanded = descriptionExpanded.not() },
+            isExpanded = isExpanded.value,
+            isTablet = isTablet,
+            expandCollapseClick = {
+                //dont expand/collapse when tablet
+                if (isTablet.not()) {
+                    isExpanded.value = isExpanded.value.not()
+                }
+            },
             genreClick = genreClick,
             genreLongClick = genreLongClick,
         )
-
     }
 }
 
