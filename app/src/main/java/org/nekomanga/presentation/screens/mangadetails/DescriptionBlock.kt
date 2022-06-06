@@ -6,7 +6,7 @@ import androidx.compose.animation.core.Easing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
-import androidx.compose.foundation.focusable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -74,11 +74,15 @@ fun DescriptionBlock(
         false -> manga.description ?: stringResource(R.string.no_description)
     }
 
+    val interactionSource = remember { MutableInteractionSource() }
     Column(
         modifier = Modifier
             .padding(horizontal = 16.dp)
-            .focusable(enabled = false)
-            .clickable { expandCollapseClick() },
+            .clickable(
+                interactionSource = interactionSource,
+                indication = null,
+                onClick = expandCollapseClick,
+            ),
         // .animateContentSize(tween(400, easing = AnticipateOvershootInterpolator().toEasing())),
     ) {
 
