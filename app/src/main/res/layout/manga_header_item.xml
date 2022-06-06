@@ -16,23 +16,6 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/start_reading_button"
-        style="@style/Neko.Button.Rounded.Alternative"
-        android:textColor="?attr/colorOnUnreadBadge"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:transitionName="details start reading transition"
-        android:layout_marginStart="16dp"
-        android:layout_marginTop="12dp"
-        android:layout_marginEnd="16dp"
-        android:text="@string/start_reading"
-        app:layout_constraintBottom_toTopOf="@id/chapter_layout"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/compose"
-        tools:text="Continue Reading Chapter 17.1" />
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/chapter_layout"
         android:layout_width="match_parent"
@@ -43,7 +26,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/start_reading_button">
+        app:layout_constraintTop_toBottomOf="@id/compose">
 
         <com.google.android.material.textview.MaterialTextView
             android:id="@+id/chapters_title"

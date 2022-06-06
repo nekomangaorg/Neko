@@ -4,12 +4,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.layout.statusBarsPadding
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -24,6 +28,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
+import onColor
 
 @Composable
 fun MangaDetailsHeader(
@@ -41,6 +46,8 @@ fun MangaDetailsHeader(
     shareClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
+    quickReadText: String = "",
+    quickReadClick: () -> Unit = {},
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val secondaryColor = MaterialTheme.colorScheme.secondary
@@ -55,7 +62,7 @@ fun MangaDetailsHeader(
         }
     }
     val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
-    
+
     val isExpanded = rememberSaveable {
         when (isTablet) {
             false -> mutableStateOf(manga.favorite.not())
@@ -108,7 +115,7 @@ fun MangaDetailsHeader(
                 )
             }
         }
-        Gap(height = 16.dp)
+        Gap(16.dp)
         DescriptionBlock(
             manga = manga,
             buttonColor = buttonColor,
@@ -123,6 +130,19 @@ fun MangaDetailsHeader(
             genreClick = genreClick,
             genreLongClick = genreLongClick,
         )
+        Gap(16.dp)
+        if (quickReadText.isNotEmpty()) {
+            ElevatedButton(
+                onClick = quickReadClick,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
+                colors = ButtonDefaults.elevatedButtonColors(containerColor = buttonColor),
+            ) {
+                Text(text = quickReadText, style = MaterialTheme.typography.titleMedium, color = buttonColor.onColor())
+            }
+        }
     }
 }
 

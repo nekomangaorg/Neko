@@ -119,7 +119,7 @@ class MangaDetailsAdapter(
         fun mangaPresenter(): MangaDetailsPresenter
         fun prepareToShareManga()
         fun startDownloadRange(position: Int)
-        fun readNextChapter(readingButton: View)
+        fun readNextChapter()
         fun topCoverHeight(): Int
         fun tagClicked(text: String)
         fun tagLongClicked(text: String)

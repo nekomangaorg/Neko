@@ -1324,14 +1324,14 @@ class MangaDetailsController :
         onItemClick(null, position)
     }
 
-    override fun readNextChapter(readingButton: View) {
+    override fun readNextChapter() {
         if (activity is SearchActivity && presenter.isLockedFromSearch) {
             SecureActivityDelegate.promptLockIfNeeded(activity)
             return
         }
         val item = presenter.getNextUnreadChapter()
         if (item != null) {
-            openChapter(item.chapter, readingButton)
+            openChapter(item.chapter)
         } else if (snack == null ||
             snack?.getText() != view?.context?.getString(R.string.next_chapter_not_found)
         ) {
