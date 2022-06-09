@@ -29,6 +29,7 @@ import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
 import onColor
+import org.nekomanga.presentation.screens.ChapterRow
 
 @Composable
 fun MangaDetailsHeader(
@@ -48,6 +49,9 @@ fun MangaDetailsHeader(
     genreLongClick: (String) -> Unit = {},
     quickReadText: String = "",
     quickReadClick: () -> Unit = {},
+    numberOfChapters: Int,
+    chapterHeaderClick: () -> Unit = {},
+    chapterFilterText: String,
 ) {
     val isDarkTheme = isSystemInDarkTheme()
     val secondaryColor = MaterialTheme.colorScheme.secondary

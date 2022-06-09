@@ -3,7 +3,6 @@ package eu.kanade.tachiyomi.ui.manga
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.ContextWrapper
-import android.content.res.ColorStateList
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Text
@@ -20,7 +19,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.databinding.ChapterHeaderItemBinding
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
@@ -43,63 +41,11 @@ class MangaHeaderHolder(
     } catch (e: Exception) {
         null
     }
-    private val chapterBinding: ChapterHeaderItemBinding? = try {
-        ChapterHeaderItemBinding.bind(view)
-    } catch (e: Exception) {
-        null
-    }
 
-    private var showReadingButton = true
-    private var showMoreButton = true
-    private var canCollapse = true
-
-    init {
-
-        if (binding == null) {
-            with(chapterBinding) {
-                this ?: return@with
-                chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
-            }
-        }
-        with(binding) {
-            this ?: return@with
-            chapterLayout.setOnClickListener { adapter.delegate.showChapterFilter() }
-        }
-    }
-
-    fun bindChapters() {
-        val presenter = adapter.delegate.mangaPresenter()
-        val count = presenter.chapters.size
-        if (binding != null) {
-            binding.chaptersTitle.text =
-                itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
-            binding.filtersText.text = presenter.currentFilters()
-        } else if (chapterBinding != null) {
-            chapterBinding.chaptersTitle.text =
-                itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
-            chapterBinding.filtersText.text = presenter.currentFilters()
-        }
-    }
-
-    @SuppressLint("SetTextI18n")
     fun bind(item: MangaHeaderItem, manga: Manga) {
         val presenter = adapter.delegate.mangaPresenter()
-        if (binding == null) {
-            if (chapterBinding != null) {
-                val count = presenter.chapters.size
-                chapterBinding.chaptersTitle.text =
-                    itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
-                chapterBinding.filtersText.text = presenter.currentFilters()
-                if (adapter.preferences.themeMangaDetails()) {
-                    val accentColor = adapter.delegate.accentColor() ?: return
-                    chapterBinding.filterButton.imageTintList = ColorStateList.valueOf(accentColor)
-                }
-            }
-            return
-        }
-
         // composeStuff
-        binding.compose.setContent {
+        binding?.compose?.setContent {
             NekoTheme {
                 var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
@@ -134,6 +80,9 @@ class MangaHeaderHolder(
                     genreLongClick = { adapter.delegate.tagLongClicked(it) },
                     quickReadText = quickReadText,
                     quickReadClick = { adapter.delegate.readNextChapter() },
+                    numberOfChapters = presenter.chapters.size,
+                    chapterFilterText = presenter.currentFilters(),
+                    chapterHeaderClick = { adapter.delegate.showChapterFilter() },
                 )
 
                 CascadeDropdownMenu(
@@ -177,13 +126,6 @@ class MangaHeaderHolder(
 
         //val tracked = presenter.isTracked() && !item.isLocked
 
-        val count = presenter.chapters.size
-        binding.chaptersTitle.text =
-            itemView.resources.getQuantityString(R.plurals.chapters_plural, count, count)
-
-
-        binding.filtersText.text = presenter.currentFilters()
-
         if (!manga.initialized) return
         updateCover(manga)
         if (adapter.preferences.themeMangaDetails()) {
@@ -193,12 +135,6 @@ class MangaHeaderHolder(
 
     fun updateColors(updateAll: Boolean = true) {
         val accentColor = adapter.delegate.accentColor() ?: return
-        if (binding == null) {
-            if (chapterBinding != null) {
-                chapterBinding.filterButton.imageTintList = ColorStateList.valueOf(accentColor)
-            }
-            return
-        }
     }
 
     fun updateCover(manga: Manga) {
