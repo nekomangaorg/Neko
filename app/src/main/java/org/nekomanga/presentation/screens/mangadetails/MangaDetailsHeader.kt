@@ -38,6 +38,7 @@ import onColor
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
+    inLibrary: Boolean = true,
     buttonColor: Color,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
@@ -106,10 +107,11 @@ fun MangaDetailsHeader(
                 Gap(height = 24.dp)
                 ButtonBlock(
                     manga = manga,
+                    inLibrary = inLibrary,
                     trackServiceCount = trackServiceCount,
                     buttonColor = buttonColor,
                     favoriteClick = {
-                        if (manga.favorite.not()) {
+                        if (inLibrary.not()) {
                             toggleFavorite()
                         } else {
                             favoriteExpanded = true

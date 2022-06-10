@@ -53,6 +53,7 @@ import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 @Composable
 fun ButtonBlock(
     manga: Manga,
+    inLibrary: Boolean,
     trackServiceCount: Int,
     buttonColor: Color,
     favoriteClick: () -> Unit = {},
@@ -66,7 +67,7 @@ fun ButtonBlock(
 
     val surfaceColor = MaterialTheme.colorScheme.surface
     val secondaryColor = MaterialTheme.colorScheme.secondary
-    
+
     val rippleTheme = when (buttonColor != secondaryColor) {
         true -> DynamicRippleTheme(buttonColor)
         false -> PrimaryColorRippleTheme
@@ -91,7 +92,7 @@ fun ButtonBlock(
 
         CompositionLocalProvider(LocalRippleTheme provides rippleTheme) {
 
-            val favConfig = when (manga.favorite) {
+            val favConfig = when (inLibrary) {
                 true -> ButtonConfig(icon = Icons.Filled.Favorite, buttonColors = checkedButtonColors, borderStroke = checkedBorderStroke, text = stringResource(R.string.in_library))
                 false -> ButtonConfig(icon = Icons.Filled.FavoriteBorder, buttonColors = uncheckedButtonColors, borderStroke = uncheckedBorderStroke, text = stringResource(R.string.add_to_library))
             }

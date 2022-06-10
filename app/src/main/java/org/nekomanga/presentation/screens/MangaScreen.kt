@@ -4,10 +4,12 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
@@ -48,7 +50,7 @@ fun MangaScreen(
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
     trackServiceCount: Int,
-    toggleFavorite: () -> Unit = {},
+    toggleFavorite: () -> Boolean = { true },
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
@@ -92,12 +94,6 @@ fun MangaScreen(
     if (scaffoldState.bottomSheetState.isCollapsed)
         currentBottomSheet = null
 
-    val closeSheet: () -> Unit = {
-        scope.launch {
-            scaffoldState.bottomSheetState.collapse()
-        }
-    }
-
     val openSheet: (BottomSheetScreen) -> Unit = {
         scope.launch {
             currentBottomSheet = it
@@ -106,11 +102,14 @@ fun MangaScreen(
     }
 
     BottomSheetScaffold(
-        sheetPeekHeight = 0.dp, scaffoldState = scaffoldState,
+        sheetPeekHeight = 0.dp,
+        scaffoldState = scaffoldState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
-            currentBottomSheet?.let { currentSheet ->
-                SheetLayout(currentSheet, closeSheet)
+            Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
+                currentBottomSheet?.let { currentSheet ->
+                    SheetLayout(currentSheet)
+                }
             }
         },
     ) {
@@ -142,16 +141,19 @@ fun MangaScreen(
 
             val context = LocalContext.current
 
+            var inLibrary by remember { mutableStateOf(manga.favorite) }
+
             LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
                 item {
                     MangaDetailsHeader(
                         manga = manga,
+                        inLibrary = inLibrary,
                         titleLongClick = { title -> titleLongClick(context, title) },
                         creatorLongClick = { creator -> creatorLongClick(context, creator) },
                         buttonColor = buttonColor,
                         generatePalette = generatePalette,
                         trackServiceCount = trackServiceCount,
-                        toggleFavorite = toggleFavorite,
+                        toggleFavorite = { inLibrary = toggleFavorite() },
                         categories = categories,
                         moveCategories = { openSheet(BottomSheetScreen.CategoriesSheet) },
                         trackingClick = trackingClick,
@@ -177,7 +179,7 @@ fun MangaScreen(
 }
 
 @Composable
-fun SheetLayout(currentScreen: BottomSheetScreen, onCloseBottomSheet: () -> Unit) {
+fun SheetLayout(currentScreen: BottomSheetScreen) {
     when (currentScreen) {
         BottomSheetScreen.CategoriesSheet -> EditCategorySheet()
     }

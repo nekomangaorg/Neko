@@ -56,7 +56,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
             creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
             trackServiceCount = trackServiceCount,
-            toggleFavorite = { },
+            toggleFavorite = { presenter.toggleFavorite() },
             trackingClick = { },
             artworkClick = { },
             similarClick = { },

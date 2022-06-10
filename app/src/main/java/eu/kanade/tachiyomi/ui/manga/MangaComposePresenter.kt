@@ -12,6 +12,7 @@ import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.util.Date
 
 class MangaComposePresenter(
     private val manga: Manga,
@@ -31,5 +32,23 @@ class MangaComposePresenter(
      */
     fun getCategories(): List<Category> {
         return db.getCategories().executeAsBlocking()
+    }
+
+    /**
+     * Toggle a manga as favorite
+     */
+    fun toggleFavorite(): Boolean {
+        manga.favorite = !manga.favorite
+
+        when (manga.favorite) {
+            true -> {
+                manga.date_added = Date().time
+                //TODO need to add to MDList as Plan to read if enabled see the other toggleFavorite in the detailsPResenter
+            }
+            false -> manga.date_added = 0
+        }
+
+        db.insertManga(manga).executeAsBlocking()
+        return manga.favorite
     }
 }
