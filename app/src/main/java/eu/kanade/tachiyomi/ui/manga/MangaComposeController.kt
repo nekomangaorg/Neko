@@ -1,0 +1,80 @@
+package eu.kanade.tachiyomi.ui.manga
+
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
+import android.os.Bundle
+import androidx.annotation.StringRes
+import androidx.compose.runtime.Composable
+import androidx.core.content.getSystemService
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.DatabaseHelper
+import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.notification.NotificationReceiver
+import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
+import org.nekomanga.presentation.screens.MangaScreen
+import uy.kohesive.injekt.Injekt
+import uy.kohesive.injekt.api.get
+import uy.kohesive.injekt.injectLazy
+
+class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComposePresenter>() {
+
+    constructor(mangaId: Long) : this(
+        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()!!,
+    )
+
+    constructor(bundle: Bundle) : this(bundle.getLong(MangaDetailsController.MANGA_EXTRA)) {
+        val notificationId = bundle.getInt("notificationId", -1)
+        val context = applicationContext ?: return
+        if (notificationId > -1) NotificationReceiver.dismissNotification(
+            context,
+            notificationId,
+            bundle.getInt("groupId", 0),
+        )
+    }
+
+    override val presenter = MangaComposePresenter(manga)
+
+    private val preferences: PreferencesHelper by injectLazy()
+
+    @Composable
+    override fun ScreenContent() {
+
+        // val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
+        val trackServiceCount = 1
+
+        MangaScreen(
+            manga = manga,
+            categories = presenter.getCategories(),
+            moveCategories = { },
+            themeBasedOffCover = preferences.themeMangaDetails(),
+            titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
+            creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
+            trackServiceCount = trackServiceCount,
+            toggleFavorite = { },
+            trackingClick = { },
+            artworkClick = { },
+            similarClick = { },
+            mergeClick = { },
+            linksClick = {},
+            shareClick = {},
+            genreClick = {},
+            genreLongClick = {},
+            quickReadText = "",
+            quickReadClick = {},
+            numberOfChapters = 0,
+            chapterHeaderClick = {},
+            chapterFilterText = "",
+            onBackPressed = { activity?.onBackPressed() },
+        )
+    }
+
+    /**
+     * Copy the Device and App info to clipboard
+     */
+    private fun copyToClipboard(context: Context, content: String, @StringRes label: Int) {
+        val clipboard = context.getSystemService<ClipboardManager>()!!
+        clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(label), content))
+    }
+}

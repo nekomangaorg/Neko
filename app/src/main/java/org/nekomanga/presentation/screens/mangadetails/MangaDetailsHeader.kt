@@ -15,19 +15,28 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.graphics.ColorUtils
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
+import me.saket.cascade.CascadeDropdownMenu
 import onColor
 
 @Composable
@@ -37,7 +46,9 @@ fun MangaDetailsHeader(
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
     trackServiceCount: Int,
-    favoriteClick: () -> Unit = {},
+    toggleFavorite: () -> Unit = {},
+    categories: List<Category> = emptyList(),
+    moveCategories: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
@@ -52,6 +63,9 @@ fun MangaDetailsHeader(
     chapterHeaderClick: () -> Unit = {},
     chapterFilterText: String,
 ) {
+
+    var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
+
     val isDarkTheme = isSystemInDarkTheme()
     val secondaryColor = MaterialTheme.colorScheme.secondary
 
@@ -108,13 +122,26 @@ fun MangaDetailsHeader(
                     manga = manga,
                     trackServiceCount = trackServiceCount,
                     buttonColor = buttonColor,
-                    favoriteClick = favoriteClick,
+                    favoriteClick = {
+                        if (manga.favorite.not()) {
+                            toggleFavorite()
+                        } else {
+                            favoriteExpanded = true
+                        }
+                    },
                     trackingClick = trackingClick,
                     artworkClick = artworkClick,
                     similarClick = similarClick,
                     mergeClick = mergeClick,
                     linksClick = linksClick,
                     shareClick = shareClick,
+                )
+                FavoriteDropDown(
+                    favoriteExpanded = favoriteExpanded,
+                    categories = categories,
+                    moveCategories = moveCategories,
+                    toggleFavorite = toggleFavorite,
+                    onDismiss = { favoriteExpanded = false },
                 )
             }
         }
@@ -149,6 +176,44 @@ fun MangaDetailsHeader(
 
         Gap(8.dp)
         ChapterHeader(buttonColor = buttonColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
+    }
+}
+
+@Composable
+private fun FavoriteDropDown(favoriteExpanded: Boolean, categories: List<Category>, moveCategories: () -> Unit, toggleFavorite: () -> Unit, onDismiss: () -> Unit) {
+    CascadeDropdownMenu(
+        expanded = favoriteExpanded,
+        offset = DpOffset(8.dp, 0.dp),
+        onDismissRequest = onDismiss,
+    ) {
+        val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
+        androidx.compose.material3.DropdownMenuItem(
+            text = {
+                androidx.compose.material.Text(
+                    text = stringResource(R.string.remove_from_library),
+                    style = style,
+                )
+            },
+            onClick = {
+                toggleFavorite()
+                onDismiss()
+            },
+        )
+        if (categories.isNotEmpty()) {
+            val context = LocalContext.current
+            androidx.compose.material3.DropdownMenuItem(
+                text = {
+                    androidx.compose.material.Text(
+                        text = stringResource(R.string.edit_categories),
+                        style = style,
+                    )
+                },
+                onClick = {
+                    moveCategories()
+                    onDismiss()
+                },
+            )
+        }
     }
 }
 

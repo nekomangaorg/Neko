@@ -5,28 +5,16 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import androidx.compose.material.Text
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.DpOffset
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
-import eu.kanade.tachiyomi.util.moveCategories
-import me.saket.cascade.CascadeDropdownMenu
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.NekoTheme
-import androidx.compose.material3.DropdownMenuItem as MenuItem
 
 @SuppressLint("ClickableViewAccessibility")
 class MangaHeaderHolder(
@@ -47,8 +35,6 @@ class MangaHeaderHolder(
         // composeStuff
         binding?.compose?.setContent {
             NekoTheme {
-                var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
-
                 val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
 
                 val quickReadText = getQuickReadText(presenter, LocalContext.current)
@@ -63,13 +49,7 @@ class MangaHeaderHolder(
                     },
                     themeBasedOffCover = adapter.preferences.themeMangaDetails(),
                     trackServiceCount = trackServiceCount,
-                    favoriteClick = {
-                        if (manga.favorite.not()) {
-                            presenter.toggleFavorite()
-                        } else {
-                            favoriteExpanded = true
-                        }
-                    },
+                    toggleFavorite = {},
                     trackingClick = { adapter.delegate.showTrackingSheet() },
                     artworkClick = { },
                     similarClick = { adapter.delegate.openSimilar() },
@@ -84,41 +64,6 @@ class MangaHeaderHolder(
                     chapterFilterText = presenter.currentFilters(),
                     chapterHeaderClick = { adapter.delegate.showChapterFilter() },
                 )
-
-                CascadeDropdownMenu(
-                    expanded = favoriteExpanded,
-                    offset = DpOffset(8.dp, 0.dp),
-                    onDismissRequest = { favoriteExpanded = false },
-                ) {
-                    val style = MaterialTheme.typography.bodyLarge.copy(color = MaterialTheme.colorScheme.onSurface, letterSpacing = (-.5).sp)
-                    MenuItem(
-                        text = {
-                            Text(
-                                text = stringResource(R.string.remove_from_library),
-                                style = style,
-                            )
-                        },
-                        onClick = {
-                            presenter.toggleFavorite()
-                            favoriteExpanded = false
-                        },
-                    )
-                    if (presenter.getCategories().isNotEmpty()) {
-                        val context = LocalContext.current
-                        MenuItem(
-                            text = {
-                                Text(
-                                    text = stringResource(R.string.edit_categories),
-                                    style = style,
-                                )
-                            },
-                            onClick = {
-                                presenter.manga.moveCategories(presenter.db, context.getActivity()!!)
-                                favoriteExpanded = false
-                            },
-                        )
-                    }
-                }
             }
         }
 

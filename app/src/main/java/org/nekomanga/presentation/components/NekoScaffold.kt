@@ -32,6 +32,7 @@ import eu.kanade.tachiyomi.R
 fun NekoScaffold(
     title: String,
     onNavigationIconClicked: () -> Unit,
+    modifier: Modifier = Modifier,
     navigationIcon: ImageVector = Icons.Filled.ArrowBack,
     navigationIconLabel: String = stringResource(id = R.string.back),
     subtitle: String = "",
@@ -41,22 +42,22 @@ fun NekoScaffold(
 ) {
     val systemUiController = rememberSystemUiController()
     val useDarkIcons = MaterialTheme.colorScheme.surface.luminance() > .5
-    val color = getTopAppBarColor()
+    val color = getTopAppBarColor(title)
     SideEffect {
         systemUiController.setStatusBarColor(color, darkIcons = useDarkIcons)
     }
     val scrollBehavior = remember { TopAppBarDefaults.enterAlwaysScrollBehavior() }
     Scaffold(
-        modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
+        modifier = modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         snackbarHost = snackBarHost,
         topBar =
         {
             CompositionLocalProvider(LocalRippleTheme provides PrimaryColorRippleTheme) {
-                if (subtitle.isEmpty()) {
+                if (subtitle.isEmpty() && title.isNotEmpty()) {
                     CenterAlignedTopAppBar(
                         colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = getTopAppBarColor(),
-                            scrolledContainerColor = getTopAppBarColor(),
+                            containerColor = color,
+                            scrolledContainerColor = color,
                         ),
                         modifier = Modifier
                             .statusBarsPadding(),
@@ -78,11 +79,30 @@ fun NekoScaffold(
                         actions = actions,
                         scrollBehavior = scrollBehavior,
                     )
+                } else if (title.isEmpty()) {
+                    SmallTopAppBar(
+                        colors = TopAppBarDefaults.smallTopAppBarColors(
+                            containerColor = color,
+                            scrolledContainerColor = color,
+                        ),
+                        modifier = Modifier
+                            .statusBarsPadding(),
+                        title = {},
+                        navigationIcon = {
+                            ToolTipIconButton(
+                                toolTipLabel = navigationIconLabel,
+                                icon = navigationIcon,
+                                buttonClicked = onNavigationIconClicked,
+                            )
+                        },
+                        actions = actions,
+                        scrollBehavior = scrollBehavior,
+                    )
                 } else {
                     SmallTopAppBar(
                         colors = TopAppBarDefaults.smallTopAppBarColors(
-                            containerColor = getTopAppBarColor(),
-                            scrolledContainerColor = getTopAppBarColor(),
+                            containerColor = color,
+                            scrolledContainerColor = color,
                         ),
                         modifier = Modifier
                             .statusBarsPadding(),
@@ -125,7 +145,10 @@ fun NekoScaffold(
 }
 
 @Composable
-fun getTopAppBarColor(): Color {
-    return MaterialTheme.colorScheme.surface.copy(alpha = .7f)
+fun getTopAppBarColor(title: String): Color {
+    return when (title.isEmpty()) {
+        true -> Color.Transparent
+        false -> MaterialTheme.colorScheme.surface.copy(alpha = .7f)
+    }
 }
 

@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.dp
 
 object Shapes {
     val coverRadius = 12.dp
+    val sheetRadius = 16.dp
 }
 
 object Padding {

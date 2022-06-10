@@ -80,7 +80,7 @@ import eu.kanade.tachiyomi.ui.main.BottomSheetController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import eu.kanade.tachiyomi.ui.main.RootSearchInterface
-import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
+import eu.kanade.tachiyomi.ui.manga.MangaComposeController
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
 import eu.kanade.tachiyomi.ui.source.browse.BrowseSourceController
 import eu.kanade.tachiyomi.util.moveCategories
@@ -1400,7 +1400,7 @@ class LibraryController(
     }
 
     private fun openManga(manga: Manga) {
-        router.pushController(MangaDetailsController(manga).withFadeTransaction())
+        router.pushController(MangaComposeController(manga).withFadeTransaction())
     }
 
     /**
