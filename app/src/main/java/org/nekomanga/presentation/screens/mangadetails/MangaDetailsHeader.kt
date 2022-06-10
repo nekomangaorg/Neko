@@ -29,7 +29,6 @@ import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
 import onColor
-import org.nekomanga.presentation.screens.ChapterRow
 
 @Composable
 fun MangaDetailsHeader(
@@ -147,6 +146,9 @@ fun MangaDetailsHeader(
                 Text(text = quickReadText, style = MaterialTheme.typography.titleMedium, color = buttonColor.onColor())
             }
         }
+
+        Gap(8.dp)
+        ChapterHeader(buttonColor = buttonColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
     }
 }
 
