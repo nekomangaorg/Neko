@@ -1,7 +1,9 @@
 package org.nekomanga.presentation.screens.mangadetails
 
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -14,10 +16,10 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
 
 @Composable
-fun BackDrop(manga: Manga, themeBasedOffCover: Boolean = true, modifier: Modifier = Modifier) {
+fun BackDrop(manga: Manga, buttonColor: Color, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
 
     Box {
-        if (themeBasedOffCover && manga.vibrantCoverColor != null) {
+        if (buttonColor != MaterialTheme.colorScheme.primary && manga.vibrantCoverColor != null) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -33,6 +35,7 @@ fun BackDrop(manga: Manga, themeBasedOffCover: Boolean = true, modifier: Modifie
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .alpha(.3f),
+            onSuccess = { generatePalette(it.result.drawable) },
         )
 
     }

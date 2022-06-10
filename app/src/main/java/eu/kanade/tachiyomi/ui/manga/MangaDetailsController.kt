@@ -51,7 +51,6 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.fullUrl
 import eu.kanade.tachiyomi.data.download.DownloadService
 import eu.kanade.tachiyomi.data.download.model.Download
-import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.databinding.MangaDetailsControllerBinding
@@ -523,7 +522,7 @@ class MangaDetailsController :
                     if (bitmap != null) {
                         Palette.from(bitmap).generate {
                             if (it == null) return@generate
-                            if (presenter.preferences.themeMangaDetails()) {
+                            /*if (presenter.preferences.themeMangaDetails()) {
                                 launchUI {
                                     view.context.getResourceColor(R.attr.colorSecondary)
                                     val vibrantColor = it.getBestColor() ?: return@launchUI
@@ -535,7 +534,7 @@ class MangaDetailsController :
                             } else {
                                 setCoverColorValue()
                                 //coverColor?.let { color -> getHeader()?.setBackDrop(color) }
-                            }
+                            }*/
                         }
                     }
                     binding.mangaCoverFull.setImageDrawable(drawable)

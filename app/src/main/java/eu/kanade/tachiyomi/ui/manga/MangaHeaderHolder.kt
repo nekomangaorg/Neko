@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.ContextWrapper
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.platform.LocalContext
@@ -47,9 +48,9 @@ class MangaHeaderHolder(
                     creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
-                    themeBasedOffCover = adapter.preferences.themeMangaDetails(),
+                    buttonColor = MaterialTheme.colorScheme.primary,
                     trackServiceCount = trackServiceCount,
-                    toggleFavorite = {},
+                    toggleFavorite = { presenter.toggleFavorite() },
                     trackingClick = { adapter.delegate.showTrackingSheet() },
                     artworkClick = { },
                     similarClick = { adapter.delegate.openSimilar() },

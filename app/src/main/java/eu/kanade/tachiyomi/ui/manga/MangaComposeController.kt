@@ -3,16 +3,21 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
 import androidx.core.content.getSystemService
+import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
+import eu.kanade.tachiyomi.util.system.launchUI
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -43,11 +48,10 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
 
         // val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
         val trackServiceCount = 1
-
         MangaScreen(
             manga = manga,
             categories = presenter.getCategories(),
-            moveCategories = { },
+            generatePalette = { setPalette(it) },
             themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
             creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
@@ -68,6 +72,19 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             chapterFilterText = "",
             onBackPressed = { activity?.onBackPressed() },
         )
+    }
+
+    private fun setPalette(drawable: Drawable) {
+        val bitmap = (drawable as? BitmapDrawable)?.bitmap ?: return
+        // Generate the Palette on a background thread.
+
+        Palette.from(bitmap).generate {
+            it ?: return@generate
+            viewScope.launchUI {
+                val vibrantColor = it.getBestColor() ?: return@launchUI
+                manga.vibrantCoverColor = vibrantColor
+            }
+        }
     }
 
     /**

@@ -1,7 +1,7 @@
 package org.nekomanga.presentation.screens.mangadetails
 
+import android.graphics.drawable.Drawable
 import androidx.compose.foundation.background
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -17,21 +17,17 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
@@ -42,7 +38,8 @@ import onColor
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
-    themeBasedOffCover: Boolean = true,
+    buttonColor: Color,
+    generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
     trackServiceCount: Int,
@@ -66,18 +63,6 @@ fun MangaDetailsHeader(
 
     var favoriteExpanded by rememberSaveable { mutableStateOf(false) }
 
-    val isDarkTheme = isSystemInDarkTheme()
-    val secondaryColor = MaterialTheme.colorScheme.secondary
-
-    val buttonColor = remember {
-        when (themeBasedOffCover && manga.vibrantCoverColor != null) {
-            true -> {
-                val color = getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
-                color
-            }
-            false -> secondaryColor
-        }
-    }
     val isTablet = LocalConfiguration.current.screenWidthDp.dp >= 600.dp
 
     val isExpanded = rememberSaveable {
@@ -91,10 +76,11 @@ fun MangaDetailsHeader(
         Box {
             BackDrop(
                 manga = manga,
-                themeBasedOffCover = themeBasedOffCover,
+                buttonColor = buttonColor,
                 modifier = Modifier
                     .fillMaxWidth()
                     .requiredHeightIn(250.dp, 400.dp),
+                generatePalette = generatePalette,
             )
             Box(
                 modifier = Modifier
@@ -200,7 +186,6 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, categories: List<Categor
             },
         )
         if (categories.isNotEmpty()) {
-            val context = LocalContext.current
             androidx.compose.material3.DropdownMenuItem(
                 text = {
                     androidx.compose.material.Text(
@@ -217,23 +202,3 @@ private fun FavoriteDropDown(favoriteExpanded: Boolean, categories: List<Categor
     }
 }
 
-private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
-
-    val color1 = buttonColor.toArgb()
-    val luminance = ColorUtils.calculateLuminance(color1).toFloat()
-
-    val color2 = when (isNightMode) {
-        true -> Color.White.toArgb()
-        false -> Color.Black.toArgb()
-    }
-
-    val ratio = when (isNightMode) {
-        true -> (-(luminance - 1)) * .33f
-        false -> luminance * .5f
-    }
-
-    return when ((isNightMode && luminance <= 0.6) || (isNightMode.not() && luminance > 0.4)) {
-        true -> Color(ColorUtils.blendARGB(color1, color2, ratio))
-        false -> buttonColor
-    }
-}
