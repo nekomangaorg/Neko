@@ -196,7 +196,7 @@ class FollowsHandler {
                     val followStatus =
                         FollowStatus.fromDex(readingStatusResponse.getOrThrow().status)
                     val rating =
-                        ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>().get(mangaId)
+                        ratingResponse.getOrThrow().ratings.asMdMap<RatingDto>()[mangaId]
                     val track = Track.create(TrackManager.MDLIST).apply {
                         status = followStatus.int
                         tracking_url = "$baseUrl/title/$mangaId"
