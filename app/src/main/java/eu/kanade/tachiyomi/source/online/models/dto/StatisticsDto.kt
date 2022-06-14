@@ -17,4 +17,5 @@ data class StatisticsDto(
 @Serializable
 data class StatisticRatingDto(
     val average: Double?,
+    val bayesian: Double?,
 )
