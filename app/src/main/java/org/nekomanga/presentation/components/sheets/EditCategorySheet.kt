@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -20,15 +21,16 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun EditCategorySheet() {
+fun EditCategorySheet(themeColors: ThemeColors) {
     ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(Shapes.sheetRadius)) {
         LazyColumn(
             modifier = Modifier
                 .navigationBarsPadding()
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 24.dp),
         ) {
             item {
                 Text(text = stringResource(id = R.string.move_x_to, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
@@ -46,6 +48,7 @@ fun EditCategorySheet() {
                         onCheckedChange = { newValue ->
                             state.value = newValue
                         },
+                        colors = CheckboxDefaults.colors(checkedColor = themeColors.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
                     )
                     Gap(4.dp)
                     Text("Text")

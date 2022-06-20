@@ -42,6 +42,8 @@ import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
 
+lateinit var themeColor: ThemeColors
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
@@ -93,7 +95,7 @@ fun MangaScreen(
         false -> PrimaryColorRippleTheme
     }
 
-    val themeColor = ThemeColors(buttonColor, rippleTheme)
+    themeColor = ThemeColors(buttonColor, rippleTheme)
 
     //set the current sheet to null when bottom sheet is closed
     if (sheetState.isVisible.not()) {
@@ -120,17 +122,6 @@ fun MangaScreen(
 
         NekoScaffold(
             title = "",
-            /*modifier = Modifier.pointerInput(Unit) {
-                detectTapGestures(
-                    onTap = {
-                        scope.launch {
-                            if (scaffoldState.bottomSheetState.isExpanded) {
-                                scaffoldState.bottomSheetState.collapse()
-                            }
-                        }
-                    },
-                )
-            },*/
             onNavigationIconClicked = onBackPressed,
             actions = {
 
@@ -185,7 +176,7 @@ fun MangaScreen(
 @Composable
 fun SheetLayout(currentScreen: BottomSheetScreen) {
     when (currentScreen) {
-        BottomSheetScreen.CategoriesSheet -> EditCategorySheet()
+        BottomSheetScreen.CategoriesSheet -> EditCategorySheet(themeColor)
     }
 }
 
