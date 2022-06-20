@@ -164,7 +164,6 @@ fun InformationHeader(
             }
             if (manga.rating != null) {
                 val rating = ((manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
-                XLog.e("ESCO $rating")
                 Row {
                     Image(
                         asset = MaterialDesignDx.Icon.gmf_bar_chart,
