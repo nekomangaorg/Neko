@@ -43,6 +43,7 @@ import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.theme.Typefaces
 import java.text.NumberFormat
 import java.util.Locale
+import kotlin.math.roundToInt
 
 @Composable
 fun InformationHeader(
@@ -161,15 +162,16 @@ fun InformationHeader(
                     )
                 }
             }
-
             if (manga.rating != null) {
+                val rating = ((manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
+                XLog.e("ESCO $rating")
                 Row {
                     Image(
                         asset = MaterialDesignDx.Icon.gmf_bar_chart,
                         colorFilter = ColorFilter.tint(style.color.copy(.65f)),
                     )
                     Text(
-                        text = manga.rating!!,
+                        text = rating,
                         style = style,
                         modifier = Modifier.padding(end = 4.dp),
                     )
