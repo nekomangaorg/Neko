@@ -42,8 +42,6 @@ import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
 
-lateinit var themeColor: ThemeColors
-
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
@@ -95,7 +93,7 @@ fun MangaScreen(
         false -> PrimaryColorRippleTheme
     }
 
-    themeColor = ThemeColors(buttonColor, rippleTheme)
+    val themeColors = ThemeColors(buttonColor, rippleTheme)
 
     //set the current sheet to null when bottom sheet is closed
     if (sheetState.isVisible.not()) {
@@ -114,7 +112,7 @@ fun MangaScreen(
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 currentBottomSheet?.let { currentSheet ->
-                    SheetLayout(currentSheet)
+                    SheetLayout(currentSheet, themeColors) { scope.launch { sheetState.hide() } }
                 }
             }
         },
@@ -145,7 +143,7 @@ fun MangaScreen(
                         inLibrary = inLibrary,
                         titleLongClick = { title -> titleLongClick(context, title) },
                         creatorLongClick = { creator -> creatorLongClick(context, creator) },
-                        themeColor = themeColor,
+                        themeColor = themeColors,
                         generatePalette = generatePalette,
                         trackServiceCount = trackServiceCount,
                         toggleFavorite = { inLibrary = toggleFavorite() },
@@ -174,9 +172,9 @@ fun MangaScreen(
 }
 
 @Composable
-fun SheetLayout(currentScreen: BottomSheetScreen) {
+fun SheetLayout(currentScreen: BottomSheetScreen, themeColor: ThemeColors, closeSheet: () -> Unit) {
     when (currentScreen) {
-        BottomSheetScreen.CategoriesSheet -> EditCategorySheet(themeColor)
+        BottomSheetScreen.CategoriesSheet -> EditCategorySheet(themeColor, closeSheet)
     }
 }
 

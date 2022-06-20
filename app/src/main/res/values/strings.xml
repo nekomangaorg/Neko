@@ -83,6 +83,7 @@
     <string name="adding_category_to_queue">Adding %1$s to update queue</string>
     <string name="_already_in_queue">%1$s is already in queue</string>
     <string name="create_new_category">Create new category</string>
+    <string name="plus_new_category">+ New category</string>
     <string name="new_category">New category</string>
     <string name="category_is_empty">Category is empty</string>
     <string name="show_categories_while_filtering">Show empty categories while filtering</string>

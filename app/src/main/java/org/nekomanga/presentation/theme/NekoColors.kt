@@ -15,6 +15,7 @@ class NekoColors {
         const val mediumAlphaLowContrast = .6f
         const val disabledAlphaHighContrast = .38f
         const val disabledAlphaLowContrast = .38f
+        const val veryLowContrast = .1f
     }
 }
 
