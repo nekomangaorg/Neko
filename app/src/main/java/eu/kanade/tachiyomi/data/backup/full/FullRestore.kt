@@ -10,6 +10,9 @@ import eu.kanade.tachiyomi.data.backup.full.models.BackupSerializer
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.notification.Notifications
 import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.online.utils.MdLang
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.util.system.notificationManager
 import kotlinx.coroutines.Job
 import okio.buffer
@@ -69,8 +72,8 @@ class FullRestore(val context: Context, val job: Job?) {
             restoreCategories(backup.backupCategories)
         }
 
-        dexManga.forEach {
-            restoreManga(it, backup.backupCategories)
+        dexManga.groupBy { MdUtil.getMangaId(it.url) }.forEach { (_, mangaList) ->
+            restoreManga(mangaList.first().title, mangaList, backup.backupCategories)
         }
 
         context.notificationManager.cancel(Notifications.ID_RESTORE_PROGRESS)
@@ -104,18 +107,37 @@ class FullRestore(val context: Context, val job: Job?) {
         restoreHelper.showProgressNotification(restoreProgress, totalAmount, "Categories added")
     }
 
-    private fun restoreManga(backupManga: BackupManga, backupCategories: List<BackupCategory>) {
+    private fun restoreManga(title: String, backupMangaList: List<BackupManga>, backupCategories: List<BackupCategory>) {
         try {
             if (job?.isCancelled == false) {
                 restoreHelper.showProgressNotification(
                     restoreProgress,
                     totalAmount,
-                    backupManga.title,
+                    title,
                 )
                 restoreProgress += 1
             } else {
                 throw java.lang.Exception("Job was cancelled")
             }
+
+            val backupManga = if (backupMangaList.size == 1) {
+                backupMangaList.first()
+            } else {
+                val tempCategories = backupMangaList.map { it.categories }.distinct().flatten()
+                val tempChapters = backupMangaList.map { it.chapters }.distinct().flatten()
+                val tempHistory = backupMangaList.map { it.history }.distinct().flatten()
+                val tempTracks = backupMangaList.map { it.tracking }.distinct().flatten()
+
+                backupMangaList.first().copy(
+                    categories = tempCategories,
+                    chapters = tempChapters,
+                    history = tempHistory,
+                    tracking = tempTracks,
+                )
+            }
+            //always make it EN source
+            backupManga.source = SourceManager.getId(MdLang.ENGLISH.lang)
+
             val manga = backupManga.getMangaImpl()
             val chapters = backupManga.getChaptersImpl()
             val categories = backupManga.categories
@@ -138,7 +160,7 @@ class FullRestore(val context: Context, val job: Job?) {
             backupManager.restoreTrackForManga(manga, tracks)
         } catch (e: Exception) {
             XLog.e(e)
-            errors.add("${backupManga.title} - ${e.message}")
+            errors.add("$title - ${e.message}")
         }
     }
 }
