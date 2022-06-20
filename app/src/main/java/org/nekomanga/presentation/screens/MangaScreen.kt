@@ -18,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +36,9 @@ import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import kotlinx.coroutines.launch
+import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
+import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
@@ -68,6 +71,7 @@ fun MangaScreen(
 ) {
     val scope = rememberCoroutineScope()
     val scaffoldState = rememberBottomSheetScaffoldState()
+
     var currentBottomSheet: BottomSheetScreen? by remember {
         mutableStateOf(null)
     }
@@ -85,6 +89,15 @@ fun MangaScreen(
         }
     }
 
+    val rippleTheme = when (buttonColor != secondaryColor) {
+        true -> DynamicRippleTheme(buttonColor)
+        false -> PrimaryColorRippleTheme
+    }
+
+    val themeColor = ThemeColors(buttonColor, rippleTheme)
+
+
+
 
 
     if (scaffoldState.bottomSheetState.isCollapsed)
@@ -100,7 +113,6 @@ fun MangaScreen(
             scaffoldState.bottomSheetState.expand()
         }
     }
-
     BottomSheetScaffold(
         sheetPeekHeight = 0.dp,
         scaffoldState = scaffoldState,
@@ -150,7 +162,7 @@ fun MangaScreen(
                         inLibrary = inLibrary,
                         titleLongClick = { title -> titleLongClick(context, title) },
                         creatorLongClick = { creator -> creatorLongClick(context, creator) },
-                        buttonColor = buttonColor,
+                        themeColor = themeColor,
                         generatePalette = generatePalette,
                         trackServiceCount = trackServiceCount,
                         toggleFavorite = { inLibrary = toggleFavorite() },
@@ -173,8 +185,8 @@ fun MangaScreen(
 
                 }
             }
-
         }
+
     }
 }
 
@@ -211,4 +223,6 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
         false -> buttonColor
     }
 }
+
+data class ThemeColors(val buttonColor: Color, val rippleTheme: RippleTheme)
 

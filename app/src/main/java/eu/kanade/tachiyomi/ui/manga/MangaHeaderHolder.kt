@@ -14,6 +14,8 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.NekoTheme
 
@@ -48,7 +50,7 @@ class MangaHeaderHolder(
                     creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
-                    buttonColor = MaterialTheme.colorScheme.primary,
+                    themeColor = ThemeColors(MaterialTheme.colorScheme.primary, PrimaryColorRippleTheme),
                     trackServiceCount = trackServiceCount,
                     toggleFavorite = { presenter.toggleFavorite() },
                     trackingClick = { adapter.delegate.showTrackingSheet() },

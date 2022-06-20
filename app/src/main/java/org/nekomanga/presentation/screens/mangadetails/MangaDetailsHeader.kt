@@ -34,12 +34,13 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
 import onColor
+import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
     inLibrary: Boolean = true,
-    buttonColor: Color,
+    themeColor: ThemeColors,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
@@ -77,7 +78,7 @@ fun MangaDetailsHeader(
         Box {
             BackDrop(
                 manga = manga,
-                buttonColor = buttonColor,
+                themeColor = themeColor,
                 modifier = Modifier
                     .fillMaxWidth()
                     .requiredHeightIn(250.dp, 400.dp),
@@ -109,7 +110,7 @@ fun MangaDetailsHeader(
                     manga = manga,
                     inLibrary = inLibrary,
                     trackServiceCount = trackServiceCount,
-                    buttonColor = buttonColor,
+                    themeColor = themeColor,
                     favoriteClick = {
                         if (inLibrary.not()) {
                             toggleFavorite()
@@ -136,7 +137,7 @@ fun MangaDetailsHeader(
         Gap(16.dp)
         DescriptionBlock(
             manga = manga,
-            buttonColor = buttonColor,
+            themeColor = themeColor,
             isExpanded = isExpanded.value,
             isTablet = isTablet,
             expandCollapseClick = {
@@ -156,14 +157,14 @@ fun MangaDetailsHeader(
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
                 contentPadding = PaddingValues(vertical = 16.dp, horizontal = 8.dp),
-                colors = ButtonDefaults.elevatedButtonColors(containerColor = buttonColor),
+                colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
             ) {
-                Text(text = quickReadText, style = MaterialTheme.typography.titleMedium, color = buttonColor.onColor())
+                Text(text = quickReadText, style = MaterialTheme.typography.titleMedium, color = themeColor.buttonColor.onColor())
             }
         }
 
         Gap(8.dp)
-        ChapterHeader(buttonColor = buttonColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
+        ChapterHeader(themeColor = themeColor, numberOfChapters = numberOfChapters, filterText = chapterFilterText, onClick = chapterHeaderClick)
     }
 }
 

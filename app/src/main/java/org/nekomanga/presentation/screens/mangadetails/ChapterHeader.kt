@@ -12,8 +12,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,48 +24,51 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
-fun ChapterHeader(buttonColor: Color, numberOfChapters: Int, filterText: String = "", onClick: () -> Unit = {}) {
-
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
-            .padding(16.dp),
-    ) {
-        ChapterText(
-            numberOfChapters,
+fun ChapterHeader(themeColor: ThemeColors, numberOfChapters: Int, filterText: String = "", onClick: () -> Unit = {}) {
+ 
+    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
+        Box(
             modifier = Modifier
-                .align(Alignment.CenterStart),
-        )
-
-        Row(
-            modifier = Modifier
-                .align(Alignment.CenterEnd),
-
-            horizontalArrangement = Arrangement.End,
+                .fillMaxWidth()
+                .clickable(onClick = onClick)
+                .padding(16.dp),
         ) {
-
-            if (filterText.isNotBlank()) {
-                Text(
-                    text = filterText,
-                    style =
-                    MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
-                    modifier = Modifier
-                        .requiredWidthIn(0.dp, 200.dp)
-                        .align(Alignment.CenterVertically)
-                        .padding(end = 8.dp),
-                    textAlign = TextAlign.End,
-                )
-            }
-
-            FilterIcon(
-                buttonColor,
+            ChapterText(
+                numberOfChapters,
                 modifier = Modifier
-                    .align(Alignment.CenterVertically),
+                    .align(Alignment.CenterStart),
             )
 
+            Row(
+                modifier = Modifier
+                    .align(Alignment.CenterEnd),
+
+                horizontalArrangement = Arrangement.End,
+            ) {
+
+                if (filterText.isNotBlank()) {
+                    Text(
+                        text = filterText,
+                        style =
+                        MaterialTheme.typography.bodyMedium.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
+                        modifier = Modifier
+                            .requiredWidthIn(0.dp, 200.dp)
+                            .align(Alignment.CenterVertically)
+                            .padding(end = 8.dp),
+                        textAlign = TextAlign.End,
+                    )
+                }
+
+                FilterIcon(
+                    themeColor.buttonColor,
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically),
+                )
+
+            }
         }
     }
 }

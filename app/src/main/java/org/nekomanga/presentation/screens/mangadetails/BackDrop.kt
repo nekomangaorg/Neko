@@ -14,16 +14,17 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.image.coil.MangaCoverFetcher
+import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
-fun BackDrop(manga: Manga, buttonColor: Color, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
+fun BackDrop(manga: Manga, themeColor: ThemeColors, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
 
     Box {
-        if (buttonColor != MaterialTheme.colorScheme.primary && manga.vibrantCoverColor != null) {
+        if (themeColor.buttonColor != MaterialTheme.colorScheme.primary && manga.vibrantCoverColor != null) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(manga.vibrantCoverColor!!).copy(alpha = .5f)),
+                    .background(Color(manga.vibrantCoverColor!!).copy(alpha = .4f)),
             )
         }
         AsyncImage(
