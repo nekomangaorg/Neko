@@ -2,7 +2,6 @@ package org.nekomanga.presentation.screens
 
 import android.content.Context
 import android.graphics.drawable.Drawable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
@@ -15,9 +14,10 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomSheetScaffold
 import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.rememberBottomSheetScaffoldState
+import androidx.compose.material.ModalBottomSheetLayout
+import androidx.compose.material.ModalBottomSheetValue
+import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -29,7 +29,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
@@ -70,7 +69,7 @@ fun MangaScreen(
     onBackPressed: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val scaffoldState = rememberBottomSheetScaffoldState()
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
 
     var currentBottomSheet: BottomSheetScreen? by remember {
         mutableStateOf(null)
@@ -96,26 +95,19 @@ fun MangaScreen(
 
     val themeColor = ThemeColors(buttonColor, rippleTheme)
 
-
-
-
-
-    if (scaffoldState.bottomSheetState.isCollapsed)
+    //set the current sheet to null when bottom sheet is closed
+    if (sheetState.isVisible.not()) {
         currentBottomSheet = null
-
-    // to set the current sheet to null when the bottom sheet closes
-    if (scaffoldState.bottomSheetState.isCollapsed)
-        currentBottomSheet = null
+    }
 
     val openSheet: (BottomSheetScreen) -> Unit = {
         scope.launch {
             currentBottomSheet = it
-            scaffoldState.bottomSheetState.expand()
+            sheetState.show()
         }
     }
-    BottomSheetScaffold(
-        sheetPeekHeight = 0.dp,
-        scaffoldState = scaffoldState,
+    ModalBottomSheetLayout(
+        sheetState = sheetState,
         sheetShape = RoundedCornerShape(Shapes.sheetRadius),
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
@@ -128,7 +120,7 @@ fun MangaScreen(
 
         NekoScaffold(
             title = "",
-            modifier = Modifier.pointerInput(Unit) {
+            /*modifier = Modifier.pointerInput(Unit) {
                 detectTapGestures(
                     onTap = {
                         scope.launch {
@@ -138,7 +130,7 @@ fun MangaScreen(
                         }
                     },
                 )
-            },
+            },*/
             onNavigationIconClicked = onBackPressed,
             actions = {
 
