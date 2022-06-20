@@ -10,7 +10,7 @@ object Configs {
     const val targetSdkVersion = 30
     const val testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     const val versionCode = 144
-    const val versionName = "2.9.1.1"
+    const val versionName = "2.9.2"
 }
 
 fun getBuildTime() = DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now(ZoneOffset.UTC))
