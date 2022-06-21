@@ -32,7 +32,7 @@ import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun EditCategorySheet(themeColor: ThemeColors, cancelClick: () -> Unit) {
+fun EditCategorySheet(themeColor: ThemeColors, cancelClick: () -> Unit, newCategoryClick: () -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
 
         ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(Shapes.sheetRadius)) {
@@ -46,7 +46,7 @@ fun EditCategorySheet(themeColor: ThemeColors, cancelClick: () -> Unit) {
                     Gap(16.dp)
                     Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                         Text(modifier = paddingModifier, text = stringResource(id = R.string.move_x_to, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
-                        TextButton(modifier = paddingModifier, onClick = { }) {
+                        TextButton(modifier = paddingModifier, onClick = newCategoryClick) {
                             Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColor.buttonColor))
                         }
                     }

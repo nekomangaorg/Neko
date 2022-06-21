@@ -38,6 +38,7 @@ import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
@@ -135,7 +136,7 @@ fun MangaScreen(
             val context = LocalContext.current
 
             var inLibrary by remember { mutableStateOf(manga.favorite) }
-
+            
             LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
                 item {
                     MangaDetailsHeader(
@@ -173,8 +174,14 @@ fun MangaScreen(
 
 @Composable
 fun SheetLayout(currentScreen: BottomSheetScreen, themeColor: ThemeColors, closeSheet: () -> Unit) {
+    var showAddCategoryDialog by remember { mutableStateOf(false) }
+
     when (currentScreen) {
-        BottomSheetScreen.CategoriesSheet -> EditCategorySheet(themeColor, closeSheet)
+        BottomSheetScreen.CategoriesSheet -> EditCategorySheet(themeColor, closeSheet, { showAddCategoryDialog = true })
+    }
+
+    if (showAddCategoryDialog) {
+        AddCategoryDialog(onDismissRequest = { showAddCategoryDialog = false }, onConfirm = {})
     }
 }
 
