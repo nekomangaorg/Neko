@@ -106,7 +106,7 @@
         <item quantity="one">%d category</item>
         <item quantity="other">%d categories</item>
     </plurals>
-    <string name="category_with_name_exists">A category with that name already exists!</string>
+    <string name="category_with_name_exists">A category with that name already exists</string>
     <string name="category_cannot_be_blank">Category name cannot be blank</string>
     <string name="category_deleted">Category deleted</string>
     <string name="long_press_category">Press and hold to edit a category</string>
@@ -930,6 +930,7 @@
     <string name="back">Back</string>
     <string name="beta">BETA</string>
     <string name="bottom">Bottom</string>
+    <string name="accept">Accept</string>
     <string name="cancel">Cancel</string>
     <string name="center">Center</string>
     <string name="change">Change</string>

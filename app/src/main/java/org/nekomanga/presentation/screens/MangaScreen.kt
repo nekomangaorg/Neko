@@ -21,6 +21,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -34,6 +35,7 @@ import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
@@ -47,7 +49,10 @@ import org.nekomanga.presentation.theme.Shapes
 @Composable
 fun MangaScreen(
     manga: Manga,
-    categories: List<Category>,
+    categories: StateFlow<List<Category>>,
+    mangaCategories: StateFlow<List<Category>>,
+    setCategories: (List<Category>) -> Unit = {},
+    addNewCategory: (String) -> Unit = {},
     themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (Context, String) -> Unit,
@@ -71,6 +76,11 @@ fun MangaScreen(
 ) {
     val scope = rememberCoroutineScope()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val categoriesState = categories.collectAsState()
+    val mangaCategoriesState = mangaCategories.collectAsState()
+    val context = LocalContext.current
+
+    var inLibrary by remember { mutableStateOf(manga.favorite) }
 
     var currentBottomSheet: BottomSheetScreen? by remember {
         mutableStateOf(null)
@@ -113,7 +123,13 @@ fun MangaScreen(
         sheetContent = {
             Box(modifier = Modifier.defaultMinSize(minHeight = 1.dp)) {
                 currentBottomSheet?.let { currentSheet ->
-                    SheetLayout(currentSheet, themeColors) { scope.launch { sheetState.hide() } }
+                    SheetLayout(
+                        currentScreen = currentSheet,
+                        themeColor = themeColors,
+                        addNewCategory = addNewCategory,
+                        allCategories = categoriesState.value,
+                        mangaCategories = mangaCategoriesState.value,
+                    ) { scope.launch { sheetState.hide() } }
                 }
             }
         },
@@ -133,10 +149,6 @@ fun MangaScreen(
                         .asPaddingValues().calculateBottomPadding(),
                 )
 
-            val context = LocalContext.current
-
-            var inLibrary by remember { mutableStateOf(manga.favorite) }
-            
             LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
                 item {
                     MangaDetailsHeader(
@@ -147,9 +159,29 @@ fun MangaScreen(
                         themeColor = themeColors,
                         generatePalette = generatePalette,
                         trackServiceCount = trackServiceCount,
-                        toggleFavorite = { inLibrary = toggleFavorite() },
-                        categories = categories,
-                        moveCategories = { openSheet(BottomSheetScreen.CategoriesSheet) },
+                        toggleFavorite = {
+                            if (inLibrary.not()) {
+                                openSheet(
+                                    BottomSheetScreen.CategoriesSheet(
+                                        addingToLibrary = true,
+                                        setCategories = setCategories,
+                                        addToLibraryClick = { inLibrary = toggleFavorite() },
+                                    ),
+                                )
+                            } else {
+                                inLibrary = toggleFavorite()
+                            }
+                        },
+                        categories = categories.collectAsState(initial = emptyList()).value,
+                        moveCategories = {
+                            openSheet(
+                                BottomSheetScreen.CategoriesSheet(
+                                    addingToLibrary = false,
+                                    setCategories = setCategories,
+
+                                    ),
+                            )
+                        },
                         trackingClick = trackingClick,
                         artworkClick = artworkClick,
                         similarClick = similarClick,
@@ -173,20 +205,40 @@ fun MangaScreen(
 }
 
 @Composable
-fun SheetLayout(currentScreen: BottomSheetScreen, themeColor: ThemeColors, closeSheet: () -> Unit) {
+fun SheetLayout(
+    currentScreen: BottomSheetScreen,
+    themeColor: ThemeColors,
+    allCategories: List<Category>,
+    mangaCategories: List<Category>,
+    addNewCategory: (String) -> Unit,
+    closeSheet: () -> Unit,
+) {
     var showAddCategoryDialog by remember { mutableStateOf(false) }
 
     when (currentScreen) {
-        BottomSheetScreen.CategoriesSheet -> EditCategorySheet(themeColor, closeSheet, { showAddCategoryDialog = true })
+        is BottomSheetScreen.CategoriesSheet -> EditCategorySheet(
+            addingToLibrary = currentScreen.addingToLibrary,
+            categories = allCategories,
+            mangaCategories = mangaCategories,
+            themeColor = themeColor,
+            cancelClick = closeSheet,
+            newCategoryClick = { showAddCategoryDialog = true },
+            confirmClicked = currentScreen.setCategories,
+            addToLibraryClick = currentScreen.addToLibraryClick,
+        )
     }
 
-    if (showAddCategoryDialog) {
-        AddCategoryDialog(onDismissRequest = { showAddCategoryDialog = false }, onConfirm = {})
+    if (showAddCategoryDialog && currentScreen is BottomSheetScreen.CategoriesSheet) {
+        AddCategoryDialog(currentCategories = allCategories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
     }
 }
 
 sealed class BottomSheetScreen {
-    object CategoriesSheet : BottomSheetScreen()
+    class CategoriesSheet(
+        val addingToLibrary: Boolean = false,
+        val setCategories: (List<Category>) -> Unit,
+        val addToLibraryClick: () -> Unit = {},
+    ) : BottomSheetScreen()
     //object Screen2 : BottomSheetScreen()
     // class Screen3(val argument: String) : BottomSheetScreen()
 }

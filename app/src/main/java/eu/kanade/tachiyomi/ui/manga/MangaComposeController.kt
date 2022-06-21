@@ -50,7 +50,12 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
         val trackServiceCount = 1
         MangaScreen(
             manga = manga,
-            categories = presenter.getCategories(),
+            categories = presenter.allCategories,
+            mangaCategories = presenter.mangaCategories,
+            setCategories = { enabledCategories ->
+                presenter.updateMangaCategories(manga, enabledCategories)
+            },
+            addNewCategory = { newCategory -> presenter.addNewCategory(newCategory) },
             generatePalette = { setPalette(it) },
             themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
@@ -70,8 +75,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             numberOfChapters = 0,
             chapterHeaderClick = {},
             chapterFilterText = "",
-            onBackPressed = { activity?.onBackPressed() },
-        )
+        ) { activity?.onBackPressed() }
     }
 
     private fun setPalette(drawable: Drawable) {
