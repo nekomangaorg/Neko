@@ -151,4 +151,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
     override fun isLogged() = mdex.isLogged()
 
     override fun isMdList() = true
+
+    fun isUnfollowed(track: Track) = track.status == 0
 }

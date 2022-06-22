@@ -53,6 +53,7 @@ import org.nekomanga.presentation.screens.ThemeColors
 fun ButtonBlock(
     manga: Manga,
     inLibrary: Boolean,
+    loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
     themeColor: ThemeColors,
     favoriteClick: () -> Unit = {},
@@ -96,9 +97,9 @@ fun ButtonBlock(
                 ButtonContent(favConfig.icon!!, color = themeColor.buttonColor, text = favConfig.text)
             }
 
-            Gap(gapBetweenButtons)
+            if (loggedIntoTrackers) {
+                Gap(gapBetweenButtons)
 
-            if (trackServiceCount >= 0) {
                 val trackerConfig = when {
                     trackServiceCount > 0 -> ButtonConfig(
                         icon = Icons.Filled.Check,

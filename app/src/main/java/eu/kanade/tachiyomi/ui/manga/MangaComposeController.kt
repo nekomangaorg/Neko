@@ -46,8 +46,6 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
     @Composable
     override fun ScreenContent() {
 
-        // val trackServiceCount: Int by presenter.trackServiceCountState.collectAsState()
-        val trackServiceCount = 1
         MangaScreen(
             manga = manga,
             categories = presenter.allCategories,
@@ -60,9 +58,10 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
             creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
-            trackServiceCount = trackServiceCount,
             toggleFavorite = { presenter.toggleFavorite() },
-            trackingClick = { },
+            loggedInTrackingServices = presenter.loggedInTrackingService,
+            tracks = presenter.tracks,
+            dateFormat = preferences.dateFormat(),
             artworkClick = { },
             similarClick = { },
             mergeClick = { },

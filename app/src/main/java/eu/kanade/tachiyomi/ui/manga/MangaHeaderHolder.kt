@@ -53,6 +53,7 @@ class MangaHeaderHolder(
                     themeColor = ThemeColors(MaterialTheme.colorScheme.primary, PrimaryColorRippleTheme),
                     trackServiceCount = trackServiceCount,
                     toggleFavorite = { presenter.toggleFavorite() },
+                    loggedIntoTrackers = presenter.loggedServices.isNotEmpty(),
                     trackingClick = { adapter.delegate.showTrackingSheet() },
                     artworkClick = { },
                     similarClick = { adapter.delegate.openSimilar() },

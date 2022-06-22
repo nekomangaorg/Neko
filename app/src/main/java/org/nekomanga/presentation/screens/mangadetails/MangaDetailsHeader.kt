@@ -44,6 +44,7 @@ fun MangaDetailsHeader(
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},
+    loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
     toggleFavorite: () -> Unit = {},
     categories: List<Category> = emptyList(),
@@ -109,6 +110,7 @@ fun MangaDetailsHeader(
                 ButtonBlock(
                     manga = manga,
                     inLibrary = inLibrary,
+                    loggedIntoTrackers = loggedIntoTrackers,
                     trackServiceCount = trackServiceCount,
                     themeColor = themeColor,
                     favoriteClick = {

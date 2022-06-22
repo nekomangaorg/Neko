@@ -4,10 +4,12 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +24,16 @@ import org.nekomanga.presentation.theme.Padding.horizontalPadding
 @Composable
 fun Divider() {
     androidx.compose.material3.Divider(
+        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+    )
+}
+
+@Composable
+fun VerticalDivider() {
+    androidx.compose.material3.Divider(
+        modifier = Modifier
+            .fillMaxHeight()
+            .width(1.dp),
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
     )
 }

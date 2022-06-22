@@ -5,8 +5,11 @@ import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
+import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.track.TrackManager
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -29,6 +32,7 @@ class MangaComposePresenter(
     val chapterFilter: ChapterFilter = Injekt.get(),
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
+    private val trackManager: TrackManager = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaComposeController>() {
 
     private val _allCategories = MutableStateFlow(emptyList<Category>())
@@ -37,9 +41,16 @@ class MangaComposePresenter(
     private val _mangaCategories = MutableStateFlow(emptyList<Category>())
     val mangaCategories: StateFlow<List<Category>> = _mangaCategories.asStateFlow()
 
+    private val _loggedInTrackingService = MutableStateFlow(emptyList<TrackService>())
+    val loggedInTrackingService: StateFlow<List<TrackService>> = _loggedInTrackingService.asStateFlow()
+
+    private val _tracks = MutableStateFlow(emptyList<Track>())
+    val tracks: StateFlow<List<Track>> = _tracks.asStateFlow()
+
     override fun onCreate() {
         super.onCreate()
         updateCategoryFlows()
+        updateTrackingFlows()
     }
 
     /**
@@ -71,6 +82,16 @@ class MangaComposePresenter(
         presenterScope.launch {
             _allCategories.value = db.getCategories().executeOnIO()
             _mangaCategories.value = db.getCategoriesForManga(manga).executeOnIO()
+        }
+    }
+
+    /**
+     * Update flows for tracking
+     */
+    private fun updateTrackingFlows() {
+        presenterScope.launch {
+            _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
+            _tracks.value = db.getTracks(manga).executeOnIO()
         }
     }
 

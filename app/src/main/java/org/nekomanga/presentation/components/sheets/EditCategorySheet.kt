@@ -10,14 +10,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -38,7 +36,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColors
-import org.nekomanga.presentation.theme.Shapes
 import java.util.Locale
 
 @Composable
@@ -59,16 +56,10 @@ fun EditCategorySheet(
         val enabledCategories = remember { mangaCategories.associateBy { it.id!! }.toMutableMap() }
         val acceptText = remember { mutableStateOf(calculateText(context, mangaCategories, enabledCategories, addingToLibrary)) }
 
-        val maxSheetHeight = LocalConfiguration.current.screenHeightDp * .7
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
+        BaseSheet(themeColor = themeColor) {
 
-        ElevatedCard(
-            modifier = Modifier
-                .fillMaxWidth()
-                .requiredHeightIn(0.dp, maxSheetHeight.dp),
-            shape = RoundedCornerShape(Shapes.sheetRadius),
-        ) {
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
             Column(
                 modifier = Modifier

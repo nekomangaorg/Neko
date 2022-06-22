@@ -37,6 +37,7 @@ import com.mikepenz.iconics.utils.colorInt
 import com.mikepenz.iconics.utils.sizeDp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.source.online.utils.MdConstants
 import eu.kanade.tachiyomi.ui.main.MainActivity
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -342,7 +343,11 @@ fun Context.defaultBrowserPackageName(): String? {
 }
 
 fun Context.openInBrowser(url: String, forceDefaultBrowser: Boolean = false) {
-    this.openInBrowser(url.toUri(), forceDefaultBrowser)
+    if (url.contains(MdConstants.baseUrl)) {
+        this.openInBrowser(url.toUri(), true)
+    } else {
+        this.openInBrowser(url.toUri(), forceDefaultBrowser)
+    }
 }
 
 fun Context.openInBrowser(uri: Uri, forceDefaultBrowser: Boolean = false) {

@@ -33,8 +33,13 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
+import com.crazylegend.activity.asActivity
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.mdlist.MdList
+import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.DynamicRippleTheme
@@ -42,24 +47,27 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
+import org.nekomanga.presentation.components.sheets.TrackingSheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
+import java.text.DateFormat
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun MangaScreen(
     manga: Manga,
-    categories: StateFlow<List<Category>>,
-    mangaCategories: StateFlow<List<Category>>,
-    setCategories: (List<Category>) -> Unit = {},
-    addNewCategory: (String) -> Unit = {},
     themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
-    trackServiceCount: Int,
     toggleFavorite: () -> Boolean = { true },
-    trackingClick: () -> Unit = {},
+    categories: StateFlow<List<Category>>,
+    mangaCategories: StateFlow<List<Category>>,
+    setCategories: (List<Category>) -> Unit = {},
+    addNewCategory: (String) -> Unit = {},
+    loggedInTrackingServices: StateFlow<List<TrackService>>,
+    tracks: StateFlow<List<Track>>,
+    dateFormat: DateFormat,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
@@ -78,6 +86,8 @@ fun MangaScreen(
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val categoriesState = categories.collectAsState()
     val mangaCategoriesState = mangaCategories.collectAsState()
+    val loggedInTrackingServiceState = loggedInTrackingServices.collectAsState()
+    val trackState = tracks.collectAsState()
     val context = LocalContext.current
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
@@ -129,6 +139,13 @@ fun MangaScreen(
                         addNewCategory = addNewCategory,
                         allCategories = categoriesState.value,
                         mangaCategories = mangaCategoriesState.value,
+                        loggedInTrackingServices = loggedInTrackingServiceState.value,
+                        tracks = trackState.value,
+                        dateFormat = dateFormat,
+                        trackLogoClick = { url ->
+                            context.asActivity().openInBrowser(url)
+                        },
+                        trackSearchClick = {},
                     ) { scope.launch { sheetState.hide() } }
                 }
             }
@@ -158,7 +175,13 @@ fun MangaScreen(
                         creatorLongClick = { creator -> creatorLongClick(context, creator) },
                         themeColor = themeColors,
                         generatePalette = generatePalette,
-                        trackServiceCount = trackServiceCount,
+                        loggedIntoTrackers = loggedInTrackingServiceState.value.isNotEmpty(),
+                        trackServiceCount = loggedInTrackingServiceState.value.count { service ->
+                            trackState.value.any {
+                                //find the matching track, except if its MDList
+                                it.sync_id == service.id && (service.isMdList().not() || (service.isMdList() && (service as MdList).isUnfollowed(it).not()))
+                            }
+                        },
                         toggleFavorite = {
                             if (inLibrary.not()) {
                                 openSheet(
@@ -172,7 +195,7 @@ fun MangaScreen(
                                 inLibrary = toggleFavorite()
                             }
                         },
-                        categories = categories.collectAsState(initial = emptyList()).value,
+                        categories = categoriesState.value,
                         moveCategories = {
                             openSheet(
                                 BottomSheetScreen.CategoriesSheet(
@@ -182,7 +205,11 @@ fun MangaScreen(
                                     ),
                             )
                         },
-                        trackingClick = trackingClick,
+                        trackingClick = {
+                            openSheet(
+                                BottomSheetScreen.TrackingSheet,
+                            )
+                        },
                         artworkClick = artworkClick,
                         similarClick = similarClick,
                         mergeClick = mergeClick,
@@ -211,6 +238,11 @@ fun SheetLayout(
     allCategories: List<Category>,
     mangaCategories: List<Category>,
     addNewCategory: (String) -> Unit,
+    loggedInTrackingServices: List<TrackService>,
+    tracks: List<Track>,
+    dateFormat: DateFormat,
+    trackLogoClick: (String) -> Unit,
+    trackSearchClick: () -> Unit,
     closeSheet: () -> Unit,
 ) {
     var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -226,6 +258,14 @@ fun SheetLayout(
             confirmClicked = currentScreen.setCategories,
             addToLibraryClick = currentScreen.addToLibraryClick,
         )
+        BottomSheetScreen.TrackingSheet -> TrackingSheet(
+            themeColors = themeColor,
+            services = loggedInTrackingServices,
+            tracks = tracks,
+            dateFormat = dateFormat,
+            onLogoClick = trackLogoClick,
+            onSearchTrackClick = trackSearchClick,
+        )
     }
 
     if (showAddCategoryDialog && currentScreen is BottomSheetScreen.CategoriesSheet) {
@@ -239,6 +279,9 @@ sealed class BottomSheetScreen {
         val setCategories: (List<Category>) -> Unit,
         val addToLibraryClick: () -> Unit = {},
     ) : BottomSheetScreen()
+
+    object TrackingSheet : BottomSheetScreen()
+
     //object Screen2 : BottomSheetScreen()
     // class Screen3(val argument: String) : BottomSheetScreen()
 }
