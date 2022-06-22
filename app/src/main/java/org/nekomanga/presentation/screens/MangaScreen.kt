@@ -75,7 +75,7 @@ fun MangaScreen(
     onBackPressed: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
+    val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val categoriesState = categories.collectAsState()
     val mangaCategoriesState = mangaCategories.collectAsState()
     val context = LocalContext.current

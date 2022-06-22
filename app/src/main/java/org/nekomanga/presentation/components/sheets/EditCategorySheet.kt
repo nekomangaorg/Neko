@@ -2,10 +2,12 @@ package org.nekomanga.presentation.components.sheets
 
 import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +29,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -56,70 +59,81 @@ fun EditCategorySheet(
         val enabledCategories = remember { mangaCategories.associateBy { it.id!! }.toMutableMap() }
         val acceptText = remember { mutableStateOf(calculateText(context, mangaCategories, enabledCategories, addingToLibrary)) }
 
+        val maxSheetHeight = LocalConfiguration.current.screenHeightDp * .7
+        val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
-        ElevatedCard(modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(Shapes.sheetRadius)) {
+
+        ElevatedCard(
+            modifier = Modifier
+                .fillMaxWidth()
+                .requiredHeightIn(0.dp, maxSheetHeight.dp),
+            shape = RoundedCornerShape(Shapes.sheetRadius),
+        ) {
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
-            LazyColumn(
+            Column(
                 modifier = Modifier
                     .navigationBarsPadding(),
             ) {
 
-                item {
-                    Gap(16.dp)
-                    Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                        val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
-                        Text(modifier = paddingModifier, text = stringResource(id = prefix, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
-                        TextButton(modifier = paddingModifier, onClick = newCategoryClick) {
-                            Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColor.buttonColor))
-                        }
+                Gap(16.dp)
+                Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                    val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
+                    Text(modifier = paddingModifier, text = stringResource(id = prefix, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
+                    TextButton(modifier = paddingModifier, onClick = newCategoryClick) {
+                        Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColor.buttonColor))
                     }
-                    Gap(16.dp)
-                    Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
+                }
+                Gap(16.dp)
+                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
+
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .requiredHeightIn(0.dp, maxLazyHeight.dp),
+                ) {
+                    items(categories) { category: Category ->
+                        Row(modifier = paddingModifier, verticalAlignment = Alignment.CenterVertically) {
+                            var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
+                            Checkbox(
+                                checked = state,
+                                onCheckedChange = {
+                                    if (it) {
+                                        enabledCategories[category.id!!] = category
+                                    } else {
+                                        enabledCategories.remove(category.id)
+                                    }
+                                    state = it
+                                    acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
+                                },
+                                colors = CheckboxDefaults.colors(checkedColor = themeColor.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
+                            )
+                            Gap(4.dp)
+                            Text(text = category.name)
+                        }
+
+                    }
                 }
 
-                items(categories) { category: Category ->
-                    Row(modifier = paddingModifier, verticalAlignment = Alignment.CenterVertically) {
-                        var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
-                        Checkbox(
-                            checked = state,
-                            onCheckedChange = {
-                                if (it) {
-                                    enabledCategories[category.id!!] = category
-                                } else {
-                                    enabledCategories.remove(category.id)
-                                }
-                                state = it
-                                acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
-                            },
-                            colors = CheckboxDefaults.colors(checkedColor = themeColor.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
-                        )
-                        Gap(4.dp)
-                        Text(text = category.name)
+
+                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
+                Gap(4.dp)
+                Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                    TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColor.buttonColor)) {
+                        Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
                     }
+                    ElevatedButton(
+                        onClick = {
+                            confirmClicked(enabledCategories.values.toList())
+                            addToLibraryClick()
+                            cancelClick()
+                        },
+                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
+                    ) {
 
-                }
-
-                item {
-                    Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
-                    Gap(4.dp)
-                    Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColor.buttonColor)) {
-                            Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
-                        }
-                        ElevatedButton(
-                            onClick = {
-                                confirmClicked(enabledCategories.values.toList())
-                                addToLibraryClick()
-                                cancelClick()
-                            },
-                            colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
-                        ) {
-
-                            Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                        }
+                        Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
                     }
-                    Gap(16.dp)
                 }
+                Gap(16.dp)
             }
         }
     }
