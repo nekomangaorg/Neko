@@ -15,10 +15,12 @@ import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -72,6 +74,39 @@ class MangaComposePresenter(
             val category = Category.create(newCategory)
             db.insertCategory(category).executeAsBlocking()
             updateCategoryFlows()
+        }
+    }
+
+    /**
+     * Update tracker with new status
+     */
+    fun updateTrackStatus(status: Int, track: Track, service: TrackService) {
+        presenterScope.launch {
+            track.status = service.getStatusList()[status]
+            if (service.isCompletedStatus(status) && track.total_chapters > 0) {
+                track.last_chapter_read = track.total_chapters.toFloat()
+            }
+            updateTrackingService(track, service)
+        }
+    }
+
+    /**
+     * Updates the remote tracking service with tracking changes
+     */
+    private fun updateTrackingService(track: Track, service: TrackService) {
+        presenterScope.launch {
+            val binding = try {
+                service.update(track)
+            } catch (e: Exception) {
+                //trackError(e)
+                null
+            }
+            if (binding != null) {
+                withContext(Dispatchers.IO) { db.insertTrack(binding).executeAsBlocking() }
+                updateTrackingFlows()
+            } else {
+                //trackRefreshDone()
+            }
         }
     }
 

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -26,6 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,31 +44,63 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 import java.text.DateFormat
 
 @Composable
-fun TrackingSheet(themeColors: ThemeColors, services: List<TrackService>, tracks: List<Track>, dateFormat: DateFormat, onLogoClick: (String) -> Unit, onSearchTrackClick: () -> Unit) {
+fun TrackingSheet(
+    themeColors: ThemeColors,
+    services: List<TrackService>,
+    tracks: List<Track>,
+    dateFormat: DateFormat,
+    onLogoClick: (String) -> Unit,
+    onSearchTrackClick: () -> Unit,
+    trackStatusChanged: (Int, Track, TrackService) -> Unit,
+) {
+
+    var showTrackingStatusDialog by remember { mutableStateOf(false) }
 
     BaseSheet(themeColor = themeColors) {
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(services) { service ->
+                val track = tracks.firstOrNull { it.sync_id == service.id }
                 TrackingServiceItem(
                     themeColors = themeColors,
                     service = service,
-                    tracks.firstOrNull { it.sync_id == service.id },
+                    track = track,
                     dateFormat = dateFormat,
                     onLogoClick = onLogoClick,
                     onSearchTrackClick = onSearchTrackClick,
+                    onRemoveTrackClick = {},
+                    statusClick = { showTrackingStatusDialog = true },
                 )
+                if (showTrackingStatusDialog && track != null) {
+                    TrackingStatusDialog(
+                        themeColors = themeColors,
+                        initialStatus = track.status,
+                        service = service,
+                        onDismiss = { showTrackingStatusDialog = false },
+                        trackStatusChange = { status -> trackStatusChanged(status, track, service) },
+                    )
+                }
             }
         }
     }
 }
 
 @Composable
-private fun TrackingServiceItem(themeColors: ThemeColors, service: TrackService, track: Track?, dateFormat: DateFormat, onLogoClick: (String) -> Unit, onSearchTrackClick: () -> Unit) {
+private fun TrackingServiceItem(
+    themeColors: ThemeColors,
+    service: TrackService,
+    track: Track?,
+    dateFormat: DateFormat,
+    onLogoClick: (String) -> Unit,
+    onSearchTrackClick: () -> Unit,
+    onRemoveTrackClick: () -> Unit,
+    statusClick: () -> Unit,
+) {
 
     OutlinedCard(
         shape = RoundedCornerShape(Shapes.sheetRadius),
@@ -76,7 +113,7 @@ private fun TrackingServiceItem(themeColors: ThemeColors, service: TrackService,
             } else {
                 TrackRowOne(themeColors = themeColors, service = service, track = track, onLogoClick = onLogoClick, searchTrackerClick = onSearchTrackClick, onRemoveClick = {})
                 Divider()
-                TrackRowTwo(service = service, track = track)
+                TrackRowTwo(service = service, track = track, statusClick)
                 if (service.supportsReadingDates) {
                     TrackRowThree(service = service, track = track, dateFormat = dateFormat)
                 }
@@ -103,44 +140,59 @@ private fun TrackRowOne(themeColors: ThemeColors, service: TrackService, track: 
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { searchTrackerClick() },
+            .conditional(!service.isMdList()) {
+                clickable { searchTrackerClick() }
+            },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = track, onClick = onLogoClick)
-        Text(text = track.title, color = MaterialTheme.colorScheme.onSurface)
-        IconButton(onClick = {}, modifier = Modifier.padding(horizontal = 4.dp)) {
-            IconButton(onClick = onRemoveClick) {
-                Icon(imageVector = Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColors.buttonColor)
+        if (service.isMdList()) {
+            Text(text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        } else {
+            Text(text = track.title, color = MaterialTheme.colorScheme.onSurface)
+            IconButton(onClick = {}, modifier = Modifier.padding(horizontal = 4.dp)) {
+                IconButton(onClick = onRemoveClick) {
+                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColors.buttonColor)
+                }
             }
         }
     }
 }
 
 @Composable
-private fun TrackRowTwo(service: TrackService, track: Track) {
+private fun TrackRowTwo(service: TrackService, track: Track, statusClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 12.dp)
             .height(IntrinsicSize.Min),
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        Text(service.getStatus(track.status))
+        WeightBox(clickable = statusClick) {
+            Text(
+                service.getStatus(track.status),
+            )
+        }
+
         VerticalDivider()
+
         if (service.isMdList().not()) {
-            Text("test")
+            WeightBox(clickable = {}) {
+                Text("test")
+            }
             VerticalDivider()
         }
 
-        when (track.score == 0f) {
-            true -> {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(stringResource(id = R.string.score))
-                    Icon(imageVector = Icons.Default.Star, contentDescription = null, modifier = Modifier.size(12.dp))
+        WeightBox(clickable = {}) {
+            when (track.score == 0f) {
+                true -> {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Text(stringResource(id = R.string.score))
+                        Icon(imageVector = Icons.Default.Star, contentDescription = null, modifier = Modifier.size(12.dp))
+                    }
                 }
+                else -> Text(service.displayScore(track))
             }
-            else -> Text(service.displayScore(track))
         }
     }
 }
@@ -183,6 +235,19 @@ private fun Logo(service: TrackService, track: Track?, onClick: (String) -> Unit
             },
     ) {
         Image(painter = painterResource(id = service.getLogo()), contentDescription = null, modifier = Modifier.align(Alignment.Center))
+    }
+}
+
+@Composable
+private fun RowScope.WeightBox(clickable: () -> Unit, content: @Composable () -> Unit) {
+    Box(
+        Modifier
+            .weight(1f)
+            .clickable { clickable() }
+            .padding(horizontal = 8.dp, vertical = 16.dp),
+        contentAlignment = Alignment.Center,
+    ) {
+        content()
     }
 }
 

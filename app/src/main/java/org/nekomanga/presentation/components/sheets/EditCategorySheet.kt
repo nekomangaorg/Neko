@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components.sheets
 
 import android.content.Context
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -83,8 +84,16 @@ fun EditCategorySheet(
                         .requiredHeightIn(0.dp, maxLazyHeight.dp),
                 ) {
                     items(categories) { category: Category ->
-                        Row(modifier = paddingModifier, verticalAlignment = Alignment.CenterVertically) {
-                            var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
+                        var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
+
+                        Row(
+                            modifier = paddingModifier
+                                .fillMaxWidth()
+                                .clickable {
+                                    state = !state
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
                             Checkbox(
                                 checked = state,
                                 onCheckedChange = {
