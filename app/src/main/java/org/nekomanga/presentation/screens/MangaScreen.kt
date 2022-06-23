@@ -69,6 +69,7 @@ fun MangaScreen(
     tracks: StateFlow<List<Track>>,
     dateFormat: DateFormat,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
+    trackScoreChanged: (Int, Track, TrackService) -> Unit,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
@@ -148,6 +149,7 @@ fun MangaScreen(
                         },
                         trackSearchClick = {},
                         trackStatusChanged = trackStatusChanged,
+                        trackScoreChanged = trackScoreChanged,
                     ) { scope.launch { sheetState.hide() } }
                 }
             }
@@ -246,6 +248,7 @@ fun SheetLayout(
     trackLogoClick: (String) -> Unit,
     trackSearchClick: () -> Unit,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
+    trackScoreChanged: (Int, Track, TrackService) -> Unit,
     closeSheet: () -> Unit,
 ) {
     var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -269,6 +272,7 @@ fun SheetLayout(
             onLogoClick = trackLogoClick,
             onSearchTrackClick = trackSearchClick,
             trackStatusChanged = trackStatusChanged,
+            trackScoreChanged = trackScoreChanged,
         )
     }
 

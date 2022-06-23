@@ -221,6 +221,7 @@ dependencies {
     implementation(compose.bundles.compose)
     implementation(compose.gap)
     implementation(compose.bundles.accompanist)
+    implementation(compose.number.picker)
 
 
     implementation(libs.pastelplaceholders)

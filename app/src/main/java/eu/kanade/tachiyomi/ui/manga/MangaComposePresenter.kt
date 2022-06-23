@@ -80,12 +80,22 @@ class MangaComposePresenter(
     /**
      * Update tracker with new status
      */
-    fun updateTrackStatus(status: Int, track: Track, service: TrackService) {
+    fun updateTrackStatus(statusIndex: Int, track: Track, service: TrackService) {
         presenterScope.launch {
-            track.status = service.getStatusList()[status]
-            if (service.isCompletedStatus(status) && track.total_chapters > 0) {
+            track.status = service.getStatusList()[statusIndex]
+            if (service.isCompletedStatus(statusIndex) && track.total_chapters > 0) {
                 track.last_chapter_read = track.total_chapters.toFloat()
             }
+            updateTrackingService(track, service)
+        }
+    }
+
+    /**
+     * Update tracker with new score
+     */
+    fun updateTrackScore(scoreIndex: Int, track: Track, service: TrackService) {
+        presenterScope.launch {
+            track.score = service.indexToScore(scoreIndex)
             updateTrackingService(track, service)
         }
     }

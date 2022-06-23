@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.dialog.TrackingScoreDialog
 import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
@@ -58,9 +59,11 @@ fun TrackingSheet(
     onLogoClick: (String) -> Unit,
     onSearchTrackClick: () -> Unit,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
+    trackScoreChanged: (Int, Track, TrackService) -> Unit,
 ) {
 
     var showTrackingStatusDialog by remember { mutableStateOf(false) }
+    var showTrackingScoreDialog by remember { mutableStateOf(false) }
 
     BaseSheet(themeColor = themeColors) {
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -75,15 +78,26 @@ fun TrackingSheet(
                     onSearchTrackClick = onSearchTrackClick,
                     onRemoveTrackClick = {},
                     statusClick = { showTrackingStatusDialog = true },
+                    scoreClick = { showTrackingScoreDialog = true },
                 )
-                if (showTrackingStatusDialog && track != null) {
-                    TrackingStatusDialog(
-                        themeColors = themeColors,
-                        initialStatus = track.status,
-                        service = service,
-                        onDismiss = { showTrackingStatusDialog = false },
-                        trackStatusChange = { status -> trackStatusChanged(status, track, service) },
-                    )
+                if (track != null) {
+                    if (showTrackingStatusDialog) {
+                        TrackingStatusDialog(
+                            themeColors = themeColors,
+                            initialStatus = track.status,
+                            service = service,
+                            onDismiss = { showTrackingStatusDialog = false },
+                            trackStatusChange = { statusIndex -> trackStatusChanged(statusIndex, track, service) },
+                        )
+                    } else if (showTrackingScoreDialog) {
+                        TrackingScoreDialog(
+                            themeColors = themeColors,
+                            track = track,
+                            service = service,
+                            onDismiss = { showTrackingScoreDialog = false },
+                            trackScoreChange = { scorePosition -> trackScoreChanged(scorePosition, track, service) },
+                        )
+                    }
                 }
             }
         }
@@ -100,6 +114,7 @@ private fun TrackingServiceItem(
     onSearchTrackClick: () -> Unit,
     onRemoveTrackClick: () -> Unit,
     statusClick: () -> Unit,
+    scoreClick: () -> Unit,
 ) {
 
     OutlinedCard(
@@ -113,7 +128,7 @@ private fun TrackingServiceItem(
             } else {
                 TrackRowOne(themeColors = themeColors, service = service, track = track, onLogoClick = onLogoClick, searchTrackerClick = onSearchTrackClick, onRemoveClick = {})
                 Divider()
-                TrackRowTwo(service = service, track = track, statusClick)
+                TrackRowTwo(service = service, track = track, statusClick, scoreClick)
                 if (service.supportsReadingDates) {
                     TrackRowThree(service = service, track = track, dateFormat = dateFormat)
                 }
@@ -160,7 +175,7 @@ private fun TrackRowOne(themeColors: ThemeColors, service: TrackService, track: 
 }
 
 @Composable
-private fun TrackRowTwo(service: TrackService, track: Track, statusClick: () -> Unit) {
+private fun TrackRowTwo(service: TrackService, track: Track, statusClick: () -> Unit, scoreClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -168,7 +183,7 @@ private fun TrackRowTwo(service: TrackService, track: Track, statusClick: () -> 
         horizontalArrangement = Arrangement.SpaceEvenly,
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        WeightBox(clickable = statusClick) {
+        TrackingBox(clickable = statusClick) {
             Text(
                 service.getStatus(track.status),
             )
@@ -177,13 +192,13 @@ private fun TrackRowTwo(service: TrackService, track: Track, statusClick: () -> 
         VerticalDivider()
 
         if (service.isMdList().not()) {
-            WeightBox(clickable = {}) {
+            TrackingBox(clickable = {}) {
                 Text("test")
             }
             VerticalDivider()
         }
 
-        WeightBox(clickable = {}) {
+        TrackingBox(clickable = scoreClick) {
             when (track.score == 0f) {
                 true -> {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -239,7 +254,7 @@ private fun Logo(service: TrackService, track: Track?, onClick: (String) -> Unit
 }
 
 @Composable
-private fun RowScope.WeightBox(clickable: () -> Unit, content: @Composable () -> Unit) {
+private fun RowScope.TrackingBox(clickable: () -> Unit, content: @Composable () -> Unit) {
     Box(
         Modifier
             .weight(1f)
