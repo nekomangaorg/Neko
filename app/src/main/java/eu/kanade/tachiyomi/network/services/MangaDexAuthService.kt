@@ -100,5 +100,5 @@ interface MangaDexAuthService {
     ): ApiResponse<ResultDto>
 
     @DELETE("${MdApi.rating}/{id}")
-    suspend fun removeRating(@Query("id") mangaId: String): ApiResponse<ResultDto>
+    suspend fun removeRating(@Path("id") mangaId: String): ApiResponse<ResultDto>
 }
