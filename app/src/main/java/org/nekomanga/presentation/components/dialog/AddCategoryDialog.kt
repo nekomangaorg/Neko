@@ -2,10 +2,12 @@ package org.nekomanga.presentation.components.dialog
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -18,16 +20,18 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
+import org.nekomanga.presentation.screens.ThemeColors
 
 /**
  * Simple Dialog to add a new category
  */
 @Composable
-fun AddCategoryDialog(currentCategories: List<Category>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun AddCategoryDialog(themeColors: ThemeColors, currentCategories: List<Category>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     val context = LocalContext.current
     var categoryText by remember { mutableStateOf("") }
     var saveEnabled by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
+
 
     LaunchedEffect(categoryText, currentCategories) {
         if (categoryText.isEmpty()) {
@@ -48,7 +52,18 @@ fun AddCategoryDialog(currentCategories: List<Category>, onDismiss: () -> Unit, 
         },
         text = {
             Column {
-                OutlinedTextField(value = categoryText, onValueChange = { categoryText = it }, label = { Text(text = stringResource(id = R.string.category)) }, singleLine = true, maxLines = 1)
+                OutlinedTextField(
+                    value = categoryText,
+                    onValueChange = { categoryText = it },
+                    label = { Text(text = stringResource(id = R.string.category)) },
+                    singleLine = true,
+                    maxLines = 1,
+                    colors = TextFieldDefaults.outlinedTextFieldColors(
+                        cursorColor = themeColors.buttonColor,
+                        focusedLabelColor = themeColors.buttonColor,
+                        focusedBorderColor = themeColors.buttonColor,
+                    ),
+                )
                 Gap(2.dp)
                 Text(text = errorMessage, style = MaterialTheme.typography.labelSmall.copy(color = MaterialTheme.colorScheme.error))
             }
@@ -61,12 +76,13 @@ fun AddCategoryDialog(currentCategories: List<Category>, onDismiss: () -> Unit, 
                     onDismiss()
                 },
                 enabled = saveEnabled,
+                colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor),
             ) {
                 Text(text = stringResource(id = R.string.save))
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) {
+            TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
                 Text(text = stringResource(id = R.string.cancel))
             }
         },

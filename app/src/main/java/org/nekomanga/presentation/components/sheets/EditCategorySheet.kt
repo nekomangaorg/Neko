@@ -108,7 +108,7 @@ fun EditCategorySheet(
                                 colors = CheckboxDefaults.colors(checkedColor = themeColor.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
                             )
                             Gap(4.dp)
-                            Text(text = category.name)
+                            Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
                         }
 
                     }

@@ -136,7 +136,7 @@ fun MangaScreen(
                 currentBottomSheet?.let { currentSheet ->
                     SheetLayout(
                         currentScreen = currentSheet,
-                        themeColor = themeColors,
+                        themeColors = themeColors,
                         addNewCategory = addNewCategory,
                         allCategories = categoriesState.value,
                         mangaCategories = mangaCategoriesState.value,
@@ -236,7 +236,7 @@ fun MangaScreen(
 @Composable
 fun SheetLayout(
     currentScreen: BottomSheetScreen,
-    themeColor: ThemeColors,
+    themeColors: ThemeColors,
     allCategories: List<Category>,
     mangaCategories: List<Category>,
     addNewCategory: (String) -> Unit,
@@ -255,14 +255,14 @@ fun SheetLayout(
             addingToLibrary = currentScreen.addingToLibrary,
             categories = allCategories,
             mangaCategories = mangaCategories,
-            themeColor = themeColor,
+            themeColor = themeColors,
             cancelClick = closeSheet,
             newCategoryClick = { showAddCategoryDialog = true },
             confirmClicked = currentScreen.setCategories,
             addToLibraryClick = currentScreen.addToLibraryClick,
         )
         BottomSheetScreen.TrackingSheet -> TrackingSheet(
-            themeColors = themeColor,
+            themeColors = themeColors,
             services = loggedInTrackingServices,
             tracks = tracks,
             dateFormat = dateFormat,
@@ -273,7 +273,7 @@ fun SheetLayout(
     }
 
     if (showAddCategoryDialog && currentScreen is BottomSheetScreen.CategoriesSheet) {
-        AddCategoryDialog(currentCategories = allCategories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
+        AddCategoryDialog(themeColors = themeColors, currentCategories = allCategories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
     }
 }
 
