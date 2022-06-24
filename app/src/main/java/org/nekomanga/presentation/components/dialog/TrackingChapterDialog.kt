@@ -21,29 +21,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import com.chargemap.compose.numberpicker.ListItemPicker
+import com.chargemap.compose.numberpicker.NumberPicker
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
-fun TrackingScoreDialog(themeColors: ThemeColors, track: Track, service: TrackService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
+fun TrackingChapterDialog(themeColors: ThemeColors, track: Track, onDismiss: () -> Unit, trackChapterChanged: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
 
-        val displayedScore = service.displayScore(track)
-        val index = when {
-            displayedScore == "-" -> 0
-            service.getScoreList().indexOf(displayedScore) != -1 -> service.getScoreList().indexOf(displayedScore)
-            else -> 0
+        var currentChapter by remember { mutableStateOf(track.last_chapter_read.toInt()) }
+
+        val range = when (track.total_chapters > 0) {
+            true -> track.total_chapters
+            false -> Int.MAX_VALUE
         }
-
-        var currentIndex by remember { mutableStateOf(index) }
-
 
         AlertDialog(
             title = {
-                Text(text = stringResource(id = R.string.score), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+                Text(text = stringResource(id = R.string.chapters), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             },
             text = {
                 Box(
@@ -52,15 +48,15 @@ fun TrackingScoreDialog(themeColors: ThemeColors, track: Track, service: TrackSe
                         .padding(16.dp)
                         .fillMaxWidth(),
                 ) {
-                    ListItemPicker(
+                    NumberPicker(
                         modifier = Modifier.fillMaxWidth(.4f),
-                        value = service.getScoreList()[currentIndex],
-                        onValueChange = { newScore ->
-                            currentIndex = service.getScoreList().indexOf(newScore)
+                        value = currentChapter,
+                        onValueChange = { newChapter ->
+                            currentChapter = newChapter
                         },
-                        list = service.getScoreList(),
-                        dividersColor = themeColors.buttonColor,
+                        range = 0..range,
                         textStyle = MaterialTheme.typography.titleMedium,
+                        dividersColor = themeColors.buttonColor,
                     )
                 }
 
@@ -74,7 +70,7 @@ fun TrackingScoreDialog(themeColors: ThemeColors, track: Track, service: TrackSe
             confirmButton = {
                 TextButton(
                     onClick = {
-                        trackScoreChange(currentIndex)
+                        trackChapterChanged(currentChapter)
                         onDismiss()
                     },
                     colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor),

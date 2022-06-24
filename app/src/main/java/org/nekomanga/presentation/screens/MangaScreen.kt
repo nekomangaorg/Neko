@@ -74,6 +74,7 @@ fun MangaScreen(
     dateFormat: DateFormat,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
+    trackChapterChanged: (Int, Track, TrackService) -> Unit,
     searchTracker: (String, TrackService) -> Unit,
     trackSearchResult: StateFlow<TrackSearchResult>,
     trackSearchItemClick: (Track, TrackService) -> Unit,
@@ -157,6 +158,7 @@ fun MangaScreen(
                         openSheet = openSheet,
                         trackStatusChanged = trackStatusChanged,
                         trackScoreChanged = trackScoreChanged,
+                        trackChapterChanged = trackChapterChanged,
                         title = manga.title,
                         trackSearchResult = trackSearchResultState.value,
                         searchTracker = searchTracker,
@@ -254,6 +256,7 @@ fun SheetLayout(
     dateFormat: DateFormat,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
+    trackChapterChanged: (Int, Track, TrackService) -> Unit,
     title: String,
     trackSearchResult: TrackSearchResult,
     searchTracker: (String, TrackService) -> Unit,
@@ -290,6 +293,7 @@ fun SheetLayout(
             trackStatusChanged = trackStatusChanged,
             trackScoreChanged = trackScoreChanged,
             trackingRemoved = trackingRemoved,
+            trackChapterChanged = trackChapterChanged,
         )
         is BottomSheetScreen.TrackingSearchSheet -> {
             //do the initial search this way we dont need to "reset" the state after the sheet closes

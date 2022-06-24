@@ -31,6 +31,7 @@ fun BackDrop(manga: Manga, themeColor: ThemeColors, modifier: Modifier = Modifie
             model = ImageRequest.Builder(LocalContext.current)
                 .data(manga)
                 .setParameter(MangaCoverFetcher.useCustomCover, false)
+                .allowHardware(false)
                 .build(),
             contentDescription = null,
             contentScale = ContentScale.Crop,
