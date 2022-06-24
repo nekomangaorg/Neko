@@ -122,18 +122,18 @@ fun TrackingSheet(
             val service = (calendarStartTrackDialog as ShowDialog).service
             val track = (calendarStartTrackDialog as ShowDialog).track
             TrackingChapterDialog(
-                themeColors = themeColors, track = track, onDismiss = { chapterTrackDialog = HideDialog },
+                themeColors = themeColors, track = track, onDismiss = { calendarStartTrackDialog = HideDialog },
                 trackChapterChanged = {
-                    trackChapterChanged(it, track, service)
+
                 },
             )
         } else if (calendarFinishedTrackDialog is ShowDialog) {
             val service = (chapterTrackDialog as ShowDialog).service
             val track = (chapterTrackDialog as ShowDialog).track
             TrackingChapterDialog(
-                themeColors = themeColors, track = track, onDismiss = { chapterTrackDialog = HideDialog },
+                themeColors = themeColors, track = track, onDismiss = { calendarFinishedTrackDialog = HideDialog },
                 trackChapterChanged = {
-                    trackChapterChanged(it, track, service)
+                    
                 },
             )
         }
