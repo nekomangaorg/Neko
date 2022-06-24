@@ -10,6 +10,8 @@ import eu.kanade.tachiyomi.data.download.DownloadManager
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.data.track.matchingTrack
+import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
@@ -47,6 +49,9 @@ class MangaComposePresenter(
 
     private val _loggedInTrackingService = MutableStateFlow(emptyList<TrackService>())
     val loggedInTrackingService: StateFlow<List<TrackService>> = _loggedInTrackingService.asStateFlow()
+
+    private val _trackServiceCount = MutableStateFlow(0)
+    val trackServiceCount: StateFlow<Int> = _trackServiceCount.asStateFlow()
 
     private val _tracks = MutableStateFlow(emptyList<Track>())
     val tracks: StateFlow<List<Track>> = _tracks.asStateFlow()
@@ -87,6 +92,7 @@ class MangaComposePresenter(
      */
     fun updateTrackStatus(statusIndex: Int, track: Track, service: TrackService) {
         presenterScope.launch {
+            service.getStatusList()
             track.status = service.getStatusList()[statusIndex]
             if (service.isCompletedStatus(statusIndex) && track.total_chapters > 0) {
                 track.last_chapter_read = track.total_chapters.toFloat()
@@ -101,7 +107,14 @@ class MangaComposePresenter(
     fun updateTrackScore(scoreIndex: Int, track: Track, service: TrackService) {
         presenterScope.launch {
             track.score = service.indexToScore(scoreIndex)
-            updateTrackingService(track, service)
+            if (service.isMdList()) {
+                runCatching {
+                    (service as MdList).updateScore(track)
+                    updateTrackingFlows()
+                }
+            } else {
+                updateTrackingService(track, service)
+            }
         }
     }
 
@@ -195,6 +208,17 @@ class MangaComposePresenter(
         presenterScope.launch {
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
             _tracks.value = db.getTracks(manga).executeOnIO()
+
+
+            _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
+                _tracks.value.any { track ->
+                    //return true if track matches and not MDList
+                    //or track matches and MDlist is anything but Unfollowed
+                    trackService.matchingTrack(track) &&
+                        (trackService.isMdList().not() ||
+                            (trackService.isMdList() && (trackService as MdList).isUnfollowed(track).not()))
+                }
+            }
         }
     }
 

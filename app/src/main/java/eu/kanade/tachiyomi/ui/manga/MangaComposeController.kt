@@ -60,6 +60,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
             toggleFavorite = { presenter.toggleFavorite() },
             loggedInTrackingServices = presenter.loggedInTrackingService,
+            trackServiceCount = presenter.trackServiceCount,
             tracks = presenter.tracks,
             dateFormat = preferences.dateFormat(),
             trackStatusChanged = { statusIndex, track, service -> presenter.updateTrackStatus(statusIndex, track, service) },

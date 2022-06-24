@@ -40,7 +40,6 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.flow.StateFlow
@@ -70,6 +69,7 @@ fun MangaScreen(
     setCategories: (List<Category>) -> Unit = {},
     addNewCategory: (String) -> Unit = {},
     loggedInTrackingServices: StateFlow<List<TrackService>>,
+    trackServiceCount: StateFlow<Int>,
     tracks: StateFlow<List<Track>>,
     dateFormat: DateFormat,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
@@ -99,6 +99,7 @@ fun MangaScreen(
     val loggedInTrackingServiceState = loggedInTrackingServices.collectAsState()
     val trackState = tracks.collectAsState()
     val trackSearchResultState = trackSearchResult.collectAsState()
+    val trackServiceCountState = trackServiceCount.collectAsState()
     val context = LocalContext.current
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
@@ -192,12 +193,7 @@ fun MangaScreen(
                         themeColor = themeColors,
                         generatePalette = generatePalette,
                         loggedIntoTrackers = loggedInTrackingServiceState.value.isNotEmpty(),
-                        trackServiceCount = loggedInTrackingServiceState.value.count { service ->
-                            trackState.value.any {
-                                //find the matching track, except if its MDList
-                                it.sync_id == service.id && (service.isMdList().not() || (service.isMdList() && (service as MdList).isUnfollowed(it).not()))
-                            }
-                        },
+                        trackServiceCount = trackServiceCountState.value,
                         toggleFavorite = {
                             if (inLibrary.not()) {
                                 openSheet(
@@ -314,6 +310,7 @@ fun SheetLayout(
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
                     trackSearchItemClick(trackSearch, currentScreen.trackingService)
+                    openSheet(BottomSheetScreen.TrackingSheet)
                 },
             )
         }

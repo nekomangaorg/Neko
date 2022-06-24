@@ -110,6 +110,10 @@ abstract class TrackService(val id: Int) {
     }
 }
 
+fun TrackService.matchingTrack(track: Track): Boolean {
+    return track.sync_id == this.id
+}
+
 suspend fun TrackService.updateNewTrackInfo(track: Track, planningStatus: Int) {
     val manga = db.getManga(track.manga_id).executeOnIO()
     val allRead = manga?.isOneShotOrCompleted(db) == true &&

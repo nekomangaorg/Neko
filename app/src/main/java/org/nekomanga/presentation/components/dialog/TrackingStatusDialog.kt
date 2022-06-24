@@ -38,20 +38,19 @@ fun TrackingStatusDialog(themeColors: ThemeColors, initialStatus: Int, service: 
 
         var selectedStatus by remember { mutableStateOf(initialStatus) }
         val scope = rememberCoroutineScope()
-
         AlertDialog(
             title = {
                 Text(text = stringResource(id = R.string.status), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
             },
             text = {
                 Column(modifier = Modifier.fillMaxWidth()) {
-                    service.getStatusList().forEach { status ->
+                    service.getStatusList().forEachIndexed { index, status ->
 
                         val clicked = {
                             selectedStatus = status
                             scope.launch {
                                 delay(100L)
-                                trackStatusChange(selectedStatus)
+                                trackStatusChange(index)
                                 onDismiss()
                             }
                         }

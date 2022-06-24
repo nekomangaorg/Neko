@@ -64,12 +64,44 @@ fun TrackingSheet(
     trackingRemoved: (Boolean, TrackService) -> Unit,
 ) {
 
-    var showTrackingStatusDialog by remember { mutableStateOf(false) }
-    var showTrackingScoreDialog by remember { mutableStateOf(false) }
-    var showRemoveTrackDialog by remember { mutableStateOf(false) }
+    var statusDialog by remember { mutableStateOf<Dialog>(HideDialog) }
+    var scoreDialog by remember { mutableStateOf<Dialog>(HideDialog) }
+    var removeTrackDialog by remember { mutableStateOf<Dialog>(HideDialog) }
 
 
     BaseSheet(themeColors = themeColors) {
+        if (statusDialog is ShowDialog) {
+            val track = (statusDialog as ShowDialog).track
+            val service = (statusDialog as ShowDialog).service
+            TrackingStatusDialog(
+                themeColors = themeColors,
+                initialStatus = track.status,
+                service = service,
+                onDismiss = { statusDialog = HideDialog },
+                trackStatusChange = { statusIndex -> trackStatusChanged(statusIndex, track, service) },
+            )
+        } else if (scoreDialog is ShowDialog) {
+            val track = (scoreDialog as ShowDialog).track
+            val service = (scoreDialog as ShowDialog).service
+            TrackingScoreDialog(
+                themeColors = themeColors,
+                track = track,
+                service = service,
+                onDismiss = { scoreDialog = HideDialog },
+                trackScoreChange = { scorePosition -> trackScoreChanged(scorePosition, track, service) },
+            )
+        } else if (removeTrackDialog is ShowDialog) {
+            val service = (removeTrackDialog as ShowDialog).service
+            RemoveTrackingDialog(
+                themeColors = themeColors, name = stringResource(id = service.nameRes()),
+                onConfirm = { alsoRemoveFromTracker ->
+                    trackingRemoved(alsoRemoveFromTracker, service)
+                },
+                onDismiss = { removeTrackDialog = HideDialog },
+            )
+        }
+
+
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(services) { service ->
                 val track = tracks.firstOrNull { it.sync_id == service.id }
@@ -80,42 +112,30 @@ fun TrackingSheet(
                     dateFormat = dateFormat,
                     onLogoClick = onLogoClick,
                     onSearchTrackClick = { onSearchTrackClick(service) },
-                    onRemoveTrackClick = { showRemoveTrackDialog = true },
-                    statusClick = { showTrackingStatusDialog = true },
-                    scoreClick = { showTrackingScoreDialog = true },
+                    onRemoveTrackClick = {
+                        if (track != null) {
+                            removeTrackDialog = ShowDialog(track, service)
+                        }
+                    },
+                    statusClick = {
+                        if (track != null) {
+                            statusDialog = ShowDialog(track, service)
+                        }
+                    },
+                    scoreClick = {
+                        if (track != null) {
+                            scoreDialog = ShowDialog(track, service)
+                        }
+                    },
                 )
-                if (track != null) {
-                    if (showTrackingStatusDialog) {
-                        TrackingStatusDialog(
-                            themeColors = themeColors,
-                            initialStatus = track.status,
-                            service = service,
-                            onDismiss = { showTrackingStatusDialog = false },
-                            trackStatusChange = { statusIndex -> trackStatusChanged(statusIndex, track, service) },
-                        )
-                    } else if (showTrackingScoreDialog) {
-                        TrackingScoreDialog(
-                            themeColors = themeColors,
-                            track = track,
-                            service = service,
-                            onDismiss = { showTrackingScoreDialog = false },
-                            trackScoreChange = { scorePosition -> trackScoreChanged(scorePosition, track, service) },
-                        )
-                    } else if (showRemoveTrackDialog) {
-                        RemoveTrackingDialog(
-                            themeColors = themeColors, name = stringResource(id = service.nameRes()),
-                            onConfirm = { alsoRemoveFromTracker ->
-                                trackingRemoved(alsoRemoveFromTracker, service)
-                                showRemoveTrackDialog = false
-                            },
-                            onDismiss = { showRemoveTrackDialog = false },
-                        )
-                    }
-                }
             }
         }
     }
 }
+
+private sealed class Dialog
+private object HideDialog : Dialog()
+private class ShowDialog(val track: Track, val service: TrackService) : Dialog()
 
 @Composable
 private fun TrackingServiceItem(
@@ -175,13 +195,16 @@ private fun TrackRowOne(themeColors: ThemeColors, service: TrackService, track: 
     ) {
         Logo(service = service, track = track, onClick = onLogoClick)
         if (service.isMdList()) {
-            Text(text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            Text(
+                text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+            )
         } else {
-            Text(text = track.title, color = MaterialTheme.colorScheme.onSurface)
-            IconButton(onClick = onRemoveClick, modifier = Modifier.padding(horizontal = 4.dp)) {
-                IconButton(onClick = onRemoveClick) {
-                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColors.buttonColor)
-                }
+            Text(text = track.title, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(4.dp))
+            IconButton(onClick = onRemoveClick) {
+                Icon(imageVector = Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColors.buttonColor)
             }
         }
     }

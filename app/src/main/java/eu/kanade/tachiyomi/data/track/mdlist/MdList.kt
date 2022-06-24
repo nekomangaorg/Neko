@@ -50,6 +50,12 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
         throw Exception("Not Used")
     }
 
+    suspend fun updateScore(track: Track) {
+        withContext(Dispatchers.IO) {
+            mdex.updateRating(track)
+        }
+    }
+
     override suspend fun update(track: Track, setToRead: Boolean): Track {
         return withContext(Dispatchers.IO) {
             try {
@@ -61,10 +67,6 @@ class MdList(private val context: Context, id: Int) : TrackService(id) {
                 mdex.updateFollowStatus(MdUtil.getMangaId(track.tracking_url), followStatus)
                 manga.follow_status = followStatus
                 db.insertManga(manga).executeAsBlocking()
-
-                if (track.score.toInt() >= 0) {
-                    mdex.updateRating(track)
-                }
 
                 // mangadex wont update chapters if manga is not follows this prevents unneeded network call
 
