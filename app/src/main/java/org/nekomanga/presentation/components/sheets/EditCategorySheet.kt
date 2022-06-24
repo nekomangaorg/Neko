@@ -36,6 +36,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColors
 import java.util.Locale
 
@@ -44,22 +45,28 @@ fun EditCategorySheet(
     addingToLibrary: Boolean,
     categories: List<Category>,
     mangaCategories: List<Category>,
-    themeColor: ThemeColors,
+    themeColors: ThemeColors,
     cancelClick: () -> Unit,
-    newCategoryClick: () -> Unit,
+    addNewCategory: (String) -> Unit,
     confirmClicked: (List<Category>) -> Unit,
     addToLibraryClick: () -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme) {
 
         val context = LocalContext.current
 
         val enabledCategories = remember { mangaCategories.associateBy { it.id!! }.toMutableMap() }
         val acceptText = remember { mutableStateOf(calculateText(context, mangaCategories, enabledCategories, addingToLibrary)) }
 
+        var showAddCategoryDialog by remember { mutableStateOf(false) }
+
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
-        BaseSheet(themeColors = themeColor) {
+        BaseSheet(themeColors = themeColors) {
+
+            if (showAddCategoryDialog) {
+                AddCategoryDialog(themeColors = themeColors, currentCategories = categories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
+            }
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
             Column(
@@ -71,8 +78,8 @@ fun EditCategorySheet(
                 Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
                     val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
                     Text(modifier = paddingModifier, text = stringResource(id = prefix, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
-                    TextButton(modifier = paddingModifier, onClick = newCategoryClick) {
-                        Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColor.buttonColor))
+                    TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
+                        Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColors.buttonColor))
                     }
                 }
                 Gap(16.dp)
@@ -105,7 +112,7 @@ fun EditCategorySheet(
                                     state = it
                                     acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
                                 },
-                                colors = CheckboxDefaults.colors(checkedColor = themeColor.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
+                                colors = CheckboxDefaults.colors(checkedColor = themeColors.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
                             )
                             Gap(4.dp)
                             Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
@@ -118,7 +125,7 @@ fun EditCategorySheet(
                 Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
                 Gap(4.dp)
                 Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColor.buttonColor)) {
+                    TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
                         Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
                     }
                     ElevatedButton(
@@ -127,7 +134,7 @@ fun EditCategorySheet(
                             addToLibraryClick()
                             cancelClick()
                         },
-                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColor.buttonColor),
+                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColors.buttonColor),
                     ) {
 
                         Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)

@@ -16,6 +16,7 @@ import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.system.executeOnIO
+import eu.kanade.tachiyomi.util.system.launchIO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -130,15 +131,50 @@ class MangaComposePresenter(
     fun searchTracker(title: String, service: TrackService) {
         presenterScope.launch {
             _trackSearchResult.value = TrackSearchResult.Loading
-            try {
+            runCatching {
                 val results = service.search(title, manga, true)
                 _trackSearchResult.value = when (results.isEmpty()) {
                     true -> TrackSearchResult.NoResult
                     false -> TrackSearchResult.Success(results)
                 }
-            } catch (e: Exception) {
+            }.onFailure { e ->
                 _trackSearchResult.value = TrackSearchResult.Error(e.message ?: "Error searching tracker")
             }
+        }
+    }
+
+    /**
+     * Register tracker
+     */
+    fun registerTracking(trackItem: Track, trackingService: TrackService) {
+        presenterScope.launch {
+            runCatching {
+                trackItem.manga_id = manga.id!!
+                trackingService.bind(trackItem)
+            }.onSuccess { track ->
+                db.insertTrack(track).executeOnIO()
+                updateTrackingFlows()
+            }.onFailure { exception ->
+                //log the error and emit it to a snackbar
+            }
+        }
+    }
+
+    /**
+     * Remove a tracker with an option to remove it from the tracking service
+     */
+    fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackService) {
+        presenterScope.launch {
+            val tracks = db.getTracks(manga).executeOnIO().filter { it.sync_id == service.id }
+            db.deleteTrackForManga(manga, service).executeOnIO()
+            if (alsoRemoveFromTracker && service.canRemoveFromService()) {
+                launchIO {
+                    tracks.forEach {
+                        service.removeFromService(it)
+                    }
+                }
+            }
+            updateTrackingFlows()
         }
     }
 

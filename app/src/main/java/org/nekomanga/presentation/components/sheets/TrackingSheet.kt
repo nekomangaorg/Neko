@@ -44,6 +44,7 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.dialog.RemoveTrackingDialog
 import org.nekomanga.presentation.components.dialog.TrackingScoreDialog
 import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
 import org.nekomanga.presentation.screens.ThemeColors
@@ -60,10 +61,13 @@ fun TrackingSheet(
     onSearchTrackClick: (TrackService) -> Unit,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
+    trackingRemoved: (Boolean, TrackService) -> Unit,
 ) {
 
     var showTrackingStatusDialog by remember { mutableStateOf(false) }
     var showTrackingScoreDialog by remember { mutableStateOf(false) }
+    var showRemoveTrackDialog by remember { mutableStateOf(false) }
+
 
     BaseSheet(themeColors = themeColors) {
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -76,7 +80,7 @@ fun TrackingSheet(
                     dateFormat = dateFormat,
                     onLogoClick = onLogoClick,
                     onSearchTrackClick = { onSearchTrackClick(service) },
-                    onRemoveTrackClick = {},
+                    onRemoveTrackClick = { showRemoveTrackDialog = true },
                     statusClick = { showTrackingStatusDialog = true },
                     scoreClick = { showTrackingScoreDialog = true },
                 )
@@ -96,6 +100,15 @@ fun TrackingSheet(
                             service = service,
                             onDismiss = { showTrackingScoreDialog = false },
                             trackScoreChange = { scorePosition -> trackScoreChanged(scorePosition, track, service) },
+                        )
+                    } else if (showRemoveTrackDialog) {
+                        RemoveTrackingDialog(
+                            themeColors = themeColors, name = stringResource(id = service.nameRes()),
+                            onConfirm = { alsoRemoveFromTracker ->
+                                trackingRemoved(alsoRemoveFromTracker, service)
+                                showRemoveTrackDialog = false
+                            },
+                            onDismiss = { showRemoveTrackDialog = false },
                         )
                     }
                 }
@@ -126,7 +139,7 @@ private fun TrackingServiceItem(
             if (track == null) {
                 NoTrack(themeColors = themeColors, service = service, onLogoClick, onSearchTrackClick)
             } else {
-                TrackRowOne(themeColors = themeColors, service = service, track = track, onLogoClick = onLogoClick, searchTrackerClick = onSearchTrackClick, onRemoveClick = {})
+                TrackRowOne(themeColors = themeColors, service = service, track = track, onLogoClick = onLogoClick, searchTrackerClick = onSearchTrackClick, onRemoveClick = onRemoveTrackClick)
                 Divider()
                 TrackRowTwo(service = service, track = track, statusClick, scoreClick)
                 if (service.supportsReadingDates) {
@@ -165,7 +178,7 @@ private fun TrackRowOne(themeColors: ThemeColors, service: TrackService, track: 
             Text(text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
         } else {
             Text(text = track.title, color = MaterialTheme.colorScheme.onSurface)
-            IconButton(onClick = {}, modifier = Modifier.padding(horizontal = 4.dp)) {
+            IconButton(onClick = onRemoveClick, modifier = Modifier.padding(horizontal = 4.dp)) {
                 IconButton(onClick = onRemoveClick) {
                     Icon(imageVector = Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColors.buttonColor)
                 }

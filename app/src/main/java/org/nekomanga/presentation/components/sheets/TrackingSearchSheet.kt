@@ -65,10 +65,12 @@ fun TrackingSearchSheet(
     trackSearchResult: TrackSearchResult,
     searchTracker: (String) -> Unit,
     openInBrowser: (String) -> Unit,
+    trackSearchItemClick: (TrackSearch) -> Unit,
 ) {
     val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
 
     BaseSheet(themeColors = themeColors, maxSheetHeightPercentage = .9f) {
+
         Column(
             modifier = Modifier.fillMaxWidth(),
         ) {
@@ -88,7 +90,7 @@ fun TrackingSearchSheet(
                             Gap(8.dp)
                         }
                         items(trackSearchResult.trackSearchResult) { item: TrackSearch ->
-                            TrackSearchItem(trackSearch = item, openInBrowser = openInBrowser)
+                            TrackSearchItem(trackSearch = item, openInBrowser = openInBrowser, trackSearchItemClick = trackSearchItemClick)
                         }
                         item {
                             Gap(8.dp)
@@ -147,8 +149,8 @@ private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearch
 }
 
 @Composable
-private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) -> Unit) {
-    OutlinedCard(modifier = Modifier.padding(horizontal = 8.dp)) {
+private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
+    OutlinedCard(modifier = Modifier.padding(horizontal = 8.dp), onClick = { trackSearchItemClick(trackSearch) }) {
 
         Box(
             modifier = Modifier

@@ -66,6 +66,8 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             trackScoreChanged = { statusIndex, track, service -> presenter.updateTrackScore(statusIndex, track, service) },
             trackSearchResult = presenter.trackSearchResult,
             searchTracker = { title, service -> presenter.searchTracker(title, service) },
+            trackSearchItemClick = { track, service -> presenter.registerTracking(track, service) },
+            trackingRemoved = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },
             artworkClick = { },
             similarClick = { },
             mergeClick = { },

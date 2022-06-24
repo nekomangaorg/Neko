@@ -48,7 +48,6 @@ import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
-import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
@@ -77,6 +76,8 @@ fun MangaScreen(
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
     searchTracker: (String, TrackService) -> Unit,
     trackSearchResult: StateFlow<TrackSearchResult>,
+    trackSearchItemClick: (Track, TrackService) -> Unit,
+    trackingRemoved: (Boolean, TrackService) -> Unit,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
@@ -159,6 +160,8 @@ fun MangaScreen(
                         trackSearchResult = trackSearchResultState.value,
                         searchTracker = searchTracker,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
+                        trackSearchItemClick = trackSearchItemClick,
+                        trackingRemoved = trackingRemoved,
                     ) { scope.launch { sheetState.hide() } }
                 }
             }
@@ -259,19 +262,20 @@ fun SheetLayout(
     trackSearchResult: TrackSearchResult,
     searchTracker: (String, TrackService) -> Unit,
     openInBrowser: (String) -> Unit,
+    trackSearchItemClick: (Track, TrackService) -> Unit,
+    trackingRemoved: (Boolean, TrackService) -> Unit,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
 ) {
-    var showAddCategoryDialog by remember { mutableStateOf(false) }
 
     when (currentScreen) {
         is BottomSheetScreen.CategoriesSheet -> EditCategorySheet(
             addingToLibrary = currentScreen.addingToLibrary,
             categories = allCategories,
             mangaCategories = mangaCategories,
-            themeColor = themeColors,
+            themeColors = themeColors,
             cancelClick = closeSheet,
-            newCategoryClick = { showAddCategoryDialog = true },
+            addNewCategory = addNewCategory,
             confirmClicked = currentScreen.setCategories,
             addToLibraryClick = currentScreen.addToLibraryClick,
         )
@@ -289,6 +293,7 @@ fun SheetLayout(
             },
             trackStatusChanged = trackStatusChanged,
             trackScoreChanged = trackScoreChanged,
+            trackingRemoved = trackingRemoved,
         )
         is BottomSheetScreen.TrackingSearchSheet -> {
             //do the initial search this way we dont need to "reset" the state after the sheet closes
@@ -306,12 +311,12 @@ fun SheetLayout(
                 },
                 searchTracker = { query -> searchTracker(query, currentScreen.trackingService) },
                 openInBrowser = openInBrowser,
+                trackSearchItemClick = { trackSearch ->
+                    closeSheet()
+                    trackSearchItemClick(trackSearch, currentScreen.trackingService)
+                },
             )
         }
-    }
-
-    if (showAddCategoryDialog && currentScreen is BottomSheetScreen.CategoriesSheet) {
-        AddCategoryDialog(themeColors = themeColors, currentCategories = allCategories, onDismiss = { showAddCategoryDialog = false }, onConfirm = { addNewCategory(it) })
     }
 }
 
