@@ -65,8 +65,8 @@ fun TrackingSheet(
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
     trackChapterChanged: (Int, Track, TrackService) -> Unit,
     trackingRemoved: (Boolean, TrackService) -> Unit,
-    trackingStartDateClick: () -> Unit,
-    trackingFinishDateClick: () -> Unit,
+    /*trackingStartDateClick: () -> Unit,
+    trackingFinishDateClick: () -> Unit,*/
 ) {
 
     var statusDialog by remember { mutableStateOf<Dialog>(HideDialog) }
