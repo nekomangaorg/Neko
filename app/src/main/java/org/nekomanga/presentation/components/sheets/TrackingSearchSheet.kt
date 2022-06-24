@@ -164,27 +164,32 @@ private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) ->
             Box(
                 modifier = Modifier
                     .height(IntrinsicSize.Min)
+                    .fillMaxWidth()
                     .background(color = MaterialTheme.colorScheme.surface.copy(alpha = NekoColors.highAlphaLowContrast)),
             ) {
+
+                IconButton(
+                    onClick = { openInBrowser(trackSearch.tracking_url) },
+                    modifier = Modifier
+                        .padding(horizontal = 4.dp)
+                        .align(Alignment.TopEnd),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.OpenInBrowser, contentDescription = null,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }
 
                 Column(
                     modifier = Modifier
                         .padding(8.dp),
                 ) {
-                    Row(verticalAlignment = Alignment.Top) {
-                        Text(text = trackSearch.title, style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold), modifier = Modifier.weight(1f))
-
-                        IconButton(
-                            onClick = { openInBrowser(trackSearch.tracking_url) },
-                            modifier = Modifier
-                                .padding(horizontal = 4.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Default.OpenInBrowser, contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
+                    Text(
+                        text = trackSearch.title,
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.SemiBold),
+                        modifier = Modifier
+                            .fillMaxWidth(.9f),
+                    )
 
                     if (trackSearch.publishing_type.isNotEmpty()) {
                         Row {
