@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
+import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.NekoTheme
@@ -50,7 +51,7 @@ class MangaHeaderHolder(
                     creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
-                    themeColor = ThemeColors(MaterialTheme.colorScheme.primary, PrimaryColorRippleTheme),
+                    themeColor = ThemeColors(MaterialTheme.colorScheme.primary, PrimaryColorRippleTheme, dynamicTextSelectionColor(MaterialTheme.colorScheme.primary)),
                     trackServiceCount = trackServiceCount,
                     toggleFavorite = { presenter.toggleFavorite() },
                     loggedIntoTrackers = presenter.loggedServices.isNotEmpty(),

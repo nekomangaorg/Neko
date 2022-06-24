@@ -57,7 +57,7 @@ fun TrackingSheet(
     tracks: List<Track>,
     dateFormat: DateFormat,
     onLogoClick: (String) -> Unit,
-    onSearchTrackClick: () -> Unit,
+    onSearchTrackClick: (TrackService) -> Unit,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
 ) {
@@ -65,7 +65,7 @@ fun TrackingSheet(
     var showTrackingStatusDialog by remember { mutableStateOf(false) }
     var showTrackingScoreDialog by remember { mutableStateOf(false) }
 
-    BaseSheet(themeColor = themeColors) {
+    BaseSheet(themeColors = themeColors) {
         LazyColumn(modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(services) { service ->
                 val track = tracks.firstOrNull { it.sync_id == service.id }
@@ -75,7 +75,7 @@ fun TrackingSheet(
                     track = track,
                     dateFormat = dateFormat,
                     onLogoClick = onLogoClick,
-                    onSearchTrackClick = onSearchTrackClick,
+                    onSearchTrackClick = { onSearchTrackClick(service) },
                     onRemoveTrackClick = {},
                     statusClick = { showTrackingStatusDialog = true },
                     scoreClick = { showTrackingScoreDialog = true },
@@ -202,8 +202,13 @@ private fun TrackRowTwo(service: TrackService, track: Track, statusClick: () -> 
             when (track.score == 0f) {
                 true -> {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Text(stringResource(id = R.string.score))
-                        Icon(imageVector = Icons.Default.Star, contentDescription = null, modifier = Modifier.size(12.dp))
+                        Text(stringResource(id = R.string.score), color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast))
+                        Icon(
+                            imageVector = Icons.Default.Star,
+                            contentDescription = null,
+                            modifier = Modifier.size(12.dp),
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast),
+                        )
                     }
                 }
                 else -> Text(service.displayScore(track))

@@ -547,8 +547,8 @@
     <string name="rereading">Rereading</string>
     <string name="score">Score</string>
     <string name="status">Status</string>
-    <string name="started">Started</string>
-    <string name="type">Type</string>
+    <string name="started">Started:</string>
+    <string name="type">Type:</string>
     <string name="url_not_set_click_again">Manga URL not set, please click title and select manga again</string>
     <string name="refresh_tracking">Refresh tracking</string>
     <string name="add_tracking">Add tracking</string>

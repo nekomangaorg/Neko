@@ -64,6 +64,8 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             dateFormat = preferences.dateFormat(),
             trackStatusChanged = { statusIndex, track, service -> presenter.updateTrackStatus(statusIndex, track, service) },
             trackScoreChanged = { statusIndex, track, service -> presenter.updateTrackScore(statusIndex, track, service) },
+            trackSearchResult = presenter.trackSearchResult,
+            searchTracker = { title, service -> presenter.searchTracker(title, service) },
             artworkClick = { },
             similarClick = { },
             mergeClick = { },

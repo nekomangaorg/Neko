@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
 import androidx.compose.material.ModalBottomSheetValue
@@ -21,6 +22,7 @@ import androidx.compose.material.rememberModalBottomSheetState
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -39,6 +41,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
+import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -46,7 +49,9 @@ import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
+import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
+import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
 import org.nekomanga.presentation.components.sheets.TrackingSheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.Shapes
@@ -70,6 +75,8 @@ fun MangaScreen(
     dateFormat: DateFormat,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
+    searchTracker: (String, TrackService) -> Unit,
+    trackSearchResult: StateFlow<TrackSearchResult>,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
@@ -90,6 +97,7 @@ fun MangaScreen(
     val mangaCategoriesState = mangaCategories.collectAsState()
     val loggedInTrackingServiceState = loggedInTrackingServices.collectAsState()
     val trackState = tracks.collectAsState()
+    val trackSearchResultState = trackSearchResult.collectAsState()
     val context = LocalContext.current
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
@@ -116,7 +124,7 @@ fun MangaScreen(
         false -> PrimaryColorRippleTheme
     }
 
-    val themeColors = ThemeColors(buttonColor, rippleTheme)
+    val themeColors = ThemeColors(buttonColor, rippleTheme, dynamicTextSelectionColor(buttonColor))
 
     //set the current sheet to null when bottom sheet is closed
     if (sheetState.isVisible.not()) {
@@ -144,12 +152,13 @@ fun MangaScreen(
                         loggedInTrackingServices = loggedInTrackingServiceState.value,
                         tracks = trackState.value,
                         dateFormat = dateFormat,
-                        trackLogoClick = { url ->
-                            context.asActivity().openInBrowser(url)
-                        },
-                        trackSearchClick = {},
+                        openSheet = openSheet,
                         trackStatusChanged = trackStatusChanged,
                         trackScoreChanged = trackScoreChanged,
+                        title = manga.title,
+                        trackSearchResult = trackSearchResultState.value,
+                        searchTracker = searchTracker,
+                        openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
             }
@@ -205,8 +214,7 @@ fun MangaScreen(
                                 BottomSheetScreen.CategoriesSheet(
                                     addingToLibrary = false,
                                     setCategories = setCategories,
-
-                                    ),
+                                ),
                             )
                         },
                         trackingClick = {
@@ -245,10 +253,13 @@ fun SheetLayout(
     loggedInTrackingServices: List<TrackService>,
     tracks: List<Track>,
     dateFormat: DateFormat,
-    trackLogoClick: (String) -> Unit,
-    trackSearchClick: () -> Unit,
     trackStatusChanged: (Int, Track, TrackService) -> Unit,
     trackScoreChanged: (Int, Track, TrackService) -> Unit,
+    title: String,
+    trackSearchResult: TrackSearchResult,
+    searchTracker: (String, TrackService) -> Unit,
+    openInBrowser: (String) -> Unit,
+    openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
 ) {
     var showAddCategoryDialog by remember { mutableStateOf(false) }
@@ -269,11 +280,34 @@ fun SheetLayout(
             services = loggedInTrackingServices,
             tracks = tracks,
             dateFormat = dateFormat,
-            onLogoClick = trackLogoClick,
-            onSearchTrackClick = trackSearchClick,
+            onLogoClick = openInBrowser,
+            onSearchTrackClick = { service ->
+                closeSheet()
+                openSheet(
+                    BottomSheetScreen.TrackingSearchSheet(service),
+                )
+            },
             trackStatusChanged = trackStatusChanged,
             trackScoreChanged = trackScoreChanged,
         )
+        is BottomSheetScreen.TrackingSearchSheet -> {
+            //do the initial search this way we dont need to "reset" the state after the sheet closes
+            LaunchedEffect(key1 = currentScreen.trackingService.id) {
+                searchTracker(title, currentScreen.trackingService)
+            }
+
+            TrackingSearchSheet(
+                themeColors = themeColors,
+                title = title,
+                trackSearchResult = trackSearchResult,
+                cancelClick = {
+                    closeSheet()
+                    openSheet(BottomSheetScreen.TrackingSheet)
+                },
+                searchTracker = { query -> searchTracker(query, currentScreen.trackingService) },
+                openInBrowser = openInBrowser,
+            )
+        }
     }
 
     if (showAddCategoryDialog && currentScreen is BottomSheetScreen.CategoriesSheet) {
@@ -289,6 +323,7 @@ sealed class BottomSheetScreen {
     ) : BottomSheetScreen()
 
     object TrackingSheet : BottomSheetScreen()
+    class TrackingSearchSheet(val trackingService: TrackService) : BottomSheetScreen()
 
     //object Screen2 : BottomSheetScreen()
     // class Screen3(val argument: String) : BottomSheetScreen()
@@ -315,5 +350,5 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
     }
 }
 
-data class ThemeColors(val buttonColor: Color, val rippleTheme: RippleTheme)
+data class ThemeColors(val buttonColor: Color, val rippleTheme: RippleTheme, val textSelectionColors: TextSelectionColors)
 

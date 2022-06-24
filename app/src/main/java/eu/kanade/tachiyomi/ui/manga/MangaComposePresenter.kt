@@ -13,6 +13,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import kotlinx.coroutines.Dispatchers
@@ -48,6 +49,9 @@ class MangaComposePresenter(
 
     private val _tracks = MutableStateFlow(emptyList<Track>())
     val tracks: StateFlow<List<Track>> = _tracks.asStateFlow()
+
+    private val _trackSearchResult = MutableStateFlow<TrackSearchResult>(TrackSearchResult.Loading)
+    val trackSearchResult: StateFlow<TrackSearchResult> = _trackSearchResult.asStateFlow()
 
     override fun onCreate() {
         super.onCreate()
@@ -116,6 +120,24 @@ class MangaComposePresenter(
                 updateTrackingFlows()
             } else {
                 //trackRefreshDone()
+            }
+        }
+    }
+
+    /**
+     * Search Tracker
+     */
+    fun searchTracker(title: String, service: TrackService) {
+        presenterScope.launch {
+            _trackSearchResult.value = TrackSearchResult.Loading
+            try {
+                val results = service.search(title, manga, true)
+                _trackSearchResult.value = when (results.isEmpty()) {
+                    true -> TrackSearchResult.NoResult
+                    false -> TrackSearchResult.Success(results)
+                }
+            } catch (e: Exception) {
+                _trackSearchResult.value = TrackSearchResult.Error(e.message ?: "Error searching tracker")
             }
         }
     }

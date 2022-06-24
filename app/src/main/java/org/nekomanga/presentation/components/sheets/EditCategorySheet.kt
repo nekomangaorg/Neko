@@ -59,7 +59,7 @@ fun EditCategorySheet(
 
         val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .5
 
-        BaseSheet(themeColor = themeColor) {
+        BaseSheet(themeColors = themeColor) {
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
             Column(

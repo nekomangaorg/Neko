@@ -2,9 +2,11 @@ package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.runtime.Composable
@@ -17,19 +19,21 @@ import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun BaseSheet(themeColor: ThemeColors, content: @Composable () -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
+fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, content: @Composable () -> Unit) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
 
-        val maxSheetHeight = LocalConfiguration.current.screenHeightDp * .7
+        val maxSheetHeight = LocalConfiguration.current.screenHeightDp * maxSheetHeightPercentage
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth()
+                .imePadding()
                 .requiredHeightIn(0.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(Shapes.sheetRadius),
         ) {
             Column(
                 modifier = Modifier
-                    .navigationBarsPadding(),
+                    .navigationBarsPadding()
+                    .imePadding(),
             ) {
                 Gap(16.dp)
                 content()

@@ -4,6 +4,8 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
@@ -12,6 +14,7 @@ import androidx.compose.material3.RadioButtonDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,57 +34,60 @@ import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
 fun TrackingStatusDialog(themeColors: ThemeColors, initialStatus: Int, service: TrackService, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
-    var selectedStatus by remember { mutableStateOf(initialStatus) }
-    val scope = rememberCoroutineScope()
+    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
 
-    AlertDialog(
-        title = {
-            Text(text = stringResource(id = R.string.status), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
-        },
-        text = {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                service.getStatusList().forEach { status ->
+        var selectedStatus by remember { mutableStateOf(initialStatus) }
+        val scope = rememberCoroutineScope()
 
-                    val clicked = {
-                        selectedStatus = status
-                        scope.launch {
-                            delay(100L)
-                            trackStatusChange(selectedStatus)
-                            onDismiss()
+        AlertDialog(
+            title = {
+                Text(text = stringResource(id = R.string.status), textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+            },
+            text = {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    service.getStatusList().forEach { status ->
+
+                        val clicked = {
+                            selectedStatus = status
+                            scope.launch {
+                                delay(100L)
+                                trackStatusChange(selectedStatus)
+                                onDismiss()
+                            }
                         }
-                    }
 
 
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .selectable(
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .selectable(
+                                    selected = (status == selectedStatus),
+                                    onClick = {
+                                        clicked()
+                                    },
+                                ),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+
+                            RadioButton(
                                 selected = (status == selectedStatus),
                                 onClick = {
                                     clicked()
                                 },
-                            ),
-                        verticalAlignment = Alignment.CenterVertically,
-                    ) {
-
-                        RadioButton(
-                            selected = (status == selectedStatus),
-                            onClick = {
-                                clicked()
-                            },
-                            colors = RadioButtonDefaults.colors(selectedColor = themeColors.buttonColor),
-                        )
-                        Gap(width = 8.dp)
-                        Text(text = service.getStatus(status), style = MaterialTheme.typography.titleMedium)
+                                colors = RadioButtonDefaults.colors(selectedColor = themeColors.buttonColor),
+                            )
+                            Gap(width = 8.dp)
+                            Text(text = service.getStatus(status), style = MaterialTheme.typography.titleMedium)
+                        }
                     }
                 }
-            }
-        },
-        onDismissRequest = onDismiss,
-        confirmButton = {
-            TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
-                Text(text = stringResource(id = R.string.cancel))
-            }
-        },
-    )
+            },
+            onDismissRequest = onDismiss,
+            confirmButton = {
+                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                    Text(text = stringResource(id = R.string.cancel))
+                }
+            },
+        )
+    }
 }

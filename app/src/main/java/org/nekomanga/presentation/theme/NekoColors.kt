@@ -1,5 +1,6 @@
 package org.nekomanga.presentation.components
 
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ripple.RippleAlpha
 import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
@@ -45,5 +46,10 @@ class DynamicRippleTheme(val color: Color) : RippleTheme {
         pressedAlpha = 0.9f,
     )
 }
+
+fun dynamicTextSelectionColor(color: Color) = TextSelectionColors(
+    handleColor = color,
+    backgroundColor = color.copy(alpha = NekoColors.disabledAlphaHighContrast),
+)
 
 

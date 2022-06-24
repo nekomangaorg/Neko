@@ -39,7 +39,7 @@ import org.nekomanga.presentation.components.MangaGridWithHeader
 import org.nekomanga.presentation.components.MangaListWithHeader
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.screens.Action
-import org.nekomanga.presentation.screens.EmptyScreen
+import org.nekomanga.presentation.screens.IconicsEmptyScreen
 import uy.kohesive.injekt.injectLazy
 
 /**
@@ -141,10 +141,10 @@ class SimilarController(bundle: Bundle? = null) :
         )
         if (isRefreshing.not()) {
             if (groupedManga.isEmpty()) {
-                EmptyScreen(
+                IconicsEmptyScreen(
                     iconicImage = CommunityMaterial.Icon.cmd_compass_off,
                     iconSize = 176.dp,
-                    message = R.string.no_results_found,
+                    message = stringResource(id = R.string.no_results_found),
                     actions = listOf(Action(R.string.retry, refreshing)),
                 )
             } else {
