@@ -60,7 +60,7 @@ fun TrackingScoreDialog(themeColors: ThemeColors, track: Track, service: TrackSe
                         },
                         list = service.getScoreList(),
                         dividersColor = themeColors.buttonColor,
-                        textStyle = MaterialTheme.typography.titleMedium,
+                        textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
                 }
 

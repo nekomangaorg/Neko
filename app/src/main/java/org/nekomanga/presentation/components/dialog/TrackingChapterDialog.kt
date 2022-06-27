@@ -55,7 +55,7 @@ fun TrackingChapterDialog(themeColors: ThemeColors, track: Track, onDismiss: () 
                             currentChapter = newChapter
                         },
                         range = 0..range,
-                        textStyle = MaterialTheme.typography.titleMedium,
+                        textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                         dividersColor = themeColors.buttonColor,
                     )
                 }
