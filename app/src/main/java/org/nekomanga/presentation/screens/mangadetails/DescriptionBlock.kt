@@ -1,7 +1,6 @@
 package org.nekomanga.presentation.screens.mangadetails
 
 import android.animation.TimeInterpolator
-import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.Easing
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -52,7 +51,6 @@ import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColors
 
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun DescriptionBlock(
     manga: Manga,
@@ -132,6 +130,9 @@ fun DescriptionBlock(
                         colors = markdownColors(),
                         typography = markdownTypography(),
                         flavour = CommonMarkFlavourDescriptor(),
+                        modifier = Modifier.clickable {
+                            expandCollapseClick()
+                        },
                     )
                 }
 

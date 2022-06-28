@@ -143,7 +143,7 @@ android {
 }
 
 dependencies {
-    
+
     implementation(kotlinx.bundles.kotlin)
 
     // Modified dependencies
@@ -186,10 +186,7 @@ dependencies {
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
     implementation("com.github.requery:sqlite-android:3.36.0")
-
-    //markdown
-    implementation(libs.markdown)
-
+    
     // Model View Presenter
     implementation(libs.bundles.nucleus)
 
