@@ -96,6 +96,7 @@ fun MangaDetailsHeader(
                         ),
                     ),
             )
+          
             Column(modifier = Modifier.align(Alignment.BottomStart)) {
                 InformationBlock(
                     manga = manga,

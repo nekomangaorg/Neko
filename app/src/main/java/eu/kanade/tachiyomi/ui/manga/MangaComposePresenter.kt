@@ -45,6 +45,9 @@ class MangaComposePresenter(
     private val trackManager: TrackManager = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaComposeController>() {
 
+    private val _isRefreshing = MutableStateFlow(false)
+    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
     private val _allCategories = MutableStateFlow(emptyList<Category>())
     val allCategories: StateFlow<List<Category>> = _allCategories.asStateFlow()
 
@@ -70,6 +73,15 @@ class MangaComposePresenter(
         super.onCreate()
         updateCategoryFlows()
         updateTrackingFlows()
+        if (!manga.initialized) {
+            _isRefreshing.value = true
+        } else {
+
+        }
+    }
+
+    fun onRefresh() {
+        _isRefreshing.value = true
     }
 
     /**
@@ -216,7 +228,7 @@ class MangaComposePresenter(
                 val trackItem = trackAndService.track.apply {
                     manga_id = manga.id!!
                 }
-                
+
                 trackAndService.service.bind(trackItem)
             }.onSuccess { track ->
                 db.insertTrack(track).executeOnIO()

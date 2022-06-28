@@ -49,6 +49,8 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
 
         MangaScreen(
             manga = manga,
+            isRefreshing = presenter.isRefreshing,
+            onRefresh = presenter::onRefresh,
             categories = presenter.allCategories,
             mangaCategories = presenter.mangaCategories,
             setCategories = { enabledCategories ->

@@ -36,6 +36,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.core.graphics.ColorUtils
 import com.crazylegend.activity.asActivity
+import com.google.accompanist.swiperefresh.SwipeRefresh
+import com.google.accompanist.swiperefresh.SwipeRefreshIndicator
+import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
@@ -64,6 +67,8 @@ import java.text.DateFormat
 @Composable
 fun MangaScreen(
     manga: Manga,
+    isRefreshing: StateFlow<Boolean>,
+    onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (Context, String) -> Unit,
@@ -95,6 +100,7 @@ fun MangaScreen(
     onBackPressed: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
+    val isRefreshingState = isRefreshing.collectAsState()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
     val categoriesState = categories.collectAsState()
     val mangaCategoriesState = mangaCategories.collectAsState()
@@ -102,7 +108,8 @@ fun MangaScreen(
     val trackState = tracks.collectAsState()
     val trackSearchResultState = trackSearchResult.collectAsState()
     val trackServiceCountState = trackServiceCount.collectAsState()
-    val trackSuggestedDates = trackSuggestedDates.collectAsState()
+    val trackSuggestedDatesState = trackSuggestedDates.collectAsState()
+
     val context = LocalContext.current
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
@@ -169,7 +176,7 @@ fun MangaScreen(
                         trackActions = trackActions,
                         title = manga.title,
                         trackSearchResult = trackSearchResultState.value,
-                        trackSuggestedDates = trackSuggestedDates.value,
+                        trackSuggestedDates = trackSuggestedDatesState.value,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
@@ -184,65 +191,81 @@ fun MangaScreen(
 
             },
         ) {
+            SwipeRefresh(
+                state = rememberSwipeRefreshState(isRefreshing = isRefreshingState.value),
+                modifier = Modifier.fillMaxSize(),
+                onRefresh = onRefresh,
+                indicator = { state, trigger ->
+                    SwipeRefreshIndicator(
+                        state = state,
+                        refreshingOffset = it.calculateTopPadding(),
+                        refreshTriggerDistance = trigger,
+                        backgroundColor = themeColors.buttonColor,
+                        contentColor = MaterialTheme.colorScheme.surface,
 
-            val contentPadding =
-                PaddingValues(
-                    bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
-                        .asPaddingValues().calculateBottomPadding(),
-                )
+                        )
+                },
+            ) {
 
-            LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
-                item {
-                    MangaDetailsHeader(
-                        manga = manga,
-                        inLibrary = inLibrary,
-                        titleLongClick = { title -> titleLongClick(context, title) },
-                        creatorLongClick = { creator -> creatorLongClick(context, creator) },
-                        themeColor = themeColors,
-                        generatePalette = generatePalette,
-                        loggedIntoTrackers = loggedInTrackingServiceState.value.isNotEmpty(),
-                        trackServiceCount = trackServiceCountState.value,
-                        toggleFavorite = {
-                            if (inLibrary.not()) {
-                                openSheet(
-                                    BottomSheetScreen.CategoriesSheet(
-                                        addingToLibrary = true,
-                                        setCategories = setCategories,
-                                        addToLibraryClick = { inLibrary = toggleFavorite() },
-                                    ),
-                                )
-                            } else {
-                                inLibrary = toggleFavorite()
-                            }
-                        },
-                        categories = categoriesState.value,
-                        moveCategories = {
-                            openSheet(
-                                BottomSheetScreen.CategoriesSheet(
-                                    addingToLibrary = false,
-                                    setCategories = setCategories,
-                                ),
-                            )
-                        },
-                        trackingClick = {
-                            openSheet(
-                                BottomSheetScreen.TrackingSheet,
-                            )
-                        },
-                        artworkClick = artworkClick,
-                        similarClick = similarClick,
-                        mergeClick = mergeClick,
-                        linksClick = linksClick,
-                        shareClick = shareClick,
-                        genreClick = genreClick,
-                        genreLongClick = genreLongClick,
-                        quickReadClick = quickReadClick,
-                        quickReadText = quickReadText,
-                        numberOfChapters = numberOfChapters,
-                        chapterHeaderClick = chapterHeaderClick,
-                        chapterFilterText = chapterFilterText,
+                val contentPadding =
+                    PaddingValues(
+                        bottom = WindowInsets.navigationBars.only(WindowInsetsSides.Bottom)
+                            .asPaddingValues().calculateBottomPadding(),
                     )
 
+                LazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = contentPadding) {
+                    item {
+                        MangaDetailsHeader(
+                            manga = manga,
+                            inLibrary = inLibrary,
+                            titleLongClick = { title -> titleLongClick(context, title) },
+                            creatorLongClick = { creator -> creatorLongClick(context, creator) },
+                            themeColor = themeColors,
+                            generatePalette = generatePalette,
+                            loggedIntoTrackers = loggedInTrackingServiceState.value.isNotEmpty(),
+                            trackServiceCount = trackServiceCountState.value,
+                            toggleFavorite = {
+                                if (inLibrary.not()) {
+                                    openSheet(
+                                        BottomSheetScreen.CategoriesSheet(
+                                            addingToLibrary = true,
+                                            setCategories = setCategories,
+                                            addToLibraryClick = { inLibrary = toggleFavorite() },
+                                        ),
+                                    )
+                                } else {
+                                    inLibrary = toggleFavorite()
+                                }
+                            },
+                            categories = categoriesState.value,
+                            moveCategories = {
+                                openSheet(
+                                    BottomSheetScreen.CategoriesSheet(
+                                        addingToLibrary = false,
+                                        setCategories = setCategories,
+                                    ),
+                                )
+                            },
+                            trackingClick = {
+                                openSheet(
+                                    BottomSheetScreen.TrackingSheet,
+                                )
+                            },
+                            artworkClick = artworkClick,
+                            similarClick = similarClick,
+                            mergeClick = mergeClick,
+                            linksClick = linksClick,
+                            shareClick = shareClick,
+                            genreClick = genreClick,
+                            genreLongClick = genreLongClick,
+                            quickReadClick = quickReadClick,
+                            quickReadText = quickReadText,
+                            numberOfChapters = numberOfChapters,
+                            chapterHeaderClick = chapterHeaderClick,
+                            chapterFilterText = chapterFilterText,
+                        )
+
+                    }
                 }
             }
         }
