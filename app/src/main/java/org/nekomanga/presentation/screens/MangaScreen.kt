@@ -286,10 +286,10 @@ fun SheetLayout(
             tracks = tracks,
             dateFormat = dateFormat,
             onLogoClick = openInBrowser,
-            onSearchTrackClick = { service ->
+            onSearchTrackClick = { service, mediaId ->
                 closeSheet()
                 openSheet(
-                    BottomSheetScreen.TrackingSearchSheet(service),
+                    BottomSheetScreen.TrackingSearchSheet(service, mediaId),
                 )
             },
             trackStatusChanged = trackActions.trackStatusChanged,
@@ -319,6 +319,7 @@ fun SheetLayout(
                 themeColors = themeColors,
                 title = title,
                 trackSearchResult = trackSearchResult,
+                alreadySelectedMediaId = currentScreen.existingMediaId,
                 cancelClick = {
                     closeSheet()
                     openSheet(BottomSheetScreen.TrackingSheet)
@@ -360,7 +361,7 @@ sealed class BottomSheetScreen {
     ) : BottomSheetScreen()
 
     object TrackingSheet : BottomSheetScreen()
-    class TrackingSearchSheet(val trackingService: TrackService) : BottomSheetScreen()
+    class TrackingSearchSheet(val trackingService: TrackService, val existingMediaId: Long) : BottomSheetScreen()
     class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
 }
 

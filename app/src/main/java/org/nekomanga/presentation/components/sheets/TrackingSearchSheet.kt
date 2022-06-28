@@ -19,9 +19,10 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Icon
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.OpenInBrowser
-import androidx.compose.material.icons.filled.SearchOff
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -36,6 +37,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
@@ -54,12 +56,12 @@ import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.IconsEmptyScreen
 import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
 fun TrackingSearchSheet(
     themeColors: ThemeColors,
+    alreadySelectedMediaId: Long = 0L,
     cancelClick: () -> Unit,
     title: String,
     trackSearchResult: TrackSearchResult,
@@ -90,7 +92,13 @@ fun TrackingSearchSheet(
                             Gap(8.dp)
                         }
                         items(trackSearchResult.trackSearchResult) { item: TrackSearch ->
-                            TrackSearchItem(trackSearch = item, openInBrowser = openInBrowser, trackSearchItemClick = trackSearchItemClick)
+                            TrackSearchItem(
+                                themeColors = themeColors,
+                                trackSearch = item,
+                                alreadySelectedMediaId = alreadySelectedMediaId,
+                                openInBrowser = openInBrowser,
+                                trackSearchItemClick = trackSearchItemClick,
+                            )
                         }
                         item {
                             Gap(8.dp)
@@ -141,7 +149,7 @@ private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearch
         when (trackSearchResult) {
             is TrackSearchResult.Loading -> CircularProgressIndicator(color = themeColors.buttonColor, modifier = Modifier.size(32.dp))
             is TrackSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found))
-            is TrackSearchResult.Error -> IconsEmptyScreen(icon = Icons.Default.SearchOff, message = trackSearchResult.errorMessage)
+            is TrackSearchResult.Error -> Text(text = trackSearchResult.errorMessage)
             else -> {}
         }
 
@@ -149,8 +157,21 @@ private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearch
 }
 
 @Composable
-private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
-    OutlinedCard(modifier = Modifier.padding(horizontal = 8.dp), onClick = { trackSearchItemClick(trackSearch) }) {
+private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, alreadySelectedMediaId: Long, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
+
+    val isSelected = alreadySelectedMediaId != 0L && alreadySelectedMediaId == trackSearch.media_id
+    val (backdropColor, outlineColor) = if (isSelected) {
+        themeColors.containerColor to themeColors.buttonColor
+    } else {
+        MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.outline
+    }
+
+
+    OutlinedCard(
+        modifier = Modifier.padding(horizontal = 8.dp),
+        border = CardDefaults.outlinedCardBorder(true).copy(brush = SolidColor(outlineColor)),
+        onClick = { trackSearchItemClick(trackSearch) },
+    ) {
 
         Box(
             modifier = Modifier
@@ -163,11 +184,12 @@ private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) ->
                 contentScale = ContentScale.Crop,
                 modifier = Modifier.matchParentSize(),
             )
+
             Box(
                 modifier = Modifier
                     .height(IntrinsicSize.Min)
                     .fillMaxWidth()
-                    .background(color = MaterialTheme.colorScheme.surface.copy(alpha = NekoColors.highAlphaLowContrast)),
+                    .background(color = backdropColor.copy(alpha = NekoColors.highAlphaLowContrast)),
             ) {
 
                 IconButton(
@@ -179,6 +201,7 @@ private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) ->
                     Icon(
                         imageVector = Icons.Default.OpenInBrowser, contentDescription = null,
                         modifier = Modifier.size(24.dp),
+                        tint = MaterialTheme.colorScheme.onSurface,
                     )
                 }
 
@@ -226,6 +249,17 @@ private fun TrackSearchItem(trackSearch: TrackSearch, openInBrowser: (String) ->
                         style = MaterialTheme.typography.bodyLarge,
                     )
                 }
+            }
+            
+            if (isSelected) {
+                Icon(
+                    imageVector = Icons.Default.CheckCircle, contentDescription = null,
+                    modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(4.dp)
+                        .size(24.dp),
+                    tint = outlineColor,
+                )
             }
         }
     }

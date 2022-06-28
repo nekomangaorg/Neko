@@ -20,7 +20,7 @@ import org.nekomanga.presentation.screens.ThemeColors
 fun BackDrop(manga: Manga, themeColor: ThemeColors, modifier: Modifier = Modifier, generatePalette: (drawable: Drawable) -> Unit = {}) {
 
     Box {
-        if (themeColor.buttonColor != MaterialTheme.colorScheme.primary && manga.vibrantCoverColor != null) {
+        if (themeColor.buttonColor != MaterialTheme.colorScheme.secondary && manga.vibrantCoverColor != null) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
