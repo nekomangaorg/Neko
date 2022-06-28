@@ -25,6 +25,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -96,6 +97,12 @@ class MangaComposePresenter(
 
     fun onRefresh() {
         _isRefreshing.value = true
+        //do stuff
+        presenterScope.launch {
+            delay(1000L)
+            _isRefreshing.value = false
+
+        }
     }
 
     /**
