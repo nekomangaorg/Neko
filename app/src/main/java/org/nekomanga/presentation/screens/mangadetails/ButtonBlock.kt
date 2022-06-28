@@ -26,18 +26,15 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.graphics.ColorUtils
 import com.mikepenz.iconics.compose.Image
 import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
@@ -65,10 +62,7 @@ fun ButtonBlock(
     shareClick: () -> Unit = {},
 ) {
 
-    val surfaceColor = MaterialTheme.colorScheme.surface
-
-    val checkedButtonBackgroundColor = remember { Color(getCheckedBackgroundColor(themeColor.buttonColor, surfaceColor)) }
-    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = checkedButtonBackgroundColor)
+    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColor.containerColor)
     val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()
@@ -193,25 +187,6 @@ private fun RowScope.ButtonText(text: String, color: Color) {
         Gap(8.dp)
         Text(text = text, style = MaterialTheme.typography.bodyLarge.copy(color = color.copy(alpha = .8f), letterSpacing = (-.5).sp, fontWeight = FontWeight.Medium))
     }
-}
-
-/*private fun getThemedColor(buttonColor: Color, surfaceColor: Color, isNightMode: Boolean): Color {
-    val dominant = ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), 0.5f)
-    val domLum = ColorUtils.calculateLuminance(dominant)
-    val lumWrongForTheme =
-        (if (isNightMode) domLum > 0.8 else domLum <= 0.2)
-    return Color(
-        ColorUtils.blendARGB(
-            dominant,
-            surfaceColor.toArgb(),
-            if (lumWrongForTheme) 0.9f else 0.7f,
-        ),
-    )
-}*/
-
-
-private fun getCheckedBackgroundColor(buttonColor: Color, surfaceColor: Color): Int {
-    return ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), .706f)
 }
 
 private data class ButtonConfig(val icon: ImageVector? = null, val iIcon: IIcon? = null, val buttonColors: ButtonColors, val borderStroke: BorderStroke, val text: String)

@@ -572,6 +572,8 @@
     <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please log in to MAL again</string>
     <string name="use_suggested_date">Use suggested date</string>
+    <string name="use_suggested_date_of_">Use suggested date of: %1$s</string>
+
 
     <!-- Migration -->
     <string name="select_sources">Select sources</string>

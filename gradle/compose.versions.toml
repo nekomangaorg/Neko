@@ -27,6 +27,9 @@ gap = "jp.wasabeef:gap:1.1.0"
 
 number-picker = "com.chargemap.compose:numberpicker:1.0.3"
 
+date-fieled = "com.github.LanarsInc:compose-date-text-field:1.0.2"
+
+
 [bundles]
 accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompainist-webview"]
-compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", ]
+compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled"]

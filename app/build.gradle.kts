@@ -143,7 +143,7 @@ android {
 }
 
 dependencies {
-
+    
     implementation(kotlinx.bundles.kotlin)
 
     // Modified dependencies

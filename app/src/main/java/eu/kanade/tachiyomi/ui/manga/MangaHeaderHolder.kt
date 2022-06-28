@@ -8,7 +8,10 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
+import androidx.core.graphics.ColorUtils
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
@@ -51,7 +54,12 @@ class MangaHeaderHolder(
                     creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
-                    themeColor = ThemeColors(MaterialTheme.colorScheme.primary, PrimaryColorRippleTheme, dynamicTextSelectionColor(MaterialTheme.colorScheme.primary)),
+                    themeColor = ThemeColors(
+                        MaterialTheme.colorScheme.primary,
+                        PrimaryColorRippleTheme,
+                        dynamicTextSelectionColor(MaterialTheme.colorScheme.primary),
+                        Color(ColorUtils.blendARGB(MaterialTheme.colorScheme.primary.toArgb(), MaterialTheme.colorScheme.surface.toArgb(), .706f)),
+                    ),
                     trackServiceCount = trackServiceCount,
                     toggleFavorite = { presenter.toggleFavorite() },
                     loggedIntoTrackers = presenter.loggedServices.isNotEmpty(),

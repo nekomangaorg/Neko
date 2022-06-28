@@ -17,6 +17,7 @@ import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.launchUI
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.Injekt
@@ -62,14 +63,18 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             loggedInTrackingServices = presenter.loggedInTrackingService,
             trackServiceCount = presenter.trackServiceCount,
             tracks = presenter.tracks,
+            trackSuggestedDates = presenter.trackSuggestedDates,
             dateFormat = preferences.dateFormat(),
-            trackStatusChanged = { statusIndex, track, service -> presenter.updateTrackStatus(statusIndex, track, service) },
-            trackScoreChanged = { statusIndex, track, service -> presenter.updateTrackScore(statusIndex, track, service) },
-            trackChapterChanged = { newChapterNumber, track, service -> presenter.updateTrackChapter(newChapterNumber, track, service) },
+            trackActions = TrackActions(
+                trackStatusChanged = { statusIndex, trackAndService -> presenter.updateTrackStatus(statusIndex, trackAndService) },
+                trackScoreChanged = { statusIndex, trackAndService -> presenter.updateTrackScore(statusIndex, trackAndService) },
+                trackChapterChanged = { newChapterNumber, trackAndService -> presenter.updateTrackChapter(newChapterNumber, trackAndService) },
+                searchTracker = { title, service -> presenter.searchTracker(title, service) },
+                trackSearchItemClick = { track, service -> presenter.registerTracking(track, service) },
+                trackingRemoved = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },
+                trackingDateChanged = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
+            ),
             trackSearchResult = presenter.trackSearchResult,
-            searchTracker = { title, service -> presenter.searchTracker(title, service) },
-            trackSearchItemClick = { track, service -> presenter.registerTracking(track, service) },
-            trackingRemoved = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },
             artworkClick = { },
             similarClick = { },
             mergeClick = { },

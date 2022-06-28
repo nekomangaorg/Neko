@@ -51,7 +51,7 @@ import coil.request.ImageRequest
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
-import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.IconsEmptyScreen

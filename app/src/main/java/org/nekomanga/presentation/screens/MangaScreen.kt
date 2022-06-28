@@ -40,7 +40,11 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -49,6 +53,7 @@ import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
+import org.nekomanga.presentation.components.sheets.TrackingDateSheet
 import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
 import org.nekomanga.presentation.components.sheets.TrackingSheet
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
@@ -71,14 +76,10 @@ fun MangaScreen(
     loggedInTrackingServices: StateFlow<List<TrackService>>,
     trackServiceCount: StateFlow<Int>,
     tracks: StateFlow<List<Track>>,
+    trackSuggestedDates: StateFlow<TrackingSuggestedDates?>,
     dateFormat: DateFormat,
-    trackStatusChanged: (Int, Track, TrackService) -> Unit,
-    trackScoreChanged: (Int, Track, TrackService) -> Unit,
-    trackChapterChanged: (Int, Track, TrackService) -> Unit,
-    searchTracker: (String, TrackService) -> Unit,
+    trackActions: TrackingConstants.TrackActions,
     trackSearchResult: StateFlow<TrackSearchResult>,
-    trackSearchItemClick: (Track, TrackService) -> Unit,
-    trackingRemoved: (Boolean, TrackService) -> Unit,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
@@ -101,6 +102,7 @@ fun MangaScreen(
     val trackState = tracks.collectAsState()
     val trackSearchResultState = trackSearchResult.collectAsState()
     val trackServiceCountState = trackServiceCount.collectAsState()
+    val trackSuggestedDates = trackSuggestedDates.collectAsState()
     val context = LocalContext.current
 
     var inLibrary by remember { mutableStateOf(manga.favorite) }
@@ -111,6 +113,7 @@ fun MangaScreen(
 
     val isDarkTheme = isSystemInDarkTheme()
     val secondaryColor = MaterialTheme.colorScheme.secondary
+    val surfaceColor = MaterialTheme.colorScheme.surface
 
     val buttonColor = remember {
         when (themeBasedOffCover && manga.vibrantCoverColor != null) {
@@ -127,7 +130,14 @@ fun MangaScreen(
         false -> PrimaryColorRippleTheme
     }
 
-    val themeColors = ThemeColors(buttonColor, rippleTheme, dynamicTextSelectionColor(buttonColor))
+    val themeColors = remember {
+        ThemeColors(
+            buttonColor = buttonColor,
+            rippleTheme = rippleTheme,
+            textSelectionColors = dynamicTextSelectionColor(buttonColor),
+            containerColor = Color(ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), .706f)),
+        )
+    }
 
     //set the current sheet to null when bottom sheet is closed
     if (sheetState.isVisible.not()) {
@@ -156,15 +166,11 @@ fun MangaScreen(
                         tracks = trackState.value,
                         dateFormat = dateFormat,
                         openSheet = openSheet,
-                        trackStatusChanged = trackStatusChanged,
-                        trackScoreChanged = trackScoreChanged,
-                        trackChapterChanged = trackChapterChanged,
+                        trackActions = trackActions,
                         title = manga.title,
                         trackSearchResult = trackSearchResultState.value,
-                        searchTracker = searchTracker,
+                        trackSuggestedDates = trackSuggestedDates.value,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
-                        trackSearchItemClick = trackSearchItemClick,
-                        trackingRemoved = trackingRemoved,
                     ) { scope.launch { sheetState.hide() } }
                 }
             }
@@ -254,15 +260,11 @@ fun SheetLayout(
     loggedInTrackingServices: List<TrackService>,
     tracks: List<Track>,
     dateFormat: DateFormat,
-    trackStatusChanged: (Int, Track, TrackService) -> Unit,
-    trackScoreChanged: (Int, Track, TrackService) -> Unit,
-    trackChapterChanged: (Int, Track, TrackService) -> Unit,
     title: String,
+    trackActions: TrackingConstants.TrackActions,
     trackSearchResult: TrackSearchResult,
-    searchTracker: (String, TrackService) -> Unit,
+    trackSuggestedDates: TrackingSuggestedDates?,
     openInBrowser: (String) -> Unit,
-    trackSearchItemClick: (Track, TrackService) -> Unit,
-    trackingRemoved: (Boolean, TrackService) -> Unit,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
 ) {
@@ -290,15 +292,27 @@ fun SheetLayout(
                     BottomSheetScreen.TrackingSearchSheet(service),
                 )
             },
-            trackStatusChanged = trackStatusChanged,
-            trackScoreChanged = trackScoreChanged,
-            trackingRemoved = trackingRemoved,
-            trackChapterChanged = trackChapterChanged,
+            trackStatusChanged = trackActions.trackStatusChanged,
+            trackScoreChanged = trackActions.trackScoreChanged,
+            trackingRemoved = trackActions.trackingRemoved,
+            trackChapterChanged = trackActions.trackChapterChanged,
+            trackingStartDateClick = { trackAndService, trackingDate ->
+                closeSheet()
+                openSheet(
+                    BottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, trackSuggestedDates),
+                )
+            },
+            trackingFinishDateClick = { trackAndService, trackingDate ->
+                closeSheet()
+                openSheet(
+                    BottomSheetScreen.TrackingDateSheet(trackAndService, trackingDate, trackSuggestedDates),
+                )
+            },
         )
         is BottomSheetScreen.TrackingSearchSheet -> {
             //do the initial search this way we dont need to "reset" the state after the sheet closes
             LaunchedEffect(key1 = currentScreen.trackingService.id) {
-                searchTracker(title, currentScreen.trackingService)
+                trackActions.searchTracker(title, currentScreen.trackingService)
             }
 
             TrackingSearchSheet(
@@ -309,11 +323,28 @@ fun SheetLayout(
                     closeSheet()
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
-                searchTracker = { query -> searchTracker(query, currentScreen.trackingService) },
+                searchTracker = { query -> trackActions.searchTracker(query, currentScreen.trackingService) },
                 openInBrowser = openInBrowser,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
-                    trackSearchItemClick(trackSearch, currentScreen.trackingService)
+                    trackActions.trackSearchItemClick(trackSearch, currentScreen.trackingService)
+                    openSheet(BottomSheetScreen.TrackingSheet)
+                },
+            )
+        }
+        is BottomSheetScreen.TrackingDateSheet -> {
+            TrackingDateSheet(
+                themeColors = themeColors,
+                trackAndService = currentScreen.trackAndService,
+                trackingDate = currentScreen.trackingDate,
+                trackSuggestedDates = currentScreen.trackSuggestedDates,
+                onDismiss = {
+                    closeSheet()
+                    openSheet(BottomSheetScreen.TrackingSheet)
+                },
+                trackDateChanged = { trackDateChanged ->
+                    closeSheet()
+                    trackActions.trackingDateChanged(trackDateChanged)
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
             )
@@ -330,9 +361,7 @@ sealed class BottomSheetScreen {
 
     object TrackingSheet : BottomSheetScreen()
     class TrackingSearchSheet(val trackingService: TrackService) : BottomSheetScreen()
-
-    //object Screen2 : BottomSheetScreen()
-    // class Screen3(val argument: String) : BottomSheetScreen()
+    class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
 }
 
 private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color {
@@ -356,5 +385,5 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
     }
 }
 
-data class ThemeColors(val buttonColor: Color, val rippleTheme: RippleTheme, val textSelectionColors: TextSelectionColors)
+data class ThemeColors(val buttonColor: Color, val rippleTheme: RippleTheme, val textSelectionColors: TextSelectionColors, val containerColor: Color)
 

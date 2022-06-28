@@ -15,7 +15,12 @@ import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
-import eu.kanade.tachiyomi.ui.manga.track.TrackSearchResult
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTrackingDate
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
@@ -23,6 +28,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
 import java.util.Date
@@ -57,6 +63,9 @@ class MangaComposePresenter(
     private val _trackSearchResult = MutableStateFlow<TrackSearchResult>(TrackSearchResult.Loading)
     val trackSearchResult: StateFlow<TrackSearchResult> = _trackSearchResult.asStateFlow()
 
+    private val _trackSuggestedDates = MutableStateFlow<TrackingSuggestedDates?>(null)
+    val trackSuggestedDates: StateFlow<TrackingSuggestedDates?> = _trackSuggestedDates.asStateFlow()
+
     override fun onCreate() {
         super.onCreate()
         updateCategoryFlows()
@@ -88,40 +97,80 @@ class MangaComposePresenter(
     /**
      * Update tracker with new status
      */
-    fun updateTrackStatus(statusIndex: Int, track: Track, service: TrackService) {
+    fun updateTrackStatus(statusIndex: Int, trackAndService: TrackAndService) {
         presenterScope.launch {
-            service.getStatusList()
-            track.status = service.getStatusList()[statusIndex]
-            if (service.isCompletedStatus(statusIndex) && track.total_chapters > 0) {
+            val track = trackAndService.track.apply {
+                this.status = trackAndService.service.getStatusList()[statusIndex]
+            }
+            if (trackAndService.service.isCompletedStatus(statusIndex) && track.total_chapters > 0) {
                 track.last_chapter_read = track.total_chapters.toFloat()
             }
-            updateTrackingService(track, service)
+            updateTrackingService(track, trackAndService.service)
         }
     }
 
     /**
      * Update tracker with new score
      */
-    fun updateTrackScore(scoreIndex: Int, track: Track, service: TrackService) {
+    fun updateTrackScore(scoreIndex: Int, trackAndService: TrackAndService) {
         presenterScope.launch {
-            track.score = service.indexToScore(scoreIndex)
-            if (service.isMdList()) {
+
+            val track = trackAndService.track.apply {
+                this.score = trackAndService.service.indexToScore(scoreIndex)
+            }
+            if (trackAndService.service.isMdList()) {
                 runCatching {
-                    (service as MdList).updateScore(track)
+                    (trackAndService.service as MdList).updateScore(track)
                     updateTrackingFlows()
                 }
             } else {
-                updateTrackingService(track, service)
+                updateTrackingService(track, trackAndService.service)
             }
+        }
+    }
+
+    /** Figures out the suggested reading dates
+     */
+    fun getSuggestedDate() {
+        presenterScope.launch {
+            val chapters = db.getHistoryByMangaId(manga.id ?: 0L).executeOnIO()
+
+            _trackSuggestedDates.value = TrackingSuggestedDates(
+                startDate = chapters.minOfOrNull { it.last_read } ?: 0L,
+                finishedDate = chapters.maxOfOrNull { it.last_read } ?: 0L,
+            )
         }
     }
 
     /**
      * Update the tracker with the new chapter information
      */
-    fun updateTrackChapter(newChapterNumber: Int, track: Track, service: TrackService) {
-        track.last_chapter_read = newChapterNumber.toFloat()
-        updateTrackingService(track, service)
+    fun updateTrackChapter(newChapterNumber: Int, trackAndService: TrackAndService) {
+        val track = trackAndService.track.apply {
+            this.last_chapter_read = newChapterNumber.toFloat()
+        }
+
+        updateTrackingService(track, trackAndService.service)
+    }
+
+    /**
+     * Update the tracker with the start/finished date
+     */
+    fun updateTrackDate(trackDateChange: TrackDateChange) {
+        val date = when (trackDateChange) {
+            is EditTrackingDate -> {
+                trackDateChange.newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+            }
+            else -> 0L
+        }
+        val track = trackDateChange.trackAndService.track.apply {
+            when (trackDateChange.readingDate) {
+                ReadingDate.Start -> this.started_reading_date = date
+                ReadingDate.Finish -> this.finished_reading_date = date
+            }
+        }
+
+        updateTrackingService(track, trackDateChange.trackAndService.service)
     }
 
     /**
@@ -211,6 +260,7 @@ class MangaComposePresenter(
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
             _tracks.value = db.getTracks(manga).executeOnIO()
 
+            getSuggestedDate()
 
             _trackServiceCount.value = _loggedInTrackingService.value.count { trackService ->
                 _tracks.value.any { track ->

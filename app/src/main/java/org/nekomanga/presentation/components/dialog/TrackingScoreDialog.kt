@@ -23,18 +23,17 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.ListItemPicker
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Track
-import eu.kanade.tachiyomi.data.track.TrackService
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants
 import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
-fun TrackingScoreDialog(themeColors: ThemeColors, track: Track, service: TrackService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
+fun TrackingScoreDialog(themeColors: ThemeColors, trackAndService: TrackingConstants.TrackAndService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
 
-        val displayedScore = service.displayScore(track)
+        val displayedScore = trackAndService.service.displayScore(trackAndService.track)
         val index = when {
             displayedScore == "-" -> 0
-            service.getScoreList().indexOf(displayedScore) != -1 -> service.getScoreList().indexOf(displayedScore)
+            trackAndService.service.getScoreList().indexOf(displayedScore) != -1 -> trackAndService.service.getScoreList().indexOf(displayedScore)
             else -> 0
         }
 
@@ -54,11 +53,11 @@ fun TrackingScoreDialog(themeColors: ThemeColors, track: Track, service: TrackSe
                 ) {
                     ListItemPicker(
                         modifier = Modifier.fillMaxWidth(.4f),
-                        value = service.getScoreList()[currentIndex],
+                        value = trackAndService.service.getScoreList()[currentIndex],
                         onValueChange = { newScore ->
-                            currentIndex = service.getScoreList().indexOf(newScore)
+                            currentIndex = trackAndService.service.getScoreList().indexOf(newScore)
                         },
-                        list = service.getScoreList(),
+                        list = trackAndService.service.getScoreList(),
                         dividersColor = themeColors.buttonColor,
                         textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )

@@ -38,6 +38,7 @@ import eu.kanade.tachiyomi.databinding.TrackScoreDialogBinding
 import eu.kanade.tachiyomi.databinding.TrackingBottomSheetBinding
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsController
 import eu.kanade.tachiyomi.ui.manga.MangaDetailsDivider
+import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackItem
 import eu.kanade.tachiyomi.util.lang.indexesOf
 import eu.kanade.tachiyomi.util.system.addCheckBoxPrompt
 import eu.kanade.tachiyomi.util.system.dpToPx
