@@ -70,7 +70,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
                 trackScoreChanged = { statusIndex, trackAndService -> presenter.updateTrackScore(statusIndex, trackAndService) },
                 trackChapterChanged = { newChapterNumber, trackAndService -> presenter.updateTrackChapter(newChapterNumber, trackAndService) },
                 searchTracker = { title, service -> presenter.searchTracker(title, service) },
-                trackSearchItemClick = { track, service -> presenter.registerTracking(track, service) },
+                trackSearchItemClick = { trackAndService -> presenter.registerTracking(trackAndService) },
                 trackingRemoved = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },
                 trackingDateChanged = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),

@@ -32,7 +32,7 @@ object TrackingConstants {
         val trackScoreChanged: (Int, TrackAndService) -> Unit,
         val trackChapterChanged: (Int, TrackAndService) -> Unit,
         val searchTracker: (String, TrackService) -> Unit,
-        val trackSearchItemClick: (Track, TrackService) -> Unit,
+        val trackSearchItemClick: (TrackAndService) -> Unit,
         val trackingRemoved: (Boolean, TrackService) -> Unit,
         val trackingDateChanged: (TrackDateChange) -> Unit,
     )

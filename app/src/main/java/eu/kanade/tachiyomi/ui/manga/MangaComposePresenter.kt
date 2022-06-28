@@ -210,11 +210,14 @@ class MangaComposePresenter(
     /**
      * Register tracker
      */
-    fun registerTracking(trackItem: Track, trackingService: TrackService) {
+    fun registerTracking(trackAndService: TrackAndService) {
         presenterScope.launch {
             runCatching {
-                trackItem.manga_id = manga.id!!
-                trackingService.bind(trackItem)
+                val trackItem = trackAndService.track.apply {
+                    manga_id = manga.id!!
+                }
+                
+                trackAndService.service.bind(trackItem)
             }.onSuccess { track ->
                 db.insertTrack(track).executeOnIO()
                 updateTrackingFlows()

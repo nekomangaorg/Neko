@@ -63,7 +63,7 @@ fun TrackingSheet(
     tracks: List<Track>,
     dateFormat: DateFormat,
     onLogoClick: (String) -> Unit,
-    onSearchTrackClick: (TrackService, Long) -> Unit,
+    onSearchTrackClick: (TrackService, Track?) -> Unit,
     trackStatusChanged: (Int, TrackAndService) -> Unit,
     trackScoreChanged: (Int, TrackAndService) -> Unit,
     trackChapterChanged: (Int, TrackAndService) -> Unit,
@@ -147,7 +147,7 @@ fun TrackingSheet(
                     trackAndService = trackAndService,
                     dateFormat = dateFormat,
                     onLogoClick = onLogoClick,
-                    onSearchTrackClick = { mediaId -> onSearchTrackClick(service, mediaId) },
+                    onSearchTrackClick = { track -> onSearchTrackClick(service, track) },
                     onRemoveTrackClick = {
                         trackAndService?.run { removeTrackDialog = ShowDialog(trackAndService) }
                     },
@@ -183,7 +183,7 @@ private fun TrackingServiceItem(
     trackAndService: TrackAndService?,
     dateFormat: DateFormat,
     onLogoClick: (String) -> Unit,
-    onSearchTrackClick: (Long) -> Unit,
+    onSearchTrackClick: (Track?) -> Unit,
     onRemoveTrackClick: () -> Unit,
     statusClick: () -> Unit,
     scoreClick: () -> Unit,
@@ -199,7 +199,7 @@ private fun TrackingServiceItem(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (trackAndService == null) {
-                NoTrack(themeColors = themeColors, service = service, onLogoClick, onSearchTrackClick)
+                NoTrack(themeColors = themeColors, service = service, onLogoClick, { onSearchTrackClick(null) })
             } else {
                 TrackRowOne(
                     themeColors = themeColors,
@@ -221,11 +221,11 @@ private fun TrackingServiceItem(
 }
 
 @Composable
-private fun NoTrack(themeColors: ThemeColors, service: TrackService, onLogoClick: (String) -> Unit, searchTrackerClick: (Long) -> Unit) {
+private fun NoTrack(themeColors: ThemeColors, service: TrackService, onLogoClick: (String) -> Unit, searchTrackerClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
-            .clickable { searchTrackerClick(0L) },
+            .clickable { searchTrackerClick() },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = null, onClick = onLogoClick)
@@ -234,12 +234,12 @@ private fun NoTrack(themeColors: ThemeColors, service: TrackService, onLogoClick
 }
 
 @Composable
-private fun TrackRowOne(themeColors: ThemeColors, track: Track, service: TrackService, onLogoClick: (String) -> Unit = {}, searchTrackerClick: (Long) -> Unit, onRemoveClick: () -> Unit) {
+private fun TrackRowOne(themeColors: ThemeColors, track: Track, service: TrackService, onLogoClick: (String) -> Unit = {}, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
             .conditional(!service.isMdList()) {
-                clickable { searchTrackerClick(track.media_id) }
+                clickable { searchTrackerClick(track) }
             },
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {

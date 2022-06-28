@@ -286,10 +286,10 @@ fun SheetLayout(
             tracks = tracks,
             dateFormat = dateFormat,
             onLogoClick = openInBrowser,
-            onSearchTrackClick = { service, mediaId ->
+            onSearchTrackClick = { service, track ->
                 closeSheet()
                 openSheet(
-                    BottomSheetScreen.TrackingSearchSheet(service, mediaId),
+                    BottomSheetScreen.TrackingSearchSheet(service, track),
                 )
             },
             trackStatusChanged = trackActions.trackStatusChanged,
@@ -319,16 +319,18 @@ fun SheetLayout(
                 themeColors = themeColors,
                 title = title,
                 trackSearchResult = trackSearchResult,
-                alreadySelectedMediaId = currentScreen.existingMediaId,
+                alreadySelectedTrack = currentScreen.alreadySelectedTrack,
+                service = currentScreen.trackingService,
                 cancelClick = {
                     closeSheet()
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
                 searchTracker = { query -> trackActions.searchTracker(query, currentScreen.trackingService) },
                 openInBrowser = openInBrowser,
+                trackingRemoved = trackActions.trackingRemoved,
                 trackSearchItemClick = { trackSearch ->
                     closeSheet()
-                    trackActions.trackSearchItemClick(trackSearch, currentScreen.trackingService)
+                    trackActions.trackSearchItemClick(TrackAndService(trackSearch, currentScreen.trackingService))
                     openSheet(BottomSheetScreen.TrackingSheet)
                 },
             )
@@ -361,7 +363,7 @@ sealed class BottomSheetScreen {
     ) : BottomSheetScreen()
 
     object TrackingSheet : BottomSheetScreen()
-    class TrackingSearchSheet(val trackingService: TrackService, val existingMediaId: Long) : BottomSheetScreen()
+    class TrackingSearchSheet(val trackingService: TrackService, val alreadySelectedTrack: Track?) : BottomSheetScreen()
     class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
 }
 

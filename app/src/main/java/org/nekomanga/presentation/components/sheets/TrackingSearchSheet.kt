@@ -52,24 +52,32 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.model.TrackSearch
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
+import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
 import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
 fun TrackingSearchSheet(
     themeColors: ThemeColors,
-    alreadySelectedMediaId: Long = 0L,
+    alreadySelectedTrack: Track? = null,
     cancelClick: () -> Unit,
     title: String,
     trackSearchResult: TrackSearchResult,
+    service: TrackService,
+    trackingRemoved: (Boolean, TrackService) -> Unit,
     searchTracker: (String) -> Unit,
     openInBrowser: (String) -> Unit,
     trackSearchItemClick: (TrackSearch) -> Unit,
 ) {
     val maxLazyHeight = LocalConfiguration.current.screenHeightDp * .6
+
+    var trackSearchItem by remember { mutableStateOf<TrackSearch?>(null) }
+
 
     BaseSheet(themeColors = themeColors, maxSheetHeightPercentage = .9f) {
 
@@ -95,10 +103,31 @@ fun TrackingSearchSheet(
                             TrackSearchItem(
                                 themeColors = themeColors,
                                 trackSearch = item,
-                                alreadySelectedMediaId = alreadySelectedMediaId,
+                                alreadySelectedTrack = alreadySelectedTrack,
                                 openInBrowser = openInBrowser,
-                                trackSearchItemClick = trackSearchItemClick,
+                                trackSearchItemClick = {
+                                    if (alreadySelectedTrack == null) {
+                                        trackSearchItemClick(it)
+                                    } else {
+                                        trackSearchItem = item
+                                    }
+                                },
                             )
+
+                            if (trackSearchItem != null) {
+                                TrackingSwitchDialog(
+                                    themeColors = themeColors,
+                                    name = stringResource(id = service.nameRes()),
+                                    oldName = alreadySelectedTrack?.title ?: "",
+                                    newName = trackSearchItem!!.title,
+                                    onConfirm = { alsoRemoveFromTracker ->
+                                        trackingRemoved(alsoRemoveFromTracker, service)
+                                        trackSearchItemClick(trackSearchItem!!)
+                                        cancelClick()
+                                    },
+                                    onDismiss = { trackSearchItem = null },
+                                )
+                            }
                         }
                         item {
                             Gap(8.dp)
@@ -157,9 +186,10 @@ private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearch
 }
 
 @Composable
-private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, alreadySelectedMediaId: Long, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
+private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, alreadySelectedTrack: Track?, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
 
-    val isSelected = alreadySelectedMediaId != 0L && alreadySelectedMediaId == trackSearch.media_id
+    val isSelected = alreadySelectedTrack != null && alreadySelectedTrack.media_id != 0L && alreadySelectedTrack.media_id == trackSearch.media_id
+
     val (backdropColor, outlineColor) = if (isSelected) {
         themeColors.containerColor to themeColors.buttonColor
     } else {
@@ -250,7 +280,7 @@ private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, 
                     )
                 }
             }
-            
+
             if (isSelected) {
                 Icon(
                     imageVector = Icons.Default.CheckCircle, contentDescription = null,
