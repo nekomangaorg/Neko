@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import eu.kanade.presentation.components.Divider
@@ -249,12 +250,27 @@ private fun TrackRowOne(themeColors: ThemeColors, track: Track, service: TrackSe
                 text = track.title, color = MaterialTheme.colorScheme.onSurface, textAlign = TextAlign.Start,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
+                    .padding(horizontal = 8.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
             )
         } else {
-            Text(text = track.title, color = MaterialTheme.colorScheme.onSurface, modifier = Modifier.padding(4.dp))
+            Text(
+                text = track.title, color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier
+                    .padding(8.dp)
+                    .fillMaxSize(.85f),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
             IconButton(onClick = onRemoveClick) {
-                Icon(imageVector = Icons.Default.Cancel, contentDescription = null, modifier = Modifier.size(24.dp), tint = themeColors.buttonColor)
+                Icon(
+                    imageVector = Icons.Default.Cancel, contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .size(24.dp),
+                    tint = themeColors.buttonColor,
+                )
             }
         }
     }
