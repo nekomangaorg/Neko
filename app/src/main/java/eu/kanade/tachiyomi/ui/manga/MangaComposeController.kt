@@ -17,7 +17,8 @@ import eu.kanade.tachiyomi.data.image.coil.getBestColor
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.util.system.launchUI
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.Injekt
@@ -53,10 +54,10 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             onRefresh = presenter::onRefresh,
             categories = presenter.allCategories,
             mangaCategories = presenter.mangaCategories,
-            setCategories = { enabledCategories ->
-                presenter.updateMangaCategories(manga, enabledCategories)
-            },
-            addNewCategory = { newCategory -> presenter.addNewCategory(newCategory) },
+            categoryActions = CategoryActions(
+                setCategories = { enabledCategories -> presenter.updateMangaCategories(manga, enabledCategories) },
+                addNewCategory = { newCategory -> presenter.addNewCategory(newCategory) },
+            ),
             generatePalette = { setPalette(it) },
             themeBasedOffCover = preferences.themeMangaDetails(),
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
@@ -80,6 +81,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             artworkClick = { },
             similarClick = { },
             mergeClick = { },
+            externalLinks = presenter.externalLinks,
             linksClick = {},
             shareClick = {},
             genreClick = {},

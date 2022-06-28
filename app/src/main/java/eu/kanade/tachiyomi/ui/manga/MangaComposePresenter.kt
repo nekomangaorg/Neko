@@ -7,6 +7,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.MangaCategory
 import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.download.DownloadManager
+import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.data.track.TrackManager
 import eu.kanade.tachiyomi.data.track.TrackService
@@ -69,15 +70,28 @@ class MangaComposePresenter(
     private val _trackSuggestedDates = MutableStateFlow<TrackingSuggestedDates?>(null)
     val trackSuggestedDates: StateFlow<TrackingSuggestedDates?> = _trackSuggestedDates.asStateFlow()
 
+    private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
+    val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
+
     override fun onCreate() {
         super.onCreate()
-        updateCategoryFlows()
-        updateTrackingFlows()
         if (!manga.initialized) {
             _isRefreshing.value = true
+            //do stuff
+            updateAllFlows()
+            _isRefreshing.value = false
         } else {
-
+            updateAllFlows()
         }
+    }
+
+    /**
+     * Update all flows that dont require network
+     */
+    fun updateAllFlows() {
+        updateCategoryFlows()
+        updateTrackingFlows()
+        updateExternalFlows()
     }
 
     fun onRefresh() {
@@ -286,6 +300,15 @@ class MangaComposePresenter(
                             (trackService.isMdList() && (trackService as MdList).isUnfollowed(track).not()))
                 }
             }
+        }
+    }
+
+    /**
+     * Update flows for external links
+     */
+    private fun updateExternalFlows() {
+        presenterScope.launch {
+            _externalLinks.value = manga.getExternalLinks()
         }
     }
 

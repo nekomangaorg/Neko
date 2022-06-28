@@ -42,8 +42,10 @@ import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.database.models.Track
+import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
-import eu.kanade.tachiyomi.ui.manga.TrackingConstants
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
@@ -74,20 +76,20 @@ fun MangaScreen(
     titleLongClick: (Context, String) -> Unit,
     creatorLongClick: (Context, String) -> Unit,
     toggleFavorite: () -> Boolean = { true },
+    categoryActions: CategoryActions,
     categories: StateFlow<List<Category>>,
     mangaCategories: StateFlow<List<Category>>,
-    setCategories: (List<Category>) -> Unit = {},
-    addNewCategory: (String) -> Unit = {},
     loggedInTrackingServices: StateFlow<List<TrackService>>,
     trackServiceCount: StateFlow<Int>,
     tracks: StateFlow<List<Track>>,
     trackSuggestedDates: StateFlow<TrackingSuggestedDates?>,
     dateFormat: DateFormat,
-    trackActions: TrackingConstants.TrackActions,
+    trackActions: TrackActions,
     trackSearchResult: StateFlow<TrackSearchResult>,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
+    externalLinks: StateFlow<List<ExternalLink>>,
     linksClick: () -> Unit = {},
     shareClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
@@ -109,6 +111,7 @@ fun MangaScreen(
     val trackSearchResultState = trackSearchResult.collectAsState()
     val trackServiceCountState = trackServiceCount.collectAsState()
     val trackSuggestedDatesState = trackSuggestedDates.collectAsState()
+    val externalLinksState = externalLinks.collectAsState()
 
     val context = LocalContext.current
 
@@ -166,7 +169,7 @@ fun MangaScreen(
                     SheetLayout(
                         currentScreen = currentSheet,
                         themeColors = themeColors,
-                        addNewCategory = addNewCategory,
+                        addNewCategory = categoryActions.addNewCategory,
                         allCategories = categoriesState.value,
                         mangaCategories = mangaCategoriesState.value,
                         loggedInTrackingServices = loggedInTrackingServiceState.value,
@@ -229,7 +232,7 @@ fun MangaScreen(
                                     openSheet(
                                         BottomSheetScreen.CategoriesSheet(
                                             addingToLibrary = true,
-                                            setCategories = setCategories,
+                                            setCategories = categoryActions.setCategories,
                                             addToLibraryClick = { inLibrary = toggleFavorite() },
                                         ),
                                     )
@@ -242,7 +245,7 @@ fun MangaScreen(
                                 openSheet(
                                     BottomSheetScreen.CategoriesSheet(
                                         addingToLibrary = false,
-                                        setCategories = setCategories,
+                                        setCategories = categoryActions.setCategories,
                                     ),
                                 )
                             },
@@ -284,7 +287,7 @@ fun SheetLayout(
     tracks: List<Track>,
     dateFormat: DateFormat,
     title: String,
-    trackActions: TrackingConstants.TrackActions,
+    trackActions: TrackActions,
     trackSearchResult: TrackSearchResult,
     trackSuggestedDates: TrackingSuggestedDates?,
     openInBrowser: (String) -> Unit,

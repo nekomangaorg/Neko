@@ -27,16 +27,6 @@ object TrackingConstants {
         class Error(val errorMessage: String) : TrackSearchResult()
     }
 
-    class TrackActions(
-        val trackStatusChanged: (Int, TrackAndService) -> Unit,
-        val trackScoreChanged: (Int, TrackAndService) -> Unit,
-        val trackChapterChanged: (Int, TrackAndService) -> Unit,
-        val searchTracker: (String, TrackService) -> Unit,
-        val trackSearchItemClick: (TrackAndService) -> Unit,
-        val trackingRemoved: (Boolean, TrackService) -> Unit,
-        val trackingDateChanged: (TrackDateChange) -> Unit,
-    )
-
     enum class ReadingDate {
         Start,
         Finish
