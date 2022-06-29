@@ -128,10 +128,29 @@ class RecentMangaHolder(
                 item.mch.manga.date_added.timeSpanFromNow(itemView.context),
             )
             isSmallUpdates -> ""
-            item.mch.history.id == null -> binding.body.context.getString(
-                R.string.updated_,
-                item.chapter.date_upload.timeSpanFromNow(itemView.context),
-            )
+            item.mch.history.id == null -> {
+                if (adapter.viewType == RecentsPresenter.VIEW_TYPE_ONLY_UPDATES) {
+                    if (adapter.sortByFetched) {
+                        binding.body.context.getString(
+                            R.string.fetched_,
+                            item.chapter.date_fetch.timeSpanFromNow(itemView.context),
+                        )
+                    } else {
+                        binding.body.context.getString(
+                            R.string.updated_,
+                            item.chapter.date_upload.timeSpanFromNow(itemView.context),
+                        )
+                    }
+                } else {
+                    binding.body.context.getString(
+                        R.string.fetched_,
+                        item.chapter.date_fetch.timeSpanFromNow(itemView.context),
+                    ) + "\n" + binding.body.context.getString(
+                        R.string.updated_,
+                        item.chapter.date_upload.timeSpanFromNow(itemView.context),
+                    )
+                }
+            }
             item.chapter.id != item.mch.chapter.id ->
                 binding.body.context.getString(
                     R.string.read_,

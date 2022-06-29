@@ -4,6 +4,7 @@ import androidx.recyclerview.widget.ItemTouchHelper
 import com.fredporciuncula.flow.preferences.Preference
 import eu.davidea.flexibleadapter.items.IFlexible
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
+import eu.kanade.tachiyomi.data.preference.asImmediateFlowIn
 import eu.kanade.tachiyomi.ui.manga.chapter.BaseChapterAdapter
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.drop
@@ -24,6 +25,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
     var showUpdatedTime = preferences.showUpdatedTime().get()
     var uniformCovers = preferences.uniformGrid().get()
     var showOutline = preferences.outlineOnCovers().get()
+    var sortByFetched = preferences.sortFetchedTime().get()
 
     val viewType: Int
         get() = delegate.getViewType()
@@ -48,6 +50,7 @@ class RecentMangaAdapter(val delegate: RecentsInterface) :
         preferences.showTitleFirstInRecents().register { showTitleFirst = it }
         preferences.showUpdatedTime().register { showUpdatedTime = it }
         preferences.uniformGrid().register { uniformCovers = it }
+        preferences.sortFetchedTime().asImmediateFlowIn(delegate.scope()) { sortByFetched = it }
         preferences.outlineOnCovers().register(false) {
             showOutline = it
             (0 until itemCount).forEach { i ->
