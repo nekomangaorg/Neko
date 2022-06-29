@@ -56,7 +56,10 @@ class MangaCoverFetcher(
         url = manga.thumbnail_url ?: error("No cover specified")
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
-            Type.File -> fileLoader(File(url.substringAfter("file://")))
+            Type.File -> {
+                setRatioAndColorsInScope(manga, File(url.substringAfter("file://")))
+                fileLoader(File(url.substringAfter("file://")))
+            }
             null -> error("Invalid image")
         }
     }
@@ -90,10 +93,12 @@ class MangaCoverFetcher(
                 val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, coverFile)
                 if (snapshotCoverCache != null) {
                     // Read from cover cache after added to library
+                    setRatioAndColorsInScope(manga, snapshotCoverCache)
                     return fileLoader(snapshotCoverCache)
                 }
 
                 // Read from snapshot
+                setRatioAndColorsInScope(manga)
                 return SourceResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -107,6 +112,7 @@ class MangaCoverFetcher(
             try {
                 // Read from cover cache after library manga cover updated
                 val responseCoverCache = writeResponseToCoverCache(response, coverFile)
+                setRatioAndColorsInScope(manga)
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }

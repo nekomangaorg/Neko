@@ -50,7 +50,7 @@ object MangaCoverMetadata {
 
     fun setRatioAndColors(manga: Manga, ogFile: File? = null, force: Boolean = false) {
         if (!manga.favorite) {
-            MangaCoverMetadata.remove(manga)
+            remove(manga)
         }
         if (manga.vibrantCoverColor != null && !manga.favorite) return
         val file = ogFile ?: coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga)
@@ -63,8 +63,8 @@ object MangaCoverMetadata {
             } else {
                 options.inSampleSize = 4
             }
-            val bitmap = BitmapFactory.decodeFile(file.path, options) ?: return
-            if (!options.inJustDecodeBounds) {
+            val bitmap = BitmapFactory.decodeFile(file.path, options)
+            if (bitmap != null) {
                 Palette.from(bitmap).generate {
                     if (it == null) return@generate
                     if (manga.favorite) {

@@ -265,8 +265,7 @@ class LibraryPresenter(
 
         val filterMangaType = preferences.filterMangaType().get()
 
-        val showEmptyCategoriesWhileFiltering =
-            preferences.showEmptyCategoriesWhileFiltering().get()
+        val showEmptyCategoriesWhileFiltering = preferences.showEmptyCategoriesWhileFiltering().get()
 
         val filterTrackers = FilterBottomSheet.FILTER_TRACKER
 
@@ -635,14 +634,7 @@ class LibraryPresenter(
                         items.removeAll(mangaToRemove)
                         val headerItem = headerItems[catId]
                         if (headerItem != null) items.add(
-                            LibraryItem(
-                                LibraryManga.createHide(
-                                    catId,
-                                    mergedTitle,
-                                    mangaToRemove.size,
-                                ),
-                                headerItem,
-                            ),
+                            LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
                         )
                     }
                 }
@@ -754,10 +746,7 @@ class LibraryPresenter(
                 sectionedLibraryItems[catId] = mangaToRemove
                 items.removeAll { it.header.catId == catId }
                 if (headerItem != null) items.add(
-                    LibraryItem(
-                        LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size),
-                        headerItem,
-                    ),
+                    LibraryItem(LibraryManga.createHide(catId, mergedTitle, mangaToRemove.size), headerItem),
                 )
             }
         }
@@ -814,28 +803,25 @@ class LibraryPresenter(
         }
     }
 
-    /** Requests the library to have download badges added/removed. */
-    fun requestDownloadBadgesUpdate() {
+    fun requestBadgeUpdate(badgeUpdate: (List<LibraryItem>) -> Unit) {
         presenterScope.launch {
             val mangaMap = allLibraryItems
-            setDownloadCount(mangaMap)
+            badgeUpdate(mangaMap)
             allLibraryItems = mangaMap
             val current = libraryItems
-            setDownloadCount(current)
+            badgeUpdate(current)
             sectionLibrary(current)
         }
     }
 
+    /** Requests the library to have download badges added/removed. */
+    fun requestDownloadBadgesUpdate() {
+        requestBadgeUpdate { setDownloadCount(it) }
+    }
+
     /** Requests the library to have unread badges changed. */
     fun requestUnreadBadgesUpdate() {
-        presenterScope.launch {
-            val mangaMap = allLibraryItems
-            setUnreadBadge(mangaMap)
-            allLibraryItems = mangaMap
-            val current = libraryItems
-            setUnreadBadge(current)
-            sectionLibrary(current)
-        }
+        requestBadgeUpdate { setUnreadBadge(it) }
     }
 
     /** Requests the library to be sorted. */
@@ -850,13 +836,13 @@ class LibraryPresenter(
     /**
      * Returns the common categories for the given list of manga.
      *
-     * @param mangaList the list of manga.
+     * @param mangas the list of manga.
      */
     fun getCommonCategories(mangaList: List<Manga>): Collection<Category> {
         if (mangaList.isEmpty()) return emptyList()
         return mangaList.toSet()
             .map { db.getCategoriesForManga(it).executeAsBlocking() }
-            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2).toMutableList() }
+            .reduce { set1: Iterable<Category>, set2 -> set1.intersect(set2.toSet()).toMutableList() }
     }
 
     fun getMangaUrls(mangaList: List<Manga>): List<String> {
@@ -1222,10 +1208,10 @@ class LibraryPresenter(
                             sourceManager.get(
                                 distinctSources.randomOrNull(random)?.source ?: 0L,
                             )?.name
-                        randomSource?.chopByWords(15)
+                        randomSource?.chopByWords(30)
                     }
                     randomTitle -> {
-                        libraryManga.randomOrNull(random)?.title?.chopByWords(15)
+                        libraryManga.randomOrNull(random)?.title?.chopByWords(30)
                     }
                     in randomTags -> {
                         val tags = recentManga.map {

@@ -118,9 +118,8 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
         libraryRecyler?.post {
             bottomBarHeight =
                 controller.activityBinding?.bottomNav?.height
-                    ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(
-                        systemBars(),
-                    )?.bottom ?: 0
+                    ?: controller.activityBinding?.root?.rootWindowInsetsCompat?.getInsets(systemBars())?.bottom
+                        ?: 0
         }
         sheetBehavior?.addBottomSheetCallback(
             object : BottomSheetBehavior.BottomSheetCallback() {
@@ -195,10 +194,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
     private fun stateChanged(state: Int) {
         controller?.updateHopperY()
         if (state == BottomSheetBehavior.STATE_COLLAPSED) {
-            libraryRecyler?.updatePaddingRelative(
-                bottom = sheetBehavior?.peekHeight
-                    ?: 0 + 10.dpToPx + bottomBarHeight,
-            )
+            libraryRecyler?.updatePaddingRelative(bottom = sheetBehavior?.peekHeight ?: 0 + 10.dpToPx + bottomBarHeight)
         }
         if (state == BottomSheetBehavior.STATE_EXPANDED) {
             binding.pill.alpha = 0f
@@ -506,10 +502,7 @@ class FilterBottomSheet @JvmOverloads constructor(context: Context, attrs: Attri
 
         val transition = androidx.transition.AutoTransition()
         transition.duration = 150
-        androidx.transition.TransitionManager.beginDelayedTransition(
-            binding.filterLayout,
-            transition,
-        )
+        androidx.transition.TransitionManager.beginDelayedTransition(binding.filterLayout, transition)
         reorderFilters()
         filterItems.forEach {
             it.reset()

@@ -60,14 +60,7 @@ class MangaUpdatesApi(
     }
 
     suspend fun addSeriesToList(track: Track) {
-        val body = buildJsonArray {
-            addJsonObject {
-                putJsonObject("series") {
-                    put("id", track.media_id)
-                }
-                put("list_id", track.status)
-            }
-        }
+        val body = createTrackBody(track)
         authClient.newCall(
             POST(
                 url = "$baseUrl/v1/lists/series",
@@ -92,17 +85,7 @@ class MangaUpdatesApi(
     }
 
     suspend fun updateSeriesListItem(track: Track) {
-        val body = buildJsonArray {
-            addJsonObject {
-                putJsonObject("series") {
-                    put("id", track.media_id)
-                }
-                put("list_id", track.status)
-                putJsonObject("status") {
-                    put("chapter", track.last_chapter_read.toInt())
-                }
-            }
-        }
+        val body = createTrackBody(track)
         authClient.newCall(
             POST(
                 url = "$baseUrl/v1/lists/series/update",
@@ -114,7 +97,19 @@ class MangaUpdatesApi(
         updateSeriesRating(track)
     }
 
-    suspend fun getSeriesRating(track: Track): Rating? {
+    private fun createTrackBody(track: Track) = buildJsonArray {
+        addJsonObject {
+            putJsonObject("series") {
+                put("id", track.media_id)
+            }
+            put("list_id", track.status)
+            putJsonObject("status") {
+                put("chapter", track.last_chapter_read.toInt())
+            }
+        }
+    }
+
+    private suspend fun getSeriesRating(track: Track): Rating? {
         return try {
             authClient.newCall(
                 GET(
@@ -128,7 +123,7 @@ class MangaUpdatesApi(
         }
     }
 
-    suspend fun updateSeriesRating(track: Track) {
+    private suspend fun updateSeriesRating(track: Track) {
         if (track.score != 0f) {
             val body = buildJsonObject {
                 put("rating", track.score)

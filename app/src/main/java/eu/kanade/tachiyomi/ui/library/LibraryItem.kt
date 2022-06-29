@@ -18,14 +18,12 @@ import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.LibraryManga
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.databinding.MangaGridItemBinding
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.util.system.dpToPx
 import eu.kanade.tachiyomi.util.system.spToPx
 import eu.kanade.tachiyomi.util.view.compatToolTipText
 import eu.kanade.tachiyomi.widget.AutofitRecyclerView
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
-import uy.kohesive.injekt.injectLazy
 
 class LibraryItem(
     val manga: LibraryManga,
@@ -38,7 +36,6 @@ class LibraryItem(
     var unreadType = 2
     var filter = ""
 
-    private val sourceManager: SourceManager by injectLazy()
     private val uniformSize: Boolean
         get() = preferences.uniformGrid().get()
 
@@ -164,7 +161,6 @@ class LibraryItem(
         if (manga.isBlank() && manga.title.isBlank()) {
             return constraint.isEmpty()
         }
-        val sourceName by lazy { sourceManager.getMangadex().name }
         return manga.title.contains(constraint, true) ||
             (manga.author?.contains(constraint, true) ?: false) ||
             (manga.artist?.contains(constraint, true) ?: false) ||
