@@ -3,10 +3,8 @@ package org.nekomanga.presentation.components.sheets
 import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +13,6 @@ import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,10 +29,10 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import eu.kanade.presentation.components.Divider
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.dialog.AddCategoryDialog
 import org.nekomanga.presentation.screens.ThemeColors
 import java.util.Locale
@@ -69,79 +66,73 @@ fun EditCategorySheet(
             }
 
             val paddingModifier = Modifier.padding(horizontal = 8.dp)
-            Column(
-                modifier = Modifier
-                    .navigationBarsPadding(),
-            ) {
 
-                Gap(16.dp)
-                Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-                    val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
-                    Text(modifier = paddingModifier, text = stringResource(id = prefix, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
-                    TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
-                        Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColors.buttonColor))
-                    }
+            Gap(16.dp)
+            Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
+                val prefix = if (addingToLibrary) R.string.add_x_to else R.string.move_x_to
+                Text(modifier = paddingModifier, text = stringResource(id = prefix, stringResource(id = R.string.manga)), style = MaterialTheme.typography.titleLarge)
+                TextButton(modifier = paddingModifier, onClick = { showAddCategoryDialog = true }) {
+                    Text(text = stringResource(id = R.string.plus_new_category), style = MaterialTheme.typography.titleSmall.copy(color = themeColors.buttonColor))
                 }
-                Gap(16.dp)
-                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
-
-                LazyColumn(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeightIn(0.dp, maxLazyHeight.dp),
-                ) {
-                    items(categories) { category: Category ->
-                        var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
-
-                        Row(
-                            modifier = paddingModifier
-                                .fillMaxWidth()
-                                .clickable {
-                                    state = !state
-                                },
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Checkbox(
-                                checked = state,
-                                onCheckedChange = {
-                                    if (it) {
-                                        enabledCategories[category.id!!] = category
-                                    } else {
-                                        enabledCategories.remove(category.id)
-                                    }
-                                    state = it
-                                    acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
-                                },
-                                colors = CheckboxDefaults.colors(checkedColor = themeColors.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
-                            )
-                            Gap(4.dp)
-                            Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
-                        }
-
-                    }
-                }
-
-
-                Divider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.veryLowContrast))
-                Gap(4.dp)
-                Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                    TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
-                        Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
-                    }
-                    ElevatedButton(
-                        onClick = {
-                            confirmClicked(enabledCategories.values.toList())
-                            addToLibraryClick()
-                            cancelClick()
-                        },
-                        colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColors.buttonColor),
-                    ) {
-
-                        Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
-                    }
-                }
-                Gap(16.dp)
             }
+            Gap(16.dp)
+            Divider()
+
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeightIn(0.dp, maxLazyHeight.dp),
+            ) {
+                items(categories) { category: Category ->
+                    var state by remember { mutableStateOf(enabledCategories.contains(category.id)) }
+
+                    Row(
+                        modifier = paddingModifier
+                            .fillMaxWidth()
+                            .clickable {
+                                state = !state
+                            },
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Checkbox(
+                            checked = state,
+                            onCheckedChange = {
+                                if (it) {
+                                    enabledCategories[category.id!!] = category
+                                } else {
+                                    enabledCategories.remove(category.id)
+                                }
+                                state = it
+                                acceptText.value = calculateText(context, mangaCategories, enabledCategories, addingToLibrary)
+                            },
+                            colors = CheckboxDefaults.colors(checkedColor = themeColors.buttonColor, checkmarkColor = MaterialTheme.colorScheme.surface),
+                        )
+                        Gap(4.dp)
+                        Text(text = category.name, color = MaterialTheme.colorScheme.onSurface)
+                    }
+
+                }
+            }
+
+            Divider()
+            Gap(4.dp)
+            Row(modifier = paddingModifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                TextButton(onClick = cancelClick, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                    Text(text = stringResource(id = R.string.cancel), style = MaterialTheme.typography.titleSmall)
+                }
+                ElevatedButton(
+                    onClick = {
+                        confirmClicked(enabledCategories.values.toList())
+                        addToLibraryClick()
+                        cancelClick()
+                    },
+                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColors.buttonColor),
+                ) {
+
+                    Text(text = acceptText.value, style = MaterialTheme.typography.titleSmall, color = MaterialTheme.colorScheme.surface)
+                }
+            }
+            Gap(16.dp)
         }
     }
 }

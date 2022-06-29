@@ -1,6 +1,7 @@
 package org.nekomanga.presentation.components.sheets
 
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -19,7 +20,7 @@ import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, content: @Composable () -> Unit) {
+fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, content: @Composable ColumnScope.() -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
 
         val maxSheetHeight = LocalConfiguration.current.screenHeightDp * maxSheetHeightPercentage
