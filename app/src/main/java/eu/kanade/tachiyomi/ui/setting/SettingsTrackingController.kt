@@ -12,7 +12,6 @@ import eu.kanade.tachiyomi.data.track.myanimelist.MyAnimeListApi
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import eu.kanade.tachiyomi.util.view.snack
-import eu.kanade.tachiyomi.widget.preference.LoginPreference
 import eu.kanade.tachiyomi.widget.preference.TrackLoginDialog
 import eu.kanade.tachiyomi.widget.preference.TrackLogoutDialog
 import eu.kanade.tachiyomi.widget.preference.TrackerPreference
@@ -122,7 +121,7 @@ class SettingsTrackingController :
     }
 
     private fun updatePreference(id: Int) {
-        val pref = findPreference(Keys.trackUsername(id)) as? LoginPreference
+        val pref = findPreference(Keys.trackUsername(id)) as? TrackerPreference
         pref?.notifyChanged()
     }
 
