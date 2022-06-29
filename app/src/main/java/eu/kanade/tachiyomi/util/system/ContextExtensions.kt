@@ -443,3 +443,7 @@ fun Context.iconicsDrawable(
         }
     }
 }
+
+fun Context.sharedCacheDir(): File {
+    return File(this.cacheDir, "shared_image")
+}

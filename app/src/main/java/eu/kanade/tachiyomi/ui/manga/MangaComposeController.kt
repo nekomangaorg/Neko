@@ -3,6 +3,7 @@ package eu.kanade.tachiyomi.ui.manga
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.os.Bundle
@@ -20,7 +21,15 @@ import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
+import eu.kanade.tachiyomi.ui.similar.SimilarController
+import eu.kanade.tachiyomi.util.getSlug
+import eu.kanade.tachiyomi.util.storage.getUriCompat
 import eu.kanade.tachiyomi.util.system.launchUI
+import eu.kanade.tachiyomi.util.system.sharedCacheDir
+import eu.kanade.tachiyomi.util.system.toast
+import eu.kanade.tachiyomi.util.system.withUIContext
+import eu.kanade.tachiyomi.util.view.withFadeTransaction
+import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.MangaScreen
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -48,7 +57,6 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
 
     @Composable
     override fun ScreenContent() {
-
         MangaScreen(
             manga = manga,
             isRefreshing = presenter.isRefreshing.collectAsState(),
@@ -80,10 +88,10 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
             artworkClick = { },
-            similarClick = { },
+            similarClick = { router.pushController(SimilarController(manga).withFadeTransaction()) },
             mergeClick = { },
             externalLinks = presenter.externalLinks.collectAsState(),
-            shareClick = {},
+            shareClick = { context -> viewScope.launch { shareManga(context) } },
             genreClick = {},
             genreLongClick = {},
             quickReadText = "",
@@ -113,5 +121,28 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
     private fun copyToClipboard(context: Context, content: String, @StringRes label: Int) {
         val clipboard = context.getSystemService<ClipboardManager>()!!
         clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(label), content))
+    }
+
+    suspend fun shareManga(context: Context) {
+        val cover = presenter.shareMangaCover(context.sharedCacheDir())
+        withUIContext {
+            val stream = cover?.getUriCompat(context)
+            try {
+                var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
+                url = "$url/" + manga.getSlug()
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/*"
+                    putExtra(Intent.EXTRA_TEXT, url)
+                    putExtra(Intent.EXTRA_TITLE, manga.title)
+                    flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    if (stream != null) {
+                        clipData = ClipData.newRawUri(null, stream)
+                    }
+                }
+                startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+            } catch (e: Exception) {
+                context.toast(e.message)
+            }
+        }
     }
 }

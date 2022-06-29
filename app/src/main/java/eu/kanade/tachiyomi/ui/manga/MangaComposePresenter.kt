@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.os.Build
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -23,8 +24,11 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTracki
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.storage.DiskUtil
+import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
+import eu.kanade.tachiyomi.util.system.withIOContext
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +37,7 @@ import kotlinx.coroutines.launch
 import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
+import java.io.File
 import java.util.Date
 
 class MangaComposePresenter(
@@ -276,6 +281,47 @@ class MangaComposePresenter(
             }
             updateTrackingFlows()
         }
+    }
+
+    suspend fun shareMangaCover(destDir: File): File? {
+        return withIOContext {
+            return@withIOContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                destDir.deleteRecursively()
+                try {
+                    saveCover(destDir)
+                } catch (e: java.lang.Exception) {
+                    null
+                }
+            } else {
+                null
+            }
+
+        }
+    }
+
+    /**
+     * Save Cover to directory
+     */
+    private fun saveCover(directory: File): File {
+        val cover =
+            coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
+                manga,
+            )
+        val type = ImageUtil.findImageType(cover.inputStream())
+            ?: throw Exception("Not an image")
+
+        directory.mkdirs()
+
+        // Build destination file.
+        val filename = DiskUtil.buildValidFilename("${manga.title}.${type.extension}")
+
+        val destFile = File(directory, filename)
+        cover.inputStream().use { input ->
+            destFile.outputStream().use { output ->
+                input.copyTo(output)
+            }
+        }
+        return destFile
     }
 
     /**
