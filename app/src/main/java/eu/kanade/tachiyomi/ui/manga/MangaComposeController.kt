@@ -8,6 +8,7 @@ import android.graphics.drawable.Drawable
 import android.os.Bundle
 import androidx.annotation.StringRes
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
@@ -50,10 +51,10 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
 
         MangaScreen(
             manga = manga,
-            isRefreshing = presenter.isRefreshing,
+            isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
-            categories = presenter.allCategories,
-            mangaCategories = presenter.mangaCategories,
+            categories = presenter.allCategories.collectAsState(),
+            mangaCategories = presenter.mangaCategories.collectAsState(),
             categoryActions = CategoryActions(
                 setCategories = { enabledCategories -> presenter.updateMangaCategories(manga, enabledCategories) },
                 addNewCategory = { newCategory -> presenter.addNewCategory(newCategory) },
@@ -63,10 +64,10 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             titleLongClick = { context, content -> copyToClipboard(context, content, R.string.title) },
             creatorLongClick = { context, content -> copyToClipboard(context, content, R.string.creator) },
             toggleFavorite = { presenter.toggleFavorite() },
-            loggedInTrackingServices = presenter.loggedInTrackingService,
-            trackServiceCount = presenter.trackServiceCount,
-            tracks = presenter.tracks,
-            trackSuggestedDates = presenter.trackSuggestedDates,
+            loggedInTrackingServices = presenter.loggedInTrackingService.collectAsState(),
+            trackServiceCount = presenter.trackServiceCount.collectAsState(),
+            tracks = presenter.tracks.collectAsState(),
+            trackSuggestedDates = presenter.trackSuggestedDates.collectAsState(),
             dateFormat = preferences.dateFormat(),
             trackActions = TrackActions(
                 trackStatusChanged = { statusIndex, trackAndService -> presenter.updateTrackStatus(statusIndex, trackAndService) },
@@ -77,12 +78,11 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
                 trackingRemoved = { alsoRemoveFromTracker, service -> presenter.removeTracking(alsoRemoveFromTracker, service) },
                 trackingDateChanged = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),
-            trackSearchResult = presenter.trackSearchResult,
+            trackSearchResult = presenter.trackSearchResult.collectAsState(),
             artworkClick = { },
             similarClick = { },
             mergeClick = { },
-            externalLinks = presenter.externalLinks,
-            linksClick = {},
+            externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = {},
             genreClick = {},
             genreLongClick = {},

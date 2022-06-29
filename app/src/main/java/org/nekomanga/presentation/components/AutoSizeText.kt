@@ -9,12 +9,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun AutoSizeText(
     text: String,
     style: TextStyle,
     modifier: Modifier = Modifier,
+    textAlign: TextAlign = TextAlign.Start,
 ) {
     var scaledTextStyle by remember { mutableStateOf(style) }
     var readyToDraw by remember { mutableStateOf(false) }
@@ -37,5 +39,6 @@ fun AutoSizeText(
                 readyToDraw = true
             }
         },
+        textAlign = textAlign,
     )
 }

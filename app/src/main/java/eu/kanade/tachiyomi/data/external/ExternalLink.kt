@@ -104,6 +104,8 @@ sealed class ExternalLink(val id: String) {
     @DrawableRes
     abstract fun getLogo(): Int
 
+    fun isOther() = getLogo() == R.drawable.ic_other_text_logo
+
     abstract fun getLogoColor(): Int
 
     abstract fun getUrl(): String

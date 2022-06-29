@@ -23,7 +23,7 @@ import androidx.compose.material.ripple.RippleTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,13 +51,13 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.system.openInBrowser
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
+import org.nekomanga.presentation.components.sheets.ExternalLinksSheet
 import org.nekomanga.presentation.components.sheets.TrackingDateSheet
 import org.nekomanga.presentation.components.sheets.TrackingSearchSheet
 import org.nekomanga.presentation.components.sheets.TrackingSheet
@@ -69,7 +69,7 @@ import java.text.DateFormat
 @Composable
 fun MangaScreen(
     manga: Manga,
-    isRefreshing: StateFlow<Boolean>,
+    isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
     generatePalette: (Drawable) -> Unit = {},
@@ -77,20 +77,19 @@ fun MangaScreen(
     creatorLongClick: (Context, String) -> Unit,
     toggleFavorite: () -> Boolean = { true },
     categoryActions: CategoryActions,
-    categories: StateFlow<List<Category>>,
-    mangaCategories: StateFlow<List<Category>>,
-    loggedInTrackingServices: StateFlow<List<TrackService>>,
-    trackServiceCount: StateFlow<Int>,
-    tracks: StateFlow<List<Track>>,
-    trackSuggestedDates: StateFlow<TrackingSuggestedDates?>,
+    categories: State<List<Category>>,
+    mangaCategories: State<List<Category>>,
+    loggedInTrackingServices: State<List<TrackService>>,
+    trackServiceCount: State<Int>,
+    tracks: State<List<Track>>,
+    trackSuggestedDates: State<TrackingSuggestedDates?>,
     dateFormat: DateFormat,
     trackActions: TrackActions,
-    trackSearchResult: StateFlow<TrackSearchResult>,
+    trackSearchResult: State<TrackSearchResult>,
     artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     mergeClick: () -> Unit = {},
-    externalLinks: StateFlow<List<ExternalLink>>,
-    linksClick: () -> Unit = {},
+    externalLinks: State<List<ExternalLink>>,
     shareClick: () -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
@@ -102,16 +101,7 @@ fun MangaScreen(
     onBackPressed: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val isRefreshingState = isRefreshing.collectAsState()
     val sheetState = rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden, skipHalfExpanded = true)
-    val categoriesState = categories.collectAsState()
-    val mangaCategoriesState = mangaCategories.collectAsState()
-    val loggedInTrackingServiceState = loggedInTrackingServices.collectAsState()
-    val trackState = tracks.collectAsState()
-    val trackSearchResultState = trackSearchResult.collectAsState()
-    val trackServiceCountState = trackServiceCount.collectAsState()
-    val trackSuggestedDatesState = trackSuggestedDates.collectAsState()
-    val externalLinksState = externalLinks.collectAsState()
 
     val context = LocalContext.current
 
@@ -170,16 +160,17 @@ fun MangaScreen(
                         currentScreen = currentSheet,
                         themeColors = themeColors,
                         addNewCategory = categoryActions.addNewCategory,
-                        allCategories = categoriesState.value,
-                        mangaCategories = mangaCategoriesState.value,
-                        loggedInTrackingServices = loggedInTrackingServiceState.value,
-                        tracks = trackState.value,
+                        allCategories = categories.value,
+                        mangaCategories = mangaCategories.value,
+                        loggedInTrackingServices = loggedInTrackingServices.value,
+                        tracks = tracks.value,
                         dateFormat = dateFormat,
                         openSheet = openSheet,
                         trackActions = trackActions,
                         title = manga.title,
-                        trackSearchResult = trackSearchResultState.value,
-                        trackSuggestedDates = trackSuggestedDatesState.value,
+                        trackSearchResult = trackSearchResult.value,
+                        trackSuggestedDates = trackSuggestedDates.value,
+                        externalLinks = externalLinks.value,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
@@ -195,7 +186,7 @@ fun MangaScreen(
             },
         ) {
             SwipeRefresh(
-                state = rememberSwipeRefreshState(isRefreshing = isRefreshingState.value),
+                state = rememberSwipeRefreshState(isRefreshing = isRefreshing.value),
                 modifier = Modifier.fillMaxSize(),
                 onRefresh = onRefresh,
                 indicator = { state, trigger ->
@@ -225,8 +216,8 @@ fun MangaScreen(
                             creatorLongClick = { creator -> creatorLongClick(context, creator) },
                             themeColor = themeColors,
                             generatePalette = generatePalette,
-                            loggedIntoTrackers = loggedInTrackingServiceState.value.isNotEmpty(),
-                            trackServiceCount = trackServiceCountState.value,
+                            loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
+                            trackServiceCount = trackServiceCount.value,
                             toggleFavorite = {
                                 if (inLibrary.not()) {
                                     openSheet(
@@ -240,7 +231,7 @@ fun MangaScreen(
                                     inLibrary = toggleFavorite()
                                 }
                             },
-                            categories = categoriesState.value,
+                            categories = categories.value,
                             moveCategories = {
                                 openSheet(
                                     BottomSheetScreen.CategoriesSheet(
@@ -257,7 +248,7 @@ fun MangaScreen(
                             artworkClick = artworkClick,
                             similarClick = similarClick,
                             mergeClick = mergeClick,
-                            linksClick = linksClick,
+                            linksClick = { openSheet(BottomSheetScreen.ExternalLinksSheet) },
                             shareClick = shareClick,
                             genreClick = genreClick,
                             genreLongClick = genreLongClick,
@@ -290,6 +281,7 @@ fun SheetLayout(
     trackActions: TrackActions,
     trackSearchResult: TrackSearchResult,
     trackSuggestedDates: TrackingSuggestedDates?,
+    externalLinks: List<ExternalLink>,
     openInBrowser: (String) -> Unit,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
@@ -378,6 +370,15 @@ fun SheetLayout(
                 },
             )
         }
+        is BottomSheetScreen.ExternalLinksSheet -> {
+            ExternalLinksSheet(
+                themeColors = themeColors, externalLinks = externalLinks,
+                onLinkClick = { url ->
+                    closeSheet()
+                    openInBrowser(url)
+                },
+            )
+        }
     }
 }
 
@@ -389,6 +390,7 @@ sealed class BottomSheetScreen {
     ) : BottomSheetScreen()
 
     object TrackingSheet : BottomSheetScreen()
+    object ExternalLinksSheet : BottomSheetScreen()
     class TrackingSearchSheet(val trackingService: TrackService, val alreadySelectedTrack: Track?) : BottomSheetScreen()
     class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
 }
