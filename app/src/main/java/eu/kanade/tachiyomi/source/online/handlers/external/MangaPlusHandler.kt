@@ -5,6 +5,7 @@ import eu.kanade.tachiyomi.network.NetworkHelper
 import eu.kanade.tachiyomi.network.await
 import eu.kanade.tachiyomi.source.model.Page
 import eu.kanade.tachiyomi.source.online.HttpSource.Companion.USER_AGENT
+import eu.kanade.tachiyomi.source.online.models.dto.Language
 import eu.kanade.tachiyomi.source.online.models.dto.MangaPlusResponse
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
@@ -55,7 +56,7 @@ class MangaPlusHandler {
     private fun pageListParse(response: Response): List<Page> {
         val result = response.asMangaPlusResponse()
 
-        checkNotNull(result.success) { result.error!!.englishPopup.body }
+        checkNotNull(result.success) { result.error!!.popups.firstOrNull { it.language == Language.ENGLISH } ?: "Error with MangaPlus" }
 
         return result.success.mangaViewer!!.pages
             .mapNotNull { it.mangaPage }

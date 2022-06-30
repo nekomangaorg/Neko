@@ -32,7 +32,6 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.launchNow
 import eu.kanade.tachiyomi.util.system.runAsObservable
-import eu.kanade.tachiyomi.util.system.withUIContext
 import kotlinx.coroutines.async
 import okhttp3.Response
 import rx.Observable
@@ -264,6 +263,7 @@ class Downloader(
             chapters
                 // Filter out those already downloaded.
                 .filter { provider.findChapterDir(it, manga) == null }
+                .filter { it.scanlator?.contains("Comikey")?.not() ?: true }
                 // Add chapters to queue from the start.
                 .sortedByDescending { it.source_order }
         }
@@ -509,7 +509,7 @@ class Downloader(
     private fun getImageExtension(response: Response, file: UniFile): String {
         // Read content type if available.
         val mime = response.body?.contentType()?.let { ct -> "${ct.type}/${ct.subtype}" }
-            // Else guess from the uri.
+        // Else guess from the uri.
             ?: context.contentResolver.getType(file.uri)
             // Else read magic numbers.
             ?: ImageUtil.findImageType { file.openInputStream() }?.mime
