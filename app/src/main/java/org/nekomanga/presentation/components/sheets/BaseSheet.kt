@@ -28,15 +28,16 @@ import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, content: @Composable ColumnScope.() -> Unit) {
+fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, minSheetHeightPercentage: Float = 0f, content: @Composable ColumnScope.() -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
-
-        val maxSheetHeight = LocalConfiguration.current.screenHeightDp * maxSheetHeightPercentage
+        val screenHeight = LocalConfiguration.current.screenHeightDp
+        val maxSheetHeight = screenHeight * maxSheetHeightPercentage
+        val minSheetHeight = screenHeight * minSheetHeightPercentage
         ElevatedCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .imePadding()
-                .requiredHeightIn(0.dp, maxSheetHeight.dp),
+                .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(Shapes.sheetRadius),
         ) {
             Gap(16.dp)

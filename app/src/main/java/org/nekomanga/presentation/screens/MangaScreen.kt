@@ -56,6 +56,7 @@ import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
+import org.nekomanga.presentation.components.sheets.ArtworkSheet
 import org.nekomanga.presentation.components.sheets.EditCategorySheet
 import org.nekomanga.presentation.components.sheets.ExternalLinksSheet
 import org.nekomanga.presentation.components.sheets.MergeSheet
@@ -87,10 +88,10 @@ fun MangaScreen(
     dateFormat: DateFormat,
     trackActions: TrackActions,
     trackSearchResult: State<TrackSearchResult>,
-    artworkClick: () -> Unit = {},
     similarClick: () -> Unit = {},
     externalLinks: State<List<ExternalLink>>,
     isMerged: State<Boolean>,
+    artworkLinks: State<List<String>>,
     shareClick: (Context) -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
@@ -173,6 +174,7 @@ fun MangaScreen(
                         trackSuggestedDates = trackSuggestedDates.value,
                         externalLinks = externalLinks.value,
                         isMerged = isMerged.value,
+                        artworkLinks = artworkLinks.value,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
@@ -247,8 +249,8 @@ fun MangaScreen(
                                     BottomSheetScreen.TrackingSheet,
                                 )
                             },
-                            artworkClick = artworkClick,
                             similarClick = similarClick,
+                            artworkClick = { openSheet(BottomSheetScreen.ArtworkSheet) },
                             mergeClick = { openSheet(BottomSheetScreen.MergeSheet) },
                             linksClick = { openSheet(BottomSheetScreen.ExternalLinksSheet) },
                             shareClick = { shareClick(context) },
@@ -284,6 +286,7 @@ fun SheetLayout(
     trackSearchResult: TrackSearchResult,
     trackSuggestedDates: TrackingSuggestedDates?,
     externalLinks: List<ExternalLink>,
+    artworkLinks: List<String>,
     isMerged: Boolean,
     openInBrowser: (String) -> Unit,
     openSheet: (BottomSheetScreen) -> Unit,
@@ -386,6 +389,10 @@ fun SheetLayout(
         is BottomSheetScreen.MergeSheet -> {
             MergeSheet(themeColors = themeColors, isMerged = isMerged)
         }
+
+        is BottomSheetScreen.ArtworkSheet -> {
+            ArtworkSheet(themeColors = themeColors, artworkLinks = artworkLinks)
+        }
     }
 }
 
@@ -399,6 +406,7 @@ sealed class BottomSheetScreen {
     object TrackingSheet : BottomSheetScreen()
     object ExternalLinksSheet : BottomSheetScreen()
     object MergeSheet : BottomSheetScreen()
+    object ArtworkSheet : BottomSheetScreen()
     class TrackingSearchSheet(val trackingService: TrackService, val alreadySelectedTrack: Track?) : BottomSheetScreen()
     class TrackingDateSheet(val trackAndService: TrackAndService, val trackingDate: TrackingDate, val trackSuggestedDates: TrackingSuggestedDates?) : BottomSheetScreen()
 }

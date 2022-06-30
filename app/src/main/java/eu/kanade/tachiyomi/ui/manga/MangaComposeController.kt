@@ -87,7 +87,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
                 trackingDateChanged = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
-            artworkClick = { },
+            artworkLinks = presenter.artworkLinks.collectAsState(),
             isMerged = presenter.isMerged.collectAsState(),
             similarClick = { router.pushController(SimilarController(manga).withFadeTransaction()) },
             externalLinks = presenter.externalLinks.collectAsState(),

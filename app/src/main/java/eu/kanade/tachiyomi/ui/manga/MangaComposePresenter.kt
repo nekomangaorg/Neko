@@ -80,6 +80,9 @@ class MangaComposePresenter(
     private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
     val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
 
+    private val _artworkLinks = MutableStateFlow(emptyList<String>())
+    val artworkLinks: StateFlow<List<String>> = _artworkLinks.asStateFlow()
+
     private val _isMerged = MutableStateFlow(manga.isMerged())
     val isMerged: StateFlow<Boolean> = _isMerged.asStateFlow()
 
@@ -102,7 +105,8 @@ class MangaComposePresenter(
         updateCategoryFlows()
         updateTrackingFlows()
         updateExternalFlows()
-        updateMergeFlows()
+        updateMergeFlow()
+        updateArtworkFlow()
     }
 
     fun onRefresh() {
@@ -373,9 +377,18 @@ class MangaComposePresenter(
     /**
      * Update flows for merge
      */
-    private fun updateMergeFlows() {
+    private fun updateMergeFlow() {
         presenterScope.launch {
             _isMerged.value = manga.isMerged()
+        }
+    }
+
+    /**
+     * Update flows for merge
+     */
+    private fun updateArtworkFlow() {
+        presenterScope.launch {
+            _artworkLinks.value = listOf(manga.thumbnail_url!!)
         }
     }
 
