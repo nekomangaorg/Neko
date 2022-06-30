@@ -34,7 +34,7 @@ fun TrackingChapterDialog(themeColors: ThemeColors, track: Track, onDismiss: () 
 
         val range = when (track.total_chapters > 0) {
             true -> track.total_chapters
-            false -> Int.MAX_VALUE
+            false -> 10000
         }
 
         AlertDialog(
