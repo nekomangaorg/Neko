@@ -71,7 +71,6 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterHolder
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChaptersSortBottomSheet
-import eu.kanade.tachiyomi.ui.manga.external.ExternalBottomSheet
 import eu.kanade.tachiyomi.ui.manga.merge.MergeSearchBottomSheet
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.reader.ReaderActivity
@@ -176,7 +175,6 @@ class MangaDetailsController :
     private var startingRangeChapterPos: Int? = null
     private var rangeMode: RangeMode? = null
     private var mergeSearchBottomSheet: MergeSearchBottomSheet? = null
-    private var externalBottomSheet: ExternalBottomSheet? = null
     var refreshTracker: Int? = null
     var chapterPopupMenu: Pair<Int, CascadePopupMenu>? = null
 
@@ -367,7 +365,6 @@ class MangaDetailsController :
         finishFloatingActionMode()
         trackingBottomSheet = null
         updateToolbarTitleAlpha(1f)
-        externalBottomSheet = null
         mergeSearchBottomSheet = null
         super.onDestroyView(view)
     }
@@ -1160,7 +1157,6 @@ class MangaDetailsController :
     }
 
     fun openInWebView(url: String) {
-        externalBottomSheet?.dismiss()
         if (isNotOnline()) return
         val activity = activity ?: return
 
@@ -1545,9 +1541,6 @@ class MangaDetailsController :
 
     override fun showExternalSheet() {
         if (isLocked()) return
-        externalBottomSheet =
-            ExternalBottomSheet(this)
-        externalBottomSheet?.show()
     }
 
     //endregion

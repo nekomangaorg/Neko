@@ -23,7 +23,6 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import jp.wasabeef.gap.Gap
-import onColor
 import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
@@ -31,8 +30,12 @@ fun ExternalLinksSheet(themeColors: ThemeColors, externalLinks: List<ExternalLin
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme) {
 
         BaseSheet(themeColors = themeColors) {
-            Gap(8.dp)
-            FlowRow(modifier = Modifier.fillMaxWidth(), mainAxisAlignment = FlowMainAxisAlignment.Start, crossAxisSpacing = 8.dp, mainAxisSpacing = 8.dp) {
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 8.dp),
+                mainAxisAlignment = FlowMainAxisAlignment.Start, crossAxisSpacing = 8.dp, mainAxisSpacing = 8.dp,
+            ) {
                 externalLinks.forEach {
                     LinkCard(externalLink = it, onLinkClick = onLinkClick)
                 }
@@ -46,14 +49,15 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String) -> Unit) 
     OutlinedCard(
         onClick = { onLinkClick(externalLink.getUrl()) },
         modifier = Modifier.height(48.dp),
-        colors = CardDefaults.outlinedCardColors(containerColor = Color(externalLink.getLogoColor())),
+        colors = CardDefaults.outlinedCardColors(containerColor = Color(externalLink.logoColor)),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxHeight()) {
 
-            if (externalLink.isOther().not()) {
+            if (externalLink.showLogo) {
                 Gap(8.dp)
+                Color.White
                 Image(
-                    painter = painterResource(id = externalLink.getLogo()), contentDescription = null,
+                    painter = painterResource(id = externalLink.logo), contentDescription = null,
                     modifier = Modifier
                         .size(28.dp)
                         .padding(top = 4.dp, bottom = 4.dp),
@@ -64,7 +68,7 @@ private fun LinkCard(externalLink: ExternalLink, onLinkClick: (String) -> Unit) 
             }
             Text(
                 text = externalLink.name,
-                style = MaterialTheme.typography.bodyMedium.copy(color = Color(externalLink.getLogoColor()).onColor()),
+                style = MaterialTheme.typography.bodyMedium.copy(color = Color(externalLink.onLogoColor)),
             )
             Gap(12.dp)
         }

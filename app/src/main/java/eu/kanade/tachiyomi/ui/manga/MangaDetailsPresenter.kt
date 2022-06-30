@@ -38,7 +38,6 @@ import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackItem
 import eu.kanade.tachiyomi.ui.manga.chapter.ChapterItem
-import eu.kanade.tachiyomi.ui.manga.external.ExternalItem
 import eu.kanade.tachiyomi.ui.manga.track.TrackingBottomSheet
 import eu.kanade.tachiyomi.ui.security.SecureActivityDelegate
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
@@ -110,8 +109,6 @@ class MangaDetailsPresenter(
     var tracks = emptyList<Track>()
 
     var trackList: List<TrackItem> = emptyList()
-
-    var externalLinksList: List<ExternalItem> = emptyList()
 
     var chapters: List<ChapterItem> = emptyList()
         private set
@@ -989,9 +986,6 @@ class MangaDetailsPresenter(
 
     private fun fetchExternalLinks() {
         presenterScope.launch {
-            externalLinksList = manga.getExternalLinks().map { external ->
-                ExternalItem(external)
-            }
         }
     }
 
