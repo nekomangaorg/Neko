@@ -53,7 +53,7 @@ fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, c
                     .navigationBarsPadding()
                     .imePadding(),
             ) {
-                Gap(24.dp)
+                Gap(16.dp)
                 content()
                 Gap(16.dp)
             }

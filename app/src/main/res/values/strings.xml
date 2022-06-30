@@ -568,6 +568,7 @@
     <string name="update_tracking_scoring_type">Update %1$s\'s scoring type</string>
     <string name="scoring_type_updated">Scoring type updated</string>
     <string name="could_not_update_scoring_">Could not update scoring type: %1$s</string>
+    <string name="current_date_">Current date: %1$s</string>
     <string name="started_reading_date">Started reading date</string>
     <string name="finished_reading_date">Finished reading date</string>
     <string name="myanimelist_relogin">Please log in to MAL again</string>
@@ -995,7 +996,8 @@
 
     <string name="open_log">Open log</string>
     <string name="open_in_webview">Open in WebView</string>
-    <string name="open_merged_in_webview">Open Merged Source</string>
+    <string name="open_merged_in_webview">Open Merged source in WebView</string>
+    <string name="remove_merged_source">Remove merged source</string>
     <string name="options">Options</string>
     <string name="pause">Pause</string>
     <string name="picture_saved">Picture saved</string>
@@ -1005,6 +1007,7 @@
     <string name="previous">Previous</string>
     <string name="refresh">Refresh</string>
     <string name="remove">Remove</string>
+    <string name="remove_date">Remove date</string>
     <string name="remove_from_">Remove from %1$s</string>
     <string name="reorder">Reorder</string>
     <string name="reset">Reset</string>

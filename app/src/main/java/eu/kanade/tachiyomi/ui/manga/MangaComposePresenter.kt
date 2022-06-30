@@ -15,6 +15,7 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
+import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
@@ -79,6 +80,9 @@ class MangaComposePresenter(
     private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
     val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
 
+    private val _isMerged = MutableStateFlow(manga.isMerged())
+    val isMerged: StateFlow<Boolean> = _isMerged.asStateFlow()
+
     override fun onCreate() {
         super.onCreate()
         if (!manga.initialized) {
@@ -98,6 +102,7 @@ class MangaComposePresenter(
         updateCategoryFlows()
         updateTrackingFlows()
         updateExternalFlows()
+        updateMergeFlows()
     }
 
     fun onRefresh() {
@@ -362,6 +367,15 @@ class MangaComposePresenter(
     private fun updateExternalFlows() {
         presenterScope.launch {
             _externalLinks.value = manga.getExternalLinks()
+        }
+    }
+
+    /**
+     * Update flows for merge
+     */
+    private fun updateMergeFlows() {
+        presenterScope.launch {
+            _isMerged.value = manga.isMerged()
         }
     }
 

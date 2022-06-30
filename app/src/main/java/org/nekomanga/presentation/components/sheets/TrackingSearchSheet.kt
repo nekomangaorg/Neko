@@ -287,7 +287,8 @@ private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, 
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .padding(4.dp)
-                        .size(24.dp),
+                        .size(24.dp)
+                        .background(color = MaterialTheme.colorScheme.surface),
                     tint = outlineColor,
                 )
             }
