@@ -10,9 +10,11 @@ import androidx.appcompat.widget.SearchView
 import androidx.recyclerview.widget.LinearLayoutManager
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.databinding.SettingsSearchControllerBinding
+import eu.kanade.tachiyomi.ui.base.SmallToolbarInterface
 import eu.kanade.tachiyomi.ui.base.controller.NucleusController
 import eu.kanade.tachiyomi.ui.main.FloatingSearchInterface
 import eu.kanade.tachiyomi.ui.setting.SettingsController
+import eu.kanade.tachiyomi.util.view.activityBinding
 import eu.kanade.tachiyomi.util.view.liftAppbarWith
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 
@@ -23,13 +25,14 @@ import eu.kanade.tachiyomi.util.view.withFadeTransaction
 class SettingsSearchController :
     NucleusController<SettingsSearchControllerBinding, SettingsSearchPresenter>(),
     FloatingSearchInterface,
+    SmallToolbarInterface,
     SettingsSearchAdapter.OnTitleClickListener {
 
     /**
      * Adapter containing search results grouped by lang.
      */
     private var adapter: SettingsSearchAdapter? = null
-    private lateinit var searchView: SearchView
+    private var searchView: SearchView? = null
 
     init {
         setHasOptionsMenu(true)
@@ -60,31 +63,15 @@ class SettingsSearchController :
         // Inflate menu.
         inflater.inflate(R.menu.settings_main, menu)
 
-        // Initialize search menu
-        val searchItem = menu.findItem(R.id.action_search)
-        searchView = searchItem.actionView as SearchView
-        searchView.maxWidth = Int.MAX_VALUE
+        val searchItem = activityBinding?.searchToolbar?.searchItem
+        searchView = activityBinding?.searchToolbar?.searchView
 
-        // Change hint to show "search settings."
-        searchView.queryHint = applicationContext?.getString(R.string.search_settings)
+        activityBinding?.searchToolbar?.setQueryHint(applicationContext?.getString(R.string.search_settings), false)
 
-        searchItem.expandActionView()
+        searchItem?.expandActionView()
         setItems(getResultSet())
 
-        searchItem.setOnActionExpandListener(
-            object : MenuItem.OnActionExpandListener {
-                override fun onMenuItemActionExpand(item: MenuItem?): Boolean {
-                    return true
-                }
-
-                override fun onMenuItemActionCollapse(item: MenuItem?): Boolean {
-                    router.popCurrentController()
-                    return false
-                }
-            },
-        )
-
-        searchView.setOnQueryTextListener(
+        searchView?.setOnQueryTextListener(
             object : SearchView.OnQueryTextListener {
                 override fun onQueryTextSubmit(query: String?): Boolean {
                     setItems(getResultSet(query))
@@ -101,7 +88,11 @@ class SettingsSearchController :
             },
         )
 
-        searchView.setQuery(lastSearch, true)
+        searchView?.setQuery(lastSearch, true)
+    }
+
+    override fun onActionViewCollapse(item: MenuItem?) {
+        router.popCurrentController()
     }
 
     override fun onViewCreated(view: View) {
@@ -159,7 +150,7 @@ class SettingsSearchController :
      * Opens a catalogue with the given search.
      */
     override fun onTitleClick(ctrl: SettingsController) {
-        searchView.query.let {
+        searchView?.query.let {
             lastSearch = it.toString()
         }
 

@@ -32,14 +32,14 @@ object SettingsSearchHelper {
      */
     private val settingControllersList: List<KClass<out SettingsController>> = listOf(
         SettingsAdvancedController::class,
+        SettingsAppearanceController::class,
         SettingsBackupController::class,
         SettingsDownloadController::class,
         SettingsGeneralController::class,
-        SettingsAppearanceController::class,
-        SettingsSecurityController::class,
         SettingsLibraryController::class,
         SettingsMainController::class,
         SettingsReaderController::class,
+        SettingsSecurityController::class,
         SettingsSiteController::class,
         SettingsTrackingController::class,
     )
@@ -55,8 +55,7 @@ object SettingsSearchHelper {
         launchNow {
             settingControllersList.forEach { kClass ->
                 val ctrl = kClass.createInstance()
-                val settingsPrefScreen =
-                    ctrl.setupPreferenceScreen(preferenceManager.createPreferenceScreen(context))
+                val settingsPrefScreen = ctrl.setupPreferenceScreen(preferenceManager.createPreferenceScreen(context))
                 val prefCount = settingsPrefScreen.preferenceCount
                 for (i in 0 until prefCount) {
                     val rootPref = settingsPrefScreen.getPreference(i)
