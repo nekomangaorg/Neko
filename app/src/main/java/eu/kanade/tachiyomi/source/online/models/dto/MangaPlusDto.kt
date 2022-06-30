@@ -11,13 +11,8 @@ data class MangaPlusResponse(
 
 @Serializable
 data class MangaPlusErrorResult(
-    val englishPopup: Popup,
     val popups: List<Popup> = emptyList(),
-) {
-
-    fun langPopup(lang: Language): Popup =
-        popups.firstOrNull { it.language == lang } ?: englishPopup
-}
+)
 
 @Serializable
 data class Popup(
