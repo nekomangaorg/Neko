@@ -117,7 +117,7 @@ class RecentsController(bundle: Bundle? = null) :
     private var showingDownloads = false
     var headerHeight = 0
     private var ogRadius = 0f
-    private var deviceRadius = 0f
+    private var deviceRadius = 0f to 0f
 
     private var query = ""
         set(value) {
@@ -197,9 +197,12 @@ class RecentsController(bundle: Bundle? = null) :
                     setBottomPadding()
                 }
                 deviceRadius = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    it.toWindowInsets()?.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)?.radius?.toFloat() ?: ogRadius
+                    val wInsets = it.toWindowInsets()
+                    val lCorner = wInsets?.getRoundedCorner(RoundedCorner.POSITION_TOP_LEFT)
+                    val rCorner = wInsets?.getRoundedCorner(RoundedCorner.POSITION_TOP_RIGHT)
+                    (lCorner?.radius?.toFloat() ?: 0f) to (rCorner?.radius?.toFloat() ?: 0f)
                 } else {
-                    ogRadius
+                    ogRadius to ogRadius
                 }
             },
             onBottomNavUpdate = {

@@ -60,6 +60,7 @@ import androidx.recyclerview.widget.RecyclerView.SmoothScroller
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
+import com.google.android.material.math.MathUtils
 import com.google.android.material.navigation.NavigationBarItemView
 import com.google.android.material.navigation.NavigationBarMenuView
 import com.google.android.material.navigation.NavigationBarView
@@ -80,7 +81,6 @@ import eu.kanade.tachiyomi.widget.StaggeredGridLayoutManagerAccurateOffset
 import eu.kanade.tachiyomi.widget.cascadeMenuStyler
 import me.saket.cascade.CascadePopupMenu
 import kotlin.math.max
-import kotlin.math.min
 import kotlin.math.pow
 import kotlin.math.roundToInt
 
@@ -528,18 +528,30 @@ fun TextView.setTextColorAlpha(alpha: Int) {
 
 fun View.updateGradiantBGRadius(
     ogRadius: Float,
-    deviceRadius: Float,
+    deviceRadius: Pair<Float, Float>,
     progress: Float,
     vararg updateOtherViews: View,
 ) {
     (background as? GradientDrawable)?.let { drawable ->
-        val lerp = min(ogRadius, deviceRadius) * (1 - progress) +
-            max(ogRadius, deviceRadius) * progress
+        val hasRail = resources.configuration.screenWidthDp >= 720
+        val lerpL = MathUtils.lerp(
+            ogRadius,
+            if (hasRail && resources.isLTR) 0f else deviceRadius.first,
+            max(0f, progress),
+        )
+        val lerpR = MathUtils.lerp(
+            ogRadius,
+            if (hasRail && !resources.isLTR) 0f else deviceRadius.second,
+            max(0f, progress),
+        )
         drawable.shape = GradientDrawable.RECTANGLE
-        drawable.cornerRadii = floatArrayOf(lerp, lerp, lerp, lerp, 0f, 0f, 0f, 0f)
+        drawable.cornerRadii = floatArrayOf(lerpL, lerpL, lerpR, lerpR, 0f, 0f, 0f, 0f)
         background = drawable
         updateOtherViews.forEach {
-            it.background = drawable
+            (it.background as? GradientDrawable)?.let { tDrawable ->
+                tDrawable.shape = GradientDrawable.RECTANGLE
+                tDrawable.cornerRadii = floatArrayOf(lerpL, lerpL, lerpR, lerpR, 0f, 0f, 0f, 0f)
+            }
         }
     }
 }
