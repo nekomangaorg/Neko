@@ -76,6 +76,26 @@
         <item name="android:minHeight">?attr/mainActionBarSize</item>
     </style>
 
+    <style name="Tachiyomi.PreferenceTheme" parent="@style/PreferenceThemeOverlay">
+        <item name="switchPreferenceCompatStyle">@style/Widget.Tachiyomi.SwitchPreferenceCompat</item>
+    </style>
+
+    <style name="Widget.Tachiyomi.SwitchPreferenceCompat" parent="Preference.SwitchPreferenceCompat.Material">
+        <item name="widgetLayout">@layout/preference_widget_material_switch</item>
+    </style>
+
+    <style name="Widget.Tachiyomi.CardView.Elevated" parent="Widget.Material3.CardView.Elevated">
+        <item name="shapeAppearance">?attr/shapeAppearanceCornerSmall</item>
+    </style>
+
+    <style name="Widget.Tachiyomi.CardView.Outlined" parent="Widget.Material3.CardView.Outlined">
+        <item name="shapeAppearance">?attr/shapeAppearanceCornerSmall</item>
+    </style>
+
+    <style name="Widget.Tachiyomi.CardView.Filled" parent="Widget.Material3.CardView.Filled">
+        <item name="shapeAppearance">?attr/shapeAppearanceCornerSmall</item>
+    </style>
+
     <style name="Widget.Tachiyomi.CardView.Tracker" parent="Widget.Material3.CardView.Outlined">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

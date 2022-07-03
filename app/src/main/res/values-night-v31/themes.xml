@@ -8,6 +8,7 @@
         <item name="colorSecondaryVariant">@android:color/system_accent2_100</item>
         <item name="colorTertiary">@android:color/system_accent3_800</item>
         <item name="colorOnTertiary">@color/md_white_1000</item>
+        <item name="colorOnPrimary">@android:color/system_accent1_900</item>
         <item name="colorPrimaryVariant">@android:color/system_neutral2_800</item>
         <item name="colorSurface">@android:color/system_neutral1_900</item>
         <item name="colorControlHighlight">@color/secondary_highlight</item>

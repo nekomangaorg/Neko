@@ -4,6 +4,7 @@
     <color name="primaryVariantTachiyomi">@color/md_white_1000</color>
     <color name="colorPrimaryInactive">#C2424242</color>
     <color name="primaryTachiyomi">@color/neko_primary</color>
+    <color name="onPrimaryTachiyomi">@color/md_white_1000</color>
     <color name="primaryInverseTachiyomi">@color/neko_primary</color>
     <color name="splashBackground">@color/primaryTachiyomi</color>
     <color name="secondaryTachiyomi">@color/neko_accent</color>
@@ -80,6 +81,7 @@
     <color name="secondaryVariantDuskDawn">#4c163a</color>
     <color name="backgroundDuskDawn">#f7f4f8</color>
     <color name="primaryVariantDuskDawn">#efe3f3</color>
+    <color name="onPrimaryDuskDawn">@color/onPrimaryTachiyomi</color>
     <color name="colorOnBackgroundDuskDawn">#DE240728</color>
     <color name="appBarTextDuskDawn">#DE4c0d4b</color>
 
@@ -90,6 +92,7 @@
     <color name="primaryTealSapphire">#5f9c96</color>
     <color name="primaryInverseTealSapphire">#a1e1db</color>
     <color name="primaryVariantTealSapphire">#d4f1e6</color>
+    <color name="onPrimaryTealSapphire">@color/onPrimaryTachiyomi</color>
     <color name="backgroundTealSapphire">#f0f7f7</color>
     <color name="colorOnBackgroundTealSapphire">#DE072926</color>
     <color name="tabBarIconColorTealSapphire">#DE072927</color>
@@ -99,6 +102,7 @@
     <color name="primaryLime">#57BD79</color>
     <color name="primaryVariantLime">#D9ECE0</color>
     <color name="primaryInverseLime">#AEDFC0</color>
+    <color name="onPrimaryLime">@color/onPrimaryTachiyomi</color>
     <color name="secondaryLime">#1DA750</color>
     <color name="secondaryVariantLime">#065124</color>
     <color name="rippleColorLime">#1F4AF88A</color>
@@ -140,6 +144,7 @@
     <!-- Strawberry Daiquiri Theme -->
     <color name="primaryStrawberry">#d31d3b</color>
     <color name="primaryVariantStrawberry">#F3E7E7</color>
+    <color name="onPrimaryStrawberry">@color/onPrimaryTachiyomi</color>
     <color name="primaryInverseStrawberry">#ef8e9e</color>
     <color name="secondaryStrawberry">#ED4A65</color>
     <color name="rippleColorStrawberry">#1FED4A65</color>
@@ -150,6 +155,7 @@
     <color name="primaryTako">#463561</color>
     <color name="primaryVariantTako">#E5DCF4</color>
     <color name="primaryInverseTako">#ac8fd9</color>
+    <color name="onPrimaryTako">@color/onPrimaryTachiyomi</color>
     <color name="secondaryTako">#66577E</color>
     <color name="onSecondaryTako">#F3B375</color>
     <color name="secondaryVariantTako">#3f2b49</color>

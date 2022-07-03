@@ -24,13 +24,17 @@
         <item name="colorPrimaryVariant">@color/primaryVariantTachiyomi</item>
         <item name="colorSurface">@color/background</item>
         //old colorSecondary
+        <item name="colorSurfaceVariant">?colorPrimaryVariant</item>
+        //old colorSecondary
         <item name="colorOnSurface">@color/colorOnSurface</item>
         //old colorOnSecondary
         <item name="colorSecondary">@color/secondaryTachiyomi</item>
         //colorAccent
         <item name="colorOnSecondary">@color/md_white_1000</item>
+        <item name="colorOnPrimary">@color/onPrimaryTachiyomi</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantTachiyomi</item>
         // much darker / lighter version of colorSecondary
+        <item name="colorPrimaryContainer">@color/primary_container</item>
         <item name="colorSecondaryContainer">@color/secondary_container</item>
         <item name="background">@color/background</item>
         <item name="colorOnBackground">@color/colorOnBackground</item>
@@ -45,6 +49,11 @@
         <item name="android:listDivider">@drawable/line_divider</item>
         <item name="colorControlHighlight">@color/rippleColorTachiyomi</item>
         <item name="actionModeStyle">@style/Widget.Tachiyomi.ActionMode</item>
+        <item name="materialSwitchStyle">@style/Widget.Material3.CompoundButton.MaterialSwitch</item>
+        <item name="materialCardViewOutlinedStyle">@style/Widget.Tachiyomi.CardView.Outlined</item>
+        <item name="materialCardViewFilledStyle">@style/Widget.Tachiyomi.CardView.Filled</item>
+        <item name="materialCardViewElevatedStyle">@style/Widget.Tachiyomi.CardView.Elevated</item>
+        <item name="switchPreferenceCompatStyle">@style/Widget.Tachiyomi.SwitchPreferenceCompat</item>
         <item name="android:colorBackground">?background</item>
         <item name="android:textColorSecondary">@color/text_color_secondary</item>
         <item name="android:textColorHint">@color/text_color_hint</item>
@@ -71,7 +80,7 @@
         <item name="windowActionModeOverlay">true</item>
         <item name="bottomSheetDialogTheme">@style/BottomSheetDialogTheme</item>
         <item name="actionBarTheme">@style/Theme.ActionBar.DayNight</item>
-        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+        <item name="preferenceTheme">@style/Tachiyomi.PreferenceTheme</item>
 
         <!-- Custom Attributes-->
         <item name="actionBarTintColor">?attr/colorOnBackground</item>
@@ -99,6 +108,7 @@
     <style name="Theme.Tachiyomi.FlatLime">
         <item name="colorPrimary">@color/primaryLime</item>
         <item name="colorPrimaryVariant">@color/primaryVariantLime</item>
+        <item name="colorOnPrimary">@color/onPrimaryLime</item>
         <item name="colorPrimaryInverse">@color/primaryInverseLime</item>
         <item name="colorSecondary">@color/secondaryLime</item>
         <item name="colorOnSecondary">@color/textColorPrimaryInverse</item>
@@ -121,6 +131,7 @@
         <item name="colorPrimary">@color/primaryDuskDawn</item>
         <item name="colorPrimaryInverse">@color/primaryInverseDuskDawn</item>
         <item name="colorPrimaryVariant">@color/primaryVariantDuskDawn</item>
+        <item name="colorOnPrimary">@color/onPrimaryDuskDawn</item>
         <item name="colorSecondary">@color/secondaryDuskDawn</item>
         <item name="colorControlHighlight">@color/rippleColorDuskDawn</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantDuskDawn</item>
@@ -138,6 +149,7 @@
         <item name="colorPrimary">@color/primaryTealSapphire</item>
         <item name="colorPrimaryInverse">@color/primaryInverseTealSapphire</item>
         <item name="colorPrimaryVariant">@color/primaryVariantTealSapphire</item>
+        <item name="colorOnPrimary">@color/onPrimaryTealSapphire</item>
         <item name="colorSecondary">@color/secondaryTealSapphire</item>
         <item name="colorControlHighlight">@color/rippleColorTealSapphire</item>
         <item name="tabBarIconColor">@color/tabBarIconColorTealSapphire</item>
@@ -184,6 +196,7 @@
         <item name="colorPrimary">@color/primaryStrawberry</item>
         <item name="colorPrimaryVariant">@color/primaryVariantStrawberry</item>
         <item name="colorPrimaryInverse">@color/primaryInverseStrawberry</item>
+        <item name="colorOnPrimary">@color/onPrimaryStrawberry</item>
         <item name="colorSecondary">@color/secondaryStrawberry</item>
         <item name="colorControlHighlight">@color/rippleColorStrawberry</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantStrawberry</item>
@@ -198,6 +211,7 @@
     <style name="Theme.Tachiyomi.Tako">
         <item name="colorPrimary">@color/primaryTako</item>
         <item name="colorPrimaryInverse">@color/primaryInverseTako</item>
+        <item name="colorOnPrimary">@color/onPrimaryTako</item>
         <item name="colorSecondary">@color/secondaryTako</item>
         <item name="colorOnSecondary">@color/onSecondaryTako</item>
         <item name="colorSecondaryVariant">@color/secondaryVariantTako</item>
@@ -223,6 +237,7 @@
         <item name="colorPrimary">@color/secondaryMangaDex</item>
         <item name="colorSecondary">@color/secondaryMangaDex</item>
         <item name="colorSecondaryVariant">?attr/colorSecondary</item>
+        <item name="colorOnPrimary">@color/md_white_1000</item>
         <item name="colorOnSecondary">@color/md_black_1000</item>
         <item name="colorControlHighlight">@color/secondaryMangaDex</item>
         <item name="unreadBadgeColor">?attr/colorSecondary</item>

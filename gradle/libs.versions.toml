@@ -16,7 +16,7 @@ roboelectric_version = "4.8.1"
 google-services-gradle = "com.google.gms:google-services:4.3.13"
 firebase-gradle = "com.google.firebase:firebase-crashlytics-gradle:2.9.1"
 
-material = "com.google.android.material:material:1.6.0"
+material = "com.google.android.material:material:1.7.0-alpha02"
 firebase-analytics = "com.google.firebase:firebase-analytics-ktx:21.0.0"
 firebase-crashlytics = "com.google.firebase:firebase-crashlytics-ktx:18.2.11"
 play-services = "com.google.android.gms:play-services-gcm:17.0.0"

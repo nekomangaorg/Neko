@@ -40,20 +40,19 @@
             app:title="@string/scale_type"
             android:entries="@array/image_scale_type" />
 
-
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/landscape_zoom"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/zoom_double_page_spreads"
             android:textColor="?attr/colorOnBackground" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/navigate_pan"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/navigate_pan"
             android:textColor="?attr/colorOnBackground" />
 
@@ -81,27 +80,27 @@
             app:title="@string/zoom_start_position"
             android:entries="@array/zoom_start" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/invert_double_pages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/invert_double_pages"
             android:textColor="?attr/colorOnBackground" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/crop_borders"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/crop_borders"
             android:textColor="?attr/colorOnBackground" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/page_transitions"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="0dp"
+            android:layout_marginTop="16dp"
             android:text="@string/animate_page_transitions"
             android:textColor="?attr/colorOnBackground" />
 
@@ -130,20 +129,20 @@
             app:title="@string/pref_webtoon_side_padding"
             android:entries="@array/webtoon_side_padding" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/crop_borders_webtoon"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/crop_borders"
             android:textColor="?attr/colorOnBackground"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/webtoon_enable_zoom_out"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/enable_zoom_out"
             android:textColor="?attr/colorOnBackground"
             app:layout_constraintTop_toBottomOf="@id/webtoon_side_padding" />
@@ -152,15 +151,15 @@
             android:id="@+id/webtoon_page_layout"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             app:title="@string/page_layout"
             android:entries="@array/webtoon_page_layouts" />
 
-        <com.google.android.material.switchmaterial.SwitchMaterial
+        <com.google.android.material.materialswitch.MaterialSwitch
             android:id="@+id/webtoon_invert_double_pages"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="16dp"
             android:text="@string/invert_double_pages"
             android:textColor="?attr/colorOnBackground" />
     </LinearLayout>
