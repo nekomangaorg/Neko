@@ -38,7 +38,7 @@ iconics-material = "com.mikepenz:community-material-typeface:6.4.95.0-kotlin"
 iconics-dx = "com.mikepenz:material-design-icons-dx-typeface:5.0.1.2-kotlin"
 iconics-outlined = "com.mikepenz:google-material-typeface-outlined:4.0.0.1-kotlin"
 
-jsoup = "org.jsoup:jsoup:1.15.1"
+jsoup = "org.jsoup:jsoup:1.15.2"
 
 
 nucleus = { module = "info.android15.nucleus:nucleus", version.ref = "nucleus_version" }
