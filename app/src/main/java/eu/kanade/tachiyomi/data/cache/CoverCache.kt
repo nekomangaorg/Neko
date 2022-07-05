@@ -203,6 +203,17 @@ class CoverCache(val context: Context) {
         }
     }
 
+    /**
+     * Returns the cover from cache.
+     *
+     * @param thumbnailUrl the thumbnail url.
+     * @return cover image.
+     */
+    fun getCoverFile(url: String): File {
+        val hashKey = DiskUtil.hashKeyForDisk((url))
+        return File(onlineCoverDirectory, url)
+    }
+
     fun deleteFromCache(name: String?) {
         if (name.isNullOrEmpty()) return
         val file = getCoverFile(MangaImpl().apply { thumbnail_url = name })

@@ -45,6 +45,7 @@ import eu.kanade.tachiyomi.data.database.models.Track
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import eu.kanade.tachiyomi.data.track.TrackService
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
@@ -92,6 +93,7 @@ fun MangaScreen(
     externalLinks: State<List<ExternalLink>>,
     isMerged: State<Boolean>,
     artworkLinks: State<List<String>>,
+    coverActions: CoverActions,
     shareClick: (Context) -> Unit = {},
     genreClick: (String) -> Unit = {},
     genreLongClick: (String) -> Unit = {},
@@ -175,6 +177,7 @@ fun MangaScreen(
                         externalLinks = externalLinks.value,
                         isMerged = isMerged.value,
                         artworkLinks = artworkLinks.value,
+                        coverActions = coverActions,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
                 }
@@ -289,10 +292,11 @@ fun SheetLayout(
     artworkLinks: List<String>,
     isMerged: Boolean,
     openInBrowser: (String) -> Unit,
+    coverActions: CoverActions,
     openSheet: (BottomSheetScreen) -> Unit,
     closeSheet: () -> Unit,
 ) {
-
+    val context = LocalContext.current
     when (currentScreen) {
         is BottomSheetScreen.CategoriesSheet -> EditCategorySheet(
             addingToLibrary = currentScreen.addingToLibrary,
@@ -391,7 +395,7 @@ fun SheetLayout(
         }
 
         is BottomSheetScreen.ArtworkSheet -> {
-            ArtworkSheet(themeColors = themeColors, artworkLinks = artworkLinks)
+            ArtworkSheet(themeColors = themeColors, artworkLinks = artworkLinks, saveClick = coverActions.save, shareClick = { url -> coverActions.share(context, url) }, setClick = coverActions.set)
         }
     }
 }

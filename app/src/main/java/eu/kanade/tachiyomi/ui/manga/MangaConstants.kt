@@ -1,5 +1,6 @@
 package eu.kanade.tachiyomi.ui.manga
 
+import android.content.Context
 import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
 
@@ -17,5 +18,11 @@ object MangaConstants {
         val trackSearchItemClick: (TrackingConstants.TrackAndService) -> Unit,
         val trackingRemoved: (Boolean, TrackService) -> Unit,
         val trackingDateChanged: (TrackingConstants.TrackDateChange) -> Unit,
+    )
+
+    class CoverActions(
+        val share: (Context, String) -> Unit,
+        val set: (String) -> Unit,
+        val save: (String) -> Unit,
     )
 }

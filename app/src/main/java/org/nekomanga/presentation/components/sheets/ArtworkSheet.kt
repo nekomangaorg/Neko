@@ -1,7 +1,5 @@
 package org.nekomanga.presentation.components.sheets
 
-import androidx.compose.animation.core.Animatable
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -13,8 +11,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
-import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
@@ -22,6 +18,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,31 +27,27 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
+import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.data.image.coil.AlternativeMangaCover
 import jp.wasabeef.gap.Gap
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
-import kotlin.math.roundToInt
 
 @Composable
-fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>) {
+fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick: (String) -> Unit, setClick: (String) -> Unit, shareClick: (String) -> Unit) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
         Box(
             modifier = Modifier
@@ -108,7 +101,7 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>) {
                     items(images) { url ->
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(url)
+                                .data(AlternativeMangaCover(url))
                                 .placeholder(Pastel.getColorLight())
                                 .build(),
                             contentDescription = null,
@@ -133,58 +126,25 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>) {
                         .fillMaxWidth(),
                 ) {
                     Gap(8.dp)
-                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
-                        Text(text = "Save", color = MaterialTheme.colorScheme.surface)
+                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f), colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor)) {
+                        Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.surface)
                     }
                     Gap(8.dp)
-                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
-                        Text(text = "Set", color = MaterialTheme.colorScheme.surface)
+                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f), colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor)) {
+                        Text(text = stringResource(id = R.string.set), color = MaterialTheme.colorScheme.surface)
                     }
                     Gap(8.dp)
-                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f)) {
-                        Text(text = "Share", color = MaterialTheme.colorScheme.surface)
+                    FilledIconButton(
+                        onClick = { shareClick(currentImage) },
+                        modifier = Modifier.weight(1f),
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                    ) {
+                        Text(text = stringResource(id = R.string.share), color = MaterialTheme.colorScheme.surface)
                     }
                     Gap(8.dp)
                 }
             }
         }
-    }
-}
-
-@Composable
-fun Card(
-    url: String,
-    advance: () -> Unit = {},
-) {
-    val coroutineScope = rememberCoroutineScope()
-    var offsetX = remember(url) { Animatable(0f) }
-
-    Box(
-        modifier = Modifier
-            .offset { IntOffset(offsetX.value.roundToInt(), 0) }
-            .fillMaxSize()
-            .padding(8.dp)
-            .clip(RoundedCornerShape(Shapes.coverRadius))
-            .background(color = Color.White)
-            .clickable {
-                coroutineScope.launch {
-                    offsetX.animateTo(
-                        targetValue = 3000F,
-                    )
-                }
-                coroutineScope.launch {
-                    delay(400)
-                    advance()
-                }
-            },
-    ) {
-        Image(
-            painter = rememberAsyncImagePainter(url),
-            contentDescription = null,
-            modifier = Modifier
-                .fillMaxSize()
-                .clip(RoundedCornerShape(Shapes.coverRadius)),
-        )
     }
 }
 

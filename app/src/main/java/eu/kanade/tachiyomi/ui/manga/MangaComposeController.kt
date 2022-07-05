@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.util.getSlug
@@ -92,6 +93,11 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             similarClick = { router.pushController(SimilarController(manga).withFadeTransaction()) },
             externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = { context -> viewScope.launch { shareManga(context) } },
+            coverActions = CoverActions(
+                share = { context, url -> viewScope.launch { shareCover(context, url) } },
+                set = { url -> },
+                save = { url -> },
+            ),
             genreClick = {},
             genreLongClick = {},
             quickReadText = "",
@@ -121,6 +127,24 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
     private fun copyToClipboard(context: Context, content: String, @StringRes label: Int) {
         val clipboard = context.getSystemService<ClipboardManager>()!!
         clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(label), content))
+    }
+
+    suspend fun shareCover(context: Context, urlOfCover: String) {
+        val cover = presenter.shareMangaCover(context.sharedCacheDir(), urlOfCover)
+        withUIContext {
+            val stream = cover?.getUriCompat(context)
+            try {
+                val intent = Intent(Intent.ACTION_SEND).apply {
+                    putExtra(Intent.EXTRA_STREAM, stream)
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    clipData = ClipData.newRawUri(null, stream)
+                    type = "image/*"
+                }
+                startActivity(Intent.createChooser(intent, context.getString(R.string.share)))
+            } catch (e: Exception) {
+                context.toast(e.message)
+            }
+        }
     }
 
     suspend fun shareManga(context: Context) {

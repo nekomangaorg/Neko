@@ -36,8 +36,8 @@ import java.io.File
 import java.net.HttpURLConnection
 import java.util.Date
 
-class MangaCoverFetcher(
-    private val manga: Manga,
+class AlternativeMangaCoverFetcher(
+    private val cover: AlternativeMangaCover,
     private val sourceLazy: Lazy<HttpSource?>,
     private val options: Options,
     private val coverCache: CoverCache,
@@ -46,18 +46,18 @@ class MangaCoverFetcher(
 ) : Fetcher {
 
     // For non-custom cover
-    private val diskCacheKey: String? by lazy { MangaCoverKeyer().key(manga, options) }
+    private val diskCacheKey: String? by lazy { AlternativeMangaCoverKeyer().key(cover, options) }
     private lateinit var url: String
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
 
     override suspend fun fetch(): FetchResult {
         // diskCacheKey is thumbnail_url
-        url = manga.thumbnail_url ?: error("No cover specified")
+        url = cover.url
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
             Type.File -> {
-                setRatioAndColorsInScope(manga, File(url.substringAfter("file://")))
+                // setRatioAndColorsInScope(manga, File(url.substringAfter("file://")))
                 fileLoader(File(url.substringAfter("file://")))
             }
             null -> error("Invalid image")
@@ -69,21 +69,11 @@ class MangaCoverFetcher(
         val networkRead = options.networkCachePolicy.readEnabled
         val onlyCache = !networkRead && diskRead
         val shouldFetchRemotely = networkRead && !diskRead && !onlyCache
-        val useCustomCover = options.parameters.value(useCustomCover) ?: true
-        // Use custom cover if exists
-        if (!shouldFetchRemotely) {
-            val customCoverFile by lazy { coverCache.getCustomCoverFile(manga) }
-            if (useCustomCover && customCoverFile.exists()) {
-                setRatioAndColorsInScope(manga, customCoverFile)
-                return fileLoader(customCoverFile)
-            }
-        }
-        val coverFile = coverCache.getCoverFile(manga)
+
+        val coverFile = coverCache.getCoverFile(url)
         if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
-            if (!manga.favorite) {
-                coverFile.setLastModified(Date().time)
-            }
-            setRatioAndColorsInScope(manga, coverFile)
+            coverFile.setLastModified(Date().time)
+            // setRatioAndColorsInScope(manga, coverFile)
             return fileLoader(coverFile)
         }
         var snapshot = readFromDiskCache()
@@ -93,12 +83,12 @@ class MangaCoverFetcher(
                 val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, coverFile)
                 if (snapshotCoverCache != null) {
                     // Read from cover cache after added to library
-                    setRatioAndColorsInScope(manga, snapshotCoverCache)
+                    //setRatioAndColorsInScope(manga, snapshotCoverCache)
                     return fileLoader(snapshotCoverCache)
                 }
 
                 // Read from snapshot
-                setRatioAndColorsInScope(manga)
+                // setRatioAndColorsInScope(manga)
                 return SourceResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -112,7 +102,7 @@ class MangaCoverFetcher(
             try {
                 // Read from cover cache after library manga cover updated
                 val responseCoverCache = writeResponseToCoverCache(response, coverFile)
-                setRatioAndColorsInScope(manga)
+                // setRatioAndColorsInScope(manga)
                 if (responseCoverCache != null) {
                     return fileLoader(responseCoverCache)
                 }
@@ -162,8 +152,6 @@ class MangaCoverFetcher(
 
         val diskRead = options.diskCachePolicy.readEnabled
         val networkRead = options.networkCachePolicy.readEnabled
-        val onlyCache = !networkRead && diskRead
-        val forceNetwork = networkRead && !diskRead
         when {
             !networkRead && diskRead -> {
                 request.cacheControl(CacheControl.FORCE_CACHE)
@@ -300,14 +288,14 @@ class MangaCoverFetcher(
     class Factory(
         private val callFactoryLazy: Lazy<Call.Factory>,
         private val diskCacheLazy: Lazy<DiskCache>,
-    ) : Fetcher.Factory<Manga> {
+    ) : Fetcher.Factory<AlternativeMangaCover> {
 
         private val coverCache: CoverCache by injectLazy()
         private val sourceManager: SourceManager by injectLazy()
 
-        override fun create(data: Manga, options: Options, imageLoader: ImageLoader): Fetcher {
-            val source = lazy { sourceManager.get(data.source) as? HttpSource }
-            return MangaCoverFetcher(data, source, options, coverCache, callFactoryLazy, diskCacheLazy)
+        override fun create(data: AlternativeMangaCover, options: Options, imageLoader: ImageLoader): Fetcher {
+            val source = lazy { sourceManager.getMangadex() }
+            return AlternativeMangaCoverFetcher(data, source, options, coverCache, callFactoryLazy, diskCacheLazy)
         }
     }
 
@@ -316,9 +304,9 @@ class MangaCoverFetcher(
     }
 
     companion object {
-        const val useCustomCover = "use_custom_cover"
-        
         private val CACHE_CONTROL_FORCE_NETWORK_NO_CACHE = CacheControl.Builder().noCache().noStore().build()
         private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }
+
+data class AlternativeMangaCover(val url: String)

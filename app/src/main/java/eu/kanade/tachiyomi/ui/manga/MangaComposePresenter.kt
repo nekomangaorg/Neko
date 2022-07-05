@@ -1,6 +1,7 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.os.Build
+import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -292,13 +293,18 @@ class MangaComposePresenter(
         }
     }
 
-    suspend fun shareMangaCover(destDir: File): File? {
+    /**
+     * share the cover that is written in the destination folder.  If a url is  passed in then share that one instead of the
+     * manga thumbnail url one
+     */
+    suspend fun shareMangaCover(destDir: File, url: String = ""): File? {
         return withIOContext {
             return@withIOContext if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 destDir.deleteRecursively()
                 try {
-                    saveCover(destDir)
+                    saveCover(destDir, url)
                 } catch (e: java.lang.Exception) {
+                    XLog.e("error", e)
                     null
                 }
             } else {
@@ -309,13 +315,18 @@ class MangaComposePresenter(
     }
 
     /**
-     * Save Cover to directory
+     * Save Cover to directory, if given a url save that specific cover
      */
-    private fun saveCover(directory: File): File {
+    private fun saveCover(directory: File, url: String = ""): File {
         val cover =
-            coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
-                manga,
-            )
+            if (url.isBlank()) {
+                coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
+                    manga,
+                )
+            } else {
+                coverCache.getCoverFile(url)
+            }
+
         val type = ImageUtil.findImageType(cover.inputStream())
             ?: throw Exception("Not an image")
 
