@@ -8,6 +8,9 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
@@ -46,6 +49,8 @@ class MangaHeaderHolder(
 
                 val quickReadText = getQuickReadText(presenter, LocalContext.current)
 
+                var inLibrary by remember { mutableStateOf(manga.favorite) }
+
                 MangaDetailsHeader(
                     manga = manga,
                     titleLongClick = { title ->
@@ -62,6 +67,7 @@ class MangaHeaderHolder(
                     ),
                     trackServiceCount = trackServiceCount,
                     toggleFavorite = { presenter.toggleFavorite() },
+                    inLibrary = inLibrary,
                     loggedIntoTrackers = presenter.loggedServices.isNotEmpty(),
                     trackingClick = { adapter.delegate.showTrackingSheet() },
                     artworkClick = { },

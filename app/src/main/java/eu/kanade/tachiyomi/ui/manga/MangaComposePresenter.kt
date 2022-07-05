@@ -388,7 +388,20 @@ class MangaComposePresenter(
      */
     private fun updateArtworkFlow() {
         presenterScope.launch {
-            _artworkLinks.value = listOf(manga.thumbnail_url!!)
+            _artworkLinks.value = listOf(
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+                manga.thumbnail_url!!,
+            )
         }
     }
 

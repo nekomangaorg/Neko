@@ -21,6 +21,7 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
@@ -28,7 +29,14 @@ import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, minSheetHeightPercentage: Float = 0f, content: @Composable ColumnScope.() -> Unit) {
+fun BaseSheet(
+    themeColors: ThemeColors,
+    maxSheetHeightPercentage: Float = .7f,
+    minSheetHeightPercentage: Float = 0f,
+    paddingAroundContent: Dp = 16.dp,
+    showHandle: Boolean = true,
+    content: @Composable ColumnScope.() -> Unit,
+) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
         val screenHeight = LocalConfiguration.current.screenHeightDp
         val maxSheetHeight = screenHeight * maxSheetHeightPercentage
@@ -40,23 +48,25 @@ fun BaseSheet(themeColors: ThemeColors, maxSheetHeightPercentage: Float = .7f, m
                 .requiredHeightIn(minSheetHeight.dp, maxSheetHeight.dp),
             shape = RoundedCornerShape(Shapes.sheetRadius),
         ) {
-            Gap(16.dp)
-            Box(
-                modifier = Modifier
-                    .width(50.dp)
-                    .height(4.dp)
-                    .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
-                    .align(Alignment.CenterHorizontally),
-            )
+            if (showHandle) {
+                Gap(16.dp)
+                Box(
+                    modifier = Modifier
+                        .width(50.dp)
+                        .height(4.dp)
+                        .background(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaLowContrast), CircleShape)
+                        .align(Alignment.CenterHorizontally),
+                )
+            }
 
             Column(
                 modifier = Modifier
                     .navigationBarsPadding()
                     .imePadding(),
             ) {
-                Gap(16.dp)
+                Gap(paddingAroundContent)
                 content()
-                Gap(16.dp)
+                Gap(paddingAroundContent)
             }
         }
 

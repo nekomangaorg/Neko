@@ -33,4 +33,4 @@ markdown = "com.mikepenz:multiplatform-markdown-renderer-android:0.6.1"
 
 [bundles]
 accompanist = ["accompanist-swiperefresh", "accompanist-flowlayout", "accompanist-drawablepainter", "accompanist-systemuicontroller", "accompainist-webview"]
-compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown"]
+compose = ["activity", "paging", "material3-core", "material3-adapter", "ui", "ui-tooling", "runtime-livedata", "foundation", "material", "material-icons-core", "material-icons-extended", "date-fieled", "markdown", ]
