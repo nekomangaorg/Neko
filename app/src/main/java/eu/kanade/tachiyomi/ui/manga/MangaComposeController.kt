@@ -96,7 +96,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             coverActions = CoverActions(
                 share = { context, url -> viewScope.launch { shareCover(context, url) } },
                 set = { url -> },
-                save = { url -> },
+                save = { url -> viewScope.launch { saveCover(url) } },
             ),
             genreClick = {},
             genreLongClick = {},
@@ -129,6 +129,16 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
         clipboard.setPrimaryClip(ClipData.newPlainText(context.getString(label), content))
     }
 
+    /**
+     * Save the image of the given image
+     */
+    suspend fun saveCover(urlOfCover: String) {
+        presenter.saveCover(urlOfCover)
+    }
+
+    /**
+     * Share a cover with the given url
+     */
     suspend fun shareCover(context: Context, urlOfCover: String) {
         val cover = presenter.shareMangaCover(context.sharedCacheDir(), urlOfCover)
         withUIContext {
@@ -147,6 +157,9 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
         }
     }
 
+    /**
+     * Share the given manga
+     */
     suspend fun shareManga(context: Context) {
         val cover = presenter.shareMangaCover(context.sharedCacheDir())
         withUIContext {

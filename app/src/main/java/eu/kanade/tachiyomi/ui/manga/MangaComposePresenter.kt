@@ -1,7 +1,9 @@
 package eu.kanade.tachiyomi.ui.manga
 
 import android.os.Build
+import android.os.Environment
 import com.elvishew.xlog.XLog
+import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.cache.CoverCache
 import eu.kanade.tachiyomi.data.database.DatabaseHelper
 import eu.kanade.tachiyomi.data.database.models.Category
@@ -18,6 +20,7 @@ import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
+import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
@@ -304,13 +307,32 @@ class MangaComposePresenter(
                 try {
                     saveCover(destDir, url)
                 } catch (e: java.lang.Exception) {
-                    XLog.e("error", e)
+                    XLog.e("warn", e)
                     null
                 }
             } else {
                 null
             }
 
+        }
+    }
+
+    /**
+     * Save the given url cover to file
+     */
+    suspend fun saveCover(url: String) {
+        return withIOContext {
+            try {
+                val directory = File(
+                    Environment.getExternalStorageDirectory().absolutePath +
+                        File.separator + Environment.DIRECTORY_PICTURES +
+                        File.separator + preferences.context.getString(R.string.app_name),
+                )
+                saveCover(directory, url)
+            } catch (e: Exception) {
+                XLog.e("warn", e)
+                //toast
+            }
         }
     }
 
@@ -333,7 +355,13 @@ class MangaComposePresenter(
         directory.mkdirs()
 
         // Build destination file.
-        val filename = DiskUtil.buildValidFilename("${manga.title}.${type.extension}")
+        val suffix = when (url.isNotBlank()) {
+            true -> "-" + MdUtil.getMangaId(url)
+            false -> ""
+
+        }
+
+        val filename = DiskUtil.buildValidFilename("${manga.title}${suffix}.${type.extension}")
 
         val destFile = File(directory, filename)
         cover.inputStream().use { input ->

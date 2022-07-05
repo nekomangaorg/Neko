@@ -126,7 +126,11 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick
                         .fillMaxWidth(),
                 ) {
                     Gap(8.dp)
-                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f), colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor)) {
+                    FilledIconButton(
+                        onClick = { saveClick(currentImage) },
+                        modifier = Modifier.weight(1f),
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                    ) {
                         Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.surface)
                     }
                     Gap(8.dp)
