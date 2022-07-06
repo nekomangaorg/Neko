@@ -24,5 +24,6 @@ object MangaConstants {
         val share: (Context, String) -> Unit,
         val set: (String) -> Unit,
         val save: (String) -> Unit,
+        val reset: () -> Unit,
     )
 }

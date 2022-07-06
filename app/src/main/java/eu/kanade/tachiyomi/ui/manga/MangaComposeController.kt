@@ -60,6 +60,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
     override fun ScreenContent() {
         MangaScreen(
             manga = manga,
+            artwork = presenter.currentArtwork.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
             categories = presenter.allCategories.collectAsState(),
@@ -88,15 +89,16 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
                 trackingDateChanged = { trackDateChange -> presenter.updateTrackDate(trackDateChange) },
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
-            artworkLinks = presenter.artworkLinks.collectAsState(),
+            alternativeArtwork = presenter.alternativeArtwork.collectAsState(),
             isMerged = presenter.isMerged.collectAsState(),
             similarClick = { router.pushController(SimilarController(manga).withFadeTransaction()) },
             externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = { context -> viewScope.launch { shareManga(context) } },
             coverActions = CoverActions(
                 share = { context, url -> viewScope.launch { shareCover(context, url) } },
-                set = { url -> },
+                set = { url -> viewScope.launch { setCover(url) } },
                 save = { url -> viewScope.launch { saveCover(url) } },
+                reset = { viewScope.launch { resetCover() } },
             ),
             genreClick = {},
             genreLongClick = {},
@@ -116,7 +118,7 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             it ?: return@generate
             viewScope.launchUI {
                 val vibrantColor = it.getBestColor() ?: return@launchUI
-                manga.vibrantCoverColor = vibrantColor
+                presenter.updateMangaColor(vibrantColor)
             }
         }
     }
@@ -154,6 +156,18 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             } catch (e: Exception) {
                 context.toast(e.message)
             }
+        }
+    }
+
+    suspend fun setCover(urlOfCover: String) {
+        withUIContext {
+            presenter.setCover(urlOfCover)
+        }
+    }
+
+    suspend fun resetCover() {
+        withUIContext {
+            presenter.resetCover()
         }
     }
 

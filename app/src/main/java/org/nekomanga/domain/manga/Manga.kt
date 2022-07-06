@@ -1,0 +1,17 @@
+package org.nekomanga.domain.manga
+
+import androidx.annotation.ColorInt
+
+/*
+data class Manga(
+    val id: Long,
+    val inLibrary: Boolean,
+    val thumbnailUrl: String,
+    val initialized: Boolean,
+    val coverLastModified: Boolean,
+    )
+*/
+
+
+data class Artwork(val url: String, val mangaId: Long, val inLibrary: Boolean, val originalArtwork: String, @ColorInt val vibrantColor: Int? = null)
+

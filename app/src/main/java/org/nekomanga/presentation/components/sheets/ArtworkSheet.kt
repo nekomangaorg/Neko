@@ -24,10 +24,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -41,13 +39,21 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.image.coil.AlternativeMangaCover
 import jp.wasabeef.gap.Gap
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColors
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
-fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick: (String) -> Unit, setClick: (String) -> Unit, shareClick: (String) -> Unit) {
+fun ArtworkSheet(
+    themeColors: ThemeColors,
+    alternativeArtwork: List<Artwork>,
+    inLibrary: Boolean,
+    saveClick: (String) -> Unit,
+    setClick: (String) -> Unit,
+    shareClick: (String) -> Unit,
+    resetClick: () -> Unit,
+) {
     CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
         Box(
             modifier = Modifier
@@ -56,22 +62,8 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick
                 .statusBarsPadding()
                 .navigationBarsPadding(),
         ) {
-            val images = remember {
-                mutableStateListOf(
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/dfcaab7a-2c3c-4ea5-8641-abffd2a95b5f.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/512496fb-6e57-483f-9380-aa6027d4f157.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/d9497f0d-3bd7-42d9-832c-696ff39a6a28.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/bb38cabc-769b-4b6c-b7c1-dc3a933cd3c9.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/e393ec1a-320d-4ef7-92de-ca84b0d20309.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/17acc2b0-2cab-46f2-954d-91b1174db67e.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/5a2e4c1d-696e-4983-ad9c-67eba37c0daa.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/1b266184-eb7a-4801-9ad6-8f53ac8acb47.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/67cc4435-16cc-4d32-8163-a82a681b826e.jpg",
-                    "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/8b4b0dec-d3f9-4471-be67-46ea386164a1.jpg",
 
-                    )
-            }
-            var currentImage by rememberSaveable { mutableStateOf(images[0]) }
+            var currentImage by remember { mutableStateOf(alternativeArtwork[0]) }
 
             val screenHeight = LocalConfiguration.current.screenHeightDp
             val thumbnailHeight = screenHeight * .15f
@@ -98,10 +90,10 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick
                 Gap(4.dp)
 
                 LazyRow(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    items(images) { url ->
+                    items(alternativeArtwork) { artwork ->
                         AsyncImage(
                             model = ImageRequest.Builder(LocalContext.current)
-                                .data(AlternativeMangaCover(url))
+                                .data(artwork)
                                 .placeholder(Pastel.getColorLight())
                                 .build(),
                             contentDescription = null,
@@ -113,7 +105,7 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick
                                     RoundedCornerShape(Shapes.coverRadius),
                                 )
                                 .clickable {
-                                    currentImage = url
+                                    currentImage = artwork
                                 },
                         )
                     }
@@ -127,19 +119,33 @@ fun ArtworkSheet(themeColors: ThemeColors, artworkLinks: List<String>, saveClick
                 ) {
                     Gap(8.dp)
                     FilledIconButton(
-                        onClick = { saveClick(currentImage) },
+                        onClick = { saveClick(currentImage.url) },
                         modifier = Modifier.weight(1f),
                         colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
                     ) {
                         Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.surface)
                     }
-                    Gap(8.dp)
-                    FilledIconButton(onClick = { /*TODO*/ }, modifier = Modifier.weight(1f), colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor)) {
-                        Text(text = stringResource(id = R.string.set), color = MaterialTheme.colorScheme.surface)
+                    if (inLibrary) {
+                        Gap(8.dp)
+                        FilledIconButton(
+                            onClick = { setClick(currentImage.url) },
+                            modifier = Modifier.weight(1f),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                        ) {
+                            Text(text = stringResource(id = R.string.set), color = MaterialTheme.colorScheme.surface)
+                        }
+                        Gap(8.dp)
+                        FilledIconButton(
+                            onClick = resetClick,
+                            modifier = Modifier.weight(1f),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                        ) {
+                            Text(text = stringResource(id = R.string.reset), color = MaterialTheme.colorScheme.surface)
+                        }
                     }
                     Gap(8.dp)
                     FilledIconButton(
-                        onClick = { shareClick(currentImage) },
+                        onClick = { shareClick(currentImage.url) },
                         modifier = Modifier.weight(1f),
                         colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
                     ) {

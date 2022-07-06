@@ -26,7 +26,7 @@ class LibraryMangaImageTarget(
         super.onError(error)
         if (manga.favorite) {
             launchIO {
-                val file = coverCache.getCoverFile(manga)
+                val file = coverCache.getCoverFile(manga.thumbnail_url, manga.favorite)
                 // if the file exists and the there was still an error then the file is corrupted
                 if (file.exists()) {
                     val options = BitmapFactory.Options()

@@ -41,6 +41,7 @@ class LibraryGridHolder(
 ) : LibraryHolder(view, adapter) {
 
     private val binding = MangaGridItemBinding.bind(view)
+
     init {
         binding.playLayout.setOnClickListener { playButtonClicked() }
         binding.playLayout.setOnLongClickListener { itemView.performLongClick() }
@@ -70,7 +71,7 @@ class LibraryGridHolder(
         binding.constraintLayout.isVisible = !item.manga.isBlank()
         binding.title.text = item.manga.title.highlightText(item.filter, color)
         binding.behindTitle.text = item.manga.title
-        val mangaColor = item.manga.dominantCoverColors
+        val mangaColor = MangaCoverMetadata.getColors(item.manga.id!!)
         binding.coverConstraint.backgroundColor = mangaColor?.first ?: itemView.context.getResourceColor(R.attr.background)
         binding.behindTitle.setTextColor(
             mangaColor?.second ?: itemView.context.getResourceColor(R.attr.colorOnBackground),

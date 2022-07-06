@@ -228,7 +228,7 @@ class MangaDetailsController :
     private fun setAccentColorValue(colorToUse: Int? = null) {
         val context = view?.context ?: return
         setCoverColorValue(colorToUse)
-        accentColor = if (presenter.preferences.themeMangaDetails()) {
+        accentColor = null /*if (presenter.preferences.themeMangaDetails()) {
             (colorToUse ?: manga?.vibrantCoverColor)?.let {
                 val luminance = ColorUtils.calculateLuminance(it).toFloat()
                 if (if (!context.isInNightMode()) luminance > 0.4 else luminance <= 0.6) {
@@ -244,7 +244,7 @@ class MangaDetailsController :
             }
         } else {
             null
-        }
+        }*/
     }
 
     private fun setCoverColorValue(colorToUse: Int? = null) {
@@ -252,16 +252,16 @@ class MangaDetailsController :
         val colorBack = context.getResourceColor(R.attr.background)
         coverColor =
             (
-                if (presenter.preferences.themeMangaDetails()) {
-                    (colorToUse ?: manga?.vibrantCoverColor)
-                } else {
-                    ColorUtils.blendARGB(
-                        context.getResourceColor(R.attr.colorSecondary),
-                        colorBack,
-                        0.5f,
-                    )
-                }
-                )?.let {
+                /*if (presenter.preferences.themeMangaDetails()) {
+                            (colorToUse ?: manga?.vibrantCoverColor)
+                        } else {*/
+                ColorUtils.blendARGB(
+                    context.getResourceColor(R.attr.colorSecondary),
+                    colorBack,
+                    0.5f,
+                )
+                // }
+                ).let {
                     // this makes the color more consistent regardless of theme
                     val dominant = it
                     val domLum = ColorUtils.calculateLuminance(dominant)
@@ -292,7 +292,7 @@ class MangaDetailsController :
 
     private fun setHeaderColorValue(colorToUse: Int? = null) {
         val context = view?.context ?: return
-        headerColor = if (presenter.preferences.themeMangaDetails()) {
+        headerColor = null /*if (presenter.preferences.themeMangaDetails()) {
             (colorToUse ?: manga?.vibrantCoverColor)?.let { color ->
                 val newColor =
                     makeColorFrom(color, context.getResourceColor(R.attr.colorPrimaryVariant))
@@ -306,7 +306,7 @@ class MangaDetailsController :
             }
         } else {
             null
-        }
+        }*/
         setRefreshStyle()
     }
 
@@ -538,7 +538,7 @@ class MangaDetailsController :
                     getHeader()?.updateCover(manga!!)
                 },
                 onError = {
-                    val file = presenter.coverCache.getCoverFile(manga!!)
+                    val file = presenter.coverCache.getCoverFile(manga!!.thumbnail_url, manga!!.favorite)
                     if (file.exists()) {
                         file.delete()
                         setPaletteColor()

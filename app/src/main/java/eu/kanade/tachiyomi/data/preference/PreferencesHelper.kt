@@ -503,6 +503,8 @@ class PreferencesHelper(val context: Context) {
 
     fun coverColors() = flowPrefs.getStringSet(Keys.coverColors, emptySet())
 
+    fun coverVibrantColors() = flowPrefs.getStringSet(Keys.coverVibrantColors, emptySet())
+    
     fun useStaggeredGrid() = flowPrefs.getBoolean("use_staggered_grid", false)
 
     fun dataSaver() = prefs.getBoolean(Keys.dataSaver, false)

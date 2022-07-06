@@ -263,6 +263,8 @@ object PreferenceKeys {
 
     const val coverColors = "cover_colors"
 
+    const val coverVibrantColors = "cover_vibrant_colors"
+    
     const val hideChapterTitles = "hide_chapter_titles"
 
     const val chaptersDescAsDefault = "chapters_desc_as_default"

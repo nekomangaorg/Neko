@@ -20,6 +20,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.databinding.MangaHeaderItemBinding
 import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
 import org.nekomanga.presentation.screens.ThemeColors
@@ -53,6 +54,7 @@ class MangaHeaderHolder(
 
                 MangaDetailsHeader(
                     manga = manga,
+                    artwork = Artwork(url = "", mangaId = manga.id!!, inLibrary = manga.favorite, manga.thumbnail_url ?: ""),
                     titleLongClick = { title ->
                         adapter.delegate.copyToClipboard(title, R.string.title)
                     },

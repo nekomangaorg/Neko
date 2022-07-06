@@ -51,8 +51,10 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.system.openInBrowser
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.DynamicRippleTheme
 import org.nekomanga.presentation.components.NekoScaffold
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
@@ -72,6 +74,7 @@ import java.text.DateFormat
 @Composable
 fun MangaScreen(
     manga: Manga,
+    artwork: State<Artwork>,
     isRefreshing: State<Boolean>,
     onRefresh: () -> Unit,
     themeBasedOffCover: Boolean = true,
@@ -92,7 +95,7 @@ fun MangaScreen(
     similarClick: () -> Unit = {},
     externalLinks: State<List<ExternalLink>>,
     isMerged: State<Boolean>,
-    artworkLinks: State<List<String>>,
+    alternativeArtwork: State<List<Artwork>>,
     coverActions: CoverActions,
     shareClick: (Context) -> Unit = {},
     genreClick: (String) -> Unit = {},
@@ -119,27 +122,31 @@ fun MangaScreen(
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val surfaceColor = MaterialTheme.colorScheme.surface
 
+    val vibrantColor = MangaCoverMetadata.getVibrantColor(manga.id!!)
+
     val buttonColor = remember {
-        when (themeBasedOffCover && manga.vibrantCoverColor != null) {
-            true -> {
-                val color = getButtonThemeColor(Color(manga.vibrantCoverColor!!), isDarkTheme)
-                color
-            }
-            false -> secondaryColor
-        }
+        mutableStateOf(
+            when (themeBasedOffCover && vibrantColor != null) {
+                true -> {
+                    val color = getButtonThemeColor(Color(vibrantColor), isDarkTheme)
+                    color
+                }
+                false -> secondaryColor
+            },
+        )
     }
 
-    val rippleTheme = when (buttonColor != secondaryColor) {
-        true -> DynamicRippleTheme(buttonColor)
+    val rippleTheme = when (buttonColor.value != secondaryColor) {
+        true -> DynamicRippleTheme(buttonColor.value)
         false -> PrimaryColorRippleTheme
     }
 
     val themeColors = remember {
         ThemeColors(
-            buttonColor = buttonColor,
+            buttonColor = buttonColor.value,
             rippleTheme = rippleTheme,
-            textSelectionColors = dynamicTextSelectionColor(buttonColor),
-            containerColor = Color(ColorUtils.blendARGB(buttonColor.toArgb(), surfaceColor.toArgb(), .706f)),
+            textSelectionColors = dynamicTextSelectionColor(buttonColor.value),
+            containerColor = Color(ColorUtils.blendARGB(buttonColor.value.toArgb(), surfaceColor.toArgb(), .706f)),
         )
     }
 
@@ -163,6 +170,7 @@ fun MangaScreen(
                     SheetLayout(
                         currentScreen = currentSheet,
                         themeColors = themeColors,
+                        inLibrary = inLibrary,
                         addNewCategory = categoryActions.addNewCategory,
                         allCategories = categories.value,
                         mangaCategories = mangaCategories.value,
@@ -176,7 +184,7 @@ fun MangaScreen(
                         trackSuggestedDates = trackSuggestedDates.value,
                         externalLinks = externalLinks.value,
                         isMerged = isMerged.value,
-                        artworkLinks = artworkLinks.value,
+                        alternativeArtwork = alternativeArtwork.value,
                         coverActions = coverActions,
                         openInBrowser = { url -> context.asActivity().openInBrowser(url) },
                     ) { scope.launch { sheetState.hide() } }
@@ -218,6 +226,8 @@ fun MangaScreen(
                     item {
                         MangaDetailsHeader(
                             manga = manga,
+                            artwork = artwork.value,
+                            showBackdrop = themeBasedOffCover,
                             inLibrary = inLibrary,
                             titleLongClick = { title -> titleLongClick(context, title) },
                             creatorLongClick = { creator -> creatorLongClick(context, creator) },
@@ -278,6 +288,7 @@ fun MangaScreen(
 fun SheetLayout(
     currentScreen: BottomSheetScreen,
     themeColors: ThemeColors,
+    inLibrary: Boolean,
     allCategories: List<Category>,
     mangaCategories: List<Category>,
     addNewCategory: (String) -> Unit,
@@ -289,7 +300,7 @@ fun SheetLayout(
     trackSearchResult: TrackSearchResult,
     trackSuggestedDates: TrackingSuggestedDates?,
     externalLinks: List<ExternalLink>,
-    artworkLinks: List<String>,
+    alternativeArtwork: List<Artwork>,
     isMerged: Boolean,
     openInBrowser: (String) -> Unit,
     coverActions: CoverActions,
@@ -395,7 +406,21 @@ fun SheetLayout(
         }
 
         is BottomSheetScreen.ArtworkSheet -> {
-            ArtworkSheet(themeColors = themeColors, artworkLinks = artworkLinks, saveClick = coverActions.save, shareClick = { url -> coverActions.share(context, url) }, setClick = coverActions.set)
+            ArtworkSheet(
+                themeColors = themeColors,
+                alternativeArtwork = alternativeArtwork,
+                inLibrary = inLibrary,
+                saveClick = coverActions.save,
+                shareClick = { url -> coverActions.share(context, url) },
+                setClick = { url ->
+                    closeSheet()
+                    coverActions.set(url)
+                },
+                resetClick = {
+                    closeSheet()
+                    coverActions.reset()
+                },
+            )
         }
     }
 }

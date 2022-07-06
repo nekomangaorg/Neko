@@ -34,11 +34,14 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
 import onColor
+import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.screens.ThemeColors
 
 @Composable
 fun MangaDetailsHeader(
     manga: Manga,
+    artwork: Artwork,
+    showBackdrop: Boolean = true,
     inLibrary: Boolean = true,
     themeColor: ThemeColors,
     generatePalette: (Drawable) -> Unit = {},
@@ -78,8 +81,8 @@ fun MangaDetailsHeader(
     Column {
         Box {
             BackDrop(
-                manga = manga,
-                themeColor = themeColor,
+                artwork = artwork,
+                showBackdrop = showBackdrop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .requiredHeightIn(250.dp, 400.dp),
@@ -96,7 +99,7 @@ fun MangaDetailsHeader(
                         ),
                     ),
             )
-          
+
             Column(modifier = Modifier.align(Alignment.BottomStart)) {
                 InformationBlock(
                     manga = manga,

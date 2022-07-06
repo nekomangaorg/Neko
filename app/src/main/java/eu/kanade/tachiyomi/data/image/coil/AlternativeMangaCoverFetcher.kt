@@ -1,7 +1,5 @@
 package eu.kanade.tachiyomi.data.image.coil
 
-import android.webkit.MimeTypeMap
-import coil.ImageLoader
 import coil.decode.DataSource
 import coil.decode.ImageSource
 import coil.disk.DiskCache
@@ -13,15 +11,11 @@ import coil.request.Options
 import coil.request.Parameters
 import com.elvishew.xlog.XLog
 import eu.kanade.tachiyomi.data.cache.CoverCache
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.network.await
-import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.online.HttpSource
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import okhttp3.CacheControl
 import okhttp3.Call
 import okhttp3.Request
@@ -31,13 +25,14 @@ import okio.Path.Companion.toOkioPath
 import okio.Source
 import okio.buffer
 import okio.sink
-import uy.kohesive.injekt.injectLazy
+import org.nekomanga.domain.manga.Artwork
 import java.io.File
 import java.net.HttpURLConnection
 import java.util.Date
 
 class AlternativeMangaCoverFetcher(
-    private val cover: AlternativeMangaCover,
+    private val url: String,
+    private val mangaId: Long,
     private val sourceLazy: Lazy<HttpSource?>,
     private val options: Options,
     private val coverCache: CoverCache,
@@ -45,19 +40,14 @@ class AlternativeMangaCoverFetcher(
     private val diskCacheLazy: Lazy<DiskCache>,
 ) : Fetcher {
 
-    // For non-custom cover
-    private val diskCacheKey: String? by lazy { AlternativeMangaCoverKeyer().key(cover, options) }
-    private lateinit var url: String
+    private val diskCacheKey: String? by lazy { ArtworkKeyer().key(Artwork(url = url, inLibrary = false, originalArtwork = "", mangaId = mangaId), options) }
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
 
     override suspend fun fetch(): FetchResult {
-        // diskCacheKey is thumbnail_url
-        url = cover.url
         return when (getResourceType(url)) {
             Type.URL -> httpLoader()
             Type.File -> {
-                // setRatioAndColorsInScope(manga, File(url.substringAfter("file://")))
                 fileLoader(File(url.substringAfter("file://")))
             }
             null -> error("Invalid image")
@@ -73,7 +63,6 @@ class AlternativeMangaCoverFetcher(
         val coverFile = coverCache.getCoverFile(url)
         if (!shouldFetchRemotely && coverFile.exists() && options.diskCachePolicy.readEnabled) {
             coverFile.setLastModified(Date().time)
-            // setRatioAndColorsInScope(manga, coverFile)
             return fileLoader(coverFile)
         }
         var snapshot = readFromDiskCache()
@@ -83,12 +72,10 @@ class AlternativeMangaCoverFetcher(
                 val snapshotCoverCache = moveSnapshotToCoverCache(snapshot, coverFile)
                 if (snapshotCoverCache != null) {
                     // Read from cover cache after added to library
-                    //setRatioAndColorsInScope(manga, snapshotCoverCache)
                     return fileLoader(snapshotCoverCache)
                 }
 
                 // Read from snapshot
-                // setRatioAndColorsInScope(manga)
                 return SourceResult(
                     source = snapshot.toImageSource(),
                     mimeType = "image/*",
@@ -247,27 +234,6 @@ class AlternativeMangaCoverFetcher(
         return ImageSource(file = data, diskCacheKey = diskCacheKey, closeable = this)
     }
 
-    private fun setRatioAndColorsInScope(manga: Manga, ogFile: File? = null, force: Boolean = false) {
-        fileScope.launch {
-            MangaCoverMetadata.setRatioAndColors(manga, ogFile, force)
-        }
-    }
-
-    /** Modified from [MimeTypeMap.getFileExtensionFromUrl] to be more permissive with special characters. */
-    private fun MimeTypeMap.getMimeTypeFromUrl(url: String?): String? {
-        if (url.isNullOrBlank()) {
-            return null
-        }
-
-        val extension = url
-            .substringBeforeLast('#') // Strip the fragment.
-            .substringBeforeLast('?') // Strip the query.
-            .substringAfterLast('/') // Get the last path segment.
-            .substringAfterLast('.', missingDelimiterValue = "") // Get the file extension.
-
-        return getMimeTypeFromExtension(extension)
-    }
-
     private fun fileLoader(file: File): FetchResult {
         return SourceResult(
             source = ImageSource(file = file.toOkioPath(), diskCacheKey = diskCacheKey),
@@ -284,21 +250,7 @@ class AlternativeMangaCoverFetcher(
             else -> null
         }
     }
-
-    class Factory(
-        private val callFactoryLazy: Lazy<Call.Factory>,
-        private val diskCacheLazy: Lazy<DiskCache>,
-    ) : Fetcher.Factory<AlternativeMangaCover> {
-
-        private val coverCache: CoverCache by injectLazy()
-        private val sourceManager: SourceManager by injectLazy()
-
-        override fun create(data: AlternativeMangaCover, options: Options, imageLoader: ImageLoader): Fetcher {
-            val source = lazy { sourceManager.getMangadex() }
-            return AlternativeMangaCoverFetcher(data, source, options, coverCache, callFactoryLazy, diskCacheLazy)
-        }
-    }
-
+    
     private enum class Type {
         File, URL;
     }
@@ -308,5 +260,3 @@ class AlternativeMangaCoverFetcher(
         private val CACHE_CONTROL_NO_NETWORK_NO_CACHE = CacheControl.Builder().noCache().onlyIfCached().build()
     }
 }
-
-data class AlternativeMangaCover(val url: String)

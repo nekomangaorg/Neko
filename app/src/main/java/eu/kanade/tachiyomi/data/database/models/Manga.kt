@@ -22,7 +22,7 @@ import eu.kanade.tachiyomi.source.model.SManga
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.reader.settings.OrientationType
 import eu.kanade.tachiyomi.ui.reader.settings.ReadingModeType
-import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
+import eu.kanade.tachiyomi.util.system.toMangaCacheKey
 import tachiyomi.source.model.MangaInfo
 import java.util.Locale
 
@@ -171,7 +171,7 @@ interface Manga : SManga {
     }
 
     fun key(): String {
-        return "manga-id-$id"
+        return id!!.toMangaCacheKey()
     }
 
     fun getExternalLinks(): List<ExternalLink> {
@@ -242,19 +242,6 @@ interface Manga : SManga {
     var orientationType: Int
         get() = viewer_flags and OrientationType.MASK
         set(rotationType) = setViewerFlags(rotationType, OrientationType.MASK)
-
-    var vibrantCoverColor: Int?
-        get() = vibrantCoverColorMap[id]
-        set(value) {
-            id?.let { vibrantCoverColorMap[it] = value }
-        }
-
-    var dominantCoverColors: Pair<Int, Int>?
-        get() = MangaCoverMetadata.getColors(this)
-        set(value) {
-            value ?: return
-            MangaCoverMetadata.addCoverColor(this, value.first, value.second)
-        }
 
     companion object {
 

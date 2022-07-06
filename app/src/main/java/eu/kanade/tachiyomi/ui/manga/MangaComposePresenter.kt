@@ -29,6 +29,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange.EditTracki
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import eu.kanade.tachiyomi.util.chapter.ChapterFilter
+import eu.kanade.tachiyomi.util.manga.MangaCoverMetadata
 import eu.kanade.tachiyomi.util.storage.DiskUtil
 import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
@@ -39,6 +40,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import org.nekomanga.domain.manga.Artwork
 import org.threeten.bp.ZoneId
 import uy.kohesive.injekt.Injekt
 import uy.kohesive.injekt.api.get
@@ -84,11 +86,22 @@ class MangaComposePresenter(
     private val _externalLinks = MutableStateFlow(emptyList<ExternalLink>())
     val externalLinks: StateFlow<List<ExternalLink>> = _externalLinks.asStateFlow()
 
-    private val _artworkLinks = MutableStateFlow(emptyList<String>())
-    val artworkLinks: StateFlow<List<String>> = _artworkLinks.asStateFlow()
+    private val _alternativeArtwork = MutableStateFlow(emptyList<Artwork>())
+    val alternativeArtwork: StateFlow<List<Artwork>> = _alternativeArtwork.asStateFlow()
 
     private val _isMerged = MutableStateFlow(manga.isMerged())
     val isMerged: StateFlow<Boolean> = _isMerged.asStateFlow()
+
+    private val _currentArtwork = MutableStateFlow(
+        Artwork(
+            url = "",
+            mangaId = manga.id!!,
+            inLibrary = manga.favorite,
+            originalArtwork = manga.thumbnail_url ?: "",
+            vibrantColor = MangaCoverMetadata.getVibrantColor(manga.id!!),
+        ),
+    )
+    val currentArtwork: StateFlow<Artwork> = _currentArtwork.asStateFlow()
 
     override fun onCreate() {
         super.onCreate()
@@ -342,9 +355,7 @@ class MangaComposePresenter(
     private fun saveCover(directory: File, url: String = ""): File {
         val cover =
             if (url.isBlank()) {
-                coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(
-                    manga,
-                )
+                coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga.thumbnail_url, manga.favorite)
             } else {
                 coverCache.getCoverFile(url)
             }
@@ -370,6 +381,33 @@ class MangaComposePresenter(
             }
         }
         return destFile
+    }
+
+    /**
+     * Set custom cover
+     */
+    fun setCover(url: String) {
+        coverCache.setCustomCoverToCache(manga, url)
+        MangaCoverMetadata.remove(manga)
+        updateArtwork(url)
+    }
+
+    /**
+     * Reset cover
+     */
+    fun resetCover() {
+        coverCache.deleteCustomCover(manga)
+        MangaCoverMetadata.remove(manga)
+        updateArtwork()
+    }
+
+    /**
+     * Updates the artwork flow
+     */
+    private fun updateArtwork(url: String = "") {
+        presenterScope.launch {
+            _currentArtwork.value = Artwork(url = url, inLibrary = manga.favorite, originalArtwork = manga.thumbnail_url ?: "", mangaId = manga.id!!)
+        }
     }
 
     /**
@@ -423,23 +461,43 @@ class MangaComposePresenter(
     }
 
     /**
+     * Update the current artwork with the vibrant color
+     */
+    fun updateMangaColor(vibrantColor: Int) {
+        MangaCoverMetadata.addVibrantColor(manga.id!!, vibrantColor)
+        _currentArtwork.value = currentArtwork.value.copy(vibrantColor = vibrantColor)
+    }
+
+    /**
      * Update flows for merge
      */
     private fun updateArtworkFlow() {
         presenterScope.launch {
-            _artworkLinks.value = listOf(
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
-                manga.thumbnail_url!!,
+            _alternativeArtwork.value = listOf(
+                Artwork(
+                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/dfcaab7a-2c3c-4ea5-8641-abffd2a95b5f.jpg",
+                    inLibrary = manga.favorite,
+                    originalArtwork = manga.thumbnail_url ?: "",
+                    mangaId = manga.id!!,
+                ),
+                Artwork(
+                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/512496fb-6e57-483f-9380-aa6027d4f157.jpg",
+                    inLibrary = manga.favorite,
+                    originalArtwork = manga.thumbnail_url ?: "",
+                    mangaId = manga.id!!,
+                ),
+                Artwork(
+                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/d9497f0d-3bd7-42d9-832c-696ff39a6a28.jpg",
+                    inLibrary = manga.favorite,
+                    originalArtwork = manga.thumbnail_url ?: "",
+                    mangaId = manga.id!!,
+                ),
+                Artwork(
+                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/e393ec1a-320d-4ef7-92de-ca84b0d20309.jpg",
+                    inLibrary = manga.favorite,
+                    originalArtwork = manga.thumbnail_url ?: "",
+                    mangaId = manga.id!!,
+                ),
             )
         }
     }

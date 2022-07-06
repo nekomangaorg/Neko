@@ -1300,7 +1300,7 @@ class LibraryPresenter(
                 val libraryManga = db.getLibraryMangaList().executeAsBlocking()
                 libraryManga.forEach { manga ->
                     if (manga.thumbnail_url?.startsWith("custom", ignoreCase = true) == true) {
-                        val file = cc.getCoverFile(manga)
+                        val file = cc.getCoverFile(manga.thumbnail_url, manga.favorite)
                         if (file.exists()) {
                             file.renameTo(cc.getCustomCoverFile(manga))
                         }
