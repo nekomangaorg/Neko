@@ -425,7 +425,7 @@ class LibraryUpdateService(
                 if (manga.thumbnail_url != null && preferences.refreshCoversToo()
                         .get()
                 ) {
-                    coverCache.deleteFromCache(thumbnailUrl)
+                    coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                     // load new covers in background
                     val request =
                         ImageRequest.Builder(this@LibraryUpdateService).data(manga)

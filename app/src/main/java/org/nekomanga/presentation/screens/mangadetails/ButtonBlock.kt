@@ -40,15 +40,13 @@ import com.mikepenz.iconics.typeface.IIcon
 import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import com.mikepenz.iconics.typeface.library.materialdesigndx.MaterialDesignDx
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.models.Manga
-import eu.kanade.tachiyomi.source.model.isMerged
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun ButtonBlock(
-    manga: Manga,
+    isMerged: Boolean,
     inLibrary: Boolean,
     loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
@@ -125,7 +123,7 @@ fun ButtonBlock(
 
             Gap(gapBetweenButtons)
 
-            val mergeConfig = when (manga.isMerged()) {
+            val mergeConfig = when (isMerged) {
                 true -> ButtonConfig(
                     iIcon = CommunityMaterial.Icon.cmd_check_decagram,
                     buttonColors = checkedButtonColors,

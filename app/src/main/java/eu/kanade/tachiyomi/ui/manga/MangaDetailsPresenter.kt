@@ -365,7 +365,7 @@ class MangaDetailsPresenter(
                 downloadManager.deleteChapters(mergedChapters, manga, sourceManager.getMangadex())
                 db.deleteChapters(mergedChapters).executeAsBlocking()
                 allChapterScanlators =
-                    nonMergedChapters.flatMap { it -> it.scanlatorList() }.toSet()
+                    nonMergedChapters.flatMap { it.scanlatorList() }.toSet()
                 if (allChapterScanlators.size == 1) filteredScanlators = emptySet()
                 if (filteredScanlators.isNotEmpty()) {
                     val newSet = filteredScanlators.toMutableSet()
@@ -461,7 +461,7 @@ class MangaDetailsPresenter(
                     // force new cover if it exists
                     if (networkManga.thumbnail_url != null || preferences.refreshCoversToo().get()
                     ) {
-                        coverCache.deleteFromCache(thumbnailUrl)
+                        coverCache.deleteFromCache(thumbnailUrl, manga.favorite)
                     }
 
                     db.insertManga(manga).executeOnIO()

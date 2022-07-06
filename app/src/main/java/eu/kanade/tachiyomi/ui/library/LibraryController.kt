@@ -1400,7 +1400,7 @@ class LibraryController(
     }
 
     private fun openManga(manga: Manga) {
-        router.pushController(MangaComposeController(manga).withFadeTransaction())
+        router.pushController(MangaComposeController(manga.id!!).withFadeTransaction())
     }
 
     /**

@@ -120,6 +120,7 @@ object MangaCoverMetadata {
     fun remove(mangaId: Long) {
         coverRatioMap.remove(mangaId)
         coverColorMap.remove(mangaId)
+        coverVibrantColorMap.remove(mangaId)
     }
 
     fun addCoverRatio(mangaId: Long, ratio: Float) {

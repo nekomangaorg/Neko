@@ -42,6 +42,7 @@ fun MangaDetailsHeader(
     manga: Manga,
     artwork: Artwork,
     showBackdrop: Boolean = true,
+    isMerged: Boolean = true,
     inLibrary: Boolean = true,
     themeColor: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
@@ -112,7 +113,7 @@ fun MangaDetailsHeader(
                 )
                 Gap(height = 24.dp)
                 ButtonBlock(
-                    manga = manga,
+                    isMerged = isMerged,
                     inLibrary = inLibrary,
                     loggedIntoTrackers = loggedIntoTrackers,
                     trackServiceCount = trackServiceCount,

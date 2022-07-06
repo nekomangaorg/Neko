@@ -1108,6 +1108,9 @@
     <string name="missing_chapters">%1$s missing chapters</string>
 
     <string name="using_cached_source_cant_open">Using cached source, can\'t open this chapter</string>
+    <string name="site_down">MangaDex appears to be down, or under heavy load</string>
+    <string name="v3_manga">Cannot refresh this is a V3 manga entry</string>
+
 
     <!-- Reader -->
     <string name="try_similar">Don\'t forget to try looking for \nSimilar Manga. Click the </string>

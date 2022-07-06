@@ -186,7 +186,7 @@ dependencies {
     implementation("com.github.inorichi.storio:storio-common:8be19de@aar")
     implementation("com.github.inorichi.storio:storio-sqlite:8be19de@aar")
     implementation("com.github.requery:sqlite-android:3.36.0")
-    
+
     // Model View Presenter
     implementation(libs.bundles.nucleus)
 
@@ -213,6 +213,7 @@ dependencies {
     implementation("com.getkeepsafe.taptargetview:taptargetview:1.13.3")
     implementation("me.saket.cascade:cascade:2.0.0-beta1")
     implementation("me.saket.cascade:cascade-compose:2.0.0-beta1")
+    implementation("com.michael-bull.kotlin-result:kotlin-result:1.1.16")
 
     //Compose
     implementation(compose.bundles.compose)

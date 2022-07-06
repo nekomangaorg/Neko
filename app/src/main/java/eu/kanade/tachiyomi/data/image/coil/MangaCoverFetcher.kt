@@ -38,7 +38,7 @@ import java.net.HttpURLConnection
 import java.util.Date
 
 class MangaCoverFetcher(
-    private val url: String,
+    private val altUrl: String,
     private val inLibrary: Boolean,
     private val mangaId: Long,
     private val originalThumbnailUrl: String,
@@ -54,18 +54,20 @@ class MangaCoverFetcher(
 
     val fileScope = CoroutineScope(Job() + Dispatchers.IO)
 
+    lateinit var url: String
+
     override suspend fun fetch(): FetchResult {
         // diskCacheKey is thumbnail_url
-        val urlToUse = when (url.isBlank()) {
+        url = when (altUrl.isBlank()) {
             true -> originalThumbnailUrl
             false -> url
         }
 
-        return when (getResourceType(urlToUse)) {
+        return when (getResourceType(url)) {
             Type.URL -> httpLoader()
             Type.File -> {
-                setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = File(urlToUse.substringAfter("file://")))
-                fileLoader(File(urlToUse.substringAfter("file://")))
+                setRatioAndColorsInScope(mangaId = mangaId, inLibrary = inLibrary, originalThumbnail = originalThumbnailUrl, ogFile = File(url.substringAfter("file://")))
+                fileLoader(File(url.substringAfter("file://")))
             }
             null -> error("Invalid image")
         }
@@ -145,6 +147,7 @@ class MangaCoverFetcher(
                 throw e
             }
         } catch (e: Exception) {
+            XLog.e("error", e)
             snapshot?.closeQuietly()
             throw e
         }
@@ -314,7 +317,7 @@ class MangaCoverFetcher(
 
         override fun create(data: Manga, options: Options, imageLoader: ImageLoader): Fetcher {
             return MangaCoverFetcher(
-                url = "",
+                altUrl = "",
                 inLibrary = data.favorite,
                 mangaId = data.id!!,
                 originalThumbnailUrl = data.thumbnail_url ?: """error("No cover specified")""",
@@ -338,7 +341,7 @@ class MangaCoverFetcher(
         override fun create(data: Artwork, options: Options, imageLoader: ImageLoader): Fetcher {
             return if (data.url.isBlank()) {
                 return MangaCoverFetcher(
-                    url = data.url,
+                    altUrl = data.url,
                     inLibrary = data.inLibrary,
                     mangaId = data.mangaId,
                     originalThumbnailUrl = data.originalArtwork,

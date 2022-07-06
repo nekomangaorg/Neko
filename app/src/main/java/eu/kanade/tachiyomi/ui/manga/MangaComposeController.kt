@@ -13,13 +13,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.core.content.getSystemService
 import androidx.palette.graphics.Palette
 import eu.kanade.tachiyomi.R
-import eu.kanade.tachiyomi.data.database.DatabaseHelper
-import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.data.notification.NotificationReceiver
 import eu.kanade.tachiyomi.data.preference.PreferencesHelper
 import eu.kanade.tachiyomi.ui.base.controller.BaseComposeController
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CategoryActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.CoverActions
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergeActions
 import eu.kanade.tachiyomi.ui.manga.MangaConstants.TrackActions
 import eu.kanade.tachiyomi.ui.similar.SimilarController
 import eu.kanade.tachiyomi.util.getSlug
@@ -32,15 +31,9 @@ import eu.kanade.tachiyomi.util.system.withUIContext
 import eu.kanade.tachiyomi.util.view.withFadeTransaction
 import kotlinx.coroutines.launch
 import org.nekomanga.presentation.screens.MangaScreen
-import uy.kohesive.injekt.Injekt
-import uy.kohesive.injekt.api.get
 import uy.kohesive.injekt.injectLazy
 
-class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComposePresenter>() {
-
-    constructor(mangaId: Long) : this(
-        Injekt.get<DatabaseHelper>().getManga(mangaId).executeAsBlocking()!!,
-    )
+class MangaComposeController(val mangaId: Long) : BaseComposeController<MangaComposePresenter>() {
 
     constructor(bundle: Bundle) : this(bundle.getLong(MangaDetailsController.MANGA_EXTRA)) {
         val notificationId = bundle.getInt("notificationId", -1)
@@ -52,21 +45,21 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
         )
     }
 
-    override val presenter = MangaComposePresenter(manga)
+    override val presenter = MangaComposePresenter(mangaId)
 
     private val preferences: PreferencesHelper by injectLazy()
 
     @Composable
     override fun ScreenContent() {
         MangaScreen(
-            manga = manga,
+            manga = presenter.manga.value,
             artwork = presenter.currentArtwork.collectAsState(),
             isRefreshing = presenter.isRefreshing.collectAsState(),
             onRefresh = presenter::onRefresh,
             categories = presenter.allCategories.collectAsState(),
             mangaCategories = presenter.mangaCategories.collectAsState(),
             categoryActions = CategoryActions(
-                setCategories = { enabledCategories -> presenter.updateMangaCategories(manga, enabledCategories) },
+                setCategories = { enabledCategories -> presenter.updateMangaCategories(enabledCategories) },
                 addNewCategory = { newCategory -> presenter.addNewCategory(newCategory) },
             ),
             generatePalette = { setPalette(it) },
@@ -90,8 +83,11 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
             ),
             trackSearchResult = presenter.trackSearchResult.collectAsState(),
             alternativeArtwork = presenter.alternativeArtwork.collectAsState(),
-            isMerged = presenter.isMerged.collectAsState(),
-            similarClick = { router.pushController(SimilarController(manga).withFadeTransaction()) },
+            mergedManga = presenter.isMerged.collectAsState(),
+            mergeActions = MergeActions(
+                remove = { presenter.removeMergedManga() },
+            ),
+            similarClick = { router.pushController(SimilarController(presenter.manga.value).withFadeTransaction()) },
             externalLinks = presenter.externalLinks.collectAsState(),
             shareClick = { context -> viewScope.launch { shareManga(context) } },
             coverActions = CoverActions(
@@ -179,8 +175,9 @@ class MangaComposeController(val manga: Manga) : BaseComposeController<MangaComp
         withUIContext {
             val stream = cover?.getUriCompat(context)
             try {
+                val manga = presenter.manga.value
                 var url = presenter.sourceManager.getMangadex().mangaDetailsRequest(manga).url.toString()
-                url = "$url/" + manga.getSlug()
+                url = "$url/" + presenter.manga.value.getSlug()
                 val intent = Intent(Intent.ACTION_SEND).apply {
                     type = "text/*"
                     putExtra(Intent.EXTRA_TEXT, url)

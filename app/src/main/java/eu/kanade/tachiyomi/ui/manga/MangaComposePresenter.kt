@@ -19,9 +19,11 @@ import eu.kanade.tachiyomi.data.track.matchingTrack
 import eu.kanade.tachiyomi.data.track.mdlist.MdList
 import eu.kanade.tachiyomi.source.SourceManager
 import eu.kanade.tachiyomi.source.model.isMerged
+import eu.kanade.tachiyomi.source.model.isMergedChapter
 import eu.kanade.tachiyomi.source.online.handlers.StatusHandler
 import eu.kanade.tachiyomi.source.online.utils.MdUtil
 import eu.kanade.tachiyomi.ui.base.presenter.BaseCoroutinePresenter
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergedManga
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.ReadingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackAndService
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackDateChange
@@ -35,7 +37,6 @@ import eu.kanade.tachiyomi.util.system.ImageUtil
 import eu.kanade.tachiyomi.util.system.executeOnIO
 import eu.kanade.tachiyomi.util.system.launchIO
 import eu.kanade.tachiyomi.util.system.withIOContext
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -48,7 +49,7 @@ import java.io.File
 import java.util.Date
 
 class MangaComposePresenter(
-    private val manga: Manga,
+    private val mangaId: Long,
     val preferences: PreferencesHelper = Injekt.get(),
     val coverCache: CoverCache = Injekt.get(),
     val db: DatabaseHelper = Injekt.get(),
@@ -57,7 +58,11 @@ class MangaComposePresenter(
     val sourceManager: SourceManager = Injekt.get(),
     val statusHandler: StatusHandler = Injekt.get(),
     private val trackManager: TrackManager = Injekt.get(),
+    val mangaRepository: MangaRepository = Injekt.get(),
 ) : BaseCoroutinePresenter<MangaComposeController>() {
+
+    private val _currentManga = MutableStateFlow(db.getManga(mangaId).executeAsBlocking()!!)
+    val manga: StateFlow<Manga> = _currentManga.asStateFlow()
 
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
@@ -89,27 +94,30 @@ class MangaComposePresenter(
     private val _alternativeArtwork = MutableStateFlow(emptyList<Artwork>())
     val alternativeArtwork: StateFlow<List<Artwork>> = _alternativeArtwork.asStateFlow()
 
-    private val _isMerged = MutableStateFlow(manga.isMerged())
-    val isMerged: StateFlow<Boolean> = _isMerged.asStateFlow()
+    private val _isMerged = MutableStateFlow(
+        if (manga.value.isMerged()) {
+            MergedManga.IsMerged(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
+        } else {
+            MergedManga.NotMerged
+        },
+    )
+    val isMerged: StateFlow<MergedManga> = _isMerged.asStateFlow()
 
     private val _currentArtwork = MutableStateFlow(
         Artwork(
             url = "",
-            mangaId = manga.id!!,
-            inLibrary = manga.favorite,
-            originalArtwork = manga.thumbnail_url ?: "",
-            vibrantColor = MangaCoverMetadata.getVibrantColor(manga.id!!),
+            mangaId = mangaId,
+            inLibrary = manga.value.favorite,
+            originalArtwork = manga.value.thumbnail_url ?: "",
+            vibrantColor = MangaCoverMetadata.getVibrantColor(mangaId),
         ),
     )
     val currentArtwork: StateFlow<Artwork> = _currentArtwork.asStateFlow()
 
     override fun onCreate() {
         super.onCreate()
-        if (!manga.initialized) {
-            _isRefreshing.value = true
-            //do stuff
-            updateAllFlows()
-            _isRefreshing.value = false
+        if (!manga.value.initialized) {
+            onRefresh()
         } else {
             updateAllFlows()
         }
@@ -128,10 +136,27 @@ class MangaComposePresenter(
 
     fun onRefresh() {
         _isRefreshing.value = true
-        //do stuff
-        presenterScope.launch {
-            delay(1000L)
-            _isRefreshing.value = false
+        presenterScope.launchIO {
+            mangaRepository.update(manga.value, true).collect { result ->
+                when (result) {
+                    is MangaResult.Error -> {
+                        //send a toast
+                        _isRefreshing.value = false
+                    }
+                    is MangaResult.Success -> {
+                        updateAllFlows()
+                        _isRefreshing.value = false
+                    }
+                    is MangaResult.UpdatedManga -> {
+                        updateMangaFlow()
+                    }
+                }
+            }
+
+            //if (controller?.isNotOnline() == true) {
+            //_isRefreshing.value = false
+            // return@launchIO
+            // }
 
         }
     }
@@ -139,10 +164,10 @@ class MangaComposePresenter(
     /**
      * Updates the database with categories for the manga
      */
-    fun updateMangaCategories(manga: Manga, enabledCategories: List<Category>) {
+    fun updateMangaCategories(enabledCategories: List<Category>) {
         presenterScope.launch {
-            val categories = enabledCategories.map { MangaCategory.create(manga, it) }
-            db.setMangaCategories(categories, listOf(manga))
+            val categories = enabledCategories.map { MangaCategory.create(manga.value, it) }
+            db.setMangaCategories(categories, listOf(manga.value))
             updateCategoryFlows()
         }
     }
@@ -197,7 +222,7 @@ class MangaComposePresenter(
      */
     fun getSuggestedDate() {
         presenterScope.launch {
-            val chapters = db.getHistoryByMangaId(manga.id ?: 0L).executeOnIO()
+            val chapters = db.getHistoryByMangaId(mangaId).executeOnIO()
 
             _trackSuggestedDates.value = TrackingSuggestedDates(
                 startDate = chapters.minOfOrNull { it.last_read } ?: 0L,
@@ -260,7 +285,7 @@ class MangaComposePresenter(
         presenterScope.launch {
             _trackSearchResult.value = TrackSearchResult.Loading
             runCatching {
-                val results = service.search(title, manga, true)
+                val results = service.search(title, manga.value, true)
                 _trackSearchResult.value = when (results.isEmpty()) {
                     true -> TrackSearchResult.NoResult
                     false -> TrackSearchResult.Success(results)
@@ -278,7 +303,7 @@ class MangaComposePresenter(
         presenterScope.launch {
             runCatching {
                 val trackItem = trackAndService.track.apply {
-                    manga_id = manga.id!!
+                    manga_id = mangaId
                 }
 
                 trackAndService.service.bind(trackItem)
@@ -296,8 +321,8 @@ class MangaComposePresenter(
      */
     fun removeTracking(alsoRemoveFromTracker: Boolean, service: TrackService) {
         presenterScope.launch {
-            val tracks = db.getTracks(manga).executeOnIO().filter { it.sync_id == service.id }
-            db.deleteTrackForManga(manga, service).executeOnIO()
+            val tracks = db.getTracks(mangaId).executeOnIO().filter { it.sync_id == service.id }
+            db.deleteTrackForManga(mangaId, service).executeOnIO()
             if (alsoRemoveFromTracker && service.canRemoveFromService()) {
                 launchIO {
                     tracks.forEach {
@@ -355,7 +380,7 @@ class MangaComposePresenter(
     private fun saveCover(directory: File, url: String = ""): File {
         val cover =
             if (url.isBlank()) {
-                coverCache.getCustomCoverFile(manga).takeIf { it.exists() } ?: coverCache.getCoverFile(manga.thumbnail_url, manga.favorite)
+                coverCache.getCustomCoverFile(manga.value).takeIf { it.exists() } ?: coverCache.getCoverFile(manga.value.thumbnail_url, manga.value.favorite)
             } else {
                 coverCache.getCoverFile(url)
             }
@@ -372,7 +397,7 @@ class MangaComposePresenter(
 
         }
 
-        val filename = DiskUtil.buildValidFilename("${manga.title}${suffix}.${type.extension}")
+        val filename = DiskUtil.buildValidFilename("${manga.value.title}${suffix}.${type.extension}")
 
         val destFile = File(directory, filename)
         cover.inputStream().use { input ->
@@ -387,8 +412,8 @@ class MangaComposePresenter(
      * Set custom cover
      */
     fun setCover(url: String) {
-        coverCache.setCustomCoverToCache(manga, url)
-        MangaCoverMetadata.remove(manga)
+        coverCache.setCustomCoverToCache(manga.value, url)
+        MangaCoverMetadata.remove(mangaId)
         updateArtwork(url)
     }
 
@@ -396,9 +421,41 @@ class MangaComposePresenter(
      * Reset cover
      */
     fun resetCover() {
-        coverCache.deleteCustomCover(manga)
-        MangaCoverMetadata.remove(manga)
+        coverCache.deleteCustomCover(manga.value)
+        MangaCoverMetadata.remove(mangaId)
         updateArtwork()
+    }
+
+    /**
+     * Remove merged manga entry
+     */
+    fun removeMergedManga() {
+        presenterScope.launchIO {
+            val editManga = manga.value
+            editManga.apply {
+                merge_manga_url = null
+            }
+            db.insertManga(editManga).executeOnIO()
+            updateMangaFlow()
+            val dbChapters =
+                db.getChapters(manga.value).executeOnIO().partition { it.isMergedChapter() }
+            val mergedChapters = dbChapters.first
+            val nonMergedChapters = dbChapters.second
+            downloadManager.deleteChapters(mergedChapters, manga.value, sourceManager.getMangadex())
+            db.deleteChapters(mergedChapters).executeOnIO()
+            /**
+             * Scanlator filter stuff
+             * allChapterScanlators =
+            nonMergedChapters.flatMap { it.scanlatorList() }.toSet()
+            if (allChapterScanlators.size == 1) filteredScanlators = emptySet()
+            if (filteredScanlators.isNotEmpty()) {
+            val newSet = filteredScanlators.toMutableSet()
+            newSet.remove(sourceManager.getMergeSource().name)
+            filteredScanlators = newSet.toSet()
+            }
+             */
+
+        }
     }
 
     /**
@@ -406,7 +463,7 @@ class MangaComposePresenter(
      */
     private fun updateArtwork(url: String = "") {
         presenterScope.launch {
-            _currentArtwork.value = Artwork(url = url, inLibrary = manga.favorite, originalArtwork = manga.thumbnail_url ?: "", mangaId = manga.id!!)
+            _currentArtwork.value = Artwork(url = url, inLibrary = manga.value.favorite, originalArtwork = manga.value.thumbnail_url ?: "", mangaId = mangaId)
         }
     }
 
@@ -416,7 +473,7 @@ class MangaComposePresenter(
     private fun updateCategoryFlows() {
         presenterScope.launch {
             _allCategories.value = db.getCategories().executeOnIO()
-            _mangaCategories.value = db.getCategoriesForManga(manga).executeOnIO()
+            _mangaCategories.value = db.getCategoriesForManga(mangaId).executeOnIO()
         }
     }
 
@@ -426,7 +483,7 @@ class MangaComposePresenter(
     private fun updateTrackingFlows() {
         presenterScope.launch {
             _loggedInTrackingService.value = trackManager.services.filter { it.isLogged() }
-            _tracks.value = db.getTracks(manga).executeOnIO()
+            _tracks.value = db.getTracks(manga.value).executeOnIO()
 
             getSuggestedDate()
 
@@ -447,7 +504,7 @@ class MangaComposePresenter(
      */
     private fun updateExternalFlows() {
         presenterScope.launch {
-            _externalLinks.value = manga.getExternalLinks()
+            _externalLinks.value = manga.value.getExternalLinks()
         }
     }
 
@@ -456,7 +513,10 @@ class MangaComposePresenter(
      */
     private fun updateMergeFlow() {
         presenterScope.launch {
-            _isMerged.value = manga.isMerged()
+            _isMerged.value = when (manga.value.isMerged()) {
+                true -> MergedManga.IsMerged(sourceManager.getMergeSource().baseUrl + manga.value.merge_manga_url!!)
+                false -> MergedManga.NotMerged
+            }
         }
     }
 
@@ -464,7 +524,7 @@ class MangaComposePresenter(
      * Update the current artwork with the vibrant color
      */
     fun updateMangaColor(vibrantColor: Int) {
-        MangaCoverMetadata.addVibrantColor(manga.id!!, vibrantColor)
+        MangaCoverMetadata.addVibrantColor(mangaId, vibrantColor)
         _currentArtwork.value = currentArtwork.value.copy(vibrantColor = vibrantColor)
     }
 
@@ -475,9 +535,9 @@ class MangaComposePresenter(
         presenterScope.launch {
             val simple = Artwork(
                 url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/dfcaab7a-2c3c-4ea5-8641-abffd2a95b5f.jpg",
-                inLibrary = manga.favorite,
-                originalArtwork = manga.thumbnail_url ?: "",
-                mangaId = manga.id!!,
+                inLibrary = manga.value.favorite,
+                originalArtwork = manga.value.thumbnail_url ?: "",
+                mangaId = mangaId,
             )
             _alternativeArtwork.value = listOf(
                 simple,
@@ -497,20 +557,33 @@ class MangaComposePresenter(
     }
 
     /**
+     * Update flows for external links
+     */
+    private fun updateMangaFlow() {
+        presenterScope.launch {
+            _currentManga.value = db.getManga(mangaId).executeOnIO()!!
+        }
+    }
+
+    /**
      * Toggle a manga as favorite
      */
     fun toggleFavorite(): Boolean {
-        manga.favorite = !manga.favorite
-
-        when (manga.favorite) {
-            true -> {
-                manga.date_added = Date().time
-                //TODO need to add to MDList as Plan to read if enabled see the other toggleFavorite in the detailsPResenter
+        val editManga = manga.value
+        editManga.apply {
+            favorite = !favorite
+            when (favorite) {
+                true -> {
+                    date_added = Date().time
+                    //TODO need to add to MDList as Plan to read if enabled see the other toggleFavorite in the detailsPResenter
+                }
+                false -> date_added = 0
             }
-            false -> manga.date_added = 0
+
         }
 
-        db.insertManga(manga).executeAsBlocking()
-        return manga.favorite
+        db.insertManga(editManga).executeAsBlocking()
+        updateMangaFlow()
+        return editManga.favorite
     }
 }

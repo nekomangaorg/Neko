@@ -229,9 +229,9 @@ class CoverCache(val context: Context) {
         }
     }
 
-    fun deleteFromCache(name: String?) {
+    fun deleteFromCache(name: String?, inLibrary: Boolean) {
         if (name.isNullOrEmpty()) return
-        val file = getCoverFile(name)
+        val file = getCoverFile(name, inLibrary)
         context.imageLoader.memoryCache?.remove(MemoryCache.Key(file.name))
         if (file.exists()) file.delete()
     }

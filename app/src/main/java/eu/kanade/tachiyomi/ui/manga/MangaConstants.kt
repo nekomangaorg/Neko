@@ -5,6 +5,12 @@ import eu.kanade.tachiyomi.data.database.models.Category
 import eu.kanade.tachiyomi.data.track.TrackService
 
 object MangaConstants {
+
+    sealed class MergedManga {
+        class IsMerged(val url: String) : MergedManga()
+        object NotMerged : MergedManga()
+    }
+
     class CategoryActions(
         val setCategories: (List<Category>) -> Unit = {},
         val addNewCategory: (String) -> Unit = {},
@@ -25,5 +31,9 @@ object MangaConstants {
         val set: (String) -> Unit,
         val save: (String) -> Unit,
         val reset: () -> Unit,
+    )
+
+    class MergeActions(
+        val remove: () -> Unit,
     )
 }

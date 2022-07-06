@@ -8,20 +8,22 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
+import eu.kanade.tachiyomi.ui.manga.MangaConstants.MergedManga
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun MergeSheet(themeColorState: ThemeColorState, isMerged: Boolean) {
+fun MergeSheet(themeColorState: ThemeColorState, mergedManga: MergedManga, openMergeSource: (String) -> Unit, removeMergeSource: () -> Unit) {
 
     BaseSheet(themeColor = themeColorState) {
-        if (isMerged) {
-            TextButton(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(id = R.string.open_merged_in_webview))
+
+        if (mergedManga is MergedManga.IsMerged) {
+            TextButton(onClick = { openMergeSource(mergedManga.url) }, modifier = Modifier.fillMaxWidth()) {
+                Text(text = stringResource(id = R.string.open_merged_in_webview), color = themeColorState.buttonColor)
             }
             Gap(8.dp)
-            TextButton(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
-                Text(text = stringResource(id = R.string.remove_merged_source))
+            TextButton(onClick = removeMergeSource, modifier = Modifier.fillMaxWidth()) {
+                Text(text = stringResource(id = R.string.remove_merged_source), color = themeColorState.buttonColor)
             }
         } else {
 
