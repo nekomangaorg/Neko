@@ -473,31 +473,25 @@ class MangaComposePresenter(
      */
     private fun updateArtworkFlow() {
         presenterScope.launch {
+            val simple = Artwork(
+                url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/dfcaab7a-2c3c-4ea5-8641-abffd2a95b5f.jpg",
+                inLibrary = manga.favorite,
+                originalArtwork = manga.thumbnail_url ?: "",
+                mangaId = manga.id!!,
+            )
             _alternativeArtwork.value = listOf(
-                Artwork(
-                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/dfcaab7a-2c3c-4ea5-8641-abffd2a95b5f.jpg",
-                    inLibrary = manga.favorite,
-                    originalArtwork = manga.thumbnail_url ?: "",
-                    mangaId = manga.id!!,
-                ),
-                Artwork(
-                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/512496fb-6e57-483f-9380-aa6027d4f157.jpg",
-                    inLibrary = manga.favorite,
-                    originalArtwork = manga.thumbnail_url ?: "",
-                    mangaId = manga.id!!,
-                ),
-                Artwork(
-                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/d9497f0d-3bd7-42d9-832c-696ff39a6a28.jpg",
-                    inLibrary = manga.favorite,
-                    originalArtwork = manga.thumbnail_url ?: "",
-                    mangaId = manga.id!!,
-                ),
-                Artwork(
-                    url = "https://mangadex.org/covers/a96676e5-8ae2-425e-b549-7f15dd34a6d8/e393ec1a-320d-4ef7-92de-ca84b0d20309.jpg",
-                    inLibrary = manga.favorite,
-                    originalArtwork = manga.thumbnail_url ?: "",
-                    mangaId = manga.id!!,
-                ),
+                simple,
+                simple.copy(url = "https://mangadex.org/covers/6ebe8b8a-7bac-45f0-8652-4b9d52b95644/0263895a-3826-4d2d-af4a-2751413d2d7c.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/6ebe8b8a-7bac-45f0-8652-4b9d52b95644/3bd22d26-f22b-4d7c-8943-f22bd7302519.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/e0c9100e-287d-4417-8c17-b4e696254dc7/6e8d421d-3780-4b38-a377-63c4da4adb07.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/e0c9100e-287d-4417-8c17-b4e696254dc7/bb1f9608-7380-41cc-a1b1-144a7e20aa93.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/c28803a6-498a-42a4-8beb-a6edacbdd94c/ed8b03f5-70e5-432d-99aa-f22f1848d7c9.png"),
+                simple.copy(url = "https://mangadex.org/covers/b1ad0635-702d-4762-b7bd-1f9475688b5d/9132f3a0-8d7d-4df0-b6bf-ebbde700bcd0.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/141015d2-e545-40f8-bb89-4903204fd34e/3c6ba9b7-12ed-4eec-8b60-47d8d74e7371.png"),
+                simple.copy(url = "https://mangadex.org/covers/a2c1d849-af05-4bbc-b2a7-866ebb10331f/da0341d8-5526-452c-8bd3-dc8e3cd89f99.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/a2c1d849-af05-4bbc-b2a7-866ebb10331f/bf899731-d31e-4a44-9022-4cef07aac5cf.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/a2c1d849-af05-4bbc-b2a7-866ebb10331f/a6fc5965-280b-4b35-8040-9d6d9ac453a7.jpg"),
+                simple.copy(url = "https://mangadex.org/covers/6e4ab519-495f-4dc9-9f8a-00f18de96fe8/afd51888-3e45-4101-8993-e0afc677c52e.jpg"),
             )
         }
     }

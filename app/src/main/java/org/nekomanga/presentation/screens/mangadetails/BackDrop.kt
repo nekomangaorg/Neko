@@ -21,7 +21,9 @@ fun BackDrop(artwork: Artwork, showBackdrop: Boolean, modifier: Modifier = Modif
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(artwork.vibrantColor).copy(alpha = .4f)),
+                    .background(
+                        Color(artwork.vibrantColor).copy(alpha = .2f),
+                    ),
             )
         }
         AsyncImage(
@@ -33,7 +35,8 @@ fun BackDrop(artwork: Artwork, showBackdrop: Boolean, modifier: Modifier = Modif
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
-                .alpha(.3f),
+                .alpha(.2f),
+
             onSuccess = { generatePalette(it.result.drawable) },
         )
 
