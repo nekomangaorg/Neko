@@ -44,7 +44,7 @@ import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.isMerged
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun ButtonBlock(
@@ -52,7 +52,7 @@ fun ButtonBlock(
     inLibrary: Boolean,
     loggedIntoTrackers: Boolean,
     trackServiceCount: Int,
-    themeColor: ThemeColors,
+    themeColor: ThemeColorState,
     favoriteClick: () -> Unit = {},
     trackingClick: () -> Unit = {},
     artworkClick: () -> Unit = {},
@@ -62,7 +62,7 @@ fun ButtonBlock(
     shareClick: () -> Unit = {},
 ) {
 
-    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColor.containerColor)
+    val checkedButtonColors = ButtonDefaults.outlinedButtonColors(containerColor = themeColor.altContainerColor)
     val checkedBorderStroke = BorderStroke(1.dp, Color.Transparent)
 
     val uncheckedButtonColors = ButtonDefaults.outlinedButtonColors()

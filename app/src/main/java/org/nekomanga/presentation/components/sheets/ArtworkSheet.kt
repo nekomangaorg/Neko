@@ -41,12 +41,12 @@ import com.zedlabs.pastelplaceholder.Pastel
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun ArtworkSheet(
-    themeColors: ThemeColors,
+    themeColorState: ThemeColorState,
     alternativeArtwork: List<Artwork>,
     inLibrary: Boolean,
     saveClick: (String) -> Unit,
@@ -54,7 +54,7 @@ fun ArtworkSheet(
     shareClick: (String) -> Unit,
     resetClick: () -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -121,7 +121,7 @@ fun ArtworkSheet(
                     FilledIconButton(
                         onClick = { saveClick(currentImage.url) },
                         modifier = Modifier.weight(1f),
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColorState.buttonColor),
                     ) {
                         Text(text = stringResource(id = R.string.save), color = MaterialTheme.colorScheme.surface)
                     }
@@ -130,7 +130,7 @@ fun ArtworkSheet(
                         FilledIconButton(
                             onClick = { setClick(currentImage.url) },
                             modifier = Modifier.weight(1f),
-                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColorState.buttonColor),
                         ) {
                             Text(text = stringResource(id = R.string.set), color = MaterialTheme.colorScheme.surface)
                         }
@@ -138,7 +138,7 @@ fun ArtworkSheet(
                         FilledIconButton(
                             onClick = resetClick,
                             modifier = Modifier.weight(1f),
-                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                            colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColorState.buttonColor),
                         ) {
                             Text(text = stringResource(id = R.string.reset), color = MaterialTheme.colorScheme.surface)
                         }
@@ -147,7 +147,7 @@ fun ArtworkSheet(
                     FilledIconButton(
                         onClick = { shareClick(currentImage.url) },
                         modifier = Modifier.weight(1f),
-                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColors.buttonColor),
+                        colors = IconButtonDefaults.filledIconButtonColors(containerColor = themeColorState.buttonColor),
                     ) {
                         Text(text = stringResource(id = R.string.share), color = MaterialTheme.colorScheme.surface)
                     }

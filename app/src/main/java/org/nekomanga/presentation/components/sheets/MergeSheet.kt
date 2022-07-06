@@ -9,12 +9,12 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun MergeSheet(themeColors: ThemeColors, isMerged: Boolean) {
+fun MergeSheet(themeColorState: ThemeColorState, isMerged: Boolean) {
 
-    BaseSheet(themeColors = themeColors) {
+    BaseSheet(themeColor = themeColorState) {
         if (isMerged) {
             TextButton(onClick = { /*TODO*/ }, modifier = Modifier.fillMaxWidth()) {
                 Text(text = stringResource(id = R.string.open_merged_in_webview))

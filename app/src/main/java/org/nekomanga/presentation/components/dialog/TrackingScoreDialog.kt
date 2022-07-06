@@ -24,11 +24,11 @@ import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.ListItemPicker
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingScoreDialog(themeColors: ThemeColors, trackAndService: TrackingConstants.TrackAndService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+fun TrackingScoreDialog(themeColorState: ThemeColorState, trackAndService: TrackingConstants.TrackAndService, onDismiss: () -> Unit, trackScoreChange: (Int) -> Unit) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         val displayedScore = trackAndService.service.displayScore(trackAndService.track)
         val index = when {
@@ -58,7 +58,7 @@ fun TrackingScoreDialog(themeColors: ThemeColors, trackAndService: TrackingConst
                             currentIndex = trackAndService.service.getScoreList().indexOf(newScore)
                         },
                         list = trackAndService.service.getScoreList(),
-                        dividersColor = themeColors.buttonColor,
+                        dividersColor = themeColorState.buttonColor,
                         textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
                     )
                 }
@@ -66,7 +66,7 @@ fun TrackingScoreDialog(themeColors: ThemeColors, trackAndService: TrackingConst
             },
             onDismissRequest = onDismiss,
             dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },
@@ -76,7 +76,7 @@ fun TrackingScoreDialog(themeColors: ThemeColors, trackAndService: TrackingConst
                         trackScoreChange(currentIndex)
                         onDismiss()
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor),
+                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }

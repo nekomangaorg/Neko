@@ -24,11 +24,11 @@ import androidx.compose.ui.unit.dp
 import com.chargemap.compose.numberpicker.NumberPicker
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Track
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingChapterDialog(themeColors: ThemeColors, track: Track, onDismiss: () -> Unit, trackChapterChanged: (Int) -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+fun TrackingChapterDialog(themeColorState: ThemeColorState, track: Track, onDismiss: () -> Unit, trackChapterChanged: (Int) -> Unit) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         var currentChapter by remember { mutableStateOf(track.last_chapter_read.toInt()) }
 
@@ -56,14 +56,14 @@ fun TrackingChapterDialog(themeColors: ThemeColors, track: Track, onDismiss: () 
                         },
                         range = 0..range,
                         textStyle = MaterialTheme.typography.titleMedium.copy(color = MaterialTheme.colorScheme.onSurface),
-                        dividersColor = themeColors.buttonColor,
+                        dividersColor = themeColorState.buttonColor,
                     )
                 }
 
             },
             onDismissRequest = onDismiss,
             dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },
@@ -73,7 +73,7 @@ fun TrackingChapterDialog(themeColors: ThemeColors, track: Track, onDismiss: () 
                         trackChapterChanged(currentChapter)
                         onDismiss()
                     },
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor),
+                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))
                 }

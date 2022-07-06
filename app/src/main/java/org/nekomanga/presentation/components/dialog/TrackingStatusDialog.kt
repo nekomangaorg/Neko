@@ -30,11 +30,11 @@ import eu.kanade.tachiyomi.data.track.TrackService
 import jp.wasabeef.gap.Gap
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingStatusDialog(themeColors: ThemeColors, initialStatus: Int, service: TrackService, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+fun TrackingStatusDialog(themeColorState: ThemeColorState, initialStatus: Int, service: TrackService, onDismiss: () -> Unit, trackStatusChange: (Int) -> Unit) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         var selectedStatus by remember { mutableStateOf(initialStatus) }
         val scope = rememberCoroutineScope()
@@ -73,7 +73,7 @@ fun TrackingStatusDialog(themeColors: ThemeColors, initialStatus: Int, service: 
                                 onClick = {
                                     clicked()
                                 },
-                                colors = RadioButtonDefaults.colors(selectedColor = themeColors.buttonColor),
+                                colors = RadioButtonDefaults.colors(selectedColor = themeColorState.buttonColor),
                             )
                             Gap(width = 8.dp)
                             Text(text = service.getStatus(status), style = MaterialTheme.typography.titleMedium)
@@ -83,7 +83,7 @@ fun TrackingStatusDialog(themeColors: ThemeColors, initialStatus: Int, service: 
             },
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

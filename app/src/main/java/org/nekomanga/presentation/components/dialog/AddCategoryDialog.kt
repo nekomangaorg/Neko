@@ -23,19 +23,19 @@ import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Category
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 /**
  * Simple Dialog to add a new category
  */
 @Composable
-fun AddCategoryDialog(themeColors: ThemeColors, currentCategories: List<Category>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
+fun AddCategoryDialog(themeColorState: ThemeColorState, currentCategories: List<Category>, onDismiss: () -> Unit, onConfirm: (String) -> Unit) {
     val context = LocalContext.current
     var categoryText by remember { mutableStateOf("") }
     var saveEnabled by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf("") }
 
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         LaunchedEffect(categoryText, currentCategories) {
             if (categoryText.isEmpty()) {
@@ -63,9 +63,9 @@ fun AddCategoryDialog(themeColors: ThemeColors, currentCategories: List<Category
                         singleLine = true,
                         maxLines = 1,
                         colors = TextFieldDefaults.outlinedTextFieldColors(
-                            cursorColor = themeColors.buttonColor,
-                            focusedLabelColor = themeColors.buttonColor,
-                            focusedBorderColor = themeColors.buttonColor,
+                            cursorColor = themeColorState.buttonColor,
+                            focusedLabelColor = themeColorState.buttonColor,
+                            focusedBorderColor = themeColorState.buttonColor,
 
                             ),
                     )
@@ -81,13 +81,13 @@ fun AddCategoryDialog(themeColors: ThemeColors, currentCategories: List<Category
                         onDismiss()
                     },
                     enabled = saveEnabled,
-                    colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor),
+                    colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor),
                 ) {
                     Text(text = stringResource(id = R.string.save))
                 }
             },
             dismissButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

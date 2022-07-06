@@ -25,19 +25,19 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 
 @Composable
 fun BaseSheet(
-    themeColors: ThemeColors,
+    themeColor: ThemeColorState,
     maxSheetHeightPercentage: Float = .7f,
     minSheetHeightPercentage: Float = 0f,
     paddingAroundContent: Dp = 16.dp,
     showHandle: Boolean = true,
     content: @Composable ColumnScope.() -> Unit,
 ) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme, LocalTextSelectionColors provides themeColor.textSelectionColors) {
         val screenHeight = LocalConfiguration.current.screenHeightDp
         val maxSheetHeight = screenHeight * maxSheetHeightPercentage
         val minSheetHeight = screenHeight * minSheetHeightPercentage

@@ -49,12 +49,12 @@ import jp.wasabeef.gap.Gap
 import org.intellij.markdown.flavours.commonmark.CommonMarkFlavourDescriptor
 import org.nekomanga.presentation.Chip
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun DescriptionBlock(
     manga: Manga,
-    themeColor: ThemeColors,
+    themeColor: ThemeColorState,
     isExpanded: Boolean,
     isTablet: Boolean,
     expandCollapseClick: () -> Unit = {},
@@ -65,7 +65,6 @@ fun DescriptionBlock(
     val surfaceColor = MaterialTheme.colorScheme.surface
     val secondaryColor = MaterialTheme.colorScheme.secondary
     val isDarkTheme = isSystemInDarkTheme()
-
     val tagColor = remember {
         generateTagColor(surfaceColor, secondaryColor, themeColor.buttonColor, isDarkTheme)
     }

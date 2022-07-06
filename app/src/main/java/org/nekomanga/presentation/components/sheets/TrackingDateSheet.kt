@@ -40,7 +40,7 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingDate
 import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackingSuggestedDates
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.threeten.bp.Instant
 import org.threeten.bp.LocalDate
 import org.threeten.bp.LocalDateTime
@@ -52,7 +52,7 @@ import java.text.SimpleDateFormat
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun TrackingDateSheet(
-    themeColors: ThemeColors,
+    themeColorState: ThemeColorState,
     trackAndService: TrackAndService,
     trackingDate: TrackingDate,
     trackSuggestedDates: TrackingSuggestedDates?,
@@ -74,7 +74,7 @@ fun TrackingDateSheet(
     val currentDateExists = trackingDate.currentDate > 0L
 
 
-    BaseSheet(themeColors = themeColors) {
+    BaseSheet(themeColor = themeColorState) {
 
         Box(
             modifier = Modifier
@@ -121,7 +121,7 @@ fun TrackingDateSheet(
             TextButton(onClick = { trackDateChanged(RemoveTrackingDate(trackingDate.readingDate, trackAndService)) }) {
                 Text(
                     text = stringResource(id = R.string.remove),
-                    style = MaterialTheme.typography.titleMedium.copy(color = themeColors.buttonColor),
+                    style = MaterialTheme.typography.titleMedium.copy(color = themeColorState.buttonColor),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -143,7 +143,7 @@ fun TrackingDateSheet(
                 TextButton(onClick = { trackDateChanged(EditTrackingDate(trackingDate.readingDate, suggestedDate, trackAndService)) }) {
                     Text(
                         text = stringResource(id = R.string.use_suggested_date_of_, suggestedDate.format(dateTimeFormatter)),
-                        style = MaterialTheme.typography.titleMedium.copy(color = themeColors.buttonColor),
+                        style = MaterialTheme.typography.titleMedium.copy(color = themeColorState.buttonColor),
                         modifier = Modifier.fillMaxWidth(),
                     )
                 }
@@ -155,7 +155,7 @@ fun TrackingDateSheet(
             TextButton(onClick = { showDateField = !showDateField }) {
                 Text(
                     text = stringResource(id = R.string.edit),
-                    style = MaterialTheme.typography.titleMedium.copy(color = themeColors.buttonColor),
+                    style = MaterialTheme.typography.titleMedium.copy(color = themeColorState.buttonColor),
                     modifier = Modifier.fillMaxWidth(),
                 )
             }
@@ -180,12 +180,12 @@ fun TrackingDateSheet(
                     onEditingComplete = { currentDate -> newDate = currentDate }, format = format,
                     maxDate = LocalDate.now(),
                     contentTextStyle = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface),
-                    cursorBrush = SolidColor(themeColors.buttonColor),
+                    cursorBrush = SolidColor(themeColorState.buttonColor),
                     hintTextStyle = MaterialTheme.typography.headlineSmall.copy(color = MaterialTheme.colorScheme.onSurface.copy(alpha = NekoColors.disabledAlphaHighContrast)),
                 )
                 ElevatedButton(
                     onClick = { trackDateChanged(EditTrackingDate(trackingDate.readingDate, newDate!!, trackAndService)) },
-                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColors.buttonColor, contentColor = MaterialTheme.colorScheme.surface),
+                    colors = ButtonDefaults.elevatedButtonColors(containerColor = themeColorState.buttonColor, contentColor = MaterialTheme.colorScheme.surface),
                     enabled = newDate != null,
                 ) {
                     Text(text = stringResource(id = android.R.string.ok))

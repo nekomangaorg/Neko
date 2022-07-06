@@ -53,13 +53,13 @@ import org.nekomanga.presentation.components.dialog.RemoveTrackingDialog
 import org.nekomanga.presentation.components.dialog.TrackingChapterDialog
 import org.nekomanga.presentation.components.dialog.TrackingScoreDialog
 import org.nekomanga.presentation.components.dialog.TrackingStatusDialog
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.theme.Shapes
 import java.text.DateFormat
 
 @Composable
 fun TrackingSheet(
-    themeColors: ThemeColors,
+    themeColor: ThemeColorState,
     services: List<TrackService>,
     tracks: List<Track>,
     dateFormat: DateFormat,
@@ -83,11 +83,11 @@ fun TrackingSheet(
 
 
 
-    BaseSheet(themeColors = themeColors) {
+    BaseSheet(themeColor = themeColor) {
         if (statusDialog is ShowDialog) {
             val trackAndService = (statusDialog as ShowDialog).trackAndService
             TrackingStatusDialog(
-                themeColors = themeColors,
+                themeColorState = themeColor,
                 initialStatus = trackAndService.track.status,
                 service = trackAndService.service,
                 onDismiss = { statusDialog = HideDialog },
@@ -96,7 +96,7 @@ fun TrackingSheet(
         } else if (scoreDialog is ShowDialog) {
             val trackAndService = (scoreDialog as ShowDialog).trackAndService
             TrackingScoreDialog(
-                themeColors = themeColors,
+                themeColorState = themeColor,
                 trackAndService = trackAndService,
                 onDismiss = { scoreDialog = HideDialog },
                 trackScoreChange = { scorePosition -> trackScoreChanged(scorePosition, trackAndService) },
@@ -104,7 +104,7 @@ fun TrackingSheet(
         } else if (removeTrackDialog is ShowDialog) {
             val trackAndService = (removeTrackDialog as ShowDialog).trackAndService
             RemoveTrackingDialog(
-                themeColors = themeColors,
+                themeColorState = themeColor,
                 name = stringResource(id = trackAndService.service.nameRes()),
                 onConfirm = { alsoRemoveFromTracker ->
                     trackingRemoved(alsoRemoveFromTracker, trackAndService.service)
@@ -114,7 +114,7 @@ fun TrackingSheet(
         } else if (chapterTrackDialog is ShowDialog) {
             val trackAndService = (chapterTrackDialog as ShowDialog).trackAndService
             TrackingChapterDialog(
-                themeColors = themeColors,
+                themeColorState = themeColor,
                 track = trackAndService.track,
                 onDismiss = { chapterTrackDialog = HideDialog },
                 trackChapterChanged = {
@@ -143,7 +143,7 @@ fun TrackingSheet(
                     false -> null
                 }
                 TrackingServiceItem(
-                    themeColors = themeColors,
+                    themeColor = themeColor,
                     service = service,
                     trackAndService = trackAndService,
                     dateFormat = dateFormat,
@@ -179,7 +179,7 @@ private class ShowDialog(val trackAndService: TrackAndService) : Dialog()
 
 @Composable
 private fun TrackingServiceItem(
-    themeColors: ThemeColors,
+    themeColor: ThemeColorState,
     service: TrackService,
     trackAndService: TrackAndService?,
     dateFormat: DateFormat,
@@ -200,10 +200,10 @@ private fun TrackingServiceItem(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (trackAndService == null) {
-                NoTrack(themeColors = themeColors, service = service, onLogoClick, { onSearchTrackClick(null) })
+                NoTrack(themeColor = themeColor, service = service, onLogoClick, { onSearchTrackClick(null) })
             } else {
                 TrackRowOne(
-                    themeColors = themeColors,
+                    themeColor = themeColor,
                     track = trackAndService.track,
                     service = trackAndService.service,
                     onLogoClick = onLogoClick,
@@ -222,7 +222,7 @@ private fun TrackingServiceItem(
 }
 
 @Composable
-private fun NoTrack(themeColors: ThemeColors, service: TrackService, onLogoClick: (String) -> Unit, searchTrackerClick: () -> Unit) {
+private fun NoTrack(themeColor: ThemeColorState, service: TrackService, onLogoClick: (String) -> Unit, searchTrackerClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -230,12 +230,12 @@ private fun NoTrack(themeColors: ThemeColors, service: TrackService, onLogoClick
         verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.SpaceBetween,
     ) {
         Logo(service = service, track = null, onClick = onLogoClick)
-        Text(text = stringResource(id = R.string.add_tracking), color = themeColors.buttonColor, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
+        Text(text = stringResource(id = R.string.add_tracking), color = themeColor.buttonColor, textAlign = TextAlign.Center, modifier = Modifier.fillMaxWidth())
     }
 }
 
 @Composable
-private fun TrackRowOne(themeColors: ThemeColors, track: Track, service: TrackService, onLogoClick: (String) -> Unit = {}, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
+private fun TrackRowOne(themeColor: ThemeColorState, track: Track, service: TrackService, onLogoClick: (String) -> Unit = {}, searchTrackerClick: (Track) -> Unit, onRemoveClick: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -269,7 +269,7 @@ private fun TrackRowOne(themeColors: ThemeColors, track: Track, service: TrackSe
                     modifier = Modifier
                         .padding(end = 8.dp)
                         .size(24.dp),
-                    tint = themeColors.buttonColor,
+                    tint = themeColor.buttonColor,
                 )
             }
         }

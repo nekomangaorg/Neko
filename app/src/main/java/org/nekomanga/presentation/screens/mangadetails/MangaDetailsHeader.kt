@@ -35,7 +35,7 @@ import jp.wasabeef.gap.Gap
 import me.saket.cascade.CascadeDropdownMenu
 import onColor
 import org.nekomanga.domain.manga.Artwork
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun MangaDetailsHeader(
@@ -43,7 +43,7 @@ fun MangaDetailsHeader(
     artwork: Artwork,
     showBackdrop: Boolean = true,
     inLibrary: Boolean = true,
-    themeColor: ThemeColors,
+    themeColor: ThemeColorState,
     generatePalette: (Drawable) -> Unit = {},
     titleLongClick: (String) -> Unit = {},
     creatorLongClick: (String) -> Unit = {},

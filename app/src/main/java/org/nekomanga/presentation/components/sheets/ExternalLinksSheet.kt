@@ -23,13 +23,13 @@ import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
 import eu.kanade.tachiyomi.data.external.ExternalLink
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ExternalLinksSheet(themeColors: ThemeColors, externalLinks: List<ExternalLink>, onLinkClick: (String) -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme) {
+fun ExternalLinksSheet(themeColorState: ThemeColorState, externalLinks: List<ExternalLink>, onLinkClick: (String) -> Unit) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme) {
 
-        BaseSheet(themeColors = themeColors) {
+        BaseSheet(themeColor = themeColorState) {
             FlowRow(
                 modifier = Modifier
                     .fillMaxWidth()

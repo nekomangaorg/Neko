@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
 import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetLayout
@@ -124,29 +125,26 @@ fun MangaScreen(
 
     val vibrantColor = MangaCoverMetadata.getVibrantColor(manga.id!!)
 
-    val buttonColor = remember {
+    val defaultTextSelection = LocalTextSelectionColors.current
+
+    var themeColorState by remember {
         mutableStateOf(
-            when (themeBasedOffCover && vibrantColor != null) {
-                true -> {
-                    val color = getButtonThemeColor(Color(vibrantColor), isDarkTheme)
-                    color
-                }
-                false -> secondaryColor
-            },
+            ThemeColorState(
+                buttonColor = secondaryColor,
+                rippleTheme = PrimaryColorRippleTheme,
+                textSelectionColors = defaultTextSelection,
+                altContainerColor = Color(ColorUtils.blendARGB(secondaryColor.toArgb(), surfaceColor.toArgb(), .706f)),
+            ),
         )
     }
 
-    val rippleTheme = when (buttonColor.value != secondaryColor) {
-        true -> DynamicRippleTheme(buttonColor.value)
-        false -> PrimaryColorRippleTheme
-    }
-
-    val themeColors = remember {
-        ThemeColors(
-            buttonColor = buttonColor.value,
-            rippleTheme = rippleTheme,
-            textSelectionColors = dynamicTextSelectionColor(buttonColor.value),
-            containerColor = Color(ColorUtils.blendARGB(buttonColor.value.toArgb(), surfaceColor.toArgb(), .706f)),
+    if (themeBasedOffCover && vibrantColor != null) {
+        val color = getButtonThemeColor(Color(vibrantColor), isDarkTheme)
+        themeColorState = ThemeColorState(
+            buttonColor = color,
+            rippleTheme = DynamicRippleTheme(color),
+            textSelectionColors = dynamicTextSelectionColor(color),
+            altContainerColor = Color(ColorUtils.blendARGB(color.toArgb(), surfaceColor.toArgb(), .706f)),
         )
     }
 
@@ -169,7 +167,7 @@ fun MangaScreen(
                 currentBottomSheet?.let { currentSheet ->
                     SheetLayout(
                         currentScreen = currentSheet,
-                        themeColors = themeColors,
+                        themeColorState = themeColorState,
                         inLibrary = inLibrary,
                         addNewCategory = categoryActions.addNewCategory,
                         allCategories = categories.value,
@@ -209,7 +207,7 @@ fun MangaScreen(
                         state = state,
                         refreshingOffset = it.calculateTopPadding(),
                         refreshTriggerDistance = trigger,
-                        backgroundColor = themeColors.buttonColor,
+                        backgroundColor = themeColorState.buttonColor,
                         contentColor = MaterialTheme.colorScheme.surface,
 
                         )
@@ -231,7 +229,7 @@ fun MangaScreen(
                             inLibrary = inLibrary,
                             titleLongClick = { title -> titleLongClick(context, title) },
                             creatorLongClick = { creator -> creatorLongClick(context, creator) },
-                            themeColor = themeColors,
+                            themeColor = themeColorState,
                             generatePalette = generatePalette,
                             loggedIntoTrackers = loggedInTrackingServices.value.isNotEmpty(),
                             trackServiceCount = trackServiceCount.value,
@@ -287,7 +285,7 @@ fun MangaScreen(
 @Composable
 fun SheetLayout(
     currentScreen: BottomSheetScreen,
-    themeColors: ThemeColors,
+    themeColorState: ThemeColorState,
     inLibrary: Boolean,
     allCategories: List<Category>,
     mangaCategories: List<Category>,
@@ -313,14 +311,14 @@ fun SheetLayout(
             addingToLibrary = currentScreen.addingToLibrary,
             categories = allCategories,
             mangaCategories = mangaCategories,
-            themeColors = themeColors,
+            themeColorState = themeColorState,
             cancelClick = closeSheet,
             addNewCategory = addNewCategory,
             confirmClicked = currentScreen.setCategories,
             addToLibraryClick = currentScreen.addToLibraryClick,
         )
         BottomSheetScreen.TrackingSheet -> TrackingSheet(
-            themeColors = themeColors,
+            themeColor = themeColorState,
             services = loggedInTrackingServices,
             tracks = tracks,
             dateFormat = dateFormat,
@@ -355,7 +353,7 @@ fun SheetLayout(
             }
 
             TrackingSearchSheet(
-                themeColors = themeColors,
+                themeColorState = themeColorState,
                 title = title,
                 trackSearchResult = trackSearchResult,
                 alreadySelectedTrack = currentScreen.alreadySelectedTrack,
@@ -376,7 +374,7 @@ fun SheetLayout(
         }
         is BottomSheetScreen.TrackingDateSheet -> {
             TrackingDateSheet(
-                themeColors = themeColors,
+                themeColorState = themeColorState,
                 trackAndService = currentScreen.trackAndService,
                 trackingDate = currentScreen.trackingDate,
                 trackSuggestedDates = currentScreen.trackSuggestedDates,
@@ -393,7 +391,7 @@ fun SheetLayout(
         }
         is BottomSheetScreen.ExternalLinksSheet -> {
             ExternalLinksSheet(
-                themeColors = themeColors, externalLinks = externalLinks,
+                themeColorState = themeColorState, externalLinks = externalLinks,
                 onLinkClick = { url ->
                     closeSheet()
                     openInBrowser(url)
@@ -402,12 +400,12 @@ fun SheetLayout(
         }
 
         is BottomSheetScreen.MergeSheet -> {
-            MergeSheet(themeColors = themeColors, isMerged = isMerged)
+            MergeSheet(themeColorState = themeColorState, isMerged = isMerged)
         }
 
         is BottomSheetScreen.ArtworkSheet -> {
             ArtworkSheet(
-                themeColors = themeColors,
+                themeColorState = themeColorState,
                 alternativeArtwork = alternativeArtwork,
                 inLibrary = inLibrary,
                 saveClick = coverActions.save,
@@ -461,5 +459,12 @@ private fun getButtonThemeColor(buttonColor: Color, isNightMode: Boolean): Color
     }
 }
 
-data class ThemeColors(val buttonColor: Color, val rippleTheme: RippleTheme, val textSelectionColors: TextSelectionColors, val containerColor: Color)
+class ThemeColorState(buttonColor: Color, rippleTheme: RippleTheme, textSelectionColors: TextSelectionColors, altContainerColor: Color) {
+    var buttonColor by mutableStateOf(buttonColor)
+    var rippleTheme by mutableStateOf(rippleTheme)
+    var textSelectionColors by mutableStateOf(textSelectionColors)
+    var altContainerColor by mutableStateOf(altContainerColor)
+}
+
+//data class themeColorState(val buttonColor: Color, val rippleTheme: RippleTheme, val textSelectionColors: TextSelectionColors, val containerColor: Color)
 

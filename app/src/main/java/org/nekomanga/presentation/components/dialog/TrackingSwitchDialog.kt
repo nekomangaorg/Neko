@@ -15,11 +15,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import jp.wasabeef.gap.Gap
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun TrackingSwitchDialog(themeColors: ThemeColors, name: String, oldName: String, newName: String, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
-    CompositionLocalProvider(LocalRippleTheme provides themeColors.rippleTheme, LocalTextSelectionColors provides themeColors.textSelectionColors) {
+fun TrackingSwitchDialog(themeColorState: ThemeColorState, name: String, oldName: String, newName: String, onConfirm: (Boolean) -> Unit, onDismiss: () -> Unit) {
+    CompositionLocalProvider(LocalRippleTheme provides themeColorState.rippleTheme, LocalTextSelectionColors provides themeColorState.textSelectionColors) {
 
         AlertDialog(
             title = {
@@ -49,7 +49,7 @@ fun TrackingSwitchDialog(themeColors: ThemeColors, name: String, oldName: String
             },
             onDismissRequest = onDismiss,
             confirmButton = {
-                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColors.buttonColor)) {
+                TextButton(onClick = onDismiss, colors = ButtonDefaults.textButtonColors(contentColor = themeColorState.buttonColor)) {
                     Text(text = stringResource(id = R.string.cancel))
                 }
             },

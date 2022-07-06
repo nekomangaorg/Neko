@@ -24,11 +24,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import eu.kanade.tachiyomi.R
 import org.nekomanga.presentation.components.NekoColors
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
-fun ChapterHeader(themeColor: ThemeColors, numberOfChapters: Int, filterText: String = "", onClick: () -> Unit = {}) {
- 
+fun ChapterHeader(themeColor: ThemeColorState, numberOfChapters: Int, filterText: String = "", onClick: () -> Unit = {}) {
+
     CompositionLocalProvider(LocalRippleTheme provides themeColor.rippleTheme) {
         Box(
             modifier = Modifier

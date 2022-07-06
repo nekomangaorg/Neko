@@ -23,7 +23,7 @@ import eu.kanade.tachiyomi.ui.base.holder.BaseFlexibleViewHolder
 import org.nekomanga.domain.manga.Artwork
 import org.nekomanga.presentation.components.PrimaryColorRippleTheme
 import org.nekomanga.presentation.components.dynamicTextSelectionColor
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 import org.nekomanga.presentation.screens.mangadetails.MangaDetailsHeader
 import org.nekomanga.presentation.theme.NekoTheme
 
@@ -61,7 +61,7 @@ class MangaHeaderHolder(
                     creatorLongClick = { creator ->
                         adapter.delegate.copyToClipboard(creator, R.string.creator)
                     },
-                    themeColor = ThemeColors(
+                    themeColor = ThemeColorState(
                         MaterialTheme.colorScheme.primary,
                         PrimaryColorRippleTheme,
                         dynamicTextSelectionColor(MaterialTheme.colorScheme.primary),

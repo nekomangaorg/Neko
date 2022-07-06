@@ -59,11 +59,11 @@ import eu.kanade.tachiyomi.ui.manga.TrackingConstants.TrackSearchResult
 import jp.wasabeef.gap.Gap
 import org.nekomanga.presentation.components.NekoColors
 import org.nekomanga.presentation.components.dialog.TrackingSwitchDialog
-import org.nekomanga.presentation.screens.ThemeColors
+import org.nekomanga.presentation.screens.ThemeColorState
 
 @Composable
 fun TrackingSearchSheet(
-    themeColors: ThemeColors,
+    themeColorState: ThemeColorState,
     alreadySelectedTrack: Track? = null,
     cancelClick: () -> Unit,
     title: String,
@@ -79,7 +79,7 @@ fun TrackingSearchSheet(
     var trackSearchItem by remember { mutableStateOf<TrackSearch?>(null) }
 
 
-    BaseSheet(themeColors = themeColors, maxSheetHeightPercentage = .9f) {
+    BaseSheet(themeColor = themeColorState, maxSheetHeightPercentage = .9f) {
 
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -101,7 +101,7 @@ fun TrackingSearchSheet(
                         }
                         items(trackSearchResult.trackSearchResult) { item: TrackSearch ->
                             TrackSearchItem(
-                                themeColors = themeColors,
+                                themeColorState = themeColorState,
                                 trackSearch = item,
                                 alreadySelectedTrack = alreadySelectedTrack,
                                 openInBrowser = openInBrowser,
@@ -116,7 +116,7 @@ fun TrackingSearchSheet(
 
                             if (trackSearchItem != null) {
                                 TrackingSwitchDialog(
-                                    themeColors = themeColors,
+                                    themeColorState = themeColorState,
                                     name = stringResource(id = service.nameRes()),
                                     oldName = alreadySelectedTrack?.title ?: "",
                                     newName = trackSearchItem!!.title,
@@ -134,9 +134,9 @@ fun TrackingSearchSheet(
                         }
                     }
                 }
-                else -> CenteredBox(themeColors = themeColors, trackSearchResult = trackSearchResult)
+                else -> CenteredBox(themeColorState = themeColorState, trackSearchResult = trackSearchResult)
             }
-            Footer(themeColors, title, searchTracker)
+            Footer(themeColorState, title, searchTracker)
         }
     }
 }
@@ -168,7 +168,7 @@ private fun ColumnScope.Header(cancelClick: () -> Unit) {
 }
 
 @Composable
-private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearchResult) {
+private fun CenteredBox(themeColorState: ThemeColorState, trackSearchResult: TrackSearchResult) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -176,7 +176,7 @@ private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearch
         contentAlignment = Alignment.Center,
     ) {
         when (trackSearchResult) {
-            is TrackSearchResult.Loading -> CircularProgressIndicator(color = themeColors.buttonColor, modifier = Modifier.size(32.dp))
+            is TrackSearchResult.Loading -> CircularProgressIndicator(color = themeColorState.buttonColor, modifier = Modifier.size(32.dp))
             is TrackSearchResult.NoResult -> Text(text = stringResource(id = R.string.no_results_found))
             is TrackSearchResult.Error -> Text(text = trackSearchResult.errorMessage)
             else -> {}
@@ -186,12 +186,12 @@ private fun CenteredBox(themeColors: ThemeColors, trackSearchResult: TrackSearch
 }
 
 @Composable
-private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, alreadySelectedTrack: Track?, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
+private fun TrackSearchItem(themeColorState: ThemeColorState, trackSearch: TrackSearch, alreadySelectedTrack: Track?, openInBrowser: (String) -> Unit, trackSearchItemClick: (TrackSearch) -> Unit) {
 
     val isSelected = alreadySelectedTrack != null && alreadySelectedTrack.media_id != 0L && alreadySelectedTrack.media_id == trackSearch.media_id
 
     val (backdropColor, outlineColor) = if (isSelected) {
-        themeColors.containerColor to themeColors.buttonColor
+        themeColorState.altContainerColor to themeColorState.buttonColor
     } else {
         MaterialTheme.colorScheme.surface to MaterialTheme.colorScheme.outline
     }
@@ -297,7 +297,7 @@ private fun TrackSearchItem(themeColors: ThemeColors, trackSearch: TrackSearch, 
 }
 
 @Composable
-private fun ColumnScope.Footer(themeColors: ThemeColors, title: String, searchTracker: (String) -> Unit) {
+private fun ColumnScope.Footer(themeColorState: ThemeColorState, title: String, searchTracker: (String) -> Unit) {
 
     val focusManager = LocalFocusManager.current
     var searchText by remember { mutableStateOf(title) }
@@ -316,15 +316,15 @@ private fun ColumnScope.Footer(themeColors: ThemeColors, title: String, searchTr
         trailingIcon = {
             if (searchText.isNotEmpty()) {
                 IconButton(onClick = { searchText = "" }) {
-                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColors.buttonColor)
+                    Icon(imageVector = Icons.Default.Cancel, contentDescription = null, tint = themeColorState.buttonColor)
                 }
             }
         },
         onValueChange = { searchText = it },
         colors = TextFieldDefaults.outlinedTextFieldColors(
-            focusedLabelColor = themeColors.buttonColor,
-            focusedBorderColor = themeColors.buttonColor,
-            cursorColor = themeColors.buttonColor,
+            focusedLabelColor = themeColorState.buttonColor,
+            focusedBorderColor = themeColorState.buttonColor,
+            cursorColor = themeColorState.buttonColor,
         ),
         keyboardOptions = KeyboardOptions.Default.copy(
             imeAction = ImeAction.Search,
