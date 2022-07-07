@@ -13,6 +13,7 @@ import okhttp3.Request
 import rx.Observable
 import uy.kohesive.injekt.injectLazy
 import java.security.MessageDigest
+import java.util.Locale
 
 /**
  * A simple implementation for sources from a website.
@@ -50,7 +51,7 @@ abstract class HttpSource : Source {
      * Note the generated id sets the sign bit to 0.
      */
     override val id by lazy {
-        val key = "${name.toLowerCase()}/en/$versionId"
+        val key = "${name.lowercase(Locale.getDefault())}/en/$versionId"
         val bytes = MessageDigest.getInstance("MD5").digest(key.toByteArray())
         (0..7).map { bytes[it].toLong() and 0xff shl 8 * (7 - it) }
             .reduce(Long::or) and Long.MAX_VALUE
@@ -94,7 +95,6 @@ abstract class HttpSource : Source {
     override fun getFilterList() = FilterList()
 
     companion object {
-        const val USER_AGENT =
-            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/69.0.3497.92 Safari/537.36"
+        const val DEFAULT_USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.5005.124 Safari/537.36 Edg/102.0.1245.44"
     }
 }
