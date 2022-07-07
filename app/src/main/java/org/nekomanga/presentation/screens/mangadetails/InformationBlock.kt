@@ -120,10 +120,11 @@ fun InformationBlock(
             ) {
             if (manga.lang_flag != null) {
                 val flag = when (manga.lang_flag?.lowercase(Locale.US)) {
-                    "zh-hk" -> R.drawable.ic_flag_china
-                    "zh" -> R.drawable.ic_flag_china
-                    "ko" -> R.drawable.ic_flag_korea
-                    "ja" -> R.drawable.ic_flag_japan
+                    "zh-hk" -> R.drawable.ic_flag_hk
+                    "zh" -> R.drawable.ic_flag_cn
+                    "ko" -> R.drawable.ic_flag_kr
+                    "ja" -> R.drawable.ic_flag_jp
+                    "en" -> R.drawable.ic_flag_us
                     else -> null
                 }
                 if (flag != null) {
@@ -145,7 +146,7 @@ fun InformationBlock(
             }
 
             manga.rating?.let { rating ->
-                val formattedRating = ((manga.rating!!.toDouble() * 100).roundToInt() / 100.0).toString()
+                val formattedRating = ((rating.toDouble() * 100).roundToInt() / 100.0).toString()
 
                 Row {
                     Gap(8.dp)
