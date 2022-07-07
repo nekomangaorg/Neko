@@ -412,7 +412,10 @@ fun SheetLayout(
                     closeSheet()
                     openInBrowser(url)
                 },
-                removeMergeSource = mergeActions.remove,
+                removeMergeSource = {
+                    closeSheet()
+                    mergeActions.remove()
+                },
             )
         }
 

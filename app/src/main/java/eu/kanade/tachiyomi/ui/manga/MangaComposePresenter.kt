@@ -455,6 +455,8 @@ class MangaComposePresenter(
             }
              */
 
+            updateMergeFlow()
+
         }
     }
 
