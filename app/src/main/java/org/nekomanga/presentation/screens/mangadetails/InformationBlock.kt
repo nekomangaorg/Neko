@@ -32,6 +32,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import com.google.accompanist.flowlayout.FlowCrossAxisAlignment
 import com.google.accompanist.flowlayout.FlowMainAxisAlignment
 import com.google.accompanist.flowlayout.FlowRow
+import com.mikepenz.iconics.typeface.library.community.material.CommunityMaterial
 import eu.kanade.tachiyomi.R
 import eu.kanade.tachiyomi.data.database.models.Manga
 import eu.kanade.tachiyomi.source.model.SManga
@@ -48,6 +49,7 @@ fun InformationBlock(
     manga: Manga,
     modifier: Modifier = Modifier,
     isExpanded: Boolean = true,
+    isMerged: Boolean = true,
     titleLongClick: (String) -> Unit = {},
     creatorLongClicked: (String) -> Unit = {},
 ) {
@@ -174,6 +176,13 @@ fun InformationBlock(
                         style = MaterialTheme.typography.bodyLarge,
                         color = mediumAlpha,
                     )
+                }
+            }
+
+            if (isMerged) {
+                Row {
+                    Gap(8.dp)
+                    com.mikepenz.iconics.compose.Image(asset = CommunityMaterial.Icon.cmd_check_decagram, colorFilter = ColorFilter.tint(mediumAlpha))
                 }
             }
 
